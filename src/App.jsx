@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-19 19:36:25
+// NEXO TRADE — build: 2026-05-19 19:49:17
 import { useState, useEffect, useRef, useContext, createContext } from 'react';
 
 // ── CASHTAG RENDERER ──────────────────────────────────────────────────────────
@@ -1154,134 +1154,199 @@ function NoticiasPage({lang}){
 }
 
 function EarningsPage({lang}){
-  const [liveEvent,  setLiveEvent]  = useState(null);
-  const [voted,      setVoted]      = useState({});
-  const [votes,      setVotes]      = useState(
-    Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker, e.bull_pct]))
-  );
-  const [earnings,   setEarnings]   = useState(MOCK_EARNINGS); // empieza con mock, se reemplaza con datos reales
-  const [loadingEar, setLoadingEar] = useState(true);
+  const [liveEvent,   setLiveEvent]  = useState(null);
+  const [selected,    setSelected]   = useState(null);   // ticker seleccionado para el panel detalle
+  const [voted,       setVoted]      = useState({});
+  const [votes,       setVotes]      = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker, e.bull_pct])));
+  const [earnings,    setEarnings]   = useState(MOCK_EARNINGS);
+  const [loadingEar,  setLoadingEar] = useState(true);
 
-  // Fetch calendario real de Finnhub
   useEffect(()=>{
-    const today = new Date();
-    const from  = today.toISOString().slice(0,10);
-    const to    = new Date(today.getTime() + 14*24*60*60*1000).toISOString().slice(0,10);
+    const today=new Date();
+    const from=today.toISOString().slice(0,10);
+    const to=new Date(today.getTime()+14*24*60*60*1000).toISOString().slice(0,10);
     fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_KEY}`)
       .then(r=>r.json())
       .then(data=>{
-        if(!data?.earningsCalendar?.length){ setLoadingEar(false); return; }
-        // Filtrar solo compañías conocidas y con estimados
-        const interesting = data.earningsCalendar
-          .filter(e => e.epsEstimate != null || e.revenueEstimate != null)
-          .slice(0,10)
-          .map(e=>{
-            const mock = MOCK_EARNINGS.find(m=>m.ticker===e.symbol)||{};
-            const dateObj  = new Date(e.date+"T12:00:00");
-            const todayStr = new Date().toISOString().slice(0,10);
-            const isToday  = e.date === todayStr;
-            const dayLabel = isToday ? "Hoy" : dateObj.toLocaleDateString(lang==="en"?"en-US":"es-ES",{weekday:"short",day:"numeric",month:"short"});
-            const hora = e.hour==="bmo"?(lang==="en"?"Before open":"Antes apertura"):(lang==="en"?"After close":"Tras cierre");
-            const revEst = e.revenueEstimate ? (e.revenueEstimate>=1e9?`$${(e.revenueEstimate/1e9).toFixed(1)}B`:`$${(e.revenueEstimate/1e6).toFixed(0)}M`) : mock.rev_est||"—";
-            const epsEst = e.epsEstimate!=null ? `$${e.epsEstimate.toFixed(2)}` : mock.eps_est||"—";
-            return {
-              ticker:   e.symbol,
-              nombre:   mock.nombre || e.symbol,
-              fecha:    isToday?"Hoy":dayLabel,
-              fechaEn:  isToday?"Today":dayLabel,
-              hora,
-              eps_est:  epsEst,
-              rev_est:  revEst,
-              sorpresa: e.epsActual!=null&&e.epsEstimate!=null ? (e.epsActual>=e.epsEstimate?`+${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`:`${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`) : mock.sorpresa||null,
-              bull_pct:       mock.bull_pct||50,
-              community_votes:mock.community_votes||0,
-              live:           mock.live||false,
-              live_viewers:   mock.live_viewers||0,
-              live_title:     mock.live_title||`Q Earnings Call`,
-              live_speaker:   mock.live_speaker||"",
-            };
-          });
-        if(interesting.length > 0){
-          setEarnings(interesting);
-          setVotes(Object.fromEntries(interesting.map(e=>[e.ticker,e.bull_pct])));
-        }
+        if(!data?.earningsCalendar?.length){setLoadingEar(false);return;}
+        const interesting=data.earningsCalendar.filter(e=>e.epsEstimate!=null||e.revenueEstimate!=null).slice(0,10).map(e=>{
+          const mock=MOCK_EARNINGS.find(m=>m.ticker===e.symbol)||{};
+          const dateObj=new Date(e.date+"T12:00:00");
+          const todayStr=new Date().toISOString().slice(0,10);
+          const isToday=e.date===todayStr;
+          const dayLabel=isToday?"Hoy":dateObj.toLocaleDateString(lang==="en"?"en-US":"es-ES",{weekday:"short",day:"numeric",month:"short"});
+          const hora=e.hour==="bmo"?(lang==="en"?"Before open":"Antes apertura"):(lang==="en"?"After close":"Tras cierre");
+          const revEst=e.revenueEstimate?(e.revenueEstimate>=1e9?`$${(e.revenueEstimate/1e9).toFixed(1)}B`:`$${(e.revenueEstimate/1e6).toFixed(0)}M`):mock.rev_est||"—";
+          const epsEst=e.epsEstimate!=null?`$${e.epsEstimate.toFixed(2)}`:mock.eps_est||"—";
+          return{ticker:e.symbol,nombre:mock.nombre||e.symbol,fecha:isToday?"Hoy":dayLabel,fechaEn:isToday?"Today":dayLabel,hora,eps_est:epsEst,rev_est:revEst,
+            sorpresa:e.epsActual!=null&&e.epsEstimate!=null?(e.epsActual>=e.epsEstimate?`+${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`:`${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`):mock.sorpresa||null,
+            bull_pct:mock.bull_pct||50,community_votes:mock.community_votes||0,live:mock.live||false,live_viewers:mock.live_viewers||0,live_title:mock.live_title||"Earnings Call",live_speaker:mock.live_speaker||""};
+        });
+        if(interesting.length>0){setEarnings(interesting);setVotes(Object.fromEntries(interesting.map(e=>[e.ticker,e.bull_pct])));}
       })
       .catch(()=>{})
       .finally(()=>setLoadingEar(false));
   },[lang]);
 
-  const vote = (ticker, dir) => {
-    if(voted[ticker]) return;
+  const vote=(ticker,dir)=>{
+    if(voted[ticker])return;
     setVoted(v=>({...v,[ticker]:dir}));
-    setVotes(v=>({...v,[ticker]: dir==="bull" ? Math.min(99,v[ticker]+1) : Math.max(1,v[ticker]-1)}));
+    setVotes(v=>({...v,[ticker]:dir==="bull"?Math.min(99,v[ticker]+1):Math.max(1,v[ticker]-1)}));
   };
 
+  // Group by date
+  const dates=[...new Set(earnings.map(e=>lang==="en"?e.fechaEn:e.fecha))];
+  const sel=selected?earnings.find(e=>e.ticker===selected):null;
+
   return(
-    <div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20}}>
-        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📅 Earnings Calendar</h2>
-        <span style={{background:C.goldBg,color:"#b45309",border:"1px solid #fcd34d",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>{lang==="en"?"This week":"Esta semana"}</span>
-        {loadingEar
-          ? <span style={{marginLeft:"auto",color:C.muted2,fontSize:11,display:"flex",alignItems:"center",gap:5}}>⏳ {lang==="en"?"Loading live data...":"Cargando datos reales..."}</span>
-          : <span style={{marginLeft:"auto",color:C.bull,fontSize:11,fontWeight:700}}>🟢 {lang==="en"?"Live data":"Datos en vivo"}</span>
-        }
+    <div style={{display:"grid",gridTemplateColumns:sel?"1fr 340px":"1fr",gap:18,transition:"all 0.2s"}}>
+
+      {/* LEFT — Stock list */}
+      <div>
+        {/* Header */}
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+          <h2 style={{margin:0,color:"#F1F5F9",fontSize:17,fontWeight:800,letterSpacing:-0.3}}>📅 Earnings Calendar</h2>
+          <span style={{background:"rgba(245,158,11,0.12)",color:C.gold,border:"1px solid rgba(245,158,11,0.2)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:700}}>ESTA SEMANA</span>
+          {loadingEar
+            ?<span style={{marginLeft:"auto",color:"#334155",fontSize:11,display:"flex",alignItems:"center",gap:5}}>⏳ Cargando...</span>
+            :<span style={{marginLeft:"auto",color:C.bull,fontSize:11,fontWeight:700}}>🟢 En vivo</span>}
+        </div>
+
+        {/* By-date groups */}
+        {dates.map(fecha=>{
+          const group=earnings.filter(e=>(lang==="en"?e.fechaEn:e.fecha)===fecha);
+          return(
+            <div key={fecha} style={{marginBottom:16}}>
+              {/* Date label */}
+              <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:8,paddingLeft:2,textTransform:"uppercase"}}>{fecha}</div>
+              {/* Stock rows */}
+              {group.map(e=>{
+                const bull=votes[e.ticker];
+                const isToday=e.fecha==="Hoy"||e.fechaEn==="Today";
+                const isSel=selected===e.ticker;
+                return(
+                  <div key={e.ticker}
+                    onClick={()=>setSelected(isSel?null:e.ticker)}
+                    style={{
+                      display:"flex",alignItems:"center",gap:10,
+                      background:isSel?"rgba(0,229,143,0.06)":isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)",
+                      border:`1px solid ${isSel?"rgba(0,229,143,0.25)":isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)"}`,
+                      borderRadius:11,padding:"11px 14px",marginBottom:6,cursor:"pointer",transition:"all 0.15s",
+                      boxShadow:isSel?"0 0 20px rgba(0,229,143,0.1)":"none"
+                    }}
+                    onMouseEnter={e2=>{if(!isSel){e2.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e2.currentTarget.style.background="rgba(14,22,40,0.9)";}}}
+                    onMouseLeave={e2=>{if(!isSel){e2.currentTarget.style.borderColor=isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)";e2.currentTarget.style.background=isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)";}}}
+                  >
+                    {/* Ticker */}
+                    <span style={{fontFamily:"monospace",fontSize:13,fontWeight:800,color:isToday?C.gold:C.accent,minWidth:50,letterSpacing:0.5}}>{e.ticker}</span>
+                    {/* Company */}
+                    <span style={{fontSize:13,fontWeight:600,color:"#CBD5E1",flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</span>
+                    {/* Time */}
+                    <span style={{fontSize:11,color:"#475569",whiteSpace:"nowrap"}}>{e.hora}</span>
+                    {/* Live badge */}
+                    {e.live&&<span onClick={ev=>{ev.stopPropagation();setLiveEvent(e);}} style={{background:"#ef4444",borderRadius:12,padding:"2px 8px",fontSize:10,fontWeight:800,color:"#fff",whiteSpace:"nowrap",cursor:"pointer"}}>🔴 LIVE</span>}
+                    {/* Bull % pill */}
+                    <div style={{display:"flex",gap:0,background:"rgba(255,255,255,0.04)",borderRadius:8,overflow:"hidden",border:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
+                      <span style={{fontSize:10,fontWeight:800,color:C.bull,padding:"3px 7px",background:"rgba(0,229,143,0.08)"}}>{bull}%</span>
+                      <span style={{fontSize:10,fontWeight:800,color:C.bear,padding:"3px 7px",background:"rgba(255,77,106,0.08)"}}>{100-bull}%</span>
+                    </div>
+                    {/* Chevron */}
+                    <span style={{color:"#334155",fontSize:14,transition:"transform 0.2s",transform:isSel?"rotate(90deg)":"none"}}>›</span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
 
-      {earnings.map(e=>{
-        const bull = votes[e.ticker];
-        const bear = 100 - bull;
-        const isToday = e.fecha==="Hoy";
-        const myVote = voted[e.ticker];
+      {/* RIGHT — Detail panel (appears on click) */}
+      {sel&&(()=>{
+        const bull=votes[sel.ticker];
+        const bear=100-bull;
+        const myVote=voted[sel.ticker];
+        const isToday=sel.fecha==="Hoy"||sel.fechaEn==="Today";
         return(
-          <div key={e.ticker} style={{background:isToday?"#fffbeb":C.surface,border:`1px solid ${isToday?C.gold+"66":C.border}`,borderRadius:14,padding:"16px 20px",marginBottom:12,boxShadow:isToday?`0 0 0 2px ${C.gold}22,${C.shadow}`:C.shadow,transition:"box-shadow 0.2s"}}>
-            {/* Row 1: ticker info */}
-            <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",marginBottom:12}}>
-              <span style={{background:C.accentDim,color:C.accentText,borderRadius:8,padding:"4px 11px",fontSize:14,fontWeight:800,fontFamily:"monospace"}}>${e.ticker}</span>
-              <span style={{fontWeight:700,color:C.text,fontSize:14}}>{e.nombre}</span>
-              {isToday
-                ? <span style={{background:"#fef3c7",color:"#b45309",fontWeight:800,fontSize:12,padding:"3px 9px",borderRadius:20}}>🔥 {lang==="en"?"TODAY":"HOY"}</span>
-                : <span style={{color:C.muted,fontSize:13}}>{lang==="en"?e.fechaEn:e.fecha}</span>
-              }
-              <span style={{color:C.muted2,fontSize:12,background:"#f1f5f9",padding:"2px 8px",borderRadius:6}}>{e.hora}</span>
-              {e.live && (
-                <button onClick={()=>setLiveEvent(e)} style={{marginLeft:4,display:"flex",alignItems:"center",gap:5,background:"#ef4444",border:"none",borderRadius:20,padding:"4px 12px",cursor:"pointer",color:"#fff",fontSize:11,fontWeight:800,animation:"pulse 1.5s infinite"}}>
-                  <span style={{width:7,height:7,borderRadius:"50%",background:"#fff",display:"inline-block",boxShadow:"0 0 0 2px rgba(255,255,255,0.4)"}}/>
-                  EN VIVO
-                </button>
-              )}
-              <div style={{marginLeft:"auto",display:"flex",gap:14}}>
-                <div style={{textAlign:"center"}}><div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:C.text}}>{e.eps_est}</div><div style={{fontSize:10,color:C.muted2}}>EPS est.</div></div>
-                <div style={{textAlign:"center"}}><div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:C.text}}>{e.rev_est}</div><div style={{fontSize:10,color:C.muted2}}>Rev. est.</div></div>
-                {e.sorpresa&&<div style={{textAlign:"center"}}><div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:C.bull}}>{e.sorpresa}</div><div style={{fontSize:10,color:C.muted2}}>{lang==="en"?"Surprise":"Sorpresa"}</div></div>}
+          <div style={{position:"sticky",top:88}}>
+            <div style={{background:"rgba(14,22,40,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,padding:"20px",backdropFilter:"blur(20px)",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
+              {/* Close */}
+              <button onClick={()=>setSelected(null)} style={{float:"right",background:"none",border:"none",color:"#475569",fontSize:18,cursor:"pointer",lineHeight:1}}>×</button>
+              {/* Ticker & name */}
+              <div style={{marginBottom:16}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                  <span style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:isToday?C.gold:C.accent}}>${sel.ticker}</span>
+                  {isToday&&<span style={{background:"rgba(245,158,11,0.15)",color:C.gold,border:"1px solid rgba(245,158,11,0.3)",borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>🔥 HOY</span>}
+                </div>
+                <div style={{fontSize:14,color:"#94A3B8",fontWeight:600}}>{sel.nombre}</div>
+                <div style={{fontSize:12,color:"#475569",marginTop:2}}>{lang==="en"?sel.fechaEn:sel.fecha} · {sel.hora}</div>
               </div>
-            </div>
 
-            {/* Row 2: Sentiment gauge */}
-            <div style={{background:"#f8fafc",borderRadius:10,padding:"10px 12px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,marginBottom:6}}>
-                <span style={{color:C.bull}}>▲ {lang==="en"?"Bullish":"Alcista"} {bull}%</span>
-                <span style={{color:C.muted2,fontSize:11}}>💬 {e.community_votes.toLocaleString()} {lang==="en"?"votes":"votos"}</span>
-                <span style={{color:C.bear}}>▼ {lang==="en"?"Bearish":"Bajista"} {bear}%</span>
+              {/* EPS + Rev + Sorpresa */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
+                {[["EPS Est.",sel.eps_est,C.accent],["Rev. Est.",sel.rev_est,C.blue],
+                  ...(sel.sorpresa?[["Sorpresa",sel.sorpresa,C.bull]]:[])]
+                  .map(([label,val,col])=>(
+                  <div key={label} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:9,padding:"10px 12px"}}>
+                    <div style={{fontSize:10,color:"#475569",fontWeight:600,marginBottom:4,letterSpacing:0.3}}>{label}</div>
+                    <div style={{fontFamily:"monospace",fontSize:16,fontWeight:800,color:col}}>{val}</div>
+                  </div>
+                ))}
               </div>
-              <div style={{background:C.border,borderRadius:20,height:10,overflow:"hidden",display:"flex"}}>
-                <div style={{width:`${bull}%`,background:`linear-gradient(90deg,${C.bull},#00e5b0)`,transition:"width 0.5s"}}/>
-                <div style={{flex:1,background:`linear-gradient(90deg,#ff8080,${C.bear})`}}/>
+
+              {/* Community sentiment — gauge style */}
+              <div style={{marginBottom:16}}>
+                <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8,textTransform:"uppercase"}}>Sentimiento de la Comunidad</div>
+                {/* Semicircle gauge */}
+                <div style={{textAlign:"center",position:"relative",marginBottom:8}}>
+                  <svg viewBox="0 0 120 65" style={{width:"100%",maxWidth:160,margin:"0 auto",display:"block"}}>
+                    {/* Background arc */}
+                    <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" strokeLinecap="round"/>
+                    {/* Bull arc */}
+                    <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#gaugeGrad)" strokeWidth="10" strokeLinecap="round"
+                      strokeDasharray={`${bull*1.57} 157`}/>
+                    <defs>
+                      <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#ef4444"/>
+                        <stop offset="50%" stopColor="#F59E0B"/>
+                        <stop offset="100%" stopColor="#00E58F"/>
+                      </linearGradient>
+                    </defs>
+                    <text x="60" y="52" textAnchor="middle" fontSize="18" fontWeight="900" fill="#F1F5F9">{bull}%</text>
+                  </svg>
+                  <div style={{fontSize:12,color:"#64748B",marginTop:-4}}>
+                    <span style={{color:C.bull,fontWeight:700}}>👍 Bullish</span> / <span style={{color:C.bear,fontWeight:700}}>{bear}% Bearish 👎</span>
+                  </div>
+                  <div style={{fontSize:11,color:"#334155",marginTop:4}}>💬 {sel.community_votes.toLocaleString()} votos</div>
+                </div>
+                {/* Bar */}
+                <div style={{height:6,background:"rgba(255,255,255,0.05)",borderRadius:6,overflow:"hidden",display:"flex",marginBottom:12}}>
+                  <div style={{width:`${bull}%`,background:`linear-gradient(90deg,${C.bull},#00c4d4)`,transition:"width 0.5s"}}/>
+                  <div style={{flex:1,background:`linear-gradient(90deg,rgba(255,100,100,0.5),${C.bear})`}}/>
+                </div>
+                {/* Vote buttons */}
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>vote(sel.ticker,"bull")} disabled={!!myVote}
+                    style={{flex:1,background:myVote==="bull"?"rgba(0,229,143,0.15)":"transparent",border:`1.5px solid ${myVote==="bull"?C.bull:"rgba(0,229,143,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bull"?C.bull:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s",boxShadow:myVote==="bull"?"0 0 16px rgba(0,229,143,0.2)":"none"}}>
+                    {myVote==="bull"?"✓ Alcista":"▲ Soy Alcista"}
+                  </button>
+                  <button onClick={()=>vote(sel.ticker,"bear")} disabled={!!myVote}
+                    style={{flex:1,background:myVote==="bear"?"rgba(255,77,106,0.15)":"transparent",border:`1.5px solid ${myVote==="bear"?C.bear:"rgba(255,77,106,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bear"?C.bear:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s",boxShadow:myVote==="bear"?"0 0 16px rgba(255,77,106,0.2)":"none"}}>
+                    {myVote==="bear"?"✓ Bajista":"▼ Soy Bajista"}
+                  </button>
+                </div>
               </div>
-              {/* Vote buttons */}
-              <div style={{display:"flex",gap:8,marginTop:8,justifyContent:"center"}}>
-                <button onClick={()=>vote(e.ticker,"bull")} disabled={!!myVote} style={{flex:1,border:`1.5px solid ${myVote==="bull"?C.bull:C.border}`,background:myVote==="bull"?C.bullBg:"#fff",borderRadius:8,padding:"5px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bull"?C.bull:C.muted,fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
-                  {myVote==="bull"?"✓ ":""}▲ {lang==="en"?"I'm bullish":"Soy alcista"}
-                </button>
-                <button onClick={()=>vote(e.ticker,"bear")} disabled={!!myVote} style={{flex:1,border:`1.5px solid ${myVote==="bear"?C.bear:C.border}`,background:myVote==="bear"?C.bearBg:"#fff",borderRadius:8,padding:"5px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bear"?C.bear:C.muted,fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
-                  {myVote==="bear"?"✓ ":""}▼ {lang==="en"?"I'm bearish":"Soy bajista"}
-                </button>
-              </div>
+
+              {/* Live button if applicable */}
+              {sel.live&&<button onClick={()=>setLiveEvent(sel)} style={{width:"100%",background:"#ef4444",border:"none",borderRadius:9,padding:"10px",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 0 20px rgba(239,68,68,0.4)"}}>
+                <span style={{width:8,height:8,borderRadius:"50%",background:"#fff",display:"inline-block"}}/>
+                {sel.live_title} — EN VIVO
+              </button>}
             </div>
           </div>
         );
-      })}
+      })()}
 
-      {liveEvent && <LiveConferenceModal event={liveEvent} lang={lang} onClose={()=>setLiveEvent(null)}/>}
+      {liveEvent&&<LiveConferenceModal event={liveEvent} lang={lang} onClose={()=>setLiveEvent(null)}/>}
     </div>
   );
 }
@@ -1586,68 +1651,49 @@ function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
           </div>
         </div>
 
-        {/* Plans grid */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:28}}>
-          {/* FREE PLAN */}
-          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:20,padding:28,boxShadow:C.shadow}}>
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,marginBottom:8}}>COMUNIDAD</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:6}}>
-                <span style={{fontSize:36,fontWeight:900,color:C.text}}>Gratis</span>
-              </div>
-              <p style={{color:C.accent,fontSize:12,fontWeight:700,margin:"0 0 4px"}}>Gratis para siempre</p>
-              <p style={{color:C.muted,fontSize:13,margin:0,lineHeight:1.5}}>Empieza a invertir en comunidad sin costo.</p>
-            </div>
-            <div style={{marginBottom:24}}>
+        {/* Plans grid — exactly like the photo */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0,marginBottom:28,borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
+
+          {/* FREE PLAN — left, clean gray */}
+          <div style={{background:"rgba(14,22,40,0.95)",padding:"28px 26px",borderRight:"1px solid rgba(255,255,255,0.08)"}}>
+            <div style={{fontSize:28,fontWeight:900,color:"#F1F5F9",marginBottom:2}}>Free</div>
+            <div style={{fontSize:13,color:"#64748B",marginBottom:22}}>Gratis para siempre</div>
+            <div>
               {FREE_FEATURES.map((f,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"7px 0",borderBottom:i<FREE_FEATURES.length-1?`1px solid ${C.border}`:"none"}}>
-                  <span style={{fontSize:14,flexShrink:0,marginTop:1}}>{f.ok?"✅":"❌"}</span>
-                  <span style={{fontSize:13,color:f.ok?C.text:C.muted2,lineHeight:1.4}}>{f.text}</span>
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:i<FREE_FEATURES.length-1?"1px solid rgba(255,255,255,0.05)":"none"}}>
+                  <span style={{fontSize:13,color:"#64748B",flexShrink:0}}>✓</span>
+                  <span style={{fontSize:13,color:"#94A3B8",lineHeight:1.4}}>{f.text}</span>
                 </div>
               ))}
             </div>
-            <button style={{width:"100%",background:C.card2,border:`1.5px solid ${C.border}`,borderRadius:12,padding:"11px",fontSize:14,fontWeight:700,color:C.muted,cursor:"pointer"}}>{user?"Plan actual":"Empezar gratis"}</button>
+            <div style={{marginTop:24,padding:"10px",borderRadius:10,background:"rgba(255,255,255,0.04)",textAlign:"center",color:"#475569",fontSize:13,fontWeight:600,border:"1px solid rgba(255,255,255,0.06)"}}>Plan actual</div>
           </div>
 
-          {/* PREMIUM PLAN */}
-          <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",border:`2px solid ${C.accent}55`,borderRadius:20,padding:28,boxShadow:`0 8px 32px ${C.accent}22`,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:`radial-gradient(circle at 80% 20%,${C.accent}10,transparent 50%)`,pointerEvents:"none"}}/>
+          {/* VIP MEMBER — right, gold */}
+          <div style={{background:"rgba(10,16,30,0.98)",padding:"28px 26px",position:"relative",overflow:"hidden",borderLeft:"2px solid #F59E0B"}}>
+            <div style={{position:"absolute",top:0,right:0,width:200,height:200,background:"radial-gradient(circle,rgba(245,158,11,0.08),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-                <span style={{fontSize:12,fontWeight:700,color:C.accent,letterSpacing:1}}>⭐ VIP MEMBER</span>
-                <span style={{background:C.gold+"33",color:C.gold,border:`1px solid ${C.gold}55`,borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>MÁS POPULAR</span>
+              <div style={{fontSize:22,fontWeight:900,color:"#F59E0B",marginBottom:4,letterSpacing:-0.3}}>VIP Member</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:2}}>
+                <span style={{fontSize:28,fontWeight:900,color:"#F1F5F9"}}>$9.99</span>
+                <span style={{fontSize:13,color:"#64748B"}}> / mes · cancela cuando quieras</span>
               </div>
-              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:36,fontWeight:900,color:"#fff"}}>€{price}</span>
-                <span style={{color:"#94a3b8",fontSize:14}}>/mes</span>
-              </div>
-              {billing==="yearly"&&<div style={{color:C.bull,fontSize:12,fontWeight:700,marginBottom:6}}>💰 Ahorras €{savings} al año</div>}
-              <p style={{color:"#94a3b8",fontSize:13,margin:"0 0 20px",lineHeight:1.5}}>$9.99 / mes · cancela cuando quieras</p>
-              <div style={{marginBottom:24}}>
+              <div style={{marginTop:18,marginBottom:22}}>
                 {PREMIUM_FEATURES.map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"7px 0",borderBottom:i<PREMIUM_FEATURES.length-1?"1px solid #1e293b":"none"}}>
-                    <span style={{fontSize:14,flexShrink:0,marginTop:1}}>✅</span>
-                    <span style={{fontSize:13,color:f.star?"#e2e8f0":"#94a3b8",fontWeight:f.star?600:400,lineHeight:1.4}}>{f.text}</span>
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<PREMIUM_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+                    <span style={{fontSize:12,color:"#F59E0B",flexShrink:0}}>★</span>
+                    <span style={{fontSize:13,color:"#CBD5E1",lineHeight:1.4}}>{f.text.replace("★ ","")}</span>
                   </div>
                 ))}
               </div>
-
-              {/* Email input */}
               {!isPremium&&<>
-                <div style={{marginBottom:10}}>
-                  <label style={{color:"#94a3b8",fontSize:11,fontWeight:700,display:"block",marginBottom:6}}>📧 TU EMAIL PARA ALERTAS</label>
-                  <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu@email.com" type="email"
-                    style={{width:"100%",boxSizing:"border-box",background:"#1e293b",border:`1px solid ${C.accent}44`,borderRadius:10,padding:"10px 14px",fontSize:13,outline:"none",color:"#e2e8f0",fontFamily:"inherit",marginBottom:10}}/>
-                  <p style={{margin:"0 0 12px",color:"#64748b",fontSize:11,lineHeight:1.6}}>📬 Recibirás alertas de precio, earnings y señales directamente en tu email.</p>
-                </div>
-                <button onClick={handleSubscribe} style={{width:"100%",background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:12,padding:"13px",fontSize:14,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:`0 4px 16px ${C.accent}44`,transition:"opacity 0.15s"}}
-                  onMouseEnter={e=>e.currentTarget.style.opacity="0.9"}
-                  onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
-                  ⭐ Hazte VIP por $9.99/mes →
+                <button onClick={handleSubscribe}
+                  style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:11,padding:"13px",fontSize:14,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:"0 4px 20px rgba(245,158,11,0.35)",letterSpacing:0.2,marginBottom:8}}>
+                  ✦ Hazte VIP — $9.99/mes →
                 </button>
-                <p style={{margin:"10px 0 0",color:"#475569",fontSize:11,textAlign:"center"}}>💳 Pago seguro · Cancela cuando quieras · Sin permanencia</p>
+                <div style={{textAlign:"center",fontSize:11,color:"#334155"}}>7 días gratis · Sin compromiso · Cancela cuando quieras</div>
               </>}
-              {isPremium&&<div style={{background:C.bull+"22",border:`1px solid ${C.bull}44`,borderRadius:12,padding:"12px 16px",textAlign:"center",color:C.bull,fontWeight:700,fontSize:14}}>✅ Plan activo</div>}
+              {isPremium&&<div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"11px",textAlign:"center",color:C.bull,fontWeight:800,fontSize:14}}>✅ Plan activo</div>}
             </div>
           </div>
         </div>
@@ -2182,7 +2228,8 @@ function PredictionBanner(){
 const NAV_ITEMS = (t) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},{label:t.crypto,idx:2},
   {label:t.acciones,idx:3},{label:t.macro,idx:4},
-  {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},{label:"⭐ Premium",idx:8,special:true},
+  {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
+  {label:"✦ Premium",idx:8,premium:true},
 ];
 
 // ── APP ROOT ──────────────────────────────────────────────────────────────────
@@ -2290,11 +2337,6 @@ export default function App(){
           <div style={{flex:1,display:"flex",justifyContent:"center",maxWidth:420}}><SearchBar lang={lang}/></div>
           {/* Right controls */}
           <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
-            {/* VIP Membership CTA */}
-            <button onClick={()=>setPage(8)}
-              style={{background:`linear-gradient(135deg,${C.vip},#9333EA)`,border:"none",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:800,display:"flex",alignItems:"center",gap:5,boxShadow:`0 0 20px ${C.vipGlow}`,letterSpacing:0.3,whiteSpace:"nowrap"}}>
-              ✦ VIP <span style={{opacity:0.85,fontWeight:600}}>$9.99</span>
-            </button>
             {/* Light/Dark toggle */}
             <button onClick={()=>setDarkMode(!darkMode)} title={darkMode?"Modo claro":"Modo oscuro"}
               style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"8px 11px",cursor:"pointer",color:C.muted,fontSize:15,display:"flex",alignItems:"center"}}>
@@ -2313,14 +2355,25 @@ export default function App(){
         </div>
         {/* Tabs — bigger, professional */}
         <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.glassBorder}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none"}}>
-          {NAV_ITEMS(t).map(n=>(
-            <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-              style={{background:n.special?(page===n.idx?`${C.gold}15`:"transparent"):"transparent",border:"none",borderBottom:n.special?"none":`2.5px solid ${page===n.idx?C.accent:"transparent"}`,borderRadius:n.special?20:0,margin:n.special?"6px 6px":"0",padding:n.special?"6px 18px":"12px 20px",cursor:"pointer",color:n.special?(page===n.idx?C.gold:`${C.gold}77`):page===n.idx?"#fff":C.muted,fontSize:14,fontWeight:page===n.idx?700:n.special?700:500,whiteSpace:"nowrap",transition:"all 0.2s",letterSpacing:0.2,display:"flex",alignItems:"center",gap:5}}
-              onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#fff";e.currentTarget.style.background="rgba(255,255,255,0.04)";}}}
-              onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color=n.special?`${C.gold}77`:C.muted;e.currentTarget.style.background="transparent";}}}>
-              {n.label}
-            </button>
-          ))}
+          {NAV_ITEMS(t).map(n=>{
+            if(n.premium){
+              const active=page===n.idx;
+              return(
+                <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
+                  style={{background:active?"linear-gradient(135deg,#7C3AED,#9333EA)":"transparent",border:active?"none":"1px solid rgba(124,58,237,0.35)",borderBottom:"none",borderRadius:20,margin:"6px 6px 6px auto",padding:"6px 16px",cursor:"pointer",color:active?"#fff":"#A78BFA",fontSize:13,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5,letterSpacing:0.3,boxShadow:active?"0 0 18px rgba(124,58,237,0.4)":"none",transition:"all 0.2s"}}>
+                  ✦ Premium
+                </button>
+              );
+            }
+            return(
+              <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
+                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?C.accent:"transparent"}`,margin:"0",padding:"12px 18px",cursor:"pointer",color:page===n.idx?"#fff":"#475569",fontSize:13.5,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
+                onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#CBD5E1";e.currentTarget.style.background="rgba(255,255,255,0.03)";}}}
+                onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#475569";e.currentTarget.style.background="transparent";}}}>
+                {n.label}
+              </button>
+            );
+          })}
         </div>
       </nav>
 
