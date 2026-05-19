@@ -1,5 +1,21 @@
-// NEXO TRADE — build: 2026-05-19 18:32:52
+// NEXO TRADE — build: 2026-05-19 18:50:11
 import { useState, useEffect, useRef, useContext, createContext } from 'react';
+
+// ── CASHTAG RENDERER ──────────────────────────────────────────────────────────
+function renderWithCashtags(text, onTickerClick){
+  if(!text) return text;
+  const parts = text.split(/(\$[A-Z]{1,5})/g);
+  return parts.map((part, i) => {
+    if(/^\$[A-Z]{1,5}$/.test(part)){
+      return <span key={i} onClick={()=>onTickerClick&&onTickerClick(part.slice(1))}
+        style={{color:"#00D26A",fontWeight:700,cursor:"pointer",background:"rgba(0,210,106,0.1)",borderRadius:4,padding:"0 3px",border:"1px solid rgba(0,210,106,0.25)",fontSize:"0.95em"}}
+        onMouseEnter={e=>e.currentTarget.style.background="rgba(0,210,106,0.2)"}
+        onMouseLeave={e=>e.currentTarget.style.background="rgba(0,210,106,0.1)"}
+      >{part}</span>;
+    }
+    return part;
+  });
+}
 
 // ── THEME — Dark Luxury Fintech ───────────────────────────────────────────────
 const C = {
@@ -920,7 +936,7 @@ function AlertsPanel({lang,onClose}){
 
 // ── POST CARD ─────────────────────────────────────────────────────────────────
 const CONF_LEVELS=[{min:80,label:"Alta",col:C.bull},{min:60,label:"Media",col:C.gold},{min:0,label:"Baja",col:C.muted}];
-function PostCard({post,onProfile,onPoints,lang}){
+function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes),[repost,setRepost]=useState(false);
   const conf=55+Math.floor((post.id||1)%40);
   const confLevel=CONF_LEVELS.find(c=>conf>=c.min);
@@ -941,7 +957,7 @@ function PostCard({post,onProfile,onPoints,lang}){
             {aiAgrees&&<span style={{background:"rgba(124,110,250,0.15)",color:C.purple,border:`1px solid ${C.purple}44`,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:700}}>🧠 AI concuerda</span>}
             <span style={{color:C.muted2,fontSize:11,marginLeft:"auto"}}>{post.time}</span>
           </div>
-          <p style={{margin:"0 0 10px",color:"#D0D8F0",fontSize:14,lineHeight:1.7}}>{post.text}</p>
+          <p style={{margin:"0 0 10px",color:"#D0D8F0",fontSize:14,lineHeight:1.7}}>{renderWithCashtags(post.text, onTickerClick)}</p>
           {/* Confidence bar */}
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
             <span style={{fontSize:10,color:C.muted2,fontWeight:600}}>Confianza:</span>
@@ -984,27 +1000,37 @@ function NewPost({user,onPost,onNeedAuth,lang}){
     setText("");setTicker("");setModMsg("");
   };
   return(
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 20px",marginBottom:20,boxShadow:C.shadow}}>
-      {modMsg&&<div style={{background:"#fef2f2",border:`1px solid ${C.bear}33`,borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:13,color:C.bear}}>{modMsg}</div>}
+    <div style={{background:"rgba(19,26,46,0.9)",border:`1px solid ${C.glassBorder}`,borderRadius:16,padding:"20px",marginBottom:20,backdropFilter:"blur(12px)"}}>
+      {modMsg&&<div style={{background:`${C.bear}15`,border:`1px solid ${C.bear}44`,borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:13,color:C.bear}}>{modMsg}</div>}
       <div style={{display:"flex",gap:12}}>
-        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:40,height:40,borderRadius:"50%",background:C.card2,border:`2px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👤</div>}
+        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:40,height:40,borderRadius:"50%",background:"rgba(255,255,255,0.05)",border:`2px solid ${C.glassBorder}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👤</div>}
         <div style={{flex:1}}>
           {!user&&<div style={{background:C.accentDim,border:`1px solid ${C.accent}33`,borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:13,color:C.muted}}>
-            <span style={{color:C.accentText,fontWeight:700}}>{t.login}</span> {lang==="en"?"to share your analysis":"para compartir tu análisis"}
+            <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}}>{t.login}</span> {lang==="en"?"to share your analysis":"para compartir tu análisis"}
           </div>}
           {user&&<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
             <LevelBadge points={user.points} lang={lang}/>
             <span style={{color:C.muted2,fontSize:11}}>+{POINT_ACTIONS.post} pts por publicar</span>
           </div>}
-          <textarea value={text} onChange={e=>setText(e.target.value)} placeholder={t.newPost}
-            style={{width:"100%",background:C.card2,border:`1.5px solid ${C.border}`,borderRadius:10,color:C.text,fontSize:14,padding:"11px",resize:"none",outline:"none",height:74,fontFamily:"inherit",lineHeight:1.5,boxSizing:"border-box"}}/>
-          <div style={{display:"flex",gap:8,marginTop:10,alignItems:"center",flexWrap:"wrap"}}>
-            <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder={t.ticker}
-              style={{background:C.card2,border:`1.5px solid ${C.border}`,borderRadius:8,color:C.text,padding:"8px 12px",fontSize:13,outline:"none",width:110,fontFamily:"monospace",textTransform:"uppercase"}}/>
-            <div style={{display:"flex",borderRadius:8,overflow:"hidden",border:`1.5px solid ${C.border}`}}>
-              {["bull","bear"].map(s=><button key={s} onClick={()=>setSent(s)} style={{background:sent===s?(s==="bull"?C.bullBg:C.bearBg):"transparent",border:"none",cursor:"pointer",padding:"8px 12px",color:s==="bull"?C.bull:C.bear,fontSize:11,fontWeight:800}}>{s==="bull"?t.bullish:t.bearish}</button>)}
-            </div>
-            <Btn onClick={submit} style={{marginLeft:"auto"}}>{user?t.publish:t.login}</Btn>
+          <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="¿Qué piensas del mercado? Usa $NVDA, $BTC... para mencionar activos"
+            style={{width:"100%",background:"rgba(255,255,255,0.04)",border:`1.5px solid ${C.glassBorder}`,borderRadius:10,color:"#fff",fontSize:14,padding:"12px",resize:"none",outline:"none",height:80,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box"}}/>
+          {/* Bullish / Bearish — prominente */}
+          <div style={{display:"flex",gap:10,marginTop:12,marginBottom:12}}>
+            {[
+              {v:"bull",label:"▲ BULLISH",sub:"Mercado va a subir",col:C.bull},
+              {v:"bear",label:"▼ BEARISH",sub:"Mercado va a bajar",col:C.bear},
+            ].map(({v,label,sub,col})=>(
+              <button key={v} onClick={()=>setSent(v)} style={{flex:1,background:sent===v?`${col}18`:"rgba(255,255,255,0.03)",border:`2px solid ${sent===v?col:C.glassBorder}`,borderRadius:12,padding:"10px",cursor:"pointer",textAlign:"center",transition:"all 0.15s",boxShadow:sent===v?`0 0 20px ${col}33`:"none"}}>
+                <div style={{color:sent===v?col:C.muted,fontWeight:800,fontSize:13,letterSpacing:0.5}}>{label}</div>
+                <div style={{color:C.muted2,fontSize:10,marginTop:2}}>{sub}</div>
+              </button>
+            ))}
+          </div>
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
+              style={{background:"rgba(255,255,255,0.05)",border:`1.5px solid ${C.glassBorder}`,borderRadius:8,color:C.accent,padding:"8px 12px",fontSize:13,outline:"none",width:100,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700}}/>
+            <span style={{color:C.muted2,fontSize:12}}>Tip: escribe $NVDA en tu post para cashtag interactivo</span>
+            <Btn onClick={submit} style={{marginLeft:"auto",padding:"9px 24px"}}>{user?t.publish:t.login}</Btn>
           </div>
         </div>
       </div>
@@ -2089,24 +2115,45 @@ export default function App(){
     if(page===7) return <TrendingPage/>;
     return(
       <>
-        <div style={{display:"flex",gap:7,marginBottom:18,alignItems:"center",flexWrap:"wrap"}}>
+        {/* Ticker filter banner */}
+        {tickerFilter&&(
+          <div style={{background:`${C.accent}12`,border:`1px solid ${C.accent}33`,borderRadius:12,padding:"10px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{color:C.accent,fontWeight:800,fontSize:14}}>${tickerFilter}</span>
+            <span style={{color:C.muted,fontSize:13}}>— mostrando posts sobre este activo</span>
+            <button onClick={()=>setTickerFilter(null)} style={{marginLeft:"auto",background:"rgba(255,255,255,0.08)",border:"none",borderRadius:8,padding:"4px 12px",color:C.muted,cursor:"pointer",fontSize:12}}>✕ Limpiar filtro</button>
+          </div>
+        )}
+        <div style={{display:"flex",gap:7,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
           <span style={{color:C.muted2,fontSize:12,fontWeight:600}}>{lang==="en"?"Filter:":"Filtrar:"}</span>
           {[[`all`,t.filterAll],[`bull`,t.filterBull],[`bear`,t.filterBear]].map(([v,l])=>(
-            <button key={v} onClick={()=>setSent(v)} style={{background:sent===v?(v==="bull"?C.bullBg:v==="bear"?C.bearBg:C.accentDim):"transparent",border:`1.5px solid ${sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent)+"55":C.border}`,borderRadius:8,padding:"5px 13px",cursor:"pointer",color:sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accentText):C.muted,fontSize:12,fontWeight:600,transition:"all 0.15s"}}>{l}</button>
+            <button key={v} onClick={()=>setSent(v)} style={{background:sent===v?(v==="bull"?"rgba(0,210,106,0.15)":v==="bear"?"rgba(255,77,106,0.15)":"rgba(0,210,106,0.1)"):"transparent",border:`1.5px solid ${sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent)+"55":C.glassBorder}`,borderRadius:20,padding:"5px 14px",cursor:"pointer",color:sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent):C.muted,fontSize:12,fontWeight:600,transition:"all 0.15s"}}>{l}</button>
           ))}
-          <span style={{marginLeft:"auto",color:C.muted2,fontSize:12}}>{filtered.length} {t.ideas}</span>
+          <span style={{marginLeft:"auto",color:C.muted2,fontSize:12}}>{filtered2.length} {t.ideas}</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
-        {filtered.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} lang={lang}/>)}
+        {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerFilter(tk)} lang={lang}/>)}
       </>
     );
   };
 
   const [showLanding, setShowLanding] = useState(!user);
+  const [darkMode, setDarkMode] = useState(true);
+  const [tickerFilter, setTickerFilter] = useState(null);
+
+  // Light mode overrides
+  const theme = darkMode ? {} : {
+    "--bg":"#f0f4f8","--surface":"#ffffff","--card":"#ffffff",
+    "--text":"#0f172a","--muted":"#64748b","--border":"#e2e8f0",
+  };
+
+  const filteredByTicker = tickerFilter
+    ? posts.filter(p => p.text?.toUpperCase().includes(`$${tickerFilter}`) || p.ticker===tickerFilter)
+    : posts;
+  const filtered2 = sent==="all" ? filteredByTicker : filteredByTicker.filter(p=>p.sentiment===sent);
 
   return(
     <PriceProvider>
-    <div style={{minHeight:"100vh",background:C.bg,color:C.text,fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif"}}>
+    <div style={{minHeight:"100vh",background:darkMode?C.bg:"#f0f4f8",color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
       <TickerTape/>
 
       {/* NAVBAR — Floating Glass */}
@@ -2114,17 +2161,20 @@ export default function App(){
         <div style={{display:"flex",alignItems:"center",gap:12,height:62,maxWidth:1180,margin:"0 auto"}}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:10,marginRight:8,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
-            <div style={{width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${C.accent},#00a060)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff",boxShadow:`0 0 16px ${C.accent}55`}}>N</div>
-            <div>
-              <div style={{fontSize:17,fontWeight:800,letterSpacing:-0.5,color:"#fff"}}>NexoTrade</div>
-              <div style={{fontSize:8,color:C.muted2,letterSpacing:2,lineHeight:1,textTransform:"uppercase"}}>Comunidad Inversora</div>
-            </div>
+            <img src="/logo.png" alt="NEXO TRADE" style={{height:40,width:"auto",objectFit:"contain",filter:"drop-shadow(0 0 8px rgba(0,210,106,0.4))"}}
+              onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
+            <div style={{display:"none",width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${C.accent},#00a060)`,alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff"}}>N</div>
             <span style={{fontSize:9,fontWeight:800,color:C.accent,background:C.accentDim,padding:"2px 6px",borderRadius:4,letterSpacing:1,border:`1px solid ${C.accent}33`}}>BETA</span>
           </div>
           {/* Search */}
           <div style={{flex:1,display:"flex",justifyContent:"center"}}><SearchBar lang={lang}/></div>
           {/* Right controls */}
           <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+            {/* Light/Dark toggle */}
+            <button onClick={()=>setDarkMode(!darkMode)} title={darkMode?"Modo claro":"Modo oscuro"}
+              style={{background:"rgba(255,255,255,0.06)",border:`1px solid ${C.glassBorder}`,borderRadius:10,padding:"7px 12px",cursor:"pointer",color:C.muted,fontSize:16,display:"flex",alignItems:"center",backdropFilter:"blur(8px)"}}>
+              {darkMode?"☀️":"🌙"}
+            </button>
             <button onClick={()=>setShowAI(true)} style={{background:`rgba(0,210,106,0.1)`,border:`1px solid ${C.accent}33`,borderRadius:10,padding:"7px 14px",cursor:"pointer",color:C.accent,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:6,backdropFilter:"blur(8px)"}}>
               🤖 IA
             </button>
@@ -2135,10 +2185,15 @@ export default function App(){
             }
           </div>
         </div>
-        {/* Tabs */}
-        <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.glassBorder}`,overflowX:"auto",maxWidth:1180,margin:"0 auto"}}>
+        {/* Tabs — bigger, professional */}
+        <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.glassBorder}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none"}}>
           {NAV_ITEMS(t).map(n=>(
-            <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);}} style={{background:n.special?(page===n.idx?`${C.gold}22`:"transparent"):"transparent",border:"none",borderBottom:n.special?"none":`2px solid ${page===n.idx?C.accent:"transparent"}`,borderRadius:n.special?20:0,margin:n.special?"5px 4px":"0",padding:n.special?"5px 14px":"10px 16px",cursor:"pointer",color:n.special?(page===n.idx?C.gold:`${C.gold}88`):page===n.idx?C.accent:C.muted,fontSize:12,fontWeight:page===n.idx?700:n.special?700:500,whiteSpace:"nowrap",transition:"all 0.2s",letterSpacing:0.2}}>{n.label}</button>
+            <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
+              style={{background:n.special?(page===n.idx?`${C.gold}15`:"transparent"):"transparent",border:"none",borderBottom:n.special?"none":`2.5px solid ${page===n.idx?C.accent:"transparent"}`,borderRadius:n.special?20:0,margin:n.special?"6px 6px":"0",padding:n.special?"6px 18px":"12px 20px",cursor:"pointer",color:n.special?(page===n.idx?C.gold:`${C.gold}77`):page===n.idx?"#fff":C.muted,fontSize:14,fontWeight:page===n.idx?700:n.special?700:500,whiteSpace:"nowrap",transition:"all 0.2s",letterSpacing:0.2,display:"flex",alignItems:"center",gap:5}}
+              onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#fff";e.currentTarget.style.background="rgba(255,255,255,0.04)";}}}
+              onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color=n.special?`${C.gold}77`:C.muted;e.currentTarget.style.background="transparent";}}}>
+              {n.label}
+            </button>
           ))}
         </div>
       </nav>
