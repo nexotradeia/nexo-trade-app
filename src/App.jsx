@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-19 19:02:24
+// NEXO TRADE — build: 2026-05-19 19:09:10
 import { useState, useEffect, useRef, useContext, createContext } from 'react';
 
 // ── CASHTAG RENDERER ──────────────────────────────────────────────────────────
@@ -2161,7 +2161,7 @@ export default function App(){
         <div style={{display:"flex",alignItems:"center",gap:12,height:62,maxWidth:1180,margin:"0 auto"}}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:10,marginRight:8,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
-            <img src="/logo.png" alt="NEXO TRADE" style={{height:40,width:"auto",objectFit:"contain",filter:"drop-shadow(0 0 8px rgba(0,210,106,0.4))"}}
+            <img src="/logo2.png" alt="NEXO TRADE" style={{height:44,width:"auto",objectFit:"contain",filter:"drop-shadow(0 0 12px rgba(0,220,255,0.5))"}}
               onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
             <div style={{display:"none",width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${C.accent},#00a060)`,alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff"}}>N</div>
             <span style={{fontSize:9,fontWeight:800,color:C.accent,background:C.accentDim,padding:"2px 6px",borderRadius:4,letterSpacing:1,border:`1px solid ${C.accent}33`}}>BETA</span>
@@ -2200,37 +2200,100 @@ export default function App(){
 
       {/* HERO LANDING */}
       {showLanding && page===0 && (
-        <div style={{background:`radial-gradient(ellipse at 20% 50%, rgba(0,210,106,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(60,142,250,0.08) 0%, transparent 60%), ${C.bg}`,borderBottom:`1px solid ${C.glassBorder}`,padding:"60px 20px 50px"}}>
-          <div style={{maxWidth:900,margin:"0 auto",textAlign:"center"}}>
-            {/* Badge */}
-            <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,210,106,0.1)",border:`1px solid ${C.accent}33`,borderRadius:30,padding:"6px 16px",marginBottom:28}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 8px ${C.accent}`}}/>
-              <span style={{color:C.accent,fontSize:12,fontWeight:700,letterSpacing:1}}>TRADING SOCIAL CON IA · EN VIVO</span>
-            </div>
-            {/* Headline */}
-            <h1 style={{fontSize:"clamp(32px,5vw,60px)",fontWeight:900,letterSpacing:-1.5,lineHeight:1.1,margin:"0 0 20px",color:"#fff"}}>
-              La comunidad inversora<br/>
-              <span style={{background:`linear-gradient(90deg,${C.accent},#3B8EFA)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>hispana impulsada por IA</span>
-            </h1>
-            <p style={{fontSize:18,color:C.muted,lineHeight:1.7,margin:"0 auto 36px",maxWidth:560,fontWeight:400}}>Analiza mercados, comparte ideas y aprende de los mejores traders — todo potenciado por IA en tiempo real.</p>
-            {/* CTAs */}
-            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:48}}>
-              <button onClick={()=>setAuth("register")} style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 30px ${C.accent}44`,letterSpacing:0.3}}>
-                Empezar Gratis →
-              </button>
-              <button onClick={()=>setShowLanding(false)} style={{background:"rgba(255,255,255,0.05)",border:`1px solid ${C.glassBorder}`,borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:700,color:"#fff",cursor:"pointer",backdropFilter:"blur(8px)"}}>
-                Explorar Mercado
-              </button>
-            </div>
-            {/* Stats */}
-            <div style={{display:"flex",gap:0,justifyContent:"center",flexWrap:"wrap",borderTop:`1px solid ${C.glassBorder}`,paddingTop:36}}>
-              {[["12,400+","Traders activos"],["$2.4B","Volumen discutido"],["1.2M","Predicciones hechas"],["98%","Satisfacción"]].map(([num,label],i)=>(
-                <div key={i} style={{padding:"0 36px",borderRight:i<3?`1px solid ${C.glassBorder}`:"none",textAlign:"center"}}>
-                  <div style={{fontSize:28,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>{num}</div>
-                  <div style={{fontSize:12,color:C.muted,marginTop:4,fontWeight:500}}>{label}</div>
+        <div style={{background:`radial-gradient(ellipse at 15% 60%, rgba(0,210,106,0.10) 0%, transparent 55%), radial-gradient(ellipse at 85% 15%, rgba(59,142,250,0.10) 0%, transparent 55%), ${C.bg}`,borderBottom:`1px solid ${C.glassBorder}`,padding:"64px 20px 56px",overflow:"hidden"}}>
+          <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:48,flexWrap:"wrap"}}>
+
+            {/* LEFT — Text */}
+            <div style={{flex:"1 1 400px",minWidth:300}}>
+              {/* Badge */}
+              <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,210,106,0.1)",border:`1px solid ${C.accent}33`,borderRadius:30,padding:"6px 16px",marginBottom:28}}>
+                <span style={{width:7,height:7,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 10px ${C.accent}`,animation:"pulse 2s infinite"}}/>
+                <span style={{color:C.accent,fontSize:11,fontWeight:700,letterSpacing:1.2}}>TRADING SOCIAL CON IA</span>
+              </div>
+              {/* Headline */}
+              <h1 style={{fontSize:"clamp(36px,5vw,64px)",fontWeight:900,letterSpacing:-2,lineHeight:1.05,margin:"0 0 18px",color:"#fff"}}>
+                El futuro del<br/>
+                <span style={{background:`linear-gradient(90deg,${C.accent} 0%,#3B8EFA 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>trading social</span>
+              </h1>
+              <p style={{fontSize:17,color:C.muted,lineHeight:1.75,margin:"0 0 36px",maxWidth:480,fontWeight:400}}>
+                Analiza mercados, comparte ideas y aprende de los mejores traders — todo potenciado por IA en tiempo real.
+              </p>
+              {/* CTAs */}
+              <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:40}}>
+                <button onClick={()=>setAuth("register")}
+                  style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:12,padding:"14px 30px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 32px ${C.accent}55`,letterSpacing:0.2}}>
+                  Empezar Gratis →
+                </button>
+                <button onClick={()=>setShowLanding(false)}
+                  style={{background:"rgba(255,255,255,0.05)",border:`1px solid rgba(255,255,255,0.15)`,borderRadius:12,padding:"14px 30px",fontSize:15,fontWeight:700,color:"#fff",cursor:"pointer",backdropFilter:"blur(8px)"}}>
+                  Explorar Mercado
+                </button>
+              </div>
+              {/* Social proof */}
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <div style={{display:"flex"}}>
+                  {["#00D26A","#3B8EFA","#FFB800","#FF4D6A"].map((c,i)=>(
+                    <div key={i} style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${c},${c}88)`,border:"2px solid #0B1020",marginLeft:i>0?-8:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff"}}>{["MC","SB","AT","FP"][i]}</div>
+                  ))}
                 </div>
-              ))}
+                <span style={{fontSize:13,color:C.muted,fontWeight:500}}><strong style={{color:"#fff"}}>12,400+</strong> traders ya están dentro</span>
+              </div>
             </div>
+
+            {/* RIGHT — Chart Mockup */}
+            <div style={{flex:"0 0 auto",position:"relative",width:380}}>
+              {/* Main card */}
+              <div style={{background:"rgba(19,26,46,0.9)",border:`1px solid rgba(0,210,106,0.2)`,borderRadius:20,padding:"20px 24px",backdropFilter:"blur(20px)",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
+                {/* Header */}
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{width:8,height:8,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 8px ${C.accent}`}}/>
+                    <span style={{fontSize:12,color:C.muted,fontWeight:600}}>En vivo</span>
+                    <span style={{fontSize:11,color:C.muted2}}>/</span>
+                    <span style={{fontSize:11,color:C.muted2,fontWeight:500}}>USD · 1D</span>
+                  </div>
+                  <span style={{fontSize:11,color:C.muted2,background:"rgba(255,255,255,0.05)",padding:"3px 8px",borderRadius:6}}>S&P 500</span>
+                </div>
+                {/* Price */}
+                <div style={{marginBottom:18}}>
+                  <div style={{fontSize:38,fontWeight:900,color:"#fff",letterSpacing:-1,lineHeight:1}}>$68,420</div>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
+                    <span style={{fontSize:14,color:C.accent,fontWeight:700}}>▲ +4.2%</span>
+                    <span style={{fontSize:13,color:C.muted,fontWeight:500}}>· +$2,761</span>
+                  </div>
+                </div>
+                {/* Chart SVG */}
+                <svg viewBox="0 0 330 70" style={{width:"100%",height:70,display:"block",marginBottom:8}}>
+                  <defs>
+                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#00D26A" stopOpacity="0.35"/>
+                      <stop offset="100%" stopColor="#00D26A" stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M0 60 C20 55, 40 50, 60 45 S90 35, 110 30 S150 25, 170 22 S210 18, 240 15 S280 10, 330 5" fill="none" stroke="#00D26A" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M0 60 C20 55, 40 50, 60 45 S90 35, 110 30 S150 25, 170 22 S210 18, 240 15 S280 10, 330 5 L330 70 L0 70Z" fill="url(#chartGrad)"/>
+                </svg>
+                {/* Mini bars */}
+                <div style={{display:"flex",gap:3,alignItems:"flex-end",height:16}}>
+                  {[30,50,40,70,55,80,65,90,75,95,85,100].map((h,i)=>(
+                    <div key={i} style={{flex:1,height:`${h*0.16}px`,borderRadius:2,background:i>7?C.accent:"rgba(0,210,106,0.3)"}}/>
+                  ))}
+                </div>
+              </div>
+
+              {/* Floating badge — NVDA */}
+              <div style={{position:"absolute",top:-14,right:-14,background:"rgba(19,26,46,0.95)",border:`1px solid rgba(0,210,106,0.4)`,borderRadius:12,padding:"8px 14px",backdropFilter:"blur(12px)",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+                <div style={{fontSize:11,color:C.muted,fontWeight:600,marginBottom:2}}>NVDA</div>
+                <div style={{fontSize:16,fontWeight:900,color:C.accent}}>+2.8%</div>
+              </div>
+
+              {/* Floating badge — TSLA */}
+              <div style={{position:"absolute",bottom:-14,left:-14,background:"rgba(19,26,46,0.95)",border:`1px solid rgba(255,77,106,0.4)`,borderRadius:12,padding:"8px 14px",backdropFilter:"blur(12px)",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+                <div style={{fontSize:11,color:C.muted,fontWeight:600,marginBottom:2}}>TSLA</div>
+                <div style={{fontSize:16,fontWeight:900,color:C.bear}}>-3.1%</div>
+              </div>
+            </div>
+
           </div>
         </div>
       )}
