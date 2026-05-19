@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-19 19:09:10
+// NEXO TRADE — build: 2026-05-19 19:29:27
 import { useState, useEffect, useRef, useContext, createContext } from 'react';
 
 // ── CASHTAG RENDERER ──────────────────────────────────────────────────────────
@@ -8,9 +8,9 @@ function renderWithCashtags(text, onTickerClick){
   return parts.map((part, i) => {
     if(/^\$[A-Z]{1,5}$/.test(part)){
       return <span key={i} onClick={()=>onTickerClick&&onTickerClick(part.slice(1))}
-        style={{color:"#00D26A",fontWeight:700,cursor:"pointer",background:"rgba(0,210,106,0.1)",borderRadius:4,padding:"0 3px",border:"1px solid rgba(0,210,106,0.25)",fontSize:"0.95em"}}
-        onMouseEnter={e=>e.currentTarget.style.background="rgba(0,210,106,0.2)"}
-        onMouseLeave={e=>e.currentTarget.style.background="rgba(0,210,106,0.1)"}
+        style={{color:"#00E58F",fontWeight:700,cursor:"pointer",background:"rgba(0,229,143,0.1)",borderRadius:4,padding:"1px 5px",border:"1px solid rgba(0,229,143,0.2)",fontSize:"0.9em",letterSpacing:0.3,fontFamily:"monospace"}}
+        onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,229,143,0.18)";e.currentTarget.style.boxShadow="0 0 8px rgba(0,229,143,0.3)";}}
+        onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,229,143,0.1)";e.currentTarget.style.boxShadow="none";}}
       >{part}</span>;
     }
     return part;
@@ -19,15 +19,17 @@ function renderWithCashtags(text, onTickerClick){
 
 // ── THEME — Dark Luxury Fintech ───────────────────────────────────────────────
 const C = {
-  bg:"#0B1020", surface:"#131A2E", card:"#131A2E", card2:"#0F1525",
-  border:"#1E2D45", borderHover:"#00D26A55",
-  accent:"#00D26A", accentDim:"#00D26A12", accentText:"#00D26A",
-  bull:"#00D26A", bullBg:"#00D26A15", bear:"#FF4D6A", bearBg:"#FF4D6A15",
-  gold:"#FFB800", goldBg:"#FFB80015", purple:"#7C6EFA", purpleBg:"#7C6EFA15",
-  blue:"#3B8EFA", blueBg:"#3B8EFA15", orange:"#FF8C42", orangeBg:"#FF8C4215",
-  text:"#F0F4FF", muted:"#8899BB", muted2:"#5A6B8A",
-  shadow:"0 2px 16px rgba(0,0,0,0.45)", shadowMd:"0 8px 40px rgba(0,0,0,0.6)",
-  glass:"rgba(19,26,46,0.7)", glassBorder:"rgba(255,255,255,0.07)",
+  bg:"#080D1A", surface:"#0E1628", card:"#0E1628", card2:"#080D1A",
+  border:"rgba(255,255,255,0.06)", borderHover:"rgba(0,229,143,0.3)",
+  accent:"#00E58F", accentDim:"rgba(0,229,143,0.08)", accentText:"#00E58F",
+  bull:"#00E58F", bullBg:"rgba(0,229,143,0.1)", bear:"#FF4D6A", bearBg:"rgba(255,77,106,0.1)",
+  gold:"#F59E0B", goldBg:"rgba(245,158,11,0.1)", purple:"#7C3AED", purpleBg:"rgba(124,58,237,0.1)",
+  blue:"#3B82F6", blueBg:"rgba(59,130,246,0.1)", orange:"#F97316", orangeBg:"rgba(249,115,22,0.1)",
+  text:"#F1F5F9", muted:"#64748B", muted2:"#334155",
+  shadow:"0 4px 24px rgba(0,0,0,0.6)", shadowMd:"0 16px 60px rgba(0,0,0,0.7)",
+  shadowGlow:"0 0 40px rgba(0,229,143,0.12)", shadowGlowBlue:"0 0 40px rgba(59,130,246,0.12)",
+  glass:"rgba(14,22,40,0.8)", glassBorder:"rgba(255,255,255,0.06)",
+  vip:"#7C3AED", vipGlow:"rgba(124,58,237,0.3)",
 };
 
 // ── LANGS ─────────────────────────────────────────────────────────────────────
@@ -592,25 +594,25 @@ function SearchBar({lang}) {
   useEffect(()=>{if(!q){setRes([]);return;}setRes(SEARCH_TICKERS.filter(x=>x.toLowerCase().includes(q.toLowerCase())).slice(0,6));},[q]);
   useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setFoc(false);};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
   return(
-    <div ref={ref} style={{position:"relative",width:"100%",maxWidth:440}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,background:C.card2,border:`1.5px solid ${foc?C.accent:C.border}`,borderRadius:12,padding:"9px 14px",transition:"all 0.2s",boxShadow:foc?`0 0 0 3px ${C.accentDim}`:"none"}}>
-        <span style={{fontSize:15}}>🔍</span>
+    <div ref={ref} style={{position:"relative",width:"100%",maxWidth:420}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",border:`1px solid ${foc?"rgba(59,130,246,0.45)":"rgba(255,255,255,0.07)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(59,130,246,0.1), 0 4px 16px rgba(0,0,0,0.3)":"0 2px 8px rgba(0,0,0,0.2)"}}>
+        <span style={{fontSize:13,color:"#475569"}}>⌕</span>
         <input value={q} onChange={e=>setQ(e.target.value)} onFocus={()=>setFoc(true)} placeholder={t.search}
-          style={{flex:1,background:"none",border:"none",outline:"none",color:C.text,fontSize:13,fontFamily:"inherit"}}/>
-        {q&&<button onClick={()=>{setQ("");setRes([]);}} style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:18}}>×</button>}
+          style={{flex:1,background:"none",border:"none",outline:"none",color:"#E2E8F0",fontSize:13,fontFamily:"'Inter',sans-serif",fontWeight:400,letterSpacing:0.1}}/>
+        {q&&<button onClick={()=>{setQ("");setRes([]);}} style={{background:"none",border:"none",cursor:"pointer",color:"#334155",fontSize:16,lineHeight:1}}>×</button>}
       </div>
       {res.length>0&&foc&&(
-        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,boxShadow:C.shadowMd,zIndex:200,overflow:"hidden"}}>
+        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"rgba(8,13,26,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,boxShadow:"0 20px 60px rgba(0,0,0,0.8)",zIndex:200,overflow:"hidden",backdropFilter:"blur(20px)"}}>
           {res.map(ticker=>{
             const tape=TAPE_ITEMS.find(x=>x.ticker===ticker);
             return(
-              <div key={ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",cursor:"pointer",borderBottom:`1px solid ${C.border}`,transition:"background 0.1s"}}
-                onMouseEnter={e=>e.currentTarget.style.background=C.card2}
+              <div key={ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.04)",transition:"background 0.1s"}}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.04)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                 onClick={()=>{setQ(ticker);setRes([]);setFoc(false);}}>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <span style={{background:C.accentDim,color:C.accentText,borderRadius:6,padding:"3px 8px",fontSize:12,fontWeight:800,fontFamily:"monospace"}}>${ticker}</span>
-                  {tape?.earning&&<span style={{background:"#fffbeb",color:"#b45309",border:"1px solid #fcd34d",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700}}>📅 EARN</span>}
+                  <span style={{background:"rgba(0,229,143,0.08)",color:C.accent,borderRadius:6,padding:"3px 8px",fontSize:11.5,fontWeight:800,fontFamily:"monospace",letterSpacing:0.5}}>${ticker}</span>
+                  {tape?.earning&&<span style={{background:"rgba(245,158,11,0.1)",color:C.gold,border:"1px solid rgba(245,158,11,0.2)",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700}}>📅 EARN</span>}
                 </div>
                 {tape&&<span style={{color:chgCol(tape.change),fontWeight:700,fontSize:12,fontFamily:"monospace"}}>{fmtChg(tape.change)}</span>}
               </div>
@@ -935,51 +937,84 @@ function AlertsPanel({lang,onClose}){
 }
 
 // ── POST CARD ─────────────────────────────────────────────────────────────────
-const CONF_LEVELS=[{min:80,label:"Alta",col:C.bull},{min:60,label:"Media",col:C.gold},{min:0,label:"Baja",col:C.muted}];
+const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col:"#F59E0B"},{min:0,label:"Baja",col:"#64748B"}];
+// Mini sparkline data per post
+const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
+
 function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes),[repost,setRepost]=useState(false);
   const conf=55+Math.floor((post.id||1)%40);
   const confLevel=CONF_LEVELS.find(c=>conf>=c.min);
-  const aiAgrees=conf>70;
+  const aiPct=45+Math.floor((post.id||1)*7%40);
+  const target=post.sentiment==="bull"?`+${8+((post.id||1)%15)}%`:`-${5+((post.id||1)%10)}%`;
+  const spark=SPARKLINES[(post.id||0)%4];
+  const sparkMax=Math.max(...spark), sparkMin=Math.min(...spark);
+  const sparkPts=spark.map((v,i)=>`${(i/(spark.length-1))*80},${20-((v-sparkMin)/(sparkMax-sparkMin||1))*18}`).join(" ");
+  const isBull=post.sentiment==="bull";
   return(
-    <div style={{background:"rgba(19,26,46,0.85)",border:`1px solid ${C.glassBorder}`,borderRadius:16,padding:"18px 20px",marginBottom:10,backdropFilter:"blur(12px)",transition:"all 0.2s"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.accent}33`;e.currentTarget.style.boxShadow=`0 8px 40px rgba(0,0,0,0.4)`;e.currentTarget.style.transform="translateY(-1px)";}}
-      onMouseLeave={e=>{e.currentTarget.style.borderColor=C.glassBorder;e.currentTarget.style.boxShadow="none";e.currentTarget.style.transform="translateY(0)";}}>
-      <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-        <div style={{cursor:"pointer"}} onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>
+    <div
+      style={{background:"rgba(14,22,40,0.7)",border:"1px solid rgba(255,255,255,0.055)",borderRadius:14,padding:"14px 16px",marginBottom:6,backdropFilter:"blur(16px)",transition:"all 0.18s ease"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e.currentTarget.style.background="rgba(14,22,40,0.9)";e.currentTarget.style.boxShadow="0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)";e.currentTarget.style.transform="translateY(-1px)";}}
+      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.055)";e.currentTarget.style.background="rgba(14,22,40,0.7)";e.currentTarget.style.boxShadow="none";e.currentTarget.style.transform="translateY(0)";}}>
+      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+        <div style={{cursor:"pointer",flexShrink:0}} onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>
           <AvatarBubble emoji={post.avatar} color={post.avatarColor||C.accent} online={post.id%2===0}/>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:8}}>
-            <span style={{fontWeight:800,color:"#fff",fontSize:14,cursor:"pointer"}} onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
+          {/* Header row */}
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
+            <span style={{fontWeight:700,color:"#F1F5F9",fontSize:13.5,cursor:"pointer",letterSpacing:-0.2}}
+              onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
             <TickerBadge ticker={post.ticker} sentiment={post.sentiment}/>
             <SentPill sentiment={post.sentiment} lang={lang}/>
-            {aiAgrees&&<span style={{background:"rgba(124,110,250,0.15)",color:C.purple,border:`1px solid ${C.purple}44`,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:700}}>🧠 AI concuerda</span>}
-            <span style={{color:C.muted2,fontSize:11,marginLeft:"auto"}}>{post.time}</span>
+            <span style={{color:"#334155",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
           </div>
-          <p style={{margin:"0 0 10px",color:"#D0D8F0",fontSize:14,lineHeight:1.7}}>{renderWithCashtags(post.text, onTickerClick)}</p>
-          {/* Confidence bar */}
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <span style={{fontSize:10,color:C.muted2,fontWeight:600}}>Confianza:</span>
-            <div style={{flex:1,height:3,background:C.card2,borderRadius:3,overflow:"hidden"}}>
-              <div style={{width:`${conf}%`,height:"100%",background:`linear-gradient(90deg,${confLevel.col},${confLevel.col}88)`,borderRadius:3}}/>
+          {/* Post text */}
+          <p style={{margin:"0 0 10px",color:"#94A3B8",fontSize:13.5,lineHeight:1.65,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick)}</p>
+          {/* Metrics row — target + confidence + sparkline + AI agreement */}
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+            {/* Target */}
+            <div style={{display:"flex",alignItems:"center",gap:4,background:isBull?"rgba(0,229,143,0.07)":"rgba(255,77,106,0.07)",border:`1px solid ${isBull?"rgba(0,229,143,0.15)":"rgba(255,77,106,0.15)"}`,borderRadius:7,padding:"3px 8px"}}>
+              <span style={{fontSize:10,color:C.muted,fontWeight:500}}>🎯</span>
+              <span style={{fontSize:11,fontWeight:800,color:isBull?C.bull:C.bear,fontFamily:"monospace"}}>{target}</span>
             </div>
-            <span style={{fontSize:10,color:confLevel.col,fontWeight:700}}>{conf}% {confLevel.label}</span>
+            {/* Confidence */}
+            <div style={{display:"flex",alignItems:"center",gap:5,flex:1,minWidth:120}}>
+              <div style={{flex:1,height:2.5,background:"rgba(255,255,255,0.06)",borderRadius:3,overflow:"hidden"}}>
+                <div style={{width:`${conf}%`,height:"100%",background:confLevel.col,borderRadius:3,transition:"width 0.6s ease"}}/>
+              </div>
+              <span style={{fontSize:10,color:confLevel.col,fontWeight:700,fontVariantNumeric:"tabular-nums",whiteSpace:"nowrap"}}>{conf}%</span>
+            </div>
+            {/* Mini sparkline */}
+            <svg viewBox={`0 0 80 20`} style={{width:48,height:14,flexShrink:0}}>
+              <polyline points={sparkPts} fill="none" stroke={isBull?"#00E58F":"#FF4D6A"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {/* AI agreement */}
+            <div style={{display:"flex",alignItems:"center",gap:4,background:"rgba(59,130,246,0.07)",border:"1px solid rgba(59,130,246,0.15)",borderRadius:7,padding:"3px 8px"}}>
+              <span style={{fontSize:10}}>🧠</span>
+              <span style={{fontSize:10,fontWeight:700,color:C.blue,fontVariantNumeric:"tabular-nums"}}>{aiPct}%</span>
+            </div>
           </div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
-            {post.tags.map(t=><span key={t} style={{background:`${C.blue}15`,color:C.blue,borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:600,border:`1px solid ${C.blue}22`}}>#{t}</span>)}
-          </div>
-          <div style={{display:"flex",gap:2}}>
+          {/* Tags */}
+          {post.tags?.length>0&&<div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:9}}>
+            {post.tags.map(tg=><span key={tg} style={{background:"rgba(59,130,246,0.07)",color:"#64748B",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:600}}>#{tg}</span>)}
+          </div>}
+          {/* Action row */}
+          <div style={{display:"flex",gap:0,alignItems:"center",marginTop:2}}>
             {[{icon:"♥",val:likes,active:liked,col:C.bear,fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
               {icon:"💬",val:post.comments,active:false,col:C.blue,fn:()=>{}},
               {icon:"↗",val:post.reposts,active:repost,col:C.bull,fn:()=>setRepost(!repost)}
             ].map(({icon,val,active,col,fn},i)=>(
-              <button key={i} onClick={fn} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:active?col:C.muted2,fontSize:13,fontWeight:600,padding:"5px 10px",borderRadius:8}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.05)";e.currentTarget.style.color=col;}}
-                onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=active?col:C.muted2;}}>
-                <span style={{fontSize:15}}>{icon}</span><span>{val}</span>
+              <button key={i} onClick={fn}
+                style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"#334155",fontSize:12,fontWeight:600,padding:"4px 10px",borderRadius:7,transition:"all 0.15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.color=col;}}
+                onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=active?col:"#334155";}}>
+                <span style={{fontSize:13}}>{icon}</span><span style={{fontVariantNumeric:"tabular-nums"}}>{val}</span>
               </button>
             ))}
+            <div style={{marginLeft:"auto",fontSize:10,color:"#1E293B",fontWeight:600}}>
+              {`${91-((post.id||0)%30)} traders coinciden`}
+            </div>
           </div>
         </div>
       </div>
@@ -1000,37 +1035,45 @@ function NewPost({user,onPost,onNeedAuth,lang}){
     setText("");setTicker("");setModMsg("");
   };
   return(
-    <div style={{background:"rgba(19,26,46,0.9)",border:`1px solid ${C.glassBorder}`,borderRadius:16,padding:"20px",marginBottom:20,backdropFilter:"blur(12px)"}}>
-      {modMsg&&<div style={{background:`${C.bear}15`,border:`1px solid ${C.bear}44`,borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:13,color:C.bear}}>{modMsg}</div>}
-      <div style={{display:"flex",gap:12}}>
-        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:40,height:40,borderRadius:"50%",background:"rgba(255,255,255,0.05)",border:`2px solid ${C.glassBorder}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👤</div>}
+    <div style={{background:"rgba(14,22,40,0.85)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px 18px",marginBottom:14,backdropFilter:"blur(16px)"}}>
+      {modMsg&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:12,color:C.bear}}>{modMsg}</div>}
+      <div style={{display:"flex",gap:10}}>
+        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:38,height:38,borderRadius:"50%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
         <div style={{flex:1}}>
-          {!user&&<div style={{background:C.accentDim,border:`1px solid ${C.accent}33`,borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:13,color:C.muted}}>
+          {!user&&<div style={{background:"rgba(0,229,143,0.05)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:13,color:C.muted}}>
             <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}}>{t.login}</span> {lang==="en"?"to share your analysis":"para compartir tu análisis"}
           </div>}
-          {user&&<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+          {user&&<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
             <LevelBadge points={user.points} lang={lang}/>
-            <span style={{color:C.muted2,fontSize:11}}>+{POINT_ACTIONS.post} pts por publicar</span>
+            <span style={{color:"#1E293B",fontSize:11}}>+{POINT_ACTIONS.post} pts</span>
           </div>}
-          <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="¿Qué piensas del mercado? Usa $NVDA, $BTC... para mencionar activos"
-            style={{width:"100%",background:"rgba(255,255,255,0.04)",border:`1.5px solid ${C.glassBorder}`,borderRadius:10,color:"#fff",fontSize:14,padding:"12px",resize:"none",outline:"none",height:80,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box"}}/>
-          {/* Bullish / Bearish — prominente */}
-          <div style={{display:"flex",gap:10,marginTop:12,marginBottom:12}}>
+          <textarea value={text} onChange={e=>setText(e.target.value)}
+            placeholder="¿Qué piensas del mercado? Usa $NVDA, $BTC... para mencionar activos"
+            style={{width:"100%",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,color:"#E2E8F0",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:72,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box",transition:"border-color 0.15s"}}
+            onFocus={e=>e.target.style.borderColor="rgba(0,229,143,0.3)"}
+            onBlur={e=>e.target.style.borderColor="rgba(255,255,255,0.07)"}/>
+          {/* Bullish / Bearish — outline minimalista */}
+          <div style={{display:"flex",gap:8,marginTop:10,marginBottom:10}}>
             {[
-              {v:"bull",label:"▲ BULLISH",sub:"Mercado va a subir",col:C.bull},
-              {v:"bear",label:"▼ BEARISH",sub:"Mercado va a bajar",col:C.bear},
-            ].map(({v,label,sub,col})=>(
-              <button key={v} onClick={()=>setSent(v)} style={{flex:1,background:sent===v?`${col}18`:"rgba(255,255,255,0.03)",border:`2px solid ${sent===v?col:C.glassBorder}`,borderRadius:12,padding:"10px",cursor:"pointer",textAlign:"center",transition:"all 0.15s",boxShadow:sent===v?`0 0 20px ${col}33`:"none"}}>
-                <div style={{color:sent===v?col:C.muted,fontWeight:800,fontSize:13,letterSpacing:0.5}}>{label}</div>
-                <div style={{color:C.muted2,fontSize:10,marginTop:2}}>{sub}</div>
-              </button>
-            ))}
+              {v:"bull",label:"▲ Alcista",col:"#00E58F"},
+              {v:"bear",label:"▼ Bajista",col:"#FF4D6A"},
+            ].map(({v,label,col})=>{
+              const active=sent===v;
+              return(
+                <button key={v} onClick={()=>setSent(v)}
+                  style={{flex:1,background:active?`${col}12`:"transparent",border:`1.5px solid ${active?col:"rgba(255,255,255,0.08)"}`,borderRadius:9,padding:"8px 0",cursor:"pointer",textAlign:"center",transition:"all 0.15s",boxShadow:active?`0 0 16px ${col}25, inset 0 0 12px ${col}08`:"none"}}>
+                  <span style={{color:active?col:"#475569",fontWeight:active?800:600,fontSize:12.5,letterSpacing:0.3}}>{label}</span>
+                </button>
+              );
+            })}
           </div>
-          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
             <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
-              style={{background:"rgba(255,255,255,0.05)",border:`1.5px solid ${C.glassBorder}`,borderRadius:8,color:C.accent,padding:"8px 12px",fontSize:13,outline:"none",width:100,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700}}/>
-            <span style={{color:C.muted2,fontSize:12}}>Tip: escribe $NVDA en tu post para cashtag interactivo</span>
-            <Btn onClick={submit} style={{marginLeft:"auto",padding:"9px 24px"}}>{user?t.publish:t.login}</Btn>
+              style={{background:"rgba(0,229,143,0.05)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:7,color:C.accent,padding:"7px 10px",fontSize:12,outline:"none",width:90,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
+              onFocus={e=>e.target.style.borderColor="rgba(0,229,143,0.4)"}
+              onBlur={e=>e.target.style.borderColor="rgba(0,229,143,0.15)"}/>
+            <span style={{color:"#1E293B",fontSize:11}}>Usa $TICKER en el texto para cashtags</span>
+            <Btn onClick={submit} style={{marginLeft:"auto",padding:"8px 22px",fontSize:13}}>{user?t.publish:t.login}</Btn>
           </div>
         </div>
       </div>
@@ -1865,75 +1908,144 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
       change: live ? live.change : s.change,
     };
   });
+  const sideCard={background:"rgba(14,22,40,0.8)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px",marginBottom:12,backdropFilter:"blur(16px)"};
   return(
     <div>
-      {/* AI Widget */}
-      <div style={{background:`linear-gradient(135deg,rgba(0,210,106,0.08),rgba(60,142,250,0.08))`,border:`1px solid ${C.accent}22`,borderRadius:16,padding:20,marginBottom:14,cursor:"pointer",boxShadow:`0 0 30px ${C.accent}11`,backdropFilter:"blur(12px)"}} onClick={onAI}
-        onMouseEnter={e=>e.currentTarget.style.boxShadow=`0 0 40px ${C.accent}22`}
-        onMouseLeave={e=>e.currentTarget.style.boxShadow=`0 0 30px ${C.accent}11`}>
-        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
-          <div style={{width:40,height:40,borderRadius:12,background:`linear-gradient(135deg,${C.accent},#0099ff)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:`0 0 16px ${C.accent}44`}}>🤖</div>
-          <div><div style={{fontWeight:800,color:"#fff",fontSize:14}}>NexoTrade AI</div><div style={{color:C.bull,fontSize:11,display:"flex",alignItems:"center",gap:4}}><span style={{width:5,height:5,borderRadius:"50%",background:C.bull,display:"inline-block",boxShadow:`0 0 6px ${C.bull}`}}/>Online</div></div>
+
+      {/* 🧠 AI MARKET PULSE */}
+      <div style={{...sideCard,background:"linear-gradient(145deg,rgba(59,130,246,0.08),rgba(124,58,237,0.08))",border:"1px solid rgba(59,130,246,0.15)",boxShadow:"0 0 40px rgba(59,130,246,0.06)",cursor:"pointer"}}
+        onClick={onAI}
+        onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 0 50px rgba(59,130,246,0.12)";e.currentTarget.style.borderColor="rgba(59,130,246,0.25)";}}
+        onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 0 40px rgba(59,130,246,0.06)";e.currentTarget.style.borderColor="rgba(59,130,246,0.15)";}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+          <div style={{width:38,height:38,borderRadius:11,background:"linear-gradient(135deg,#3B82F6,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:"0 0 20px rgba(59,130,246,0.4)"}}>🧠</div>
+          <div>
+            <div style={{fontWeight:800,color:"#fff",fontSize:13,letterSpacing:-0.2}}>AI Market Pulse</div>
+            <div style={{fontSize:10,color:C.bull,display:"flex",alignItems:"center",gap:4,marginTop:1}}>
+              <span style={{width:5,height:5,borderRadius:"50%",background:C.bull,display:"inline-block",boxShadow:`0 0 6px ${C.bull}`}}/>EN VIVO
+            </div>
+          </div>
         </div>
-        <p style={{color:C.muted,fontSize:12,lineHeight:1.6,margin:"0 0 12px"}}>{lang==="en"?"Ask me about any stock, crypto or market analysis.":"Pregúntame sobre cualquier acción, crypto o análisis de mercado."}</p>
-        <div style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,borderRadius:10,padding:"9px 14px",textAlign:"center",color:"#000",fontSize:13,fontWeight:800,boxShadow:`0 4px 16px ${C.accent}44`}}>💬 {t.aiAssistant}</div>
+        {/* Sentimiento */}
+        <div style={{marginBottom:10}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+            <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>Sentimiento IA</span>
+            <span style={{fontSize:11,color:C.bull,fontWeight:800}}>BULLISH 71%</span>
+          </div>
+          <div style={{height:5,background:"rgba(255,255,255,0.05)",borderRadius:5,overflow:"hidden"}}>
+            <div style={{width:"71%",height:"100%",background:`linear-gradient(90deg,${C.bull},#3B82F6)`,borderRadius:5}}/>
+          </div>
+        </div>
+        {/* Stocks calientes */}
+        <div style={{marginBottom:10}}>
+          <div style={{fontSize:10,color:"#475569",fontWeight:600,marginBottom:6,letterSpacing:0.5}}>STOCKS CALIENTES</div>
+          {[{t:"NVDA",d:"↑",c:C.bull},{t:"BTC",d:"↑",c:C.bull},{t:"TSLA",d:"↓",c:C.bear}].map(({t,d,c})=>(
+            <div key={t} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3px 0"}}>
+              <span style={{fontFamily:"monospace",fontSize:11,fontWeight:700,color:"#94A3B8"}}>${t}</span>
+              <span style={{fontSize:12,color:c,fontWeight:800}}>{d}</span>
+            </div>
+          ))}
+        </div>
+        {/* Riesgo */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.15)",borderRadius:8,padding:"7px 10px"}}>
+          <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>Riesgo del mercado</span>
+          <span style={{fontSize:11,color:C.gold,fontWeight:800}}>MEDIO ⚡</span>
+        </div>
+        <div style={{marginTop:10,background:"linear-gradient(135deg,#3B82F6,#7C3AED)",borderRadius:9,padding:"8px",textAlign:"center",color:"#fff",fontSize:12,fontWeight:800,boxShadow:"0 4px 16px rgba(59,130,246,0.3)"}}>💬 Preguntar a la IA</div>
       </div>
-      {/* CTA */}
-      {!user&&<div style={{background:"rgba(19,26,46,0.8)",border:`1px solid ${C.glassBorder}`,borderRadius:16,padding:20,marginBottom:14,textAlign:"center",backdropFilter:"blur(12px)"}}>
-        <div style={{width:44,height:44,borderRadius:12,background:`linear-gradient(135deg,${C.accent},#00a060)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,color:"#000",fontWeight:900,margin:"0 auto 12px",boxShadow:`0 0 20px ${C.accent}44`}}>N</div>
-        <h3 style={{margin:"0 0 6px",color:"#fff",fontSize:15,fontWeight:800}}>{t.join}</h3>
-        <p style={{margin:"0 0 6px",color:C.muted,fontSize:12,lineHeight:1.5}}>{t.tagline}</p>
-        <p style={{margin:"0 0 14px",color:C.accent,fontSize:11,fontWeight:700}}>🎁 +100 pts de bienvenida · 🚀 Early Adopter</p>
-        <Btn onClick={onNeedAuth} style={{width:"100%",padding:"10px"}}>{t.register}</Btn>
-        <button onClick={onNeedAuth} style={{background:"none",border:"none",color:C.muted2,fontSize:12,cursor:"pointer",marginTop:8,fontFamily:"inherit"}}>{t.login}</button>
+
+      {/* 📊 COMMUNITY vs IA */}
+      <div style={sideCard}>
+        <div style={{fontSize:12,fontWeight:800,color:"#fff",marginBottom:10,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
+        {[{label:"Comunidad",pct:78,col:C.bull},{label:"IA",pct:61,col:C.blue}].map(({label,pct,col})=>(
+          <div key={label} style={{marginBottom:8}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+              <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>{label}</span>
+              <span style={{fontSize:11,color:col,fontWeight:800}}>BULLISH {pct}%</span>
+            </div>
+            <div style={{height:4,background:"rgba(255,255,255,0.05)",borderRadius:4,overflow:"hidden"}}>
+              <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:4,opacity:0.85}}/>
+            </div>
+          </div>
+        ))}
+        <div style={{fontSize:10,color:"#1E293B",marginTop:4}}>Basado en 2,847 posts de hoy</div>
+      </div>
+
+      {/* 😨 FEAR & GREED */}
+      <div style={sideCard}>
+        <div style={{fontSize:12,fontWeight:800,color:"#fff",marginBottom:10}}>😨 Fear & Greed Index</div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
+            <svg viewBox="0 0 56 56" style={{width:56,height:56,transform:"rotate(-90deg)"}}>
+              <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6"/>
+              <circle cx="28" cy="28" r="22" fill="none" stroke="#00E58F" strokeWidth="6" strokeDasharray={`${0.72*138} 138`} strokeLinecap="round"/>
+            </svg>
+            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"#fff"}}>72</div>
+          </div>
+          <div>
+            <div style={{fontSize:14,fontWeight:900,color:C.bull}}>Greed 🟢</div>
+            <div style={{fontSize:11,color:"#475569",marginTop:2,lineHeight:1.4}}>Mercado en modo alcista. Los inversores están confiados.</div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA VIP si no logueado */}
+      {!user&&<div style={{...sideCard,background:"linear-gradient(145deg,rgba(124,58,237,0.1),rgba(8,13,26,0.9))",border:"1px solid rgba(124,58,237,0.2)",textAlign:"center"}}>
+        <div style={{fontSize:22,marginBottom:8}}>✦</div>
+        <h3 style={{margin:"0 0 4px",color:"#fff",fontSize:14,fontWeight:800}}>VIP Member</h3>
+        <p style={{margin:"0 0 4px",color:"#64748B",fontSize:12,lineHeight:1.5}}>Señales exclusivas, IA ilimitada y acceso a todos los datos</p>
+        <div style={{fontSize:20,fontWeight:900,color:"#fff",margin:"8px 0 4px"}}><span style={{color:C.vip}}>$9.99</span><span style={{fontSize:12,color:"#475569",fontWeight:500}}>/mes</span></div>
+        <Btn onClick={onNeedAuth} style={{width:"100%",padding:"9px",background:"linear-gradient(135deg,#7C3AED,#9333EA)",boxShadow:"0 0 20px rgba(124,58,237,0.3)"}}>✦ Empezar VIP →</Btn>
+        <div style={{fontSize:11,color:"#334155",marginTop:6}}>7 días gratis · Sin compromiso</div>
       </div>}
-      {/* Markets */}
-      <div style={{background:"rgba(19,26,46,0.8)",border:`1px solid ${C.glassBorder}`,borderRadius:16,padding:"16px 18px",marginBottom:14,backdropFilter:"blur(12px)"}}>
-        <h3 style={{margin:"0 0 12px",color:"#fff",fontSize:13,fontWeight:800}}>{t.markets}</h3>
-        {mini.map(m=>(
-          <div key={m.ticker} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${C.glassBorder}`}}>
-            <span style={{fontWeight:700,color:"#fff",fontFamily:"monospace",fontSize:13}}>${m.ticker}</span>
+
+      {/* 📡 MARKETS */}
+      <div style={sideCard}>
+        <h3 style={{margin:"0 0 10px",color:"#fff",fontSize:12,fontWeight:800,letterSpacing:0.3}}>{t.markets}</h3>
+        {mini.map((m,i)=>(
+          <div key={m.ticker} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:i<mini.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+            <span style={{fontWeight:700,color:"#CBD5E1",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{m.ticker}</span>
             <div style={{textAlign:"right"}}>
-              <div style={{fontFamily:"monospace",fontSize:11,color:C.muted2}}>{m.price}</div>
-              <div style={{fontFamily:"monospace",fontSize:12,fontWeight:700,color:chgCol(m.change)}}>{fmtChg(m.change)}</div>
+              <div style={{fontFamily:"monospace",fontSize:10,color:"#334155"}}>{m.price}</div>
+              <div style={{fontFamily:"monospace",fontSize:11,fontWeight:800,color:chgCol(m.change)}}>{fmtChg(m.change)}</div>
             </div>
           </div>
         ))}
       </div>
-      {/* Top Traders Rankings */}
-      <div style={{background:"rgba(19,26,46,0.8)",border:`1px solid ${C.glassBorder}`,borderRadius:16,padding:"16px 18px",marginBottom:14,backdropFilter:"blur(12px)"}}>
-        <h3 style={{margin:"0 0 14px",color:"#fff",fontSize:13,fontWeight:800}}>🏆 Top Traders del Día</h3>
+
+      {/* 🏆 TOP TRADERS */}
+      <div style={sideCard}>
+        <h3 style={{margin:"0 0 10px",color:"#fff",fontSize:12,fontWeight:800}}>🏆 Top Traders</h3>
         {[
-          {name:"NvidiaChad",badge:"🐋",badgeName:"Whale",color:"#3B8EFA",pts:"+12.4%",emoji:"🟢"},
-          {name:"CryptoWolf",badge:"🚀",badgeName:"Momentum King",color:C.accent,pts:"+8.7%",emoji:"🟢"},
-          {name:"SPY_Trader",badge:"🧠",badgeName:"AI Hunter",color:C.purple,pts:"+6.2%",emoji:"🟢"},
+          {name:"NvidiaChad",badge:"🐋",label:"Whale",col:"#3B82F6",pts:"+12.4%",streak:"🔥5"},
+          {name:"CryptoWolf",badge:"🚀",label:"Momentum",col:"#00E58F",pts:"+8.7%",streak:"🔥3"},
+          {name:"SPY_Trader",badge:"🧠",label:"AI Hunter",col:"#7C3AED",pts:"+6.2%",streak:"🔥7"},
         ].map((tr,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<2?`1px solid ${C.glassBorder}`:"none"}}>
-            <span style={{color:C.muted2,fontSize:12,fontWeight:700,minWidth:16}}>#{i+1}</span>
-            <div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${tr.color}44,${tr.color}22)`,border:`1.5px solid ${tr.color}66`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>{tr.badge}</div>
+          <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<2?"1px solid rgba(255,255,255,0.04)":"none"}}>
+            <span style={{color:"#1E293B",fontSize:11,fontWeight:700,minWidth:14}}>#{i+1}</span>
+            <div style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${tr.col}30,${tr.col}10)`,border:`1.5px solid ${tr.col}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>{tr.badge}</div>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontWeight:700,color:"#fff",fontSize:12}}>{tr.name}</div>
-              <span style={{fontSize:9,color:tr.color,background:`${tr.color}15`,border:`1px solid ${tr.color}33`,borderRadius:10,padding:"1px 6px",fontWeight:700}}>{tr.badge} {tr.badgeName}</span>
+              <div style={{fontWeight:700,color:"#CBD5E1",fontSize:12}}>{tr.name}</div>
+              <div style={{fontSize:9,color:tr.col}}>{tr.label} · {tr.streak}</div>
             </div>
-            <span style={{color:C.bull,fontSize:12,fontWeight:800,fontFamily:"monospace"}}>{tr.pts}</span>
+            <span style={{color:C.bull,fontSize:11,fontWeight:800,fontFamily:"monospace"}}>{tr.pts}</span>
           </div>
         ))}
       </div>
-      {/* Top 5 */}
-      <Top5Foristas user={user} following={following} onFollow={onFollow} onProfile={onProfile} lang={lang}/>
-      {/* Seguir */}
+
+      {/* WHO TO FOLLOW */}
       {(()=>{
         const sug=MOCK_USERS.filter(u=>u.id!==user?.id&&!following.includes(u.id)).slice(0,3);
         if(!sug.length)return null;
         return(
-          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 18px",marginBottom:16,boxShadow:C.shadow}}>
-            <h3 style={{margin:"0 0 14px",color:C.text,fontSize:13,fontWeight:800}}>{t.whofollow}</h3>
-            {sug.map(u=>(
-              <div key={u.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
-                <div style={{cursor:"pointer"}} onClick={()=>onProfile(u)}><AvatarBubble emoji={u.emoji} color={u.color} size={34}/></div>
+          <div style={sideCard}>
+            <h3 style={{margin:"0 0 10px",color:"#fff",fontSize:12,fontWeight:800}}>{t.whofollow}</h3>
+            {sug.map((u,i)=>(
+              <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<sug.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+                <div style={{cursor:"pointer"}} onClick={()=>onProfile(u)}><AvatarBubble emoji={u.emoji} color={u.color} size={30}/></div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:700,color:C.text,fontSize:13,cursor:"pointer"}} onClick={()=>onProfile(u)}>{u.name}</div>
-                  <div style={{color:C.muted2,fontSize:11}}>{fmtNum(u.followers)} {t.followers}</div>
+                  <div style={{fontWeight:700,color:"#CBD5E1",fontSize:12,cursor:"pointer"}} onClick={()=>onProfile(u)}>{u.name}</div>
+                  <div style={{color:"#334155",fontSize:10}}>{fmtNum(u.followers)} {t.followers}</div>
                 </div>
                 <Btn variant="follow" small onClick={()=>user?onFollow(u.id):onNeedAuth()}>{t.follow}</Btn>
               </div>
@@ -1941,7 +2053,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
           </div>
         );
       })()}
-      <div style={{background:"rgba(255,184,0,0.06)",border:`1px solid ${C.gold}33`,borderRadius:12,padding:"12px 16px",color:C.gold,fontSize:11,lineHeight:1.7,backdropFilter:"blur(8px)"}}><strong>⚠️ {t.disclaimer}</strong></div>
+      <div style={{background:"rgba(245,158,11,0.05)",border:"1px solid rgba(245,158,11,0.12)",borderRadius:10,padding:"10px 14px",color:"#78716C",fontSize:10,lineHeight:1.7}}><strong style={{color:C.gold}}>⚠️</strong> {t.disclaimer}</div>
     </div>
   );
 }
@@ -2157,25 +2269,37 @@ export default function App(){
       <TickerTape/>
 
       {/* NAVBAR — Floating Glass */}
-      <nav style={{background:"rgba(11,16,32,0.85)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderBottom:`1px solid ${C.glassBorder}`,padding:"0 20px",position:"sticky",top:0,zIndex:100,boxShadow:"0 4px 30px rgba(0,0,0,0.5)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:12,height:62,maxWidth:1180,margin:"0 auto"}}>
-          {/* Logo */}
-          <div style={{display:"flex",alignItems:"center",gap:10,marginRight:8,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
-            <img src="/logo2.png" alt="NEXO TRADE" style={{height:44,width:"auto",objectFit:"contain",filter:"drop-shadow(0 0 12px rgba(0,220,255,0.5))"}}
+      <nav style={{background:"rgba(8,13,26,0.92)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderBottom:`1px solid rgba(255,255,255,0.05)`,padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 0 rgba(255,255,255,0.04), 0 8px 40px rgba(0,0,0,0.7)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:16,height:68,maxWidth:1200,margin:"0 auto"}}>
+          {/* Logo — big & prominent */}
+          <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
+            <img src="/logo2.png" alt="NEXO TRADE"
+              style={{height:56,width:"auto",objectFit:"contain",filter:"drop-shadow(0 0 18px rgba(0,229,143,0.55)) drop-shadow(0 0 6px rgba(59,130,246,0.4))"}}
               onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
-            <div style={{display:"none",width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${C.accent},#00a060)`,alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff"}}>N</div>
-            <span style={{fontSize:9,fontWeight:800,color:C.accent,background:C.accentDim,padding:"2px 6px",borderRadius:4,letterSpacing:1,border:`1px solid ${C.accent}33`}}>BETA</span>
+            <div style={{display:"none",alignItems:"center",gap:8}}>
+              <div style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,#00E58F,#3B82F6)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:"#000",boxShadow:"0 0 20px rgba(0,229,143,0.5)"}}>N</div>
+              <div>
+                <div style={{fontSize:14,fontWeight:900,color:"#fff",letterSpacing:1}}>NEXO</div>
+                <div style={{fontSize:9,fontWeight:700,color:C.accent,letterSpacing:3}}>TRADE</div>
+              </div>
+            </div>
           </div>
           {/* Search */}
-          <div style={{flex:1,display:"flex",justifyContent:"center"}}><SearchBar lang={lang}/></div>
+          <div style={{flex:1,display:"flex",justifyContent:"center",maxWidth:420}}><SearchBar lang={lang}/></div>
           {/* Right controls */}
-          <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+          <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
+            {/* VIP Membership CTA */}
+            <button onClick={()=>setPage(8)}
+              style={{background:`linear-gradient(135deg,${C.vip},#9333EA)`,border:"none",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:800,display:"flex",alignItems:"center",gap:5,boxShadow:`0 0 20px ${C.vipGlow}`,letterSpacing:0.3,whiteSpace:"nowrap"}}>
+              ✦ VIP <span style={{opacity:0.85,fontWeight:600}}>$9.99</span>
+            </button>
             {/* Light/Dark toggle */}
             <button onClick={()=>setDarkMode(!darkMode)} title={darkMode?"Modo claro":"Modo oscuro"}
-              style={{background:"rgba(255,255,255,0.06)",border:`1px solid ${C.glassBorder}`,borderRadius:10,padding:"7px 12px",cursor:"pointer",color:C.muted,fontSize:16,display:"flex",alignItems:"center",backdropFilter:"blur(8px)"}}>
+              style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"8px 11px",cursor:"pointer",color:C.muted,fontSize:15,display:"flex",alignItems:"center"}}>
               {darkMode?"☀️":"🌙"}
             </button>
-            <button onClick={()=>setShowAI(true)} style={{background:`rgba(0,210,106,0.1)`,border:`1px solid ${C.accent}33`,borderRadius:10,padding:"7px 14px",cursor:"pointer",color:C.accent,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:6,backdropFilter:"blur(8px)"}}>
+            <button onClick={()=>setShowAI(true)}
+              style={{background:"rgba(59,130,246,0.1)",border:"1px solid rgba(59,130,246,0.2)",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:C.blue,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
               🤖 IA
             </button>
             <LangSelector lang={lang} setLang={setLang}/>
