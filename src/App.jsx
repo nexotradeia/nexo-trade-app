@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-19 19:29:27
+// NEXO TRADE — build: 2026-05-19 19:36:25
 import { useState, useEffect, useRef, useContext, createContext } from 'react';
 
 // ── CASHTAG RENDERER ──────────────────────────────────────────────────────────
@@ -2269,18 +2269,20 @@ export default function App(){
       <TickerTape/>
 
       {/* NAVBAR — Floating Glass */}
-      <nav style={{background:"rgba(8,13,26,0.92)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderBottom:`1px solid rgba(255,255,255,0.05)`,padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 0 rgba(255,255,255,0.04), 0 8px 40px rgba(0,0,0,0.7)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:16,height:68,maxWidth:1200,margin:"0 auto"}}>
-          {/* Logo — big & prominent */}
-          <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
+      <nav style={{background:"rgba(8,13,26,0.92)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderBottom:"1px solid rgba(255,255,255,0.05)",padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 0 rgba(255,255,255,0.04), 0 8px 40px rgba(0,0,0,0.7)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:16,height:80,maxWidth:1200,margin:"0 auto"}}>
+          {/* Logo — BIG & prominent */}
+          <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer",marginRight:4}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
             <img src="/logo2.png" alt="NEXO TRADE"
-              style={{height:56,width:"auto",objectFit:"contain",filter:"drop-shadow(0 0 18px rgba(0,229,143,0.55)) drop-shadow(0 0 6px rgba(59,130,246,0.4))"}}
+              style={{height:72,width:"auto",objectFit:"contain",
+                filter:"drop-shadow(0 0 22px rgba(0,229,255,0.65)) drop-shadow(0 0 10px rgba(124,58,237,0.45)) drop-shadow(0 0 4px rgba(59,130,246,0.5))"}}
               onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
-            <div style={{display:"none",alignItems:"center",gap:8}}>
-              <div style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,#00E58F,#3B82F6)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:"#000",boxShadow:"0 0 20px rgba(0,229,143,0.5)"}}>N</div>
+            {/* Fallback if image fails */}
+            <div style={{display:"none",alignItems:"center",gap:10}}>
+              <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#00E58F,#3B82F6,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,color:"#000",boxShadow:"0 0 28px rgba(0,229,143,0.6)"}}>N</div>
               <div>
-                <div style={{fontSize:14,fontWeight:900,color:"#fff",letterSpacing:1}}>NEXO</div>
-                <div style={{fontSize:9,fontWeight:700,color:C.accent,letterSpacing:3}}>TRADE</div>
+                <div style={{fontSize:18,fontWeight:900,color:"#fff",letterSpacing:2,lineHeight:1}}>NEXO</div>
+                <div style={{fontSize:10,fontWeight:800,color:"#00E58F",letterSpacing:4}}>TRADE</div>
               </div>
             </div>
           </div>
