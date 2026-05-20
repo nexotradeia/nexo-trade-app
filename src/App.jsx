@@ -1,10 +1,10 @@
-// NEXO TRADE — build: 2026-05-19 20:21:04
+// NEXO TRADE — build: 2026-05-19 20:25:57
 import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
 const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
-const SUPABASE_KEY  = "SUPABASE_ANON_KEY"; // ← supabase_setup.py reemplaza esto automáticamente
+const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...aquí_tu_key_completa";
 const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
