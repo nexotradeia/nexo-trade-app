@@ -1,16 +1,33 @@
-// NEXO TRADE — build: 2026-05-19 19:49:17
-import { useState, useEffect, useRef, useContext, createContext } from 'react';
+// NEXO TRADE — build: 2026-05-19 20:09:10
+import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
-// ── CASHTAG RENDERER ──────────────────────────────────────────────────────────
-function renderWithCashtags(text, onTickerClick){
+// ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
+const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
+const SUPABASE_KEY  = "SUPABASE_ANON_KEY"; // ← supabase_setup.py reemplaza esto automáticamente
+const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── CASHTAG + @MENTION RENDERER ───────────────────────────────────────────────
+function renderWithCashtags(text, onTickerClick, onMentionClick){
   if(!text) return text;
-  const parts = text.split(/(\$[A-Z]{1,5})/g);
+  // Detecta $TICKER (cashtag verde) y @TICKER (mención oscura)
+  const parts = text.split(/(\$[A-Z]{1,5}|@[A-Z0-9]{1,15})/g);
   return parts.map((part, i) => {
     if(/^\$[A-Z]{1,5}$/.test(part)){
+      // Cashtag — verde brillante
       return <span key={i} onClick={()=>onTickerClick&&onTickerClick(part.slice(1))}
         style={{color:"#00E58F",fontWeight:700,cursor:"pointer",background:"rgba(0,229,143,0.1)",borderRadius:4,padding:"1px 5px",border:"1px solid rgba(0,229,143,0.2)",fontSize:"0.9em",letterSpacing:0.3,fontFamily:"monospace"}}
         onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,229,143,0.18)";e.currentTarget.style.boxShadow="0 0 8px rgba(0,229,143,0.3)";}}
         onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,229,143,0.1)";e.currentTarget.style.boxShadow="none";}}
+      >{part}</span>;
+    }
+    if(/^@[A-Z0-9]{1,15}$/.test(part)){
+      // @Mención — chip oscuro azulado, abre vista del ticker
+      const sym = part.slice(1);
+      return <span key={i} onClick={()=>onMentionClick&&onMentionClick(sym)}
+        style={{color:"#CBD5E1",fontWeight:700,cursor:"pointer",background:"rgba(15,23,42,0.95)",borderRadius:5,padding:"1px 7px",border:"1px solid rgba(71,85,105,0.55)",fontSize:"0.88em",letterSpacing:0.2,fontFamily:"monospace",display:"inline-block"}}
+        onMouseEnter={e=>{e.currentTarget.style.background="rgba(30,41,59,0.98)";e.currentTarget.style.borderColor="rgba(59,130,246,0.55)";e.currentTarget.style.color="#93C5FD";e.currentTarget.style.boxShadow="0 0 10px rgba(59,130,246,0.25)";}}
+        onMouseLeave={e=>{e.currentTarget.style.background="rgba(15,23,42,0.95)";e.currentTarget.style.borderColor="rgba(71,85,105,0.55)";e.currentTarget.style.color="#CBD5E1";e.currentTarget.style.boxShadow="none";}}
       >{part}</span>;
     }
     return part;
@@ -239,6 +256,14 @@ const fmtNum   = (n) => n >= 1000 ? (n/1000).toFixed(1)+"k" : n;
 const fmtPx    = (p) => p >= 1000 ? `$${p.toLocaleString()}` : `$${p.toFixed(2)}`;
 const fmtChg   = (c) => `${c>=0?"+":""}${c}%`;
 const chgCol   = (c) => c >= 0 ? C.bull : C.bear;
+const fmtTimeAgo=(iso)=>{
+  if(!iso)return"ahora";
+  const secs=Math.floor((Date.now()-new Date(iso))/1000);
+  if(secs<60)return"ahora";
+  if(secs<3600)return`hace ${Math.floor(secs/60)}m`;
+  if(secs<86400)return`hace ${Math.floor(secs/3600)}h`;
+  return`hace ${Math.floor(secs/86400)}d`;
+};
 
 // ── MODERATION ────────────────────────────────────────────────────────────────
 const BAD_WORDS = ["puta","mierda","coño","joder","hostia","gilipollas","idiota","imbecil","estupido","cabrón","polla","culo","fuck","shit","ass","bitch","damn"];
@@ -771,10 +796,49 @@ function AuthModal({mode,onClose,onAuth,lang}){
   const t=LANGS[lang];
   const [tab,setTab]=useState(mode),[name,setName]=useState(""),[email,setEmail]=useState(""),[pass,setPass]=useState("");
   const [avatar,setAvatar]=useState(AVATAR_OPTIONS[0]);
-  const submit=()=>{
-    if(!email||!pass)return;
-    onAuth({id:99,name:name||email.split("@")[0],emoji:avatar.emoji,avatarColor:avatar.color,followers:0,following:0,posts:0,points:100,badges:["early"],bio:"Nuevo en NexoTrade 🚀"});
-    onClose();
+  const [loading,setLoading]=useState(false);
+  const [error,setError]=useState("");
+
+  const submit=async()=>{
+    if(!email||!pass){setError("Por favor completa email y contraseña.");return;}
+    setLoading(true);setError("");
+    try{
+      if(tab==="register"){
+        const {data,error:err}=await supabase.auth.signUp({
+          email,password:pass,
+          options:{data:{username:name||email.split("@")[0],avatar_emoji:avatar.emoji,avatar_color:avatar.color}}
+        });
+        if(err){setError(err.message);setLoading(false);return;}
+        onAuth({
+          id:data.user?.id||"local",
+          name:name||email.split("@")[0],
+          emoji:avatar.emoji,avatarColor:avatar.color,
+          followers:0,following:0,posts:0,points:100,badges:["early"],
+          bio:"Nuevo en NexoTrade 🚀"
+        });
+      }else{
+        const {data,error:err}=await supabase.auth.signInWithPassword({email,password:pass});
+        if(err){setError(err.message==="Invalid login credentials"?"Email o contraseña incorrectos":err.message);setLoading(false);return;}
+        // Cargar perfil de la BD
+        const {data:profile}=await supabase.from("profiles").select("*").eq("id",data.user.id).single();
+        onAuth({
+          id:data.user.id,
+          name:profile?.username||email.split("@")[0],
+          emoji:profile?.avatar_emoji||avatar.emoji,
+          avatarColor:profile?.avatar_color||C.accent,
+          followers:profile?.followers_count||0,
+          following:profile?.following_count||0,
+          posts:profile?.posts_count||0,
+          points:profile?.points||100,
+          badges:profile?.badges||["early"],
+          bio:profile?.bio||""
+        });
+      }
+      onClose();
+    }catch(e){
+      setError("Error de conexión. Inténtalo de nuevo.");
+    }
+    setLoading(false);
   };
   return(
     <div style={{position:"fixed",inset:0,background:"#00000066",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -804,8 +868,13 @@ function AuthModal({mode,onClose,onAuth,lang}){
         <label style={{color:C.muted,fontSize:12,fontWeight:700}}>{t.email.toUpperCase()}</label>
         <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu@email.com" type="email" style={inputSt}/>
         <label style={{color:C.muted,fontSize:12,fontWeight:700}}>{t.password.toUpperCase()}</label>
-        <input value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••" type="password" style={{...inputSt,marginBottom:24}}/>
-        <Btn onClick={submit} style={{width:"100%",padding:"12px"}}>{tab==="login"?`${t.login} →`:`${t.join.replace("Únete a ","").replace("Join ","")} →`}</Btn>
+        <input value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••" type="password"
+          onKeyDown={e=>e.key==="Enter"&&submit()}
+          style={{...inputSt,marginBottom:error?12:24}}/>
+        {error&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.25)",borderRadius:9,padding:"9px 14px",marginBottom:16,fontSize:12.5,color:C.bear,lineHeight:1.5}}>{error}</div>}
+        <Btn onClick={submit} style={{width:"100%",padding:"12px",opacity:loading?0.7:1}}>
+          {loading?"⏳ Un momento...":(tab==="login"?`${t.login} →`:`${t.join.replace("Únete a ","").replace("Join ","")} →`)}
+        </Btn>
         {tab==="register"&&<p style={{margin:"14px 0 0",color:C.muted2,fontSize:11,textAlign:"center",lineHeight:1.6}}>
           🎁 Al registrarte recibes <strong style={{color:C.accentText}}>100 puntos de bienvenida</strong> y la insignia <strong>🚀 Early Adopter</strong>
         </p>}
@@ -970,7 +1039,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
             <span style={{color:"#334155",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
           </div>
           {/* Post text */}
-          <p style={{margin:"0 0 10px",color:"#94A3B8",fontSize:13.5,lineHeight:1.65,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick)}</p>
+          <p style={{margin:"0 0 10px",color:"#94A3B8",fontSize:13.5,lineHeight:1.65,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
           {/* Metrics row — target + confidence + sparkline + AI agreement */}
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
             {/* Target */}
@@ -1023,35 +1092,88 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
 }
 
 // ── NEW POST ──────────────────────────────────────────────────────────────────
+const MENTION_TICKERS = ["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META","BTC","ETH","SPY","AMD","NFLX","COIN","PLTR","SMCI","ARM","JPM","V","BABA","RIVN"];
+
 function NewPost({user,onPost,onNeedAuth,lang}){
   const t=LANGS[lang];
   const [text,setText]=useState(""),[ticker,setTicker]=useState(""),[sent,setSent]=useState("bull"),[modMsg,setModMsg]=useState("");
-  const submit=()=>{
+  const [posting,setPosting]=useState(false);
+  const [mentionBox,setMentionBox]=useState({open:false,query:"",results:[],caretPos:0});
+  const taRef=useRef();
+
+  // Detectar @ en el textarea y mostrar autocomplete
+  const handleTextChange=(e)=>{
+    const val=e.target.value;
+    setText(val);
+    const pos=e.target.selectionStart;
+    // Buscar @ antes del cursor
+    const before=val.slice(0,pos);
+    const match=before.match(/@([A-Z0-9]*)$/i);
+    if(match){
+      const q=match[1].toUpperCase();
+      const results=MENTION_TICKERS.filter(t=>t.startsWith(q)).slice(0,6);
+      setMentionBox({open:results.length>0||q.length===0,query:q,results:q.length===0?MENTION_TICKERS.slice(0,6):results,caretPos:pos});
+    }else{
+      setMentionBox(m=>({...m,open:false}));
+    }
+  };
+
+  const insertMention=(sym)=>{
+    const pos=mentionBox.caretPos;
+    const before=text.slice(0,pos);
+    const after=text.slice(pos);
+    const match=before.match(/@([A-Z0-9]*)$/i);
+    const start=match?pos-match[0].length:pos;
+    const newText=text.slice(0,start)+"@"+sym+" "+after;
+    setText(newText);
+    setMentionBox(m=>({...m,open:false}));
+    setTimeout(()=>taRef.current?.focus(),50);
+  };
+
+  const submit=async()=>{
     if(!user){onNeedAuth();return;}
     if(!text.trim())return;
     const mod=moderateText(text);
     if(!mod.ok){setModMsg(t.modWarning);setTimeout(()=>setModMsg(""),4000);return;}
-    onPost({text,ticker:ticker.toUpperCase()||"GENERAL",sentiment:sent});
+    setPosting(true);
+    await onPost({text,ticker:ticker.toUpperCase()||"GENERAL",sentiment:sent});
     setText("");setTicker("");setModMsg("");
+    setPosting(false);
   };
+
   return(
     <div style={{background:"rgba(14,22,40,0.85)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px 18px",marginBottom:14,backdropFilter:"blur(16px)"}}>
       {modMsg&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:12,color:C.bear}}>{modMsg}</div>}
       <div style={{display:"flex",gap:10}}>
         {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:38,height:38,borderRadius:"50%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
-        <div style={{flex:1}}>
+        <div style={{flex:1,position:"relative"}}>
           {!user&&<div style={{background:"rgba(0,229,143,0.05)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:13,color:C.muted}}>
-            <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}}>{t.login}</span> {lang==="en"?"to share your analysis":"para compartir tu análisis"}
+            <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}} onClick={onNeedAuth}>{t.login}</span> {lang==="en"?"to share your analysis":"para compartir tu análisis"}
           </div>}
           {user&&<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
             <LevelBadge points={user.points} lang={lang}/>
             <span style={{color:"#1E293B",fontSize:11}}>+{POINT_ACTIONS.post} pts</span>
           </div>}
-          <textarea value={text} onChange={e=>setText(e.target.value)}
-            placeholder="¿Qué piensas del mercado? Usa $NVDA, $BTC... para mencionar activos"
+          <textarea ref={taRef} value={text} onChange={handleTextChange}
+            placeholder="¿Qué piensas del mercado? Usa $NVDA para cashtags y @META para mencionar activos"
             style={{width:"100%",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,color:"#E2E8F0",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:72,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box",transition:"border-color 0.15s"}}
             onFocus={e=>e.target.style.borderColor="rgba(0,229,143,0.3)"}
-            onBlur={e=>e.target.style.borderColor="rgba(255,255,255,0.07)"}/>
+            onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,0.07)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}/>
+          {/* @Mention autocomplete dropdown */}
+          {mentionBox.open&&(
+            <div style={{position:"absolute",top:user?108:80,left:0,right:0,background:"rgba(8,13,26,0.98)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:10,boxShadow:"0 16px 48px rgba(0,0,0,0.8)",zIndex:200,overflow:"hidden",backdropFilter:"blur(20px)"}}>
+              <div style={{padding:"6px 10px 4px",fontSize:10,color:"#3B82F6",fontWeight:700,letterSpacing:0.8,borderBottom:"1px solid rgba(255,255,255,0.04)"}}>MENCIONAR ACTIVO</div>
+              {mentionBox.results.map(sym=>(
+                <div key={sym} onMouseDown={()=>insertMention(sym)}
+                  style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",cursor:"pointer",transition:"background 0.1s",borderBottom:"1px solid rgba(255,255,255,0.03)"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(59,130,246,0.08)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                  <span style={{background:"rgba(15,23,42,0.95)",color:"#CBD5E1",borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace",border:"1px solid rgba(71,85,105,0.55)"}} >@{sym}</span>
+                  <span style={{color:"#475569",fontSize:11}}>Mencionar {sym}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {/* Bullish / Bearish — outline minimalista */}
           <div style={{display:"flex",gap:8,marginTop:10,marginBottom:10}}>
             {[
@@ -1072,8 +1194,8 @@ function NewPost({user,onPost,onNeedAuth,lang}){
               style={{background:"rgba(0,229,143,0.05)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:7,color:C.accent,padding:"7px 10px",fontSize:12,outline:"none",width:90,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
               onFocus={e=>e.target.style.borderColor="rgba(0,229,143,0.4)"}
               onBlur={e=>e.target.style.borderColor="rgba(0,229,143,0.15)"}/>
-            <span style={{color:"#1E293B",fontSize:11}}>Usa $TICKER en el texto para cashtags</span>
-            <Btn onClick={submit} style={{marginLeft:"auto",padding:"8px 22px",fontSize:13}}>{user?t.publish:t.login}</Btn>
+            <span style={{color:"#334155",fontSize:11}}>$TICKER para cashtag · @TICKER para mencionar</span>
+            <Btn onClick={submit} style={{marginLeft:"auto",padding:"8px 22px",fontSize:13,opacity:posting?0.6:1}}>{posting?"Publicando...":user?t.publish:t.login}</Btn>
           </div>
         </div>
       </div>
@@ -2246,23 +2368,147 @@ export default function App(){
   const [showAlerts,setAlerts] = useState(false);
   const [lang,setLang]         = useState("es");
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
+  const [dbReady,setDbReady]   = useState(false); // true cuando Supabase responde
 
   const t = LANGS[lang];
+
+  // ── SUPABASE: Auth listener & session restore ──────────────────────────────
+  useEffect(()=>{
+    // Comprobar sesión existente al cargar
+    supabase.auth.getSession().then(async({data:{session}})=>{
+      if(session?.user){
+        const {data:profile}=await supabase.from("profiles").select("*").eq("id",session.user.id).single();
+        if(profile){
+          setUser({
+            id:session.user.id,
+            name:profile.username||session.user.email?.split("@")[0]||"Usuario",
+            emoji:profile.avatar_emoji||"🦅",
+            avatarColor:profile.avatar_color||C.accent,
+            followers:profile.followers_count||0,
+            following:profile.following_count||0,
+            posts:profile.posts_count||0,
+            points:profile.points||100,
+            badges:profile.badges||["early"],
+            bio:profile.bio||""
+          });
+        }
+      }
+    });
+    // Escuchar cambios de auth (login / logout)
+    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event,session)=>{
+      if(event==="SIGNED_OUT"){ setUser(null); }
+    });
+    return()=>subscription.unsubscribe();
+  },[]);
+
+  // ── SUPABASE: Cargar posts reales y suscripción realtime ──────────────────
+  useEffect(()=>{
+    let sub;
+    const loadPosts=async()=>{
+      try{
+        const {data,error}=await supabase
+          .from("posts")
+          .select(`*, profiles(username,avatar_emoji,avatar_color,points)`)
+          .order("created_at",{ascending:false})
+          .limit(50);
+        if(!error && data && data.length>0){
+          const mapped=data.map(p=>({
+            id:p.id,
+            userId:p.user_id,
+            user:p.profiles?.username||"Anónimo",
+            avatar:p.profiles?.avatar_emoji||"🦅",
+            avatarColor:p.profiles?.avatar_color||C.accent,
+            time:fmtTimeAgo(p.created_at),
+            ticker:p.ticker||"GENERAL",
+            sentiment:p.sentiment||"bull",
+            text:p.text,
+            likes:p.likes_count||0,
+            comments:p.comments_count||0,
+            reposts:p.reposts_count||0,
+            tags:p.tags||[p.ticker||"GENERAL"],
+          }));
+          setPosts(mapped);
+          setDbReady(true);
+        }
+      }catch(e){ /* fallback a MOCK_POSTS */ }
+    };
+    loadPosts();
+
+    // Suscripción realtime — nuevos posts aparecen al instante
+    sub=supabase
+      .channel("posts-realtime")
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"posts"},async(payload)=>{
+        const p=payload.new;
+        const {data:profile}=await supabase.from("profiles").select("username,avatar_emoji,avatar_color,points").eq("id",p.user_id).single();
+        const newPost={
+          id:p.id,userId:p.user_id,
+          user:profile?.username||"Anónimo",
+          avatar:profile?.avatar_emoji||"🦅",
+          avatarColor:profile?.avatar_color||C.accent,
+          time:"ahora",ticker:p.ticker,sentiment:p.sentiment,
+          text:p.text,likes:0,comments:0,reposts:0,tags:p.tags||[p.ticker],
+        };
+        setPosts(prev=>{
+          // Evitar duplicados (el post local ya fue insertado optimistamente)
+          if(prev.some(x=>x.id===newPost.id)) return prev;
+          return [newPost,...prev];
+        });
+      })
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"posts"},(payload)=>{
+        const p=payload.new;
+        setPosts(prev=>prev.map(x=>x.id===p.id?{...x,likes:p.likes_count,comments:p.comments_count}:x));
+      })
+      .subscribe();
+
+    return()=>{ if(sub) supabase.removeChannel(sub); };
+  },[]);
 
   const showPoints = (pts, reason) => {
     setToast({show:true,points:pts,reason});
     setTimeout(()=>setToast({show:false,points:0,reason:""}),3000);
   };
 
-  const toggleFollow = (id) => {
+  const toggleFollow = async(id) => {
     if(!user){setAuth("register");return;}
-    setFollow(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);
-    if(!following.includes(id)) showPoints(POINT_ACTIONS.follower,"¡Nuevo seguidor!");
+    const isFollowing=following.includes(id);
+    setFollow(prev=>isFollowing?prev.filter(x=>x!==id):[...prev,id]);
+    if(!isFollowing){
+      showPoints(POINT_ACTIONS.follower,"¡Siguiendo!");
+      // Guardar en BD si hay sesión
+      if(user?.id && user.id!=="local"){
+        await supabase.from("follows").insert({follower_id:user.id,following_id:id}).select();
+      }
+    }else{
+      if(user?.id && user.id!=="local"){
+        await supabase.from("follows").delete().eq("follower_id",user.id).eq("following_id",id);
+      }
+    }
   };
 
-  const addPost = ({text,ticker,sentiment}) => {
-    setPosts(prev=>[{id:Date.now(),userId:user.id,user:user.name,avatar:user.emoji,avatarColor:user.avatarColor||C.accent,time:lang==="en"?"just now":"ahora",ticker,sentiment,text,likes:0,comments:0,reposts:0,tags:[ticker]},...prev]);
+  const addPost = async({text,ticker,sentiment}) => {
+    // Inserción optimista inmediata en el feed local
+    const localPost={
+      id:`local-${Date.now()}`,userId:user.id,user:user.name,
+      avatar:user.emoji,avatarColor:user.avatarColor||C.accent,
+      time:lang==="en"?"just now":"ahora",ticker,sentiment,text,
+      likes:0,comments:0,reposts:0,tags:[ticker]
+    };
+    setPosts(prev=>[localPost,...prev]);
     showPoints(POINT_ACTIONS.post, lang==="en"?"Post published! 🎉":"¡Post publicado! 🎉");
+
+    // Guardar en Supabase (si hay sesión real, no local)
+    if(user?.id && user.id!=="local"){
+      try{
+        const {data,error}=await supabase.from("posts").insert({
+          user_id:user.id,text,ticker,sentiment,tags:[ticker],
+          likes_count:0,comments_count:0,reposts_count:0
+        }).select().single();
+        if(!error && data){
+          // Reemplazar el post temporal con el ID real de la BD
+          setPosts(prev=>prev.map(p=>p.id===localPost.id?{...localPost,id:data.id}:p));
+        }
+      }catch(e){ /* mantiene el post local */ }
+    }
   };
 
   const filtered = sent==="all"?posts:posts.filter(p=>p.sentiment===sent);
@@ -2348,7 +2594,7 @@ export default function App(){
             </button>
             <LangSelector lang={lang} setLang={setLang}/>
             {user
-              ? <UserMenu user={user} onLogout={()=>{setUser(null);setFollow([]);setShowLanding(true);}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
+              ? <UserMenu user={user} onLogout={async()=>{await supabase.auth.signOut();setUser(null);setFollow([]);setShowLanding(true);}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
             }
           </div>
