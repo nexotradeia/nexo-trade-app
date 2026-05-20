@@ -3542,7 +3542,16 @@ export default function App(){
           text:p.text,likes:0,comments:0,reposts:0,tags:p.tags||[p.ticker],
         };
         setPosts(prev=>{
-          // Evitar duplicados (el post local ya fue insertado optimistamente)
+          // Si ya existe con ese UUID (confirmado desde addPost) → no duplicar
+          if(prev.some(x=>x.id===newPost.id && x._confirmed)) return prev;
+          // Si hay un post local pendiente del mismo usuario+texto → reemplazarlo
+          const localIdx=prev.findIndex(x=>x.id?.startsWith("local-")&&x.text===newPost.text&&x.userId===newPost.userId);
+          if(localIdx>=0){
+            const updated=[...prev];
+            updated[localIdx]={...updated[localIdx],...newPost,_confirmed:true};
+            return updated;
+          }
+          // Post de otro usuario → agregar arriba
           if(prev.some(x=>x.id===newPost.id)) return prev;
           return [newPost,...prev];
         });
@@ -3579,30 +3588,40 @@ export default function App(){
   };
 
   const addPost = async({text,ticker,sentiment,image}) => {
-    // Inserción optimista inmediata en el feed local
+    const localId = `local-${Date.now()}`;
+    // 1. Mostrar el post INMEDIATAMENTE en la pantalla (optimista)
     const localPost={
-      id:`local-${Date.now()}`,userId:user.id,user:user.name,
-      avatar:user.emoji,avatarColor:user.avatarColor||C.accent,
-      time:lang==="en"?"just now":"ahora",ticker,sentiment,text,image:image||null,
-      likes:0,comments:0,reposts:0,tags:[ticker]
+      id:localId, userId:user?.id, user:user?.name||"Tú",
+      avatar:user?.emoji||"🦅", avatarColor:user?.avatarColor||C.accent,
+      time:"ahora", ticker, sentiment, text, image:image||null,
+      likes:0, comments:0, reposts:0, tags:[ticker]
     };
     setPosts(prev=>[localPost,...prev]);
-    setNewPostId(localPost.id);
+    setNewPostId(localId);
     setTimeout(()=>setNewPostId(null), 1500);
     showPoints(POINT_ACTIONS.post, lang==="en"?"Post published! 🎉":"¡Post publicado! 🎉");
 
-    // Guardar en Supabase (si hay sesión real, no local)
+    // 2. Guardar en Supabase
     if(user?.id && user.id!=="local"){
       try{
         const {data,error}=await supabase.from("posts").insert({
-          user_id:user.id,text,ticker,sentiment,tags:[ticker],
-          likes_count:0,comments_count:0,reposts_count:0
+          user_id:user.id, text, ticker, sentiment, tags:[ticker],
+          likes_count:0, comments_count:0, reposts_count:0
         }).select().single();
+
         if(!error && data){
-          // Reemplazar el post temporal con el ID real de la BD
-          setPosts(prev=>prev.map(p=>p.id===localPost.id?{...localPost,id:data.id}:p));
+          // 3. Reemplazar el post temporal con el real (con UUID de la BD)
+          //    Marcamos el localId para que el canal realtime lo ignore
+          setPosts(prev=>prev.map(p=>
+            p.id===localId ? {...localPost, id:data.id, _confirmed:true} : p
+          ));
+          setNewPostId(data.id);
+          setTimeout(()=>setNewPostId(null), 800);
         }
-      }catch(e){ /* mantiene el post local */ }
+      }catch(e){
+        // Si falla, el post local sigue visible pero marca como no guardado
+        setPosts(prev=>prev.map(p=>p.id===localId?{...p,_failed:true}:p));
+      }
     }
   };
 
@@ -3709,10 +3728,10 @@ export default function App(){
 
           {/* Logo — grande y llamativo */}
           <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
-            <img src="/logo2.png" alt="NEXO TRADE"
-              style={{height:110,width:"auto",objectFit:"contain",
-                filter:"drop-shadow(0 2px 16px rgba(0,168,255,0.45)) drop-shadow(0 0 8px rgba(0,168,255,0.25))"}}
-              onError={e=>{e.target.src="/logo.png";}}/>
+            <img src="/logo_nexo.png" alt="NEXO TRADE"
+              style={{height:115,width:"auto",objectFit:"contain",
+                filter:"drop-shadow(0 2px 16px rgba(0,168,255,0.4)) drop-shadow(0 0 8px rgba(0,168,255,0.2))"}}
+              onError={e=>{e.target.src="/logo2.png";}}/>
           </div>
 
           {/* Search — centrado */}
