@@ -1238,17 +1238,90 @@ function TopTable({title,icon,data,cols}){
   );
 }
 
+const TOPS_TICKERS=[
+  {ticker:"NVDA",name:"NVIDIA"},{ticker:"AAPL",name:"Apple"},{ticker:"TSLA",name:"Tesla"},
+  {ticker:"AMZN",name:"Amazon"},{ticker:"META",name:"Meta"},{ticker:"MSFT",name:"Microsoft"},
+  {ticker:"GOOGL",name:"Alphabet"},{ticker:"NFLX",name:"Netflix"},{ticker:"AMD",name:"AMD"},
+  {ticker:"COIN",name:"Coinbase"},{ticker:"PLTR",name:"Palantir"},{ticker:"SMCI",name:"SuperMicro"},
+  {ticker:"MSTR",name:"MicroStrategy"},{ticker:"ARM",name:"ARM Holdings"},{ticker:"BABA",name:"Alibaba"},
+  {ticker:"RIVN",name:"Rivian"},{ticker:"SNAP",name:"Snap"},{ticker:"PYPL",name:"PayPal"},
+  {ticker:"SPY",name:"S&P 500 ETF"},{ticker:"QQQ",name:"Nasdaq ETF"},
+];
+
 function TopsPage(){
   const [tab,setTab]=useState("activas");
+  const [quotes,setQuotes]=useState([]);
+  const [loading,setLoading]=useState(true);
   const tabs=[["activas","🔥 Más Activas"],["ganadoras","📈 Ganadoras"],["perdedoras","📉 Perdedoras"]];
+
+  useEffect(()=>{
+    setLoading(true);
+    // Traer cotizaciones reales de Finnhub para todos los tickers
+    Promise.all(
+      TOPS_TICKERS.map(({ticker,name})=>
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
+          .then(r=>r.json())
+          .then(q=>({ticker,name,price:q.c,change:q.dp,changeAbs:q.d,high:q.h,low:q.l,open:q.o,prevClose:q.pc}))
+          .catch(()=>null)
+      )
+    ).then(results=>{
+      setQuotes(results.filter(r=>r&&r.price>0));
+      setLoading(false);
+    });
+  },[]);
+
+  const sorted=[...quotes].sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
+  const ganadoras=[...quotes].filter(q=>q.change>0).sort((a,b)=>b.change-a.change).slice(0,5);
+  const perdedoras=[...quotes].filter(q=>q.change<0).sort((a,b)=>a.change-b.change).slice(0,5);
+  const activas=sorted.slice(0,5);
+
+  const Row=({q,rank})=>(
+    <div style={{display:"flex",alignItems:"center",gap:10,background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 16px",marginBottom:8,transition:"all 0.15s"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
+      onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.boxShadow="none";}}>
+      <span style={{fontSize:12,fontWeight:800,color:C.muted2,width:18,textAlign:"center"}}>{rank}</span>
+      <div style={{background:q.change>=0?C.bullBg:C.bearBg,borderRadius:8,padding:"6px 10px",minWidth:64,textAlign:"center"}}>
+        <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:q.change>=0?C.bull:C.bear}}>{q.ticker}</div>
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontWeight:600,fontSize:13,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{q.name}</div>
+        <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>${q.price?.toFixed(2)}</div>
+      </div>
+      <div style={{textAlign:"right",flexShrink:0}}>
+        <div style={{fontWeight:800,fontSize:14,fontFamily:"monospace",color:q.change>=0?C.bull:C.bear}}>
+          {q.change>=0?"+":""}{q.change?.toFixed(2)}%
+        </div>
+        <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{q.change>=0?"+":""}{q.changeAbs?.toFixed(2)}</div>
+      </div>
+    </div>
+  );
+
   return(
     <div>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📊 Tops del Mercado</h2>
+        {loading
+          ?<span style={{fontSize:11,color:C.muted}}>⏳ Cargando precios...</span>
+          :<span style={{fontSize:11,color:C.bull,fontWeight:700}}>🟢 Precios en vivo · Finnhub</span>}
+        <button onClick={()=>{setLoading(true);setQuotes([]);setTimeout(()=>setLoading(false),100);}}
+          style={{marginLeft:"auto",background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"4px 10px",cursor:"pointer",fontSize:11,color:C.muted,fontWeight:600}}
+          title="Actualizar">🔄 Refresh</button>
+      </div>
       <div style={{display:"flex",gap:6,marginBottom:20}}>
         {tabs.map(([k,l])=><button key={k} onClick={()=>setTab(k)} style={{background:tab===k?C.accent:"transparent",border:`1.5px solid ${tab===k?C.accent:C.border}`,borderRadius:10,padding:"7px 14px",cursor:"pointer",color:tab===k?"#fff":C.muted,fontSize:12,fontWeight:700,whiteSpace:"nowrap",transition:"all 0.15s"}}>{l}</button>)}
       </div>
-      {tab==="activas"&&<TopTable title="Top 5 Más Activas" icon="🔥" data={TOP_D.activas} cols={[{k:"ticker",label:"TICKER",mono:true,bold:true},{k:"name",label:"NOMBRE"},{k:"price",label:"PRECIO",render:r=>fmtPx(r.price),mono:true},{k:"change",label:"% DÍA",render:r=>fmtChg(r.change),col:r=>chgCol(r.change),mono:true,bold:true},{k:"mentions",label:"MENCIONES",render:r=>`💬 ${r.mentions.toLocaleString()}`,col:()=>C.purple}]}/>}
-      {tab==="ganadoras"&&<TopTable title="Top 5 Ganadoras" icon="📈" data={TOP_D.ganadoras} cols={[{k:"ticker",label:"TICKER",mono:true,bold:true},{k:"name",label:"NOMBRE"},{k:"price",label:"PRECIO",render:r=>fmtPx(r.price),mono:true},{k:"change",label:"% HOY",render:r=>fmtChg(r.change),col:r=>chgCol(r.change),mono:true,bold:true},{k:"vol",label:"VOLUMEN",col:()=>C.muted}]}/>}
-      {tab==="perdedoras"&&<TopTable title="Top 5 Perdedoras" icon="📉" data={TOP_D.perdedoras} cols={[{k:"ticker",label:"TICKER",mono:true,bold:true},{k:"name",label:"NOMBRE"},{k:"price",label:"PRECIO",render:r=>fmtPx(r.price),mono:true},{k:"change",label:"% HOY",render:r=>fmtChg(r.change),col:r=>chgCol(r.change),mono:true,bold:true},{k:"vol",label:"VOLUMEN",col:()=>C.muted}]}/>}
+      {loading?(
+        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>
+          <div style={{fontSize:28,marginBottom:8}}>⏳</div>
+          <div>Cargando datos en vivo...</div>
+        </div>
+      ):(
+        <>
+          {tab==="activas"&&(activas.length>0?activas.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin datos</div>)}
+          {tab==="ganadoras"&&(ganadoras.length>0?ganadoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin ganadoras por ahora</div>)}
+          {tab==="perdedoras"&&(perdedoras.length>0?perdedoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin perdedoras por ahora</div>)}
+        </>
+      )}
     </div>
   );
 }
