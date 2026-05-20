@@ -2101,6 +2101,7 @@ function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
     {ok:true,  text:"Leaderboard público"},
     {ok:true,  text:"Simulador paper trading"},
     {ok:true,  text:"Sistema de puntos y badges"},
+    {ok:true,  text:"Gráficas japonesas avanzadas"},
   ];
 
   const PREMIUM_FEATURES = [
@@ -2111,7 +2112,7 @@ function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
     {star:true, text:"★ Calculadora riesgo/recompensa"},
     {star:true, text:"★ Alertas de precio personalizadas"},
     {star:true, text:"★ Alertas de noticias del día"},
-    {star:true, text:"★ Bot IA de trading"},
+    {star:true, text:"★ Bot IA de trading con ChatGPT"},
     {star:true, text:"★ Exportar datos (Excel/CSV)"},
     {star:true, text:"★ Watchlist semanal ilimitada"},
     {star:true, text:"★ GIFs en posts"},
@@ -2219,19 +2220,27 @@ function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
         {/* Plans grid — exactly like the photo */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0,marginBottom:28,borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
 
-          {/* FREE PLAN — left, clean gray */}
-          <div style={{background:"rgba(14,22,40,0.95)",padding:"28px 26px",borderRight:"1px solid rgba(255,255,255,0.08)"}}>
-            <div style={{fontSize:28,fontWeight:900,color:"#F1F5F9",marginBottom:2}}>Free</div>
-            <div style={{fontSize:13,color:"#64748B",marginBottom:22}}>Gratis para siempre</div>
-            <div>
-              {FREE_FEATURES.map((f,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:i<FREE_FEATURES.length-1?"1px solid rgba(255,255,255,0.05)":"none"}}>
-                  <span style={{fontSize:13,color:"#64748B",flexShrink:0}}>✓</span>
-                  <span style={{fontSize:13,color:"#94A3B8",lineHeight:1.4}}>{f.text}</span>
-                </div>
-              ))}
+          {/* FREE PLAN — left, mismo estilo oscuro brillante */}
+          <div style={{background:"rgba(10,16,30,0.98)",padding:"28px 26px",borderRight:"1px solid rgba(255,255,255,0.08)",position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,left:0,width:200,height:200,background:"radial-gradient(circle,rgba(0,168,255,0.07),transparent 70%)",pointerEvents:"none"}}/>
+            <div style={{position:"relative"}}>
+              <div style={{fontSize:22,fontWeight:900,color:"#00A8FF",marginBottom:4,letterSpacing:-0.3}}>Free</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:2}}>
+                <span style={{fontSize:28,fontWeight:900,color:"#F1F5F9"}}>$0</span>
+                <span style={{fontSize:13,color:"#64748B"}}> / gratis para siempre</span>
+              </div>
+              <div style={{marginTop:18,marginBottom:22}}>
+                {FREE_FEATURES.map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<FREE_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+                    <span style={{fontSize:12,color:"#00A8FF",flexShrink:0}}>✓</span>
+                    <span style={{fontSize:13,color:"#CBD5E1",lineHeight:1.4}}>{f.text}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{padding:"13px",borderRadius:11,background:"rgba(0,168,255,0.06)",textAlign:"center",color:"#475569",fontSize:13,fontWeight:700,border:"1px solid rgba(0,168,255,0.15)"}}>
+                Plan actual
+              </div>
             </div>
-            <div style={{marginTop:24,padding:"10px",borderRadius:10,background:"rgba(255,255,255,0.04)",textAlign:"center",color:"#475569",fontSize:13,fontWeight:600,border:"1px solid rgba(255,255,255,0.06)"}}>Plan actual</div>
           </div>
 
           {/* VIP MEMBER — right, gold */}
