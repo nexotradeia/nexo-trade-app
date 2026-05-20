@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-20 14:18:55
+// NEXO TRADE — build: 2026-05-19 21:00:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -2590,7 +2590,7 @@ export default function App(){
         <div style={{display:"flex",alignItems:"center",gap:16,height:80,maxWidth:1200,margin:"0 auto"}}>
           {/* Logo — BIG & prominent */}
           <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer",marginRight:4}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
-            <img src="/logo2.png" alt="NEXO TRADE"
+            <img src="/logo_foro.jpg" alt="NEXO TRADE"
               style={{height:72,width:"auto",objectFit:"contain",
                 filter:"drop-shadow(0 0 22px rgba(0,229,255,0.65)) drop-shadow(0 0 10px rgba(124,58,237,0.45)) drop-shadow(0 0 4px rgba(59,130,246,0.5))"}}
               onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
