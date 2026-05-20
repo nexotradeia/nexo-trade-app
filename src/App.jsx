@@ -1102,9 +1102,9 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
 // ── NEW POST ──────────────────────────────────────────────────────────────────
 const MENTION_TICKERS = ["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META","BTC","ETH","SPY","AMD","NFLX","COIN","PLTR","SMCI","ARM","JPM","V","BABA","RIVN"];
 
-function NewPost({user,onPost,onNeedAuth,lang}){
+function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   const t=LANGS[lang];
-  const [text,setText]=useState(""),[ticker,setTicker]=useState(""),[sent,setSent]=useState("bull"),[modMsg,setModMsg]=useState("");
+  const [text,setText]=useState(""),[ticker,setTicker]=useState(defaultTicker),[sent,setSent]=useState("bull"),[modMsg,setModMsg]=useState("");
   const [posting,setPosting]=useState(false);
   const [image,setImage]=useState(null);
   const [showGif,setShowGif]=useState(false);
@@ -1275,7 +1275,7 @@ function GifPicker({onSelect,onClose}){
 }
 
 // ── TICKER PAGE (página completa de una acción) ───────────────────────────────
-function TickerPage({ticker,posts=[],onClose,lang="es"}){
+function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth}){
   const [quote,setQuote]=useState(null);
   const [news,setNews]=useState([]);
   const [loadingQ,setLoadingQ]=useState(true);
@@ -1336,6 +1336,11 @@ function TickerPage({ticker,posts=[],onClose,lang="es"}){
           </div>
           <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{total} votos de la comunidad</div>
         </div>
+      </div>
+
+      {/* Cajón para escribir posts sobre este ticker */}
+      <div style={{marginBottom:16}}>
+        <NewPost user={user} onPost={onPost} onNeedAuth={onNeedAuth} lang={lang} defaultTicker={ticker}/>
       </div>
 
       {/* TradingView Chart */}
@@ -3039,7 +3044,7 @@ export default function App(){
   const filtered = sent==="all"?posts:posts.filter(p=>p.sentiment===sent);
 
   const renderPage = () => {
-    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang}/>;
+    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
     if(page===1) return <TopsPage posts={posts}/>;
     if(page===2||page===3||page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
@@ -3138,14 +3143,10 @@ export default function App(){
 
           {/* Logo — grande y llamativo */}
           <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
-            <img src="/logo_foro.jpg" alt="NEXO TRADE"
-              style={{height:90,width:"auto",objectFit:"contain",
-                filter:"drop-shadow(0 2px 12px rgba(0,168,255,0.5)) drop-shadow(0 0 6px rgba(0,168,255,0.3))"}}
-              onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
-            <div style={{display:"none",alignItems:"center",gap:8}}>
-              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#00A8FF,#0090D4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:"#fff",boxShadow:"0 0 20px rgba(0,168,255,0.5)"}}>N</div>
-              <div><div style={{fontSize:17,fontWeight:900,color:"#0F172A",letterSpacing:1}}>NEXO</div><div style={{fontSize:9,fontWeight:800,color:"#00A8FF",letterSpacing:3}}>TRADE</div></div>
-            </div>
+            <img src="/logo2.png" alt="NEXO TRADE"
+              style={{height:110,width:"auto",objectFit:"contain",
+                filter:"drop-shadow(0 2px 16px rgba(0,168,255,0.45)) drop-shadow(0 0 8px rgba(0,168,255,0.25))"}}
+              onError={e=>{e.target.src="/logo.png";}}/>
           </div>
 
           {/* Search — centrado */}
