@@ -1159,10 +1159,11 @@ function NewPost({user,onPost,onNeedAuth,lang}){
             <span style={{color:"#94A3B8",fontSize:11}}>+{POINT_ACTIONS.post} pts</span>
           </div>}
           <textarea ref={taRef} value={text} onChange={handleTextChange}
-            placeholder="¿Qué piensas del mercado? Usa $NVDA para cashtags y @META para mencionar activos"
+            placeholder="¿Qué piensas del mercado? Usa $NVDA para cashtags y @META para mencionar activos · Enter para publicar"
             style={{width:"100%",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:9,color:"#0F172A",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:72,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box",transition:"border-color 0.15s"}}
             onFocus={e=>e.target.style.borderColor="rgba(0,160,96,0.4)"}
-            onBlur={e=>{e.target.style.borderColor="rgba(15,23,42,0.1)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}/>
+            onBlur={e=>{e.target.style.borderColor="rgba(15,23,42,0.1)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
+            onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}/>
           {/* @Mention autocomplete dropdown */}
           {mentionBox.open&&(
             <div style={{position:"absolute",top:user?108:80,left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(37,99,235,0.25)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.1)",zIndex:200,overflow:"hidden"}}>
@@ -2522,9 +2523,18 @@ export default function App(){
 
   const renderPage = () => {
     if(page===1) return <TopsPage/>;
+    if(page===2||page===3||page===4) return(
+      <div style={{textAlign:"center",padding:"60px 20px"}}>
+        <div style={{fontSize:48,marginBottom:16}}>🚧</div>
+        <h2 style={{color:C.text,fontWeight:800,marginBottom:8}}>{page===2?"Crypto":page===3?"Acciones":"Macro"}</h2>
+        <p style={{color:C.muted,fontSize:15}}>Esta sección estará disponible muy pronto.<br/>Mientras tanto, explora el feed principal.</p>
+        <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>← Volver al Feed</button>
+      </div>
+    );
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage/>;
+    if(page===8) return <PremiumPage user={user} isPremium={isPremium} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     return(
       <>
         {/* Ticker filter banner */}
