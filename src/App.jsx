@@ -1,5 +1,5 @@
 // NEXO TRADE — build: 2026-05-19 21:00:00
-import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
+import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
@@ -1754,34 +1754,108 @@ function LiveConferenceModal({event, lang, onClose}){
   );
 }
 
-function TrendingPage(){
+function TrendingPage({posts=[]}){
+  const [quotes,setQuotes]=useState({});
+  const [loading,setLoading]=useState(true);
+  const [lastUpdate,setLastUpdate]=useState(null);
+
+  // Calcular tickers trending desde los posts reales del foro
+  const trendingData = useMemo(()=>{
+    const map={};
+    posts.forEach(p=>{
+      if(!p.ticker||p.ticker==="GENERAL") return;
+      if(!map[p.ticker]) map[p.ticker]={ticker:p.ticker,mentions:0,bull:0,bear:0};
+      map[p.ticker].mentions++;
+      if(p.sentiment==="bull") map[p.ticker].bull++;
+      else map[p.ticker].bear++;
+    });
+    // Completar con fallback si hay pocos posts reales
+    const FALLBACK=["NVDA","BTC","TSLA","AAPL","META","ETH","AMZN","SPY"];
+    FALLBACK.forEach(tk=>{if(!map[tk]) map[tk]={ticker:tk,mentions:0,bull:0,bear:0};});
+    return Object.values(map)
+      .sort((a,b)=>b.mentions-a.mentions)
+      .slice(0,10)
+      .map(t=>({...t,sentiment:t.bull+t.bear>0?Math.round(t.bull/(t.bull+t.bear)*100):50}));
+  },[posts]);
+
+  const fetchQuotes=useCallback(()=>{
+    if(!trendingData.length) return;
+    setLoading(true);
+    Promise.all(
+      trendingData.map(({ticker})=>
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
+          .then(r=>r.json())
+          .then(q=>({ticker,price:q.c,change:q.dp,changeAbs:q.d}))
+          .catch(()=>({ticker,price:0,change:0,changeAbs:0}))
+      )
+    ).then(results=>{
+      const q={};
+      results.forEach(r=>{q[r.ticker]=r;});
+      setQuotes(q);
+      setLastUpdate(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
+      setLoading(false);
+    });
+  },[trendingData]);
+
+  useEffect(()=>{ fetchQuotes(); },[fetchQuotes]);
+
+  // Auto-refresh cada 60 segundos
+  useEffect(()=>{
+    const interval=setInterval(fetchQuotes,60000);
+    return()=>clearInterval(interval);
+  },[fetchQuotes]);
+
   return(
     <div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,flexWrap:"wrap"}}>
         <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>🔥 Trending en NexoTrade</h2>
-        <span style={{background:C.bearBg,color:C.bear,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>Últimas 24h</span>
+        <span style={{background:"rgba(239,68,68,0.08)",color:C.bear,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>Últimas 24h</span>
+        {loading
+          ?<span style={{fontSize:11,color:C.muted,marginLeft:"auto"}}>⏳ Actualizando...</span>
+          :<span style={{fontSize:11,color:C.bull,fontWeight:700,marginLeft:"auto"}}>🟢 En vivo · {lastUpdate}</span>}
+        <button onClick={fetchQuotes} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"4px 10px",cursor:"pointer",fontSize:11,color:C.muted,fontWeight:600}}>🔄</button>
       </div>
-      {MOCK_TRENDING.map((t,i)=>(
-        <div key={t.ticker} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 20px",marginBottom:12,boxShadow:C.shadow,display:"flex",alignItems:"center",gap:16,cursor:"pointer",transition:"box-shadow 0.2s"}}
-          onMouseEnter={e=>e.currentTarget.style.boxShadow=C.shadowMd}
-          onMouseLeave={e=>e.currentTarget.style.boxShadow=C.shadow}>
-          <span style={{color:i<3?C.gold:C.muted2,fontWeight:900,fontSize:i<3?22:16,width:30,textAlign:"center"}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</span>
-          <div style={{flex:1}}>
-            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-              <span style={{background:C.accentDim,color:C.accentText,borderRadius:8,padding:"3px 10px",fontSize:14,fontWeight:800,fontFamily:"monospace"}}>${t.ticker}</span>
-              <span style={{color:C.text,fontSize:14,fontWeight:600}}>{t.nombre}</span>
-              <span style={{color:chgCol(t.change),fontWeight:700,fontSize:13,fontFamily:"monospace",marginLeft:"auto"}}>{fmtChg(t.change)}</span>
+
+      {trendingData.map((t,i)=>{
+        const q=quotes[t.ticker]||{};
+        const change=q.change||0;
+        const price=q.price||0;
+        return(
+          <div key={t.ticker} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 18px",marginBottom:10,boxShadow:"0 1px 4px rgba(0,0,0,0.05)",display:"flex",alignItems:"center",gap:14,transition:"all 0.15s"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.05)";}}>
+            {/* Rank */}
+            <span style={{fontWeight:900,fontSize:i<3?22:15,width:28,textAlign:"center",flexShrink:0}}>
+              {i===0?"🥇":i===1?"🥈":i===2?"🥉":<span style={{color:C.muted2}}>{i+1}</span>}
+            </span>
+            {/* Ticker badge */}
+            <div style={{background:change>=0?C.bullBg:C.bearBg,borderRadius:9,padding:"7px 12px",minWidth:60,textAlign:"center",flexShrink:0}}>
+              <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:change>=0?C.bull:C.bear}}>{t.ticker}</div>
+              {price>0&&<div style={{fontSize:10,color:C.muted,fontFamily:"monospace"}}>${price>=1000?price.toFixed(0):price.toFixed(2)}</div>}
             </div>
-            <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <span style={{color:C.muted2,fontSize:12}}>💬 {t.mentions.toLocaleString()} menciones</span>
-              <div style={{flex:1,background:C.border,borderRadius:20,height:6,overflow:"hidden"}}>
-                <div style={{height:"100%",borderRadius:20,width:`${t.sentiment}%`,background:t.sentiment>60?`linear-gradient(90deg,${C.bull},#00e5b0)`:t.sentiment>40?"#f59e0b":`linear-gradient(90deg,${C.bear},#ff8080)`}}/>
+            {/* Info */}
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+                {t.mentions>0&&<span style={{color:C.muted2,fontSize:12}}>💬 {t.mentions} menciones</span>}
+                {change!==0&&<span style={{color:change>=0?C.bull:C.bear,fontWeight:700,fontSize:13,fontFamily:"monospace",marginLeft:"auto"}}>
+                  {change>=0?"+":""}{change.toFixed(2)}%
+                </span>}
               </div>
-              <span style={{color:t.sentiment>60?C.bull:t.sentiment>40?C.gold:C.bear,fontSize:12,fontWeight:700,width:40,textAlign:"right"}}>{t.sentiment}% 🐂</span>
+              {/* Sentiment bar */}
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:11,color:C.bull,fontWeight:600,width:28}}>{t.sentiment}%</span>
+                <div style={{flex:1,background:C.border,borderRadius:20,height:5,overflow:"hidden"}}>
+                  <div style={{height:"100%",borderRadius:20,width:`${t.sentiment}%`,background:t.sentiment>60?`linear-gradient(90deg,${C.bull},#00e5b0)`:t.sentiment>40?"#f59e0b":`linear-gradient(90deg,${C.bear},#ff8080)`,transition:"width 0.4s"}}/>
+                </div>
+                <span style={{fontSize:11,color:C.bear,fontWeight:600,width:28,textAlign:"right"}}>{100-t.sentiment}%</span>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
+      <div style={{textAlign:"center",color:C.muted2,fontSize:11,marginTop:8}}>
+        🔄 Se actualiza automáticamente cada 60 segundos
+      </div>
     </div>
   );
 }
@@ -2751,7 +2825,7 @@ export default function App(){
     );
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
-    if(page===7) return <TrendingPage/>;
+    if(page===7) return <TrendingPage posts={posts}/>;
     if(page===8) return <PremiumPage user={user} isPremium={isPremium} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     return(
       <>
