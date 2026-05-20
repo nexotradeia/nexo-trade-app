@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-19 20:14:44
+// NEXO TRADE — build: 2026-05-19 20:21:04
 import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1712,7 +1712,7 @@ function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
     if(!user){ onNeedAuth(); return; }
     // Abrir Stripe Checkout — pago real con 7 días gratis
     // Pasamos el email del usuario para pre-rellenar el formulario de Stripe
-    const stripeUrl = STRIPE_PAYMENT_LINK !== "https://buy.stripe.com/test_6oUeV67aKcTZgeF9eA4c800"
+    const stripeUrl = STRIPE_PAYMENT_LINK
       ? STRIPE_PAYMENT_LINK + (user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : "")
       : "https://dashboard.stripe.com"; // fallback si no se configuró el link
     window.open(stripeUrl, "_blank");
