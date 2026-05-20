@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-19 20:09:10
+// NEXO TRADE — build: 2026-05-19 20:14:44
 import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6,6 +6,10 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
 const SUPABASE_KEY  = "SUPABASE_ANON_KEY"; // ← supabase_setup.py reemplaza esto automáticamente
 const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── STRIPE ────────────────────────────────────────────────────────────────────
+// email_stripe_setup.py reemplaza este link automáticamente con el link real
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_6oUeV67aKcTZgeF9eA4c800";
 
 // ── CASHTAG + @MENTION RENDERER ───────────────────────────────────────────────
 function renderWithCashtags(text, onTickerClick, onMentionClick){
@@ -1706,9 +1710,12 @@ function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
 
   const handleSubscribe = () => {
     if(!user){ onNeedAuth(); return; }
-    if(!email){ return; }
-    onSubscribe();
-    setSuccessMsg("¡Suscripción activada! Revisa tu email " + email + " para confirmar.");
+    // Abrir Stripe Checkout — pago real con 7 días gratis
+    // Pasamos el email del usuario para pre-rellenar el formulario de Stripe
+    const stripeUrl = STRIPE_PAYMENT_LINK !== "https://buy.stripe.com/test_6oUeV67aKcTZgeF9eA4c800"
+      ? STRIPE_PAYMENT_LINK + (user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : "")
+      : "https://dashboard.stripe.com"; // fallback si no se configuró el link
+    window.open(stripeUrl, "_blank");
   };
 
   const TABS = [
@@ -2163,7 +2170,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
         <h3 style={{margin:"0 0 4px",color:"#fff",fontSize:14,fontWeight:800}}>VIP Member</h3>
         <p style={{margin:"0 0 4px",color:"#64748B",fontSize:12,lineHeight:1.5}}>Señales exclusivas, IA ilimitada y acceso a todos los datos</p>
         <div style={{fontSize:20,fontWeight:900,color:"#fff",margin:"8px 0 4px"}}><span style={{color:C.vip}}>$9.99</span><span style={{fontSize:12,color:"#475569",fontWeight:500}}>/mes</span></div>
-        <Btn onClick={onNeedAuth} style={{width:"100%",padding:"9px",background:"linear-gradient(135deg,#7C3AED,#9333EA)",boxShadow:"0 0 20px rgba(124,58,237,0.3)"}}>✦ Empezar VIP →</Btn>
+        <Btn onClick={()=>window.open(STRIPE_PAYMENT_LINK,"_blank")} style={{width:"100%",padding:"9px",background:"linear-gradient(135deg,#7C3AED,#9333EA)",boxShadow:"0 0 20px rgba(124,58,237,0.3)"}}>✦ Empezar VIP →</Btn>
         <div style={{fontSize:11,color:"#334155",marginTop:6}}>7 días gratis · Sin compromiso</div>
       </div>}
 
