@@ -2501,8 +2501,8 @@ function PredictionBanner(){
 
 // ── NAV TABS ──────────────────────────────────────────────────────────────────
 const NAV_ITEMS = (t) => [
-  {label:t.feed,idx:0},{label:t.tops,idx:1},{label:t.crypto,idx:2},
-  {label:t.acciones,idx:3},{label:t.macro,idx:4},
+  {label:t.feed,idx:0},{label:t.tops,idx:1},
+  {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"✦ Premium",idx:8,premium:true},
 ];
