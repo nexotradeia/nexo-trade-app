@@ -2264,7 +2264,11 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       {(()=>{
         // Contar posts por usuario y construir ranking
         const countMap={};
-        posts.forEach(p=>{if(p.user){countMap[p.user]=(countMap[p.user]||{count:0,avatar:p.avatar,color:p.avatarColor});countMap[p.user].count++;countMap[p.user].avatar=p.avatar;countMap[p.user].color=p.avatarColor||C.accent;}});
+        posts.forEach(p=>{
+          if(!p.user) return;
+          if(!countMap[p.user]) countMap[p.user]={count:0,avatar:p.avatar||"🦅",color:p.avatarColor||C.accent};
+          countMap[p.user].count++;
+        });
         const medals=["🥇","🥈","🥉"];
         const topList=Object.entries(countMap).sort((a,b)=>b[1].count-a[1].count).slice(0,3);
         if(topList.length===0)return null;
