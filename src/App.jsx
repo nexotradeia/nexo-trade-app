@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-20 04:07:42
+// NEXO TRADE — build: 2026-05-20 14:03:21
 import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -20,7 +20,7 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
     if(/^\$[A-Z]{1,5}$/.test(part)){
       // Cashtag — verde brillante
       return <span key={i} onClick={()=>onTickerClick&&onTickerClick(part.slice(1))}
-        style={{color:"#00E58F",fontWeight:700,cursor:"pointer",background:"rgba(0,229,143,0.1)",borderRadius:4,padding:"1px 5px",border:"1px solid rgba(0,229,143,0.2)",fontSize:"0.9em",letterSpacing:0.3,fontFamily:"monospace"}}
+        style={{color:"#007A48",fontWeight:700,cursor:"pointer",background:"rgba(0,160,96,0.1)",borderRadius:4,padding:"1px 5px",border:"1px solid rgba(0,160,96,0.25)",fontSize:"0.9em",letterSpacing:0.3,fontFamily:"monospace"}}
         onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,229,143,0.18)";e.currentTarget.style.boxShadow="0 0 8px rgba(0,229,143,0.3)";}}
         onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,229,143,0.1)";e.currentTarget.style.boxShadow="none";}}
       >{part}</span>;
@@ -29,9 +29,9 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
       // @Mención — chip oscuro azulado, abre vista del ticker
       const sym = part.slice(1);
       return <span key={i} onClick={()=>onMentionClick&&onMentionClick(sym)}
-        style={{color:"#CBD5E1",fontWeight:700,cursor:"pointer",background:"rgba(15,23,42,0.95)",borderRadius:5,padding:"1px 7px",border:"1px solid rgba(71,85,105,0.55)",fontSize:"0.88em",letterSpacing:0.2,fontFamily:"monospace",display:"inline-block"}}
+        style={{color:"#2563EB",fontWeight:700,cursor:"pointer",background:"rgba(37,99,235,0.07)",borderRadius:5,padding:"1px 7px",border:"1px solid rgba(37,99,235,0.25)",fontSize:"0.88em",letterSpacing:0.2,fontFamily:"monospace",display:"inline-block"}}
         onMouseEnter={e=>{e.currentTarget.style.background="rgba(30,41,59,0.98)";e.currentTarget.style.borderColor="rgba(59,130,246,0.55)";e.currentTarget.style.color="#93C5FD";e.currentTarget.style.boxShadow="0 0 10px rgba(59,130,246,0.25)";}}
-        onMouseLeave={e=>{e.currentTarget.style.background="rgba(15,23,42,0.95)";e.currentTarget.style.borderColor="rgba(71,85,105,0.55)";e.currentTarget.style.color="#CBD5E1";e.currentTarget.style.boxShadow="none";}}
+        onMouseLeave={e=>{e.currentTarget.style.background="rgba(15,23,42,0.95)";e.currentTarget.style.borderColor="rgba(71,85,105,0.55)";e.currentTarget.style.color="#0F172A";e.currentTarget.style.boxShadow="none";}}
       >{part}</span>;
     }
     return part;
@@ -40,17 +40,17 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
 
 // ── THEME — Dark Luxury Fintech ───────────────────────────────────────────────
 const C = {
-  bg:"#080D1A", surface:"#0E1628", card:"#0E1628", card2:"#080D1A",
-  border:"rgba(255,255,255,0.06)", borderHover:"rgba(0,229,143,0.3)",
-  accent:"#00E58F", accentDim:"rgba(0,229,143,0.08)", accentText:"#00E58F",
-  bull:"#00E58F", bullBg:"rgba(0,229,143,0.1)", bear:"#FF4D6A", bearBg:"rgba(255,77,106,0.1)",
-  gold:"#F59E0B", goldBg:"rgba(245,158,11,0.1)", purple:"#7C3AED", purpleBg:"rgba(124,58,237,0.1)",
-  blue:"#3B82F6", blueBg:"rgba(59,130,246,0.1)", orange:"#F97316", orangeBg:"rgba(249,115,22,0.1)",
-  text:"#F1F5F9", muted:"#64748B", muted2:"#334155",
-  shadow:"0 4px 24px rgba(0,0,0,0.6)", shadowMd:"0 16px 60px rgba(0,0,0,0.7)",
-  shadowGlow:"0 0 40px rgba(0,229,143,0.12)", shadowGlowBlue:"0 0 40px rgba(59,130,246,0.12)",
-  glass:"rgba(14,22,40,0.8)", glassBorder:"rgba(255,255,255,0.06)",
-  vip:"#7C3AED", vipGlow:"rgba(124,58,237,0.3)",
+  bg:"#F0F4F8", surface:"#FFFFFF", card:"#FFFFFF", card2:"#F8FAFC",
+  border:"rgba(15,23,42,0.09)", borderHover:"rgba(0,160,96,0.4)",
+  accent:"#00A060", accentDim:"rgba(0,160,96,0.09)", accentText:"#007A48",
+  bull:"#16A34A", bullBg:"rgba(22,163,74,0.09)", bear:"#DC2626", bearBg:"rgba(220,38,38,0.09)",
+  gold:"#D97706", goldBg:"rgba(217,119,6,0.1)", purple:"#7C3AED", purpleBg:"rgba(124,58,237,0.08)",
+  blue:"#2563EB", blueBg:"rgba(37,99,235,0.08)", orange:"#EA580C", orangeBg:"rgba(234,88,12,0.08)",
+  text:"#0F172A", muted:"#64748B", muted2:"#94A3B8",
+  shadow:"0 2px 12px rgba(0,0,0,0.07)", shadowMd:"0 8px 32px rgba(0,0,0,0.1)",
+  shadowGlow:"0 0 24px rgba(0,160,96,0.12)", shadowGlowBlue:"0 0 24px rgba(37,99,235,0.1)",
+  glass:"rgba(255,255,255,0.88)", glassBorder:"rgba(15,23,42,0.09)",
+  vip:"#7C3AED", vipGlow:"rgba(124,58,237,0.2)",
 };
 
 // ── LANGS ─────────────────────────────────────────────────────────────────────
@@ -455,13 +455,13 @@ function LangSelector({lang, setLang}){
   },[]);
   return(
     <div ref={ref} style={{position:"relative"}}>
-      <button onClick={()=>setOpen(!open)} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,padding:"6px 11px",cursor:"pointer",fontSize:12,fontWeight:700,color:C.muted,display:"flex",alignItems:"center",gap:5}}>
+      <button onClick={()=>setOpen(!open)} style={{background:"#F8FAFC",border:`1px solid ${C.border}`,borderRadius:8,padding:"6px 11px",cursor:"pointer",fontSize:12,fontWeight:700,color:C.muted,display:"flex",alignItems:"center",gap:5}}>
         <span style={{fontSize:14}}>{current.flag}</span>
         <span>{current.code.toUpperCase()}</span>
         <span style={{fontSize:9,color:C.muted2}}>▾</span>
       </button>
       {open && (
-        <div style={{position:"absolute",right:0,top:"calc(100% + 6px)",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:6,zIndex:200,boxShadow:C.shadowMd,minWidth:155}}>
+        <div style={{position:"absolute",right:0,top:"calc(100% + 6px)",background:"#FFFFFF",border:`1px solid ${C.border}`,borderRadius:14,padding:6,zIndex:200,boxShadow:C.shadowMd,minWidth:155}}>
           {LANG_META.map(l => (
             <button key={l.code} onClick={()=>{ setLang(l.code); setOpen(false); }} style={{display:"flex",alignItems:"center",gap:10,width:"100%",textAlign:"left",border:"none",cursor:"pointer",padding:"8px 12px",borderRadius:9,fontFamily:"inherit",fontSize:13,fontWeight:lang===l.code?700:500,color:lang===l.code?C.accentText:C.text,background:lang===l.code?C.accentDim:"transparent",transition:"background 0.1s"}}>
               <span style={{fontSize:18}}>{l.flag}</span>
@@ -624,18 +624,18 @@ function SearchBar({lang}) {
   useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setFoc(false);};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
   return(
     <div ref={ref} style={{position:"relative",width:"100%",maxWidth:420}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",border:`1px solid ${foc?"rgba(59,130,246,0.45)":"rgba(255,255,255,0.07)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(59,130,246,0.1), 0 4px 16px rgba(0,0,0,0.3)":"0 2px 8px rgba(0,0,0,0.2)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,background:"#F8FAFC",border:`1px solid ${foc?"rgba(37,99,235,0.45)":"rgba(15,23,42,0.12)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(37,99,235,0.1)":"none"}}>
         <span style={{fontSize:13,color:"#475569"}}>⌕</span>
         <input value={q} onChange={e=>setQ(e.target.value)} onFocus={()=>setFoc(true)} placeholder={t.search}
-          style={{flex:1,background:"none",border:"none",outline:"none",color:"#E2E8F0",fontSize:13,fontFamily:"'Inter',sans-serif",fontWeight:400,letterSpacing:0.1}}/>
+          style={{flex:1,background:"none",border:"none",outline:"none",color:"#0F172A",fontSize:13,fontFamily:"'Inter',sans-serif",fontWeight:400,letterSpacing:0.1}}/>
         {q&&<button onClick={()=>{setQ("");setRes([]);}} style={{background:"none",border:"none",cursor:"pointer",color:"#334155",fontSize:16,lineHeight:1}}>×</button>}
       </div>
       {res.length>0&&foc&&(
-        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"rgba(8,13,26,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,boxShadow:"0 20px 60px rgba(0,0,0,0.8)",zIndex:200,overflow:"hidden",backdropFilter:"blur(20px)"}}>
+        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.1)",borderRadius:12,boxShadow:"0 8px 30px rgba(0,0,0,0.12)",zIndex:200,overflow:"hidden"}}>
           {res.map(ticker=>{
             const tape=TAPE_ITEMS.find(x=>x.ticker===ticker);
             return(
-              <div key={ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.04)",transition:"background 0.1s"}}
+              <div key={ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",cursor:"pointer",borderBottom:"1px solid rgba(15,23,42,0.07)",transition:"background 0.1s"}}
                 onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.04)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                 onClick={()=>{setQ(ticker);setRes([]);setFoc(false);}}>
@@ -703,7 +703,7 @@ function TickerBadge({ticker,sentiment}){
   return <span style={{background:bg,color:col,border:`1px solid ${col}33`,borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800,letterSpacing:0.5,fontFamily:"monospace"}}>${ticker}</span>;
 }
 
-const inputSt={display:"block",width:"100%",boxSizing:"border-box",background:"rgba(255,255,255,0.04)",border:`1.5px solid ${C.glassBorder}`,borderRadius:10,color:C.text,padding:"10px 14px",fontSize:14,outline:"none",fontFamily:"inherit",margin:"6px 0 14px",backdropFilter:"blur(8px)"};
+const inputSt={display:"block",width:"100%",boxSizing:"border-box",background:"#F8FAFC",border:`1.5px solid ${C.glassBorder}`,borderRadius:10,color:C.text,padding:"10px 14px",fontSize:14,outline:"none",fontFamily:"inherit",margin:"6px 0 14px"};
 
 // ── POINT TOAST ───────────────────────────────────────────────────────────────
 function PointToast({show,points,reason}){
@@ -1026,9 +1026,9 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
   const isBull=post.sentiment==="bull";
   return(
     <div
-      style={{background:"rgba(14,22,40,0.7)",border:"1px solid rgba(255,255,255,0.055)",borderRadius:14,padding:"14px 16px",marginBottom:6,backdropFilter:"blur(16px)",transition:"all 0.18s ease"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e.currentTarget.style.background="rgba(14,22,40,0.9)";e.currentTarget.style.boxShadow="0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)";e.currentTarget.style.transform="translateY(-1px)";}}
-      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.055)";e.currentTarget.style.background="rgba(14,22,40,0.7)";e.currentTarget.style.boxShadow="none";e.currentTarget.style.transform="translateY(0)";}}>
+      style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"10px 14px",marginBottom:4,transition:"all 0.18s ease",boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,160,96,0.25)";e.currentTarget.style.boxShadow="0 4px 20px rgba(0,0,0,0.08)";e.currentTarget.style.transform="translateY(-1px)";}}
+      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(15,23,42,0.09)";e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.05)";e.currentTarget.style.transform="translateY(0)";}}>
       <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
         <div style={{cursor:"pointer",flexShrink:0}} onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>
           <AvatarBubble emoji={post.avatar} color={post.avatarColor||C.accent} online={post.id%2===0}/>
@@ -1036,14 +1036,14 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
         <div style={{flex:1,minWidth:0}}>
           {/* Header row */}
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
-            <span style={{fontWeight:700,color:"#F1F5F9",fontSize:13.5,cursor:"pointer",letterSpacing:-0.2}}
+            <span style={{fontWeight:700,color:"#0F172A",fontSize:13.5,cursor:"pointer",letterSpacing:-0.2}}
               onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
             <TickerBadge ticker={post.ticker} sentiment={post.sentiment}/>
             <SentPill sentiment={post.sentiment} lang={lang}/>
-            <span style={{color:"#334155",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
+            <span style={{color:"#94A3B8",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
           </div>
           {/* Post text */}
-          <p style={{margin:"0 0 10px",color:"#94A3B8",fontSize:13.5,lineHeight:1.65,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
+          <p style={{margin:"0 0 8px",color:"#475569",fontSize:13.5,lineHeight:1.6,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
           {/* Metrics row — target + confidence + sparkline + AI agreement */}
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
             {/* Target */}
@@ -1053,7 +1053,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
             </div>
             {/* Confidence */}
             <div style={{display:"flex",alignItems:"center",gap:5,flex:1,minWidth:120}}>
-              <div style={{flex:1,height:2.5,background:"rgba(255,255,255,0.06)",borderRadius:3,overflow:"hidden"}}>
+              <div style={{flex:1,height:2.5,background:"rgba(15,23,42,0.09)",borderRadius:3,overflow:"hidden"}}>
                 <div style={{width:`${conf}%`,height:"100%",background:confLevel.col,borderRadius:3,transition:"width 0.6s ease"}}/>
               </div>
               <span style={{fontSize:10,color:confLevel.col,fontWeight:700,fontVariantNumeric:"tabular-nums",whiteSpace:"nowrap"}}>{conf}%</span>
@@ -1070,7 +1070,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
           </div>
           {/* Tags */}
           {post.tags?.length>0&&<div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:9}}>
-            {post.tags.map(tg=><span key={tg} style={{background:"rgba(59,130,246,0.07)",color:"#64748B",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:600}}>#{tg}</span>)}
+            {post.tags.map(tg=><span key={tg} style={{background:"rgba(37,99,235,0.07)",color:"#2563EB",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:600}}>#{tg}</span>)}
           </div>}
           {/* Action row */}
           <div style={{display:"flex",gap:0,alignItems:"center",marginTop:2}}>
@@ -1079,13 +1079,13 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
               {icon:"↗",val:post.reposts,active:repost,col:C.bull,fn:()=>setRepost(!repost)}
             ].map(({icon,val,active,col,fn},i)=>(
               <button key={i} onClick={fn}
-                style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"#334155",fontSize:12,fontWeight:600,padding:"4px 10px",borderRadius:7,transition:"all 0.15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.color=col;}}
+                style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"#94A3B8",fontSize:12,fontWeight:600,padding:"4px 10px",borderRadius:7,transition:"all 0.15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,23,42,0.05)";e.currentTarget.style.color=col;}}
                 onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=active?col:"#334155";}}>
                 <span style={{fontSize:13}}>{icon}</span><span style={{fontVariantNumeric:"tabular-nums"}}>{val}</span>
               </button>
             ))}
-            <div style={{marginLeft:"auto",fontSize:10,color:"#1E293B",fontWeight:600}}>
+            <div style={{marginLeft:"auto",fontSize:10,color:"#94A3B8",fontWeight:500}}>
               {`${91-((post.id||0)%30)} traders coinciden`}
             </div>
           </div>
@@ -1146,33 +1146,33 @@ function NewPost({user,onPost,onNeedAuth,lang}){
   };
 
   return(
-    <div style={{background:"rgba(14,22,40,0.85)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px 18px",marginBottom:14,backdropFilter:"blur(16px)"}}>
+    <div style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"14px 16px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.06)"}}>
       {modMsg&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:12,color:C.bear}}>{modMsg}</div>}
       <div style={{display:"flex",gap:10}}>
-        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:38,height:38,borderRadius:"50%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
+        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:38,height:38,borderRadius:"50%",background:"rgba(15,23,42,0.06)",border:"1px solid rgba(15,23,42,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
         <div style={{flex:1,position:"relative"}}>
-          {!user&&<div style={{background:"rgba(0,229,143,0.05)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:13,color:C.muted}}>
+          {!user&&<div style={{background:"rgba(0,160,96,0.05)",border:"1px solid rgba(0,160,96,0.18)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:13,color:C.muted}}>
             <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}} onClick={onNeedAuth}>{t.login}</span> {lang==="en"?"to share your analysis":"para compartir tu análisis"}
           </div>}
           {user&&<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
             <LevelBadge points={user.points} lang={lang}/>
-            <span style={{color:"#1E293B",fontSize:11}}>+{POINT_ACTIONS.post} pts</span>
+            <span style={{color:"#94A3B8",fontSize:11}}>+{POINT_ACTIONS.post} pts</span>
           </div>}
           <textarea ref={taRef} value={text} onChange={handleTextChange}
             placeholder="¿Qué piensas del mercado? Usa $NVDA para cashtags y @META para mencionar activos"
-            style={{width:"100%",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,color:"#E2E8F0",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:72,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box",transition:"border-color 0.15s"}}
-            onFocus={e=>e.target.style.borderColor="rgba(0,229,143,0.3)"}
-            onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,0.07)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}/>
+            style={{width:"100%",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:9,color:"#0F172A",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:72,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box",transition:"border-color 0.15s"}}
+            onFocus={e=>e.target.style.borderColor="rgba(0,160,96,0.4)"}
+            onBlur={e=>{e.target.style.borderColor="rgba(15,23,42,0.1)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}/>
           {/* @Mention autocomplete dropdown */}
           {mentionBox.open&&(
-            <div style={{position:"absolute",top:user?108:80,left:0,right:0,background:"rgba(8,13,26,0.98)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:10,boxShadow:"0 16px 48px rgba(0,0,0,0.8)",zIndex:200,overflow:"hidden",backdropFilter:"blur(20px)"}}>
-              <div style={{padding:"6px 10px 4px",fontSize:10,color:"#3B82F6",fontWeight:700,letterSpacing:0.8,borderBottom:"1px solid rgba(255,255,255,0.04)"}}>MENCIONAR ACTIVO</div>
+            <div style={{position:"absolute",top:user?108:80,left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(37,99,235,0.25)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.1)",zIndex:200,overflow:"hidden"}}>
+              <div style={{padding:"6px 10px 4px",fontSize:10,color:"#3B82F6",fontWeight:700,letterSpacing:0.8,borderBottom:"1px solid rgba(15,23,42,0.07)"}}>MENCIONAR ACTIVO</div>
               {mentionBox.results.map(sym=>(
                 <div key={sym} onMouseDown={()=>insertMention(sym)}
-                  style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",cursor:"pointer",transition:"background 0.1s",borderBottom:"1px solid rgba(255,255,255,0.03)"}}
-                  onMouseEnter={e=>e.currentTarget.style.background="rgba(59,130,246,0.08)"}
+                  style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",cursor:"pointer",transition:"background 0.1s",borderBottom:"1px solid rgba(15,23,42,0.06)"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(37,99,235,0.06)"}
                   onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                  <span style={{background:"rgba(15,23,42,0.95)",color:"#CBD5E1",borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace",border:"1px solid rgba(71,85,105,0.55)"}} >@{sym}</span>
+                  <span style={{background:"rgba(37,99,235,0.07)",color:"#2563EB",borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace",border:"1px solid rgba(37,99,235,0.2)"}} >@{sym}</span>
                   <span style={{color:"#475569",fontSize:11}}>Mencionar {sym}</span>
                 </div>
               ))}
@@ -1181,24 +1181,24 @@ function NewPost({user,onPost,onNeedAuth,lang}){
           {/* Bullish / Bearish — outline minimalista */}
           <div style={{display:"flex",gap:8,marginTop:10,marginBottom:10}}>
             {[
-              {v:"bull",label:"▲ Alcista",col:"#00E58F"},
-              {v:"bear",label:"▼ Bajista",col:"#FF4D6A"},
+              {v:"bull",label:"▲ Alcista",col:"#16A34A"},
+              {v:"bear",label:"▼ Bajista",col:"#DC2626"},
             ].map(({v,label,col})=>{
               const active=sent===v;
               return(
                 <button key={v} onClick={()=>setSent(v)}
-                  style={{flex:1,background:active?`${col}12`:"transparent",border:`1.5px solid ${active?col:"rgba(255,255,255,0.08)"}`,borderRadius:9,padding:"8px 0",cursor:"pointer",textAlign:"center",transition:"all 0.15s",boxShadow:active?`0 0 16px ${col}25, inset 0 0 12px ${col}08`:"none"}}>
-                  <span style={{color:active?col:"#475569",fontWeight:active?800:600,fontSize:12.5,letterSpacing:0.3}}>{label}</span>
+                  style={{flex:1,background:active?`${col}10`:"#FFFFFF",border:`1.5px solid ${active?col:"rgba(15,23,42,0.12)"}`,borderRadius:9,padding:"8px 0",cursor:"pointer",textAlign:"center",transition:"all 0.15s",boxShadow:"none"}}>
+                  <span style={{color:active?col:"#94A3B8",fontWeight:active?800:600,fontSize:12.5,letterSpacing:0.3}}>{label}</span>
                 </button>
               );
             })}
           </div>
           <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
             <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
-              style={{background:"rgba(0,229,143,0.05)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:7,color:C.accent,padding:"7px 10px",fontSize:12,outline:"none",width:90,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
-              onFocus={e=>e.target.style.borderColor="rgba(0,229,143,0.4)"}
-              onBlur={e=>e.target.style.borderColor="rgba(0,229,143,0.15)"}/>
-            <span style={{color:"#334155",fontSize:11}}>$TICKER para cashtag · @TICKER para mencionar</span>
+              style={{background:"rgba(0,160,96,0.06)",border:"1px solid rgba(0,160,96,0.2)",borderRadius:7,color:"#007A48",padding:"7px 10px",fontSize:12,outline:"none",width:90,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
+              onFocus={e=>e.target.style.borderColor="rgba(0,160,96,0.4)"}
+              onBlur={e=>e.target.style.borderColor="rgba(0,160,96,0.2)"}/>
+            <span style={{color:"#94A3B8",fontSize:11}}>$TICKER para cashtag · @TICKER para mencionar</span>
             <Btn onClick={submit} style={{marginLeft:"auto",padding:"8px 22px",fontSize:13,opacity:posting?0.6:1}}>{posting?"Publicando...":user?t.publish:t.login}</Btn>
           </div>
         </div>
@@ -2083,19 +2083,19 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
       change: live ? live.change : s.change,
     };
   });
-  const sideCard={background:"rgba(14,22,40,0.8)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px",marginBottom:12,backdropFilter:"blur(16px)"};
+  const sideCard={background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"16px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.06)"};
   return(
     <div>
 
       {/* 🧠 AI MARKET PULSE */}
-      <div style={{...sideCard,background:"linear-gradient(145deg,rgba(59,130,246,0.08),rgba(124,58,237,0.08))",border:"1px solid rgba(59,130,246,0.15)",boxShadow:"0 0 40px rgba(59,130,246,0.06)",cursor:"pointer"}}
+      <div style={{...sideCard,background:"linear-gradient(145deg,rgba(37,99,235,0.06),rgba(124,58,237,0.06))",border:"1px solid rgba(37,99,235,0.2)",boxShadow:"0 2px 16px rgba(37,99,235,0.08)",cursor:"pointer"}}
         onClick={onAI}
         onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 0 50px rgba(59,130,246,0.12)";e.currentTarget.style.borderColor="rgba(59,130,246,0.25)";}}
         onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 0 40px rgba(59,130,246,0.06)";e.currentTarget.style.borderColor="rgba(59,130,246,0.15)";}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
           <div style={{width:38,height:38,borderRadius:11,background:"linear-gradient(135deg,#3B82F6,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:"0 0 20px rgba(59,130,246,0.4)"}}>🧠</div>
           <div>
-            <div style={{fontWeight:800,color:"#fff",fontSize:13,letterSpacing:-0.2}}>AI Market Pulse</div>
+            <div style={{fontWeight:800,color:"#0F172A",fontSize:13,letterSpacing:-0.2}}>AI Market Pulse</div>
             <div style={{fontSize:10,color:C.bull,display:"flex",alignItems:"center",gap:4,marginTop:1}}>
               <span style={{width:5,height:5,borderRadius:"50%",background:C.bull,display:"inline-block",boxShadow:`0 0 6px ${C.bull}`}}/>EN VIVO
             </div>
@@ -2107,7 +2107,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
             <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>Sentimiento IA</span>
             <span style={{fontSize:11,color:C.bull,fontWeight:800}}>BULLISH 71%</span>
           </div>
-          <div style={{height:5,background:"rgba(255,255,255,0.05)",borderRadius:5,overflow:"hidden"}}>
+          <div style={{height:5,background:"rgba(15,23,42,0.08)",borderRadius:5,overflow:"hidden"}}>
             <div style={{width:"71%",height:"100%",background:`linear-gradient(90deg,${C.bull},#3B82F6)`,borderRadius:5}}/>
           </div>
         </div>
@@ -2131,28 +2131,28 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
 
       {/* 📊 COMMUNITY vs IA */}
       <div style={sideCard}>
-        <div style={{fontSize:12,fontWeight:800,color:"#fff",marginBottom:10,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
+        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:10,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
         {[{label:"Comunidad",pct:78,col:C.bull},{label:"IA",pct:61,col:C.blue}].map(({label,pct,col})=>(
           <div key={label} style={{marginBottom:8}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
               <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>{label}</span>
               <span style={{fontSize:11,color:col,fontWeight:800}}>BULLISH {pct}%</span>
             </div>
-            <div style={{height:4,background:"rgba(255,255,255,0.05)",borderRadius:4,overflow:"hidden"}}>
+            <div style={{height:4,background:"rgba(15,23,42,0.08)",borderRadius:4,overflow:"hidden"}}>
               <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:4,opacity:0.85}}/>
             </div>
           </div>
         ))}
-        <div style={{fontSize:10,color:"#1E293B",marginTop:4}}>Basado en 2,847 posts de hoy</div>
+        <div style={{fontSize:10,color:"#94A3B8",marginTop:4}}>Basado en 2,847 posts de hoy</div>
       </div>
 
       {/* 😨 FEAR & GREED */}
       <div style={sideCard}>
-        <div style={{fontSize:12,fontWeight:800,color:"#fff",marginBottom:10}}>😨 Fear & Greed Index</div>
+        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:10}}>😨 Fear & Greed Index</div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
             <svg viewBox="0 0 56 56" style={{width:56,height:56,transform:"rotate(-90deg)"}}>
-              <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6"/>
+              <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(15,23,42,0.09)" strokeWidth="6"/>
               <circle cx="28" cy="28" r="22" fill="none" stroke="#00E58F" strokeWidth="6" strokeDasharray={`${0.72*138} 138`} strokeLinecap="round"/>
             </svg>
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"#fff"}}>72</div>
@@ -2538,7 +2538,7 @@ export default function App(){
         <div style={{display:"flex",gap:7,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
           <span style={{color:C.muted2,fontSize:12,fontWeight:600}}>{lang==="en"?"Filter:":"Filtrar:"}</span>
           {[[`all`,t.filterAll],[`bull`,t.filterBull],[`bear`,t.filterBear]].map(([v,l])=>(
-            <button key={v} onClick={()=>setSent(v)} style={{background:sent===v?(v==="bull"?"rgba(0,210,106,0.15)":v==="bear"?"rgba(255,77,106,0.15)":"rgba(0,210,106,0.1)"):"transparent",border:`1.5px solid ${sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent)+"55":C.glassBorder}`,borderRadius:20,padding:"5px 14px",cursor:"pointer",color:sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent):C.muted,fontSize:12,fontWeight:600,transition:"all 0.15s"}}>{l}</button>
+            <button key={v} onClick={()=>setSent(v)} style={{background:sent===v?(v==="bull"?"rgba(22,163,74,0.1)":v==="bear"?"rgba(220,38,38,0.1)":"rgba(0,160,96,0.1)"):"#FFFFFF",border:`1.5px solid ${sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent)+"77":C.border}`,borderRadius:20,padding:"5px 14px",cursor:"pointer",color:sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent):C.muted,fontSize:12,fontWeight:600,transition:"all 0.15s"}}>{l}</button>
           ))}
           <span style={{marginLeft:"auto",color:C.muted2,fontSize:12}}>{filtered2.length} {t.ideas}</span>
         </div>
@@ -2549,7 +2549,7 @@ export default function App(){
   };
 
   const [showLanding, setShowLanding] = useState(!user);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
 
   // Light mode overrides
@@ -2565,11 +2565,28 @@ export default function App(){
 
   return(
     <PriceProvider>
-    <div style={{minHeight:"100vh",background:darkMode?C.bg:"#f0f4f8",color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
+    <style>{`
+      @media (min-width: 768px) {
+        .nexo-body-grid { grid-template-columns: minmax(0,1fr) 290px !important; }
+      }
+      @media (max-width: 767px) {
+        .nexo-sidebar { display: none; }
+        .nexo-nav-search { display: none !important; }
+        .nexo-mobile-search { display: flex !important; }
+      }
+      @media (min-width: 768px) {
+        .nexo-mobile-search { display: none !important; }
+      }
+      * { -webkit-font-smoothing: antialiased; }
+      ::-webkit-scrollbar { width: 4px; height: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.15); border-radius: 4px; }
+    `}</style>
+    <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
       <TickerTape/>
 
       {/* NAVBAR — Floating Glass */}
-      <nav style={{background:"rgba(8,13,26,0.92)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderBottom:"1px solid rgba(255,255,255,0.05)",padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 0 rgba(255,255,255,0.04), 0 8px 40px rgba(0,0,0,0.7)"}}>
+      <nav style={{background:"rgba(255,255,255,0.95)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 0 rgba(15,23,42,0.06), 0 4px 20px rgba(0,0,0,0.06)"}}>
         <div style={{display:"flex",alignItems:"center",gap:16,height:80,maxWidth:1200,margin:"0 auto"}}>
           {/* Logo — BIG & prominent */}
           <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer",marginRight:4}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
@@ -2592,11 +2609,11 @@ export default function App(){
           <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
             {/* Light/Dark toggle */}
             <button onClick={()=>setDarkMode(!darkMode)} title={darkMode?"Modo claro":"Modo oscuro"}
-              style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"8px 11px",cursor:"pointer",color:C.muted,fontSize:15,display:"flex",alignItems:"center"}}>
+              style={{background:"rgba(15,23,42,0.05)",border:"1px solid rgba(15,23,42,0.09)",borderRadius:10,padding:"8px 11px",cursor:"pointer",color:C.muted,fontSize:15,display:"flex",alignItems:"center"}}>
               {darkMode?"☀️":"🌙"}
             </button>
             <button onClick={()=>setShowAI(true)}
-              style={{background:"rgba(59,130,246,0.1)",border:"1px solid rgba(59,130,246,0.2)",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:C.blue,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
+              style={{background:"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.18)",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:C.blue,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
               🤖 IA
             </button>
             <LangSelector lang={lang} setLang={setLang}/>
@@ -2607,7 +2624,7 @@ export default function App(){
           </div>
         </div>
         {/* Tabs — bigger, professional */}
-        <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.glassBorder}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none"}}>
+        <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.border}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none"}}>
           {NAV_ITEMS(t).map(n=>{
             if(n.premium){
               const active=page===n.idx;
@@ -2620,8 +2637,8 @@ export default function App(){
             }
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?C.accent:"transparent"}`,margin:"0",padding:"12px 18px",cursor:"pointer",color:page===n.idx?"#fff":"#475569",fontSize:13.5,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
-                onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#CBD5E1";e.currentTarget.style.background="rgba(255,255,255,0.03)";}}}
+                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?C.accent:"transparent"}`,margin:"0",padding:"12px 18px",cursor:"pointer",color:page===n.idx?"#0F172A":"#64748B",fontSize:13.5,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
+                onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#0F172A";e.currentTarget.style.background="rgba(255,255,255,0.03)";}}}
                 onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#475569";e.currentTarget.style.background="transparent";}}}>
                 {n.label}
               </button>
@@ -2734,9 +2751,9 @@ export default function App(){
       {page===0 && !showLanding && <PredictionBanner/>}
 
       {/* BODY */}
-      <div style={{maxWidth:1140,margin:"0 auto",padding:"24px 14px",display:"grid",gridTemplateColumns:"1fr 300px",gap:20}}>
+      <div className="nexo-body-grid" style={{maxWidth:1140,margin:"0 auto",padding:"16px 12px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16}}>
         <div>{renderPage()}</div>
-        <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang}/>
+        <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang}/></div>
       </div>
 
       <Footer/>
