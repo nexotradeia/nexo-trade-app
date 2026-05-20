@@ -7,3 +7,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>,
 )
+
+// Registrar Service Worker para PWA (instalable en celular)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('✅ NexoTrade PWA lista:', reg.scope))
+      .catch(err => console.warn('SW error:', err));
+  });
+}
