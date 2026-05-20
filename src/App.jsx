@@ -1046,6 +1046,8 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
           </div>
           {/* Post text */}
           <p style={{margin:"0 0 8px",color:"#475569",fontSize:13.5,lineHeight:1.6,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
+          {/* Imagen / GIF */}
+          {post.image&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:10,marginBottom:8,border:`1px solid ${C.border}`,display:"block"}} onError={e=>e.target.style.display="none"}/>}
           {/* Metrics row — target + confidence + sparkline + AI agreement */}
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
             {/* Target */}
@@ -1104,6 +1106,9 @@ function NewPost({user,onPost,onNeedAuth,lang}){
   const t=LANGS[lang];
   const [text,setText]=useState(""),[ticker,setTicker]=useState(""),[sent,setSent]=useState("bull"),[modMsg,setModMsg]=useState("");
   const [posting,setPosting]=useState(false);
+  const [image,setImage]=useState(null);
+  const [showGif,setShowGif]=useState(false);
+  const fileRef=useRef(null);
   const [mentionBox,setMentionBox]=useState({open:false,query:"",results:[],caretPos:0});
   const taRef=useRef();
 
@@ -1142,8 +1147,8 @@ function NewPost({user,onPost,onNeedAuth,lang}){
     const mod=moderateText(text);
     if(!mod.ok){setModMsg(t.modWarning);setTimeout(()=>setModMsg(""),4000);return;}
     setPosting(true);
-    await onPost({text,ticker:ticker.toUpperCase()||"GENERAL",sentiment:sent});
-    setText("");setTicker("");setModMsg("");
+    await onPost({text,ticker:ticker.toUpperCase()||"GENERAL",sentiment:sent,image:image||null});
+    setText("");setTicker("");setModMsg("");setImage(null);setShowGif(false);
     setPosting(false);
   };
 
@@ -1196,16 +1201,187 @@ function NewPost({user,onPost,onNeedAuth,lang}){
               );
             })}
           </div>
+          {/* Preview imagen/GIF */}
+          {image&&(
+            <div style={{position:"relative",marginBottom:8,display:"inline-block"}}>
+              <img src={image} alt="preview" style={{maxHeight:160,maxWidth:"100%",borderRadius:10,border:`1px solid ${C.border}`,display:"block"}}/>
+              <button onClick={()=>setImage(null)} style={{position:"absolute",top:5,right:5,background:"rgba(0,0,0,0.6)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+            </div>
+          )}
+          {/* GIF Picker */}
+          {showGif&&<GifPicker onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)}/>}
           <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
+            {/* Foto upload */}
+            <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}}
+              onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImage(ev.target.result);r.readAsDataURL(f);e.target.value="";}}/>
+            <button onClick={()=>fileRef.current?.click()} title="Subir foto"
+              style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:15,color:C.muted,transition:"all 0.15s",lineHeight:1}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.color=C.accent;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.color=C.muted;}}>
+              📷
+            </button>
+            {/* GIF button */}
+            <button onClick={()=>setShowGif(v=>!v)} title="Buscar GIF"
+              style={{background:showGif?C.accentDim:"transparent",border:`1px solid ${showGif?C.accent:C.border}`,borderRadius:8,padding:"5px 9px",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?C.accentText:C.muted,letterSpacing:0.5,transition:"all 0.15s"}}>
+              GIF
+            </button>
             <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
               style={{background:"rgba(0,160,96,0.06)",border:"1px solid rgba(0,160,96,0.2)",borderRadius:7,color:"#007A48",padding:"7px 10px",fontSize:12,outline:"none",width:90,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
               onFocus={e=>e.target.style.borderColor="rgba(0,160,96,0.4)"}
               onBlur={e=>e.target.style.borderColor="rgba(0,160,96,0.2)"}/>
-            <span style={{color:"#94A3B8",fontSize:11}}>$TICKER para cashtag · @TICKER para mencionar</span>
             <Btn onClick={submit} style={{marginLeft:"auto",padding:"8px 22px",fontSize:13,opacity:posting?0.6:1}}>{posting?"Publicando...":user?t.publish:t.login}</Btn>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── GIF PICKER (Giphy free) ───────────────────────────────────────────────────
+const GIPHY_KEY="dc6zaTOxFJmzC";
+function GifPicker({onSelect,onClose}){
+  const [q,setQ]=useState("trading stocks");
+  const [gifs,setGifs]=useState([]);
+  const [loading,setLoading]=useState(false);
+  const search=(query)=>{
+    setLoading(true);
+    fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=12&rating=g`)
+      .then(r=>r.json()).then(d=>{setGifs(d.data||[]);setLoading(false);}).catch(()=>setLoading(false));
+  };
+  useEffect(()=>{search(q);},[]);
+  return(
+    <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"1px solid rgba(15,23,42,0.12)",borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.15)",zIndex:300,padding:12,marginTop:4}}>
+      <div style={{display:"flex",gap:6,marginBottom:10}}>
+        <input value={q} onChange={e=>setQ(e.target.value)}
+          onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();search(q);}}}
+          placeholder="Buscar GIF..." style={{flex:1,border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"6px 10px",fontSize:12,outline:"none"}}/>
+        <button onClick={()=>search(q)} style={{background:C.accent,border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>🔍</button>
+        <button onClick={onClose} style={{background:"transparent",border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>✕</button>
+      </div>
+      {loading?<div style={{textAlign:"center",padding:16,color:C.muted,fontSize:13}}>⏳ Cargando...</div>:(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:180,overflowY:"auto"}}>
+          {gifs.map(g=>(
+            <img key={g.id} src={g.images?.fixed_height_small?.url} alt={g.title}
+              style={{width:"100%",borderRadius:6,cursor:"pointer",transition:"opacity 0.15s"}}
+              onClick={()=>onSelect(g.images?.original?.url||g.images?.fixed_height?.url)}
+              onMouseEnter={e=>e.target.style.opacity="0.75"}
+              onMouseLeave={e=>e.target.style.opacity="1"}/>
+          ))}
+        </div>
+      )}
+      <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:6}}>Powered by GIPHY</div>
+    </div>
+  );
+}
+
+// ── TICKER PAGE (página completa de una acción) ───────────────────────────────
+function TickerPage({ticker,posts=[],onClose,lang="es"}){
+  const [quote,setQuote]=useState(null);
+  const [news,setNews]=useState([]);
+  const [loadingQ,setLoadingQ]=useState(true);
+
+  const tkPosts=posts.filter(p=>
+    p.ticker===ticker||
+    (p.text?.toUpperCase().includes(`$${ticker}`))||
+    (p.text?.toUpperCase().includes(`@${ticker}`))
+  );
+  const bullN=tkPosts.filter(p=>p.sentiment==="bull").length;
+  const bearN=tkPosts.filter(p=>p.sentiment==="bear").length;
+  const total=bullN+bearN;
+  const bullPct=total>0?Math.round(bullN/total*100):50;
+
+  useEffect(()=>{
+    setLoadingQ(true);
+    fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
+      .then(r=>r.json()).then(q=>{setQuote(q);setLoadingQ(false);}).catch(()=>setLoadingQ(false));
+    const today=new Date().toISOString().slice(0,10);
+    const weekAgo=new Date(Date.now()-7*24*60*60*1000).toISOString().slice(0,10);
+    fetch(`https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${weekAgo}&to=${today}&token=${FINNHUB_KEY}`)
+      .then(r=>r.json()).then(d=>{if(Array.isArray(d))setNews(d.slice(0,5));}).catch(()=>{});
+  },[ticker]);
+
+  const price=quote?.c||0;
+  const chg=quote?.dp||0;
+  const chgAbs=quote?.d||0;
+
+  return(
+    <div>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18,flexWrap:"wrap"}}>
+        <button onClick={onClose}
+          style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 14px",cursor:"pointer",color:C.muted,fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
+          ← Volver
+        </button>
+        <div style={{background:chg>=0?C.bullBg:C.bearBg,borderRadius:10,padding:"8px 18px"}}>
+          <span style={{fontWeight:900,fontSize:20,fontFamily:"monospace",color:chg>=0?C.bull:C.bear}}>${ticker}</span>
+        </div>
+        {!loadingQ&&price>0&&(
+          <div>
+            <div style={{fontWeight:800,fontSize:22,fontFamily:"monospace",color:C.text}}>
+              ${price>=1000?price.toLocaleString("en",{minimumFractionDigits:0,maximumFractionDigits:0}):price.toFixed(2)}
+            </div>
+            <div style={{fontWeight:700,fontSize:13,color:chg>=0?C.bull:C.bear}}>
+              {chg>=0?"+":""}{chg.toFixed(2)}% ({chg>=0?"+":""}{chgAbs.toFixed(2)})
+            </div>
+          </div>
+        )}
+        <div style={{marginLeft:"auto",textAlign:"right"}}>
+          <div style={{fontSize:11,color:C.muted,marginBottom:4}}>Sentimiento NexoTrade</div>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <span style={{color:C.bull,fontWeight:700,fontSize:12}}>{bullPct}% 🐂</span>
+            <div style={{width:60,height:5,background:C.bearBg,borderRadius:20,overflow:"hidden"}}>
+              <div style={{width:`${bullPct}%`,height:"100%",background:C.bull,borderRadius:20}}/>
+            </div>
+            <span style={{color:C.bear,fontWeight:700,fontSize:12}}>{100-bullPct}% 🐻</span>
+          </div>
+          <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{total} votos de la comunidad</div>
+        </div>
+      </div>
+
+      {/* TradingView Chart */}
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden",marginBottom:20,height:320}}>
+        <iframe
+          src={`https://s.tradingview.com/widgetembed/?symbol=${ticker}&interval=D&theme=light&style=1&locale=${lang==="en"?"en":"es"}&hide_top_toolbar=0&hide_legend=0&save_image=0`}
+          style={{width:"100%",height:"100%",border:"none"}}
+          title={`${ticker} chart`}/>
+      </div>
+
+      {/* Posts de la comunidad */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+        <h3 style={{margin:0,color:C.text,fontWeight:800,fontSize:16}}>
+          💬 {lang==="en"?"Community posts about":"Posts de la comunidad sobre"} ${ticker}
+        </h3>
+        <span style={{background:C.accentDim,color:C.accentText,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>{tkPosts.length}</span>
+      </div>
+      {tkPosts.length===0?(
+        <div style={{textAlign:"center",padding:"28px 0",color:C.muted,background:C.surface,border:`1px solid ${C.border}`,borderRadius:14}}>
+          <div style={{fontSize:28,marginBottom:8}}>📭</div>
+          <div style={{fontSize:14}}>{lang==="en"?`Be the first to post about $${ticker}!`:`¡Sé el primero en comentar $${ticker}!`}</div>
+        </div>
+      ):(
+        tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang}/>)
+      )}
+
+      {/* Noticias recientes */}
+      {news.length>0&&(
+        <>
+          <h3 style={{color:C.text,fontWeight:800,fontSize:16,margin:"20px 0 12px"}}>📰 Noticias recientes</h3>
+          {news.map((n,i)=>(
+            <a key={i} href={n.url} target="_blank" rel="noopener noreferrer"
+              style={{display:"block",textDecoration:"none",background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px",marginBottom:8,borderLeft:`3px solid ${C.accent}`,transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.boxShadow="none";}}>
+              <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                {n.image&&<img src={n.image} alt="" style={{width:60,height:42,objectFit:"cover",borderRadius:6,flexShrink:0}} onError={e=>e.target.style.display="none"}/>}
+                <div>
+                  <div style={{fontSize:11,color:C.muted,marginBottom:3}}>{n.source}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:C.text,lineHeight:1.5}}>{n.headline}</div>
+                </div>
+              </div>
+            </a>
+          ))}
+        </>
+      )}
     </div>
   );
 }
@@ -1248,11 +1424,11 @@ const TOPS_TICKERS=[
   {ticker:"SPY",name:"S&P 500 ETF"},{ticker:"QQQ",name:"Nasdaq ETF"},
 ];
 
-function TopsPage(){
+function TopsPage({posts=[]}){
   const [tab,setTab]=useState("activas");
   const [quotes,setQuotes]=useState([]);
   const [loading,setLoading]=useState(true);
-  const tabs=[["activas","🔥 Más Activas"],["ganadoras","📈 Ganadoras"],["perdedoras","📉 Perdedoras"]];
+  const tabs=[["activas","🔥 Más Activas"],["ganadoras","📈 Ganadoras"],["perdedoras","📉 Perdedoras"],["leaderboard","🏆 Leaderboard"]];
 
   useEffect(()=>{
     setLoading(true);
@@ -1320,6 +1496,52 @@ function TopsPage(){
           {tab==="activas"&&(activas.length>0?activas.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin datos</div>)}
           {tab==="ganadoras"&&(ganadoras.length>0?ganadoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin ganadoras por ahora</div>)}
           {tab==="perdedoras"&&(perdedoras.length>0?perdedoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin perdedoras por ahora</div>)}
+          {tab==="leaderboard"&&(()=>{
+            // Calcular top traders esta semana por posts
+            const weekAgo=Date.now()-7*24*60*60*1000;
+            const map={};
+            posts.forEach(p=>{
+              if(!p.user)return;
+              if(!map[p.user]) map[p.user]={user:p.user,avatar:p.avatar||"🦅",color:p.avatarColor||C.accent,posts:0,bull:0,bear:0,pts:0};
+              map[p.user].posts++;
+              map[p.user].pts+=10;
+              if(p.sentiment==="bull") map[p.user].bull++; else map[p.user].bear++;
+              if(p.likes) map[p.user].pts+=p.likes*5;
+            });
+            const lb=Object.values(map).sort((a,b)=>b.pts-a.pts).slice(0,10);
+            const medals=["🥇","🥈","🥉"];
+            if(lb.length===0) return <div style={{textAlign:"center",padding:40,color:C.muted}}>
+              <div style={{fontSize:32,marginBottom:8}}>🏆</div>
+              <div>¡Publica tu primer análisis para aparecer aquí!</div>
+            </div>;
+            return lb.map((u,i)=>{
+              const lvl=getLevel(u.pts);
+              const bullPct=u.bull+u.bear>0?Math.round(u.bull/(u.bull+u.bear)*100):50;
+              return(
+                <div key={u.user} style={{background:i===0?`linear-gradient(135deg,rgba(217,119,6,0.06),rgba(245,158,11,0.03))`:C.surface,border:`1px solid ${i===0?"rgba(217,119,6,0.25)":C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:8,display:"flex",alignItems:"center",gap:12,transition:"all 0.15s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor=i===0?"rgba(217,119,6,0.25)":C.border;e.currentTarget.style.boxShadow="none";}}>
+                  <span style={{fontWeight:900,fontSize:i<3?22:15,width:28,textAlign:"center",flexShrink:0}}>{medals[i]||<span style={{color:C.muted2}}>{i+1}</span>}</span>
+                  <div style={{width:38,height:38,borderRadius:"50%",background:`linear-gradient(135deg,${u.color},${u.color}88)`,border:`2px solid ${u.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{u.avatar}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
+                      <span style={{fontWeight:800,fontSize:14,color:C.text}}>{u.user}</span>
+                      <span style={{background:lvl.color+"20",color:lvl.color,borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,border:`1px solid ${lvl.color}44`}}>{lvl.icon} {lvl.label}</span>
+                    </div>
+                    <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                      <span style={{fontSize:11,color:C.muted}}>📝 {u.posts} posts</span>
+                      <span style={{fontSize:11,color:C.bull}}>▲{u.bull}</span>
+                      <span style={{fontSize:11,color:C.bear}}>▼{u.bear}</span>
+                    </div>
+                  </div>
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontWeight:800,fontSize:15,color:i===0?C.gold:C.accent}}>{u.pts.toLocaleString()}</div>
+                    <div style={{fontSize:10,color:C.muted}}>puntos</div>
+                  </div>
+                </div>
+              );
+            });
+          })()}
         </>
       )}
     </div>
@@ -2785,12 +3007,12 @@ export default function App(){
     }
   };
 
-  const addPost = async({text,ticker,sentiment}) => {
+  const addPost = async({text,ticker,sentiment,image}) => {
     // Inserción optimista inmediata en el feed local
     const localPost={
       id:`local-${Date.now()}`,userId:user.id,user:user.name,
       avatar:user.emoji,avatarColor:user.avatarColor||C.accent,
-      time:lang==="en"?"just now":"ahora",ticker,sentiment,text,
+      time:lang==="en"?"just now":"ahora",ticker,sentiment,text,image:image||null,
       likes:0,comments:0,reposts:0,tags:[ticker]
     };
     setPosts(prev=>[localPost,...prev]);
@@ -2814,7 +3036,8 @@ export default function App(){
   const filtered = sent==="all"?posts:posts.filter(p=>p.sentiment===sent);
 
   const renderPage = () => {
-    if(page===1) return <TopsPage/>;
+    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang}/>;
+    if(page===1) return <TopsPage posts={posts}/>;
     if(page===2||page===3||page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
         <div style={{fontSize:48,marginBottom:16}}>🚧</div>
@@ -2846,7 +3069,7 @@ export default function App(){
           <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:12,whiteSpace:"nowrap"}}>{filtered2.length} posts</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
-        {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerFilter(tk)} lang={lang}/>)}
+        {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>)}
       </>
     );
   };
@@ -2854,6 +3077,7 @@ export default function App(){
   const [showLanding, setShowLanding] = useState(!user);
   const [darkMode, setDarkMode] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
+  const [tickerPage,  setTickerPage]   = useState(null); // página completa de ticker (@META)
 
   // Light mode overrides
   const theme = darkMode ? {} : {
