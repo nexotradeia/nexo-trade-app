@@ -2682,38 +2682,69 @@ export default function App(){
     <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
       <TickerTape/>
 
-      {/* NAVBAR — Floating Glass */}
-      <nav style={{background:"rgba(255,255,255,0.95)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 0 rgba(15,23,42,0.06), 0 4px 20px rgba(0,0,0,0.06)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:16,height:80,maxWidth:1200,margin:"0 auto"}}>
-          {/* Logo — BIG & prominent */}
-          <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer",marginRight:4}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
+      {/* NAVBAR — Estilo Socimo */}
+      <nav style={{background:"#FFFFFF",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:16,height:70,maxWidth:1200,margin:"0 auto"}}>
+
+          {/* Logo — grande y llamativo */}
+          <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
             <img src="/logo_foro.jpg" alt="NEXO TRADE"
-              style={{height:72,width:"auto",objectFit:"contain",
-                filter:"drop-shadow(0 0 22px rgba(0,229,255,0.65)) drop-shadow(0 0 10px rgba(124,58,237,0.45)) drop-shadow(0 0 4px rgba(59,130,246,0.5))"}}
+              style={{height:90,width:"auto",objectFit:"contain",
+                filter:"drop-shadow(0 2px 12px rgba(0,168,255,0.5)) drop-shadow(0 0 6px rgba(0,168,255,0.3))"}}
               onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
-            {/* Fallback if image fails */}
-            <div style={{display:"none",alignItems:"center",gap:10}}>
-              <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#00E58F,#3B82F6,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,color:"#000",boxShadow:"0 0 28px rgba(0,229,143,0.6)"}}>N</div>
-              <div>
-                <div style={{fontSize:18,fontWeight:900,color:"#fff",letterSpacing:2,lineHeight:1}}>NEXO</div>
-                <div style={{fontSize:10,fontWeight:800,color:"#00E58F",letterSpacing:4}}>TRADE</div>
-              </div>
+            <div style={{display:"none",alignItems:"center",gap:8}}>
+              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#00A8FF,#0090D4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:"#fff",boxShadow:"0 0 20px rgba(0,168,255,0.5)"}}>N</div>
+              <div><div style={{fontSize:17,fontWeight:900,color:"#0F172A",letterSpacing:1}}>NEXO</div><div style={{fontSize:9,fontWeight:800,color:"#00A8FF",letterSpacing:3}}>TRADE</div></div>
             </div>
           </div>
-          {/* Search */}
-          <div style={{flex:1,display:"flex",justifyContent:"center",maxWidth:420}}><SearchBar lang={lang}/></div>
-          {/* Right controls */}
-          <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
-            {/* Light/Dark toggle */}
-            <button onClick={()=>setDarkMode(!darkMode)} title={darkMode?"Modo claro":"Modo oscuro"}
-              style={{background:"rgba(15,23,42,0.05)",border:"1px solid rgba(15,23,42,0.09)",borderRadius:10,padding:"8px 11px",cursor:"pointer",color:C.muted,fontSize:15,display:"flex",alignItems:"center"}}>
-              {darkMode?"☀️":"🌙"}
+
+          {/* Search — centrado */}
+          <div style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460}}><SearchBar lang={lang}/></div>
+
+          {/* Right — iconos estilo Socimo */}
+          <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
+
+            {/* Home */}
+            <button onClick={()=>{setPage(0);setShowLanding(false);}}
+              title="Inicio"
+              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:page===0?"rgba(0,168,255,0.1)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#00A8FF",transition:"all 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
+              onMouseLeave={e=>e.currentTarget.style.background=page===0?"rgba(0,168,255,0.1)":"transparent"}>
+              🏠
             </button>
+
+            {/* IA */}
             <button onClick={()=>setShowAI(true)}
-              style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:"#00A8FF",fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
-              🤖 IA
+              title="IA de NexoTrade"
+              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#00A8FF",transition:"all 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              🤖
             </button>
+
+            {/* Alertas */}
+            <button onClick={()=>setAlerts(true)}
+              title="Alertas"
+              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,position:"relative",transition:"all 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              🔔
+              <span style={{position:"absolute",top:4,right:4,width:8,height:8,background:"#EF4444",borderRadius:"50%",border:"1.5px solid #fff"}}/>
+            </button>
+
+            {/* Settings / Dark mode */}
+            <button onClick={()=>setDarkMode(!darkMode)}
+              title={darkMode?"Modo claro":"Modo oscuro"}
+              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:darkMode?"rgba(0,168,255,0.1)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
+              onMouseLeave={e=>e.currentTarget.style.background=darkMode?"rgba(0,168,255,0.1)":"transparent"}>
+              ⚙️
+            </button>
+
+            {/* Idioma */}
             <LangSelector lang={lang} setLang={setLang}/>
+
+            {/* Auth / User */}
             {user
               ? <UserMenu user={user} onLogout={async()=>{await supabase.auth.signOut();setUser(null);setFollow([]);setShowLanding(true);}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
@@ -2721,7 +2752,7 @@ export default function App(){
           </div>
         </div>
         {/* Tabs — bigger, professional */}
-        <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.border}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none"}}>
+        <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.border}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none",justifyContent:"center"}}>
           {NAV_ITEMS(t).map(n=>{
             if(n.premium){
               const active=page===n.idx;
@@ -2734,7 +2765,7 @@ export default function App(){
             }
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,margin:"0",padding:"12px 18px",cursor:"pointer",color:page===n.idx?"#00A8FF":"#64748B",fontSize:13.5,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
+                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,margin:"0",padding:"15px 24px",cursor:"pointer",color:page===n.idx?"#00A8FF":"#64748B",fontSize:15,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
                 onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}}
                 onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#64748B";e.currentTarget.style.background="transparent";}}}>
                 {n.label}
