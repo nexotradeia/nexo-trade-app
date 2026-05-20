@@ -2887,13 +2887,19 @@ const NAV_ITEMS = (t) => [
 ];
 
 // ── APP ROOT ──────────────────────────────────────────────────────────────────
+// Leer sesión guardada de localStorage ANTES de renderizar (síncrono, sin flash)
+const _getSavedUser = () => {
+  try { return JSON.parse(localStorage.getItem("nexotrade-user") || "null"); }
+  catch { return null; }
+};
+
 export default function App(){
   const [posts,setPosts]       = useState(MOCK_POSTS);
   const [newPostId,setNewPostId]= useState(null);
   const [page,setPage]         = useState(0);
   const [sent,setSent]         = useState("all");
   const [auth,setAuth]         = useState(null);
-  const [user,setUser]         = useState(null);
+  const [user,setUser]         = useState(_getSavedUser); // ← restaura al instante
   const [following,setFollow]  = useState([]);
   const [isPremium,setIsPremium]= useState(false);
   const [profUser,setProfUser] = useState(null);
@@ -2901,9 +2907,16 @@ export default function App(){
   const [showAlerts,setAlerts] = useState(false);
   const [lang,setLang]         = useState("es");
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
-  const [dbReady,setDbReady]   = useState(false); // true cuando Supabase responde
+  const [dbReady,setDbReady]   = useState(false);
 
   const t = LANGS[lang];
+
+  // Helper: guardar/borrar usuario en localStorage + state
+  const saveUser = useCallback((u) => {
+    setUser(u);
+    if(u) localStorage.setItem("nexotrade-user", JSON.stringify(u));
+    else  localStorage.removeItem("nexotrade-user");
+  }, []);
 
   // ── SUPABASE: Auth listener & session restore ──────────────────────────────
   const buildUserFromProfile = (supabaseUser, profile) => ({
@@ -2920,13 +2933,17 @@ export default function App(){
   });
 
   useEffect(()=>{
-    // Escuchar cambios de auth — maneja login, recarga y token refresh
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event, session)=>{
-      if(event==="SIGNED_OUT"){ setUser(null); setShowLanding(true); return; }
+      if(event==="SIGNED_OUT"){
+        saveUser(null);
+        setShowLanding(true);
+        return;
+      }
       if(session?.user && (event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="INITIAL_SESSION")){
         const {data:profile}=await supabase.from("profiles").select("*").eq("id",session.user.id).single();
         if(profile){
-          setUser(buildUserFromProfile(session.user, profile));
+          const u = buildUserFromProfile(session.user, profile);
+          saveUser(u);
           setShowLanding(false);
         }
       }
@@ -3087,7 +3104,7 @@ export default function App(){
     );
   };
 
-  const [showLanding, setShowLanding] = useState(!user);
+  const [showLanding, setShowLanding] = useState(!_getSavedUser());
   const [darkMode, setDarkMode] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
   const [tickerPage,  setTickerPage]   = useState(null); // página completa de ticker (@META)
@@ -3202,7 +3219,7 @@ export default function App(){
 
             {/* Auth / User */}
             {user
-              ? <UserMenu user={user} onLogout={async()=>{await supabase.auth.signOut();setUser(null);setFollow([]);setShowLanding(true);}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
+              ? <UserMenu user={user} onLogout={async()=>{await supabase.auth.signOut();saveUser(null);setFollow([]);setShowLanding(true);}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
             }
           </div>
@@ -3344,7 +3361,7 @@ export default function App(){
       <Footer/>
 
       {/* MODALS */}
-      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{setUser(u);setShowLanding(false);}} lang={lang}/>}
+      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{saveUser(u);setShowLanding(false);}} lang={lang}/>}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
       {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)}/>}
