@@ -1013,7 +1013,7 @@ const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col
 // Mini sparkline data per post
 const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
 
-function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
+function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes),[repost,setRepost]=useState(false);
   // Convertir id a número de forma segura (soporta "local-123..." y números reales)
   const idNum = typeof post.id==="number" ? post.id : (parseInt(String(post.id).replace(/\D/g,""))||1);
@@ -1027,7 +1027,8 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
   const isBull=post.sentiment==="bull";
   return(
     <div
-      style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"10px 14px",marginBottom:4,transition:"all 0.18s ease",boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}
+      className={isNew ? "post-card-new" : ""}
+      style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"10px 14px",marginBottom:4,transition:"border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}
       onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,160,96,0.25)";e.currentTarget.style.boxShadow="0 4px 20px rgba(0,0,0,0.08)";e.currentTarget.style.transform="translateY(-1px)";}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(15,23,42,0.09)";e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.05)";e.currentTarget.style.transform="translateY(0)";}}>
       <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
@@ -2878,6 +2879,7 @@ const NAV_ITEMS = (t) => [
 // ── APP ROOT ──────────────────────────────────────────────────────────────────
 export default function App(){
   const [posts,setPosts]       = useState(MOCK_POSTS);
+  const [newPostId,setNewPostId]= useState(null);
   const [page,setPage]         = useState(0);
   const [sent,setSent]         = useState("all");
   const [auth,setAuth]         = useState(null);
@@ -3015,6 +3017,8 @@ export default function App(){
       likes:0,comments:0,reposts:0,tags:[ticker]
     };
     setPosts(prev=>[localPost,...prev]);
+    setNewPostId(localPost.id);
+    setTimeout(()=>setNewPostId(null), 1500);
     showPoints(POINT_ACTIONS.post, lang==="en"?"Post published! 🎉":"¡Post publicado! 🎉");
 
     // Guardar en Supabase (si hay sesión real, no local)
@@ -3068,7 +3072,7 @@ export default function App(){
           <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:12,whiteSpace:"nowrap"}}>{filtered2.length} posts</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
-        {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>)}
+        {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>)}
       </>
     );
   };
@@ -3112,6 +3116,18 @@ export default function App(){
       ::-webkit-scrollbar { width: 4px; height: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(0,168,255,0.2); border-radius: 4px; }
+      @keyframes postSlideIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes postPulse {
+        0%   { box-shadow: 0 0 0 0 rgba(0,168,255,0.18); }
+        70%  { box-shadow: 0 0 0 8px rgba(0,168,255,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,168,255,0); }
+      }
+      .post-card-new {
+        animation: postSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) both, postPulse 0.9s ease 0.35s;
+      }
     `}</style>
     <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
       <TickerTape/>
