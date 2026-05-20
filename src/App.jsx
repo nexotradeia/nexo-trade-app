@@ -5,7 +5,14 @@ import { createClient } from '@supabase/supabase-js';
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
 const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
 const SUPABASE_KEY  = "sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl";
-const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storageKey: 'nexotrade-session',
+  }
+});
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 // email_stripe_setup.py reemplaza este link automáticamente con el link real
@@ -1277,8 +1284,8 @@ function GifPicker({onSelect,onClose}){
 // ── TICKER PAGE (página completa de una acción) ───────────────────────────────
 function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth}){
   const [quote,setQuote]=useState(null);
-  const [news,setNews]=useState([]);
   const [loadingQ,setLoadingQ]=useState(true);
+  const [showChart,setShowChart]=useState(true);
 
   const tkPosts=posts.filter(p=>
     p.ticker===ticker||
@@ -1294,10 +1301,6 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth}){
     setLoadingQ(true);
     fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
       .then(r=>r.json()).then(q=>{setQuote(q);setLoadingQ(false);}).catch(()=>setLoadingQ(false));
-    const today=new Date().toISOString().slice(0,10);
-    const weekAgo=new Date(Date.now()-7*24*60*60*1000).toISOString().slice(0,10);
-    fetch(`https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${weekAgo}&to=${today}&token=${FINNHUB_KEY}`)
-      .then(r=>r.json()).then(d=>{if(Array.isArray(d))setNews(d.slice(0,5));}).catch(()=>{});
   },[ticker]);
 
   const price=quote?.c||0;
@@ -1343,12 +1346,25 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth}){
         <NewPost user={user} onPost={onPost} onNeedAuth={onNeedAuth} lang={lang} defaultTicker={ticker}/>
       </div>
 
-      {/* TradingView Chart */}
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden",marginBottom:20,height:320}}>
-        <iframe
-          src={`https://s.tradingview.com/widgetembed/?symbol=${ticker}&interval=D&theme=light&style=1&locale=${lang==="en"?"en":"es"}&hide_top_toolbar=0&hide_legend=0&save_image=0`}
-          style={{width:"100%",height:"100%",border:"none"}}
-          title={`${ticker} chart`}/>
+      {/* TradingView Chart con toggle */}
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden",marginBottom:20}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",borderBottom:showChart?`1px solid ${C.border}`:"none"}}>
+          <span style={{fontWeight:700,fontSize:13,color:C.text}}>📊 Gráfico ${ticker}</span>
+          <button onClick={()=>setShowChart(v=>!v)}
+            style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:8,padding:"5px 14px",cursor:"pointer",color:"#00A8FF",fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5,transition:"all 0.15s"}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.15)"}
+            onMouseLeave={e=>e.currentTarget.style.background="rgba(0,168,255,0.08)"}>
+            {showChart ? "▲ Ocultar" : "▼ Mostrar"}
+          </button>
+        </div>
+        {showChart&&(
+          <div style={{height:320}}>
+            <iframe
+              src={`https://s.tradingview.com/widgetembed/?symbol=${ticker}&interval=D&theme=light&style=1&locale=${lang==="en"?"en":"es"}&hide_top_toolbar=0&hide_legend=0&save_image=0`}
+              style={{width:"100%",height:"100%",border:"none"}}
+              title={`${ticker} chart`}/>
+          </div>
+        )}
       </div>
 
       {/* Posts de la comunidad */}
@@ -1367,26 +1383,6 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth}){
         tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang}/>)
       )}
 
-      {/* Noticias recientes */}
-      {news.length>0&&(
-        <>
-          <h3 style={{color:C.text,fontWeight:800,fontSize:16,margin:"20px 0 12px"}}>📰 Noticias recientes</h3>
-          {news.map((n,i)=>(
-            <a key={i} href={n.url} target="_blank" rel="noopener noreferrer"
-              style={{display:"block",textDecoration:"none",background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px",marginBottom:8,borderLeft:`3px solid ${C.accent}`,transition:"all 0.15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.boxShadow="none";}}>
-              <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                {n.image&&<img src={n.image} alt="" style={{width:60,height:42,objectFit:"cover",borderRadius:6,flexShrink:0}} onError={e=>e.target.style.display="none"}/>}
-                <div>
-                  <div style={{fontSize:11,color:C.muted,marginBottom:3}}>{n.source}</div>
-                  <div style={{fontSize:13,fontWeight:600,color:C.text,lineHeight:1.5}}>{n.headline}</div>
-                </div>
-              </div>
-            </a>
-          ))}
-        </>
-      )}
     </div>
   );
 }
@@ -2901,30 +2897,30 @@ export default function App(){
   const t = LANGS[lang];
 
   // ── SUPABASE: Auth listener & session restore ──────────────────────────────
+  const buildUserFromProfile = (supabaseUser, profile) => ({
+    id: supabaseUser.id,
+    name: profile?.username || supabaseUser.email?.split("@")[0] || "Usuario",
+    emoji: profile?.avatar_emoji || "🦅",
+    avatarColor: profile?.avatar_color || C.accent,
+    followers: profile?.followers_count || 0,
+    following: profile?.following_count || 0,
+    posts: profile?.posts_count || 0,
+    points: profile?.points || 100,
+    badges: profile?.badges || ["early"],
+    bio: profile?.bio || ""
+  });
+
   useEffect(()=>{
-    // Comprobar sesión existente al cargar
-    supabase.auth.getSession().then(async({data:{session}})=>{
-      if(session?.user){
+    // Escuchar cambios de auth — maneja login, recarga y token refresh
+    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event, session)=>{
+      if(event==="SIGNED_OUT"){ setUser(null); setShowLanding(true); return; }
+      if(session?.user && (event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="INITIAL_SESSION")){
         const {data:profile}=await supabase.from("profiles").select("*").eq("id",session.user.id).single();
         if(profile){
-          setUser({
-            id:session.user.id,
-            name:profile.username||session.user.email?.split("@")[0]||"Usuario",
-            emoji:profile.avatar_emoji||"🦅",
-            avatarColor:profile.avatar_color||C.accent,
-            followers:profile.followers_count||0,
-            following:profile.following_count||0,
-            posts:profile.posts_count||0,
-            points:profile.points||100,
-            badges:profile.badges||["early"],
-            bio:profile.bio||""
-          });
+          setUser(buildUserFromProfile(session.user, profile));
+          setShowLanding(false);
         }
       }
-    });
-    // Escuchar cambios de auth (login / logout)
-    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event,session)=>{
-      if(event==="SIGNED_OUT"){ setUser(null); }
     });
     return()=>subscription.unsubscribe();
   },[]);
