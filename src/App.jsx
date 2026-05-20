@@ -1296,7 +1296,8 @@ function EarningsPage({lang}){
       .then(r=>r.json())
       .then(data=>{
         if(!data?.earningsCalendar?.length){setLoadingEar(false);return;}
-        const interesting=data.earningsCalendar.filter(e=>e.epsEstimate!=null||e.revenueEstimate!=null).slice(0,10).map(e=>{
+        const todayOnly=new Date().toISOString().slice(0,10);
+        const interesting=data.earningsCalendar.filter(e=>(e.epsEstimate!=null||e.revenueEstimate!=null)&&e.date>=todayOnly).slice(0,10).map(e=>{
           const mock=MOCK_EARNINGS.find(m=>m.ticker===e.symbol)||{};
           const dateObj=new Date(e.date+"T12:00:00");
           const todayStr=new Date().toISOString().slice(0,10);
@@ -2138,7 +2139,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang}){
   );
 }
 
-function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
+function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[]}){
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
   const SIDEBAR_STATIC=[
@@ -2247,37 +2248,43 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
 
       {/* 📡 MARKETS */}
       <div style={sideCard}>
-        <h3 style={{margin:"0 0 10px",color:"#fff",fontSize:12,fontWeight:800,letterSpacing:0.3}}>{t.markets}</h3>
+        <h3 style={{margin:"0 0 10px",color:"#0F172A",fontSize:12,fontWeight:800,letterSpacing:0.3}}>{t.markets}</h3>
         {mini.map((m,i)=>(
-          <div key={m.ticker} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:i<mini.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
-            <span style={{fontWeight:700,color:"#CBD5E1",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{m.ticker}</span>
+          <div key={m.ticker} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:i<mini.length-1?"1px solid rgba(15,23,42,0.07)":"none"}}>
+            <span style={{fontWeight:700,color:"#0F172A",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{m.ticker}</span>
             <div style={{textAlign:"right"}}>
-              <div style={{fontFamily:"monospace",fontSize:10,color:"#334155"}}>{m.price}</div>
+              <div style={{fontFamily:"monospace",fontSize:10,color:"#475569"}}>{m.price}</div>
               <div style={{fontFamily:"monospace",fontSize:11,fontWeight:800,color:chgCol(m.change)}}>{fmtChg(m.change)}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* 🏆 TOP TRADERS */}
-      <div style={sideCard}>
-        <h3 style={{margin:"0 0 10px",color:"#fff",fontSize:12,fontWeight:800}}>🏆 Top Traders</h3>
-        {[
-          {name:"NvidiaChad",badge:"🐋",label:"Whale",col:"#3B82F6",pts:"+12.4%",streak:"🔥5"},
-          {name:"CryptoWolf",badge:"🚀",label:"Momentum",col:"#00E58F",pts:"+8.7%",streak:"🔥3"},
-          {name:"SPY_Trader",badge:"🧠",label:"AI Hunter",col:"#7C3AED",pts:"+6.2%",streak:"🔥7"},
-        ].map((tr,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<2?"1px solid rgba(255,255,255,0.04)":"none"}}>
-            <span style={{color:"#1E293B",fontSize:11,fontWeight:700,minWidth:14}}>#{i+1}</span>
-            <div style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${tr.col}30,${tr.col}10)`,border:`1.5px solid ${tr.col}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>{tr.badge}</div>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontWeight:700,color:"#CBD5E1",fontSize:12}}>{tr.name}</div>
-              <div style={{fontSize:9,color:tr.col}}>{tr.label} · {tr.streak}</div>
-            </div>
-            <span style={{color:C.bull,fontSize:11,fontWeight:800,fontFamily:"monospace"}}>{tr.pts}</span>
+      {/* 🏆 TOP TRADERS — dinámico con posts reales */}
+      {(()=>{
+        // Contar posts por usuario y construir ranking
+        const countMap={};
+        posts.forEach(p=>{if(p.user){countMap[p.user]=(countMap[p.user]||{count:0,avatar:p.avatar,color:p.avatarColor});countMap[p.user].count++;countMap[p.user].avatar=p.avatar;countMap[p.user].color=p.avatarColor||C.accent;}});
+        const medals=["🥇","🥈","🥉"];
+        const topList=Object.entries(countMap).sort((a,b)=>b[1].count-a[1].count).slice(0,3);
+        if(topList.length===0)return null;
+        return(
+          <div style={sideCard}>
+            <h3 style={{margin:"0 0 10px",color:"#0F172A",fontSize:12,fontWeight:800}}>🏆 Top Traders Activos</h3>
+            {topList.map(([name,info],i)=>(
+              <div key={name} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<topList.length-1?"1px solid rgba(15,23,42,0.07)":"none"}}>
+                <span style={{fontSize:16,minWidth:20}}>{medals[i]}</span>
+                <AvatarBubble emoji={info.avatar||"🦅"} color={info.color||C.accent} size={28}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:700,color:"#0F172A",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name}</div>
+                  <div style={{fontSize:10,color:"#64748B"}}>{info.count} post{info.count!==1?"s":""} hoy</div>
+                </div>
+                <span style={{color:C.accent,fontSize:11,fontWeight:800}}>#{i+1}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        );
+      })()}
 
       {/* WHO TO FOLLOW */}
       {(()=>{
@@ -2285,13 +2292,13 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
         if(!sug.length)return null;
         return(
           <div style={sideCard}>
-            <h3 style={{margin:"0 0 10px",color:"#fff",fontSize:12,fontWeight:800}}>{t.whofollow}</h3>
+            <h3 style={{margin:"0 0 10px",color:"#0F172A",fontSize:12,fontWeight:800}}>{t.whofollow}</h3>
             {sug.map((u,i)=>(
-              <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<sug.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+              <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<sug.length-1?"1px solid rgba(15,23,42,0.07)":"none"}}>
                 <div style={{cursor:"pointer"}} onClick={()=>onProfile(u)}><AvatarBubble emoji={u.emoji} color={u.color} size={30}/></div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:700,color:"#CBD5E1",fontSize:12,cursor:"pointer"}} onClick={()=>onProfile(u)}>{u.name}</div>
-                  <div style={{color:"#334155",fontSize:10}}>{fmtNum(u.followers)} {t.followers}</div>
+                  <div style={{fontWeight:700,color:"#0F172A",fontSize:12,cursor:"pointer"}} onClick={()=>onProfile(u)}>{u.name}</div>
+                  <div style={{color:"#64748B",fontSize:10}}>{fmtNum(u.followers)} {t.followers}</div>
                 </div>
                 <Btn variant="follow" small onClick={()=>user?onFollow(u.id):onNeedAuth()}>{t.follow}</Btn>
               </div>
@@ -2840,7 +2847,7 @@ export default function App(){
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"16px 12px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:20,alignItems:"start"}}>
         <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang}/></div>
         <div>{renderPage()}</div>
-        <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang}/></div>
+        <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
       </div>
 
       <Footer/>
