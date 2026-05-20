@@ -41,14 +41,14 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
 // ── THEME — Dark Luxury Fintech ───────────────────────────────────────────────
 const C = {
   bg:"#F0F4F8", surface:"#FFFFFF", card:"#FFFFFF", card2:"#F8FAFC",
-  border:"rgba(15,23,42,0.09)", borderHover:"rgba(0,160,96,0.4)",
-  accent:"#00A060", accentDim:"rgba(0,160,96,0.09)", accentText:"#007A48",
+  border:"rgba(15,23,42,0.09)", borderHover:"rgba(0,168,255,0.4)",
+  accent:"#00A8FF", accentDim:"rgba(0,168,255,0.09)", accentText:"#0090D4",
   bull:"#16A34A", bullBg:"rgba(22,163,74,0.09)", bear:"#DC2626", bearBg:"rgba(220,38,38,0.09)",
   gold:"#D97706", goldBg:"rgba(217,119,6,0.1)", purple:"#7C3AED", purpleBg:"rgba(124,58,237,0.08)",
-  blue:"#2563EB", blueBg:"rgba(37,99,235,0.08)", orange:"#EA580C", orangeBg:"rgba(234,88,12,0.08)",
+  blue:"#00A8FF", blueBg:"rgba(0,168,255,0.08)", orange:"#EA580C", orangeBg:"rgba(234,88,12,0.08)",
   text:"#0F172A", muted:"#64748B", muted2:"#94A3B8",
   shadow:"0 2px 12px rgba(0,0,0,0.07)", shadowMd:"0 8px 32px rgba(0,0,0,0.1)",
-  shadowGlow:"0 0 24px rgba(0,160,96,0.12)", shadowGlowBlue:"0 0 24px rgba(37,99,235,0.1)",
+  shadowGlow:"0 0 24px rgba(0,168,255,0.12)", shadowGlowBlue:"0 0 24px rgba(0,168,255,0.1)",
   glass:"rgba(255,255,255,0.88)", glassBorder:"rgba(15,23,42,0.09)",
   vip:"#7C3AED", vipGlow:"rgba(124,58,237,0.2)",
 };
@@ -2068,6 +2068,76 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
 }
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
+// ── LEFT SIDEBAR — Perfil + Stats estilo Socimo ───────────────────────────────
+function LeftSidebar({user, onProfile, onNeedAuth, lang}){
+  const t=LANGS[lang];
+  const sCard={background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,overflow:"hidden",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)"};
+  const lvl = user ? getLevel(user.points) : null;
+  return(
+    <div style={{position:"sticky",top:96}}>
+      {/* Profile Card */}
+      <div style={sCard}>
+        {/* Cover */}
+        <div style={{height:70,background:"linear-gradient(135deg,#00A8FF,#0090D4,#7C3AED)",position:"relative"}}>
+          <div style={{position:"absolute",bottom:-22,left:16}}>
+            {user
+              ? <AvatarBubble emoji={user.emoji} color={user.avatarColor||"#00A8FF"} size={48} online level={user.points}/>
+              : <div style={{width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.3)",border:"3px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>👤</div>
+            }
+          </div>
+        </div>
+        <div style={{padding:"28px 16px 16px"}}>
+          {user ? <>
+            <div style={{fontWeight:800,color:"#0F172A",fontSize:15,lineHeight:1.2}}>{user.name}</div>
+            {lvl && <div style={{fontSize:11,color:"#00A8FF",fontWeight:700,marginTop:2}}>{lvl.label}</div>}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4,marginTop:12,textAlign:"center"}}>
+              {[{v:user.followers||0,l:t.followers},{v:user.following||0,l:t.following},{v:user.points||0,l:t.points}].map(({v,l})=>(
+                <div key={l} style={{background:"#F8FAFC",borderRadius:8,padding:"6px 4px"}}>
+                  <div style={{fontWeight:800,fontSize:14,color:"#0F172A"}}>{v}</div>
+                  <div style={{fontSize:9,color:"#94A3B8",fontWeight:600,letterSpacing:0.3}}>{l}</div>
+                </div>
+              ))}
+            </div>
+          </> : <>
+            <div style={{fontWeight:800,color:"#0F172A",fontSize:14,marginBottom:4}}>¡Únete a NexoTrade!</div>
+            <div style={{fontSize:12,color:"#64748B",marginBottom:12,lineHeight:1.5}}>La comunidad inversora en español</div>
+            <button onClick={onNeedAuth} style={{width:"100%",background:"#00A8FF",color:"#fff",border:"none",borderRadius:8,padding:"9px",fontWeight:700,fontSize:13,cursor:"pointer"}}>Crear cuenta gratis →</button>
+          </>}
+        </div>
+      </div>
+
+      {/* Quick Nav Links */}
+      <div style={sCard}>
+        <div style={{padding:"12px 16px"}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:0.8,marginBottom:8}}>NAVEGACIÓN</div>
+          {[
+            {icon:"🔥",label:"Feed"},
+            {icon:"📊",label:"Tops Traders"},
+            {icon:"📅",label:"Earnings"},
+            {icon:"📰",label:"Noticias"},
+            {icon:"🔥",label:"Trending"},
+            {icon:"✦",label:"Premium VIP",color:"#7C3AED"},
+          ].map(({icon,label,color})=>(
+            <div key={label} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 8px",borderRadius:8,cursor:"pointer",marginBottom:2,transition:"background 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.06)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <span style={{fontSize:15}}>{icon}</span>
+              <span style={{fontSize:13,fontWeight:600,color:color||"#0F172A"}}>{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* NexoTrade info */}
+      <div style={{padding:"0 4px"}}>
+        <div style={{fontSize:11,color:"#94A3B8",lineHeight:1.8}}>
+          © 2026 NexoTrade · <span style={{color:"#00A8FF",cursor:"pointer"}}>Términos</span> · <span style={{color:"#00A8FF",cursor:"pointer"}}>Privacidad</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang}){
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
@@ -2537,20 +2607,21 @@ export default function App(){
     if(page===8) return <PremiumPage user={user} isPremium={isPremium} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     return(
       <>
-        {/* Ticker filter banner */}
-        {tickerFilter&&(
-          <div style={{background:`${C.accent}12`,border:`1px solid ${C.accent}33`,borderRadius:12,padding:"10px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
-            <span style={{color:C.accent,fontWeight:800,fontSize:14}}>${tickerFilter}</span>
-            <span style={{color:C.muted,fontSize:13}}>— mostrando posts sobre este activo</span>
-            <button onClick={()=>setTickerFilter(null)} style={{marginLeft:"auto",background:"rgba(255,255,255,0.08)",border:"none",borderRadius:8,padding:"4px 12px",color:C.muted,cursor:"pointer",fontSize:12}}>✕ Limpiar filtro</button>
-          </div>
-        )}
-        <div style={{display:"flex",gap:7,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
-          <span style={{color:C.muted2,fontSize:12,fontWeight:600}}>{lang==="en"?"Filter:":"Filtrar:"}</span>
-          {[[`all`,t.filterAll],[`bull`,t.filterBull],[`bear`,t.filterBear]].map(([v,l])=>(
-            <button key={v} onClick={()=>setSent(v)} style={{background:sent===v?(v==="bull"?"rgba(22,163,74,0.1)":v==="bear"?"rgba(220,38,38,0.1)":"rgba(0,160,96,0.1)"):"#FFFFFF",border:`1.5px solid ${sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent)+"77":C.border}`,borderRadius:20,padding:"5px 14px",cursor:"pointer",color:sent===v?(v==="bull"?C.bull:v==="bear"?C.bear:C.accent):C.muted,fontSize:12,fontWeight:600,transition:"all 0.15s"}}>{l}</button>
+        {/* Tabs estilo Socimo */}
+        <div style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"0 16px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",display:"flex",gap:4,alignItems:"center"}}>
+          {[["all",lang==="en"?"Home":"Inicio"],["bull",lang==="en"?"Bullish":"Alcistas"],["bear",lang==="en"?"Bearish":"Bajistas"]].map(([v,l])=>(
+            <button key={v} onClick={()=>setSent(v)}
+              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?"#00A8FF":"transparent"}`,padding:"14px 18px",cursor:"pointer",color:sent===v?"#00A8FF":"#64748B",fontSize:14,fontWeight:sent===v?700:500,transition:"all 0.15s",whiteSpace:"nowrap"}}>
+              {l}
+            </button>
           ))}
-          <span style={{marginLeft:"auto",color:C.muted2,fontSize:12}}>{filtered2.length} {t.ideas}</span>
+          {tickerFilter&&(
+            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:20,padding:"4px 12px"}}>
+              <span style={{color:"#00A8FF",fontWeight:800,fontSize:12}}>${tickerFilter}</span>
+              <button onClick={()=>setTickerFilter(null)} style={{background:"none",border:"none",color:"#94A3B8",cursor:"pointer",fontSize:13,lineHeight:1}}>✕</button>
+            </div>
+          )}
+          <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:12,whiteSpace:"nowrap"}}>{filtered2.length} posts</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
         {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerFilter(tk)} lang={lang}/>)}
@@ -2576,11 +2647,16 @@ export default function App(){
   return(
     <PriceProvider>
     <style>{`
-      @media (min-width: 768px) {
-        .nexo-body-grid { grid-template-columns: minmax(0,1fr) 290px !important; }
+      @media (min-width: 1024px) {
+        .nexo-body-grid { grid-template-columns: 240px minmax(0,1fr) 280px !important; }
+      }
+      @media (min-width: 768px) and (max-width: 1023px) {
+        .nexo-body-grid { grid-template-columns: minmax(0,1fr) 260px !important; }
+        .nexo-left-sidebar { display: none !important; }
       }
       @media (max-width: 767px) {
         .nexo-sidebar { display: none; }
+        .nexo-left-sidebar { display: none !important; }
         .nexo-nav-search { display: none !important; }
         .nexo-mobile-search { display: flex !important; }
       }
@@ -2590,7 +2666,7 @@ export default function App(){
       * { -webkit-font-smoothing: antialiased; }
       ::-webkit-scrollbar { width: 4px; height: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.15); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb { background: rgba(0,168,255,0.2); border-radius: 4px; }
     `}</style>
     <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
       <TickerTape/>
@@ -2623,7 +2699,7 @@ export default function App(){
               {darkMode?"☀️":"🌙"}
             </button>
             <button onClick={()=>setShowAI(true)}
-              style={{background:"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.18)",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:C.blue,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
+              style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:10,padding:"8px 14px",cursor:"pointer",color:"#00A8FF",fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
               🤖 IA
             </button>
             <LangSelector lang={lang} setLang={setLang}/>
@@ -2647,9 +2723,9 @@ export default function App(){
             }
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?C.accent:"transparent"}`,margin:"0",padding:"12px 18px",cursor:"pointer",color:page===n.idx?"#0F172A":"#64748B",fontSize:13.5,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
-                onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#0F172A";e.currentTarget.style.background="rgba(255,255,255,0.03)";}}}
-                onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#475569";e.currentTarget.style.background="transparent";}}}>
+                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,margin:"0",padding:"12px 18px",cursor:"pointer",color:page===n.idx?"#00A8FF":"#64748B",fontSize:13.5,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
+                onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}}
+                onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#64748B";e.currentTarget.style.background="transparent";}}}>
                 {n.label}
               </button>
             );
@@ -2659,7 +2735,7 @@ export default function App(){
 
       {/* HERO LANDING */}
       {showLanding && page===0 && (
-        <div style={{background:`radial-gradient(ellipse at 15% 60%, rgba(0,210,106,0.10) 0%, transparent 55%), radial-gradient(ellipse at 85% 15%, rgba(59,142,250,0.10) 0%, transparent 55%), ${C.bg}`,borderBottom:`1px solid ${C.glassBorder}`,padding:"64px 20px 56px",overflow:"hidden"}}>
+        <div style={{background:`linear-gradient(135deg,#0B1A2E 0%,#0D2244 50%,#0B1A2E 100%)`,borderBottom:`1px solid rgba(0,168,255,0.2)`,padding:"64px 20px 56px",overflow:"hidden"}}>
           <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:48,flexWrap:"wrap"}}>
 
             {/* LEFT — Text */}
@@ -2760,8 +2836,9 @@ export default function App(){
       {/* PREDICCIÓN DEL DÍA */}
       {page===0 && !showLanding && <PredictionBanner/>}
 
-      {/* BODY */}
-      <div className="nexo-body-grid" style={{maxWidth:1140,margin:"0 auto",padding:"16px 12px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16}}>
+      {/* BODY — 3 columnas estilo Socimo */}
+      <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"16px 12px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:20,alignItems:"start"}}>
+        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang}/></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang}/></div>
       </div>
