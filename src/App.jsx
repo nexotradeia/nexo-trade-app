@@ -735,16 +735,12 @@ function AIAssistant({lang,onClose}){
     setMsgs(prev=>[...prev,{role:"user",text:userMsg}]);
     setLoading(true);
     try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",max_tokens:400,
-          system:t.aiSys,
-          messages:[{role:"user",content:userMsg}]
-        })
+      // Llama a la Supabase Edge Function (seguro — la API key nunca sale al navegador)
+      const {data,error}=await supabase.functions.invoke("chat-ai",{
+        body:{message:userMsg,systemPrompt:t.aiSys}
       });
-      const data=await res.json();
-      const reply=data.content?.[0]?.text||t.aiErr;
+      if(error) throw error;
+      const reply=data?.reply||t.aiErr;
       setMsgs(prev=>[...prev,{role:"ai",text:reply}]);
     }catch{
       setMsgs(prev=>[...prev,{role:"ai",text:t.aiErr}]);
