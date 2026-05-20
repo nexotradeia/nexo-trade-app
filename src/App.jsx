@@ -11,6 +11,7 @@ const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY);
 // email_stripe_setup.py reemplaza este link automáticamente con el link real
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_6oUeV67aKcTZgeF9eA4c800";
 
+
 // ── CASHTAG + @MENTION RENDERER ───────────────────────────────────────────────
 function renderWithCashtags(text, onTickerClick, onMentionClick){
   if(!text) return text;
@@ -735,12 +736,14 @@ function AIAssistant({lang,onClose}){
     setMsgs(prev=>[...prev,{role:"user",text:userMsg}]);
     setLoading(true);
     try{
-      // Llama a la Supabase Edge Function (seguro — la API key nunca sale al navegador)
-      const {data,error}=await supabase.functions.invoke("chat-ai",{
-        body:{message:userMsg,systemPrompt:t.aiSys}
+      // Llama a la Vercel serverless function /api/chat (la key queda segura en Vercel)
+      const res=await fetch("/api/chat",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message:userMsg,systemPrompt:t.aiSys})
       });
-      if(error) throw error;
-      const reply=data?.reply||t.aiErr;
+      const data=await res.json();
+      const reply=data.reply||t.aiErr;
       setMsgs(prev=>[...prev,{role:"ai",text:reply}]);
     }catch{
       setMsgs(prev=>[...prev,{role:"ai",text:t.aiErr}]);
