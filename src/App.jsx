@@ -1016,11 +1016,13 @@ const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48
 
 function PostCard({post,onProfile,onPoints,onTickerClick,lang}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes),[repost,setRepost]=useState(false);
-  const conf=55+Math.floor((post.id||1)%40);
+  // Convertir id a número de forma segura (soporta "local-123..." y números reales)
+  const idNum = typeof post.id==="number" ? post.id : (parseInt(String(post.id).replace(/\D/g,""))||1);
+  const conf=55+Math.floor(idNum%40);
   const confLevel=CONF_LEVELS.find(c=>conf>=c.min);
-  const aiPct=45+Math.floor((post.id||1)*7%40);
-  const target=post.sentiment==="bull"?`+${8+((post.id||1)%15)}%`:`-${5+((post.id||1)%10)}%`;
-  const spark=SPARKLINES[(post.id||0)%4];
+  const aiPct=45+Math.floor((idNum*7)%40);
+  const target=post.sentiment==="bull"?`+${8+(idNum%15)}%`:`-${5+(idNum%10)}%`;
+  const spark=SPARKLINES[idNum%4]||SPARKLINES[0];
   const sparkMax=Math.max(...spark), sparkMin=Math.min(...spark);
   const sparkPts=spark.map((v,i)=>`${(i/(spark.length-1))*80},${20-((v-sparkMin)/(sparkMax-sparkMin||1))*18}`).join(" ");
   const isBull=post.sentiment==="bull";
@@ -1252,30 +1254,92 @@ function TopsPage(){
 }
 
 function NoticiasPage({lang}){
+  const [cat,setCat]=useState("general");
+  const [news,setNews]=useState([]);
+  const [loading,setLoading]=useState(true);
+
+  useEffect(()=>{
+    setLoading(true);
+    // Finnhub news API — gratis ilimitado (30 req/min)
+    fetch(`https://finnhub.io/api/v1/news?category=${cat}&token=${FINNHUB_KEY}`)
+      .then(r=>r.json())
+      .then(data=>{
+        if(Array.isArray(data)){
+          // Mostrar las 30 más recientes con imagen y headline
+          setNews(data.filter(n=>n.headline&&n.source).slice(0,30));
+        }
+      })
+      .catch(()=>{})
+      .finally(()=>setLoading(false));
+  },[cat]);
+
+  const cats=[
+    {k:"general",  l:lang==="en"?"📰 Macro News":"📰 Macro",     color:C.accent},
+    {k:"crypto",   l:lang==="en"?"₿ Crypto":"₿ Crypto",           color:"#F59E0B"},
+    {k:"forex",    l:lang==="en"?"💱 Forex":"💱 Forex",           color:"#16A34A"},
+    {k:"merger",   l:lang==="en"?"🏦 M&A":"🏦 M&A",              color:C.purple},
+  ];
+
+  const timeAgo=(ts)=>{
+    const diff=Math.floor((Date.now()/1000)-ts);
+    if(diff<60) return lang==="en"?`${diff}s ago`:`hace ${diff}s`;
+    if(diff<3600) return lang==="en"?`${Math.floor(diff/60)}m ago`:`hace ${Math.floor(diff/60)}m`;
+    if(diff<86400) return lang==="en"?`${Math.floor(diff/3600)}h ago`:`hace ${Math.floor(diff/3600)}h`;
+    return lang==="en"?`${Math.floor(diff/86400)}d ago`:`hace ${Math.floor(diff/86400)}d`;
+  };
+
   return(
     <div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20}}>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
         <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📰 {lang==="en"?"Market News":"Noticias del Mercado"}</h2>
         <span style={{background:"#fef2f2",color:C.bear,border:`1px solid ${C.bear}33`,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>🔴 LIVE</span>
+        <span style={{color:C.muted2,fontSize:11,marginLeft:"auto"}}>Finnhub · {lang==="en"?"Updated now":"Actualizado ahora"}</span>
       </div>
-      {MOCK_NOTICIAS.map(n=>(
-        <div key={n.id} style={{background:C.surface,border:`1px solid ${n.urgente?C.bear+"44":C.border}`,borderRadius:14,padding:"16px 18px",marginBottom:12,boxShadow:C.shadow,borderLeft:`4px solid ${n.urgente?C.bear:C.accent}`,cursor:"pointer",transition:"box-shadow 0.2s"}}
-          onMouseEnter={e=>e.currentTarget.style.boxShadow=C.shadowMd}
-          onMouseLeave={e=>e.currentTarget.style.boxShadow=C.shadow}>
-          <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-            <span style={{fontSize:24}}>{n.emoji}</span>
-            <div style={{flex:1}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}>
-                {n.urgente&&<span style={{background:"#fef2f2",color:C.bear,borderRadius:4,padding:"1px 7px",fontSize:10,fontWeight:800}}>🔴 URGENTE</span>}
-                <span style={{background:C.accentDim,color:C.accentText,borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:700,fontFamily:"monospace"}}>${n.ticker}</span>
-                <span style={{color:C.muted2,fontSize:11}}>{n.fuente}</span>
-                <span style={{color:C.muted2,fontSize:11,marginLeft:"auto"}}>{n.tiempo}</span>
-              </div>
-              <p style={{margin:0,color:C.text,fontSize:14,fontWeight:600,lineHeight:1.5}}>{lang==="en"?n.tituloEn:n.titulo}</p>
-            </div>
-          </div>
+
+      {/* Category tabs */}
+      <div style={{display:"flex",gap:6,marginBottom:18,flexWrap:"wrap"}}>
+        {cats.map(c=>(
+          <button key={c.k} onClick={()=>setCat(c.k)}
+            style={{background:cat===c.k?c.color:"transparent",border:`1.5px solid ${cat===c.k?c.color:C.border}`,borderRadius:20,padding:"6px 16px",cursor:"pointer",color:cat===c.k?"#fff":C.muted,fontSize:13,fontWeight:700,transition:"all 0.15s"}}>
+            {c.l}
+          </button>
+        ))}
+      </div>
+
+      {/* News list */}
+      {loading?(
+        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>
+          <div style={{fontSize:28,marginBottom:8}}>⏳</div>
+          <div style={{fontSize:14}}>{lang==="en"?"Loading news...":"Cargando noticias..."}</div>
         </div>
-      ))}
+      ):news.length===0?(
+        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>
+          <div style={{fontSize:28,marginBottom:8}}>📭</div>
+          <div style={{fontSize:14}}>{lang==="en"?"No news at the moment":"No hay noticias en este momento"}</div>
+        </div>
+      ):(
+        news.map((n,i)=>(
+          <a key={i} href={n.url} target="_blank" rel="noopener noreferrer"
+            style={{display:"block",textDecoration:"none",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:10,boxShadow:C.shadow,borderLeft:`4px solid ${cat==="crypto"?"#F59E0B":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accent}`,transition:"box-shadow 0.2s,transform 0.15s"}}
+            onMouseEnter={e=>{e.currentTarget.style.boxShadow=C.shadowMd;e.currentTarget.style.transform="translateY(-1px)";}}
+            onMouseLeave={e=>{e.currentTarget.style.boxShadow=C.shadow;e.currentTarget.style.transform="translateY(0)";}}>
+            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              {/* Imagen */}
+              {n.image&&<img src={n.image} alt="" style={{width:72,height:52,objectFit:"cover",borderRadius:8,flexShrink:0,background:"#F1F5F9"}} onError={e=>{e.target.style.display="none";}}/>}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
+                  <span style={{background:cat==="crypto"?"rgba(245,158,11,0.1)":cat==="forex"?"rgba(22,163,74,0.1)":cat==="merger"?"rgba(124,58,237,0.08)":C.accentDim,color:cat==="crypto"?"#D97706":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accentText,borderRadius:5,padding:"2px 8px",fontSize:10.5,fontWeight:700}}>{n.source}</span>
+                  {n.related&&n.related.trim()&&<span style={{background:"rgba(15,23,42,0.05)",color:C.muted,borderRadius:4,padding:"2px 6px",fontSize:10.5,fontFamily:"monospace",fontWeight:600}}>{n.related.split(",")[0]}</span>}
+                  <span style={{color:C.muted2,fontSize:10.5,marginLeft:"auto"}}>{timeAgo(n.datetime)}</span>
+                </div>
+                <p style={{margin:0,color:C.text,fontSize:13.5,fontWeight:600,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{n.headline}</p>
+                {n.summary&&<p style={{margin:"4px 0 0",color:C.muted,fontSize:12,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical"}}>{n.summary}</p>}
+              </div>
+            </div>
+          </a>
+        ))
+      )}
     </div>
   );
 }
