@@ -3708,7 +3708,10 @@ export default function App(){
   const [user,setUser]         = useState(_getSavedUser); // ← restaura al instante
   const [following,setFollow]  = useState([]);
   const ADMIN_EMAILS = ['mariangat26@gmail.com','mariagalarraga2013@gmail.com'];
-  const [isPremium,setIsPremium]= useState(false);
+  const _savedUser = _getSavedUser();
+  const [isPremium,setIsPremium]= useState(
+    (_savedUser?.is_premium || false) || ADMIN_EMAILS.includes(_savedUser?.email || '')
+  );
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]     = useState(false);
   const [showAlerts,setAlerts] = useState(false);
@@ -3728,6 +3731,7 @@ export default function App(){
   // ── SUPABASE: Auth listener & session restore ──────────────────────────────
   const buildUserFromProfile = (supabaseUser, profile) => ({
     id: supabaseUser.id,
+    email: supabaseUser.email || "",
     name: profile?.username || supabaseUser.email?.split("@")[0] || "Usuario",
     emoji: profile?.avatar_emoji || "🦅",
     avatarColor: profile?.avatar_color || C.accent,
