@@ -4045,9 +4045,13 @@ export default function App(){
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
       }
-      html, body { 
-        overflow-x: hidden !important; 
+      html {
+        overflow-x: clip !important;
+      }
+      body {
+        overflow-x: hidden !important;
         max-width: 100vw !important;
+        overflow-y: auto !important;
       }
       @media (min-width: 768px) {
         .nexo-mobile-search { display: none !important; }
