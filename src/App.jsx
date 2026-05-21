@@ -2735,80 +2735,139 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
 // ── LEFT SIDEBAR — Perfil + Stats estilo Socimo ───────────────────────────────
 function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
   const t=LANGS[lang];
-  const sCard={background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,overflow:"hidden",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)"};
   const lvl = user ? getLevel(user.points) : null;
+  const [activeNav, setActiveNav] = useState(0);
+
+  const navItems = [
+    {icon:"🔥", label:"Feed",             idx:0},
+    {icon:"📊", label:"Tops Traders",     idx:1},
+    {icon:"📈", label:"Acciones",         idx:3},
+    {icon:"📅", label:"Earnings",         idx:6},
+    {icon:"📰", label:"Noticias",         idx:5},
+    {icon:"⚡", label:"Trending",         idx:7},
+    {icon:"🛠️",label:"Herramientas VIP", idx:9, vip:true},
+    {icon:"✦",  label:"Premium VIP",      idx:8, premium:true},
+  ];
+
   return(
-    <div style={{position:"sticky",top:96}}>
-      {/* Profile Card */}
-      <div style={sCard}>
-        {/* Cover */}
-        <div style={{height:70,background:"linear-gradient(135deg,#00A8FF,#0090D4,#7C3AED)",position:"relative"}}>
-          <div style={{position:"absolute",bottom:-22,left:16}}>
+    <div style={{position:"sticky",top:96,display:"flex",flexDirection:"column",gap:10}}>
+
+      {/* ── PROFILE CARD ── */}
+      <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(15,23,42,0.08)",border:"1px solid rgba(15,23,42,0.07)"}}>
+        {/* Cover con patrón sutil */}
+        <div style={{height:76,background:"linear-gradient(135deg,#0EA5E9 0%,#6366F1 60%,#8B5CF6 100%)",position:"relative",overflow:"hidden"}}>
+          {/* Círculos decorativos */}
+          <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
+          <div style={{position:"absolute",bottom:-30,right:20,width:60,height:60,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
+          <div style={{position:"absolute",top:10,left:"40%",width:40,height:40,borderRadius:"50%",background:"rgba(255,255,255,0.05)"}}/>
+          {/* Avatar posicionado */}
+          <div style={{position:"absolute",bottom:-24,left:16,filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.15))"}}>
             {user
-              ? <AvatarBubble emoji={user.emoji} color={user.avatarColor||"#00A8FF"} size={48} online level={user.points}/>
-              : <div style={{width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.3)",border:"3px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>👤</div>
+              ? <AvatarBubble emoji={user.emoji} color={user.avatarColor||"#0EA5E9"} size={52} online level={user.points}/>
+              : <div style={{width:52,height:52,borderRadius:"50%",background:"rgba(255,255,255,0.25)",border:"3px solid rgba(255,255,255,0.9)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>👤</div>
             }
           </div>
         </div>
-        <div style={{padding:"28px 16px 16px"}}>
+
+        <div style={{padding:"30px 16px 16px"}}>
           {user ? <>
-            <div style={{fontWeight:800,color:"#0F172A",fontSize:15,lineHeight:1.2}}>{user.name}</div>
-            {lvl && <div style={{fontSize:11,color:"#00A8FF",fontWeight:700,marginTop:2}}>{lvl.label}</div>}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4,marginTop:12,textAlign:"center"}}>
-              {[{v:user.followers||0,l:t.followers},{v:user.following||0,l:t.following},{v:user.points||0,l:t.points}].map(({v,l})=>(
-                <div key={l} style={{background:"#F8FAFC",borderRadius:8,padding:"6px 4px"}}>
-                  <div style={{fontWeight:800,fontSize:14,color:"#0F172A"}}>{v}</div>
-                  <div style={{fontSize:9,color:"#94A3B8",fontWeight:600,letterSpacing:0.3}}>{l}</div>
+            {/* Nombre + nivel */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10}}>
+              <div>
+                <div style={{fontWeight:800,color:"#0F172A",fontSize:15,letterSpacing:-0.3,lineHeight:1.2}}>{user.name}</div>
+                <div style={{fontSize:10,color:"#64748B",fontWeight:500,marginTop:2}}>@{(user.name||"").toLowerCase().replace(/\s/g,"")}</div>
+              </div>
+              {lvl && (
+                <div style={{background:"linear-gradient(135deg,rgba(14,165,233,0.1),rgba(99,102,241,0.1))",border:"1px solid rgba(99,102,241,0.2)",borderRadius:20,padding:"3px 8px",fontSize:10,fontWeight:700,color:"#6366F1",whiteSpace:"nowrap"}}>
+                  {lvl.label}
                 </div>
-              ))}
+              )}
             </div>
+
+            {/* Stats — 3 columnas con divisores */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr 1px 1fr",gap:0,background:"#F8FAFC",borderRadius:10,overflow:"hidden",border:"1px solid rgba(15,23,42,0.06)"}}>
+              {[
+                {v:user.followers||0, l:t.followers},
+                null,
+                {v:user.following||0, l:t.following},
+                null,
+                {v:user.points||0,   l:t.points},
+              ].map((item,i)=> item===null
+                ? <div key={i} style={{background:"rgba(15,23,42,0.06)"}}/>
+                : <div key={i} style={{padding:"8px 4px",textAlign:"center"}}>
+                    <div style={{fontWeight:800,fontSize:15,color:"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
+                    <div style={{fontSize:9,color:"#94A3B8",fontWeight:600,letterSpacing:0.4,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
+                  </div>
+              )}
+            </div>
+
+            {/* Ver perfil */}
+            <button onClick={()=>onProfile&&onProfile(user)}
+              style={{width:"100%",marginTop:10,background:"transparent",border:"1px solid rgba(14,165,233,0.3)",borderRadius:8,padding:"7px",color:"#0EA5E9",fontWeight:600,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(14,165,233,0.06)";e.currentTarget.style.borderColor="rgba(14,165,233,0.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(14,165,233,0.3)";}}>
+              Ver mi perfil →
+            </button>
           </> : <>
-            <div style={{fontWeight:800,color:"#0F172A",fontSize:14,marginBottom:4}}>¡Únete a NexoTrade!</div>
-            <div style={{fontSize:12,color:"#64748B",marginBottom:12,lineHeight:1.5}}>La comunidad inversora en español</div>
-            <button onClick={onNeedAuth} style={{width:"100%",background:"#00A8FF",color:"#fff",border:"none",borderRadius:8,padding:"9px",fontWeight:700,fontSize:13,cursor:"pointer"}}>Crear cuenta gratis →</button>
+            <div style={{fontWeight:800,color:"#0F172A",fontSize:14,marginBottom:3}}>¡Únete a NexoTrade!</div>
+            <div style={{fontSize:12,color:"#64748B",marginBottom:12,lineHeight:1.5}}>La comunidad inversora en español 🌎</div>
+            <button onClick={onNeedAuth}
+              style={{width:"100%",background:"linear-gradient(135deg,#0EA5E9,#6366F1)",color:"#fff",border:"none",borderRadius:9,padding:"9px",fontWeight:700,fontSize:13,cursor:"pointer",boxShadow:"0 4px 12px rgba(99,102,241,0.3)"}}>
+              Crear cuenta gratis →
+            </button>
           </>}
         </div>
       </div>
 
-      {/* Quick Nav Links */}
-      <div style={sCard}>
-        <div style={{padding:"12px 16px"}}>
-          <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:0.8,marginBottom:8}}>NAVEGACIÓN</div>
-          {[
-            {icon:"🔥",label:"Feed",               idx:0},
-            {icon:"📊",label:"Tops Traders",        idx:1},
-            {icon:"📈",label:"Acciones VIP",        idx:3},
-            {icon:"📅",label:"Earnings",            idx:6},
-            {icon:"📰",label:"Noticias",            idx:5},
-            {icon:"🔥",label:"Trending",            idx:7},
-            {icon:"🛠️",label:"Herramientas VIP",   idx:9},
-            {icon:"✦", label:"Premium VIP",         idx:8, color:"#7C3AED"},
-          ].map(({icon,label,color,idx})=>(
-            <div key={label} onClick={()=>onNavigate&&onNavigate(idx)}
-              style={{display:"flex",alignItems:"center",gap:10,padding:"7px 8px",borderRadius:8,cursor:"pointer",marginBottom:2,transition:"background 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.08)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <span style={{fontSize:15}}>{icon}</span>
-              <span style={{fontSize:13,fontWeight:600,color:color||"#0F172A"}}>{label}</span>
-            </div>
-          ))}
+      {/* ── NAVEGACIÓN ── */}
+      <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(15,23,42,0.08)",border:"1px solid rgba(15,23,42,0.07)"}}>
+        <div style={{padding:"14px 14px 10px"}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#CBD5E1",letterSpacing:1.2,marginBottom:10,paddingLeft:4}}>MENÚ</div>
+          {navItems.map(({icon,label,idx,vip,premium})=>{
+            const isActive = activeNav===idx;
+            return(
+              <div key={label} onClick={()=>{setActiveNav(idx);onNavigate&&onNavigate(idx);}}
+                style={{
+                  display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,
+                  cursor:"pointer",marginBottom:2,transition:"all 0.15s",
+                  background: isActive ? (premium?"linear-gradient(135deg,rgba(124,58,237,0.1),rgba(99,102,241,0.1))":vip?"rgba(14,165,233,0.08)":"rgba(14,165,233,0.08)") : "transparent",
+                  borderLeft: isActive ? `3px solid ${premium?"#7C3AED":"#0EA5E9"}` : "3px solid transparent",
+                }}
+                onMouseEnter={e=>{ if(!isActive) e.currentTarget.style.background=premium?"rgba(124,58,237,0.06)":"rgba(14,165,233,0.05)"; }}
+                onMouseLeave={e=>{ if(!isActive) e.currentTarget.style.background="transparent"; }}>
+                <span style={{fontSize:14,lineHeight:1,width:18,textAlign:"center"}}>{icon}</span>
+                <span style={{
+                  fontSize:13,fontWeight:isActive?700:500,
+                  color: premium?"#7C3AED": isActive?"#0EA5E9":"#334155",
+                  flex:1
+                }}>{label}</span>
+                {premium && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>VIP</span>}
+                {vip && !premium && <span style={{fontSize:9,fontWeight:700,color:"#0EA5E9",background:"rgba(14,165,233,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Logout button — siempre visible */}
+      {/* ── LOGOUT + FOOTER ── */}
       {user && onLogout && (
-        <div style={sCard}>
-          <button onClick={onLogout} style={{width:"100%",background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:10,padding:"10px",color:"#FF4D6A",fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            🚪 Cerrar sesión
-          </button>
-        </div>
+        <button onClick={onLogout}
+          style={{width:"100%",background:"#fff",border:"1px solid rgba(239,68,68,0.2)",borderRadius:12,padding:"9px",color:"#EF4444",fontWeight:600,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.15s",boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
+          onMouseEnter={e=>{e.currentTarget.style.background="rgba(239,68,68,0.04)";e.currentTarget.style.borderColor="rgba(239,68,68,0.35)";}}
+          onMouseLeave={e=>{e.currentTarget.style.background="#fff";e.currentTarget.style.borderColor="rgba(239,68,68,0.2)";}}>
+          <span style={{fontSize:13}}>←</span> Cerrar sesión
+        </button>
       )}
-      {/* NexoTrade info */}
-      <div style={{padding:"0 4px"}}>
-        <div style={{fontSize:11,color:"#94A3B8",lineHeight:1.8}}>
-          © 2026 NexoTrade · <span style={{color:"#00A8FF",cursor:"pointer"}}>Términos</span> · <span style={{color:"#00A8FF",cursor:"pointer"}}>Privacidad</span>
+
+      <div style={{padding:"0 4px 4px",textAlign:"center"}}>
+        <div style={{fontSize:10,color:"#CBD5E1",lineHeight:2}}>
+          © 2026 NexoTrade &nbsp;·&nbsp;
+          <span style={{color:"#94A3B8",cursor:"pointer"}}>Términos</span>
+          &nbsp;·&nbsp;
+          <span style={{color:"#94A3B8",cursor:"pointer"}}>Privacidad</span>
         </div>
       </div>
+
     </div>
   );
 }
