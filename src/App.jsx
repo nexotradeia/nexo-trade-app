@@ -4843,9 +4843,13 @@ export default function App(){
             {/* Auth / User */}
             {user
               ? <UserMenu user={user} onLogout={async()=>{
+  try{ await supabase.auth.signOut({scope:"local"}); }catch{}
   try{ await supabase.auth.signOut({scope:"global"}); }catch{}
   localStorage.clear();
-  window.location.reload();
+  sessionStorage.clear();
+  // Borrar todas las cookies
+  document.cookie.split(";").forEach(c=>{document.cookie=c.trim().split("=")[0]+"=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";});
+  window.location.href="/";
 }} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
             }
@@ -4980,7 +4984,8 @@ export default function App(){
 
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{try{await supabase.auth.signOut({scope:"global"});}catch{}localStorage.clear();window.location.reload();}}/></div>
+        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{try{await supabase.auth.signOut({scope:"local"});}catch{}try{await supabase.auth.signOut({scope:"global"});}catch{}localStorage.clear();sessionStorage.clear();window.location.href="/";}}
+/></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
       </div>
@@ -4995,9 +5000,11 @@ export default function App(){
         }}>
           <button
             onClick={async()=>{
+              try{ await supabase.auth.signOut({scope:"local"}); }catch{}
               try{ await supabase.auth.signOut({scope:"global"}); }catch{}
               localStorage.clear();
-              window.location.reload();
+              sessionStorage.clear();
+              window.location.href="/";
             }}
             style={{
               background:"#FF4D6A",
