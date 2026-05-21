@@ -3701,10 +3701,14 @@ export default function App(){
         .nexo-left-sidebar { display: none !important; }
       }
       @media (max-width: 767px) {
-        .nexo-sidebar { display: none; }
+        .nexo-sidebar { display: none !important; }
         .nexo-left-sidebar { display: none !important; }
         .nexo-nav-search { display: none !important; }
         .nexo-mobile-search { display: flex !important; }
+        .nexo-body-grid { padding: 8px 8px !important; gap: 12px !important; }
+        .nexo-nav-icons button { width: 32px !important; height: 32px !important; font-size: 14px !important; }
+        .nexo-tabs button { padding: 12px 14px !important; font-size: 13px !important; }
+        .nexo-logo-text span:last-child { display: none !important; }
       }
       @media (min-width: 768px) {
         .nexo-mobile-search { display: none !important; }
@@ -3730,22 +3734,25 @@ export default function App(){
       <TickerTape/>
 
       {/* NAVBAR — Estilo Socimo */}
-      <nav style={{background:"#FFFFFF",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 24px",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:16,height:70,maxWidth:1200,margin:"0 auto"}}>
+      <nav style={{background:"#FFFFFF",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 16px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(0,0,0,0.06)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,height:60,maxWidth:1200,margin:"0 auto"}}>
 
-          {/* Logo — grande y llamativo */}
-          <div style={{display:"flex",alignItems:"center",flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
+          {/* Logo — integrado al navbar */}
+          <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
             <img src="/logo_nexo.png" alt="NEXO TRADE"
-              style={{height:115,width:"auto",objectFit:"contain",
-                filter:"drop-shadow(0 2px 16px rgba(0,168,255,0.4)) drop-shadow(0 0 8px rgba(0,168,255,0.2))"}}
-              onError={e=>{e.target.src="/logo2.png";}}/>
+              style={{height:44,width:"auto",objectFit:"contain",borderRadius:8,display:"block"}}
+              onError={e=>{e.target.style.display="none";}}/>
+            <div style={{display:"flex",flexDirection:"column",lineHeight:1.1}}>
+              <span style={{fontWeight:900,fontSize:18,color:"#0F172A",letterSpacing:-0.5}}>NEXO<span style={{color:"#00A8FF"}}>TRADE</span></span>
+              <span style={{fontSize:9,fontWeight:600,color:"#94A3B8",letterSpacing:1.5,textTransform:"uppercase"}}>AI Trading Community</span>
+            </div>
           </div>
 
           {/* Search — centrado */}
           <div style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460}}><SearchBar lang={lang}/></div>
 
           {/* Right — iconos estilo Socimo */}
-          <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
+          <div className="nexo-nav-icons" style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
 
             {/* Home */}
             <button onClick={()=>{setPage(0);setShowLanding(false);}}
@@ -3795,7 +3802,7 @@ export default function App(){
           </div>
         </div>
         {/* Tabs — bigger, professional */}
-        <div style={{display:"flex",gap:0,borderTop:`1px solid ${C.border}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none",justifyContent:"center"}}>
+        <div className="nexo-tabs" style={{display:"flex",gap:0,borderTop:`1px solid ${C.border}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
           {NAV_ITEMS(t).map(n=>{
             if(n.premium){
               const active=page===n.idx;
@@ -3922,7 +3929,7 @@ export default function App(){
       {page===0 && !showLanding && <PredictionBanner/>}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"16px 12px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:20,alignItems:"start"}}>
+      <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start"}}>
         <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}}/></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
