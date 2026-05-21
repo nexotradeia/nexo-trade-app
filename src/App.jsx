@@ -626,35 +626,123 @@ function TickerTape() {
 // ── SEARCH BAR ────────────────────────────────────────────────────────────────
 function SearchBar({lang}) {
   const t = LANGS[lang];
-  const [q,setQ]=useState(""),[res,setRes]=useState(""),[foc,setFoc]=useState(false);
+  const [q,setQ]=useState(""),[res,setRes]=useState([]),[foc,setFoc]=useState(false);
+  const [selected,setSelected]=useState(null);
   const ref=useRef();
-  useEffect(()=>{if(!q){setRes([]);return;}setRes(SEARCH_TICKERS.filter(x=>x.toLowerCase().includes(q.toLowerCase())).slice(0,6));},[q]);
-  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setFoc(false);};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
+  useEffect(()=>{if(!q){setRes([]);return;}setRes(SEARCH_TICKERS.filter(x=>x.toLowerCase().includes(q.toLowerCase())).slice(0,8));},[q]);
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target)){setFoc(false);setSelected(null);}};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
+
+  const handleSelect=(ticker)=>{
+    setQ(ticker);
+    setRes([]);
+    setFoc(false);
+    setSelected(ticker);
+  };
+
+  const tape=selected?TAPE_ITEMS.find(x=>x.ticker===selected):null;
+
+  // Nombres de compañías para el mini card
+  const NAMES={"AAPL":"Apple Inc.","MSFT":"Microsoft","GOOGL":"Alphabet","AMZN":"Amazon","NVDA":"NVIDIA","TSLA":"Tesla","META":"Meta Platforms","BTC":"Bitcoin","ETH":"Ethereum","SPY":"S&P 500 ETF","AMD":"AMD","NFLX":"Netflix","COIN":"Coinbase","PLTR":"Palantir","JPM":"JPMorgan","V":"Visa","BABA":"Alibaba","RIVN":"Rivian","ARM":"ARM Holdings","SMCI":"Super Micro","QQQ":"Nasdaq ETF","INTC":"Intel","ORCL":"Oracle","SHOP":"Shopify","UBER":"Uber","SNAP":"Snap","TWLO":"Twilio","SQ":"Block Inc","PYPL":"PayPal","DIS":"Disney","GS":"Goldman Sachs","WMT":"Walmart","BAC":"Bank of America","XOM":"ExxonMobil","JNJ":"Johnson & Johnson","KO":"Coca-Cola","PFE":"Pfizer","LMT":"Lockheed Martin","CVX":"Chevron","F":"Ford","GME":"GameStop","AMC":"AMC Entertainment"};
+
   return(
     <div ref={ref} style={{position:"relative",width:"100%",maxWidth:420}}>
       <div style={{display:"flex",alignItems:"center",gap:8,background:"#F8FAFC",border:`1px solid ${foc?"rgba(37,99,235,0.45)":"rgba(15,23,42,0.12)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(37,99,235,0.1)":"none"}}>
         <span style={{fontSize:13,color:"#475569"}}>⌕</span>
-        <input value={q} onChange={e=>setQ(e.target.value)} onFocus={()=>setFoc(true)} placeholder={t.search}
+        <input value={q} onChange={e=>{setQ(e.target.value);setSelected(null);}} onFocus={()=>setFoc(true)} placeholder={t.search}
           style={{flex:1,background:"none",border:"none",outline:"none",color:"#0F172A",fontSize:13,fontFamily:"'Inter',sans-serif",fontWeight:400,letterSpacing:0.1}}/>
-        {q&&<button onClick={()=>{setQ("");setRes([]);}} style={{background:"none",border:"none",cursor:"pointer",color:"#334155",fontSize:16,lineHeight:1}}>×</button>}
+        {q&&<button onClick={()=>{setQ("");setRes([]);setSelected(null);}} style={{background:"none",border:"none",cursor:"pointer",color:"#334155",fontSize:16,lineHeight:1}}>×</button>}
       </div>
-      {res.length>0&&foc&&(
+
+      {/* Dropdown de resultados */}
+      {res.length>0&&foc&&!selected&&(
         <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.1)",borderRadius:12,boxShadow:"0 8px 30px rgba(0,0,0,0.12)",zIndex:200,overflow:"hidden"}}>
           {res.map(ticker=>{
-            const tape=TAPE_ITEMS.find(x=>x.ticker===ticker);
+            const tp=TAPE_ITEMS.find(x=>x.ticker===ticker);
+            const isUp=tp&&tp.change>=0;
             return(
-              <div key={ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",cursor:"pointer",borderBottom:"1px solid rgba(15,23,42,0.07)",transition:"background 0.1s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.04)"}
+              <div key={ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",cursor:"pointer",borderBottom:"1px solid rgba(15,23,42,0.07)",transition:"background 0.12s"}}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.04)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}
-                onClick={()=>{setQ(ticker);setRes([]);setFoc(false);}}>
+                onClick={()=>handleSelect(ticker)}>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <span style={{background:"rgba(0,229,143,0.08)",color:C.accent,borderRadius:6,padding:"3px 8px",fontSize:11.5,fontWeight:800,fontFamily:"monospace",letterSpacing:0.5}}>${ticker}</span>
-                  {tape?.earning&&<span style={{background:"rgba(245,158,11,0.1)",color:C.gold,border:"1px solid rgba(245,158,11,0.2)",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700}}>📅 EARN</span>}
+                  <div style={{width:32,height:32,borderRadius:8,background:isUp?"rgba(0,229,143,0.1)":"rgba(255,77,106,0.1)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <span style={{fontSize:13,fontWeight:800,fontFamily:"monospace",color:isUp?C.bull:C.bear}}>{ticker.slice(0,2)}</span>
+                  </div>
+                  <div>
+                    <div style={{fontSize:12.5,fontWeight:700,color:"#0F172A",fontFamily:"monospace"}}>${ticker}</div>
+                    <div style={{fontSize:10.5,color:"#64748B"}}>{NAMES[ticker]||ticker}</div>
+                  </div>
+                  {tp?.earning&&<span style={{background:"rgba(245,158,11,0.1)",color:C.gold,border:"1px solid rgba(245,158,11,0.2)",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700}}>📅 EARN</span>}
                 </div>
-                {tape&&<span style={{color:chgCol(tape.change),fontWeight:700,fontSize:12,fontFamily:"monospace"}}>{fmtChg(tape.change)}</span>}
+                <div style={{textAlign:"right"}}>
+                  {tp&&<div style={{fontSize:12.5,fontWeight:800,color:"#0F172A",fontFamily:"monospace"}}>{tp.price}</div>}
+                  {tp&&<div style={{fontSize:11,fontWeight:700,color:isUp?C.bull:C.bear,fontFamily:"monospace"}}>{fmtChg(tp.change)}</div>}
+                </div>
               </div>
             );
           })}
+          <div style={{padding:"6px 14px",fontSize:10,color:"#94A3B8",background:"#FAFAFA"}}>Haz clic en un ticker para ver detalles</div>
+        </div>
+      )}
+
+      {/* Mini tarjeta de detalle — visible para TODOS, sin login */}
+      {selected&&tape&&(
+        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.1)",borderRadius:14,boxShadow:"0 12px 40px rgba(0,0,0,0.15)",zIndex:200,padding:0,overflow:"hidden"}}>
+          {/* Header */}
+          <div style={{background:tape.change>=0?"linear-gradient(135deg,rgba(0,229,143,0.08),rgba(0,168,255,0.05))":"linear-gradient(135deg,rgba(255,77,106,0.08),rgba(255,140,0,0.05))",padding:"14px 16px",borderBottom:"1px solid rgba(15,23,42,0.07)"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{background:tape.change>=0?"rgba(0,229,143,0.15)":"rgba(255,77,106,0.15)",color:tape.change>=0?C.bull:C.bear,borderRadius:7,padding:"3px 10px",fontSize:13,fontWeight:900,fontFamily:"monospace"}}>${selected}</span>
+                  {tape.earning&&<span style={{background:"rgba(245,158,11,0.12)",color:"#D97706",border:"1px solid rgba(245,158,11,0.25)",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700}}>📅 EARNINGS PROX.</span>}
+                </div>
+                <div style={{fontSize:12,color:"#475569",marginTop:4,fontWeight:500}}>{NAMES[selected]||selected}</div>
+              </div>
+              <button onClick={()=>setSelected(null)} style={{background:"rgba(15,23,42,0.06)",border:"none",borderRadius:"50%",width:26,height:26,cursor:"pointer",fontSize:14,color:"#64748B",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+            </div>
+          </div>
+          {/* Precio principal */}
+          <div style={{padding:"14px 16px",borderBottom:"1px solid rgba(15,23,42,0.07)"}}>
+            <div style={{display:"flex",alignItems:"baseline",gap:12}}>
+              <span style={{fontSize:28,fontWeight:900,color:"#0F172A",fontFamily:"monospace",letterSpacing:-1}}>{tape.price}</span>
+              <span style={{fontSize:15,fontWeight:800,color:tape.change>=0?C.bull:C.bear,fontFamily:"monospace"}}>{fmtChg(tape.change)}</span>
+              <span style={{fontSize:12,color:"#94A3B8",fontWeight:500}}>hoy</span>
+            </div>
+            {/* Mini sparkline visual */}
+            <div style={{marginTop:10,height:36,display:"flex",alignItems:"flex-end",gap:1.5}}>
+              {Array.from({length:20},(_,i)=>{
+                const h=30+Math.sin(i*0.8+(tape.change>0?0.3:-0.3))*12+(tape.change>0?i*0.4:-i*0.4);
+                return <div key={i} style={{flex:1,height:`${Math.max(6,Math.min(36,h))}px`,background:tape.change>=0?"rgba(0,229,143,0.35)":"rgba(255,77,106,0.35)",borderRadius:"2px 2px 0 0",transition:"height 0.3s"}}/>;
+              })}
+            </div>
+          </div>
+          {/* Stats row */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0,padding:"0"}}>
+            {[
+              {label:"Tendencia",value:tape.change>=0?"📈 Alcista":"📉 Bajista",col:tape.change>=0?C.bull:C.bear},
+              {label:"Volumen",value:"Alto",col:"#3B82F6"},
+              {label:"Señal",value:tape.change>=1.5?"🔥 Fuerte":tape.change>=0?"✅ Normal":"⚠️ Débil",col:"#F59E0B"},
+            ].map(({label,value,col},i)=>(
+              <div key={i} style={{padding:"10px 14px",borderRight:i<2?"1px solid rgba(15,23,42,0.07)":"none",borderTop:"1px solid rgba(15,23,42,0.07)"}}>
+                <div style={{fontSize:10,color:"#94A3B8",fontWeight:600,marginBottom:3,letterSpacing:0.5}}>{label.toUpperCase()}</div>
+                <div style={{fontSize:12.5,fontWeight:700,color:col}}>{value}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{padding:"10px 16px",background:"rgba(0,168,255,0.03)",borderTop:"1px solid rgba(15,23,42,0.07)",fontSize:10.5,color:"#64748B",textAlign:"center"}}>
+            Regístrate gratis para ver análisis completo · <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}}>Unirme →</span>
+          </div>
+        </div>
+      )}
+
+      {/* Mini card cuando no hay datos en TAPE */}
+      {selected&&!tape&&(
+        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.1)",borderRadius:14,boxShadow:"0 12px 40px rgba(0,0,0,0.15)",zIndex:200,padding:"16px",textAlign:"center"}}>
+          <div style={{fontSize:22,marginBottom:6}}>📊</div>
+          <div style={{fontWeight:700,fontSize:13,color:"#0F172A",fontFamily:"monospace"}}>${selected}</div>
+          <div style={{fontSize:12,color:"#64748B",marginTop:4}}>{NAMES[selected]||"Ticker"}</div>
+          <div style={{fontSize:11,color:"#94A3B8",marginTop:8}}>Datos en tiempo real disponibles al registrarte</div>
+          <button onClick={()=>setSelected(null)} style={{marginTop:10,background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.accent,fontWeight:600}}>Cerrar</button>
         </div>
       )}
     </div>
@@ -1230,9 +1318,11 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
               📷
             </button>
             {/* GIF button */}
-            <button onClick={()=>setShowGif(v=>!v)} title="Buscar GIF"
-              style={{background:showGif?C.accentDim:"transparent",border:`1px solid ${showGif?C.accent:C.border}`,borderRadius:8,padding:"5px 9px",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?C.accentText:C.muted,letterSpacing:0.5,transition:"all 0.15s"}}>
-              GIF
+            <button onClick={()=>setShowGif(v=>!v)} title="Buscar GIF animado"
+              style={{background:showGif?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${showGif?"#7C3AED":C.border}`,borderRadius:8,padding:"5px 11px",cursor:"pointer",fontSize:11,fontWeight:900,color:showGif?"#fff":"#7C3AED",letterSpacing:0.8,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
+              onMouseEnter={e=>{if(!showGif){e.currentTarget.style.background="rgba(124,58,237,0.08)";e.currentTarget.style.borderColor="#7C3AED";}}}
+              onMouseLeave={e=>{if(!showGif){e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor=C.border;}}}>
+              <span style={{fontSize:13}}>🎞️</span> GIF
             </button>
             <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
               style={{background:"rgba(0,160,96,0.06)",border:"1px solid rgba(0,160,96,0.2)",borderRadius:7,color:"#007A48",padding:"7px 10px",fontSize:12,outline:"none",width:90,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
