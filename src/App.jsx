@@ -841,7 +841,8 @@ function AuthModal({mode,onClose,onAuth,lang}){
           posts:profile?.posts_count||0,
           points:profile?.points||100,
           badges:profile?.badges||["early"],
-          bio:profile?.bio||""
+          bio:profile?.bio||"",
+          is_premium:profile?.is_premium||false,
         });
       }
       onClose();
@@ -2513,7 +2514,7 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 // ── LEFT SIDEBAR — Perfil + Stats estilo Socimo ───────────────────────────────
-function LeftSidebar({user, onProfile, onNeedAuth, lang}){
+function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate}){
   const t=LANGS[lang];
   const sCard={background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,overflow:"hidden",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)"};
   const lvl = user ? getLevel(user.points) : null;
@@ -2555,15 +2556,17 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang}){
         <div style={{padding:"12px 16px"}}>
           <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:0.8,marginBottom:8}}>NAVEGACIÓN</div>
           {[
-            {icon:"🔥",label:"Feed"},
-            {icon:"📊",label:"Tops Traders"},
-            {icon:"📅",label:"Earnings"},
-            {icon:"📰",label:"Noticias"},
-            {icon:"🔥",label:"Trending"},
-            {icon:"✦",label:"Premium VIP",color:"#7C3AED"},
-          ].map(({icon,label,color})=>(
-            <div key={label} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 8px",borderRadius:8,cursor:"pointer",marginBottom:2,transition:"background 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.06)"}
+            {icon:"🔥",label:"Feed",               idx:0},
+            {icon:"📊",label:"Tops Traders",        idx:1},
+            {icon:"📅",label:"Earnings",            idx:6},
+            {icon:"📰",label:"Noticias",            idx:5},
+            {icon:"🔥",label:"Trending",            idx:7},
+            {icon:"🛠️",label:"Herramientas VIP",   idx:9},
+            {icon:"✦", label:"Premium VIP",         idx:8, color:"#7C3AED"},
+          ].map(({icon,label,color,idx})=>(
+            <div key={label} onClick={()=>onNavigate&&onNavigate(idx)}
+              style={{display:"flex",alignItems:"center",gap:10,padding:"7px 8px",borderRadius:8,cursor:"pointer",marginBottom:2,transition:"background 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.08)"}
               onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
               <span style={{fontSize:15}}>{icon}</span>
               <span style={{fontSize:13,fontWeight:600,color:color||"#0F172A"}}>{label}</span>
@@ -3472,7 +3475,8 @@ export default function App(){
     posts: profile?.posts_count || 0,
     points: profile?.points || 100,
     badges: profile?.badges || ["early"],
-    bio: profile?.bio || ""
+    bio: profile?.bio || "",
+    is_premium: profile?.is_premium || false,
   });
 
   useEffect(()=>{
@@ -3487,6 +3491,7 @@ export default function App(){
         if(profile){
           const u = buildUserFromProfile(session.user, profile);
           saveUser(u);
+          setIsPremium(profile?.is_premium || false);
           setShowLanding(false);
         }
       }
@@ -3916,7 +3921,7 @@ export default function App(){
 
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"16px 12px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:20,alignItems:"start"}}>
-        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang}/></div>
+        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}}/></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
       </div>
@@ -3924,7 +3929,7 @@ export default function App(){
       <Footer/>
 
       {/* MODALS */}
-      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{saveUser(u);setShowLanding(false);}} lang={lang}/>}
+      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false);}} lang={lang}/>}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
       {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)}/>}
