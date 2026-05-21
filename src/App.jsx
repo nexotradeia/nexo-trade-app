@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-21 19:00:00
+// NEXO TRADE — build: 2026-05-21 20:00:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -3124,6 +3124,7 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user }){
   );
 
   const TOOLS = [
+    {k:"paper",    label:"🎮 Paper Trading"},
     {k:"riesgo",   label:"⚖️ Riesgo/Recompensa"},
     {k:"sharpe",   label:"📐 Sharpe Ratio"},
     {k:"racha",    label:"🔥 Racha & Stats"},
@@ -3148,6 +3149,9 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user }){
         ))}
       </div>
 
+      {/* ── 0. PAPER TRADING ── */}
+      {tool==="paper" && <PaperTrading user={user}/>}
+
       {/* ── 1. CALCULADORA RIESGO/RECOMPENSA ── */}
       {tool==="riesgo" && <RiskRewardCalc/>}
 
@@ -3165,6 +3169,359 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user }){
 
       {/* ── 6. EXPORTAR DATOS ── */}
       {tool==="exportar" && <ExportData posts={posts} user={user}/>}
+    </div>
+  );
+}
+
+// ── PAPER TRADING ────────────────────────────────────────────────────────────
+const PAPER_INITIAL = 100000;
+function PaperTrading({ user }){
+  const KEY = `nexotrade_paper_${user?.id||"guest"}`;
+  const load = ()=>{
+    try{ const s=localStorage.getItem(KEY); return s?JSON.parse(s):{cash:PAPER_INITIAL,positions:{},trades:[]}; }
+    catch{ return {cash:PAPER_INITIAL,positions:{},trades:[]}; }
+  };
+  const [pf, setPf] = useState(load);
+  const [tab, setTab]     = useState("cartera");   // cartera | operar | historial
+  const [ticker, setTicker] = useState("");
+  const [shares, setShares] = useState("");
+  const [liveQ, setLiveQ]   = useState(null);      // {price, change, name}
+  const [fetching, setFetching] = useState(false);
+  const [prices, setPrices]   = useState({});       // {TICKER: {price, pct}}
+  const [sellTicker, setSellTicker] = useState(null);
+  const [sellShares, setSellShares] = useState("");
+  const [msg, setMsg] = useState(null);
+
+  // Persistir
+  useEffect(()=>{ try{localStorage.setItem(KEY,JSON.stringify(pf));}catch{} },[pf]);
+
+  // Refrescar precios de posiciones abiertas
+  const refreshPrices = useCallback(async()=>{
+    const tks=Object.keys(pf.positions);
+    if(!tks.length) return;
+    const next={};
+    for(const tk of tks){
+      try{
+        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINNHUB_KEY}`);
+        const d=await r.json();
+        if(d.c>0) next[tk]={price:d.c, pct:d.dp||0};
+      }catch{}
+    }
+    setPrices(next);
+  },[pf.positions]);
+
+  useEffect(()=>{ refreshPrices(); },[]);
+
+  // Buscar cotización al escribir ticker
+  const fetchQuote = async(tk)=>{
+    if(!tk||tk.length<1){setLiveQ(null);return;}
+    setFetching(true);
+    try{
+      const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk.toUpperCase()}&token=${FINNHUB_KEY}`);
+      const d=await r.json();
+      if(d.c>0) setLiveQ({price:d.c, change:d.dp||0});
+      else setLiveQ(null);
+    }catch{ setLiveQ(null); }
+    setFetching(false);
+  };
+
+  const showMsg=(text,ok=true)=>{setMsg({text,ok});setTimeout(()=>setMsg(null),3000);};
+
+  const buy=()=>{
+    const sh=parseFloat(shares), tk=ticker.trim().toUpperCase();
+    if(!sh||sh<=0||!liveQ||!tk) return;
+    const cost=liveQ.price*sh;
+    if(cost>pf.cash){showMsg("❌ Efectivo insuficiente",false);return;}
+    setPf(prev=>{
+      const ex=prev.positions[tk];
+      const newSh=(ex?.shares||0)+sh;
+      const newAvg=ex?((ex.avgCost*ex.shares)+(liveQ.price*sh))/newSh:liveQ.price;
+      return{
+        cash:prev.cash-cost,
+        positions:{...prev.positions,[tk]:{shares:newSh,avgCost:newAvg}},
+        trades:[{date:new Date().toISOString(),ticker:tk,action:"buy",shares:sh,price:liveQ.price},...prev.trades].slice(0,100)
+      };
+    });
+    setPrices(p=>({...p,[tk]:{price:liveQ.price,pct:liveQ.change}}));
+    showMsg(`✅ Compraste ${sh} acciones de $${tk}`);
+    setShares(""); setTicker(""); setLiveQ(null); setTab("cartera");
+  };
+
+  const sell=(tk,sh)=>{
+    sh=parseFloat(sh);
+    const pos=pf.positions[tk];
+    if(!pos||!sh||sh<=0||sh>pos.shares){showMsg("❌ Cantidad inválida",false);return;}
+    const sellPrice=prices[tk]?.price||pos.avgCost;
+    const rev=sellPrice*sh;
+    setPf(prev=>{
+      const newSh=prev.positions[tk].shares-sh;
+      const newPos={...prev.positions};
+      if(newSh<=0) delete newPos[tk];
+      else newPos[tk]={...prev.positions[tk],shares:newSh};
+      return{
+        cash:prev.cash+rev,
+        positions:newPos,
+        trades:[{date:new Date().toISOString(),ticker:tk,action:"sell",shares:sh,price:sellPrice},...prev.trades].slice(0,100)
+      };
+    });
+    showMsg(`✅ Vendiste ${sh} acciones de $${tk} a $${sellPrice.toFixed(2)}`);
+    setSellTicker(null); setSellShares("");
+  };
+
+  const resetPortfolio=()=>{
+    if(!window.confirm("¿Reiniciar cartera? Perderás todas las posiciones.")) return;
+    setPf({cash:PAPER_INITIAL,positions:{},trades:[]});
+    setPrices({}); showMsg("🔄 Cartera reiniciada con $100,000");
+  };
+
+  // Calcular métricas
+  const positions=Object.entries(pf.positions).map(([tk,pos])=>{
+    const cp=prices[tk]?.price||pos.avgCost;
+    const value=cp*pos.shares, cost=pos.avgCost*pos.shares;
+    const pnl=value-cost, pnlPct=(pnl/cost)*100;
+    return{tk,shares:pos.shares,avgCost:pos.avgCost,cp,value,pnl,pnlPct,pct:prices[tk]?.pct||0};
+  });
+  const totalInvested=positions.reduce((s,p)=>s+p.value,0);
+  const totalValue=pf.cash+totalInvested;
+  const totalPnl=totalValue-PAPER_INITIAL;
+  const totalPnlPct=(totalPnl/PAPER_INITIAL)*100;
+  const isGain=totalPnl>=0;
+
+  const fmtUSD=(n)=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtDate=(s)=>{const d=new Date(s);return`${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;};
+
+  return(
+    <div style={{fontFamily:"inherit"}}>
+      {/* Toast */}
+      {msg&&<div style={{position:"fixed",top:70,right:20,zIndex:999,background:msg.ok?"#16A34A":"#DC2626",color:"#fff",padding:"10px 18px",borderRadius:10,fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",animation:"fadeIn 0.2s"}}>{msg.text}</div>}
+
+      {/* ── Header cartera ── */}
+      <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",borderRadius:18,padding:"22px 24px",marginBottom:16,border:"1px solid rgba(0,168,255,0.15)"}}>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+          <div>
+            <div style={{fontSize:11,color:"#64748B",fontWeight:700,letterSpacing:1,marginBottom:4}}>CARTERA TOTAL</div>
+            <div style={{fontSize:32,fontWeight:900,color:"#fff",fontFamily:"monospace"}}>{fmtUSD(totalValue)}</div>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
+              <span style={{fontSize:14,fontWeight:800,color:isGain?"#00E58F":"#FF4D6A"}}>
+                {isGain?"▲":"▼"} {fmtUSD(Math.abs(totalPnl))} ({totalPnlPct>=0?"+":""}{totalPnlPct.toFixed(2)}%)
+              </span>
+              <span style={{fontSize:11,color:"#64748B"}}>desde inicio</span>
+            </div>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end"}}>
+            <div style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,padding:"8px 14px",textAlign:"right"}}>
+              <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>EFECTIVO</div>
+              <div style={{fontSize:18,fontWeight:800,color:"#00A8FF",fontFamily:"monospace"}}>{fmtUSD(pf.cash)}</div>
+            </div>
+            <button onClick={resetPortfolio} style={{fontSize:10,color:"#64748B",background:"transparent",border:"1px solid rgba(255,255,255,0.08)",borderRadius:7,padding:"4px 10px",cursor:"pointer",fontWeight:600}}>↺ Reiniciar</button>
+          </div>
+        </div>
+        {/* Mini stat row */}
+        <div style={{display:"flex",gap:12,marginTop:16,flexWrap:"wrap"}}>
+          {[
+            {label:"Capital inicial", val:fmtUSD(PAPER_INITIAL), col:"#64748B"},
+            {label:"Invertido",       val:fmtUSD(totalInvested),  col:"#00A8FF"},
+            {label:"Posiciones",      val:positions.length,        col:"#F59E0B"},
+            {label:"Operaciones",     val:pf.trades.length,        col:"#A78BFA"},
+          ].map(({label,val,col})=>(
+            <div key={label} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 12px",minWidth:90}}>
+              <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>{label}</div>
+              <div style={{fontSize:15,fontWeight:800,color:col,fontFamily:"monospace"}}>{val}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Tabs ── */}
+      <div style={{display:"flex",gap:4,marginBottom:16,background:"rgba(0,0,0,0.04)",borderRadius:10,padding:4}}>
+        {[["cartera","📊 Cartera"],["operar","💹 Operar"],["historial","📋 Historial"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setTab(k)}
+            style={{flex:1,padding:"8px 0",borderRadius:8,border:"none",cursor:"pointer",fontWeight:700,fontSize:13,
+              background:tab===k?"#ffffff":  "transparent",
+              color:tab===k?"#0F172A":"#64748B",
+              boxShadow:tab===k?"0 1px 4px rgba(0,0,0,0.1)":"none",
+              transition:"all 0.15s"
+            }}>{l}</button>
+        ))}
+      </div>
+
+      {/* ── TAB: CARTERA ── */}
+      {tab==="cartera"&&(
+        <div>
+          {positions.length===0?(
+            <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(0,168,255,0.03)",border:"1px dashed rgba(0,168,255,0.2)",borderRadius:14}}>
+              <div style={{fontSize:36,marginBottom:12}}>📭</div>
+              <div style={{fontWeight:700,color:"#0F172A",marginBottom:6}}>Cartera vacía</div>
+              <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>Tienes {fmtUSD(pf.cash)} de efectivo virtual.<br/>Ve a "Operar" y compra tu primera acción.</div>
+              <button onClick={()=>setTab("operar")} style={{background:"linear-gradient(135deg,#00E58F,#00A8FF)",border:"none",borderRadius:10,padding:"10px 24px",fontWeight:800,color:"#fff",cursor:"pointer",fontSize:14}}>💹 Ir a Operar</button>
+            </div>
+          ):(
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {positions.map(p=>(
+                <div key={p.tk} style={{background:"#fff",border:`1px solid ${p.pnl>=0?"rgba(0,229,143,0.2)":"rgba(255,77,106,0.2)"}`,borderRadius:12,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                  {/* Ticker */}
+                  <div style={{minWidth:60}}>
+                    <div style={{fontWeight:900,fontSize:15,color:"#0F172A",fontFamily:"monospace"}}>${p.tk}</div>
+                    <div style={{fontSize:11,color:"#64748B"}}>{p.shares} acc.</div>
+                  </div>
+                  {/* Precio actual */}
+                  <div style={{minWidth:80}}>
+                    <div style={{fontWeight:800,fontSize:14,fontFamily:"monospace",color:"#0F172A"}}>{fmtUSD(p.cp)}</div>
+                    <div style={{fontSize:11,color:p.pct>=0?"#16A34A":"#DC2626",fontWeight:700}}>{p.pct>=0?"+":""}{p.pct?.toFixed(2)}% hoy</div>
+                  </div>
+                  {/* Costo promedio */}
+                  <div style={{minWidth:80}}>
+                    <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>COMPRA PROM.</div>
+                    <div style={{fontWeight:700,fontSize:13,fontFamily:"monospace",color:"#64748B"}}>{fmtUSD(p.avgCost)}</div>
+                  </div>
+                  {/* Valor total */}
+                  <div style={{minWidth:80}}>
+                    <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>VALOR</div>
+                    <div style={{fontWeight:800,fontSize:14,fontFamily:"monospace",color:"#0F172A"}}>{fmtUSD(p.value)}</div>
+                  </div>
+                  {/* P&L */}
+                  <div style={{minWidth:80}}>
+                    <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>P&L</div>
+                    <div style={{fontWeight:800,fontSize:14,fontFamily:"monospace",color:p.pnl>=0?"#16A34A":"#DC2626"}}>
+                      {p.pnl>=0?"+":""}{fmtUSD(p.pnl)}
+                    </div>
+                    <div style={{fontSize:11,fontWeight:700,color:p.pnl>=0?"#16A34A":"#DC2626"}}>{p.pnlPct>=0?"+":""}{p.pnlPct.toFixed(2)}%</div>
+                  </div>
+                  {/* Botón vender */}
+                  <div style={{marginLeft:"auto"}}>
+                    {sellTicker===p.tk?(
+                      <div style={{display:"flex",gap:5,alignItems:"center"}}>
+                        <input value={sellShares} onChange={e=>setSellShares(e.target.value)}
+                          placeholder={`máx ${p.shares}`} type="number" min="0.01" step="0.01"
+                          style={{width:70,border:"1px solid rgba(220,38,38,0.3)",borderRadius:7,padding:"5px 8px",fontSize:12,outline:"none"}}/>
+                        <button onClick={()=>sell(p.tk,sellShares)}
+                          style={{background:"#DC2626",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>Vender</button>
+                        <button onClick={()=>setSellTicker(null)}
+                          style={{background:"transparent",border:"1px solid #ccc",borderRadius:7,padding:"5px 8px",cursor:"pointer",fontSize:12,color:"#64748B"}}>✕</button>
+                      </div>
+                    ):(
+                      <button onClick={()=>{setSellTicker(p.tk);setSellShares("");}}
+                        style={{background:"rgba(220,38,38,0.08)",border:"1px solid rgba(220,38,38,0.25)",borderRadius:8,padding:"6px 14px",color:"#DC2626",fontWeight:700,fontSize:12,cursor:"pointer"}}>
+                        Vender ▾
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <button onClick={refreshPrices} style={{background:"transparent",border:"1px solid rgba(0,168,255,0.2)",borderRadius:8,padding:"8px",color:"#00A8FF",fontSize:12,fontWeight:600,cursor:"pointer",marginTop:4}}>↻ Actualizar precios</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── TAB: OPERAR ── */}
+      {tab==="operar"&&(
+        <div style={{background:"#fff",border:"1px solid rgba(15,23,42,0.09)",borderRadius:16,padding:"20px"}}>
+          <h3 style={{fontWeight:800,fontSize:15,color:"#0F172A",marginBottom:16}}>💹 Comprar acciones</h3>
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {/* Ticker input */}
+            <div>
+              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>TICKER DE LA ACCIÓN</label>
+              <div style={{display:"flex",gap:8}}>
+                <input value={ticker}
+                  onChange={e=>{setTicker(e.target.value.toUpperCase());setLiveQ(null);}}
+                  onBlur={e=>fetchQuote(e.target.value)}
+                  onKeyDown={e=>e.key==="Enter"&&fetchQuote(ticker)}
+                  placeholder="Ej: AAPL, NVDA, TSLA, BTC-USD"
+                  style={{flex:1,border:"1.5px solid rgba(15,23,42,0.12)",borderRadius:10,padding:"10px 14px",fontSize:14,fontFamily:"monospace",fontWeight:700,outline:"none",letterSpacing:1}}/>
+                <button onClick={()=>fetchQuote(ticker)}
+                  style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"10px 16px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer"}}>
+                  {fetching?"⏳":"🔍"}
+                </button>
+              </div>
+            </div>
+
+            {/* Cotización en vivo */}
+            {liveQ&&(
+              <div style={{background:"linear-gradient(135deg,rgba(0,229,143,0.06),rgba(0,168,255,0.04))",border:"1.5px solid rgba(0,229,143,0.25)",borderRadius:12,padding:"14px 16px",display:"flex",gap:16,alignItems:"center"}}>
+                <div>
+                  <div style={{fontSize:11,color:"#64748B",fontWeight:600}}>PRECIO ACTUAL</div>
+                  <div style={{fontSize:24,fontWeight:900,fontFamily:"monospace",color:"#0F172A"}}>{fmtUSD(liveQ.price)}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:11,color:"#64748B",fontWeight:600}}>HOY</div>
+                  <div style={{fontSize:16,fontWeight:800,color:liveQ.change>=0?"#16A34A":"#DC2626"}}>{liveQ.change>=0?"+":""}{liveQ.change?.toFixed(2)}%</div>
+                </div>
+                <div style={{marginLeft:"auto",fontSize:11,color:"#16A34A",background:"rgba(22,163,74,0.08)",border:"1px solid rgba(22,163,74,0.2)",borderRadius:8,padding:"4px 10px",fontWeight:700}}>✓ En vivo</div>
+              </div>
+            )}
+            {!liveQ&&ticker&&!fetching&&(
+              <div style={{fontSize:12,color:"#DC2626",background:"rgba(220,38,38,0.06)",border:"1px solid rgba(220,38,38,0.15)",borderRadius:8,padding:"8px 12px"}}>
+                ⚠️ Ticker no encontrado. Verifica que sea un símbolo válido (ej: AAPL, MSFT, NVDA).
+              </div>
+            )}
+
+            {/* Cantidad */}
+            <div>
+              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>CANTIDAD DE ACCIONES</label>
+              <input value={shares} onChange={e=>setShares(e.target.value)}
+                type="number" min="0.01" step="0.01" placeholder="Ej: 10"
+                style={{width:"100%",border:"1.5px solid rgba(15,23,42,0.12)",borderRadius:10,padding:"10px 14px",fontSize:14,boxSizing:"border-box",outline:"none"}}/>
+            </div>
+
+            {/* Resumen de compra */}
+            {liveQ&&shares&&parseFloat(shares)>0&&(
+              <div style={{background:"rgba(0,168,255,0.04)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:10,padding:"12px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                  <span style={{fontSize:12,color:"#64748B"}}>Costo total</span>
+                  <span style={{fontWeight:800,fontFamily:"monospace",fontSize:14,color:"#0F172A"}}>{fmtUSD(liveQ.price*parseFloat(shares))}</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between"}}>
+                  <span style={{fontSize:12,color:"#64748B"}}>Efectivo restante</span>
+                  <span style={{fontWeight:800,fontFamily:"monospace",fontSize:14,
+                    color:pf.cash-(liveQ.price*parseFloat(shares))>=0?"#16A34A":"#DC2626"
+                  }}>{fmtUSD(pf.cash-(liveQ.price*parseFloat(shares)))}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Botón comprar */}
+            <button onClick={buy}
+              disabled={!liveQ||!shares||parseFloat(shares)<=0}
+              style={{background:liveQ&&shares?"linear-gradient(135deg,#00E58F,#00A8FF)":"rgba(0,0,0,0.06)",border:"none",borderRadius:12,padding:"14px",fontWeight:900,fontSize:15,color:liveQ&&shares?"#fff":"#94A3B8",cursor:liveQ&&shares?"pointer":"not-allowed",transition:"all 0.15s",letterSpacing:0.3}}>
+              {liveQ&&shares?`▲ Comprar ${shares} × $${ticker} — ${fmtUSD(liveQ.price*parseFloat(shares||0))}`:"Busca un ticker y elige cantidad"}
+            </button>
+
+            <div style={{fontSize:11,color:"#94A3B8",textAlign:"center"}}>⚠️ Solo trading simulado — dinero virtual. No es dinero real.</div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB: HISTORIAL ── */}
+      {tab==="historial"&&(
+        <div style={{background:"#fff",border:"1px solid rgba(15,23,42,0.09)",borderRadius:16,overflow:"hidden"}}>
+          <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(15,23,42,0.06)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontWeight:800,fontSize:14,color:"#0F172A"}}>📋 Historial de operaciones</span>
+            <span style={{fontSize:12,color:"#64748B"}}>{pf.trades.length} ops.</span>
+          </div>
+          {pf.trades.length===0?(
+            <div style={{textAlign:"center",padding:"32px",color:"#94A3B8",fontSize:13}}>Sin operaciones todavía</div>
+          ):(
+            <div>
+              {pf.trades.map((t,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 16px",borderBottom:"1px solid rgba(15,23,42,0.05)",background:i%2===0?"#fff":"#FAFBFC"}}>
+                  <div style={{width:40,height:40,borderRadius:"50%",background:t.action==="buy"?"rgba(22,163,74,0.1)":"rgba(220,38,38,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>
+                    {t.action==="buy"?"▲":"▼"}
+                  </div>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:800,fontSize:13,color:"#0F172A"}}>{t.action==="buy"?"COMPRA":"VENTA"} <span style={{fontFamily:"monospace",color:C.accentText}}>${t.ticker}</span></div>
+                    <div style={{fontSize:11,color:"#64748B"}}>{fmtDate(t.date)}</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:"#0F172A"}}>{fmtUSD(t.price*t.shares)}</div>
+                    <div style={{fontSize:11,color:"#64748B"}}>{t.shares} acc. × {fmtUSD(t.price)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
