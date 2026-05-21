@@ -2875,6 +2875,14 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
 // ── AFFILIATE BANNERS ────────────────────────────────────────────────────────
 const AFFILIATES = [
   {
+    id:"finviz", logo:"📊", name:"Finviz Elite",
+    color:"#E8C84A", bg:"linear-gradient(135deg,#0D0D0D,#1A1500)",
+    tagline:"El screener #1 de Wall Street",
+    sub:"Datos en tiempo real · Mapas de calor · Alertas",
+    cta:"Probar Finviz Elite →", badge:"30% COMISIÓN", badgeColor:"#E8C84A",
+    url:"https://finviz.com/?affilId=764863650",
+  },
+  {
     id:"webull",
     logo:"📈",
     name:"Webull",
