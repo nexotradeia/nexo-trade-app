@@ -3490,10 +3490,15 @@ export default function App(){
       }
       if(session?.user && (event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="INITIAL_SESSION")){
         const {data:profile}=await supabase.from("profiles").select("*").eq("id",session.user.id).single();
+        // VIP siempre se activa si el email está en ADMIN_EMAILS, sin importar si hay perfil
+        const isAdmin = ADMIN_EMAILS.includes(session.user.email);
+        setIsPremium((profile?.is_premium || false) || isAdmin);
         if(profile){
           const u = buildUserFromProfile(session.user, profile);
           saveUser(u);
-          setIsPremium(profile?.is_premium || false || ADMIN_EMAILS.includes(session.user.email));
+          setShowLanding(false);
+        } else if(session.user){
+          // Tiene cuenta pero no perfil aún — igual mostrar la app
           setShowLanding(false);
         }
       }
