@@ -3109,16 +3109,16 @@ function UserMenu({user,onLogout,onProfile,onAlerts,lang}){
   const lvl=getLevel(user.points);
   return(
     <div style={{position:"relative"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",padding:"5px 10px",borderRadius:12,border:`1px solid ${C.border}`,background:C.card2}} onClick={()=>setOpen(!open)}>
+      <div style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",padding:"5px 8px",borderRadius:12,border:`1px solid ${C.border}`,background:C.card2}} onClick={()=>setOpen(!open)}>
         <AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} size={28} online/>
-        <div>
+        <div className="nexo-logo-text">
           <div style={{color:C.text,fontSize:13,fontWeight:700,lineHeight:1}}>{user.name}</div>
           <div style={{color:lvl.color,fontSize:9,fontWeight:700}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</div>
         </div>
         <span style={{color:C.muted2,fontSize:9}}>▾</span>
       </div>
       {open&&(
-        <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:8,minWidth:195,zIndex:150,boxShadow:C.shadowMd}}>
+        <div className="nexo-usermenu-dropdown" style={{position:"absolute",right:0,top:"calc(100% + 8px)",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:8,minWidth:195,zIndex:150,boxShadow:C.shadowMd}}>
           <div style={{padding:"10px 12px",marginBottom:6,background:C.card2,borderRadius:10}}>
             <div style={{color:C.muted2,fontSize:11,marginBottom:4}}>{lang==="en"?"Your points":"Tus puntos"}</div>
             <LevelBadge points={user.points} lang={lang}/>
@@ -4734,16 +4734,22 @@ export default function App(){
         .nexo-left-sidebar { display: none !important; }
         .nexo-nav-search { display: none !important; }
         .nexo-mobile-search { display: flex !important; }
-        .nexo-body-grid { 
-          padding: 8px !important; 
+        .nexo-body-grid {
+          padding: 8px !important;
           gap: 10px !important;
           grid-template-columns: 1fr !important;
         }
-        .nexo-nav-icons button { width: 34px !important; height: 34px !important; font-size: 15px !important; }
+        .nexo-nav-icons { gap: 2px !important; }
+        .nexo-nav-icons button { width: 32px !important; height: 32px !important; font-size: 14px !important; }
         .nexo-tabs { justify-content: flex-start !important; }
         .nexo-tabs button { padding: 10px 12px !important; font-size: 12px !important; }
         .nexo-hide-mobile { display: none !important; }
         .nexo-logout-mobile { display: flex !important; }
+        /* Logo compacto en móvil */
+        .nexo-logo-text { display: none !important; }
+        .nexo-logo-img { height: 38px !important; }
+        /* UserMenu dropdown no se salga de pantalla */
+        .nexo-usermenu-dropdown { right: 0 !important; left: auto !important; min-width: 180px !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
@@ -4784,11 +4790,11 @@ export default function App(){
         <div style={{display:"flex",alignItems:"center",gap:8,height:58,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Logo — integrado al navbar */}
-          <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
-            <img src="/logo_nexo.png" alt="NEXO TRADE"
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
+            <img src="/logo_nexo.png" alt="NEXO TRADE" className="nexo-logo-img"
               style={{height:54,width:"auto",objectFit:"contain",borderRadius:8,display:"block"}}
               onError={e=>{e.target.style.display="none";}}/>
-            <div style={{display:"flex",flexDirection:"column",lineHeight:1.15}}>
+            <div className="nexo-logo-text" style={{display:"flex",flexDirection:"column",lineHeight:1.15}}>
               <span style={{fontWeight:900,fontSize:22,color:"#0F172A",letterSpacing:-0.5}}>NEXO<span style={{color:"#00A8FF"}}>TRADE</span></span>
               <span style={{fontSize:10,fontWeight:600,color:"#94A3B8",letterSpacing:1.5,textTransform:"uppercase"}}>AI Trading Community</span>
             </div>
