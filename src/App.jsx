@@ -2876,166 +2876,216 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
   const SIDEBAR_STATIC=[
-    {ticker:"BTC",price:"$68,420",change:+4.2},{ticker:"NVDA",price:"$875.40",change:+2.8},
-    {ticker:"TSLA",price:"$172.80",change:-3.1},{ticker:"ETH",price:"$3,820",change:+5.7},
-    {ticker:"AAPL",price:"$189.50",change:+0.4},{ticker:"SPY",price:"$521.30",change:-0.8},
+    {ticker:"BTC",  price:"$68,420", change:+4.2},
+    {ticker:"NVDA", price:"$875.40", change:+2.8},
+    {ticker:"TSLA", price:"$172.80", change:-3.1},
+    {ticker:"ETH",  price:"$3,820",  change:+5.7},
+    {ticker:"AAPL", price:"$189.50", change:+0.4},
+    {ticker:"SPY",  price:"$521.30", change:-0.8},
   ];
   const mini=SIDEBAR_STATIC.map(s=>{
     const live=lp[s.ticker];
-    return {
-      ticker:s.ticker,
-      price: live ? fmtLivePrice(s.ticker, live.price) : s.price,
-      change: live ? live.change : s.change,
-    };
+    return {ticker:s.ticker, price:live?fmtLivePrice(s.ticker,live.price):s.price, change:live?live.change:s.change};
   });
-  const sideCard={background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"16px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.06)"};
+
+  // Estilo base de cada tarjeta
+  const card={
+    background:"#FFFFFF",
+    border:"1px solid rgba(15,23,42,0.07)",
+    borderRadius:16,
+    padding:"16px",
+    marginBottom:10,
+    boxShadow:"0 2px 16px rgba(15,23,42,0.06)",
+  };
+
   return(
     <div>
 
-      {/* 🧠 AI MARKET PULSE */}
-      <div style={{...sideCard,background:"linear-gradient(145deg,rgba(37,99,235,0.06),rgba(124,58,237,0.06))",border:"1px solid rgba(37,99,235,0.2)",boxShadow:"0 2px 16px rgba(37,99,235,0.08)",cursor:"pointer"}}
-        onClick={onAI}
-        onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 0 50px rgba(59,130,246,0.12)";e.currentTarget.style.borderColor="rgba(59,130,246,0.25)";}}
-        onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 0 40px rgba(59,130,246,0.06)";e.currentTarget.style.borderColor="rgba(59,130,246,0.15)";}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-          <div style={{width:38,height:38,borderRadius:11,background:"linear-gradient(135deg,#3B82F6,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:"0 0 20px rgba(59,130,246,0.4)"}}>🧠</div>
-          <div>
+      {/* ── AI MARKET PULSE ── */}
+      <div onClick={onAI} style={{...card,
+        background:"linear-gradient(145deg,#F0F7FF,#F5F0FF)",
+        border:"1px solid rgba(99,102,241,0.18)",
+        cursor:"pointer",transition:"all 0.2s"}}
+        onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(99,102,241,0.14)";e.currentTarget.style.borderColor="rgba(99,102,241,0.3)";}}
+        onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 2px 16px rgba(15,23,42,0.06)";e.currentTarget.style.borderColor="rgba(99,102,241,0.18)";}}>
+
+        {/* Header */}
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
+          <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#3B82F6,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,boxShadow:"0 4px 14px rgba(99,102,241,0.35)"}}>🧠</div>
+          <div style={{flex:1}}>
             <div style={{fontWeight:800,color:"#0F172A",fontSize:13,letterSpacing:-0.2}}>AI Market Pulse</div>
-            <div style={{fontSize:10,color:C.bull,display:"flex",alignItems:"center",gap:4,marginTop:1}}>
-              <span style={{width:5,height:5,borderRadius:"50%",background:C.bull,display:"inline-block",boxShadow:`0 0 6px ${C.bull}`}}/>EN VIVO
+            <div style={{display:"flex",alignItems:"center",gap:5,marginTop:2}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#22C55E",display:"inline-block",boxShadow:"0 0 8px #22C55E"}}/>
+              <span style={{fontSize:10,color:"#22C55E",fontWeight:700,letterSpacing:0.5}}>EN VIVO</span>
             </div>
           </div>
         </div>
-        {/* Sentimiento */}
-        <div style={{marginBottom:10}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+
+        {/* Barra sentimiento */}
+        <div style={{marginBottom:12}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
             <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>Sentimiento IA</span>
-            <span style={{fontSize:11,color:C.bull,fontWeight:800}}>BULLISH 71%</span>
+            <span style={{fontSize:11,color:"#16A34A",fontWeight:800,background:"rgba(22,163,74,0.1)",borderRadius:20,padding:"2px 8px"}}>BULLISH 71%</span>
           </div>
-          <div style={{height:5,background:"rgba(15,23,42,0.08)",borderRadius:5,overflow:"hidden"}}>
-            <div style={{width:"71%",height:"100%",background:`linear-gradient(90deg,${C.bull},#3B82F6)`,borderRadius:5}}/>
+          <div style={{height:6,background:"rgba(15,23,42,0.07)",borderRadius:6,overflow:"hidden"}}>
+            <div style={{width:"71%",height:"100%",background:"linear-gradient(90deg,#22C55E,#3B82F6)",borderRadius:6}}/>
           </div>
         </div>
-        {/* Stocks calientes */}
-        <div style={{marginBottom:10}}>
-          <div style={{fontSize:10,color:"#475569",fontWeight:600,marginBottom:6,letterSpacing:0.5}}>STOCKS CALIENTES</div>
-          {[{t:"NVDA",d:"↑",c:C.bull},{t:"BTC",d:"↑",c:C.bull},{t:"TSLA",d:"↓",c:C.bear}].map(({t,d,c})=>(
-            <div key={t} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3px 0"}}>
-              <span style={{fontFamily:"monospace",fontSize:11,fontWeight:700,color:"#94A3B8"}}>${t}</span>
-              <span style={{fontSize:12,color:c,fontWeight:800}}>{d}</span>
-            </div>
+
+        {/* Stocks calientes — chips */}
+        <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+          {[{s:"NVDA",up:true},{s:"BTC",up:true},{s:"TSLA",up:false}].map(({s,up})=>(
+            <span key={s} style={{fontSize:10,fontWeight:700,fontFamily:"monospace",padding:"3px 8px",borderRadius:20,
+              background:up?"rgba(22,163,74,0.08)":"rgba(220,38,38,0.08)",
+              color:up?"#16A34A":"#DC2626",
+              border:`1px solid ${up?"rgba(22,163,74,0.2)":"rgba(220,38,38,0.2)"}`}}>
+              {up?"↑":"↓"} ${s}
+            </span>
           ))}
         </div>
+
         {/* Riesgo */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.15)",borderRadius:8,padding:"7px 10px"}}>
-          <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>Riesgo del mercado</span>
-          <span style={{fontSize:11,color:C.gold,fontWeight:800}}>MEDIO ⚡</span>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(245,158,11,0.07)",border:"1px solid rgba(245,158,11,0.18)",borderRadius:10,padding:"7px 12px",marginBottom:12}}>
+          <span style={{fontSize:11,color:"#78716C",fontWeight:600}}>Riesgo del mercado</span>
+          <span style={{fontSize:11,color:"#D97706",fontWeight:800}}>MEDIO ⚡</span>
         </div>
-        <div style={{marginTop:10,background:"linear-gradient(135deg,#3B82F6,#7C3AED)",borderRadius:9,padding:"8px",textAlign:"center",color:"#fff",fontSize:12,fontWeight:800,boxShadow:"0 4px 16px rgba(59,130,246,0.3)"}}>💬 Preguntar a la IA</div>
+
+        {/* CTA */}
+        <div style={{background:"linear-gradient(135deg,#3B82F6,#7C3AED)",borderRadius:10,padding:"9px",textAlign:"center",color:"#fff",fontSize:12,fontWeight:700,letterSpacing:0.2,boxShadow:"0 4px 14px rgba(99,102,241,0.3)"}}>
+          💬 Preguntar a la IA →
+        </div>
       </div>
 
-      {/* 📊 COMMUNITY vs IA */}
-      <div style={sideCard}>
-        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:10,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
-        {[{label:"Comunidad",pct:78,col:C.bull},{label:"IA",pct:61,col:C.blue}].map(({label,pct,col})=>(
-          <div key={label} style={{marginBottom:8}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-              <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>{label}</span>
-              <span style={{fontSize:11,color:col,fontWeight:800}}>BULLISH {pct}%</span>
+      {/* ── 📡 MERCADOS ── */}
+      <div style={card}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+          <span style={{fontSize:12,fontWeight:800,color:"#0F172A",letterSpacing:-0.2}}>📡 Mercados</span>
+          <span style={{fontSize:9,color:"#94A3B8",fontWeight:600,background:"#F1F5F9",borderRadius:20,padding:"2px 8px",letterSpacing:0.5}}>EN VIVO</span>
+        </div>
+        {mini.map((m,i)=>{
+          const up=m.change>=0;
+          return(
+            <div key={m.ticker} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:i<mini.length-1?"1px solid rgba(15,23,42,0.05)":"none"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:6,height:6,borderRadius:"50%",background:up?"#22C55E":"#EF4444",flexShrink:0}}/>
+                <span style={{fontWeight:700,color:"#1E293B",fontFamily:"monospace",fontSize:12,letterSpacing:0.3}}>{m.ticker}</span>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontFamily:"monospace",fontSize:11,fontWeight:600,color:"#334155"}}>{m.price}</div>
+                <div style={{fontFamily:"monospace",fontSize:10,fontWeight:700,color:up?"#16A34A":"#DC2626"}}>{fmtChg(m.change)}</div>
+              </div>
             </div>
-            <div style={{height:4,background:"rgba(15,23,42,0.08)",borderRadius:4,overflow:"hidden"}}>
-              <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:4,opacity:0.85}}/>
+          );
+        })}
+      </div>
+
+      {/* ── COMUNIDAD vs IA ── */}
+      <div style={card}>
+        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
+        {[{label:"Comunidad",pct:78,col:"#16A34A",bg:"rgba(22,163,74,0.1)"},{label:"IA Análisis",pct:61,col:"#0EA5E9",bg:"rgba(14,165,233,0.1)"}].map(({label,pct,col,bg})=>(
+          <div key={label} style={{marginBottom:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+              <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>{label}</span>
+              <span style={{fontSize:10,color:col,fontWeight:800,background:bg,borderRadius:20,padding:"2px 8px"}}>BULLISH {pct}%</span>
+            </div>
+            <div style={{height:5,background:"rgba(15,23,42,0.06)",borderRadius:5,overflow:"hidden"}}>
+              <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:5,opacity:0.9}}/>
             </div>
           </div>
         ))}
-        <div style={{fontSize:10,color:"#94A3B8",marginTop:4}}>Basado en 2,847 posts de hoy</div>
+        <div style={{fontSize:10,color:"#CBD5E1",marginTop:4,borderTop:"1px solid rgba(15,23,42,0.05)",paddingTop:8}}>Basado en 2,847 posts de hoy</div>
       </div>
 
-      {/* 😨 FEAR & GREED */}
-      <div style={sideCard}>
-        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:10}}>😨 Fear & Greed Index</div>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
-            <svg viewBox="0 0 56 56" style={{width:56,height:56,transform:"rotate(-90deg)"}}>
-              <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(15,23,42,0.09)" strokeWidth="6"/>
-              <circle cx="28" cy="28" r="22" fill="none" stroke="#00E58F" strokeWidth="6" strokeDasharray={`${0.72*138} 138`} strokeLinecap="round"/>
+      {/* ── FEAR & GREED ── */}
+      <div style={card}>
+        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12}}>Fear & Greed Index</div>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <div style={{position:"relative",width:60,height:60,flexShrink:0}}>
+            <svg viewBox="0 0 60 60" style={{width:60,height:60,transform:"rotate(-90deg)"}}>
+              <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(15,23,42,0.07)" strokeWidth="7"/>
+              <circle cx="30" cy="30" r="24" fill="none" stroke="#22C55E" strokeWidth="7"
+                strokeDasharray={`${0.72*150.8} 150.8`} strokeLinecap="round"/>
             </svg>
-            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"#fff"}}>72</div>
+            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+              <span style={{fontSize:14,fontWeight:900,color:"#0F172A",lineHeight:1}}>72</span>
+            </div>
           </div>
           <div>
-            <div style={{fontSize:14,fontWeight:900,color:C.bull}}>Greed 🟢</div>
-            <div style={{fontSize:11,color:"#475569",marginTop:2,lineHeight:1.4}}>Mercado en modo alcista. Los inversores están confiados.</div>
+            <div style={{fontSize:15,fontWeight:900,color:"#16A34A",letterSpacing:-0.3}}>Codicia 🟢</div>
+            <div style={{fontSize:10,color:"#64748B",marginTop:4,lineHeight:1.6}}>Inversores optimistas.<br/>Mercado en modo alcista.</div>
           </div>
+        </div>
+        {/* Escala */}
+        <div style={{marginTop:12,height:4,borderRadius:4,background:"linear-gradient(90deg,#EF4444,#F59E0B,#22C55E)",position:"relative"}}>
+          <div style={{position:"absolute",left:"72%",top:-4,width:12,height:12,borderRadius:"50%",background:"#fff",border:"2px solid #22C55E",boxShadow:"0 2px 6px rgba(0,0,0,0.12)",transform:"translateX(-50%)"}}/>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+          <span style={{fontSize:9,color:"#EF4444",fontWeight:600}}>Miedo</span>
+          <span style={{fontSize:9,color:"#22C55E",fontWeight:600}}>Codicia</span>
         </div>
       </div>
 
-      {/* CTA VIP si no logueado */}
-      {!user&&<div style={{...sideCard,background:"linear-gradient(145deg,rgba(124,58,237,0.1),rgba(8,13,26,0.9))",border:"1px solid rgba(124,58,237,0.2)",textAlign:"center"}}>
-        <div style={{fontSize:22,marginBottom:8}}>✦</div>
-        <h3 style={{margin:"0 0 4px",color:"#fff",fontSize:14,fontWeight:800}}>VIP Member</h3>
-        <p style={{margin:"0 0 4px",color:"#64748B",fontSize:12,lineHeight:1.5}}>Señales exclusivas, IA ilimitada y acceso a todos los datos</p>
-        <div style={{fontSize:20,fontWeight:900,color:"#fff",margin:"8px 0 4px"}}><span style={{color:C.vip}}>$9.99</span><span style={{fontSize:12,color:"#475569",fontWeight:500}}>/mes</span></div>
-        <Btn onClick={()=>window.open(STRIPE_PAYMENT_LINK,"_blank")} style={{width:"100%",padding:"9px",background:"linear-gradient(135deg,#7C3AED,#9333EA)",boxShadow:"0 0 20px rgba(124,58,237,0.3)"}}>✦ Empezar VIP →</Btn>
-        <div style={{fontSize:11,color:"#334155",marginTop:6}}>7 días gratis · Sin compromiso</div>
-      </div>}
-
-      {/* 📡 MARKETS */}
-      <div style={sideCard}>
-        <h3 style={{margin:"0 0 10px",color:"#0F172A",fontSize:12,fontWeight:800,letterSpacing:0.3}}>{t.markets}</h3>
-        {mini.map((m,i)=>(
-          <div key={m.ticker} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:i<mini.length-1?"1px solid rgba(15,23,42,0.07)":"none"}}>
-            <span style={{fontWeight:700,color:"#0F172A",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{m.ticker}</span>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontFamily:"monospace",fontSize:10,color:"#475569"}}>{m.price}</div>
-              <div style={{fontFamily:"monospace",fontSize:11,fontWeight:800,color:chgCol(m.change)}}>{fmtChg(m.change)}</div>
-            </div>
+      {/* ── CTA VIP (solo si no logueado) ── */}
+      {!user && (
+        <div style={{...card,background:"linear-gradient(145deg,#1E1B4B,#2D1B69)",border:"1px solid rgba(124,58,237,0.3)",textAlign:"center"}}>
+          <div style={{fontSize:26,marginBottom:6}}>✦</div>
+          <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>VIP Member</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</div>
+          <div style={{fontSize:22,fontWeight:900,color:"#fff",marginBottom:10}}>
+            <span style={{color:"#A78BFA"}}>$9.99</span>
+            <span style={{fontSize:12,color:"rgba(255,255,255,0.4)",fontWeight:400}}>/mes</span>
           </div>
-        ))}
-      </div>
+          <button onClick={()=>window.open(STRIPE_PAYMENT_LINK,"_blank")}
+            style={{width:"100%",padding:"10px",background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:10,color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",boxShadow:"0 6px 20px rgba(124,58,237,0.4)",fontFamily:"inherit"}}>
+            ✦ Empezar VIP →
+          </button>
+          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:8}}>7 días gratis · Sin compromiso</div>
+        </div>
+      )}
 
-      {/* 🏆 TOP TRADERS — dinámico con posts reales */}
+      {/* ── 🏆 TOP TRADERS ── */}
       {(()=>{
-        // Contar posts por usuario y construir ranking
         const countMap={};
         posts.forEach(p=>{
-          if(!p.user) return;
-          if(!countMap[p.user]) countMap[p.user]={count:0,avatar:p.avatar||"🦅",color:p.avatarColor||C.accent};
+          if(!p.user)return;
+          if(!countMap[p.user])countMap[p.user]={count:0,avatar:p.avatar||"🦅",color:p.avatarColor||C.accent};
           countMap[p.user].count++;
         });
-        const medals=["🥇","🥈","🥉"];
+        const rankColors=["#F59E0B","#94A3B8","#CD7C3F"];
         const topList=Object.entries(countMap).sort((a,b)=>b[1].count-a[1].count).slice(0,3);
-        if(topList.length===0)return null;
+        if(!topList.length)return null;
         return(
-          <div style={sideCard}>
-            <h3 style={{margin:"0 0 10px",color:"#0F172A",fontSize:12,fontWeight:800}}>🏆 Top Traders Activos</h3>
+          <div style={card}>
+            <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12,letterSpacing:-0.2}}>🏆 Top Traders</div>
             {topList.map(([name,info],i)=>(
-              <div key={name} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<topList.length-1?"1px solid rgba(15,23,42,0.07)":"none"}}>
-                <span style={{fontSize:16,minWidth:20}}>{medals[i]}</span>
+              <div key={name} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<topList.length-1?"1px solid rgba(15,23,42,0.05)":"none"}}>
+                <div style={{width:20,height:20,borderRadius:6,background:`${rankColors[i]}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:rankColors[i],flexShrink:0}}>#{i+1}</div>
                 <AvatarBubble emoji={info.avatar||"🦅"} color={info.color||C.accent} size={28}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"#0F172A",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name}</div>
-                  <div style={{fontSize:10,color:"#64748B"}}>{info.count} post{info.count!==1?"s":""} hoy</div>
+                  <div style={{fontSize:10,color:"#94A3B8"}}>{info.count} post{info.count!==1?"s":""} hoy</div>
                 </div>
-                <span style={{color:C.accent,fontSize:11,fontWeight:800}}>#{i+1}</span>
               </div>
             ))}
           </div>
         );
       })()}
 
-      {/* WHO TO FOLLOW */}
+      {/* ── A QUIÉN SEGUIR ── */}
       {(()=>{
         const sug=MOCK_USERS.filter(u=>u.id!==user?.id&&!following.includes(u.id)).slice(0,3);
         if(!sug.length)return null;
         return(
-          <div style={sideCard}>
-            <h3 style={{margin:"0 0 10px",color:"#0F172A",fontSize:12,fontWeight:800}}>{t.whofollow}</h3>
+          <div style={card}>
+            <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12,letterSpacing:-0.2}}>{t.whofollow}</div>
             {sug.map((u,i)=>(
-              <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<sug.length-1?"1px solid rgba(15,23,42,0.07)":"none"}}>
-                <div style={{cursor:"pointer"}} onClick={()=>onProfile(u)}><AvatarBubble emoji={u.emoji} color={u.color} size={30}/></div>
+              <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<sug.length-1?"1px solid rgba(15,23,42,0.05)":"none"}}>
+                <div style={{cursor:"pointer"}} onClick={()=>onProfile(u)}>
+                  <AvatarBubble emoji={u.emoji} color={u.color} size={30}/>
+                </div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"#0F172A",fontSize:12,cursor:"pointer"}} onClick={()=>onProfile(u)}>{u.name}</div>
-                  <div style={{color:"#64748B",fontSize:10}}>{fmtNum(u.followers)} {t.followers}</div>
+                  <div style={{color:"#94A3B8",fontSize:10}}>{fmtNum(u.followers)} {t.followers}</div>
                 </div>
                 <Btn variant="follow" small onClick={()=>user?onFollow(u.id):onNeedAuth()}>{t.follow}</Btn>
               </div>
@@ -3043,7 +3093,11 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           </div>
         );
       })()}
-      <div style={{background:"rgba(245,158,11,0.05)",border:"1px solid rgba(245,158,11,0.12)",borderRadius:10,padding:"10px 14px",color:"#78716C",fontSize:10,lineHeight:1.7}}><strong style={{color:C.gold}}>⚠️</strong> {t.disclaimer}</div>
+
+      {/* ── DISCLAIMER ── */}
+      <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
+        <strong>⚠️</strong> {t.disclaimer}
+      </div>
     </div>
   );
 }
