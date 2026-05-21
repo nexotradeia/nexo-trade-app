@@ -2515,7 +2515,7 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 // ── LEFT SIDEBAR — Perfil + Stats estilo Socimo ───────────────────────────────
-function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate}){
+function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
   const t=LANGS[lang];
   const sCard={background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,overflow:"hidden",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)"};
   const lvl = user ? getLevel(user.points) : null;
@@ -2559,6 +2559,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate}){
           {[
             {icon:"🔥",label:"Feed",               idx:0},
             {icon:"📊",label:"Tops Traders",        idx:1},
+            {icon:"📈",label:"Acciones VIP",        idx:3},
             {icon:"📅",label:"Earnings",            idx:6},
             {icon:"📰",label:"Noticias",            idx:5},
             {icon:"🔥",label:"Trending",            idx:7},
@@ -2576,6 +2577,14 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate}){
         </div>
       </div>
 
+      {/* Logout button — siempre visible */}
+      {user && onLogout && (
+        <div style={sCard}>
+          <button onClick={onLogout} style={{width:"100%",background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:10,padding:"10px",color:"#FF4D6A",fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+            🚪 Cerrar sesión
+          </button>
+        </div>
+      )}
       {/* NexoTrade info */}
       <div style={{padding:"0 4px"}}>
         <div style={{fontSize:11,color:"#94A3B8",lineHeight:1.8}}>
@@ -3697,17 +3706,26 @@ const NAV_ITEMS = (t) => [
 const ADMIN_EMAILS_CONST = ['mariangat26@gmail.com','mariagalarraga2013@gmail.com'];
 const _getAdminStatus = () => {
   try {
-    // Leer email del token JWT de Supabase directamente
-    const raw = localStorage.getItem("nexotrade-session");
-    if(raw){
-      const session = JSON.parse(raw);
-      const email = session?.user?.email || session?.currentSession?.user?.email || "";
-      if(ADMIN_EMAILS_CONST.includes(email)) return true;
+    // Intentar todos los métodos posibles para leer el email
+    const keys = Object.keys(localStorage);
+    for(const key of keys){
+      try {
+        const raw = localStorage.getItem(key);
+        if(!raw || raw[0]!=='{') continue;
+        const obj = JSON.parse(raw);
+        const email = obj?.user?.email 
+          || obj?.currentSession?.user?.email 
+          || obj?.email || "";
+        if(email && ADMIN_EMAILS_CONST.includes(email)) return true;
+        // Decodificar JWT si existe access_token
+        if(obj?.access_token){
+          const payload = JSON.parse(atob(obj.access_token.split('.')[1]));
+          if(ADMIN_EMAILS_CONST.includes(payload?.email||"")) return true;
+        }
+      } catch {}
     }
-    // Fallback: leer del usuario guardado
-    const u = JSON.parse(localStorage.getItem("nexotrade-user") || "null");
-    return ADMIN_EMAILS_CONST.includes(u?.email || "");
-  } catch { return false; }
+  } catch {}
+  return false;
 };
 const _getSavedUser = () => {
   try { return JSON.parse(localStorage.getItem("nexotrade-user") || "null"); }
@@ -4244,7 +4262,7 @@ export default function App(){
 
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}}/></div>
+        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{await supabase.auth.signOut();saveUser(null);setIsPremium(false);setFollow([]);setShowLanding(true);}}/></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
       </div>
