@@ -1,10 +1,11 @@
-// NexoTrade Service Worker — v1.0
-const CACHE_NAME = 'nexotrade-v1';
+// NexoTrade Service Worker — v2.0
+const CACHE_NAME = 'nexotrade-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/logo.png',
-  '/logo2.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/logo_nexo.png',
   '/logo_foro.jpg',
   '/favicon.svg',
   '/manifest.json',
