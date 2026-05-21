@@ -3288,7 +3288,7 @@ function PortfolioEvolution(){
 function PriceAlerts(){
   const [alerts,setAlerts]=useState(()=>{try{return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]");}catch{return[];}});
   const [ticker,setTicker]=useState(""); const [price,setPrice]=useState(""); const [cond,setCond]=useState("above");
-  const {prices}=useContext(PriceContext)||{prices:{}};
+  const prices=useContext(PriceCtx)||{};
 
   const saveAlerts=(a)=>{ setAlerts(a); localStorage.setItem("nexotrade-alerts",JSON.stringify(a)); };
   const addAlert=()=>{
