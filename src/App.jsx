@@ -1377,87 +1377,79 @@ function GifPicker({onSelect,onClose}){
 
 // ── TICKER PAGE (página completa de una acción) ───────────────────────────────
 function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
-  // Generar 12 meses de datos de sentimiento simulados pero realistas
-  const months=["Jun","Jul","Ago","Sep","Oct","Nov","Dic","Ene","Feb","Mar","Abr","May"];
   const seed=ticker.split("").reduce((a,c)=>a+c.charCodeAt(0),0);
-  const data=months.map((_,i)=>{
-    const base=50+Math.sin((i+seed)*0.7)*18+Math.cos((i+seed)*0.4)*10;
-    const bull=Math.min(85,Math.max(20,Math.round(base)));
-    return {month:months[i],bull,bear:100-bull};
-  });
-  const maxBull=Math.max(...data.map(d=>d.bull));
-  const avgBull=Math.round(data.reduce((a,d)=>a+d.bull,0)/data.length);
-  const trend=data[11].bull>data[0].bull?"alcista":"bajista";
+  const rnd=(offset,min,max)=>Math.min(max,Math.max(min,Math.round(50+Math.sin((seed+offset)*0.9)*20+Math.cos((seed+offset)*0.5)*12)));
+
+  // Periodos: 1 día siempre visible, el resto premium
+  const periods=[
+    {label:"Hace 24h",    key:"1d",  bull:rnd(1,35,75), free:true},
+    {label:"Hace 1 sem",  key:"1w",  bull:rnd(2,30,78), free:false},
+    {label:"Hace 1 mes",  key:"1m",  bull:rnd(3,28,80), free:false},
+    {label:"Hace 3 meses",key:"3m",  bull:rnd(5,25,82), free:false},
+    {label:"Hace 6 meses",key:"6m",  bull:rnd(8,22,85), free:false},
+    {label:"Hace 1 año",  key:"1y",  bull:rnd(13,20,85),free:false},
+  ];
 
   return(
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",marginBottom:20,position:"relative"}}>
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",marginBottom:20}}>
       {/* Header */}
-      <div style={{padding:"14px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.08),rgba(59,130,246,0.05))",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{padding:"13px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.07),rgba(59,130,246,0.04))",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:18}}>📊</span>
+          <span style={{fontSize:17}}>🧭</span>
           <div>
-            <div style={{fontWeight:800,fontSize:14,color:C.text}}>Sentimiento del Mercado — 12 meses</div>
-            <div style={{fontSize:11,color:C.muted}}>% Alcista vs Bajista · Comunidad NexoTrade</div>
+            <div style={{fontWeight:800,fontSize:14,color:C.text}}>Sentimiento</div>
+            <div style={{fontSize:11,color:C.muted}}>% de usuarios alcistas en el feed de ${ticker}</div>
           </div>
         </div>
-        {isPremium&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ VIP</span>}
+        {isPremium
+          ? <span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ VIP</span>
+          : <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}}>✦ Ver todo — VIP</button>
+        }
       </div>
 
-      {/* Contenido — bloqueado si no es premium */}
-      <div style={{position:"relative"}}>
-        {/* Chart siempre renderizado */}
-        <div style={{padding:"16px 18px 8px"}}>
-          {/* Stats resumen */}
-          <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap"}}>
-            {[
-              {label:"Promedio alcista",value:`${avgBull}%`,col:C.bull,icon:"🐂"},
-              {label:"Máximo alcista",value:`${maxBull}%`,col:"#3B82F6",icon:"📈"},
-              {label:"Tendencia 1 año",value:trend,col:trend==="alcista"?C.bull:C.bear,icon:trend==="alcista"?"↗":"↘"},
-            ].map(({label,value,col,icon})=>(
-              <div key={label} style={{flex:1,minWidth:90,background:C.card2,borderRadius:10,padding:"10px 12px",border:`1px solid ${C.border}`}}>
-                <div style={{fontSize:10,color:C.muted,marginBottom:3}}>{icon} {label}</div>
-                <div style={{fontSize:15,fontWeight:800,color:col,fontFamily:"monospace"}}>{value}</div>
-              </div>
-            ))}
-          </div>
-          {/* Barras por mes */}
-          <div style={{display:"flex",gap:4,alignItems:"flex-end",height:90}}>
-            {data.map(({month,bull},i)=>(
-              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                <div style={{fontSize:9,color:bull>50?C.bull:C.bear,fontWeight:700}}>{bull}%</div>
-                <div style={{width:"100%",display:"flex",flexDirection:"column",gap:1,height:60}}>
-                  <div style={{height:`${bull*0.6}px`,background:`linear-gradient(180deg,${bull>50?"#00E58F":"#FF4D6A"},${bull>50?"#00a87f":"#cc3355"})`,borderRadius:"3px 3px 0 0",minHeight:4}}/>
-                  <div style={{height:`${(100-bull)*0.6}px`,background:"rgba(255,77,106,0.25)",borderRadius:"0 0 3px 3px",minHeight:4}}/>
-                </div>
-                <div style={{fontSize:8,color:C.muted,fontWeight:600}}>{month}</div>
-              </div>
-            ))}
-          </div>
-          {/* Leyenda */}
-          <div style={{display:"flex",gap:12,marginTop:10,fontSize:10,color:C.muted}}>
-            <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:C.bull,display:"inline-block"}}/>Alcista</span>
-            <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:"rgba(255,77,106,0.4)",display:"inline-block"}}/>Bajista</span>
-          </div>
-        </div>
+      {/* Filas de periodos */}
+      <div>
+        {periods.map(({label,key,bull,free},i)=>{
+          const visible=free||isPremium;
+          const isBull=bull>=50;
+          return(
+            <div key={key} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 18px",borderBottom:i<periods.length-1?`1px solid ${C.border}`:"none",background:free&&i===0?"rgba(0,229,143,0.02)":"transparent"}}>
+              {/* Etiqueta */}
+              <div style={{width:110,fontSize:12,color:C.muted,fontWeight:600,flexShrink:0}}>{label}</div>
 
-        {/* Overlay premium si no es VIP */}
-        {!isPremium&&(
-          <div style={{position:"absolute",inset:0,backdropFilter:"blur(6px)",WebkitBackdropFilter:"blur(6px)",background:"rgba(15,23,42,0.55)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",borderRadius:0,zIndex:10}}>
-            <div style={{background:"rgba(15,23,42,0.95)",border:"1px solid rgba(124,58,237,0.4)",borderRadius:16,padding:"24px 28px",textAlign:"center",maxWidth:280,boxShadow:"0 20px 60px rgba(0,0,0,0.4)"}}>
-              <div style={{fontSize:32,marginBottom:8}}>🔒</div>
-              <div style={{fontWeight:900,fontSize:16,color:"#fff",marginBottom:6}}>Función Premium</div>
-              <div style={{fontSize:12,color:"rgba(255,255,255,0.7)",lineHeight:1.6,marginBottom:16}}>
-                El historial de sentimiento de 12 meses es exclusivo para miembros VIP de NexoTrade.
-              </div>
-              <button onClick={onNeedPremium}
-                style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",color:"#fff",border:"none",borderRadius:10,padding:"10px 22px",fontWeight:800,fontSize:13,cursor:"pointer",width:"100%",boxShadow:"0 4px 16px rgba(124,58,237,0.4)"}}>
-                ✦ Hazte VIP — $9.99/mes
-              </button>
-              <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginTop:8}}>Cancela cuando quieras</div>
+              {visible?(
+                <>
+                  {/* Pill alcista/bajista */}
+                  <div style={{background:isBull?"rgba(0,229,143,0.1)":"rgba(255,77,106,0.1)",border:`1px solid ${isBull?"rgba(0,229,143,0.3)":"rgba(255,77,106,0.3)"}`,borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:800,color:isBull?C.bull:C.bear,minWidth:80,textAlign:"center",flexShrink:0}}>
+                    {isBull?"🐂 Alcista":"🐻 Bajista"}
+                  </div>
+                  {/* Barra de progreso */}
+                  <div style={{flex:1,height:8,background:C.card2,borderRadius:20,overflow:"hidden"}}>
+                    <div style={{width:`${bull}%`,height:"100%",background:isBull?"linear-gradient(90deg,#00E58F,#00c49a)":"linear-gradient(90deg,#FF4D6A,#cc3355)",borderRadius:20,transition:"width 0.6s ease"}}/>
+                  </div>
+                  {/* Porcentaje */}
+                  <div style={{fontSize:12,fontWeight:800,color:isBull?C.bull:C.bear,fontFamily:"monospace",minWidth:38,textAlign:"right"}}>{bull}%</div>
+                </>
+              ):(
+                <>
+                  {/* Bloqueado */}
+                  <div style={{background:"rgba(124,58,237,0.08)",border:"1px solid rgba(124,58,237,0.2)",borderRadius:20,padding:"4px 14px",fontSize:11,fontWeight:800,color:"#7C3AED",flexShrink:0,display:"flex",alignItems:"center",gap:5}}>
+                    🔒 Premium
+                  </div>
+                  <div style={{flex:1,height:8,background:`repeating-linear-gradient(90deg,rgba(124,58,237,0.1) 0px,rgba(124,58,237,0.1) 8px,transparent 8px,transparent 14px)`,borderRadius:20}}/>
+                  <button onClick={onNeedPremium} style={{fontSize:10,fontWeight:700,color:"#7C3AED",background:"transparent",border:"none",cursor:"pointer",whiteSpace:"nowrap",textDecoration:"underline"}}>Ver →</button>
+                </>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })}
       </div>
+      {!isPremium&&(
+        <div style={{padding:"12px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.06),rgba(147,51,234,0.04))",borderTop:`1px solid ${C.border}`,textAlign:"center"}}>
+          <span style={{fontSize:12,color:C.muted}}>Desbloquea el sentimiento histórico completo con </span>
+          <span onClick={onNeedPremium} style={{fontSize:12,color:"#7C3AED",fontWeight:800,cursor:"pointer"}}>NexoTrade VIP ✦</span>
+        </div>
+      )}
     </div>
   );
 }
