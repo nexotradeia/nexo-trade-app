@@ -3426,29 +3426,142 @@ function ExportData({posts=[],user}){
 
 
 // ── ACCIONES VIP PAGE ─────────────────────────────────────────────────────────
-function AccionesVIPPage({isPremium, onNeedPremium}){
+function AdminPicksModal({onClose}){
+  const categorias=["corto","largo","dividendos","crypto"];
+  const [cat,setCat]=useState("corto");
+  const [form,setForm]=useState({ticker:"",nombre:"",tipo:"COMPRA",entrada:"",target:"",stop_loss:"",confianza:80,razon:"",yield_div:"",sector:"",rating:"★★★★☆"});
+  const [saving,setSaving]=useState(false);
+  const [ok,setOk]=useState(false);
+
+  const save=async()=>{
+    if(!form.ticker||!form.nombre) return;
+    setSaving(true);
+    const payload={...form,ticker:form.ticker.toUpperCase(),categoria:cat,semana:new Date().toISOString().split("T")[0],activo:true};
+    if(cat==="dividendos"){delete payload.tipo;delete payload.target;delete payload.stop_loss;delete payload.confianza;delete payload.razon;}
+    else{delete payload.yield_div;delete payload.sector;delete payload.rating;}
+    await supabase.from("weekly_picks").insert(payload);
+    setSaving(false);setOk(true);
+    setTimeout(()=>setOk(false),2000);
+    setForm({ticker:"",nombre:"",tipo:"COMPRA",entrada:"",target:"",stop_loss:"",confianza:80,razon:"",yield_div:"",sector:"",rating:"★★★★☆"});
+  };
+
+  const clearWeek=async()=>{
+    if(!window.confirm("¿Borrar todos los picks de esta semana?")) return;
+    await supabase.from("weekly_picks").delete().eq("semana",new Date().toISOString().split("T")[0]);
+    alert("Picks borrados. Agrega los nuevos.");
+  };
+
+  const inp={width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px 12px",color:"#F1F5F9",fontSize:13,outline:"none",boxSizing:"border-box"};
+  const lbl={display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:0.5};
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div style={{background:"#0B1020",border:"1px solid rgba(255,255,255,0.1)",borderRadius:20,width:"100%",maxWidth:520,maxHeight:"90vh",overflowY:"auto",padding:24}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div>
+            <div style={{fontWeight:900,color:"#F1F5F9",fontSize:18}}>🛠️ Admin — Picks Semanales</div>
+            <div style={{fontSize:11,color:"#64748B",marginTop:2}}>Solo visible para administradores</div>
+          </div>
+          <button onClick={onClose} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"#94A3B8",cursor:"pointer",fontSize:13}}>✕ Cerrar</button>
+        </div>
+
+        {/* Categoría */}
+        <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
+          {categorias.map(c=>(
+            <button key={c} onClick={()=>setCat(c)} style={{background:cat===c?"rgba(0,168,255,0.2)":"transparent",border:`1px solid ${cat===c?"#00A8FF":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"6px 14px",color:cat===c?"#00A8FF":"#64748B",cursor:"pointer",fontSize:12,fontWeight:700,textTransform:"capitalize"}}>
+              {c==="corto"?"⚡ Corto":c==="largo"?"🏦 Largo":c==="dividendos"?"💰 Dividendos":"₿ Crypto"}
+            </button>
+          ))}
+        </div>
+
+        {/* Campos comunes */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+          <div><label style={lbl}>Ticker</label><input style={inp} value={form.ticker} onChange={e=>setForm(f=>({...f,ticker:e.target.value.toUpperCase()}))} placeholder="AAPL"/></div>
+          <div><label style={lbl}>Nombre</label><input style={inp} value={form.nombre} onChange={e=>setForm(f=>({...f,nombre:e.target.value}))} placeholder="Apple Inc."/></div>
+        </div>
+
+        {cat!=="dividendos" ? <>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10}}>
+            <div><label style={lbl}>Tipo</label>
+              <select style={{...inp}} value={form.tipo} onChange={e=>setForm(f=>({...f,tipo:e.target.value}))}>
+                <option value="COMPRA">📈 COMPRA</option><option value="VENTA">📉 VENTA</option>
+              </select>
+            </div>
+            <div><label style={lbl}>Entrada</label><input style={inp} value={form.entrada} onChange={e=>setForm(f=>({...f,entrada:e.target.value}))} placeholder="$190"/></div>
+            <div><label style={lbl}>Confianza %</label><input style={inp} type="number" min="1" max="100" value={form.confianza} onChange={e=>setForm(f=>({...f,confianza:parseInt(e.target.value)||80}))}/></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            <div><label style={lbl}>Target</label><input style={inp} value={form.target} onChange={e=>setForm(f=>({...f,target:e.target.value}))} placeholder="$220"/></div>
+            <div><label style={lbl}>Stop Loss</label><input style={inp} value={form.stop_loss} onChange={e=>setForm(f=>({...f,stop_loss:e.target.value}))} placeholder="$175"/></div>
+          </div>
+          <div style={{marginBottom:16}}><label style={lbl}>Razonamiento</label><textarea style={{...inp,resize:"vertical",minHeight:60}} value={form.razon} onChange={e=>setForm(f=>({...f,razon:e.target.value}))} placeholder="¿Por qué este pick esta semana?"/></div>
+        </> : <>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:16}}>
+            <div><label style={lbl}>Precio</label><input style={inp} value={form.entrada} onChange={e=>setForm(f=>({...f,entrada:e.target.value}))} placeholder="$152"/></div>
+            <div><label style={lbl}>Yield anual</label><input style={inp} value={form.yield_div} onChange={e=>setForm(f=>({...f,yield_div:e.target.value}))} placeholder="3.2%"/></div>
+            <div><label style={lbl}>Sector</label><input style={inp} value={form.sector} onChange={e=>setForm(f=>({...f,sector:e.target.value}))} placeholder="Salud"/></div>
+          </div>
+          <div style={{marginBottom:16}}><label style={lbl}>Rating</label>
+            <select style={{...inp}} value={form.rating} onChange={e=>setForm(f=>({...f,rating:e.target.value}))}>
+              {["★★★★★","★★★★☆","★★★☆☆","★★☆☆☆","★☆☆☆☆"].map(r=><option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+        </>}
+
+        <div style={{display:"flex",gap:10}}>
+          <button onClick={save} disabled={saving} style={{flex:1,background:ok?"#00D26A":"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer"}}>
+            {saving?"Guardando...":ok?"✅ Guardado!":"+ Agregar Pick"}
+          </button>
+          <button onClick={clearWeek} style={{background:"rgba(255,77,106,0.1)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:10,padding:"12px 16px",color:"#FF4D6A",fontSize:13,fontWeight:700,cursor:"pointer"}}>🗑️ Limpiar semana</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
+  const [picks,setPicks]=useState(null);
+  const [showAdmin,setShowAdmin]=useState(false);
   const semana = new Date().toLocaleDateString("es",{day:"numeric",month:"long",year:"numeric"});
-  const picks = {
+
+  // Picks hardcodeados como fallback mientras carga o si no hay en DB
+  const FALLBACK = {
     corto:[
-      {ticker:"NVDA", nombre:"NVIDIA",  tipo:"COMPRA", entrada:"$875",  target:"$960",  stop:"$840",  conf:92, razon:"IA ciclo alcista, earnings sólidos"},
-      {ticker:"META", nombre:"Meta",    tipo:"COMPRA", entrada:"$490",  target:"$540",  stop:"$470",  conf:88, razon:"Monetización de IA en WhatsApp/Instagram"},
-      {ticker:"TSLA", nombre:"Tesla",   tipo:"VENTA",  entrada:"$178",  target:"$155",  stop:"$188",  conf:74, razon:"Presión de márgenes y competencia China"},
+      {ticker:"NVDA",nombre:"NVIDIA",  tipo:"COMPRA",entrada:"$875", target:"$960", stop_loss:"$840", confianza:92,razon:"IA ciclo alcista, earnings sólidos"},
+      {ticker:"META",nombre:"Meta",    tipo:"COMPRA",entrada:"$490", target:"$540", stop_loss:"$470", confianza:88,razon:"Monetización de IA en WhatsApp/Instagram"},
+      {ticker:"TSLA",nombre:"Tesla",   tipo:"VENTA", entrada:"$178", target:"$155", stop_loss:"$188", confianza:74,razon:"Presión de márgenes y competencia China"},
     ],
     largo:[
-      {ticker:"AAPL", nombre:"Apple",   tipo:"COMPRA", entrada:"$189",  target:"$230",  stop:"$175",  conf:85, razon:"Superciclo iPhone con IA integrada"},
-      {ticker:"AMZN", nombre:"Amazon",  tipo:"COMPRA", entrada:"$185",  target:"$220",  stop:"$170",  conf:83, razon:"AWS crecimiento acelerado con IA"},
-      {ticker:"MSFT", nombre:"Microsoft",tipo:"COMPRA",entrada:"$415",  target:"$480",  stop:"$395",  conf:87, razon:"Copilot integrado en toda la suite Office"},
+      {ticker:"AAPL",nombre:"Apple",   tipo:"COMPRA",entrada:"$189", target:"$230", stop_loss:"$175", confianza:85,razon:"Superciclo iPhone con IA integrada"},
+      {ticker:"AMZN",nombre:"Amazon",  tipo:"COMPRA",entrada:"$185", target:"$220", stop_loss:"$170", confianza:83,razon:"AWS crecimiento acelerado con IA"},
+      {ticker:"MSFT",nombre:"Microsoft",tipo:"COMPRA",entrada:"$415",target:"$480", stop_loss:"$395", confianza:87,razon:"Copilot integrado en toda la suite Office"},
     ],
     dividendos:[
-      {ticker:"JNJ",  nombre:"J&J",     yield:"3.2%",  precio:"$152",  sector:"Salud",  rating:"★★★★★"},
-      {ticker:"KO",   nombre:"Coca-Cola",yield:"3.0%",  precio:"$63",   sector:"Consumo",rating:"★★★★☆"},
+      {ticker:"JNJ",nombre:"J&J",       yield_div:"3.2%",entrada:"$152",sector:"Salud",   rating:"★★★★★"},
+      {ticker:"KO", nombre:"Coca-Cola",  yield_div:"3.0%",entrada:"$63", sector:"Consumo", rating:"★★★★☆"},
     ],
     crypto:[
-      {ticker:"BTC",  nombre:"Bitcoin", tipo:"COMPRA", entrada:"$67,000",target:"$80,000",stop:"$62,000",conf:79,razon:"Halving + ETF flujos positivos"},
-      {ticker:"ETH",  nombre:"Ethereum",tipo:"COMPRA", entrada:"$3,500", target:"$4,500", stop:"$3,200", conf:75,razon:"Actualización Pectra + staking"},
+      {ticker:"BTC",nombre:"Bitcoin",  tipo:"COMPRA",entrada:"$67,000",target:"$80,000",stop_loss:"$62,000",confianza:79,razon:"Halving + ETF flujos positivos"},
+      {ticker:"ETH",nombre:"Ethereum", tipo:"COMPRA",entrada:"$3,500", target:"$4,500", stop_loss:"$3,200", confianza:75,razon:"Actualización Pectra + staking"},
     ],
   };
 
+  useEffect(()=>{
+    const loadPicks=async()=>{
+      const hoy=new Date().toISOString().split("T")[0];
+      const {data,error}=await supabase.from("weekly_picks").select("*").eq("activo",true).eq("semana",hoy).order("id");
+      if(!error && data && data.length>0){
+        const grouped={corto:[],largo:[],dividendos:[],crypto:[]};
+        data.forEach(p=>{ if(grouped[p.categoria]) grouped[p.categoria].push(p); });
+        setPicks(grouped);
+      } else {
+        setPicks(FALLBACK);
+      }
+    };
+    loadPicks();
+  },[showAdmin]);
+
+  const data = picks || FALLBACK;
   const C2={bull:"#00D26A",bear:"#FF4D6A",card:"rgba(10,16,30,0.98)",border:"rgba(255,255,255,0.08)"};
 
   if(!isPremium) return(
@@ -3459,8 +3572,8 @@ function AccionesVIPPage({isPremium, onNeedPremium}){
         Cada semana nuestro equipo selecciona <strong style={{color:"#F1F5F9"}}>10 acciones</strong> con mayor potencial — corto plazo, largo plazo, dividendos y crypto.
       </p>
       <div style={{background:"rgba(124,58,237,0.08)",border:"1px solid rgba(124,58,237,0.25)",borderRadius:16,padding:"20px 24px",marginBottom:28,textAlign:"left"}}>
-        {["📈 Top 3 corto plazo con entrada y stop loss","🏦 Top 3 largo plazo con análisis fundamental","💰 Top 2 dividendos con yield y rating","₿ Top 2 crypto con análisis técnico","🧠 Razonamiento detrás de cada pick"].map(f=>(
-          <div key={f} style={{display:"flex",alignItems:"center",gap:10,padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+        {["⚡ Top 3 corto plazo con entrada y stop loss","🏦 Top 3 largo plazo con análisis fundamental","💰 Top 2 dividendos con yield y rating","₿ Top 2 crypto con análisis técnico"].map(f=>(
+          <div key={f} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
             <span style={{fontSize:14}}>{f.split(" ")[0]}</span>
             <span style={{fontSize:13,color:"#CBD5E1"}}>{f.slice(f.indexOf(" ")+1)}</span>
           </div>
@@ -3491,22 +3604,20 @@ function AccionesVIPPage({isPremium, onNeedPremium}){
             <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#F1F5F9"}}>${p.ticker}</span>
             <span style={{fontSize:12,color:"#64748B",marginLeft:8}}>{p.nombre}</span>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?C2.bull:C2.bear,border:`1px solid ${bull?C2.bull+"44":C2.bear+"44"}`,borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:800}}>
-              {bull?"▲":"▼"} {p.tipo}
-            </span>
-            <span style={{background:"rgba(245,158,11,0.1)",color:"#F59E0B",borderRadius:6,padding:"3px 8px",fontSize:11,fontWeight:700}}>{p.conf}%</span>
+          <div style={{display:"flex",gap:8}}>
+            <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?C2.bull:C2.bear,border:`1px solid ${bull?C2.bull+"44":C2.bear+"44"}`,borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:800}}>{bull?"▲":"▼"} {p.tipo}</span>
+            <span style={{background:"rgba(245,158,11,0.1)",color:"#F59E0B",borderRadius:6,padding:"3px 8px",fontSize:11,fontWeight:700}}>{p.confianza}%</span>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-          {[["Entrada",p.entrada,"#CBD5E1"],["Target",p.target,C2.bull],["Stop",p.stop,C2.bear]].map(([l,v,c])=>(
+          {[["Entrada",p.entrada,"#CBD5E1"],["Target",p.target,C2.bull],["Stop",p.stop_loss,C2.bear]].map(([l,v,c])=>(
             <div key={l} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"8px 10px",textAlign:"center"}}>
               <div style={{fontSize:9,color:"#475569",fontWeight:700,marginBottom:3,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
               <div style={{fontFamily:"monospace",fontWeight:800,color:c,fontSize:14}}>{v}</div>
             </div>
           ))}
         </div>
-        <div style={{fontSize:12,color:"#94A3B8",fontStyle:"italic",lineHeight:1.5}}>💡 {p.razon}</div>
+        <div style={{fontSize:12,color:"#94A3B8",fontStyle:"italic"}}>💡 {p.razon}</div>
       </div>
     );
   };
@@ -3520,7 +3631,7 @@ function AccionesVIPPage({isPremium, onNeedPremium}){
           <div style={{fontSize:11,color:"#94A3B8",marginTop:4}}>{p.sector}</div>
         </div>
         <div style={{textAlign:"right"}}>
-          <div style={{fontWeight:900,color:"#F59E0B",fontSize:22}}>{p.yield}</div>
+          <div style={{fontWeight:900,color:"#F59E0B",fontSize:22}}>{p.yield_div}</div>
           <div style={{fontSize:11,color:"#64748B"}}>dividendo anual</div>
           <div style={{color:"#F59E0B",fontSize:13,marginTop:2}}>{p.rating}</div>
         </div>
@@ -3530,48 +3641,43 @@ function AccionesVIPPage({isPremium, onNeedPremium}){
 
   return(
     <div style={{maxWidth:680,margin:"0 auto"}}>
+      {showAdmin && <AdminPicksModal onClose={()=>setShowAdmin(false)}/>}
+
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.15),rgba(0,168,255,0.08))",border:"1px solid rgba(124,58,237,0.2)",borderRadius:16,padding:"20px 24px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-            <span style={{background:"rgba(124,58,237,0.2)",color:"#A78BFA",border:"1px solid rgba(124,58,237,0.3)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>✦ EXCLUSIVO VIP</span>
-          </div>
-          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:20,margin:"4px 0 2px"}}>Picks de la Semana</h2>
+          <span style={{background:"rgba(124,58,237,0.2)",color:"#A78BFA",border:"1px solid rgba(124,58,237,0.3)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>✦ EXCLUSIVO VIP</span>
+          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:20,margin:"6px 0 2px"}}>Picks de la Semana</h2>
           <div style={{fontSize:12,color:"#64748B"}}>Actualizado: {semana}</div>
         </div>
-        <div style={{textAlign:"center",background:"rgba(0,0,0,0.3)",borderRadius:12,padding:"12px 16px"}}>
-          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:28}}>10</div>
-          <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>PICKS</div>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
+          <div style={{textAlign:"center",background:"rgba(0,0,0,0.3)",borderRadius:12,padding:"10px 16px"}}>
+            <div style={{fontWeight:900,color:"#F1F5F9",fontSize:28}}>10</div>
+            <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>PICKS</div>
+          </div>
+          {isAdmin && <button onClick={()=>setShowAdmin(true)} style={{background:"rgba(0,168,255,0.15)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,padding:"6px 12px",color:"#00A8FF",fontSize:11,fontWeight:700,cursor:"pointer"}}>✏️ Editar picks</button>}
         </div>
       </div>
 
-      {/* Corto Plazo */}
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="⚡" title="Corto Plazo" sub="Horizonte 1-4 semanas · Momentum y técnico"/>
-        {picks.corto.map(p=><PickCard key={p.ticker} p={p}/>)}
+        {data.corto.map(p=><PickCard key={p.ticker} p={p}/>)}
       </div>
-
-      {/* Largo Plazo */}
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="🏦" title="Largo Plazo" sub="Horizonte 6-18 meses · Valor y fundamentales"/>
-        {picks.largo.map(p=><PickCard key={p.ticker} p={p}/>)}
+        {data.largo.map(p=><PickCard key={p.ticker} p={p}/>)}
       </div>
-
-      {/* Dividendos */}
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="💰" title="Dividendos" sub="Ingresos pasivos · Alta rentabilidad por dividendo"/>
-        {picks.dividendos.map(p=><DivCard key={p.ticker} p={p}/>)}
+        {data.dividendos.map(p=><DivCard key={p.ticker} p={p}/>)}
       </div>
-
-      {/* Crypto */}
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="₿" title="Crypto" sub="Alta volatilidad · Solo con capital que puedas perder"/>
-        {picks.crypto.map(p=><PickCard key={p.ticker} p={p}/>)}
+        {data.crypto.map(p=><PickCard key={p.ticker} p={p}/>)}
       </div>
 
-      {/* Disclaimer */}
       <div style={{background:"rgba(245,158,11,0.05)",border:"1px solid rgba(245,158,11,0.15)",borderRadius:12,padding:"14px 18px",fontSize:11,color:"#94A3B8",lineHeight:1.7}}>
-        ⚠️ <strong style={{color:"#F59E0B"}}>Disclaimer:</strong> Estos picks son análisis educativo y no constituyen consejo financiero. Siempre haz tu propia investigación (DYOR) antes de invertir. Las inversiones conllevan riesgo de pérdida de capital.
+        ⚠️ <strong style={{color:"#F59E0B"}}>Disclaimer:</strong> Estos picks son análisis educativo y no constituyen consejo financiero. Siempre haz tu propia investigación (DYOR). Las inversiones conllevan riesgo de pérdida de capital.
       </div>
     </div>
   );
@@ -3817,7 +3923,7 @@ export default function App(){
         <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>← Volver al Feed</button>
       </div>
     );
-    if(page===3) return <AccionesVIPPage isPremium={isPremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===3) return <AccionesVIPPage isPremium={isPremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')}/>;
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage posts={posts}/>;
