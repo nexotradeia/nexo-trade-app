@@ -3710,10 +3710,19 @@ export default function App(){
         .nexo-left-sidebar { display: none !important; }
         .nexo-nav-search { display: none !important; }
         .nexo-mobile-search { display: flex !important; }
-        .nexo-body-grid { padding: 8px 8px !important; gap: 12px !important; }
-        .nexo-nav-icons button { width: 32px !important; height: 32px !important; font-size: 14px !important; }
-        .nexo-tabs button { padding: 12px 14px !important; font-size: 13px !important; }
-        .nexo-logo-text span:last-child { display: none !important; }
+        .nexo-body-grid { 
+          padding: 8px !important; 
+          gap: 10px !important;
+          grid-template-columns: 1fr !important;
+        }
+        .nexo-nav-icons button { width: 34px !important; height: 34px !important; font-size: 15px !important; }
+        .nexo-tabs { justify-content: flex-start !important; }
+        .nexo-tabs button { padding: 10px 12px !important; font-size: 12px !important; }
+        .nexo-hide-mobile { display: none !important; }
+      }
+      html, body { 
+        overflow-x: hidden !important; 
+        max-width: 100vw !important;
       }
       @media (min-width: 768px) {
         .nexo-mobile-search { display: none !important; }
@@ -3735,12 +3744,12 @@ export default function App(){
         animation: postSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) both, postPulse 0.9s ease 0.35s;
       }
     `}</style>
-    <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
+    <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s",overflowX:"hidden",maxWidth:"100vw"}}>
       <TickerTape/>
 
       {/* NAVBAR — Estilo Socimo */}
-      <nav style={{background:"#FFFFFF",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 16px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(0,0,0,0.06)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:12,height:60,maxWidth:1200,margin:"0 auto"}}>
+      <nav style={{background:"#FFFFFF",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(0,0,0,0.06)",width:"100%",boxSizing:"border-box"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,height:58,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Logo — integrado al navbar */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
@@ -3754,7 +3763,7 @@ export default function App(){
           </div>
 
           {/* Search — centrado */}
-          <div style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460}}><SearchBar lang={lang}/></div>
+          <div className="nexo-nav-search" style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460,minWidth:0}}><SearchBar lang={lang}/></div>
 
           {/* Right — iconos estilo Socimo */}
           <div className="nexo-nav-icons" style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
@@ -3788,7 +3797,7 @@ export default function App(){
             </button>
 
             {/* Settings / Dark mode */}
-            <button onClick={()=>setDarkMode(!darkMode)}
+            <button className="nexo-hide-mobile" onClick={()=>setDarkMode(!darkMode)}
               title={darkMode?"Modo claro":"Modo oscuro"}
               style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:darkMode?"rgba(0,168,255,0.1)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
@@ -3797,7 +3806,7 @@ export default function App(){
             </button>
 
             {/* Idioma */}
-            <LangSelector lang={lang} setLang={setLang}/>
+            <span className="nexo-hide-mobile"><LangSelector lang={lang} setLang={setLang}/></span>
 
             {/* Auth / User */}
             {user
@@ -3934,7 +3943,7 @@ export default function App(){
       {page===0 && !showLanding && <PredictionBanner/>}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start"}}>
+      <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
         <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}}/></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
