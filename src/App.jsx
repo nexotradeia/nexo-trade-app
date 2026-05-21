@@ -3196,16 +3196,14 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       {/* ── GOOGLE ADSENSE ── */}
       <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",minHeight:120,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#F8FAFC",border:"1px dashed rgba(15,23,42,0.1)"}}>
         <div style={{fontSize:9,color:"#CBD5E1",fontWeight:600,letterSpacing:1,marginBottom:6,textTransform:"uppercase"}}>Publicidad</div>
-        {/* Reemplaza el div de abajo con tu script de AdSense cuando lo aprueben */}
         <ins className="adsbygoogle"
           style={{display:"block",width:"100%",minHeight:100}}
-          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-          data-ad-slot="XXXXXXXXXX"
+          data-ad-client="ca-pub-3490083853866736"
+          data-ad-slot="auto"
           data-ad-format="auto"
           data-full-width-responsive="true"/>
-        {/* Placeholder visual hasta tener AdSense aprobado */}
-        <div style={{width:"100%",padding:"12px 16px",fontSize:11,color:"#94A3B8"}}>
-          Espacio reservado — Google AdSense
+        <div style={{width:"100%",padding:"8px",fontSize:10,color:"#CBD5E1"}}>
+          Google AdSense — pendiente de aprobación
         </div>
       </div>
 
