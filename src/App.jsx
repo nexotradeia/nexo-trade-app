@@ -833,6 +833,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
         const {data:profile}=await supabase.from("profiles").select("*").eq("id",data.user.id).single();
         onAuth({
           id:data.user.id,
+          email:data.user.email,
           name:profile?.username||email.split("@")[0],
           emoji:profile?.avatar_emoji||avatar.emoji,
           avatarColor:profile?.avatar_color||C.accent,
@@ -3447,6 +3448,7 @@ export default function App(){
   const [auth,setAuth]         = useState(null);
   const [user,setUser]         = useState(_getSavedUser); // ← restaura al instante
   const [following,setFollow]  = useState([]);
+  const ADMIN_EMAILS = ['mariangat26@gmail.com','mariagalarraga2013@gmail.com'];
   const [isPremium,setIsPremium]= useState(false);
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]     = useState(false);
@@ -3491,7 +3493,7 @@ export default function App(){
         if(profile){
           const u = buildUserFromProfile(session.user, profile);
           saveUser(u);
-          setIsPremium(profile?.is_premium || false);
+          setIsPremium(profile?.is_premium || false || ADMIN_EMAILS.includes(session.user.email));
           setShowLanding(false);
         }
       }
@@ -3929,7 +3931,7 @@ export default function App(){
       <Footer/>
 
       {/* MODALS */}
-      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false);}} lang={lang}/>}
+      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false||ADMIN_EMAILS.includes(u.email||''));}} lang={lang}/>}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
       {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)}/>}
