@@ -3694,6 +3694,21 @@ const NAV_ITEMS = (t) => [
 
 // ── APP ROOT ──────────────────────────────────────────────────────────────────
 // Leer sesión guardada de localStorage ANTES de renderizar (síncrono, sin flash)
+const ADMIN_EMAILS_CONST = ['mariangat26@gmail.com','mariagalarraga2013@gmail.com'];
+const _getAdminStatus = () => {
+  try {
+    // Leer email del token JWT de Supabase directamente
+    const raw = localStorage.getItem("nexotrade-session");
+    if(raw){
+      const session = JSON.parse(raw);
+      const email = session?.user?.email || session?.currentSession?.user?.email || "";
+      if(ADMIN_EMAILS_CONST.includes(email)) return true;
+    }
+    // Fallback: leer del usuario guardado
+    const u = JSON.parse(localStorage.getItem("nexotrade-user") || "null");
+    return ADMIN_EMAILS_CONST.includes(u?.email || "");
+  } catch { return false; }
+};
 const _getSavedUser = () => {
   try { return JSON.parse(localStorage.getItem("nexotrade-user") || "null"); }
   catch { return null; }
@@ -3707,10 +3722,9 @@ export default function App(){
   const [auth,setAuth]         = useState(null);
   const [user,setUser]         = useState(_getSavedUser); // ← restaura al instante
   const [following,setFollow]  = useState([]);
-  const ADMIN_EMAILS = ['mariangat26@gmail.com','mariagalarraga2013@gmail.com'];
-  const _savedUser = _getSavedUser();
+  const ADMIN_EMAILS = ADMIN_EMAILS_CONST;
   const [isPremium,setIsPremium]= useState(
-    (_savedUser?.is_premium || false) || ADMIN_EMAILS.includes(_savedUser?.email || '')
+    _getAdminStatus() || (_getSavedUser()?.is_premium || false)
   );
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]     = useState(false);
@@ -4088,7 +4102,15 @@ export default function App(){
 
             {/* Auth / User */}
             {user
-              ? <UserMenu user={user} onLogout={async()=>{await supabase.auth.signOut();saveUser(null);setFollow([]);setShowLanding(true);}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
+              ? <UserMenu user={user} onLogout={async()=>{
+  await supabase.auth.signOut();
+  saveUser(null);
+  setIsPremium(false);
+  setFollow([]);
+  localStorage.removeItem("nexotrade-user");
+  localStorage.removeItem("nexotrade-session");
+  setShowLanding(true);
+}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
             }
           </div>
