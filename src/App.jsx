@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-21 18:00:00
+// NEXO TRADE — build: 2026-05-21 19:00:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1338,39 +1338,70 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   );
 }
 
-// ── GIF PICKER (Giphy free) ───────────────────────────────────────────────────
-const GIPHY_KEY="dc6zaTOxFJmzC";
+// ── GIF PICKER (Tenor — funciona sin registro) ────────────────────────────────
+const TENOR_KEY="AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCDg"; // Tenor v2 demo key
 function GifPicker({onSelect,onClose}){
-  const [q,setQ]=useState("trading stocks");
+  const [q,setQ]=useState("");
   const [gifs,setGifs]=useState([]);
   const [loading,setLoading]=useState(false);
+  const [error,setError]=useState(false);
+
   const search=(query)=>{
-    setLoading(true);
-    fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=12&rating=g`)
-      .then(r=>r.json()).then(d=>{setGifs(d.data||[]);setLoading(false);}).catch(()=>setLoading(false));
+    setLoading(true); setError(false);
+    const endpoint = query.trim()
+      ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${TENOR_KEY}&limit=16&media_filter=gif`
+      : `https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=16&media_filter=gif`;
+    fetch(endpoint)
+      .then(r=>r.json())
+      .then(d=>{
+        setGifs(d.results||[]);
+        setLoading(false);
+      })
+      .catch(()=>{setError(true);setLoading(false);});
   };
-  useEffect(()=>{search(q);},[]);
+
+  useEffect(()=>{search("");},[]);
+
   return(
     <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"1px solid rgba(15,23,42,0.12)",borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.15)",zIndex:300,padding:12,marginTop:4}}>
       <div style={{display:"flex",gap:6,marginBottom:10}}>
         <input value={q} onChange={e=>setQ(e.target.value)}
           onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();search(q);}}}
-          placeholder="Buscar GIF..." style={{flex:1,border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"6px 10px",fontSize:12,outline:"none"}}/>
+          placeholder="Buscar GIF: trading, moon, bull..." autoFocus
+          style={{flex:1,border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"6px 10px",fontSize:12,outline:"none"}}/>
         <button onClick={()=>search(q)} style={{background:C.accent,border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>🔍</button>
         <button onClick={onClose} style={{background:"transparent",border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>✕</button>
       </div>
-      {loading?<div style={{textAlign:"center",padding:16,color:C.muted,fontSize:13}}>⏳ Cargando...</div>:(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:180,overflowY:"auto"}}>
-          {gifs.map(g=>(
-            <img key={g.id} src={g.images?.fixed_height_small?.url} alt={g.title}
-              style={{width:"100%",borderRadius:6,cursor:"pointer",transition:"opacity 0.15s"}}
-              onClick={()=>onSelect(g.images?.original?.url||g.images?.fixed_height?.url)}
-              onMouseEnter={e=>e.target.style.opacity="0.75"}
-              onMouseLeave={e=>e.target.style.opacity="1"}/>
-          ))}
+      {/* Sugerencias rápidas */}
+      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:8}}>
+        {["📈 bull","📉 bear","🚀 moon","💎 diamond hands","stonks","crypto"].map(tag=>(
+          <button key={tag} onClick={()=>{const w=tag.replace(/^.*?\s/,"");setQ(w);search(w);}}
+            style={{background:"rgba(0,168,255,0.07)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:20,padding:"2px 9px",fontSize:11,cursor:"pointer",color:C.accentText,fontWeight:600}}>{tag}</button>
+        ))}
+      </div>
+      {loading?(
+        <div style={{textAlign:"center",padding:20,color:C.muted,fontSize:13}}>⏳ Buscando GIFs...</div>
+      ):error?(
+        <div style={{textAlign:"center",padding:20,color:C.muted,fontSize:13}}>😕 No se pudo cargar. Revisa tu conexión.</div>
+      ):(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:200,overflowY:"auto"}}>
+          {gifs.length===0
+            ? <div style={{gridColumn:"1/-1",textAlign:"center",padding:20,color:C.muted,fontSize:13}}>No se encontraron GIFs</div>
+            : gifs.map(g=>{
+              const preview=g.media_formats?.tinygif?.url||g.media_formats?.gif?.url;
+              const full=g.media_formats?.gif?.url||preview;
+              return(
+                <img key={g.id} src={preview} alt={g.title||"gif"}
+                  style={{width:"100%",borderRadius:6,cursor:"pointer",transition:"opacity 0.15s",aspectRatio:"1",objectFit:"cover"}}
+                  onClick={()=>onSelect(full)}
+                  onMouseEnter={e=>e.target.style.opacity="0.75"}
+                  onMouseLeave={e=>e.target.style.opacity="1"}/>
+              );
+            })
+          }
         </div>
       )}
-      <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:6}}>Powered by GIPHY</div>
+      <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:6}}>Powered by Tenor</div>
     </div>
   );
 }
@@ -4178,6 +4209,16 @@ export default function App(){
           <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:12,whiteSpace:"nowrap"}}>{filtered2.length} posts</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
+        {/* Banner — solo aparece cuando el feed muestra posts de ejemplo (DB vacía) */}
+        {showingMockData && dbReady && (
+          <div style={{margin:"4px 0 12px",padding:"10px 14px",background:"rgba(0,168,255,0.06)",border:"1px dashed rgba(0,168,255,0.28)",borderRadius:10,display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:16}}>💡</span>
+            <div>
+              <div style={{fontSize:12,fontWeight:700,color:C.accentText}}>Posts de ejemplo</div>
+              <div style={{fontSize:11,color:C.muted}}>¡Sé el primero en publicar algo real! Estos son ejemplos del feed.</div>
+            </div>
+          </div>
+        )}
         {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>)}
       </>
     );
@@ -4206,6 +4247,7 @@ export default function App(){
     ? sortedPosts.filter(p => p.text?.toUpperCase().includes(`$${tickerFilter}`) || p.ticker===tickerFilter)
     : sortedPosts;
   const filtered2 = sent==="all" ? filteredByTicker : filteredByTicker.filter(p=>p.sentiment===sent);
+  const showingMockData = posts === MOCK_POSTS; // true = Supabase no tiene posts reales aún
 
   return(
     <PriceProvider>
