@@ -2872,6 +2872,105 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
   );
 }
 
+// ── AFFILIATE BANNERS ────────────────────────────────────────────────────────
+const AFFILIATES = [
+  {
+    id:"webull",
+    logo:"📈",
+    name:"Webull",
+    color:"#00C4FF",
+    bg:"linear-gradient(135deg,#0A1628,#0D2137)",
+    tagline:"Hasta $100 en acciones gratis",
+    sub:"Abre tu cuenta sin comisiones",
+    cta:"Abrir cuenta →",
+    badge:"RECOMENDADO",
+    badgeColor:"#00C4FF",
+    // ⚠️ Reemplaza con tu link de afiliado real de Webull
+    url:"https://www.webull.com/activity?source=affiliates",
+  },
+  {
+    id:"moomoo",
+    logo:"🐄",
+    name:"moomoo",
+    color:"#FF6B35",
+    bg:"linear-gradient(135deg,#1A0A00,#2D1400)",
+    tagline:"15 acciones gratis al abrir",
+    sub:"Análisis avanzado sin costo",
+    cta:"Empezar gratis →",
+    badge:"POPULAR",
+    badgeColor:"#FF6B35",
+    // ⚠️ Reemplaza con tu link de afiliado real de moomoo
+    url:"https://j.moomoo.com/00yjN2",
+  },
+  {
+    id:"etoro",
+    logo:"🌐",
+    name:"eToro",
+    color:"#6DCC74",
+    bg:"linear-gradient(135deg,#051A08,#092B0D)",
+    tagline:"Copy Trading desde $200",
+    sub:"Copia a los mejores traders",
+    cta:"Unirse ahora →",
+    badge:"COPY TRADING",
+    badgeColor:"#6DCC74",
+    // ⚠️ Reemplaza con tu link de afiliado real de eToro
+    url:"https://www.etoro.com/es/trading/account/",
+  },
+];
+
+function AffiliateBanner(){
+  const [idx, setIdx] = useState(0);
+  const aff = AFFILIATES[idx];
+
+  useEffect(()=>{
+    const t = setInterval(()=> setIdx(i=>(i+1)%AFFILIATES.length), 6000);
+    return ()=> clearInterval(t);
+  },[]);
+
+  return(
+    <div style={{borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)",marginBottom:10,position:"relative",cursor:"pointer"}}
+      onClick={()=>window.open(aff.url,"_blank","noopener")}>
+
+      {/* Fondo oscuro del broker */}
+      <div style={{background:aff.bg,padding:"14px 16px"}}>
+
+        {/* Badge + label "Patrocinado" */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+          <span style={{fontSize:9,fontWeight:700,color:aff.badgeColor,background:`${aff.badgeColor}22`,borderRadius:20,padding:"2px 8px",letterSpacing:0.8}}>{aff.badge}</span>
+          <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontWeight:500,letterSpacing:0.5}}>Patrocinado</span>
+        </div>
+
+        {/* Logo + nombre */}
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+          <div style={{width:38,height:38,borderRadius:10,background:`${aff.color}22`,border:`1px solid ${aff.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+            {aff.logo}
+          </div>
+          <div>
+            <div style={{fontWeight:800,color:"#fff",fontSize:14,letterSpacing:-0.3}}>{aff.name}</div>
+            <div style={{fontSize:11,color:aff.color,fontWeight:600}}>{aff.tagline}</div>
+          </div>
+        </div>
+
+        {/* Sub */}
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:12,lineHeight:1.5}}>{aff.sub}</div>
+
+        {/* CTA */}
+        <div style={{background:aff.color,borderRadius:9,padding:"9px 14px",textAlign:"center",color:"#fff",fontWeight:800,fontSize:12,letterSpacing:0.2,boxShadow:`0 4px 14px ${aff.color}55`}}>
+          {aff.cta}
+        </div>
+      </div>
+
+      {/* Indicadores de slide */}
+      <div style={{display:"flex",justifyContent:"center",gap:5,padding:"8px",background:"rgba(0,0,0,0.4)"}}>
+        {AFFILIATES.map((_,i)=>(
+          <div key={i} onClick={e=>{e.stopPropagation();setIdx(i);}}
+            style={{width: i===idx?18:6,height:6,borderRadius:3,background:i===idx?aff.color:"rgba(255,255,255,0.2)",transition:"all 0.3s",cursor:"pointer"}}/>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[]}){
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
@@ -3093,6 +3192,25 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           </div>
         );
       })()}
+
+      {/* ── GOOGLE ADSENSE ── */}
+      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",minHeight:120,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#F8FAFC",border:"1px dashed rgba(15,23,42,0.1)"}}>
+        <div style={{fontSize:9,color:"#CBD5E1",fontWeight:600,letterSpacing:1,marginBottom:6,textTransform:"uppercase"}}>Publicidad</div>
+        {/* Reemplaza el div de abajo con tu script de AdSense cuando lo aprueben */}
+        <ins className="adsbygoogle"
+          style={{display:"block",width:"100%",minHeight:100}}
+          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+          data-ad-slot="XXXXXXXXXX"
+          data-ad-format="auto"
+          data-full-width-responsive="true"/>
+        {/* Placeholder visual hasta tener AdSense aprobado */}
+        <div style={{width:"100%",padding:"12px 16px",fontSize:11,color:"#94A3B8"}}>
+          Espacio reservado — Google AdSense
+        </div>
+      </div>
+
+      {/* ── BANNERS AFILIADOS ROTATIVOS ── */}
+      <AffiliateBanner/>
 
       {/* ── DISCLAIMER ── */}
       <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
