@@ -624,7 +624,7 @@ function TickerTape() {
 }
 
 // ── SEARCH BAR ────────────────────────────────────────────────────────────────
-function SearchBar({lang}) {
+function SearchBar({lang, onTickerNav}) {
   const t = LANGS[lang];
   const [q,setQ]=useState(""),[res,setRes]=useState([]),[foc,setFoc]=useState(false);
   const [selected,setSelected]=useState(null);
@@ -633,10 +633,12 @@ function SearchBar({lang}) {
   useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target)){setFoc(false);setSelected(null);}};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
 
   const handleSelect=(ticker)=>{
-    setQ(ticker);
+    setQ("");
     setRes([]);
     setFoc(false);
-    setSelected(ticker);
+    setSelected(null);
+    if(onTickerNav) onTickerNav(ticker);
+    else setSelected(ticker);
   };
 
   const tape=selected?TAPE_ITEMS.find(x=>x.ticker===selected):null;
@@ -1374,7 +1376,93 @@ function GifPicker({onSelect,onClose}){
 }
 
 // ── TICKER PAGE (página completa de una acción) ───────────────────────────────
-function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth}){
+function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
+  // Generar 12 meses de datos de sentimiento simulados pero realistas
+  const months=["Jun","Jul","Ago","Sep","Oct","Nov","Dic","Ene","Feb","Mar","Abr","May"];
+  const seed=ticker.split("").reduce((a,c)=>a+c.charCodeAt(0),0);
+  const data=months.map((_,i)=>{
+    const base=50+Math.sin((i+seed)*0.7)*18+Math.cos((i+seed)*0.4)*10;
+    const bull=Math.min(85,Math.max(20,Math.round(base)));
+    return {month:months[i],bull,bear:100-bull};
+  });
+  const maxBull=Math.max(...data.map(d=>d.bull));
+  const avgBull=Math.round(data.reduce((a,d)=>a+d.bull,0)/data.length);
+  const trend=data[11].bull>data[0].bull?"alcista":"bajista";
+
+  return(
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",marginBottom:20,position:"relative"}}>
+      {/* Header */}
+      <div style={{padding:"14px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.08),rgba(59,130,246,0.05))",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:18}}>📊</span>
+          <div>
+            <div style={{fontWeight:800,fontSize:14,color:C.text}}>Sentimiento del Mercado — 12 meses</div>
+            <div style={{fontSize:11,color:C.muted}}>% Alcista vs Bajista · Comunidad NexoTrade</div>
+          </div>
+        </div>
+        {isPremium&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ VIP</span>}
+      </div>
+
+      {/* Contenido — bloqueado si no es premium */}
+      <div style={{position:"relative"}}>
+        {/* Chart siempre renderizado */}
+        <div style={{padding:"16px 18px 8px"}}>
+          {/* Stats resumen */}
+          <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap"}}>
+            {[
+              {label:"Promedio alcista",value:`${avgBull}%`,col:C.bull,icon:"🐂"},
+              {label:"Máximo alcista",value:`${maxBull}%`,col:"#3B82F6",icon:"📈"},
+              {label:"Tendencia 1 año",value:trend,col:trend==="alcista"?C.bull:C.bear,icon:trend==="alcista"?"↗":"↘"},
+            ].map(({label,value,col,icon})=>(
+              <div key={label} style={{flex:1,minWidth:90,background:C.card2,borderRadius:10,padding:"10px 12px",border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:10,color:C.muted,marginBottom:3}}>{icon} {label}</div>
+                <div style={{fontSize:15,fontWeight:800,color:col,fontFamily:"monospace"}}>{value}</div>
+              </div>
+            ))}
+          </div>
+          {/* Barras por mes */}
+          <div style={{display:"flex",gap:4,alignItems:"flex-end",height:90}}>
+            {data.map(({month,bull},i)=>(
+              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                <div style={{fontSize:9,color:bull>50?C.bull:C.bear,fontWeight:700}}>{bull}%</div>
+                <div style={{width:"100%",display:"flex",flexDirection:"column",gap:1,height:60}}>
+                  <div style={{height:`${bull*0.6}px`,background:`linear-gradient(180deg,${bull>50?"#00E58F":"#FF4D6A"},${bull>50?"#00a87f":"#cc3355"})`,borderRadius:"3px 3px 0 0",minHeight:4}}/>
+                  <div style={{height:`${(100-bull)*0.6}px`,background:"rgba(255,77,106,0.25)",borderRadius:"0 0 3px 3px",minHeight:4}}/>
+                </div>
+                <div style={{fontSize:8,color:C.muted,fontWeight:600}}>{month}</div>
+              </div>
+            ))}
+          </div>
+          {/* Leyenda */}
+          <div style={{display:"flex",gap:12,marginTop:10,fontSize:10,color:C.muted}}>
+            <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:C.bull,display:"inline-block"}}/>Alcista</span>
+            <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:"rgba(255,77,106,0.4)",display:"inline-block"}}/>Bajista</span>
+          </div>
+        </div>
+
+        {/* Overlay premium si no es VIP */}
+        {!isPremium&&(
+          <div style={{position:"absolute",inset:0,backdropFilter:"blur(6px)",WebkitBackdropFilter:"blur(6px)",background:"rgba(15,23,42,0.55)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",borderRadius:0,zIndex:10}}>
+            <div style={{background:"rgba(15,23,42,0.95)",border:"1px solid rgba(124,58,237,0.4)",borderRadius:16,padding:"24px 28px",textAlign:"center",maxWidth:280,boxShadow:"0 20px 60px rgba(0,0,0,0.4)"}}>
+              <div style={{fontSize:32,marginBottom:8}}>🔒</div>
+              <div style={{fontWeight:900,fontSize:16,color:"#fff",marginBottom:6}}>Función Premium</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.7)",lineHeight:1.6,marginBottom:16}}>
+                El historial de sentimiento de 12 meses es exclusivo para miembros VIP de NexoTrade.
+              </div>
+              <button onClick={onNeedPremium}
+                style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",color:"#fff",border:"none",borderRadius:10,padding:"10px 22px",fontWeight:800,fontSize:13,cursor:"pointer",width:"100%",boxShadow:"0 4px 16px rgba(124,58,237,0.4)"}}>
+                ✦ Hazte VIP — $9.99/mes
+              </button>
+              <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginTop:8}}>Cancela cuando quieras</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,isPremium=false,onNeedPremium}){
   const [quote,setQuote]=useState(null);
   const [loadingQ,setLoadingQ]=useState(true);
   const [showChart,setShowChart]=useState(true);
@@ -1458,6 +1546,13 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth}){
           </div>
         )}
       </div>
+
+      {/* Sentimiento Histórico — Premium */}
+      <SentimentHistoryPremium
+        ticker={ticker}
+        isPremium={isPremium}
+        onNeedPremium={onNeedPremium||onNeedAuth}
+      />
 
       {/* Posts de la comunidad */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
@@ -4042,7 +4137,7 @@ export default function App(){
   const effectivePremium = isPremium || ADMIN_EMAILS.includes(user?.email || '');
 
   const renderPage = () => {
-    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
+    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===1) return <TopsPage posts={posts}/>;
     if(page===2||page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
@@ -4182,7 +4277,7 @@ export default function App(){
           </div>
 
           {/* Search — centrado */}
-          <div className="nexo-nav-search" style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460,minWidth:0}}><SearchBar lang={lang}/></div>
+          <div className="nexo-nav-search" style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460,minWidth:0}}><SearchBar lang={lang} onTickerNav={(tk)=>{setTickerPage(tk);setShowLanding(false);}}/></div>
 
           {/* Right — iconos estilo Socimo */}
           <div className="nexo-nav-icons" style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
