@@ -4040,6 +4040,10 @@ export default function App(){
         .nexo-tabs { justify-content: flex-start !important; }
         .nexo-tabs button { padding: 10px 12px !important; font-size: 12px !important; }
         .nexo-hide-mobile { display: none !important; }
+        .nexo-logout-mobile { display: flex !important; }
+      }
+      @media (min-width: 768px) {
+        .nexo-logout-mobile { display: none !important; }
       }
       html, body { 
         overflow-x: hidden !important; 
@@ -4279,6 +4283,40 @@ export default function App(){
       </div>
 
       <Footer/>
+
+      {/* LOGOUT MÓVIL — botón fijo en la esquina, solo en móvil */}
+      {user && (
+        <div className="nexo-logout-mobile" style={{
+          position:"fixed",bottom:24,right:16,zIndex:999,display:"none",
+          flexDirection:"column",alignItems:"flex-end",gap:8
+        }}>
+          <button
+            onClick={async()=>{
+              await supabase.auth.signOut();
+              saveUser(null);
+              setIsPremium(false);
+              setFollow([]);
+              localStorage.removeItem("nexotrade-user");
+              setShowLanding(true);
+            }}
+            style={{
+              background:"#FF4D6A",
+              border:"none",
+              borderRadius:50,
+              padding:"12px 20px",
+              color:"#fff",
+              fontWeight:800,
+              fontSize:14,
+              cursor:"pointer",
+              boxShadow:"0 4px 20px rgba(255,77,106,0.5)",
+              display:"flex",
+              alignItems:"center",
+              gap:8,
+            }}>
+            🚪 Cerrar sesión
+          </button>
+        </div>
+      )}
 
       {/* MODALS */}
       {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false||ADMIN_EMAILS.includes(u.email||''));}} lang={lang}/>}
