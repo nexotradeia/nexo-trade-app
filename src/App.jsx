@@ -3823,7 +3823,7 @@ export default function App(){
         const {data,error}=await supabase
           .from("posts")
           .select(`*, profiles(username,avatar_emoji,avatar_color,points)`)
-          .order("created_at",{ascending:false})
+          .order("created_at", {ascending:false},{ascending:false})
           .limit(50);
         if(!error && data && data.length>0){
           const mapped=data.map(p=>({
@@ -3948,6 +3948,9 @@ export default function App(){
 
   const filtered = sent==="all"?posts:posts.filter(p=>p.sentiment===sent);
 
+  // VIP definitivo: admin emails siempre tienen acceso sin importar el state
+  const effectivePremium = isPremium || ADMIN_EMAILS.includes(user?.email || '');
+
   const renderPage = () => {
     if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
     if(page===1) return <TopsPage posts={posts}/>;
@@ -3959,12 +3962,12 @@ export default function App(){
         <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>← Volver al Feed</button>
       </div>
     );
-    if(page===3) return <AccionesVIPPage isPremium={isPremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')}/>;
+    if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')}/>;
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage posts={posts}/>;
-    if(page===8) return <PremiumPage user={user} isPremium={isPremium} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
-    if(page===9) return <VipToolsPage isPremium={isPremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user}/>;
+    if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
+    if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user}/>;
     return(
       <>
         {/* Tabs estilo Socimo */}
@@ -4000,9 +4003,17 @@ export default function App(){
     "--text":"#0f172a","--muted":"#64748b","--border":"#e2e8f0",
   };
 
+  // Posts: el del usuario actual siempre primero, luego el resto por fecha desc
+  const sortedPosts = [...posts].sort((a,b)=>{
+    const aIsMe = user && (a.userId===user.id || a.user===user.name);
+    const bIsMe = user && (b.userId===user.id || b.user===user.name);
+    if(aIsMe && !bIsMe) return -1;
+    if(!aIsMe && bIsMe) return 1;
+    return 0;
+  });
   const filteredByTicker = tickerFilter
-    ? posts.filter(p => p.text?.toUpperCase().includes(`$${tickerFilter}`) || p.ticker===tickerFilter)
-    : posts;
+    ? sortedPosts.filter(p => p.text?.toUpperCase().includes(`$${tickerFilter}`) || p.ticker===tickerFilter)
+    : sortedPosts;
   const filtered2 = sent==="all" ? filteredByTicker : filteredByTicker.filter(p=>p.sentiment===sent);
 
   return(
@@ -4054,7 +4065,7 @@ export default function App(){
         animation: postSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) both, postPulse 0.9s ease 0.35s;
       }
     `}</style>
-    <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s",overflowX:"hidden",maxWidth:"100vw"}}>
+    <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
       <TickerTape/>
 
       {/* NAVBAR — Estilo Socimo */}
