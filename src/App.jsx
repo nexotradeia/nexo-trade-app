@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-19 21:00:00
+// NEXO TRADE — build: 2026-05-21 18:00:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1377,6 +1377,7 @@ function GifPicker({onSelect,onClose}){
 
 // ── TICKER PAGE (página completa de una acción) ───────────────────────────────
 function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
+  const [open, setOpen] = useState(false); // colapsado por defecto
   const seed=ticker.split("").reduce((a,c)=>a+c.charCodeAt(0),0);
   const rnd=(offset,min,max)=>Math.min(max,Math.max(min,Math.round(50+Math.sin((seed+offset)*0.9)*20+Math.cos((seed+offset)*0.5)*12)));
 
@@ -1392,63 +1393,72 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
 
   return(
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",marginBottom:20}}>
-      {/* Header */}
-      <div style={{padding:"13px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.07),rgba(59,130,246,0.04))",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      {/* Header — clic para expandir/colapsar */}
+      <div onClick={()=>setOpen(o=>!o)} style={{padding:"13px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.07),rgba(59,130,246,0.04))",borderBottom:open?`1px solid ${C.border}`:"none",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",userSelect:"none"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <span style={{fontSize:17}}>🧭</span>
           <div>
-            <div style={{fontWeight:800,fontSize:14,color:C.text}}>Sentimiento</div>
-            <div style={{fontSize:11,color:C.muted}}>% de usuarios alcistas en el feed de ${ticker}</div>
+            <div style={{fontWeight:800,fontSize:14,color:C.text}}>Sentimiento del mercado</div>
+            <div style={{fontSize:11,color:C.muted}}>Toca para {open?"ocultar":"ver"} el historial de ${ticker}</div>
           </div>
         </div>
-        {isPremium
-          ? <span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ VIP</span>
-          : <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}}>✦ Ver todo — VIP</button>
-        }
-      </div>
-
-      {/* Filas de periodos */}
-      <div>
-        {periods.map(({label,key,bull,free},i)=>{
-          const visible=free||isPremium;
-          const isBull=bull>=50;
-          return(
-            <div key={key} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 18px",borderBottom:i<periods.length-1?`1px solid ${C.border}`:"none",background:free&&i===0?"rgba(0,229,143,0.02)":"transparent"}}>
-              {/* Etiqueta */}
-              <div style={{width:110,fontSize:12,color:C.muted,fontWeight:600,flexShrink:0}}>{label}</div>
-
-              {visible?(
-                <>
-                  {/* Pill alcista/bajista */}
-                  <div style={{background:isBull?"rgba(0,229,143,0.1)":"rgba(255,77,106,0.1)",border:`1px solid ${isBull?"rgba(0,229,143,0.3)":"rgba(255,77,106,0.3)"}`,borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:800,color:isBull?C.bull:C.bear,minWidth:80,textAlign:"center",flexShrink:0}}>
-                    {isBull?"🐂 Alcista":"🐻 Bajista"}
-                  </div>
-                  {/* Barra de progreso */}
-                  <div style={{flex:1,height:8,background:C.card2,borderRadius:20,overflow:"hidden"}}>
-                    <div style={{width:`${bull}%`,height:"100%",background:isBull?"linear-gradient(90deg,#00E58F,#00c49a)":"linear-gradient(90deg,#FF4D6A,#cc3355)",borderRadius:20,transition:"width 0.6s ease"}}/>
-                  </div>
-                  {/* Porcentaje */}
-                  <div style={{fontSize:12,fontWeight:800,color:isBull?C.bull:C.bear,fontFamily:"monospace",minWidth:38,textAlign:"right"}}>{bull}%</div>
-                </>
-              ):(
-                <>
-                  {/* Bloqueado */}
-                  <div style={{background:"rgba(124,58,237,0.08)",border:"1px solid rgba(124,58,237,0.2)",borderRadius:20,padding:"4px 14px",fontSize:11,fontWeight:800,color:"#7C3AED",flexShrink:0,display:"flex",alignItems:"center",gap:5}}>
-                    🔒 Premium
-                  </div>
-                  <div style={{flex:1,height:8,background:`repeating-linear-gradient(90deg,rgba(124,58,237,0.1) 0px,rgba(124,58,237,0.1) 8px,transparent 8px,transparent 14px)`,borderRadius:20}}/>
-                  <button onClick={onNeedPremium} style={{fontSize:10,fontWeight:700,color:"#7C3AED",background:"transparent",border:"none",cursor:"pointer",whiteSpace:"nowrap",textDecoration:"underline"}}>Ver →</button>
-                </>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      {!isPremium&&(
-        <div style={{padding:"12px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.06),rgba(147,51,234,0.04))",borderTop:`1px solid ${C.border}`,textAlign:"center"}}>
-          <span style={{fontSize:12,color:C.muted}}>Desbloquea el sentimiento histórico completo con </span>
-          <span onClick={onNeedPremium} style={{fontSize:12,color:"#7C3AED",fontWeight:800,cursor:"pointer"}}>NexoTrade VIP ✦</span>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {isPremium
+            ? <span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ VIP</span>
+            : <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}}>✦ VIP</button>
+          }
+          {/* Flecha animada */}
+          <span style={{fontSize:16,color:C.muted,display:"inline-block",transition:"transform 0.25s",transform:open?"rotate(180deg)":"rotate(0deg)",lineHeight:1}}>▾</span>
         </div>
+      </div>
+
+      {/* Contenido — solo visible cuando open=true */}
+      {open && (
+        <>
+          {/* Filas de periodos */}
+          <div>
+            {periods.map(({label,key,bull,free},i)=>{
+              const visible=free||isPremium;
+              const isBull=bull>=50;
+              return(
+                <div key={key} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 18px",borderBottom:i<periods.length-1?`1px solid ${C.border}`:"none",background:free&&i===0?"rgba(0,229,143,0.02)":"transparent"}}>
+                  {/* Etiqueta */}
+                  <div style={{width:110,fontSize:12,color:C.muted,fontWeight:600,flexShrink:0}}>{label}</div>
+
+                  {visible?(
+                    <>
+                      {/* Pill alcista/bajista */}
+                      <div style={{background:isBull?"rgba(0,229,143,0.1)":"rgba(255,77,106,0.1)",border:`1px solid ${isBull?"rgba(0,229,143,0.3)":"rgba(255,77,106,0.3)"}`,borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:800,color:isBull?C.bull:C.bear,minWidth:80,textAlign:"center",flexShrink:0}}>
+                        {isBull?"🐂 Alcista":"🐻 Bajista"}
+                      </div>
+                      {/* Barra de progreso */}
+                      <div style={{flex:1,height:8,background:C.card2,borderRadius:20,overflow:"hidden"}}>
+                        <div style={{width:`${bull}%`,height:"100%",background:isBull?"linear-gradient(90deg,#00E58F,#00c49a)":"linear-gradient(90deg,#FF4D6A,#cc3355)",borderRadius:20,transition:"width 0.6s ease"}}/>
+                      </div>
+                      {/* Porcentaje */}
+                      <div style={{fontSize:12,fontWeight:800,color:isBull?C.bull:C.bear,fontFamily:"monospace",minWidth:38,textAlign:"right"}}>{bull}%</div>
+                    </>
+                  ):(
+                    <>
+                      {/* Bloqueado */}
+                      <div style={{background:"rgba(124,58,237,0.08)",border:"1px solid rgba(124,58,237,0.2)",borderRadius:20,padding:"4px 14px",fontSize:11,fontWeight:800,color:"#7C3AED",flexShrink:0,display:"flex",alignItems:"center",gap:5}}>
+                        🔒 Premium
+                      </div>
+                      <div style={{flex:1,height:8,background:`repeating-linear-gradient(90deg,rgba(124,58,237,0.1) 0px,rgba(124,58,237,0.1) 8px,transparent 8px,transparent 14px)`,borderRadius:20}}/>
+                      <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{fontSize:10,fontWeight:700,color:"#7C3AED",background:"transparent",border:"none",cursor:"pointer",whiteSpace:"nowrap",textDecoration:"underline"}}>Ver →</button>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {!isPremium&&(
+            <div style={{padding:"12px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.06),rgba(147,51,234,0.04))",borderTop:`1px solid ${C.border}`,textAlign:"center"}}>
+              <span style={{fontSize:12,color:C.muted}}>Desbloquea el sentimiento histórico completo con </span>
+              <span onClick={onNeedPremium} style={{fontSize:12,color:"#7C3AED",fontWeight:800,cursor:"pointer"}}>NexoTrade VIP ✦</span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -4000,30 +4010,34 @@ export default function App(){
         const {data,error}=await supabase
           .from("posts")
           .select(`*, profiles(username,avatar_emoji,avatar_color,points)`)
-          .order("created_at", {ascending:false},{ascending:false})
+          .order("created_at", {ascending:false})
           .limit(50);
-        if(!error && data && data.length>0){
-          const mapped=data.map(p=>({
-            id:p.id,
-            userId:p.user_id,
-            user:p.profiles?.username||"Anónimo",
-            avatar:p.profiles?.avatar_emoji||"🦅",
-            avatarColor:p.profiles?.avatar_color||C.accent,
-            time:fmtTimeAgo(p.created_at),
-            ticker:p.ticker||"GENERAL",
-            sentiment:p.sentiment||"bull",
-            text:p.text,
-            likes:p.likes_count||0,
-            comments:p.comments_count||0,
-            reposts:p.reposts_count||0,
-            tags:p.tags||[p.ticker||"GENERAL"],
-          }));
-          setPosts(mapped);
+        if(!error && data){
+          if(data.length>0){
+            const mapped=data.map(p=>({
+              id:p.id,
+              userId:p.user_id,
+              user:p.profiles?.username||"Anónimo",
+              avatar:p.profiles?.avatar_emoji||"🦅",
+              avatarColor:p.profiles?.avatar_color||C.accent,
+              time:fmtTimeAgo(p.created_at),
+              ticker:p.ticker||"GENERAL",
+              sentiment:p.sentiment||"bull",
+              text:p.text,
+              likes:p.likes_count||0,
+              comments:p.comments_count||0,
+              reposts:p.reposts_count||0,
+              tags:p.tags||[p.ticker||"GENERAL"],
+            }));
+            setPosts(mapped);
+          }
           setDbReady(true);
         }
       }catch(e){ /* fallback a MOCK_POSTS */ }
     };
     loadPosts();
+    // Auto-refresh cada 60 segundos para mostrar posts nuevos de otros usuarios
+    const refreshTimer=setInterval(loadPosts, 60000);
 
     // Suscripción realtime — nuevos posts aparecen al instante
     sub=supabase
@@ -4060,7 +4074,7 @@ export default function App(){
       })
       .subscribe();
 
-    return()=>{ if(sub) supabase.removeChannel(sub); };
+    return()=>{ if(sub) supabase.removeChannel(sub); clearInterval(refreshTimer); };
   },[]);
 
   const showPoints = (pts, reason) => {
