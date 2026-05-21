@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-21 20:00:00
+// NEXO TRADE — build: 2026-05-21 21:00:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4730,13 +4730,9 @@ export default function App(){
             {/* Auth / User */}
             {user
               ? <UserMenu user={user} onLogout={async()=>{
-  await supabase.auth.signOut();
-  saveUser(null);
-  setIsPremium(false);
-  setFollow([]);
-  localStorage.removeItem("nexotrade-user");
-  localStorage.removeItem("nexotrade-session");
-  setShowLanding(true);
+  try{ await supabase.auth.signOut({scope:"global"}); }catch{}
+  localStorage.clear();
+  window.location.reload();
 }} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
             }
@@ -4871,7 +4867,7 @@ export default function App(){
 
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{await supabase.auth.signOut();saveUser(null);setIsPremium(false);setFollow([]);setShowLanding(true);}}/></div>
+        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{try{await supabase.auth.signOut({scope:"global"});}catch{}localStorage.clear();window.location.reload();}}/></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
       </div>
@@ -4886,12 +4882,9 @@ export default function App(){
         }}>
           <button
             onClick={async()=>{
-              await supabase.auth.signOut();
-              saveUser(null);
-              setIsPremium(false);
-              setFollow([]);
-              localStorage.removeItem("nexotrade-user");
-              setShowLanding(true);
+              try{ await supabase.auth.signOut({scope:"global"}); }catch{}
+              localStorage.clear();
+              window.location.reload();
             }}
             style={{
               background:"#FF4D6A",
