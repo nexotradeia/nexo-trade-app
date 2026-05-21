@@ -3754,11 +3754,11 @@ export default function App(){
           {/* Logo — integrado al navbar */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
             <img src="/logo_nexo.png" alt="NEXO TRADE"
-              style={{height:44,width:"auto",objectFit:"contain",borderRadius:8,display:"block"}}
+              style={{height:54,width:"auto",objectFit:"contain",borderRadius:8,display:"block"}}
               onError={e=>{e.target.style.display="none";}}/>
-            <div style={{display:"flex",flexDirection:"column",lineHeight:1.1}}>
-              <span style={{fontWeight:900,fontSize:18,color:"#0F172A",letterSpacing:-0.5}}>NEXO<span style={{color:"#00A8FF"}}>TRADE</span></span>
-              <span style={{fontSize:9,fontWeight:600,color:"#94A3B8",letterSpacing:1.5,textTransform:"uppercase"}}>AI Trading Community</span>
+            <div style={{display:"flex",flexDirection:"column",lineHeight:1.15}}>
+              <span style={{fontWeight:900,fontSize:22,color:"#0F172A",letterSpacing:-0.5}}>NEXO<span style={{color:"#00A8FF"}}>TRADE</span></span>
+              <span style={{fontSize:10,fontWeight:600,color:"#94A3B8",letterSpacing:1.5,textTransform:"uppercase"}}>AI Trading Community</span>
             </div>
           </div>
 
