@@ -16,7 +16,7 @@ const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 // email_stripe_setup.py reemplaza este link automáticamente con el link real
-const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU14g3HQfuh1i874haR201";
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
 
 
 // ── CASHTAG + @MENTION RENDERER ───────────────────────────────────────────────
