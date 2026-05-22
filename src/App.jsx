@@ -3003,6 +3003,9 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
         </button>
       )}
 
+      {/* ── BANNER AFILIADOS (sidebar izquierdo) ── */}
+      <AffiliateBanner/>
+
       <div style={{padding:"0 4px 4px",textAlign:"center"}}>
         <div style={{fontSize:10,color:"#CBD5E1",lineHeight:2}}>
           © 2026 NexoTrade &nbsp;·&nbsp;
@@ -3464,7 +3467,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,lang}){
   const lvl=getLevel(user.points);
   return(
     <div style={{position:"relative"}}>
-      <div style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",padding:"5px 8px",borderRadius:12,border:`1px solid ${C.border}`,background:C.card2}} onClick={()=>setOpen(!open)}>
+      <div className="nexo-usermenu-trigger" style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",padding:"5px 8px",borderRadius:12,border:`1px solid ${C.border}`,background:C.card2}} onClick={()=>setOpen(!open)}>
         <AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} size={28} online/>
         <div className="nexo-logo-text">
           <div style={{color:C.text,fontSize:13,fontWeight:700,lineHeight:1}}>{user.name}</div>
@@ -5156,6 +5159,8 @@ export default function App(){
         .nexo-logo-img { height: 38px !important; }
         /* UserMenu dropdown no se salga de pantalla */
         .nexo-usermenu-dropdown { right: 0 !important; left: auto !important; min-width: 180px !important; }
+        /* UserMenu trigger compacto en móvil */
+        .nexo-usermenu-trigger { padding: 4px 6px !important; gap: 4px !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
@@ -5210,8 +5215,8 @@ export default function App(){
           {/* Right — iconos estilo Socimo */}
           <div className="nexo-nav-icons" style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
 
-            {/* Home */}
-            <button onClick={()=>{setPage(0);setShowLanding(false);}}
+            {/* Home — hidden on mobile (logo tap already navigates home) */}
+            <button className="nexo-hide-mobile" onClick={()=>{setPage(0);setShowLanding(false);}}
               title="Inicio"
               style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:page===0?"rgba(0,168,255,0.1)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#00A8FF",transition:"all 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
