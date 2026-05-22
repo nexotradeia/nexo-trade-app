@@ -2875,11 +2875,16 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
 // ── AFFILIATE BANNERS ────────────────────────────────────────────────────────
 const AFFILIATES = [
   {
-    id:"finviz", logo:"📊", name:"Finviz Elite",
-    color:"#E8C84A", bg:"linear-gradient(135deg,#0D0D0D,#1A1500)",
+    id:"finviz",
+    logo:"📊",
+    name:"Finviz Elite",
+    color:"#E8C84A",
+    bg:"linear-gradient(135deg,#0D0D0D,#1A1500)",
     tagline:"El screener #1 de Wall Street",
     sub:"Datos en tiempo real · Mapas de calor · Alertas",
-    cta:"Probar Finviz Elite →", badge:"30% COMISIÓN", badgeColor:"#E8C84A",
+    cta:"Probar Finviz Elite →",
+    badge:"30% COMISIÓN",
+    badgeColor:"#E8C84A",
     url:"https://finviz.com/?affilId=764863650",
   },
   {
@@ -2893,7 +2898,6 @@ const AFFILIATES = [
     cta:"Abrir cuenta →",
     badge:"RECOMENDADO",
     badgeColor:"#00C4FF",
-    // ⚠️ Reemplaza con tu link de afiliado real de Webull
     url:"https://www.webull.com/activity?source=affiliates",
   },
   {
@@ -2907,7 +2911,6 @@ const AFFILIATES = [
     cta:"Empezar gratis →",
     badge:"POPULAR",
     badgeColor:"#FF6B35",
-    // ⚠️ Reemplaza con tu link de afiliado real de moomoo
     url:"https://j.moomoo.com/00yjN2",
   },
   {
@@ -2921,7 +2924,6 @@ const AFFILIATES = [
     cta:"Unirse ahora →",
     badge:"COPY TRADING",
     badgeColor:"#6DCC74",
-    // ⚠️ Reemplaza con tu link de afiliado real de eToro
     url:"https://www.etoro.com/es/trading/account/",
   },
 ];
@@ -2973,6 +2975,65 @@ function AffiliateBanner(){
         {AFFILIATES.map((_,i)=>(
           <div key={i} onClick={e=>{e.stopPropagation();setIdx(i);}}
             style={{width: i===idx?18:6,height:6,borderRadius:3,background:i===idx?aff.color:"rgba(255,255,255,0.2)",transition:"all 0.3s",cursor:"pointer"}}/>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── MOBILE AFFILIATE BANNER (fixed bottom, solo móvil) ───────────────────────
+function MobileAffiliateBanner(){
+  const [idx, setIdx] = useState(0);
+  const [closed, setClosed] = useState(false);
+  const aff = AFFILIATES[idx];
+
+  useEffect(()=>{
+    const t = setInterval(()=> setIdx(i=>(i+1)%AFFILIATES.length), 6000);
+    return ()=> clearInterval(t);
+  },[]);
+
+  if(closed) return null;
+
+  return(
+    <div className="nexo-mobile-affiliate-banner" style={{
+      position:"fixed", bottom:0, left:0, right:0,
+      zIndex:1200,
+      background: aff.bg,
+      borderTop:`2px solid ${aff.color}44`,
+      padding:"10px 14px 14px",
+      display:"none", // CSS media query activa en móvil
+      flexDirection:"column",
+      gap:8,
+      boxShadow:"0 -4px 20px rgba(0,0,0,0.35)",
+    }}>
+      {/* Header: badge + patrocinado + cerrar */}
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+        <span style={{fontSize:9,fontWeight:700,color:aff.badgeColor,background:`${aff.badgeColor}22`,borderRadius:20,padding:"2px 8px",letterSpacing:0.8}}>{aff.badge}</span>
+        <span style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:0.5}}>Patrocinado</span>
+        <button onClick={()=>setClosed(true)} style={{background:"transparent",border:"none",color:"rgba(255,255,255,0.4)",fontSize:16,cursor:"pointer",padding:"0 4px",lineHeight:1}}>✕</button>
+      </div>
+
+      {/* Contenido: logo + texto + CTA */}
+      <div style={{display:"flex", alignItems:"center", gap:12}}
+        onClick={()=>window.open(aff.url,"_blank","noopener")} role="button">
+        <div style={{width:40,height:40,borderRadius:10,background:`${aff.color}22`,border:`1px solid ${aff.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>
+          {aff.logo}
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontWeight:800,color:"#fff",fontSize:14}}>{aff.name}</div>
+          <div style={{fontSize:11,color:aff.color,fontWeight:600}}>{aff.tagline}</div>
+          <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2}}>{aff.sub}</div>
+        </div>
+        <div style={{background:aff.color,borderRadius:9,padding:"9px 12px",color:"#fff",fontWeight:800,fontSize:11,whiteSpace:"nowrap",boxShadow:`0 3px 12px ${aff.color}55`,cursor:"pointer"}}>
+          {aff.cta}
+        </div>
+      </div>
+
+      {/* Indicadores */}
+      <div style={{display:"flex",justifyContent:"center",gap:5}}>
+        {AFFILIATES.map((_,i)=>(
+          <div key={i} onClick={()=>setIdx(i)}
+            style={{width:i===idx?18:6,height:5,borderRadius:3,background:i===idx?aff.color:"rgba(255,255,255,0.2)",transition:"all 0.3s",cursor:"pointer"}}/>
         ))}
       </div>
     </div>
@@ -4856,6 +4917,8 @@ export default function App(){
       @media (max-width: 767px) {
         .nexo-sidebar { display: none !important; }
         .nexo-left-sidebar { display: none !important; }
+        .nexo-mobile-affiliate-banner { display: flex !important; }
+        body { padding-bottom: 130px; }
         .nexo-nav-search { display: none !important; }
         .nexo-mobile-search { display: flex !important; }
         .nexo-body-grid {
@@ -5121,6 +5184,9 @@ export default function App(){
       </div>
 
       <Footer/>
+
+      {/* BANNER AFILIADOS MÓVIL — fijo al pie, solo en móvil */}
+      <MobileAffiliateBanner/>
 
       {/* LOGOUT MÓVIL — botón fijo en la esquina, solo en móvil */}
       {user && (
