@@ -2304,6 +2304,125 @@ function TrendingPage({posts=[]}){
 }
 
 
+// ── VIP UPSELL CARD (aparece en el feed cada 5 posts) ─────────────────────────
+function VipFeedCard({onGoVIP}){
+  return(
+    <div onClick={onGoVIP} style={{
+      background:"linear-gradient(135deg,#0F0A2E,#1A0A3D,#0D1A3D)",
+      border:"1.5px solid rgba(124,58,237,0.5)",
+      borderRadius:18,
+      padding:"18px 20px",
+      margin:"8px 0",
+      cursor:"pointer",
+      position:"relative",
+      overflow:"hidden",
+      boxShadow:"0 4px 24px rgba(124,58,237,0.2)",
+    }}>
+      {/* Fondo decorativo */}
+      <div style={{position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",background:"rgba(124,58,237,0.12)",pointerEvents:"none"}}/>
+
+      {/* Badge */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <span style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:0.8}}>✦ NEXO VIP</span>
+        <span style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>Oferta especial</span>
+      </div>
+
+      {/* Título */}
+      <div style={{fontWeight:900,color:"#fff",fontSize:17,marginBottom:4,letterSpacing:-0.3}}>
+        Accede a picks exclusivos 📈
+      </div>
+      <div style={{color:"rgba(255,255,255,0.55)",fontSize:12,marginBottom:14,lineHeight:1.5}}>
+        Señales VIP · Picks semanales · Sala privada · Análisis en tiempo real
+      </div>
+
+      {/* Features */}
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+        {["📊 Picks VIP","🔔 Alertas","💬 Sala privada","📅 Earnings"].map(f=>(
+          <span key={f} style={{background:"rgba(124,58,237,0.15)",border:"1px solid rgba(124,58,237,0.3)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"rgba(255,255,255,0.7)",fontWeight:600}}>{f}</span>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",borderRadius:12,padding:"11px 20px",textAlign:"center",color:"#fff",fontWeight:900,fontSize:14,boxShadow:"0 4px 16px rgba(124,58,237,0.5)"}}>
+        ✦ Hazte VIP — Solo $9.99/mes →
+      </div>
+    </div>
+  );
+}
+
+// ── VIP POP-UP MODAL (aparece a los 30s para no-premium) ──────────────────────
+function VipPopup({onClose, onGoVIP}){
+  return(
+    <div style={{
+      position:"fixed",inset:0,zIndex:9999,
+      background:"rgba(0,0,0,0.75)",backdropFilter:"blur(6px)",
+      display:"flex",alignItems:"center",justifyContent:"center",
+      padding:16,
+    }} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{
+        background:"linear-gradient(160deg,#0F0A2E,#1A0A3D,#0D1A3D)",
+        border:"1.5px solid rgba(124,58,237,0.5)",
+        borderRadius:24,
+        padding:"28px 24px",
+        maxWidth:380,
+        width:"100%",
+        position:"relative",
+        boxShadow:"0 8px 40px rgba(124,58,237,0.35)",
+      }}>
+        {/* Cerrar */}
+        <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"transparent",border:"none",color:"rgba(255,255,255,0.4)",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
+
+        {/* Ícono */}
+        <div style={{textAlign:"center",fontSize:44,marginBottom:10}}>✦</div>
+
+        {/* Título */}
+        <div style={{textAlign:"center",fontWeight:900,color:"#fff",fontSize:22,marginBottom:6,letterSpacing:-0.5}}>
+          Únete a NEXO VIP
+        </div>
+        <div style={{textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:20,lineHeight:1.5}}>
+          Los mejores traders ya están adentro. Accede a picks, señales y la sala privada.
+        </div>
+
+        {/* Beneficios */}
+        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:22}}>
+          {[
+            {icon:"📊", text:"Picks VIP semanales con entrada, target y stop"},
+            {icon:"🔔", text:"Alertas de precio en tiempo real"},
+            {icon:"💬", text:"Sala privada solo para miembros VIP"},
+            {icon:"📅", text:"Earnings calendar con análisis previo"},
+            {icon:"🏆", text:"Badge VIP exclusivo en tu perfil"},
+          ].map(({icon,text})=>(
+            <div key={text} style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:16,flexShrink:0}}>{icon}</span>
+              <span style={{fontSize:12,color:"rgba(255,255,255,0.75)",lineHeight:1.4}}>{text}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Precio + CTA */}
+        <div style={{textAlign:"center",marginBottom:10}}>
+          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",textDecoration:"line-through"}}>$19.99/mes</span>
+          <span style={{fontSize:28,fontWeight:900,color:"#A78BFA",marginLeft:8}}>$9.99</span>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.4)"}}>/mes</span>
+        </div>
+
+        <div onClick={onGoVIP} style={{
+          background:"linear-gradient(135deg,#7C3AED,#6366F1)",
+          borderRadius:14,padding:"14px 20px",textAlign:"center",
+          color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",
+          boxShadow:"0 4px 20px rgba(124,58,237,0.5)",
+          letterSpacing:0.2,
+        }}>
+          ✦ Empezar ahora →
+        </div>
+        <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"rgba(255,255,255,0.25)"}}>
+          Cancela cuando quieras · Sin compromisos
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── PREMIUM PAGE ──────────────────────────────────────────────────────────────
 function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
   const [billing, setBilling] = useState("monthly");
@@ -2925,6 +3044,32 @@ const AFFILIATES = [
     badge:"COPY TRADING",
     badgeColor:"#6DCC74",
     url:"https://www.etoro.com/es/trading/account/",
+  },
+  {
+    id:"coinbase",
+    logo:"🔵",
+    name:"Coinbase",
+    color:"#0052FF",
+    bg:"linear-gradient(135deg,#000B2E,#001A6B)",
+    tagline:"Hasta $50 en crypto de regalo",
+    sub:"La exchange de crypto más confiable de EE.UU.",
+    cta:"Ganar $50 gratis →",
+    badge:"CRYPTO #1",
+    badgeColor:"#0052FF",
+    url:"https://coinbase.com/join/nexotrade",
+  },
+  {
+    id:"binance",
+    logo:"🟡",
+    name:"Binance",
+    color:"#F0B90B",
+    bg:"linear-gradient(135deg,#0D0A00,#1A1300)",
+    tagline:"20% descuento en comisiones",
+    sub:"La exchange más grande del mundo",
+    cta:"Registrarse gratis →",
+    badge:"MAYOR VOLUMEN",
+    badgeColor:"#F0B90B",
+    url:"https://www.binance.com/es/register?ref=NEXOTRADE",
   },
 ];
 
@@ -4623,8 +4768,23 @@ export default function App(){
   const [lang,setLang]         = useState("es");
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
   const [dbReady,setDbReady]   = useState(false);
+  const [showVipPopup,setVipPopup] = useState(false);
 
   const t = LANGS[lang];
+
+  // ── VIP POP-UP: aparece a los 30s para usuarios no-premium ──────────────────
+  useEffect(()=>{
+    const already = sessionStorage.getItem("nexo-vip-popup-shown");
+    if(already) return;
+    const timer = setTimeout(()=>{
+      const ep = _getAdminStatus() || (_getSavedUser()?.is_premium || false);
+      if(!ep){
+        setVipPopup(true);
+        sessionStorage.setItem("nexo-vip-popup-shown","1");
+      }
+    }, 30000);
+    return ()=> clearTimeout(timer);
+  },[]);
 
   // Helper: guardar/borrar usuario en localStorage + state
   const saveUser = useCallback((u) => {
@@ -4874,7 +5034,14 @@ export default function App(){
             </div>
           </div>
         )}
-        {filtered2.map(p=><PostCard key={p.id} post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>)}
+        {filtered2.map((p,i)=>(
+          <React.Fragment key={p.id}>
+            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>
+            {!effectivePremium && (i+1)%5===0 && (
+              <VipFeedCard onGoVIP={()=>setPage(8)}/>
+            )}
+          </React.Fragment>
+        ))}
       </>
     );
   };
@@ -5219,6 +5386,14 @@ export default function App(){
             🚪 Cerrar sesión
           </button>
         </div>
+      )}
+
+      {/* VIP POP-UP */}
+      {showVipPopup && !effectivePremium && (
+        <VipPopup
+          onClose={()=>setVipPopup(false)}
+          onGoVIP={()=>{ setVipPopup(false); setPage(8); setShowLanding(false); }}
+        />
       )}
 
       {/* MODALS */}
