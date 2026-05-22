@@ -3479,7 +3479,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,lang}){
           <div style={{color:C.text,fontSize:13,fontWeight:700,lineHeight:1}}>{user.name}</div>
           <div style={{color:lvl.color,fontSize:9,fontWeight:700}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</div>
         </div>
-        <span style={{color:C.muted2,fontSize:9}}>▾</span>
+        <span className="nexo-usermenu-arrow" style={{color:C.muted2,fontSize:9}}>▾</span>
       </div>
       {open&&(
         <div className="nexo-usermenu-dropdown" style={{position:"absolute",right:0,top:"calc(100% + 8px)",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:8,minWidth:195,zIndex:150,boxShadow:C.shadowMd}}>
@@ -5119,7 +5119,7 @@ export default function App(){
     );
   };
 
-  const [showLanding, setShowLanding] = useState(!_getSavedUser());
+  const [showLanding, setShowLanding] = useState(false); // Feed visible siempre, sin obligar registro
   const [darkMode, setDarkMode] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
   const [tickerPage,  setTickerPage]   = useState(null); // página completa de ticker (@META)
@@ -5166,8 +5166,8 @@ export default function App(){
           gap: 10px !important;
           grid-template-columns: 1fr !important;
         }
-        .nexo-nav-icons { gap: 2px !important; }
-        .nexo-nav-icons button { width: 32px !important; height: 32px !important; font-size: 14px !important; }
+        .nexo-nav-icons { gap: 1px !important; }
+        .nexo-nav-icons button { width: 30px !important; height: 30px !important; font-size: 13px !important; }
         .nexo-tabs { justify-content: flex-start !important; }
         .nexo-tabs button { padding: 10px 12px !important; font-size: 12px !important; }
         .nexo-hide-mobile { display: none !important; }
@@ -5177,8 +5177,12 @@ export default function App(){
         .nexo-logo-img { height: 38px !important; }
         /* UserMenu dropdown no se salga de pantalla */
         .nexo-usermenu-dropdown { right: 0 !important; left: auto !important; min-width: 180px !important; }
-        /* UserMenu trigger compacto en móvil */
-        .nexo-usermenu-trigger { padding: 4px 6px !important; gap: 4px !important; }
+        /* UserMenu trigger — solo avatar en móvil, igual tamaño que los otros botones */
+        .nexo-usermenu-trigger { padding: 2px !important; border: none !important; background: transparent !important; gap: 2px !important; border-radius: 50% !important; }
+        /* Ocultar flecha ▾ en móvil para ahorrar espacio */
+        .nexo-usermenu-arrow { display: none !important; }
+        /* Botón de alertas oculto en móvil — accesible desde el menú de perfil */
+        .nexo-btn-alerts { display: none !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
@@ -5233,8 +5237,8 @@ export default function App(){
           {/* Right — iconos estilo Socimo */}
           <div className="nexo-nav-icons" style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
 
-            {/* Home — hidden on mobile (logo tap already navigates home) */}
-            <button className="nexo-hide-mobile" onClick={()=>{setPage(0);setShowLanding(false);}}
+            {/* Home */}
+            <button onClick={()=>{setPage(0);setShowLanding(false);}}
               title="Inicio"
               style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:page===0?"rgba(0,168,255,0.1)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#00A8FF",transition:"all 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
@@ -5251,8 +5255,8 @@ export default function App(){
               🤖
             </button>
 
-            {/* Alertas */}
-            <button onClick={()=>setAlerts(true)}
+            {/* Alertas — oculto en móvil, accesible desde menú de perfil */}
+            <button className="nexo-btn-alerts" onClick={()=>setAlerts(true)}
               title="Alertas"
               style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,position:"relative",transition:"all 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
