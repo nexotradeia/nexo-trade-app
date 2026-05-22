@@ -4896,6 +4896,14 @@ export default function App(){
           error = fallback.error;
         }
 
+        // Si Supabase falla, carga posts guardados localmente
+        if(error || !data){
+          try{
+            const local = JSON.parse(localStorage.getItem("nexo-posts-cache")||"[]");
+            if(local.length>0){ setPosts(local); setDbReady(true); }
+          }catch{}
+          return;
+        }
         if(!error && data){
           const mapped = data.map(p=>({
             id:         p.id,
@@ -4916,9 +4924,11 @@ export default function App(){
           setPosts(prev => {
             const prevIds = new Set(prev.map(p => p.id));
             const nuevos  = mapped.filter(p => !prevIds.has(p.id));
-            if(nuevos.length === 0 && prev.length > 0) return prev; // nada nuevo, no re-renderiza
+            if(nuevos.length === 0 && prev.length > 0) return prev;
             return mapped;
           });
+          // Guarda en caché local para que no desaparezcan si Supabase falla
+          try{ localStorage.setItem("nexo-posts-cache", JSON.stringify(mapped.slice(0,50))); }catch{}
           setDbReady(true);
         }
       }catch(e){ console.error("Error cargando posts:", e); }
