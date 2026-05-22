@@ -4887,14 +4887,20 @@ export default function App(){
             reposts:    p.reposts_count||0,
             tags:       p.tags||[p.ticker||"GENERAL"],
           }));
-          setPosts(mapped);
+          // Solo actualiza si hay posts nuevos — no mueve el scroll innecesariamente
+          setPosts(prev => {
+            const prevIds = new Set(prev.map(p => p.id));
+            const nuevos  = mapped.filter(p => !prevIds.has(p.id));
+            if(nuevos.length === 0 && prev.length > 0) return prev; // nada nuevo, no re-renderiza
+            return mapped;
+          });
           setDbReady(true);
         }
       }catch(e){ console.error("Error cargando posts:", e); }
     };
     loadPosts();
-    // Auto-refresh cada 10 segundos para mostrar posts nuevos (como Twitter)
-    const refreshTimer=setInterval(loadPosts, 10000);
+    // Auto-refresh cada 15 segundos — solo agrega posts NUEVOS sin mover el scroll
+    const refreshTimer=setInterval(loadPosts, 15000);
 
     // Suscripción realtime — nuevos posts aparecen al instante
     sub=supabase
