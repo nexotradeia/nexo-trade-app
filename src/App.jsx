@@ -1167,6 +1167,12 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
             <SentPill sentiment={post.sentiment} lang={lang}/>
             <span style={{color:"#94A3B8",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
           </div>
+          {/* Aviso: post no guardado en servidor */}
+          {post._failed && (
+            <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:8,padding:"5px 10px",marginBottom:6,fontSize:11,color:"#EF4444",fontWeight:600}}>
+              ⚠️ No se guardó — solo visible en este dispositivo. Recarga la página e inténtalo de nuevo.
+            </div>
+          )}
           {/* Post text */}
           <p style={{margin:"0 0 8px",color:"#475569",fontSize:13.5,lineHeight:1.6,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
           {/* Imagen / GIF */}
@@ -5014,25 +5020,37 @@ export default function App(){
     setTimeout(()=>setNewPostId(null), 1500);
     showPoints(POINT_ACTIONS.post, lang==="en"?"Post published! 🎉":"¡Post publicado! 🎉");
 
-    // 2. Guardar en Supabase
+    // 2. Guardar en Supabase (con 1 reintento automático si falla)
     if(user?.id && user.id!=="local"){
-      try{
+      const tryInsert = async () => {
         const {data,error}=await supabase.from("posts").insert({
           user_id:user.id, text, ticker, sentiment, tags:[ticker],
           likes_count:0, comments_count:0, reposts_count:0
         }).select().single();
-
+        return {data,error};
+      };
+      try{
+        let {data,error} = await tryInsert();
+        // Si falla, espera 2s y reintenta una vez más
+        if(error){
+          await new Promise(r=>setTimeout(r,2000));
+          const retry = await tryInsert();
+          data  = retry.data;
+          error = retry.error;
+        }
         if(!error && data){
           // 3. Reemplazar el post temporal con el real (con UUID de la BD)
-          //    Marcamos el localId para que el canal realtime lo ignore
           setPosts(prev=>prev.map(p=>
             p.id===localId ? {...localPost, id:data.id, _confirmed:true} : p
           ));
           setNewPostId(data.id);
           setTimeout(()=>setNewPostId(null), 800);
+        } else {
+          // Ambos intentos fallaron — marcar como no guardado
+          console.error("Post no guardado:", error);
+          setPosts(prev=>prev.map(p=>p.id===localId?{...p,_failed:true}:p));
         }
       }catch(e){
-        // Si falla, el post local sigue visible pero marca como no guardado
         setPosts(prev=>prev.map(p=>p.id===localId?{...p,_failed:true}:p));
       }
     }
