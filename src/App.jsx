@@ -4751,7 +4751,7 @@ const _getSavedUser = () => {
 };
 
 export default function App(){
-  const [posts,setPosts]       = useState(MOCK_POSTS);
+  const [posts,setPosts]       = useState([]);
   const [newPostId,setNewPostId]= useState(null);
   const [page,setPage]         = useState(0);
   const [sent,setSent]         = useState("all");
@@ -4853,37 +4853,48 @@ export default function App(){
     let sub;
     const loadPosts=async()=>{
       try{
-        const {data,error}=await supabase
+        // Primero intenta con join a profiles
+        let { data, error } = await supabase
           .from("posts")
           .select(`*, profiles(username,avatar_emoji,avatar_color,points)`)
           .order("created_at", {ascending:false})
-          .limit(50);
+          .limit(100);
+
+        // Si falla el join, intenta sin él
+        if(error){
+          const fallback = await supabase
+            .from("posts")
+            .select("*")
+            .order("created_at", {ascending:false})
+            .limit(100);
+          data  = fallback.data;
+          error = fallback.error;
+        }
+
         if(!error && data){
-          if(data.length>0){
-            const mapped=data.map(p=>({
-              id:p.id,
-              userId:p.user_id,
-              user:p.profiles?.username||"Anónimo",
-              avatar:p.profiles?.avatar_emoji||"🦅",
-              avatarColor:p.profiles?.avatar_color||C.accent,
-              time:fmtTimeAgo(p.created_at),
-              ticker:p.ticker||"GENERAL",
-              sentiment:p.sentiment||"bull",
-              text:p.text,
-              likes:p.likes_count||0,
-              comments:p.comments_count||0,
-              reposts:p.reposts_count||0,
-              tags:p.tags||[p.ticker||"GENERAL"],
-            }));
-            setPosts(mapped);
-          }
+          const mapped = data.map(p=>({
+            id:         p.id,
+            userId:     p.user_id,
+            user:       p.profiles?.username || p.user_name || "Anónimo",
+            avatar:     p.profiles?.avatar_emoji || p.avatar_emoji || "🦅",
+            avatarColor:p.profiles?.avatar_color || C.accent,
+            time:       fmtTimeAgo(p.created_at),
+            ticker:     p.ticker||"GENERAL",
+            sentiment:  p.sentiment||"bull",
+            text:       p.text,
+            likes:      p.likes_count||0,
+            comments:   p.comments_count||0,
+            reposts:    p.reposts_count||0,
+            tags:       p.tags||[p.ticker||"GENERAL"],
+          }));
+          setPosts(mapped);
           setDbReady(true);
         }
-      }catch(e){ /* fallback a MOCK_POSTS */ }
+      }catch(e){ console.error("Error cargando posts:", e); }
     };
     loadPosts();
-    // Auto-refresh cada 60 segundos para mostrar posts nuevos de otros usuarios
-    const refreshTimer=setInterval(loadPosts, 60000);
+    // Auto-refresh cada 10 segundos para mostrar posts nuevos (como Twitter)
+    const refreshTimer=setInterval(loadPosts, 10000);
 
     // Suscripción realtime — nuevos posts aparecen al instante
     sub=supabase
@@ -5069,7 +5080,7 @@ export default function App(){
     ? sortedPosts.filter(p => p.text?.toUpperCase().includes(`$${tickerFilter}`) || p.ticker===tickerFilter)
     : sortedPosts;
   const filtered2 = sent==="all" ? filteredByTicker : filteredByTicker.filter(p=>p.sentiment===sent);
-  const showingMockData = posts === MOCK_POSTS; // true = Supabase no tiene posts reales aún
+  const showingMockData = false; // ya no usamos mock posts
 
   return(
     <PriceProvider>
