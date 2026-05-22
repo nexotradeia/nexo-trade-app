@@ -2382,6 +2382,7 @@ function VipPopup({onClose, onGoVIP}){
       background:"rgba(0,0,0,0.75)",backdropFilter:"blur(6px)",
       display:"flex",alignItems:"center",justifyContent:"center",
       padding:16,
+      overflowY:"auto",
     }} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{
         background:"linear-gradient(160deg,#0F0A2E,#1A0A3D,#0D1A3D)",
@@ -4796,7 +4797,7 @@ export default function App(){
 
   const t = LANGS[lang];
 
-  // ── VIP POP-UP: aparece a los 30s para usuarios no-premium ──────────────────
+  // ── VIP POP-UP: aparece a los 2 minutos para usuarios no-premium ─────────────
   useEffect(()=>{
     const already = sessionStorage.getItem("nexo-vip-popup-shown");
     if(already) return;
@@ -4806,7 +4807,7 @@ export default function App(){
         setVipPopup(true);
         sessionStorage.setItem("nexo-vip-popup-shown","1");
       }
-    }, 30000);
+    }, 120000); // 2 minutos — no interrumpe al usuario recién llegado
     return ()=> clearTimeout(timer);
   },[]);
 
