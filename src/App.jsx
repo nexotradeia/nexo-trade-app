@@ -826,6 +826,29 @@ function AIAssistant({lang,onClose}){
   const endRef=useRef();
   useEffect(()=>endRef.current?.scrollIntoView({behavior:"smooth"}),[msgs]);
 
+  const respuestaLocal = (msg) => {
+    const m = msg.toLowerCase();
+    if(m.includes("p/e") || m.includes("pe ratio") || m.includes("price to earn"))
+      return "📊 El P/E ratio (Price-to-Earnings) indica cuánto pagan los inversores por cada $1 de ganancia. Un P/E bajo puede indicar que la acción está barata; uno alto que tiene altas expectativas de crecimiento. Por ejemplo, el S&P 500 tiene un P/E histórico de ~15-20x.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("nvidia") || m.includes("nvda"))
+      return "📈 NVIDIA (NVDA) es el líder mundial en chips para IA y data centers. Sus GPU H100/H200 son esenciales para entrenar modelos de IA. El crecimiento depende de la demanda de infraestructura de IA. Revisa los earnings trimestrales para ver si mantiene el momentum.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("bitcoin") || m.includes("btc"))
+      return "₿ Bitcoin es la criptomoneda #1 por capitalización. Su precio sigue ciclos de ~4 años ligados al halving (reducción de oferta). Instituciones como BlackRock y Fidelity ya tienen ETFs de BTC aprobados. Muchos lo ven como reserva de valor digital.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("ethereum") || m.includes("eth"))
+      return "🔷 Ethereum es la blockchain más usada para DeFi, NFTs y contratos inteligentes. Desde el merge a Proof of Stake en 2022, ETH tiene mecánica deflacionaria. Su valor está ligado al uso del ecosistema de apps descentralizadas.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("dividendo") || m.includes("dividend"))
+      return "💰 Las acciones de dividendos son empresas que pagan parte de sus ganancias a los accionistas regularmente. Ejemplos populares: $KO (Coca-Cola ~3%), $JNJ (J&J ~3%), $AAPL (Apple ~0.5%). Son populares para ingreso pasivo a largo plazo.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("sp500") || m.includes("s&p") || m.includes("nasdaq") || m.includes("indice") || m.includes("índice"))
+      return "📊 El S&P 500 es el índice de las 500 empresas más grandes de EE.UU. Históricamente retorna ~10% anual. El NASDAQ incluye más tecnología. Invertir en ETFs como SPY o QQQ es la forma más simple de exposición diversificada al mercado americano.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("empezar") || m.includes("comenzar") || m.includes("principiante") || m.includes("nuevo") || m.includes("cómo invierto") || m.includes("como invierto"))
+      return "🌱 Para empezar: 1) Edúcate gratis (YouTube, NexoTrade). 2) Define cuánto puedes perder sin estrés. 3) Empieza con ETFs diversificados (SPY, QQQ). 4) Practica con el Paper Trading de NexoTrade ($100k virtual). 5) Nunca inviertas lo que necesitas para vivir.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("tesla") || m.includes("tsla"))
+      return "🚗 Tesla (TSLA) es líder en vehículos eléctricos y almacenamiento de energía. Su precio es muy volátil, influenciado por los comentarios de Elon Musk y las entregas trimestrales. También tiene negocios en energía solar y software FSD.\n\n⚠️ No es consejo financiero.";
+    if(m.includes("apple") || m.includes("aapl"))
+      return "🍎 Apple (AAPL) es la empresa más valiosa del mundo. Sus ingresos vienen del iPhone (~50%), servicios (App Store, iCloud ~25%) y Mac/iPad. Tiene $165B+ en caja y recompra acciones agresivamente. Se considera una inversión defensiva de calidad.\n\n⚠️ No es consejo financiero.";
+    return `🤖 Gracias por tu pregunta sobre "${msg.substring(0,40)}". En NexoTrade puedes ver análisis de la comunidad en el feed en tiempo real. Para análisis más profundos, revisa los Picks VIP semanales o pregunta en el feed a otros traders.\n\n⚠️ No es consejo financiero. Consulta un asesor antes de invertir.`;
+  };
+
   const send = async(text) => {
     if(!text.trim()||loading)return;
     const userMsg=text;
@@ -833,17 +856,18 @@ function AIAssistant({lang,onClose}){
     setMsgs(prev=>[...prev,{role:"user",text:userMsg}]);
     setLoading(true);
     try{
-      // Llama a la Vercel serverless function /api/chat (la key queda segura en Vercel)
       const res=await fetch("/api/chat",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({message:userMsg,systemPrompt:t.aiSys})
       });
+      if(!res.ok) throw new Error("api_error");
       const data=await res.json();
-      const reply=data.reply||t.aiErr;
+      const reply=data.reply||respuestaLocal(userMsg);
       setMsgs(prev=>[...prev,{role:"ai",text:reply}]);
     }catch{
-      setMsgs(prev=>[...prev,{role:"ai",text:t.aiErr}]);
+      // Si la API falla, responde con IA local inmediatamente
+      setMsgs(prev=>[...prev,{role:"ai",text:respuestaLocal(userMsg)}]);
     }
     setLoading(false);
   };
@@ -5125,13 +5149,11 @@ export default function App(){
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
       }
-      html {
-        overflow-x: clip !important;
-      }
-      body {
+      html, body {
         overflow-x: hidden !important;
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch !important;
         max-width: 100vw !important;
-        overflow-y: auto !important;
       }
       @media (min-width: 768px) {
         .nexo-mobile-search { display: none !important; }
