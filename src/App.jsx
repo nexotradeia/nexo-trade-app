@@ -5035,12 +5035,12 @@ export default function App(){
           </div>
         )}
         {filtered2.map((p,i)=>(
-          <React.Fragment key={p.id}>
+          <div key={p.id}>
             <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>
             {!effectivePremium && (i+1)%5===0 && (
               <VipFeedCard onGoVIP={()=>setPage(8)}/>
             )}
-          </React.Fragment>
+          </div>
         ))}
       </>
     );
