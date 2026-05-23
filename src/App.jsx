@@ -935,13 +935,17 @@ function AuthModal({mode,onClose,onAuth,lang}){
           options:{data:{username:name||email.split("@")[0],avatar_emoji:avatar.emoji,avatar_color:avatar.color}}
         });
         if(err){setError(err.message);setLoading(false);return;}
+        // Email de bienvenida via Edge Function (no bloquea el flujo)
+        try{
+          supabase.functions.invoke("send-welcome",{body:{email,name:name||email.split("@")[0]}});
+        }catch(e){}
         onAuth({
           id:data.user?.id||"local",
           name:name||email.split("@")[0],
           emoji:avatar.emoji,avatarColor:avatar.color,
           followers:0,following:0,posts:0,points:100,badges:["early"],
           bio:"Nuevo en NexoTrade 🚀"
-        });
+        }, true /* isNew */);
       }else{
         const {data,error:err}=await supabase.auth.signInWithPassword({email,password:pass});
         if(err){setError(err.message==="Invalid login credentials"?"Email o contraseña incorrectos":err.message);setLoading(false);return;}
@@ -3117,7 +3121,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
     {icon:"📰", label:"Noticias",         idx:5},
     {icon:"⚡", label:"Trending",         idx:7},
     {icon:"💼", label:"Empleos Finanzas",  idx:10},
-    {icon:"🎓", label:"Webinars",          idx:11},
+    {icon:"🎓", label:"Webinars en Vivo",  idx:11},
+    {icon:"📚", label:"Academia — Cursos", idx:12},
     {icon:"🛠️",label:"Herramientas VIP", idx:9, vip:true},
     {icon:"✦",  label:"Premium VIP",      idx:8, premium:true},
   ];
@@ -5139,6 +5144,200 @@ const SAMPLE_JOBS = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
+   ACADEMIA PAGE — cursos grabados con pago único via Stripe
+═══════════════════════════════════════════════════════════════ */
+const CURSOS = [
+  {
+    id:"c1", titulo:"Análisis Técnico desde Cero", emoji:"📈",
+    instructor:"SPY_Trader", nivel:"Principiante", duracion:"6 horas",
+    lecciones:24, precio:49, precioVip:29,
+    stripeLink:"https://buy.stripe.com/curso1",
+    tags:["Gráficas","Velas","Soportes","Tendencias"],
+    desc:"El curso más completo de análisis técnico en español. Desde cómo leer una vela japonesa hasta estrategias completas de entrada y salida.",
+    temario:["Introducción a los mercados financieros","Tipos de gráficas y timeframes","Velas japonesas: los 15 patrones clave","Soportes, resistencias y zonas de volumen","Tendencias e indicadores (RSI, MACD, BB)","Tu primera estrategia completa"],
+    rating:4.9, reviews:147, emoji2:"🏆", bestseller:true,
+  },
+  {
+    id:"c2", titulo:"Crypto Trading: Guía Completa", emoji:"₿",
+    instructor:"CryptoWolf", nivel:"Intermedio", duracion:"8 horas",
+    lecciones:32, precio:79, precioVip:49,
+    stripeLink:"https://buy.stripe.com/curso2",
+    tags:["Bitcoin","Ethereum","DeFi","Altcoins"],
+    desc:"Todo lo que necesitas para operar crypto de forma profesional: análisis on-chain, ciclos de mercado, gestión de riesgo y los mejores exchanges.",
+    temario:["Bitcoin y blockchain explicado","Ciclos de mercado y halvings","Análisis on-chain: MVRV, NVT, Hodl Waves","Altcoins: cómo filtrar proyectos sólidos","DeFi: yield farming y staking seguro","Gestión de riesgo y portfolio crypto"],
+    rating:4.8, reviews:89, emoji2:"🔥", bestseller:false,
+  },
+  {
+    id:"c3", titulo:"Opciones para Traders Activos", emoji:"🛡️",
+    instructor:"SPY_Trader", nivel:"Avanzado", duracion:"10 horas",
+    lecciones:40, precio:99, precioVip:59,
+    stripeLink:"https://buy.stripe.com/curso3",
+    tags:["Options","Calls","Puts","Greeks"],
+    desc:"Domina el mercado de opciones: desde los conceptos básicos de calls y puts hasta estrategias avanzadas como iron condors y calendar spreads.",
+    temario:["Qué son las opciones y cómo funcionan","Las griegas: Delta, Gamma, Theta, Vega","Estrategias básicas: calls cubiertos y puts protectoras","Iron Condor y mariposas","Operando earnings con opciones","Gestión de posiciones: cuándo salir"],
+    rating:4.9, reviews:62, emoji2:"⚡", bestseller:false,
+  },
+  {
+    id:"c4", titulo:"Inversión en Dividendos — Renta Pasiva", emoji:"💰",
+    instructor:"NvidiaChad", nivel:"Principiante", duracion:"4 horas",
+    lecciones:16, precio:39, precioVip:19,
+    stripeLink:"https://buy.stripe.com/curso4",
+    tags:["Dividendos","REITs","ETFs","Portafolio"],
+    desc:"Construye un portafolio de dividendos que genere ingresos mes a mes. Las mejores acciones, ETFs y REITs para renta pasiva en 2025.",
+    temario:["Por qué los dividendos son el activo más poderoso","Cómo evaluar una empresa pagadora de dividendos","Los mejores ETFs de dividendos (SCHD, VYM, JEPI)","REITs: inmobiliario desde $10","Portafolio modelo: $500/mes pasivos","Errores más comunes de los inversores de dividendos"],
+    rating:4.7, reviews:203, emoji2:"💎", bestseller:true,
+  },
+];
+
+function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
+  const C = useColors();
+  const [filtro, setFiltro] = useState("todos");
+  const [expanded, setExpanded] = useState(null);
+
+  const niveles = ["todos","Principiante","Intermedio","Avanzado"];
+  const filtered = filtro==="todos" ? CURSOS : CURSOS.filter(c=>c.nivel===filtro);
+
+  const handleBuy = (c) => {
+    if(!user){ onNeedAuth(); return; }
+    const link = c.stripeLink + (user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : "");
+    window.open(link, "_blank");
+  };
+
+  return(
+    <div style={{maxWidth:860,margin:"0 auto",padding:"0 4px"}}>
+      {/* Hero */}
+      <div style={{background:"linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%)",borderRadius:20,padding:"36px 28px",marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 25% 50%,#f59e0b10,transparent 55%),radial-gradient(circle at 75% 50%,#10b98115,transparent 55%)",pointerEvents:"none"}}/>
+        <div style={{position:"relative"}}>
+          <div style={{fontSize:44,marginBottom:10}}>🎓</div>
+          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>Academia NexoTrade</h1>
+          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:480,marginLeft:"auto",marginRight:"auto"}}>Cursos grabados. Aprende a tu ritmo. Acceso de por vida.</p>
+          <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+            {[
+              {v:`${CURSOS.length} cursos`,l:"Disponibles"},
+              {v:"Acceso de por vida",l:"Sin caducidad"},
+              {v:"VIP 40% off",l:"Descuento miembros"},
+            ].map((s,i)=>(
+              <div key={i} style={{background:"#ffffff10",borderRadius:12,padding:"10px 18px",border:"1px solid #ffffff15"}}>
+                <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{s.v}</div>
+                <div style={{color:"#64748b",fontSize:11}}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* VIP banner */}
+      {!isPremium && <div style={{background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #7C3AED44",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
+        <span style={{fontSize:24}}>✦</span>
+        <div style={{flex:1,fontSize:13,color:"#a78bfa"}}><strong>VIP ($9.99/mes)</strong> — obtén hasta 40% de descuento en todos los cursos.</div>
+        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver VIP →</button>
+      </div>}
+
+      {/* Filtros */}
+      <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+        {niveles.map(n=>(
+          <button key={n} onClick={()=>setFiltro(n)}
+            style={{padding:"6px 16px",borderRadius:20,border:"1px solid",fontSize:12,fontWeight:600,cursor:"pointer",
+              borderColor:filtro===n?C.accent:C.border,
+              background:filtro===n?C.accent+"22":"transparent",
+              color:filtro===n?C.accent:C.muted}}>
+            {n==="todos"?"🎯 Todos":n==="Principiante"?"🟢 "+n:n==="Intermedio"?"🟡 "+n:"🔴 "+n}
+          </button>
+        ))}
+      </div>
+
+      {/* Course cards */}
+      <div style={{display:"flex",flexDirection:"column",gap:16}}>
+        {filtered.map((c)=>{
+          const nivelColor=c.nivel==="Avanzado"?"#ef4444":c.nivel==="Intermedio"?"#f59e0b":"#10b981";
+          const isOpen = expanded===c.id;
+          return(
+            <div key={c.id} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:18,overflow:"hidden",boxShadow:C.shadow}}>
+              <div style={{padding:"20px 22px",display:"flex",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
+                {/* icon */}
+                <div style={{width:60,height:60,borderRadius:16,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,flexShrink:0}}>{c.emoji}</div>
+
+                {/* body */}
+                <div style={{flex:1,minWidth:180}}>
+                  <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
+                    {c.bestseller&&<span style={{background:"#f59e0b22",color:"#f59e0b",border:"1px solid #f59e0b44",borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:700}}>🏆 Bestseller</span>}
+                    <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:700}}>{c.nivel}</span>
+                  </div>
+                  <h3 style={{margin:"0 0 6px",color:C.text,fontSize:15,fontWeight:800}}>{c.titulo}</h3>
+                  <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:8}}>
+                    <span style={{color:C.muted,fontSize:12}}>👤 @{c.instructor}</span>
+                    <span style={{color:C.muted,fontSize:12}}>⏱ {c.duracion}</span>
+                    <span style={{color:C.muted,fontSize:12}}>📚 {c.lecciones} lecciones</span>
+                    <span style={{color:"#f59e0b",fontSize:12,fontWeight:600}}>⭐ {c.rating} ({c.reviews} reviews)</span>
+                  </div>
+                  <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.6}}>{c.desc}</p>
+                  {/* tags */}
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+                    {c.tags.map(t=><span key={t} style={{background:C.border,color:C.muted2,borderRadius:6,padding:"2px 8px",fontSize:11}}>{t}</span>)}
+                  </div>
+                  {/* toggle temario */}
+                  <button onClick={()=>setExpanded(isOpen?null:c.id)}
+                    style={{background:"transparent",border:"none",padding:0,color:C.accent,fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                    {isOpen?"▲ Ocultar temario":"▼ Ver temario"}
+                  </button>
+                </div>
+
+                {/* price */}
+                <div style={{flexShrink:0,textAlign:"center",minWidth:115}}>
+                  {isPremium?(
+                    <>
+                      <div style={{fontSize:10,color:"#a78bfa",fontWeight:700,marginBottom:2}}>✦ PRECIO VIP</div>
+                      <div style={{fontSize:24,fontWeight:900,color:C.accent,lineHeight:1}}>${c.precioVip}</div>
+                      <div style={{fontSize:12,color:C.muted2,textDecoration:"line-through",marginBottom:10}}>${c.precio}</div>
+                    </>
+                  ):(
+                    <>
+                      <div style={{fontSize:10,color:C.muted2,fontWeight:600,marginBottom:2}}>PRECIO ÚNICO</div>
+                      <div style={{fontSize:24,fontWeight:900,color:C.text,lineHeight:1}}>${c.precio}</div>
+                      <div style={{fontSize:10,color:"#a78bfa",marginBottom:10}}>VIP paga ${c.precioVip}</div>
+                    </>
+                  )}
+                  <button onClick={()=>handleBuy(c)}
+                    style={{background:isPremium?`linear-gradient(135deg,${C.accent},#00a87f)`:"linear-gradient(135deg,#1d4ed8,#7C3AED)",
+                      border:"none",borderRadius:10,padding:"10px 0",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",width:"100%"}}>
+                    Comprar →
+                  </button>
+                  <div style={{fontSize:10,color:C.muted2,marginTop:6}}>🔓 Acceso de por vida</div>
+                </div>
+              </div>
+
+              {/* Temario expandible */}
+              {isOpen && (
+                <div style={{borderTop:`1px solid ${C.border}`,padding:"16px 22px",background:C.bg}}>
+                  <div style={{fontSize:12,fontWeight:700,color:C.muted,marginBottom:10}}>TEMARIO DEL CURSO</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    {c.temario.map((t,i)=>(
+                      <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                        <div style={{width:22,height:22,borderRadius:6,background:`linear-gradient(135deg,${C.accent},#00a87f)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0}}>{i+1}</div>
+                        <span style={{color:C.muted2,fontSize:13,lineHeight:1.5}}>{t}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom CTA */}
+      <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
+        <div style={{fontSize:36,marginBottom:10}}>🎓</div>
+        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Quieres enseñar en NexoTrade?</h3>
+        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Si eres trader con experiencia, escríbenos. Tú enseñas, nosotros ponemos la plataforma y los alumnos.</p>
+        <a href="mailto:hola@nexotradeia.com?subject=Quiero ser instructor en NexoTrade" style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#00a87f)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>Ser instructor →</a>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    WEBINARS PAGE — página pública de webinars con compra Stripe
 ═══════════════════════════════════════════════════════════════ */
 const WEBINARS_LIST = [
@@ -5476,6 +5675,7 @@ const NAV_ITEMS = (t) => [
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"💼 Empleos",idx:10},
   {label:"🎓 Webinars",idx:11},
+  {label:"📚 Academia",idx:12},
   {label:"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
@@ -5511,6 +5711,62 @@ const _getSavedUser = () => {
   catch { return null; }
 };
 
+/* ═══════════════════════════════════════════════════════════════
+   WELCOME MODAL — aparece al registrarse por primera vez
+═══════════════════════════════════════════════════════════════ */
+function WelcomeModal({name, onClose, onGoVip}){
+  const C = useColors();
+  const steps = [
+    {emoji:"📈", titulo:"Publica tu primera idea", desc:"Comparte tu análisis con miles de traders"},
+    {emoji:"👥", titulo:"Sigue a top traders",     desc:"Descubre quién está ganando en el leaderboard"},
+    {emoji:"🎮", titulo:"Paper trading $100k",     desc:"Practica sin arriesgar dinero real"},
+    {emoji:"✦",  titulo:"Hazte VIP por $9.99/mes", desc:"Picks semanales, señales y mucho más"},
+  ];
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div style={{background:C.surface,borderRadius:24,padding:"36px 32px",maxWidth:460,width:"100%",boxShadow:"0 25px 80px rgba(0,0,0,0.6)",border:`1px solid ${C.border}`,position:"relative"}} onClick={e=>e.stopPropagation()}>
+        {/* Close */}
+        <button onClick={onClose} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",color:C.muted2,fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
+
+        {/* Confetti header */}
+        <div style={{textAlign:"center",marginBottom:24}}>
+          <div style={{fontSize:56,marginBottom:8}}>🎉</div>
+          <h2 style={{margin:"0 0 6px",color:C.text,fontSize:22,fontWeight:900}}>¡Bienvenido, {name}!</h2>
+          <p style={{margin:0,color:C.muted,fontSize:13}}>Ya eres parte de la comunidad de inversores hispanos más activa.</p>
+        </div>
+
+        {/* Steps */}
+        <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
+          {steps.map((s,i)=>(
+            <div key={i} style={{display:"flex",gap:12,alignItems:"center",background:C.bg,borderRadius:12,padding:"12px 14px",border:`1px solid ${C.border}`}}>
+              <div style={{width:40,height:40,borderRadius:10,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{s.emoji}</div>
+              <div>
+                <div style={{color:C.text,fontWeight:700,fontSize:13}}>{s.titulo}</div>
+                <div style={{color:C.muted2,fontSize:12}}>{s.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bonus badge */}
+        <div style={{background:"linear-gradient(135deg,#f59e0b22,#d9770622)",border:"1px solid #f59e0b44",borderRadius:12,padding:"10px 16px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
+          <span style={{fontSize:22}}>🎁</span>
+          <div>
+            <div style={{color:"#f59e0b",fontWeight:700,fontSize:13}}>+100 puntos de bienvenida añadidos</div>
+            <div style={{color:"#92400e",fontSize:11}}>Badge "Early Adopter" desbloqueado en tu perfil</div>
+          </div>
+        </div>
+
+        {/* CTAs */}
+        <div style={{display:"flex",gap:10,flexDirection:"column"}}>
+          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",width:"100%"}}>✦ Ver plan VIP — 50% en webinars</button>
+          <button onClick={onClose} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:12,padding:"11px",color:C.muted,fontSize:13,fontWeight:600,cursor:"pointer",width:"100%"}}>Explorar el feed →</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App(){
   const [posts,setPosts]       = useState([]);
   const [newPostId,setNewPostId]= useState(null);
@@ -5534,6 +5790,8 @@ export default function App(){
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
   const [showVipPopup,setVipPopup] = useState(false);
+  const [showWelcome,setShowWelcome] = useState(false);
+  const [welcomeName,setWelcomeName] = useState("");
   const [newsletterEmail,setNewsletterEmail] = useState("");
   const [newsletterDone,setNewsletterDone]   = useState(false);
   const [showNewsletter,setShowNewsletter]   = useState(
@@ -5818,6 +6076,7 @@ export default function App(){
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user}/>;
     if(page===10) return <JobBoardPage user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
+    if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     return(
       <>
         {/* Tabs estilo Socimo */}
@@ -6278,7 +6537,8 @@ export default function App(){
       )}
 
       {/* MODALS */}
-      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false||ADMIN_EMAILS.includes(u.email||''));}} lang={lang}/>}
+      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u,isNew)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false||ADMIN_EMAILS.includes(u.email||''));if(isNew){setWelcomeName(u.name||u.email?.split("@")[0]||"");setShowWelcome(true);}}} lang={lang}/>}
+      {showWelcome&&<WelcomeModal name={welcomeName} onClose={()=>setShowWelcome(false)} onGoVip={()=>{setShowWelcome(false);setPage(8);}}/>}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
       {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)}/>}
