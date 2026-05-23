@@ -15,10 +15,36 @@ const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
-// email_stripe_setup.py reemplaza este link automáticamente con el link real
+// ✅ VIP $9.99/mes — link activo
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
-// ⚠️ PENDIENTE: crear producto PRO en Stripe dashboard y pegar el link aquí
-const STRIPE_PRO_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202"; // reemplazar con link PRO real
+
+// ══════════════════════════════════════════════════════════════════
+// 📋 STRIPE LINKS — ACTUALIZAR AQUÍ cuando crees los productos
+//    Instrucciones completas en: ACTIVAR_TODO.md
+// ══════════════════════════════════════════════════════════════════
+const STRIPE_LINKS = {
+  // ── Suscripciones ──────────────────────────────────────────────
+  vip:   "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $9.99/mes
+  pro:   "https://buy.stripe.com/REEMPLAZAR_PRO",          // ⚠️ pendiente $24.99/mes
+
+  // ── Webinars (sesión única) ────────────────────────────────────
+  // Crear en: dashboard.stripe.com → Payment Links → + Create Link
+  webinar1: "https://buy.stripe.com/WEBINAR_ANALISIS_TECNICO",   // $29 — Análisis técnico principiantes
+  webinar2: "https://buy.stripe.com/WEBINAR_BITCOIN_ONCHAIN",    // $49 — Bitcoin on-chain
+  webinar3: "https://buy.stripe.com/WEBINAR_EARNINGS_REPORT",    // $29 — Cómo leer earnings
+  webinar4: "https://buy.stripe.com/WEBINAR_OPCIONES",           // $79 — Opciones defensivas
+  webinar5: "https://buy.stripe.com/WEBINAR_DEFI_YIELD",         // $49 — DeFi yield farming
+  webinar6: "https://buy.stripe.com/WEBINAR_DIVIDENDOS",         // $39 — Dividendos renta pasiva
+
+  // ── Cursos (acceso de por vida) ────────────────────────────────
+  curso1: "https://buy.stripe.com/CURSO_TRADING_ZERO",           // $39 — Trading desde cero
+  curso2: "https://buy.stripe.com/CURSO_ANALISIS_TECNICO",       // $69 — Análisis técnico completo
+  curso3: "https://buy.stripe.com/CURSO_CRYPTO_MASTERCLASS",     // $99 — Crypto Masterclass
+  curso4: "https://buy.stripe.com/CURSO_OPCIONES",               // $79 — Opciones de A a Z
+};
+
+// Alias cortos (compatibilidad con código existente)
+const STRIPE_PRO_LINK = STRIPE_LINKS.pro;
 
 
 // ── CASHTAG + @MENTION RENDERER ───────────────────────────────────────────────
@@ -2602,12 +2628,12 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   ];
 
   const WEBINARS = [
-    {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar1", nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
-    {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar2", nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
-    {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar3", nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
-    {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:"https://buy.stripe.com/webinar4", nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
-    {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar5", nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
-    {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:"https://buy.stripe.com/webinar6", nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
+    {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar1, nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
+    {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar2, nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
+    {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar3, nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
+    {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:STRIPE_LINKS.webinar4, nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
+    {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar5, nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
+    {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:STRIPE_LINKS.webinar6, nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
   ];
 
   const ALERT_TYPES = [
@@ -5246,7 +5272,7 @@ const CURSOS = [
     id:"c1", titulo:"Análisis Técnico desde Cero", emoji:"📈",
     instructor:"SPY_Trader", nivel:"Principiante", duracion:"6 horas",
     lecciones:24, precio:49, precioVip:29,
-    stripeLink:"https://buy.stripe.com/curso1",
+    stripeLink:STRIPE_LINKS.curso1,
     tags:["Gráficas","Velas","Soportes","Tendencias"],
     desc:"El curso más completo de análisis técnico en español. Desde cómo leer una vela japonesa hasta estrategias completas de entrada y salida.",
     temario:["Introducción a los mercados financieros","Tipos de gráficas y timeframes","Velas japonesas: los 15 patrones clave","Soportes, resistencias y zonas de volumen","Tendencias e indicadores (RSI, MACD, BB)","Tu primera estrategia completa"],
@@ -5256,7 +5282,7 @@ const CURSOS = [
     id:"c2", titulo:"Crypto Trading: Guía Completa", emoji:"₿",
     instructor:"CryptoWolf", nivel:"Intermedio", duracion:"8 horas",
     lecciones:32, precio:79, precioVip:49,
-    stripeLink:"https://buy.stripe.com/curso2",
+    stripeLink:STRIPE_LINKS.curso2,
     tags:["Bitcoin","Ethereum","DeFi","Altcoins"],
     desc:"Todo lo que necesitas para operar crypto de forma profesional: análisis on-chain, ciclos de mercado, gestión de riesgo y los mejores exchanges.",
     temario:["Bitcoin y blockchain explicado","Ciclos de mercado y halvings","Análisis on-chain: MVRV, NVT, Hodl Waves","Altcoins: cómo filtrar proyectos sólidos","DeFi: yield farming y staking seguro","Gestión de riesgo y portfolio crypto"],
@@ -5266,7 +5292,7 @@ const CURSOS = [
     id:"c3", titulo:"Opciones para Traders Activos", emoji:"🛡️",
     instructor:"SPY_Trader", nivel:"Avanzado", duracion:"10 horas",
     lecciones:40, precio:99, precioVip:59,
-    stripeLink:"https://buy.stripe.com/curso3",
+    stripeLink:STRIPE_LINKS.curso3,
     tags:["Options","Calls","Puts","Greeks"],
     desc:"Domina el mercado de opciones: desde los conceptos básicos de calls y puts hasta estrategias avanzadas como iron condors y calendar spreads.",
     temario:["Qué son las opciones y cómo funcionan","Las griegas: Delta, Gamma, Theta, Vega","Estrategias básicas: calls cubiertos y puts protectoras","Iron Condor y mariposas","Operando earnings con opciones","Gestión de posiciones: cuándo salir"],
@@ -5276,7 +5302,7 @@ const CURSOS = [
     id:"c4", titulo:"Inversión en Dividendos — Renta Pasiva", emoji:"💰",
     instructor:"NvidiaChad", nivel:"Principiante", duracion:"4 horas",
     lecciones:16, precio:39, precioVip:19,
-    stripeLink:"https://buy.stripe.com/curso4",
+    stripeLink:STRIPE_LINKS.curso4,
     tags:["Dividendos","REITs","ETFs","Portafolio"],
     desc:"Construye un portafolio de dividendos que genere ingresos mes a mes. Las mejores acciones, ETFs y REITs para renta pasiva en 2025.",
     temario:["Por qué los dividendos son el activo más poderoso","Cómo evaluar una empresa pagadora de dividendos","Los mejores ETFs de dividendos (SCHD, VYM, JEPI)","REITs: inmobiliario desde $10","Portafolio modelo: $500/mes pasivos","Errores más comunes de los inversores de dividendos"],
@@ -5435,12 +5461,12 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
    WEBINARS PAGE — página pública de webinars con compra Stripe
 ═══════════════════════════════════════════════════════════════ */
 const WEBINARS_LIST = [
-  {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar1", nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
-  {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar2", nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
-  {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar3", nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
-  {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:"https://buy.stripe.com/webinar4", nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
-  {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar5", nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
-  {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:"https://buy.stripe.com/webinar6", nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
+  {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar1, nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
+  {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar2, nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
+  {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar3, nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
+  {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:STRIPE_LINKS.webinar4, nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
+  {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar5, nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
+  {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:STRIPE_LINKS.webinar6, nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
 ];
 
 function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
