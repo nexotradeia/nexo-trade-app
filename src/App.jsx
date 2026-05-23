@@ -6766,7 +6766,9 @@ export default function App(){
           grid-template-columns: 1fr !important;
         }
         .nexo-nav-icons { gap: 1px !important; }
-        .nexo-nav-icons button { width: 30px !important; height: 30px !important; font-size: 13px !important; }
+        .nexo-nav-icons > button { width: 30px !important; height: 30px !important; font-size: 13px !important; }
+        .nexo-auth-btns { display: flex; gap: 3px; align-items: center; }
+        .nexo-auth-btns button { width: auto !important; height: auto !important; padding: 5px 9px !important; font-size: 11px !important; white-space: nowrap !important; border-radius: 8px !important; }
         .nexo-tabs { justify-content: flex-start !important; }
         .nexo-tabs button { padding: 10px 12px !important; font-size: 12px !important; }
         .nexo-hide-mobile { display: none !important; }
@@ -6927,7 +6929,7 @@ export default function App(){
   try{ await supabase.auth.signOut(); }catch(e){}
   window.location.replace("/");
 }} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} onAdmin={()=>setPage(99)} lang={lang}/>
-              : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
+              : <div className="nexo-auth-btns"><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></div>
             }
           </div>
         </div>
