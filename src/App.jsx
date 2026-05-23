@@ -2388,22 +2388,40 @@ const SPONSORED_POSTS = [
     brand:"Interactive Brokers",
     logo:"🏦",
     brandColor:"#C8102E",
-    text:"Abre tu cuenta en Interactive Brokers y opera en 150 mercados mundiales con las comisiones más bajas del sector. Regulado por la SEC.",
-    cta:"Abrir cuenta gratis →",
+    text:"Opera en 150 mercados mundiales — acciones, opciones, futuros, forex y crypto. Comisiones desde $0. Regulado por SEC y FINRA. El broker favorito de inversores profesionales en LATAM.",
+    cta:"Abrir cuenta y ganar $200 →",
     url:"https://www.interactivebrokers.com/mkt/?src=nexotrade1&url=%2Fen%2Fwhyib%2Foverviewnetwork.php",
     badge:"Patrocinado",
-    ticker:"IBKR",
   },
   {
     id:"sp2",
+    brand:"Kraken",
+    logo:"🐙",
+    brandColor:"#5741D9",
+    text:"El exchange de crypto más seguro y regulado. Más de 200 criptomonedas disponibles, staking hasta 21% APY, y soporte 24/7 en español. Recomendado por traders profesionales.",
+    cta:"Empezar en Kraken gratis →",
+    url:"https://www.kraken.com/sign-up?referral=nexotrade",
+    badge:"Patrocinado",
+  },
+  {
+    id:"sp3",
     brand:"Tastytrade",
     logo:"🌮",
     brandColor:"#F97316",
-    text:"La plataforma de opciones favorita de traders profesionales en EEUU. Comisión $0 al cerrar. Pruébala gratis 60 días.",
-    cta:"Probar 60 días gratis →",
-    url:"https://www.tastytrade.com/",
+    text:"La plataforma de opciones favorita de traders profesionales en EE.UU. Comisión $0 al cerrar posición. Educación gratuita incluida. Más de 1 millón de traders activos.",
+    cta:"Probar gratis 60 días →",
+    url:"https://open.tastytrade.com/",
     badge:"Patrocinado",
-    ticker:"OPCIONES",
+  },
+  {
+    id:"sp4",
+    brand:"Bybit",
+    logo:"⚡",
+    brandColor:"#F7A600",
+    text:"Opera futuros y spot con las comisiones más competitivas del mercado. Bono de bienvenida hasta $100 USDT. Copy trading disponible — copia a los mejores traders automáticamente.",
+    cta:"Reclamar $100 de bienvenida →",
+    url:"https://www.bybit.com/invite?ref=NEXOTRADE",
+    badge:"Patrocinado",
   },
 ];
 
@@ -3131,45 +3149,72 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
 }
 
 // ── AFFILIATE BANNERS ────────────────────────────────────────────────────────
+// 💰 Comisiones estimadas por afiliado:
+// Interactive Brokers: $200 por cuenta abierta (programa IBKR referral)
+// Tastytrade: $50-$100 por cuenta + % comisiones
+// Kraken: 20% de comisiones del referido de POR VIDA
+// Bybit: hasta 30% comisiones trading de referidos
+// eToro: $200 CPA por depósito calificado
+// Coinbase: 50% de comisiones durante 3 meses
+// Finviz: 30% recurrente en suscripciones Elite
+// moomoo: $10-$100 por cuenta + acciones gratis
+
 const AFFILIATES = [
   {
-    id:"finviz",
-    logo:"📊",
-    name:"Finviz Elite",
-    color:"#E8C84A",
-    bg:"linear-gradient(135deg,#0D0D0D,#1A1500)",
-    tagline:"El screener #1 de Wall Street",
-    sub:"Datos en tiempo real · Mapas de calor · Alertas",
-    cta:"Probar Finviz Elite →",
+    id:"ibkr",
+    logo:"🏦",
+    name:"Interactive Brokers",
+    color:"#C8102E",
+    bg:"linear-gradient(135deg,#1A0003,#2D0008)",
+    tagline:"$200 para ti al abrir cuenta",
+    sub:"150 mercados · Comisiones desde $0 · Regulado SEC y FINRA",
+    cta:"Abrir cuenta y ganar $200 →",
+    badge:"MAYOR PAGO",
+    badgeColor:"#C8102E",
+    url:"https://www.interactivebrokers.com/mkt/?src=nexotrade1&url=%2Fen%2Fwhyib%2Foverviewnetwork.php",
+    tickers:["SPY","AAPL","MSFT","TSLA","NVDA","AMZN","META","GOOGL","AMD","QQQ"],
+  },
+  {
+    id:"tastytrade",
+    logo:"🌮",
+    name:"Tastytrade",
+    color:"#F97316",
+    bg:"linear-gradient(135deg,#1A0800,#2D1200)",
+    tagline:"La plataforma de opciones #1 en EE.UU.",
+    sub:"$0 comisión al cerrar · Plataforma gratis · Educación incluida",
+    cta:"Empezar con opciones gratis →",
+    badge:"OPCIONES PRO",
+    badgeColor:"#F97316",
+    url:"https://open.tastytrade.com/",
+    tickers:["SPY","QQQ","NVDA","TSLA","AAPL","AMD","META","AMZN"],
+  },
+  {
+    id:"kraken",
+    logo:"🐙",
+    name:"Kraken",
+    color:"#5741D9",
+    bg:"linear-gradient(135deg,#07051A,#0D0A2D)",
+    tagline:"20% de comisiones de tus referidos PARA SIEMPRE",
+    sub:"Exchange regulado · Staking hasta 21% APY · 200+ criptos",
+    cta:"Empezar en Kraken →",
+    badge:"20% DE POR VIDA",
+    badgeColor:"#5741D9",
+    url:"https://www.kraken.com/sign-up?referral=nexotrade",
+    tickers:["BTC","ETH","SOL","ADA","DOT","MATIC","AVAX","LINK"],
+  },
+  {
+    id:"bybit",
+    logo:"⚡",
+    name:"Bybit",
+    color:"#F7A600",
+    bg:"linear-gradient(135deg,#0D0900,#1A1200)",
+    tagline:"Hasta 30% de comisiones + $100 bienvenida",
+    sub:"Futuros · Spot · Copy trading · 600+ pares",
+    cta:"Ganar $100 de bienvenida →",
     badge:"30% COMISIÓN",
-    badgeColor:"#E8C84A",
-    url:"https://finviz.com/?affilId=764863650",
-  },
-  {
-    id:"webull",
-    logo:"📈",
-    name:"Webull",
-    color:"#00C4FF",
-    bg:"linear-gradient(135deg,#0A1628,#0D2137)",
-    tagline:"Hasta $100 en acciones gratis",
-    sub:"Abre tu cuenta sin comisiones",
-    cta:"Abrir cuenta →",
-    badge:"RECOMENDADO",
-    badgeColor:"#00C4FF",
-    url:"https://www.webull.com/activity?source=affiliates",
-  },
-  {
-    id:"moomoo",
-    logo:"🐄",
-    name:"moomoo",
-    color:"#FF6B35",
-    bg:"linear-gradient(135deg,#1A0A00,#2D1400)",
-    tagline:"15 acciones gratis al abrir",
-    sub:"Análisis avanzado sin costo",
-    cta:"Empezar gratis →",
-    badge:"POPULAR",
-    badgeColor:"#FF6B35",
-    url:"https://j.moomoo.com/00yjN2",
+    badgeColor:"#F7A600",
+    url:"https://www.bybit.com/invite?ref=NEXOTRADE",
+    tickers:["BTC","ETH","SOL","BNB","DOGE","SHIB","AVAX","LINK","MATIC"],
   },
   {
     id:"etoro",
@@ -3177,12 +3222,13 @@ const AFFILIATES = [
     name:"eToro",
     color:"#6DCC74",
     bg:"linear-gradient(135deg,#051A08,#092B0D)",
-    tagline:"Copy Trading desde $200",
-    sub:"Copia a los mejores traders",
-    cta:"Unirse ahora →",
-    badge:"COPY TRADING",
+    tagline:"$200 por cada cliente calificado",
+    sub:"Copy Trading · 3,000+ activos · 30M de usuarios",
+    cta:"Unirse al copy trading →",
+    badge:"$200 CPA",
     badgeColor:"#6DCC74",
     url:"https://www.etoro.com/es/trading/account/",
+    tickers:["BTC","ETH","SPY","AAPL","TSLA","NVDA","AMZN"],
   },
   {
     id:"coinbase",
@@ -3190,27 +3236,52 @@ const AFFILIATES = [
     name:"Coinbase",
     color:"#0052FF",
     bg:"linear-gradient(135deg,#000B2E,#001A6B)",
-    tagline:"Hasta $50 en crypto de regalo",
-    sub:"La exchange de crypto más confiable de EE.UU.",
-    cta:"Ganar $50 gratis →",
-    badge:"CRYPTO #1",
+    tagline:"50% de comisiones durante 3 meses",
+    sub:"La exchange de crypto más confiable de EE.UU. · NASDAQ: COIN",
+    cta:"Ganar $10 en BTC gratis →",
+    badge:"50% COMISIÓN",
     badgeColor:"#0052FF",
     url:"https://coinbase.com/join/nexotrade",
+    tickers:["BTC","ETH","SOL","DOGE","SHIB","LINK","UNI","AAVE"],
   },
   {
-    id:"binance",
-    logo:"🟡",
-    name:"Binance",
-    color:"#F0B90B",
-    bg:"linear-gradient(135deg,#0D0A00,#1A1300)",
-    tagline:"20% descuento en comisiones",
-    sub:"La exchange más grande del mundo",
-    cta:"Registrarse gratis →",
-    badge:"MAYOR VOLUMEN",
-    badgeColor:"#F0B90B",
-    url:"https://www.binance.com/es/register?ref=NEXOTRADE",
+    id:"finviz",
+    logo:"📊",
+    name:"Finviz Elite",
+    color:"#E8C84A",
+    bg:"linear-gradient(135deg,#0D0D0D,#1A1500)",
+    tagline:"El screener #1 de Wall Street",
+    sub:"Alertas en tiempo real · Heatmaps · Backtesting · Noticias",
+    cta:"Probar Finviz Elite gratis →",
+    badge:"30% RECURRENTE",
+    badgeColor:"#E8C84A",
+    url:"https://finviz.com/?affilId=764863650",
+    tickers:["SPY","QQQ","NVDA","AAPL","MSFT","TSLA","AMD","AMZN","META"],
+  },
+  {
+    id:"moomoo",
+    logo:"🐄",
+    name:"moomoo",
+    color:"#FF6B35",
+    bg:"linear-gradient(135deg,#1A0A00,#2D1400)",
+    tagline:"15 acciones gratis al abrir cuenta",
+    sub:"Análisis de nivel profesional · Gratis · Sin comisiones",
+    cta:"Reclamar acciones gratis →",
+    badge:"15 ACCIONES GRATIS",
+    badgeColor:"#FF6B35",
+    url:"https://j.moomoo.com/00yjN2",
+    tickers:["AAPL","TSLA","NVDA","AMD","META","AMZN","GOOGL","MSFT"],
   },
 ];
+
+// Afiliados por categoría para mostrar contextualmente en posts
+const AFFILIATE_BY_TICKER = (ticker) => {
+  const crypto = ["BTC","ETH","SOL","ADA","DOT","MATIC","AVAX","LINK","DOGE","SHIB","BNB","UNI","AAVE"];
+  const stocks  = ["AAPL","MSFT","NVDA","TSLA","META","AMZN","GOOGL","AMD","NFLX","COIN","PLTR","SPY","QQQ"];
+  if(crypto.includes(ticker)) return AFFILIATES.filter(a=>["kraken","bybit","coinbase"].includes(a.id));
+  if(stocks.includes(ticker))  return AFFILIATES.filter(a=>["ibkr","tastytrade","finviz"].includes(a.id));
+  return AFFILIATES.slice(0,3);
+};
 
 function AffiliateBanner(){
   const [idx, setIdx] = useState(0);
@@ -3350,8 +3421,55 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
     boxShadow:"0 2px 16px rgba(15,23,42,0.06)",
   };
 
+  // Widget afiliado destacado — rota entre los 3 mejores pagadores
+  const [affIdx, setAffIdx] = useState(0);
+  const TOP_AFFS = [AFFILIATES[0], AFFILIATES[2], AFFILIATES[3]]; // IBKR, Kraken, Bybit
+  const topAff = TOP_AFFS[affIdx % TOP_AFFS.length];
+  useEffect(()=>{
+    const t=setInterval(()=>setAffIdx(i=>(i+1)%TOP_AFFS.length),8000);
+    return()=>clearInterval(t);
+  },[]);
+
   return(
     <div>
+
+      {/* ── WIDGET AFILIADO DESTACADO (sidebar derecho) ── */}
+      <a href={topAff.url} target="_blank" rel="noopener noreferrer" style={{display:"block",textDecoration:"none",marginBottom:10}}>
+        <div style={{
+          background:topAff.bg,
+          borderRadius:16,
+          padding:"14px 16px",
+          border:`1.5px solid ${topAff.color}33`,
+          boxShadow:`0 4px 20px ${topAff.color}22`,
+          cursor:"pointer",
+          transition:"all 0.2s",
+          position:"relative",
+          overflow:"hidden",
+        }}
+        onMouseEnter={e=>{e.currentTarget.style.boxShadow=`0 8px 32px ${topAff.color}44`;e.currentTarget.style.borderColor=`${topAff.color}66`;}}
+        onMouseLeave={e=>{e.currentTarget.style.boxShadow=`0 4px 20px ${topAff.color}22`;e.currentTarget.style.borderColor=`${topAff.color}33`;}}>
+          <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,borderRadius:"50%",background:`${topAff.color}11`}}/>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <span style={{fontSize:9,fontWeight:700,color:topAff.badgeColor,background:`${topAff.badgeColor}22`,borderRadius:20,padding:"2px 8px",letterSpacing:0.8}}>{topAff.badge}</span>
+            <span style={{fontSize:9,color:"rgba(255,255,255,0.3)"}}>Patrocinado</span>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+            <span style={{fontSize:22}}>{topAff.logo}</span>
+            <div>
+              <div style={{fontWeight:800,color:"#fff",fontSize:13}}>{topAff.name}</div>
+              <div style={{fontSize:10,color:topAff.color,fontWeight:600}}>{topAff.tagline}</div>
+            </div>
+          </div>
+          <div style={{background:topAff.color,borderRadius:8,padding:"8px 12px",textAlign:"center",color:"#fff",fontWeight:800,fontSize:11,marginTop:8}}>
+            {topAff.cta}
+          </div>
+          <div style={{display:"flex",justifyContent:"center",gap:4,marginTop:8}}>
+            {TOP_AFFS.map((_,i)=>(
+              <div key={i} style={{width:i===affIdx%TOP_AFFS.length?16:5,height:4,borderRadius:2,background:i===affIdx%TOP_AFFS.length?topAff.color:"rgba(255,255,255,0.2)",transition:"all 0.3s"}}/>
+            ))}
+          </div>
+        </div>
+      </a>
 
       {/* ── AI MARKET PULSE ── */}
       <div onClick={onAI} style={{...card,
@@ -5244,7 +5362,29 @@ export default function App(){
         {filtered2.map((p,i)=>(
           <div key={p.id}>
             <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>
-            {/* Post patrocinado cada 8 posts */}
+            {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
+            {(i+1)%3===0 && (()=>{
+              const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
+              const aff = contextAffs[(Math.floor(i/3))%contextAffs.length];
+              if(!aff) return null;
+              return(
+                <a key={"aff-"+i} href={aff.url} target="_blank" rel="noopener noreferrer"
+                  style={{display:"flex",alignItems:"center",gap:10,background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.08)",borderRadius:12,padding:"10px 14px",margin:"6px 0",textDecoration:"none",transition:"all 0.15s",cursor:"pointer"}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor=aff.color+"55";e.currentTarget.style.background=aff.color+"08";}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(15,23,42,0.08)";e.currentTarget.style.background="#F8FAFC";}}>
+                  <div style={{width:34,height:34,borderRadius:9,background:aff.color+"18",border:`1px solid ${aff.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{aff.logo}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:1}}>
+                      <span style={{fontWeight:700,fontSize:12,color:"#0F172A"}}>{aff.name}</span>
+                      <span style={{fontSize:9,color:"#94A3B8",background:"rgba(15,23,42,0.05)",borderRadius:20,padding:"1px 7px",fontWeight:600}}>Patrocinado</span>
+                    </div>
+                    <div style={{fontSize:11,color:"#64748B",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{aff.tagline}</div>
+                  </div>
+                  <span style={{fontSize:11,color:aff.color,fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>{aff.badge} →</span>
+                </a>
+              );
+            })()}
+            {/* Post patrocinado completo cada 8 posts */}
             {(i+1)%8===0 && SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length]}/>
             )}
