@@ -6091,6 +6091,7 @@ export default function App(){
   const [showVipPopup,setVipPopup] = useState(false);
   const [showWelcome,setShowWelcome] = useState(false);
   const [welcomeName,setWelcomeName] = useState("");
+  const [showPushPrompt,setShowPushPrompt] = useState(false);
   const [newsletterEmail,setNewsletterEmail] = useState("");
   const [newsletterDone,setNewsletterDone]   = useState(false);
   const [showNewsletter,setShowNewsletter]   = useState(
@@ -6125,6 +6126,35 @@ export default function App(){
     }, 120000); // 2 minutos — no interrumpe al usuario recién llegado
     return ()=> clearTimeout(timer);
   },[]);
+
+  // ── PUSH NOTIFICATIONS: pide permiso a los 90s si está logueado ─────────────
+  useEffect(()=>{
+    if(!user) return;
+    const already = localStorage.getItem("nexo-push-asked");
+    if(already) return;
+    if(!("Notification" in window) || !("serviceWorker" in navigator)) return;
+    if(Notification.permission === "granted") return;
+    const t = setTimeout(()=>{ setShowPushPrompt(true); }, 90000);
+    return ()=>clearTimeout(t);
+  },[user]);
+
+  const activarPush = async()=>{
+    setShowPushPrompt(false);
+    localStorage.setItem("nexo-push-asked","1");
+    try{
+      const perm = await Notification.requestPermission();
+      if(perm==="granted"){
+        const reg = await navigator.serviceWorker.ready;
+        // Solo mostramos notificación de bienvenida local (no requiere servidor)
+        reg.showNotification("🔔 NexoTrade activado",{
+          body:"Te avisaremos cuando haya picks VIP nuevos y posts trending.",
+          icon:"/logo_nexo.png",
+          badge:"/favicon.svg",
+          tag:"nexo-welcome-push",
+        });
+      }
+    }catch(e){}
+  };
 
   // Helper: guardar/borrar usuario en localStorage + state
   const saveUser = useCallback((u) => {
@@ -6991,6 +7021,19 @@ export default function App(){
       {/* MODALS */}
       {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u,isNew)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false||ADMIN_EMAILS.includes(u.email||''));if(isNew){setWelcomeName(u.name||u.email?.split("@")[0]||"");setShowWelcome(true);}}} lang={lang}/>}
       {showWelcome&&<WelcomeModal name={welcomeName} onClose={()=>setShowWelcome(false)} onGoVip={()=>{setShowWelcome(false);setPage(8);}}/>}
+      {showPushPrompt&&(
+        <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9998,background:C.surface,border:`1px solid ${C.accent}44`,borderRadius:18,padding:"20px 24px",maxWidth:380,width:"calc(100% - 32px)",boxShadow:"0 16px 48px rgba(0,0,0,0.6)",display:"flex",gap:14,alignItems:"flex-start"}}>
+          <div style={{fontSize:28,flexShrink:0}}>🔔</div>
+          <div style={{flex:1}}>
+            <div style={{color:C.text,fontWeight:800,fontSize:14,marginBottom:4}}>¿Activar notificaciones?</div>
+            <div style={{color:C.muted2,fontSize:12,lineHeight:1.5,marginBottom:14}}>Te avisamos cuando haya picks VIP nuevos, posts trending y alertas de precio.</div>
+            <div style={{display:"flex",gap:8}}>
+              <button onClick={activarPush} style={{flex:1,background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Activar →</button>
+              <button onClick={()=>{setShowPushPrompt(false);localStorage.setItem("nexo-push-asked","1");}} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 14px",color:C.muted2,fontSize:12,cursor:"pointer"}}>Ahora no</button>
+            </div>
+          </div>
+        </div>
+      )}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
       {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)}/>}
