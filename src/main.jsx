@@ -2,11 +2,22 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-)
+);
+
+// Ocultar el loader inicial del index.html cuando React monta
+if (typeof window.__nexoLoaderHide === 'function') {
+  window.__nexoLoaderHide();
+} else {
+  // Si React monta antes de que el script inline cargue
+  window.addEventListener('load', () => {
+    if (typeof window.__nexoLoaderHide === 'function') window.__nexoLoaderHide();
+  });
+}
 
 // Registrar Service Worker para PWA (instalable en celular)
 if ('serviceWorker' in navigator) {
