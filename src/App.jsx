@@ -6312,10 +6312,10 @@ export default function App(){
 
             {/* Home */}
             <button onClick={()=>{setPage(0);setShowLanding(false);}}
-              title="Inicio"
-              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:page===0?"rgba(0,168,255,0.1)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#00A8FF",transition:"all 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
-              onMouseLeave={e=>e.currentTarget.style.background=page===0?"rgba(0,168,255,0.1)":"transparent"}>
+              title="Inicio — Página principal"
+              style={{width:42,height:42,borderRadius:12,border:`2px solid ${page===0?"#00A8FF":"rgba(0,168,255,0.3)"}`,background:page===0?"rgba(0,168,255,0.18)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:"#00A8FF",transition:"all 0.15s",boxShadow:page===0?"0 0 12px rgba(0,168,255,0.3)":"none"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.18)";e.currentTarget.style.boxShadow="0 0 12px rgba(0,168,255,0.3)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=page===0?"rgba(0,168,255,0.18)":"transparent";e.currentTarget.style.boxShadow=page===0?"0 0 12px rgba(0,168,255,0.3)":"none";}}>
               🏠
             </button>
 
@@ -6353,13 +6353,15 @@ export default function App(){
             {/* Auth / User */}
             {user
               ? <UserMenu user={user} onLogout={async()=>{
-  try{ await supabase.auth.signOut({scope:"local"}); }catch{}
-  try{ await supabase.auth.signOut({scope:"global"}); }catch{}
+  saveUser(null);
+  setIsPremium(false);
+  setIsPro(false);
+  setPage(0);
+  setShowLanding(false);
   localStorage.clear();
   sessionStorage.clear();
-  // Borrar todas las cookies
-  document.cookie.split(";").forEach(c=>{document.cookie=c.trim().split("=")[0]+"=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";});
-  window.location.href="/";
+  try{ await supabase.auth.signOut(); }catch(e){}
+  window.location.replace("/");
 }} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
             }
@@ -6494,7 +6496,21 @@ export default function App(){
 
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{try{await supabase.auth.signOut({scope:"local"});}catch{}try{await supabase.auth.signOut({scope:"global"});}catch{}localStorage.clear();sessionStorage.clear();window.location.href="/";}}
+        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+          // 1. Limpiar estado React inmediatamente (UX instantánea)
+          saveUser(null);
+          setIsPremium(false);
+          setIsPro(false);
+          setPage(0);
+          setShowLanding(false);
+          // 2. Limpiar storage
+          localStorage.clear();
+          sessionStorage.clear();
+          // 3. Cerrar sesión en Supabase (async, no bloquea)
+          try{ await supabase.auth.signOut(); }catch(e){}
+          // 4. Forzar recarga limpia
+          window.location.replace("/");
+        }}
 /></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar"><Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/></div>
