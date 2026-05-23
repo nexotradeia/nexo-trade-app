@@ -1119,12 +1119,11 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
 }
 
 // ── ALERTS PANEL ──────────────────────────────────────────────────────────────
-function AlertsPanel({lang,onClose}){
-  const [alerts,setAlerts]=useState([
-    {id:1,ticker:"BTC", type:"price_above",value:"$70,000",active:true},
-    {id:2,ticker:"NVDA",type:"earnings",  value:"Esta semana",active:true},
-    {id:3,ticker:"TSLA",type:"price_below",value:"$160",   active:false},
-  ]);
+function AlertsPanel({lang,onClose,onAlertChange}){
+  const [alerts,setAlerts]=useState(()=>{
+    try{ return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]"); }
+    catch{ return []; }
+  });
   const [newT,setNewT]=useState(""),[newV,setNewV]=useState(""),[newType,setNewType]=useState("price_above");
   const typeLabels={"price_above":"↑ Precio sube de","price_below":"↓ Precio baja de","earnings":"📅 Earnings","mentions":"💬 Menciones pico"};
   return(
@@ -1142,8 +1141,8 @@ function AlertsPanel({lang,onClose}){
                 <span style={{background:C.accentDim,color:C.accentText,borderRadius:6,padding:"2px 7px",fontSize:11,fontWeight:800,fontFamily:"monospace",marginRight:8}}>${a.ticker}</span>
                 <span style={{color:C.muted,fontSize:12}}>{typeLabels[a.type]} <strong style={{color:C.text}}>{a.value}</strong></span>
               </div>
-              <button onClick={()=>setAlerts(prev=>prev.map(x=>x.id===a.id?{...x,active:!x.active}:x))} style={{background:a.active?C.bull+"22":C.card2,border:`1px solid ${a.active?C.bull+"44":C.border}`,borderRadius:20,padding:"3px 10px",cursor:"pointer",color:a.active?C.bull:C.muted2,fontSize:11,fontWeight:700}}>{a.active?"ON":"OFF"}</button>
-              <button onClick={()=>setAlerts(prev=>prev.filter(x=>x.id!==a.id))} style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:16}}>×</button>
+              <button onClick={()=>{const upd=alerts.map(x=>x.id===a.id?{...x,active:!x.active}:x);setAlerts(upd);localStorage.setItem("nexotrade-alerts",JSON.stringify(upd));if(onAlertChange)onAlertChange(upd);}} style={{background:a.active?C.bull+"22":C.card2,border:`1px solid ${a.active?C.bull+"44":C.border}`,borderRadius:20,padding:"3px 10px",cursor:"pointer",color:a.active?C.bull:C.muted2,fontSize:11,fontWeight:700}}>{a.active?"ON":"OFF"}</button>
+              <button onClick={()=>{const upd=alerts.filter(x=>x.id!==a.id);setAlerts(upd);localStorage.setItem("nexotrade-alerts",JSON.stringify(upd));if(onAlertChange)onAlertChange(upd);}} style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:16}}>×</button>
             </div>
           ))}
         </div>
@@ -1155,7 +1154,7 @@ function AlertsPanel({lang,onClose}){
               {Object.entries(typeLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}
             </select>
             <input value={newV} onChange={e=>setNewV(e.target.value)} placeholder="Valor..." style={{flex:1,minWidth:80,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none"}}/>
-            <Btn small onClick={()=>{if(!newT)return;setAlerts(prev=>[...prev,{id:Date.now(),ticker:newT,type:newType,value:newV||"—",active:true}]);setNewT("");setNewV("");}}>+ Añadir</Btn>
+            <Btn small onClick={()=>{if(!newT)return;const upd=[...alerts,{id:Date.now(),ticker:newT,type:newType,value:newV||"—",active:true}];setAlerts(upd);localStorage.setItem("nexotrade-alerts",JSON.stringify(upd));if(onAlertChange)onAlertChange(upd);setNewT("");setNewV("");}}>+ Añadir</Btn>
           </div>
         </div>
       </div>
@@ -6110,6 +6109,28 @@ export default function App(){
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]     = useState(false);
   const [showAlerts,setAlerts] = useState(false);
+  const [alertCount,setAlertCount]   = useState(0);
+  const [triggeredIds,setTriggeredIds] = useState(()=>{try{return JSON.parse(localStorage.getItem("nexotrade-triggered")||"[]");}catch{return [];}});
+
+  // ── Revisar alertas de precio cada 30s ─────────────────────────────────
+  useEffect(()=>{
+    const checkAlerts=()=>{
+      try{
+        const saved=JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]");
+        const active=saved.filter(a=>!a.triggered);
+        setAlertCount(active.length);
+        // Disparar notificación si el precio llegó al objetivo
+        if(Notification.permission==="granted" && active.length>0){
+          const alreadyFired=JSON.parse(localStorage.getItem("nexotrade-triggered")||"[]");
+          // Aquí solo chequeamos si hay alertas — la comparación de precios
+          // la hace PriceAlerts que tiene acceso al PriceCtx
+        }
+      }catch(e){}
+    };
+    checkAlerts();
+    const t=setInterval(checkAlerts,30000);
+    return()=>clearInterval(t);
+  },[]);
   const [lang,setLang]         = useState("es");
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
   const [dbReady,setDbReady]   = useState(false);
@@ -6576,12 +6597,13 @@ export default function App(){
         .nexo-usermenu-trigger { padding: 2px !important; border: none !important; background: transparent !important; gap: 2px !important; border-radius: 50% !important; }
         /* Ocultar flecha ▾ en móvil para ahorrar espacio */
         .nexo-usermenu-arrow { display: none !important; }
-        /* Botón de alertas oculto en móvil — accesible desde el menú de perfil */
-        .nexo-btn-alerts { display: none !important; }
+        /* Campana visible en móvil */
+        .nexo-btn-alerts { display: flex !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
       }
+      @keyframes nexo-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
       html, body {
         overflow-x: hidden !important;
         overflow-y: scroll !important;
@@ -6694,7 +6716,7 @@ export default function App(){
               onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
               onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
               🔔
-              <span style={{position:"absolute",top:4,right:4,width:8,height:8,background:"#EF4444",borderRadius:"50%",border:"1.5px solid #fff"}}/>
+              {alertCount>0&&<span style={{position:"absolute",top:-3,right:-3,minWidth:16,height:16,background:"#EF4444",borderRadius:"50%",border:"1.5px solid #fff",fontSize:9,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",animation:"nexo-pulse 2s infinite"}}>{alertCount}</span>}
             </button>
 
             {/* Settings / Dark mode */}
@@ -7062,7 +7084,7 @@ export default function App(){
       )}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
-      {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)}/>}
+      {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
       <PointToast show={toast.show} points={toast.points} reason={toast.reason}/>
     </div>
     </PriceProvider>
