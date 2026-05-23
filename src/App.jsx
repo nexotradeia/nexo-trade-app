@@ -279,7 +279,7 @@ const fmtTimeAgo=(iso)=>{
 
 // ── MODERATION ────────────────────────────────────────────────────────────────
 const BAD_WORDS = ["puta","mierda","coño","joder","hostia","gilipollas","idiota","imbecil","estupido","cabrón","polla","culo","fuck","shit","ass","bitch","damn"];
-const AD_WORDS  = ["compra ahora","click aquí","gana dinero fácil","oferta limitada","descuento","promo","gratis si","código","referido","ref=","bit.ly","tinyurl","t.me/","@gmail","whatsapp","telegram.me"];
+const AD_WORDS  = ["compra ahora","click aquí","gana dinero fácil","oferta limitada","promo","gratis si","bit.ly","tinyurl","t.me/","@gmail","whatsapp","telegram.me"];
 
 const moderateText = (text) => {
   const lower = text.toLowerCase();
@@ -2380,6 +2380,70 @@ function VipFeedCard({onGoVIP}){
   );
 }
 
+// ── POSTS PATROCINADOS (aparecen en el feed como publicidad nativa) ───────────
+// Configura aquí tus anunciantes. Cada uno paga $200-$2,000/mes por aparecer aquí.
+const SPONSORED_POSTS = [
+  {
+    id:"sp1",
+    brand:"Interactive Brokers",
+    logo:"🏦",
+    brandColor:"#C8102E",
+    text:"Abre tu cuenta en Interactive Brokers y opera en 150 mercados mundiales con las comisiones más bajas del sector. Regulado por la SEC.",
+    cta:"Abrir cuenta gratis →",
+    url:"https://www.interactivebrokers.com/mkt/?src=nexotrade1&url=%2Fen%2Fwhyib%2Foverviewnetwork.php",
+    badge:"Patrocinado",
+    ticker:"IBKR",
+  },
+  {
+    id:"sp2",
+    brand:"Tastytrade",
+    logo:"🌮",
+    brandColor:"#F97316",
+    text:"La plataforma de opciones favorita de traders profesionales en EEUU. Comisión $0 al cerrar. Pruébala gratis 60 días.",
+    cta:"Probar 60 días gratis →",
+    url:"https://www.tastytrade.com/",
+    badge:"Patrocinado",
+    ticker:"OPCIONES",
+  },
+];
+
+function SponsoredPostCard({sp}){
+  const [dismissed,setDismissed]=useState(false);
+  if(dismissed) return null;
+  return(
+    <div style={{
+      background:"#FFFFFF",
+      border:`1.5px solid rgba(0,168,255,0.18)`,
+      borderRadius:18,
+      padding:"16px 18px",
+      margin:"8px 0",
+      position:"relative",
+      boxShadow:"0 2px 12px rgba(0,168,255,0.07)",
+    }}>
+      {/* Badge patrocinado */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:20}}>{sp.logo}</span>
+          <span style={{fontWeight:800,fontSize:13,color:"#0F172A"}}>{sp.brand}</span>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:20,padding:"2px 9px",fontSize:9,color:"#64748B",fontWeight:700,letterSpacing:0.5}}>Patrocinado</span>
+          <button onClick={()=>setDismissed(true)} style={{background:"none",border:"none",color:"#94A3B8",fontSize:16,cursor:"pointer",lineHeight:1,padding:"2px 4px"}}>×</button>
+        </div>
+      </div>
+      {/* Texto */}
+      <p style={{margin:"0 0 14px",color:"#475569",fontSize:13.5,lineHeight:1.6}}>{sp.text}</p>
+      {/* CTA */}
+      <a href={sp.url} target="_blank" rel="noopener noreferrer"
+        style={{display:"inline-block",background:"#00A8FF",color:"#fff",borderRadius:10,padding:"9px 20px",fontSize:13,fontWeight:700,textDecoration:"none",transition:"opacity 0.15s"}}
+        onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
+        onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+        {sp.cta}
+      </a>
+    </div>
+  );
+}
+
 // ── VIP POP-UP MODAL (aparece a los 30s para no-premium) ──────────────────────
 function VipPopup({onClose, onGoVIP}){
   return(
@@ -2999,6 +3063,47 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
         </div>
       </div>
 
+      {/* ── PROGRAMA DE REFERIDOS ── */}
+      {user && (
+        <div id="nexo-referral-section" style={{background:"#fff",borderRadius:16,padding:"16px",boxShadow:"0 2px 16px rgba(15,23,42,0.08)",border:"1px solid rgba(15,23,42,0.07)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+            <span style={{fontSize:18}}>🔗</span>
+            <div>
+              <div style={{fontWeight:800,fontSize:13,color:"#0F172A"}}>Programa de Referidos</div>
+              <div style={{fontSize:10,color:"#64748B"}}>Gana por cada amigo VIP</div>
+            </div>
+          </div>
+          <div style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:10,padding:"10px 12px",marginBottom:10}}>
+            <div style={{fontSize:11,color:"#475569",marginBottom:6,lineHeight:1.5}}>
+              Comparte tu link y gana <strong style={{color:"#00A8FF"}}>500 puntos</strong> por cada amigo que se registre y <strong style={{color:"#7C3AED"}}>1 mes VIP gratis</strong> cuando se suscriba.
+            </div>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              <div style={{flex:1,background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:7,padding:"6px 10px",fontSize:10,color:"#64748B",fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                nexotradeia.com?ref={user.id?.slice(0,8)||"xxxxxxxx"}
+              </div>
+              <button
+                onClick={()=>{
+                  const link=`https://nexotradeia.com?ref=${user.id}`;
+                  navigator.clipboard.writeText(link).then(()=>alert("✅ Link copiado al portapapeles"));
+                }}
+                style={{background:"#00A8FF",border:"none",borderRadius:7,padding:"6px 10px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+                Copiar
+              </button>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:6}}>
+            <a href={`https://wa.me/?text=Únete a NexoTrade, la comunidad de traders en español 📈 https://nexotradeia.com?ref=${user.id}`} target="_blank" rel="noopener noreferrer"
+              style={{flex:1,background:"#25D366",border:"none",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",textDecoration:"none",textAlign:"center"}}>
+              📱 WhatsApp
+            </a>
+            <a href={`https://twitter.com/intent/tweet?text=Acabo de unirme a NexoTrade, la comunidad de traders en español 📈 Únete aquí: https://nexotradeia.com?ref=${user.id}`} target="_blank" rel="noopener noreferrer"
+              style={{flex:1,background:"#0F172A",border:"none",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",textDecoration:"none",textAlign:"center"}}>
+              𝕏 Twitter
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* ── LOGOUT + FOOTER ── */}
       {user && onLogout && (
         <button onClick={onLogout}
@@ -3487,7 +3592,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,lang}){
             <div style={{color:C.muted2,fontSize:11,marginBottom:4}}>{lang==="en"?"Your points":"Tus puntos"}</div>
             <LevelBadge points={user.points} lang={lang}/>
           </div>
-          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
+          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
             <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:"none",border:"none",cursor:"pointer",color:item.red?C.bear:C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s"}}
               onMouseEnter={e=>e.currentTarget.style.background=C.card2}
               onMouseLeave={e=>e.currentTarget.style.background="none"}>
@@ -4609,20 +4714,20 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 
   useEffect(()=>{
     const loadPicks=async()=>{
-      const hoy=new Date().toISOString().split("T")[0];
-      const {data,error}=await supabase.from("weekly_picks").select("*").eq("activo",true).eq("semana",hoy).order("id");
+      // Buscar los picks más recientes (no solo hoy — el admin puede publicarlos cualquier día de la semana)
+      const {data,error}=await supabase.from("weekly_picks").select("*").eq("activo",true).order("semana",{ascending:false}).order("id").limit(40);
       if(!error && data && data.length>0){
         const grouped={corto:[],largo:[],dividendos:[],crypto:[]};
         data.forEach(p=>{ if(grouped[p.categoria]) grouped[p.categoria].push(p); });
         setPicks(grouped);
       } else {
-        setPicks(FALLBACK);
+        setPicks(null); // null = mostrar estado vacío real, no datos inventados
       }
     };
     loadPicks();
   },[showAdmin]);
 
-  const data = picks || FALLBACK;
+  const data = picks;
   const C2={bull:"#00D26A",bear:"#FF4D6A",card:"rgba(10,16,30,0.98)",border:"rgba(255,255,255,0.08)"};
 
   if(!isPremium) return(
@@ -4720,6 +4825,24 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         </div>
       </div>
 
+      {!data ? (
+        /* ── Estado vacío: no hay picks publicados aún ── */
+        <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,marginBottom:16}}>
+          <div style={{fontSize:48,marginBottom:16}}>📅</div>
+          <div style={{fontWeight:800,color:"#F1F5F9",fontSize:18,marginBottom:8}}>Picks en preparación</div>
+          <div style={{color:"#64748B",fontSize:14,lineHeight:1.7,maxWidth:340,margin:"0 auto 20px"}}>
+            Nuestro equipo está analizando el mercado esta semana.<br/>
+            <strong style={{color:"#A78BFA"}}>Los picks se publican cada lunes a las 9AM</strong> (hora EST).
+          </div>
+          <div style={{background:"rgba(124,58,237,0.1)",border:"1px solid rgba(124,58,237,0.2)",borderRadius:12,padding:"12px 20px",display:"inline-block"}}>
+            <div style={{fontSize:12,color:"#A78BFA",fontWeight:700}}>Próxima publicación</div>
+            <div style={{fontSize:16,color:"#F1F5F9",fontWeight:900,marginTop:4}}>
+              {(()=>{const d=new Date();const day=d.getDay();const diff=day===0?1:8-day;d.setDate(d.getDate()+diff);return d.toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"});})()}
+            </div>
+          </div>
+        </div>
+      ) : (
+      <>
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="⚡" title="Corto Plazo" sub="Horizonte 1-4 semanas · Momentum y técnico"/>
         {data.corto.map(p=><PickCard key={p.ticker} p={p}/>)}
@@ -4736,6 +4859,8 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         <SectionTitle icon="₿" title="Crypto" sub="Alta volatilidad · Solo con capital que puedas perder"/>
         {data.crypto.map(p=><PickCard key={p.ticker} p={p}/>)}
       </div>
+      </>
+      )}
 
       <div style={{background:"rgba(245,158,11,0.05)",border:"1px solid rgba(245,158,11,0.15)",borderRadius:12,padding:"14px 18px",fontSize:11,color:"#94A3B8",lineHeight:1.7}}>
         ⚠️ <strong style={{color:"#F59E0B"}}>Disclaimer:</strong> Estos picks son análisis educativo y no constituyen consejo financiero. Siempre haz tu propia investigación (DYOR). Las inversiones conllevan riesgo de pérdida de capital.
@@ -4802,7 +4927,13 @@ export default function App(){
   const [lang,setLang]         = useState("es");
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
   const [dbReady,setDbReady]   = useState(false);
+  const [feedError,setFeedError] = useState(false);
   const [showVipPopup,setVipPopup] = useState(false);
+  const [newsletterEmail,setNewsletterEmail] = useState("");
+  const [newsletterDone,setNewsletterDone]   = useState(false);
+  const [showNewsletter,setShowNewsletter]   = useState(
+    !sessionStorage.getItem("nexo-newsletter-dismissed")
+  );
 
   const t = LANGS[lang];
 
@@ -4905,14 +5036,16 @@ export default function App(){
           error = fallback.error;
         }
 
-        // Si Supabase falla, carga posts guardados localmente
+        // Si Supabase falla, carga posts guardados localmente y muestra aviso
         if(error || !data){
           try{
             const local = JSON.parse(localStorage.getItem("nexo-posts-cache")||"[]");
-            if(local.length>0){ setPosts(local); setDbReady(true); }
-          }catch{}
+            if(local.length>0){ setPosts(local); setDbReady(true); setFeedError(false); }
+            else { setFeedError(true); }
+          }catch{ setFeedError(true); }
           return;
         }
+        setFeedError(false);
         if(!error && data){
           const mapped = data.map(p=>({
             id:         p.id,
@@ -5097,19 +5230,24 @@ export default function App(){
           <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:12,whiteSpace:"nowrap"}}>{filtered2.length} posts</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
-        {/* Banner — solo aparece cuando el feed muestra posts de ejemplo (DB vacía) */}
-        {showingMockData && dbReady && (
-          <div style={{margin:"4px 0 12px",padding:"10px 14px",background:"rgba(0,168,255,0.06)",border:"1px dashed rgba(0,168,255,0.28)",borderRadius:10,display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:16}}>💡</span>
-            <div>
-              <div style={{fontSize:12,fontWeight:700,color:C.accentText}}>Posts de ejemplo</div>
-              <div style={{fontSize:11,color:C.muted}}>¡Sé el primero en publicar algo real! Estos son ejemplos del feed.</div>
+        {/* Banner de error de conexión */}
+        {feedError && (
+          <div style={{margin:"4px 0 12px",padding:"14px 16px",background:"rgba(220,38,38,0.06)",border:"1px solid rgba(220,38,38,0.2)",borderRadius:12,display:"flex",alignItems:"center",gap:12}}>
+            <span style={{fontSize:22}}>⚠️</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:"#DC2626"}}>Sin conexión al servidor</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:2}}>No pudimos cargar los posts. Revisa tu conexión a internet.</div>
             </div>
+            <button onClick={()=>window.location.reload()} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",borderRadius:8,padding:"6px 12px",color:"#DC2626",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>🔄 Reintentar</button>
           </div>
         )}
         {filtered2.map((p,i)=>(
           <div key={p.id}>
             <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>
+            {/* Post patrocinado cada 8 posts */}
+            {(i+1)%8===0 && SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length] && (
+              <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length]}/>
+            )}
             {!effectivePremium && (i+1)%5===0 && (
               <VipFeedCard onGoVIP={()=>setPage(8)}/>
             )}
@@ -5215,6 +5353,43 @@ export default function App(){
     `}</style>
     <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
       <TickerTape/>
+
+      {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
+      {!user && showNewsletter && !newsletterDone && (
+        <div style={{background:"linear-gradient(90deg,#0F172A 0%,#1E293B 100%)",borderBottom:"1px solid rgba(0,168,255,0.2)",padding:"10px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
+          <span style={{fontSize:16,flexShrink:0}}>📈</span>
+          <span style={{color:"#E2E8F0",fontSize:13,fontWeight:600,flexShrink:0}}>Análisis de mercado gratis cada semana:</span>
+          <div style={{display:"flex",gap:8,alignItems:"center",flex:"1 1 260px",maxWidth:400}}>
+            <input
+              type="email"
+              value={newsletterEmail}
+              onChange={e=>setNewsletterEmail(e.target.value)}
+              placeholder="tu@email.com"
+              style={{flex:1,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,padding:"7px 12px",color:"#F1F5F9",fontSize:13,outline:"none",minWidth:0}}
+              onKeyDown={e=>{if(e.key==="Enter"&&newsletterEmail.includes("@")){
+                supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).then(()=>{});
+                setNewsletterDone(true);
+              }}}
+            />
+            <button
+              onClick={async()=>{
+                if(!newsletterEmail.includes("@")) return;
+                await supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).catch(()=>{});
+                setNewsletterDone(true);
+              }}
+              style={{background:"#00A8FF",border:"none",borderRadius:8,padding:"7px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+              Suscribirme →
+            </button>
+          </div>
+          <button onClick={()=>{setShowNewsletter(false);sessionStorage.setItem("nexo-newsletter-dismissed","1");}}
+            style={{background:"none",border:"none",color:"#475569",fontSize:18,cursor:"pointer",lineHeight:1,flexShrink:0,marginLeft:4}}>×</button>
+        </div>
+      )}
+      {!user && newsletterDone && (
+        <div style={{background:"linear-gradient(90deg,#052e16,#14532d)",borderBottom:"1px solid rgba(0,200,100,0.2)",padding:"10px 16px",textAlign:"center",color:"#86efac",fontSize:13,fontWeight:700}}>
+          ✅ ¡Listo! Te avisaremos cada lunes con el análisis de la semana.
+        </div>
+      )}
 
       {/* NAVBAR — Estilo Socimo */}
       <nav style={{background:"#FFFFFF",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(0,0,0,0.06)",width:"100%",boxSizing:"border-box"}}>
