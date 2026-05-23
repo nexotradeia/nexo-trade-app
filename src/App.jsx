@@ -17,6 +17,8 @@ const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY, {
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 // email_stripe_setup.py reemplaza este link automáticamente con el link real
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
+// ⚠️ PENDIENTE: crear producto PRO en Stripe dashboard y pegar el link aquí
+const STRIPE_PRO_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202"; // reemplazar con link PRO real
 
 
 // ── CASHTAG + @MENTION RENDERER ───────────────────────────────────────────────
@@ -1163,6 +1165,8 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
             <span style={{fontWeight:700,color:"#0F172A",fontSize:13.5,cursor:"pointer",letterSpacing:-0.2}}
               onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
+            {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#000",borderRadius:20,padding:"2px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
+            {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"2px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦VIP</span>}
             <TickerBadge ticker={post.ticker} sentiment={post.sentiment}/>
             <SentPill sentiment={post.sentiment} lang={lang}/>
             <span style={{color:"#94A3B8",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
@@ -2537,41 +2541,53 @@ function VipPopup({onClose, onGoVIP}){
 }
 
 // ── PREMIUM PAGE ──────────────────────────────────────────────────────────────
-function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
+function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   const [billing, setBilling] = useState("monthly");
   const [email, setEmail] = useState(user?.email||"");
   const [successMsg, setSuccessMsg] = useState("");
   const [activeTab, setActiveTab] = useState("planes");
 
-  const price = billing==="monthly" ? 9.99 : 7.99;
-  const savings = billing==="yearly" ? Math.round((9.99-7.99)*12) : 0;
+  const price    = billing==="monthly" ? 9.99  : 7.99;
+  const pricePro = billing==="monthly" ? 24.99 : 19.99;
+  const savings  = billing==="yearly" ? Math.round((9.99-7.99)*12)    : 0;
+  const savingsPro = billing==="yearly" ? Math.round((24.99-19.99)*12) : 0;
 
   const FREE_FEATURES = [
-    {ok:true,  text:"Foro general — publicar y comentar"},
-    {ok:true,  text:"Watchlist (hasta 5 acciones)"},
-    {ok:true,  text:"Battle Stocks — votar"},
-    {ok:true,  text:"Leaderboard público"},
-    {ok:true,  text:"Simulador paper trading"},
-    {ok:true,  text:"Sistema de puntos y badges"},
-    {ok:true,  text:"Gráficas japonesas avanzadas"},
+    "Foro general — publicar y comentar",
+    "Watchlist (hasta 5 acciones)",
+    "Battle Stocks — votar",
+    "Leaderboard público",
+    "Simulador paper trading $100k",
+    "Sistema de puntos y badges",
+    "Gráficas japonesas avanzadas",
   ];
 
-  const PREMIUM_FEATURES = [
-    {star:true, text:"★ Todo lo del plan Free"},
-    {star:true, text:"★ Calculadora Sharpe Ratio"},
-    {star:true, text:"★ Racha de ganancias + estadísticas"},
-    {star:true, text:"★ Evolución del portafolio"},
-    {star:true, text:"★ Calculadora riesgo/recompensa"},
-    {star:true, text:"★ Alertas de precio personalizadas"},
-    {star:true, text:"★ Alertas de noticias del día"},
-    {star:true, text:"★ Bot IA de trading con ChatGPT"},
-    {star:true, text:"★ Exportar datos (Excel/CSV)"},
-    {star:true, text:"★ Watchlist semanal ilimitada"},
-    {star:true, text:"★ GIFs en posts"},
-    {star:true, text:"★ Gráficas japonesas avanzadas"},
-    {star:true, text:"★ Sala VIP exclusiva"},
-    {star:true, text:"★ Perfil privado top traders"},
-    {star:true, text:"★ Badge VIP en perfil y posts"},
+  const VIP_FEATURES = [
+    "✓ Todo lo del plan Free",
+    "Picks semanales exclusivos (10 acciones)",
+    "Calculadora Sharpe Ratio",
+    "Alertas de precio personalizadas (5)",
+    "Bot IA de trading ilimitado",
+    "Exportar datos Excel/CSV",
+    "Sala VIP exclusiva",
+    "Badge ✦ VIP dorado en perfil",
+    "GIFs en posts",
+    "Señales básicas (acciones y crypto)",
+    "Perfil privado top traders",
+  ];
+
+  const PRO_FEATURES = [
+    "✓ Todo lo de VIP incluido",
+    "🔥 Alertas WhatsApp/SMS ilimitadas",
+    "🔥 Paper trading con $500,000 virtual",
+    "🔥 Señales de OPCIONES avanzadas",
+    "🔥 Chat privado 1:1 con top traders",
+    "🔥 50% descuento en todos los webinars",
+    "🔥 Análisis de portafolio con IA semanal",
+    "🔥 Badge ⚡ PRO exclusivo animado",
+    "🔥 Acceso anticipado a features nuevas",
+    "🔥 Soporte prioritario 24h",
+    "🔥 Call mensual Q&A con el equipo",
   ];
 
   const SIGNALS = [
@@ -2669,57 +2685,109 @@ function PremiumPage({user, isPremium, onSubscribe, onNeedAuth, lang}){
           </div>
         </div>
 
-        {/* Plans grid — exactly like the photo */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0,marginBottom:28,borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
+        {/* ── TOGGLE MENSUAL / ANUAL ── */}
+        <div style={{display:"flex",justifyContent:"center",marginBottom:24}}>
+          <div style={{background:"rgba(255,255,255,0.05)",borderRadius:30,padding:4,display:"flex",gap:2}}>
+            {["monthly","yearly"].map(b=>(
+              <button key={b} onClick={()=>setBilling(b)}
+                style={{background:billing===b?"rgba(255,255,255,0.12)":"transparent",border:"none",borderRadius:26,padding:"8px 22px",color:billing===b?"#F1F5F9":"#64748B",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all 0.2s"}}>
+                {b==="monthly"?"Mensual":"Anual"}{b==="yearly"&&<span style={{background:"#16A34A",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,marginLeft:6}}>-20%</span>}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {/* FREE PLAN — left, mismo estilo oscuro brillante */}
-          <div style={{background:"rgba(10,16,30,0.98)",padding:"28px 26px",borderRight:"1px solid rgba(255,255,255,0.08)",position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,width:200,height:200,background:"radial-gradient(circle,rgba(0,168,255,0.07),transparent 70%)",pointerEvents:"none"}}/>
+        {/* ── GRID 3 COLUMNAS ── */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0,marginBottom:28,borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
+
+          {/* FREE */}
+          <div style={{background:"rgba(10,16,30,0.98)",padding:"24px 20px",borderRight:"1px solid rgba(255,255,255,0.06)",position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,left:0,width:150,height:150,background:"radial-gradient(circle,rgba(0,168,255,0.06),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
-              <div style={{fontSize:22,fontWeight:900,color:"#00A8FF",marginBottom:4,letterSpacing:-0.3}}>Free</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:2}}>
-                <span style={{fontSize:28,fontWeight:900,color:"#F1F5F9"}}>$0</span>
-                <span style={{fontSize:13,color:"#64748B"}}> / gratis para siempre</span>
+              <div style={{fontSize:11,fontWeight:700,color:"#00A8FF",letterSpacing:1.5,marginBottom:6}}>FREE</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:16}}>
+                <span style={{fontSize:30,fontWeight:900,color:"#F1F5F9"}}>$0</span>
               </div>
-              <div style={{marginTop:18,marginBottom:22}}>
-                {FREE_FEATURES.map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<FREE_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
-                    <span style={{fontSize:12,color:"#00A8FF",flexShrink:0}}>✓</span>
-                    <span style={{fontSize:13,color:"#CBD5E1",lineHeight:1.4}}>{f.text}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{padding:"13px",borderRadius:11,background:"rgba(0,168,255,0.06)",textAlign:"center",color:"#475569",fontSize:13,fontWeight:700,border:"1px solid rgba(0,168,255,0.15)"}}>
+              <div style={{fontSize:11,color:"#475569",marginBottom:16}}>Para siempre gratis</div>
+              {FREE_FEATURES.map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"6px 0",borderBottom:i<FREE_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+                  <span style={{fontSize:11,color:"#00A8FF",flexShrink:0,marginTop:1}}>✓</span>
+                  <span style={{fontSize:12,color:"#94A3B8",lineHeight:1.4}}>{f}</span>
+                </div>
+              ))}
+              <div style={{marginTop:20,padding:"11px",borderRadius:10,background:"rgba(0,168,255,0.04)",textAlign:"center",color:"#334155",fontSize:12,fontWeight:700,border:"1px solid rgba(0,168,255,0.1)"}}>
                 Plan actual
               </div>
             </div>
           </div>
 
-          {/* VIP MEMBER — right, gold */}
-          <div style={{background:"rgba(10,16,30,0.98)",padding:"28px 26px",position:"relative",overflow:"hidden",borderLeft:"2px solid #F59E0B"}}>
-            <div style={{position:"absolute",top:0,right:0,width:200,height:200,background:"radial-gradient(circle,rgba(245,158,11,0.08),transparent 70%)",pointerEvents:"none"}}/>
+          {/* VIP */}
+          <div style={{background:"rgba(12,10,30,0.99)",padding:"24px 20px",position:"relative",overflow:"hidden",borderLeft:"2px solid #7C3AED",borderRight:"2px solid #7C3AED"}}>
+            <div style={{position:"absolute",top:-10,right:-10,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",fontSize:9,fontWeight:800,padding:"4px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>MÁS POPULAR</div>
+            <div style={{position:"absolute",top:0,left:0,width:180,height:180,background:"radial-gradient(circle,rgba(124,58,237,0.1),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
-              <div style={{fontSize:22,fontWeight:900,color:"#F59E0B",marginBottom:4,letterSpacing:-0.3}}>VIP Member</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:2}}>
-                <span style={{fontSize:28,fontWeight:900,color:"#F1F5F9"}}>$9.99</span>
-                <span style={{fontSize:13,color:"#64748B"}}> / mes · cancela cuando quieras</span>
+              <div style={{fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:1.5,marginBottom:6}}>✦ VIP</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+                {billing==="yearly"&&<span style={{fontSize:13,color:"#64748B",textDecoration:"line-through"}}>${(9.99).toFixed(2)}</span>}
+                <span style={{fontSize:30,fontWeight:900,color:"#F1F5F9"}}>${price.toFixed(2)}</span>
+                <span style={{fontSize:11,color:"#64748B"}}>/mes</span>
               </div>
-              <div style={{marginTop:18,marginBottom:22}}>
-                {PREMIUM_FEATURES.map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<PREMIUM_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
-                    <span style={{fontSize:12,color:"#F59E0B",flexShrink:0}}>★</span>
-                    <span style={{fontSize:13,color:"#CBD5E1",lineHeight:1.4}}>{f.text.replace("★ ","")}</span>
-                  </div>
-                ))}
+              {billing==="yearly"&&<div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginBottom:8}}>Ahorras ${savings}/año</div>}
+              <div style={{fontSize:11,color:"#475569",marginBottom:16}}>Cancela cuando quieras</div>
+              {VIP_FEATURES.map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"6px 0",borderBottom:i<VIP_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+                  <span style={{fontSize:11,color:"#A78BFA",flexShrink:0,marginTop:1}}>★</span>
+                  <span style={{fontSize:12,color:"#CBD5E1",lineHeight:1.4}}>{f}</span>
+                </div>
+              ))}
+              <div style={{marginTop:20}}>
+                {isPremium&&!isPro
+                  ?<div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"11px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:13}}>✅ Plan activo</div>
+                  :<button onClick={handleSubscribe}
+                    style={{width:"100%",background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:10,padding:"12px",fontSize:13,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 4px 20px rgba(124,58,237,0.4)",marginBottom:6}}>
+                    ✦ Hazte VIP — ${price.toFixed(2)}/mes →
+                  </button>
+                }
+                {!isPremium&&<div style={{textAlign:"center",fontSize:10,color:"#334155",marginTop:4}}>7 días gratis · Sin compromiso</div>}
               </div>
-              {!isPremium&&<>
-                <button onClick={handleSubscribe}
-                  style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:11,padding:"13px",fontSize:14,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:"0 4px 20px rgba(245,158,11,0.35)",letterSpacing:0.2,marginBottom:8}}>
-                  ✦ Hazte VIP — $9.99/mes →
-                </button>
-                <div style={{textAlign:"center",fontSize:11,color:"#334155"}}>7 días gratis · Sin compromiso · Cancela cuando quieras</div>
-              </>}
-              {isPremium&&<div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"11px",textAlign:"center",color:C.bull,fontWeight:800,fontSize:14}}>✅ Plan activo</div>}
+            </div>
+          </div>
+
+          {/* PRO */}
+          <div style={{background:"linear-gradient(160deg,#0A0500,#150C00,#0A0500)",padding:"24px 20px",position:"relative",overflow:"hidden",borderLeft:"2px solid #F59E0B"}}>
+            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#000",fontSize:9,fontWeight:800,padding:"4px 10px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>⚡ NUEVO</div>
+            <div style={{position:"absolute",top:0,left:0,width:180,height:180,background:"radial-gradient(circle,rgba(245,158,11,0.1),transparent 70%)",pointerEvents:"none"}}/>
+            <div style={{position:"relative"}}>
+              <div style={{fontSize:11,fontWeight:700,color:"#F59E0B",letterSpacing:1.5,marginBottom:6}}>⚡ PRO</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+                {billing==="yearly"&&<span style={{fontSize:13,color:"#64748B",textDecoration:"line-through"}}>${(24.99).toFixed(2)}</span>}
+                <span style={{fontSize:30,fontWeight:900,color:"#F1F5F9"}}>${pricePro.toFixed(2)}</span>
+                <span style={{fontSize:11,color:"#64748B"}}>/mes</span>
+              </div>
+              {billing==="yearly"&&<div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginBottom:8}}>Ahorras ${savingsPro}/año</div>}
+              <div style={{fontSize:11,color:"#475569",marginBottom:16}}>Para traders serios</div>
+              {PRO_FEATURES.map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"6px 0",borderBottom:i<PRO_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+                  <span style={{fontSize:11,color:"#F59E0B",flexShrink:0,marginTop:1}}>⚡</span>
+                  <span style={{fontSize:12,color:f.startsWith("🔥")?"#FCD34D":"#94A3B8",lineHeight:1.4}}>{f.replace("🔥 ","")}</span>
+                </div>
+              ))}
+              <div style={{marginTop:20}}>
+                {isPro
+                  ?<div style={{background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.3)",borderRadius:10,padding:"11px",textAlign:"center",color:"#F59E0B",fontWeight:800,fontSize:13}}>⚡ Plan PRO activo</div>
+                  :<>
+                    <button onClick={()=>{
+                      if(!user){onNeedAuth();return;}
+                      const url = STRIPE_PRO_LINK + (user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:"");
+                      window.open(url,"_blank");
+                    }}
+                    style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:10,padding:"12px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:"0 4px 20px rgba(245,158,11,0.4)",marginBottom:6}}>
+                      ⚡ Hazte PRO — ${pricePro.toFixed(2)}/mes →
+                    </button>
+                    <div style={{textAlign:"center",fontSize:10,color:"#334155",marginTop:4}}>7 días gratis · Cancela cuando quieras</div>
+                  </>
+                }
+              </div>
             </div>
           </div>
         </div>
@@ -2977,6 +3045,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
     {icon:"📅", label:"Earnings",         idx:6},
     {icon:"📰", label:"Noticias",         idx:5},
     {icon:"⚡", label:"Trending",         idx:7},
+    {icon:"💼", label:"Empleos Finanzas",  idx:10},
     {icon:"🛠️",label:"Herramientas VIP", idx:9, vip:true},
     {icon:"✦",  label:"Premium VIP",      idx:8, premium:true},
   ];
@@ -4988,10 +5057,195 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 }
 
 // ── NAV TABS ──────────────────────────────────────────────────────────────────
+// ── JOB BOARD ────────────────────────────────────────────────────────────────
+const SAMPLE_JOBS = [
+  {id:1,company:"Robinhood",logo:"🐦",title:"Trader de Renta Variable — LATAM",type:"Full-time",location:"Remoto",salary:"$80,000–$120,000/año",tags:["Trading","Equities","LATAM"],desc:"Buscamos trader experimentado para gestionar posiciones en mercados latinoamericanos. 3+ años de experiencia requeridos.",featured:true,date:"hace 2 días"},
+  {id:2,company:"Bitso",logo:"🟠",title:"Analista de Mercados Crypto",type:"Full-time",location:"Ciudad de México / Remoto",salary:"$60,000–$90,000/año",tags:["Crypto","DeFi","Análisis"],desc:"Únete al exchange de crypto #1 en LATAM. Analizarás mercados, elaborarás reportes y apoyarás decisiones de inversión.",featured:true,date:"hace 3 días"},
+  {id:3,company:"GBM+",logo:"💚",title:"Asesor de Inversiones Senior",type:"Full-time",location:"Ciudad de México",salary:"$70,000–$100,000 MXN/mes",tags:["Inversiones","Acciones","Clientes"],desc:"Administra portafolios de clientes premium. Certificación AMIB requerida. Excelentes comisiones.",featured:false,date:"hace 5 días"},
+  {id:4,company:"Kushki",logo:"🔵",title:"Risk & Compliance Analyst",type:"Full-time",location:"Bogotá / Remoto",salary:"$40,000–$55,000/año",tags:["Riesgo","Fintech","Compliance"],desc:"Analiza y mitiga riesgos en transacciones de pagos digitales. Experiencia en regulación financiera LATAM.",featured:false,date:"hace 1 semana"},
+  {id:5,company:"NexoTrade",logo:"🔷",title:"Community Manager — Trading",type:"Part-time",location:"100% Remoto",salary:"$800–$1,500/mes",tags:["Trading","Redes Sociales","Español"],desc:"¿Apasionado del trading y las redes sociales? Ayúdanos a hacer crecer la comunidad de inversores hispanos más grande.",featured:false,date:"hace 2 semanas"},
+];
+
+function JobBoardPage({user, onNeedAuth}){
+  const [showForm, setShowForm] = useState(false);
+  const [filter, setFilter]     = useState("todos");
+  const [search, setSearch]     = useState("");
+  const [formData, setFormData] = useState({company:"",title:"",type:"Full-time",location:"",salary:"",desc:"",email:"",tags:""});
+  const [submitted, setSubmitted] = useState(false);
+
+  const filters = ["todos","Full-time","Part-time","Remoto","Crypto","Trading"];
+  const jobs = SAMPLE_JOBS.filter(j=>{
+    const matchFilter = filter==="todos" || j.type.includes(filter) || j.tags.some(t=>t.toLowerCase().includes(filter.toLowerCase())) || j.location.toLowerCase().includes(filter.toLowerCase());
+    const matchSearch = !search || j.title.toLowerCase().includes(search.toLowerCase()) || j.company.toLowerCase().includes(search.toLowerCase()) || j.tags.some(t=>t.toLowerCase().includes(search.toLowerCase()));
+    return matchFilter && matchSearch;
+  });
+
+  const handleSubmit = async() => {
+    if(!user){onNeedAuth();return;}
+    await supabase.from("job_listings").insert({...formData,tags:formData.tags.split(",").map(t=>t.trim()),user_id:user.id,created_at:new Date().toISOString(),active:true}).catch(()=>{});
+    setSubmitted(true);
+  };
+
+  return(
+    <div>
+      {/* HERO */}
+      <div style={{background:"linear-gradient(135deg,#0F172A,#1E293B)",borderRadius:20,padding:"32px 28px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,right:0,bottom:0,left:0,background:"radial-gradient(circle at 80% 50%,rgba(0,168,255,0.08),transparent 60%)",pointerEvents:"none"}}/>
+        <div style={{position:"relative"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:20,padding:"5px 14px",marginBottom:14}}>
+            <span style={{fontSize:12}}>💼</span>
+            <span style={{color:"#00A8FF",fontSize:11,fontWeight:700,letterSpacing:1}}>NEXOTRADE JOBS</span>
+          </div>
+          <h1 style={{margin:"0 0 8px",color:"#F1F5F9",fontSize:24,fontWeight:900,lineHeight:1.2}}>Empleos en Finanzas & Trading</h1>
+          <p style={{margin:"0 0 20px",color:"#64748B",fontSize:14,lineHeight:1.6}}>Los mejores empleos en fintech, trading, crypto e inversiones para hispanohablantes.</p>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+            <div style={{flex:1,minWidth:200,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"8px 14px",display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:13,color:"#64748B"}}>🔍</span>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar puesto, empresa..."
+                style={{background:"none",border:"none",outline:"none",color:"#F1F5F9",fontSize:13,flex:1,fontFamily:"inherit"}}/>
+            </div>
+            <button onClick={()=>{if(!user){onNeedAuth();return;}setShowForm(true);}}
+              style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"8px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+              + Publicar empleo ($99)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+        {filters.map(f=>(
+          <button key={f} onClick={()=>setFilter(f)}
+            style={{background:filter===f?"#00A8FF":"#fff",color:filter===f?"#fff":"#475569",border:`1px solid ${filter===f?"#00A8FF":"rgba(15,23,42,0.1)"}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
+            {f}
+          </button>
+        ))}
+        <span style={{marginLeft:"auto",color:"#94A3B8",fontSize:12,alignSelf:"center"}}>{jobs.length} empleos</span>
+      </div>
+
+      {/* Lista de empleos */}
+      <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:24}}>
+        {jobs.map(job=>(
+          <div key={job.id} style={{
+            background:"#fff",
+            border:`1.5px solid ${job.featured?"rgba(0,168,255,0.3)":"rgba(15,23,42,0.08)"}`,
+            borderRadius:16,padding:"18px 20px",
+            boxShadow:job.featured?"0 4px 20px rgba(0,168,255,0.08)":"0 2px 8px rgba(0,0,0,0.04)",
+            position:"relative",overflow:"hidden",
+            transition:"all 0.15s",cursor:"pointer",
+          }}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.4)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,168,255,0.1)";e.currentTarget.style.transform="translateY(-1px)";}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor=job.featured?"rgba(0,168,255,0.3)":"rgba(15,23,42,0.08)";e.currentTarget.style.boxShadow=job.featured?"0 4px 20px rgba(0,168,255,0.08)":"0 2px 8px rgba(0,0,0,0.04)";e.currentTarget.style.transform="translateY(0)";}}>
+            {job.featured&&<div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#00A8FF,#0090D4)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 12px",borderRadius:"0 14px 0 10px",letterSpacing:0.8}}>DESTACADO</div>}
+            <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
+              <div style={{width:46,height:46,borderRadius:12,background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>
+                {job.logo}
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,flexWrap:"wrap",marginBottom:4}}>
+                  <div>
+                    <div style={{fontWeight:800,fontSize:15,color:"#0F172A",marginBottom:2}}>{job.title}</div>
+                    <div style={{fontSize:13,color:"#475569",fontWeight:600}}>{job.company}</div>
+                  </div>
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontWeight:700,fontSize:13,color:"#16A34A"}}>{job.salary}</div>
+                    <div style={{fontSize:11,color:"#94A3B8",marginTop:2}}>{job.date}</div>
+                  </div>
+                </div>
+                <div style={{fontSize:12,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{job.desc}</div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                  <span style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#0090D4",fontWeight:600}}>📍 {job.location}</span>
+                  <span style={{background:"rgba(22,163,74,0.08)",border:"1px solid rgba(22,163,74,0.15)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#16A34A",fontWeight:600}}>⏰ {job.type}</span>
+                  {job.tags.map(tag=>(
+                    <span key={tag} style={{background:"rgba(15,23,42,0.05)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#64748B",fontWeight:500}}>{tag}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA para publicar */}
+      <div style={{background:"linear-gradient(135deg,#0F172A,#1E293B)",borderRadius:16,padding:"24px",textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:32,marginBottom:10}}>💼</div>
+        <div style={{fontWeight:900,color:"#F1F5F9",fontSize:18,marginBottom:6}}>¿Tienes un puesto para traders?</div>
+        <div style={{color:"#64748B",fontSize:13,marginBottom:16,lineHeight:1.6}}>Llega a miles de traders e inversores hispanohablantes activos.<br/>Publicación destacada desde <strong style={{color:"#00A8FF"}}>$99 USD</strong> · Publicación básica desde <strong style={{color:"#94A3B8"}}>$49 USD</strong></div>
+        <button onClick={()=>{if(!user){onNeedAuth();return;}setShowForm(true);}}
+          style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(0,168,255,0.3)"}}>
+          Publicar empleo ahora →
+        </button>
+      </div>
+
+      {/* Modal publicar empleo */}
+      {showForm&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setShowForm(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 24px",maxWidth:480,width:"100%",maxHeight:"90vh",overflowY:"auto"}}>
+            {submitted?(
+              <div style={{textAlign:"center",padding:"20px 0"}}>
+                <div style={{fontSize:48,marginBottom:12}}>✅</div>
+                <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginBottom:8}}>¡Empleo enviado!</div>
+                <div style={{color:"#64748B",fontSize:13,marginBottom:20}}>Recibirás un email con el link de pago. Tu empleo aparecerá en 24h tras la confirmación.</div>
+                <button onClick={()=>{setShowForm(false);setSubmitted(false);}} style={{background:"#00A8FF",border:"none",borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Cerrar</button>
+              </div>
+            ):(
+              <>
+                <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginBottom:4}}>Publicar empleo</div>
+                <div style={{fontSize:12,color:"#64748B",marginBottom:20}}>Completa el formulario — te enviamos link de pago por email</div>
+                {[
+                  {label:"Empresa",key:"company",placeholder:"Ej: Bitso, GBM+, Robinhood"},
+                  {label:"Título del puesto",key:"title",placeholder:"Ej: Trader de Renta Variable"},
+                  {label:"Ubicación",key:"location",placeholder:"Ej: Ciudad de México / Remoto"},
+                  {label:"Salario",key:"salary",placeholder:"Ej: $60,000–$90,000/año"},
+                  {label:"Tu email de contacto",key:"email",placeholder:"para enviarte el link de pago"},
+                  {label:"Tags (separados por coma)",key:"tags",placeholder:"Ej: Trading, Crypto, Remoto"},
+                ].map(field=>(
+                  <div key={field.key} style={{marginBottom:12}}>
+                    <div style={{fontSize:12,fontWeight:700,color:"#475569",marginBottom:4}}>{field.label}</div>
+                    <input value={formData[field.key]} onChange={e=>setFormData(p=>({...p,[field.key]:e.target.value}))}
+                      placeholder={field.placeholder}
+                      style={{width:"100%",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.12)",borderRadius:8,padding:"9px 12px",fontSize:13,color:"#0F172A",outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}/>
+                  </div>
+                ))}
+                <div style={{marginBottom:16}}>
+                  <div style={{fontSize:12,fontWeight:700,color:"#475569",marginBottom:4}}>Descripción del puesto</div>
+                  <textarea value={formData.desc} onChange={e=>setFormData(p=>({...p,desc:e.target.value}))}
+                    placeholder="Describe el rol, requisitos y beneficios..."
+                    rows={4}
+                    style={{width:"100%",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.12)",borderRadius:8,padding:"9px 12px",fontSize:13,color:"#0F172A",outline:"none",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"}}/>
+                </div>
+                <div style={{display:"flex",gap:8,marginBottom:14}}>
+                  {["Full-time","Part-time","Freelance"].map(t=>(
+                    <button key={t} onClick={()=>setFormData(p=>({...p,type:t}))}
+                      style={{flex:1,background:formData.type===t?"#00A8FF":"#F8FAFC",color:formData.type===t?"#fff":"#475569",border:`1px solid ${formData.type===t?"#00A8FF":"rgba(15,23,42,0.1)"}`,borderRadius:8,padding:"8px",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                <div style={{background:"rgba(0,168,255,0.06)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:10,padding:"12px",marginBottom:16,fontSize:12,color:"#475569"}}>
+                  💳 <strong>Precio:</strong> Publicación básica <strong style={{color:"#0F172A"}}>$49</strong> · Destacada (top) <strong style={{color:"#00A8FF"}}>$99</strong><br/>
+                  Te enviamos el link de pago Stripe a tu email en menos de 1 hora.
+                </div>
+                <div style={{display:"flex",gap:10}}>
+                  <button onClick={()=>setShowForm(false)} style={{flex:1,background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:10,padding:"11px",color:"#475569",fontSize:13,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
+                  <button onClick={handleSubmit} style={{flex:2,background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}}>
+                    Enviar y pagar →
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const NAV_ITEMS = (t) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},
   {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
+  {label:"💼 Empleos",idx:10},
   {label:"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
@@ -5038,6 +5292,9 @@ export default function App(){
   const ADMIN_EMAILS = ADMIN_EMAILS_CONST;
   const [isPremium,setIsPremium]= useState(
     _getAdminStatus() || (_getSavedUser()?.is_premium || false)
+  );
+  const [isPro,setIsPro]= useState(
+    _getAdminStatus() || (_getSavedUser()?.is_pro || false)
   );
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]     = useState(false);
@@ -5327,8 +5584,9 @@ export default function App(){
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage posts={posts}/>;
-    if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
+    if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user}/>;
+    if(page===10) return <JobBoardPage user={user} onNeedAuth={()=>setAuth("register")}/>;
     return(
       <>
         {/* Tabs estilo Socimo */}
