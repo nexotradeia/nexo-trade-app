@@ -6489,103 +6489,223 @@ export default function App(){
 
       {/* HERO LANDING */}
       {showLanding && page===0 && (
-        <div style={{background:`linear-gradient(135deg,#0B1A2E 0%,#0D2244 50%,#0B1A2E 100%)`,borderBottom:`1px solid rgba(0,168,255,0.2)`,padding:"64px 20px 56px",overflow:"hidden"}}>
-          <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:48,flexWrap:"wrap"}}>
+        <div>
+
+        {/* ── HERO ── */}
+        <div style={{background:`linear-gradient(135deg,#0B1A2E 0%,#0D2244 50%,#0B1A2E 100%)`,borderBottom:`1px solid rgba(0,168,255,0.15)`,padding:"64px 20px 56px",overflow:"hidden",position:"relative"}}>
+          <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 20% 50%,#00D26A08,transparent 50%),radial-gradient(circle at 80% 30%,#3B8EFA08,transparent 50%)",pointerEvents:"none"}}/>
+          <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:48,flexWrap:"wrap",position:"relative"}}>
 
             {/* LEFT — Text */}
             <div style={{flex:"1 1 400px",minWidth:300}}>
-              {/* Badge */}
               <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,210,106,0.1)",border:`1px solid ${C.accent}33`,borderRadius:30,padding:"6px 16px",marginBottom:28}}>
-                <span style={{width:7,height:7,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 10px ${C.accent}`,animation:"pulse 2s infinite"}}/>
-                <span style={{color:C.accent,fontSize:11,fontWeight:700,letterSpacing:1.2}}>TRADING SOCIAL CON IA</span>
+                <span style={{width:7,height:7,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 10px ${C.accent}`}}/>
+                <span style={{color:C.accent,fontSize:11,fontWeight:700,letterSpacing:1.2}}>🇲🇽🇨🇴🇦🇷 COMUNIDAD HISPANA DE TRADING</span>
               </div>
-              {/* Headline */}
-              <h1 style={{fontSize:"clamp(36px,5vw,64px)",fontWeight:900,letterSpacing:-2,lineHeight:1.05,margin:"0 0 18px",color:"#fff"}}>
-                El futuro del<br/>
-                <span style={{background:`linear-gradient(90deg,${C.accent} 0%,#3B8EFA 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>trading social</span>
+              <h1 style={{fontSize:"clamp(36px,5vw,62px)",fontWeight:900,letterSpacing:-2,lineHeight:1.05,margin:"0 0 18px",color:"#fff"}}>
+                Invierte mejor.<br/>
+                <span style={{background:`linear-gradient(90deg,${C.accent} 0%,#3B8EFA 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>Aprende en comunidad.</span>
               </h1>
-              <p style={{fontSize:17,color:C.muted,lineHeight:1.75,margin:"0 0 36px",maxWidth:480,fontWeight:400}}>
-                Analiza mercados, comparte ideas y aprende de los mejores traders — todo potenciado por IA en tiempo real.
+              <p style={{fontSize:17,color:"#94a3b8",lineHeight:1.75,margin:"0 0 32px",maxWidth:480}}>
+                La plataforma de trading social <strong style={{color:"#fff"}}>en español</strong> donde miles de inversores comparten análisis, picks semanales y estrategias reales — potenciada por IA.
               </p>
-              {/* CTAs */}
-              <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:40}}>
+              <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:36}}>
                 <button onClick={()=>setAuth("register")}
-                  style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:12,padding:"14px 30px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 32px ${C.accent}55`,letterSpacing:0.2}}>
-                  Empezar Gratis →
+                  style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:14,padding:"16px 34px",fontSize:16,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 32px ${C.accent}55`,letterSpacing:0.2}}>
+                  Crear cuenta gratis →
                 </button>
                 <button onClick={()=>setShowLanding(false)}
-                  style={{background:"rgba(255,255,255,0.05)",border:`1px solid rgba(255,255,255,0.15)`,borderRadius:12,padding:"14px 30px",fontSize:15,fontWeight:700,color:"#fff",cursor:"pointer",backdropFilter:"blur(8px)"}}>
-                  Explorar Mercado
+                  style={{background:"rgba(255,255,255,0.05)",border:`1px solid rgba(255,255,255,0.15)`,borderRadius:14,padding:"16px 28px",fontSize:15,fontWeight:700,color:"#fff",cursor:"pointer"}}>
+                  Ver el feed →
                 </button>
               </div>
-              {/* Social proof */}
-              <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
                 <div style={{display:"flex"}}>
-                  {["#00D26A","#3B8EFA","#FFB800","#FF4D6A"].map((c,i)=>(
-                    <div key={i} style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${c},${c}88)`,border:"2px solid #0B1020",marginLeft:i>0?-8:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff"}}>{["MC","SB","AT","FP"][i]}</div>
+                  {["#00D26A","#3B8EFA","#FFB800","#FF4D6A","#a78bfa"].map((c,i)=>(
+                    <div key={i} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${c},${c}88)`,border:"2px solid #0B1020",marginLeft:i>0?-10:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:"#fff"}}>{["MC","JR","AT","FP","LG"][i]}</div>
                   ))}
                 </div>
-                <span style={{fontSize:13,color:C.muted,fontWeight:500}}><strong style={{color:"#fff"}}>12,400+</strong> traders ya están dentro</span>
+                <div>
+                  <div style={{color:"#fff",fontWeight:700,fontSize:14}}>+2,847 traders activos</div>
+                  <div style={{color:"#64748b",fontSize:12}}>México · Colombia · Argentina · España</div>
+                </div>
               </div>
             </div>
 
-            {/* RIGHT — Chart Mockup */}
-            <div style={{flex:"0 0 auto",position:"relative",width:380}}>
-              {/* Main card */}
-              <div style={{background:"rgba(19,26,46,0.9)",border:`1px solid rgba(0,210,106,0.2)`,borderRadius:20,padding:"20px 24px",backdropFilter:"blur(20px)",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
-                {/* Header */}
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{width:8,height:8,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 8px ${C.accent}`}}/>
-                    <span style={{fontSize:12,color:C.muted,fontWeight:600}}>En vivo</span>
-                    <span style={{fontSize:11,color:C.muted2}}>/</span>
-                    <span style={{fontSize:11,color:C.muted2,fontWeight:500}}>USD · 1D</span>
+            {/* RIGHT — Feed Mockup */}
+            <div style={{flex:"0 0 auto",position:"relative",width:370}}>
+              <div style={{background:"rgba(15,23,42,0.95)",border:`1px solid rgba(0,210,106,0.2)`,borderRadius:20,padding:"20px",backdropFilter:"blur(20px)",boxShadow:"0 24px 64px rgba(0,0,0,0.7)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16,paddingBottom:14,borderBottom:"1px solid #1e293b"}}>
+                  <span style={{width:8,height:8,borderRadius:"50%",background:C.accent,boxShadow:`0 0 8px ${C.accent}`,display:"inline-block"}}/>
+                  <span style={{fontSize:12,color:"#64748b",fontWeight:600}}>Feed en vivo</span>
+                  <span style={{marginLeft:"auto",fontSize:11,color:"#64748b",background:"#1e293b",padding:"2px 8px",borderRadius:6}}>hace 2 min</span>
+                </div>
+                {[
+                  {u:"SPY_Trader",e:"🦅",c:"#00D26A",t:"NVDA rompiendo resistencia en $890. Target $950 en 2 semanas. Stop en $860. R:R 3:1 🚀",bull:true,likes:47},
+                  {u:"CryptoWolf",e:"🐺",c:"#7C3AED",t:"BTC acumulando en $67k. On-chain muestra manos fuertes comprando. Bullish largo plazo. ₿",bull:true,likes:82},
+                  {u:"NvidiaChad",e:"🦁",c:"#F59E0B",t:"TSLA reporta earnings la próxima semana. Cuidado con la volatilidad. Yo flat hasta el dato 📊",bull:false,likes:31},
+                ].map((p,i)=>(
+                  <div key={i} style={{marginBottom:12,paddingBottom:12,borderBottom:i<2?"1px solid #1e293b":"none"}}>
+                    <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+                      <div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${p.c},${p.c}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{p.e}</div>
+                      <div style={{flex:1}}>
+                        <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
+                          <span style={{color:"#fff",fontWeight:700,fontSize:12}}>@{p.u}</span>
+                          <span style={{background:p.bull?"#10b98122":"#ef444422",color:p.bull?"#10b981":"#ef4444",border:`1px solid ${p.bull?"#10b98144":"#ef444444"}`,borderRadius:4,padding:"0px 5px",fontSize:10,fontWeight:700}}>{p.bull?"ALCISTA":"BAJISTA"}</span>
+                        </div>
+                        <p style={{margin:"0 0 6px",color:"#94a3b8",fontSize:12,lineHeight:1.5}}>{p.t}</p>
+                        <div style={{display:"flex",gap:12}}>
+                          <span style={{color:"#475569",fontSize:11}}>❤️ {p.likes}</span>
+                          <span style={{color:"#475569",fontSize:11}}>💬 comentar</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <span style={{fontSize:11,color:C.muted2,background:"rgba(255,255,255,0.05)",padding:"3px 8px",borderRadius:6}}>S&P 500</span>
-                </div>
-                {/* Price */}
-                <div style={{marginBottom:18}}>
-                  <div style={{fontSize:38,fontWeight:900,color:"#fff",letterSpacing:-1,lineHeight:1}}>$68,420</div>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
-                    <span style={{fontSize:14,color:C.accent,fontWeight:700}}>▲ +4.2%</span>
-                    <span style={{fontSize:13,color:C.muted,fontWeight:500}}>· +$2,761</span>
-                  </div>
-                </div>
-                {/* Chart SVG */}
-                <svg viewBox="0 0 330 70" style={{width:"100%",height:70,display:"block",marginBottom:8}}>
-                  <defs>
-                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00D26A" stopOpacity="0.35"/>
-                      <stop offset="100%" stopColor="#00D26A" stopOpacity="0"/>
-                    </linearGradient>
-                  </defs>
-                  <path d="M0 60 C20 55, 40 50, 60 45 S90 35, 110 30 S150 25, 170 22 S210 18, 240 15 S280 10, 330 5" fill="none" stroke="#00D26A" strokeWidth="2.5" strokeLinecap="round"/>
-                  <path d="M0 60 C20 55, 40 50, 60 45 S90 35, 110 30 S150 25, 170 22 S210 18, 240 15 S280 10, 330 5 L330 70 L0 70Z" fill="url(#chartGrad)"/>
-                </svg>
-                {/* Mini bars */}
-                <div style={{display:"flex",gap:3,alignItems:"flex-end",height:16}}>
-                  {[30,50,40,70,55,80,65,90,75,95,85,100].map((h,i)=>(
-                    <div key={i} style={{flex:1,height:`${h*0.16}px`,borderRadius:2,background:i>7?C.accent:"rgba(0,210,106,0.3)"}}/>
-                  ))}
-                </div>
+                ))}
+                <button onClick={()=>setAuth("register")} style={{width:"100%",background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:10,padding:"10px",color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",marginTop:4}}>
+                  Unirme para ver más →
+                </button>
               </div>
-
-              {/* Floating badge — NVDA */}
-              <div style={{position:"absolute",top:-14,right:-14,background:"rgba(19,26,46,0.95)",border:`1px solid rgba(0,210,106,0.4)`,borderRadius:12,padding:"8px 14px",backdropFilter:"blur(12px)",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
-                <div style={{fontSize:11,color:C.muted,fontWeight:600,marginBottom:2}}>NVDA</div>
-                <div style={{fontSize:16,fontWeight:900,color:C.accent}}>+2.8%</div>
+              <div style={{position:"absolute",top:-12,right:-12,background:"rgba(15,23,42,0.97)",border:"1px solid #10b98144",borderRadius:12,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+                <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>NVDA</div>
+                <div style={{fontSize:18,fontWeight:900,color:"#10b981"}}>+2.8%</div>
               </div>
-
-              {/* Floating badge — TSLA */}
-              <div style={{position:"absolute",bottom:-14,left:-14,background:"rgba(19,26,46,0.95)",border:`1px solid rgba(255,77,106,0.4)`,borderRadius:12,padding:"8px 14px",backdropFilter:"blur(12px)",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
-                <div style={{fontSize:11,color:C.muted,fontWeight:600,marginBottom:2}}>TSLA</div>
-                <div style={{fontSize:16,fontWeight:900,color:C.bear}}>-3.1%</div>
+              <div style={{position:"absolute",bottom:-12,left:-12,background:"rgba(15,23,42,0.97)",border:"1px solid #7C3AED44",borderRadius:12,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+                <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>VIP esta semana</div>
+                <div style={{fontSize:13,fontWeight:800,color:"#a78bfa"}}>✦ 10 picks listos</div>
               </div>
             </div>
-
           </div>
         </div>
+
+        {/* ── FEATURES ── */}
+        <div style={{background:"#080e1a",padding:"56px 20px",borderBottom:"1px solid #0f172a"}}>
+          <div style={{maxWidth:1100,margin:"0 auto"}}>
+            <div style={{textAlign:"center",marginBottom:44}}>
+              <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4vw,38px)",fontWeight:900}}>Todo lo que necesitas para invertir mejor</h2>
+              <p style={{margin:0,color:"#64748b",fontSize:15,maxWidth:500,marginLeft:"auto",marginRight:"auto"}}>Una plataforma completa para traders de todos los niveles</p>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20}}>
+              {[
+                {icon:"📊",t:"Feed de Traders",d:"Ve análisis y estrategias en tiempo real de miles de inversores hispanos. Filtra por alcistas, bajistas o trending.",c:"#10b981"},
+                {icon:"🎯",t:"Picks VIP Semanales",d:"Cada lunes 9AM: 10 acciones seleccionadas por nuestros traders con mayor historial de aciertos.",c:"#a78bfa"},
+                {icon:"🤖",t:"IA de Trading",d:"Chatea con nuestra IA especializada en mercados. Analiza tickers, estrategias y gestión de riesgo.",c:"#3b82f6"},
+                {icon:"🎮",t:"Paper Trading",d:"Practica con $100,000 virtuales. Compite en el leaderboard y demuestra tu estrategia antes de arriesgar.",c:"#f59e0b"},
+                {icon:"🎓",t:"Academia & Webinars",d:"Cursos grabados ($39-$99) y webinars en vivo ($29-$79). Aprende análisis técnico, crypto, opciones y más.",c:"#ef4444"},
+                {icon:"💼",t:"Job Board",d:"Empleos en finanzas y trading para la comunidad hispana. Publica o encuentra trabajo en el sector.",c:"#06b6d4"},
+              ].map((f,i)=>(
+                <div key={i} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,padding:"24px 20px",transition:"border-color 0.2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor=f.c+"66"}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor="#1e293b"}>
+                  <div style={{width:44,height:44,borderRadius:12,background:f.c+"18",border:`1px solid ${f.c}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:14}}>{f.icon}</div>
+                  <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:15,fontWeight:800}}>{f.t}</h3>
+                  <p style={{margin:0,color:"#64748b",fontSize:13,lineHeight:1.6}}>{f.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── CÓMO FUNCIONA ── */}
+        <div style={{background:"#0a1020",padding:"56px 20px",borderBottom:"1px solid #0f172a"}}>
+          <div style={{maxWidth:900,margin:"0 auto",textAlign:"center"}}>
+            <h2 style={{margin:"0 0 8px",color:"#fff",fontSize:"clamp(22px,4vw,36px)",fontWeight:900}}>Empieza en 3 pasos</h2>
+            <p style={{margin:"0 0 44px",color:"#64748b",fontSize:15}}>Sin tarjeta de crédito. Sin complicaciones.</p>
+            <div style={{display:"flex",gap:0,justifyContent:"center",flexWrap:"wrap",position:"relative"}}>
+              {[
+                {n:"1",icon:"📝",t:"Crea tu cuenta gratis",d:"En 30 segundos. Solo necesitas un email."},
+                {n:"2",icon:"📊",t:"Explora el feed",d:"Ve análisis de traders reales. Sigue a los mejores."},
+                {n:"3",icon:"💰",t:"Empieza a ganar",d:"Aplica las estrategias. Hazte VIP para los picks exclusivos."},
+              ].map((s,i)=>(
+                <div key={i} style={{flex:"1 1 220px",maxWidth:280,padding:"0 20px",position:"relative"}}>
+                  {i<2&&<div style={{position:"absolute",top:28,right:-10,width:20,height:2,background:"linear-gradient(90deg,#10b981,#3b82f6)",display:"block"}} className="nexo-step-line"/>}
+                  <div style={{width:56,height:56,borderRadius:"50%",background:`linear-gradient(135deg,${C.accent},#3b82f6)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px",boxShadow:`0 0 24px ${C.accent}44`}}>{s.icon}</div>
+                  <div style={{background:C.accent,color:"#000",borderRadius:"50%",width:20,height:20,fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",margin:"-68px auto 52px",marginLeft:"calc(50% + 12px)"}}>{s.n}</div>
+                  <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:15,fontWeight:800}}>{s.t}</h3>
+                  <p style={{margin:0,color:"#64748b",fontSize:13,lineHeight:1.5}}>{s.d}</p>
+                </div>
+              ))}
+            </div>
+            <button onClick={()=>setAuth("register")} style={{marginTop:44,background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:14,padding:"16px 44px",fontSize:16,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 32px ${C.accent}44`}}>
+              Crear cuenta gratis — es rápido →
+            </button>
+          </div>
+        </div>
+
+        {/* ── TESTIMONIOS ── */}
+        <div style={{background:"#080e1a",padding:"56px 20px",borderBottom:"1px solid #0f172a"}}>
+          <div style={{maxWidth:1100,margin:"0 auto"}}>
+            <h2 style={{textAlign:"center",margin:"0 0 8px",color:"#fff",fontSize:"clamp(22px,4vw,36px)",fontWeight:900}}>Lo que dicen nuestros traders</h2>
+            <p style={{textAlign:"center",margin:"0 0 44px",color:"#64748b",fontSize:15}}>Inversores reales, resultados reales</p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20}}>
+              {[
+                {n:"María G.",loc:"México",e:"🦅",c:"#10b981",r:5,t:"Los picks VIP son increíbles. En 3 meses duplicé mi portafolio siguiendo las señales. Antes no sabía ni qué era un stop loss."},
+                {n:"Carlos R.",loc:"Colombia",e:"🐺",c:"#7C3AED",r:5,t:"La comunidad es lo mejor. Antes invertía solo y cometía muchos errores. Aquí aprendí análisis técnico real de traders con historial probado."},
+                {n:"Ana T.",loc:"Argentina",e:"🦁",c:"#F59E0B",r:5,t:"El webinar de opciones me cambió la vida. Ahora genero ingresos extra con covered calls cada mes. Vale cada peso que pagué."},
+                {n:"Luis M.",loc:"España",e:"🐉",c:"#3b82f6",r:5,t:"El bot de IA me ayuda a filtrar las mejores oportunidades. Le pregunto sobre cualquier ticker y me da análisis al nivel de un profesional."},
+                {n:"Patricia V.",loc:"Miami",e:"🦈",c:"#ef4444",r:5,t:"El Job Board me consiguió trabajo en una firma de trading en 2 semanas. La red de contactos hispanos en finanzas que hay aquí es única."},
+                {n:"Diego F.",loc:"Chile",e:"🐻",c:"#06b6d4",r:5,t:"Empecé con paper trading y en 6 meses pasé a dinero real con confianza. El leaderboard me motivó a estudiar más y mejorar mi estrategia."},
+              ].map((t,i)=>(
+                <div key={i} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,padding:"22px 20px"}}>
+                  <div style={{display:"flex",marginBottom:10}}>{"⭐".repeat(t.r)}</div>
+                  <p style={{margin:"0 0 16px",color:"#94a3b8",fontSize:13,lineHeight:1.7,fontStyle:"italic"}}>"{t.t}"</p>
+                  <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                    <div style={{width:36,height:36,borderRadius:"50%",background:`linear-gradient(135deg,${t.c},${t.c}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{t.e}</div>
+                    <div>
+                      <div style={{color:"#fff",fontWeight:700,fontSize:13}}>{t.n}</div>
+                      <div style={{color:"#475569",fontSize:11}}>📍 {t.loc}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── PRICING TEASER ── */}
+        <div style={{background:"#0a1020",padding:"56px 20px",borderBottom:"1px solid #0f172a"}}>
+          <div style={{maxWidth:700,margin:"0 auto",textAlign:"center"}}>
+            <h2 style={{margin:"0 0 8px",color:"#fff",fontSize:"clamp(22px,4vw,36px)",fontWeight:900}}>Empieza gratis. Escala cuando estés listo.</h2>
+            <p style={{margin:"0 0 36px",color:"#64748b",fontSize:15}}>Sin compromisos. Cancela cuando quieras.</p>
+            <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+              {[
+                {plan:"Free",precio:"$0",color:"#475569",features:["Feed de traders","Watchlist 5 acciones","Paper trading $100k","Leaderboard","Chat IA básico"],cta:"Empezar gratis",action:()=>setAuth("register")},
+                {plan:"VIP ✦",precio:"$9.99/mes",color:"#a78bfa",features:["✓ Todo lo Free","10 picks semanales exclusivos","Señales de trading","Alertas de precio (5)","50% OFF en webinars","Badge VIP en el perfil"],cta:"Probar VIP",action:()=>setAuth("register"),featured:true},
+              ].map((p,i)=>(
+                <div key={i} style={{flex:"1 1 240px",maxWidth:300,background:p.featured?"linear-gradient(135deg,#1a0f2e,#1e1040)":"#0f172a",border:`2px solid ${p.featured?"#7C3AED":"#1e293b"}`,borderRadius:20,padding:"28px 24px",position:"relative",boxShadow:p.featured?"0 0 40px #7C3AED33":"none"}}>
+                  {p.featured&&<div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#7C3AED,#4c1d95)",borderRadius:20,padding:"4px 16px",fontSize:11,fontWeight:700,color:"#fff",whiteSpace:"nowrap"}}>⚡ MÁS POPULAR</div>}
+                  <div style={{marginBottom:16}}>
+                    <div style={{color:p.color,fontWeight:800,fontSize:15,marginBottom:4}}>{p.plan}</div>
+                    <div style={{color:"#fff",fontWeight:900,fontSize:28}}>{p.precio}</div>
+                  </div>
+                  <div style={{marginBottom:20}}>
+                    {p.features.map((f,j)=><div key={j} style={{color:"#94a3b8",fontSize:13,paddingBottom:6,display:"flex",gap:8,alignItems:"flex-start"}}><span style={{color:p.color,flexShrink:0}}>✓</span>{f}</div>)}
+                  </div>
+                  <button onClick={p.action} style={{width:"100%",background:p.featured?"linear-gradient(135deg,#7C3AED,#4c1d95)":"transparent",border:`1px solid ${p.featured?"#7C3AED":"#334155"}`,borderRadius:12,padding:"12px",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer"}}>
+                    {p.cta} →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── FINAL CTA ── */}
+        <div style={{background:`linear-gradient(135deg,#0B1A2E,#0D2244)`,padding:"64px 20px",borderTop:"1px solid rgba(0,168,255,0.15)",textAlign:"center"}}>
+          <div style={{maxWidth:600,margin:"0 auto"}}>
+            <div style={{fontSize:48,marginBottom:16}}>🚀</div>
+            <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4vw,40px)",fontWeight:900}}>¿Listo para invertir mejor?</h2>
+            <p style={{margin:"0 0 32px",color:"#64748b",fontSize:16,lineHeight:1.7}}>Únete a más de 2,847 traders hispanos que ya están usando NexoTrade para tomar mejores decisiones de inversión.</p>
+            <button onClick={()=>setAuth("register")} style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:14,padding:"18px 52px",fontSize:17,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 40px ${C.accent}55`,display:"inline-block"}}>
+              Crear cuenta gratis — 0 riesgo →
+            </button>
+            <div style={{marginTop:20,color:"#334155",fontSize:13}}>Sin tarjeta de crédito · Cancela cuando quieras · En español</div>
+          </div>
+        </div>
+
+        </div>
       )}
+
 
       {/* PREDICCIÓN DEL DÍA */}
       {page===0 && !showLanding && <PredictionBanner/>}
