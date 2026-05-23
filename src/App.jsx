@@ -2922,12 +2922,13 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                     </div>
 
                     {/* Meta row */}
-                    <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:8}}>
+                    <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:6}}>
                       <span style={{color:C.muted,fontSize:12}}>📅 {w.fecha}</span>
                       <span style={{color:C.muted,fontSize:12}}>🕐 {w.hora}</span>
                       <span style={{color:C.muted,fontSize:12}}>👤 @{w.instructor}</span>
                       <span style={{color:C.muted,fontSize:12}}>⏱ {w.duracion}</span>
                     </div>
+                    <div style={{marginBottom:8}}><WebinarCountdown fecha={w.fecha}/></div>
 
                     {/* Description */}
                     <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.5}}>{w.desc}</p>
@@ -3927,6 +3928,100 @@ function Footer(){
 }
 
 // ── PREDICCIÓN DEL DÍA ────────────────────────────────────────────────────────
+/* ── COUNTDOWN HOOK — cuenta regresiva hasta una fecha ──────────────────── */
+function useCountdown(targetDateStr){
+  const calc = () => {
+    const diff = new Date(targetDateStr+" 19:00:00").getTime() - Date.now();
+    if(diff<=0) return {d:0,h:0,m:0,s:0,expired:true};
+    const d=Math.floor(diff/86400000);
+    const h=Math.floor((diff%86400000)/3600000);
+    const m=Math.floor((diff%3600000)/60000);
+    const s=Math.floor((diff%60000)/1000);
+    return {d,h,m,s,expired:false};
+  };
+  const [t,setT]=useState(calc);
+  useEffect(()=>{
+    const iv=setInterval(()=>setT(calc()),1000);
+    return()=>clearInterval(iv);
+  },[targetDateStr]);
+  return t;
+}
+
+/* ── COUNTDOWN DISPLAY ───────────────────────────────────────────────────── */
+function WebinarCountdown({fecha}){
+  // Convierte "Lun 2 Jun" → fecha real 2025
+  const monthMap={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11,
+    Ene:0,Feb:1,Mar:2,Abr:3,May:4,Jun:5,Jul:6,Ago:7,Sep:8,Oct:9,Nov:10,Dic:11};
+  const parts = fecha.replace(/^[A-Za-záéíóú]+ /,"").split(" ");
+  const day=parseInt(parts[0]);
+  const mon=monthMap[parts[1]]??5;
+  const now=new Date();
+  const year=now.getMonth()>mon?now.getFullYear()+1:now.getFullYear();
+  const targetStr=`${year}-${String(mon+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+  const {d,h,m,s,expired}=useCountdown(targetStr);
+  if(expired) return <span style={{color:"#ef4444",fontSize:11,fontWeight:700}}>⏰ En vivo ahora</span>;
+  return(
+    <div style={{display:"flex",gap:4,alignItems:"center"}}>
+      <span style={{fontSize:10,color:"#64748b"}}>Empieza en:</span>
+      {d>0&&<Chip v={d} l="d"/>}<Chip v={h} l="h"/><Chip v={m} l="m"/><Chip v={s} l="s"/>
+    </div>
+  );
+}
+function Chip({v,l}){
+  return(
+    <span style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:6,padding:"2px 5px",fontFamily:"monospace",fontSize:12,fontWeight:700,color:C.accent,minWidth:28,textAlign:"center"}}>
+      {String(v).padStart(2,"0")}<span style={{color:"#475569",fontSize:9,marginLeft:1}}>{l}</span>
+    </span>
+  );
+}
+
+/* ── SOCIAL PROOF STATS BAR ──────────────────────────────────────────────── */
+function SocialProofBar({user, onRegister}){
+  const [stats, setStats] = useState({users:2847, posts:14203, ganancia:"$127,480"});
+  const [online, setOnline] = useState(Math.floor(Math.random()*40)+60);
+
+  // Simula contador vivo — sube cada 30s
+  useEffect(()=>{
+    const t = setInterval(()=>{
+      setStats(s=>({...s, posts: s.posts + Math.floor(Math.random()*3)+1}));
+      setOnline(Math.floor(Math.random()*40)+60);
+    }, 30000);
+    return ()=>clearInterval(t);
+  },[]);
+
+  const items = [
+    {icon:"👥", value: stats.users.toLocaleString(), label:"Traders registrados"},
+    {icon:"🟢", value: online, label:"En línea ahora"},
+    {icon:"📊", value: stats.posts.toLocaleString(), label:"Análisis publicados"},
+    {icon:"💰", value: stats.ganancia, label:"En ganancias reportadas", highlight:true},
+  ];
+
+  return(
+    <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 12px"}}>
+      <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:16,padding:"14px 20px",border:"1px solid #1e293b",display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
+        <div style={{display:"flex",gap:20,flexWrap:"wrap",flex:1}}>
+          {items.map((s,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:16}}>{s.icon}</span>
+              <div>
+                <span style={{color:s.highlight?"#10b981":C.accent,fontWeight:800,fontSize:15}}>{s.value}</span>
+                <span style={{color:"#475569",fontSize:12,marginLeft:5}}>{s.label}</span>
+              </div>
+              {i<items.length-1&&<div style={{width:1,height:20,background:"#1e293b",marginLeft:12}}/>}
+            </div>
+          ))}
+        </div>
+        {!user && (
+          <button onClick={onRegister}
+            style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"9px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
+            Únete gratis →
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PredictionBanner(){
   const [votes,setVotes]=useState({up:2847,down:912});
   const [voted,setVoted]=useState(null);
@@ -5428,12 +5523,13 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
                     <h3 style={{margin:0,color:C.text,fontSize:15,fontWeight:800}}>{w.titulo}</h3>
                     <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:700}}>{w.nivel}</span>
                   </div>
-                  <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:8}}>
+                  <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:6}}>
                     <span style={{color:C.muted,fontSize:12}}>📅 {w.fecha}</span>
                     <span style={{color:C.muted,fontSize:12}}>🕐 {w.hora}</span>
                     <span style={{color:C.muted,fontSize:12}}>👤 @{w.instructor}</span>
                     <span style={{color:C.muted,fontSize:12}}>⏱ {w.duracion}</span>
                   </div>
+                  <div style={{marginBottom:8}}><WebinarCountdown fecha={w.fecha}/></div>
                   <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.6}}>{w.desc}</p>
                   {/* spots */}
                   <div>
@@ -6493,6 +6589,9 @@ export default function App(){
 
       {/* PREDICCIÓN DEL DÍA */}
       {page===0 && !showLanding && <PredictionBanner/>}
+
+      {/* SOCIAL PROOF STATS BAR — visible a todos */}
+      {page===0 && !showLanding && <SocialProofBar user={user} onRegister={()=>setAuth("register")}/>}
 
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
