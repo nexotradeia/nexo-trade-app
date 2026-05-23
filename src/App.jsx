@@ -5190,7 +5190,6 @@ const CURSOS = [
 ];
 
 function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
-  const C = useColors();
   const [filtro, setFiltro] = useState("todos");
   const [expanded, setExpanded] = useState(null);
 
@@ -5350,7 +5349,6 @@ const WEBINARS_LIST = [
 ];
 
 function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
-  const C = useColors();
   const [filtroNivel, setFiltroNivel] = useState("todos");
 
   const niveles = ["todos","Principiante","Intermedio","Avanzado"];
@@ -5715,7 +5713,6 @@ const _getSavedUser = () => {
    WELCOME MODAL — aparece al registrarse por primera vez
 ═══════════════════════════════════════════════════════════════ */
 function WelcomeModal({name, onClose, onGoVip}){
-  const C = useColors();
   const steps = [
     {emoji:"📈", titulo:"Publica tu primera idea", desc:"Comparte tu análisis con miles de traders"},
     {emoji:"👥", titulo:"Sigue a top traders",     desc:"Descubre quién está ganando en el leaderboard"},
@@ -5799,6 +5796,19 @@ export default function App(){
   );
 
   const t = LANGS[lang];
+
+  // ── BACK BUTTON: evitar que la flecha del navegador salga del sitio ──────────
+  useEffect(()=>{
+    // Empuja un estado inicial para que haya algo a lo que volver
+    window.history.pushState({page:0},"",window.location.pathname);
+    const onPop = ()=>{
+      // En lugar de salir, volvemos al feed (página 0)
+      setPage(0);
+      window.history.pushState({page:0},"",window.location.pathname);
+    };
+    window.addEventListener("popstate", onPop);
+    return ()=> window.removeEventListener("popstate", onPop);
+  },[]);
 
   // ── VIP POP-UP: aparece a los 2 minutos para usuarios no-premium ─────────────
   useEffect(()=>{
