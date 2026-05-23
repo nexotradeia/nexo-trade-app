@@ -3837,7 +3837,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 }
 
 // ── USER MENU ─────────────────────────────────────────────────────────────────
-function UserMenu({user,onLogout,onProfile,onAlerts,lang}){
+function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
   const t=LANGS[lang];
   const [open,setOpen]=useState(false);
   const lvl=getLevel(user.points);
@@ -3857,8 +3857,8 @@ function UserMenu({user,onLogout,onProfile,onAlerts,lang}){
             <div style={{color:C.muted2,fontSize:11,marginBottom:4}}>{lang==="en"?"Your points":"Tus puntos"}</div>
             <LevelBadge points={user.points} lang={lang}/>
           </div>
-          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
-            <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:"none",border:"none",cursor:"pointer",color:item.red?C.bear:C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s"}}
+          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},...(ADMIN_EMAILS_CONST.includes(user?.email||"")?[{label:"🛡️ Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}]:[]),{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
+            <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:item.admin?"linear-gradient(135deg,#7C3AED22,#4c1d9511)":"none",border:item.admin?"1px solid #7C3AED44":"none",cursor:"pointer",color:item.red?C.bear:item.admin?"#a78bfa":C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s",marginBottom:item.admin?4:0}}
               onMouseEnter={e=>e.currentTarget.style.background=C.card2}
               onMouseLeave={e=>e.currentTarget.style.background="none"}>
               {item.label}
@@ -5806,6 +5806,212 @@ const _getSavedUser = () => {
 };
 
 /* ═══════════════════════════════════════════════════════════════
+   ADMIN DASHBOARD — solo visible para emails admin
+═══════════════════════════════════════════════════════════════ */
+function AdminDashboard(){
+  const [stats,setStats] = useState(null);
+  const [posts,setPosts] = useState([]);
+  const [subs,setSubs]   = useState([]);
+  const [loading,setLoading] = useState(true);
+  const [tab,setTab] = useState("overview");
+
+  useEffect(()=>{
+    const load = async()=>{
+      setLoading(true);
+      try{
+        // Contar usuarios en profiles
+        const {count:totalUsers} = await supabase.from("profiles").select("*",{count:"exact",head:true});
+        // Usuarios nuevos hoy
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const {count:newToday} = await supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString());
+        // Usuarios nuevos esta semana
+        const semana = new Date(); semana.setDate(semana.getDate()-7);
+        const {count:newWeek} = await supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",semana.toISOString());
+        // Total VIP
+        const {count:vipCount} = await supabase.from("profiles").select("*",{count:"exact",head:true}).eq("is_premium",true);
+        // Posts hoy
+        const {count:postsHoy} = await supabase.from("posts").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString());
+        // Total posts
+        const {count:totalPosts} = await supabase.from("posts").select("*",{count:"exact",head:true});
+        // Newsletter subscribers
+        const {data:subsData,count:totalSubs} = await supabase.from("newsletter_subscribers").select("email,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(20);
+        // Posts recientes
+        const {data:recentPosts} = await supabase.from("posts").select("content,ticker,tipo,username,created_at,likes").order("created_at",{ascending:false}).limit(10);
+
+        setStats({totalUsers:totalUsers||0,newToday:newToday||0,newWeek:newWeek||0,vipCount:vipCount||0,postsHoy:postsHoy||0,totalPosts:totalPosts||0,totalSubs:totalSubs||0});
+        setSubs(subsData||[]);
+        setPosts(recentPosts||[]);
+      }catch(e){console.error(e);}
+      setLoading(false);
+    };
+    load();
+  },[]);
+
+  const ingresoEstimado = stats ? (stats.vipCount * 9.99).toFixed(2) : "0.00";
+
+  if(loading) return(
+    <div style={{textAlign:"center",padding:60}}>
+      <div style={{fontSize:40,marginBottom:16}}>🛡️</div>
+      <div style={{color:C.muted,fontSize:14}}>Cargando dashboard admin...</div>
+    </div>
+  );
+
+  const TABS = [{k:"overview",l:"📊 Overview"},{k:"usuarios",l:"👥 Usuarios"},{k:"posts",l:"📝 Posts"},{k:"emails",l:"📧 Emails"}];
+
+  return(
+    <div style={{maxWidth:1000,margin:"0 auto",padding:"0 4px"}}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"24px 28px",marginBottom:20,border:"1px solid #7C3AED44",display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
+        <div style={{width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#7C3AED,#4c1d95)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>🛡️</div>
+        <div style={{flex:1}}>
+          <h1 style={{margin:"0 0 4px",color:"#fff",fontSize:20,fontWeight:900}}>Admin Dashboard — NexoTrade</h1>
+          <div style={{color:"#64748b",fontSize:13}}>Datos en tiempo real de Supabase · {new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}</div>
+        </div>
+        <button onClick={()=>window.location.reload()} style={{background:"#7C3AED22",border:"1px solid #7C3AED44",borderRadius:10,padding:"8px 16px",color:"#a78bfa",fontSize:12,fontWeight:700,cursor:"pointer"}}>🔄 Actualizar</button>
+      </div>
+
+      {/* KPI Cards */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:14,marginBottom:20}}>
+        {[
+          {icon:"👥",label:"Usuarios totales",value:stats.totalUsers,color:"#10b981",sub:`+${stats.newWeek} esta semana`},
+          {icon:"🆕",label:"Nuevos hoy",value:stats.newToday,color:"#3b82f6",sub:"registros de hoy"},
+          {icon:"✦",label:"Miembros VIP",value:stats.vipCount,color:"#a78bfa",sub:`$${(stats.vipCount*9.99).toFixed(0)}/mes estimado`},
+          {icon:"💰",label:"MRR estimado",value:`$${ingresoEstimado}`,color:"#f59e0b",sub:"solo Stripe VIP"},
+          {icon:"📝",label:"Posts hoy",value:stats.postsHoy,color:"#06b6d4",sub:`${stats.totalPosts} en total`},
+          {icon:"📧",label:"Newsletter",value:stats.totalSubs,color:"#ec4899",sub:"emails capturados"},
+        ].map((k,i)=>(
+          <div key={i} style={{background:C.surface,border:`1px solid ${k.color}33`,borderRadius:16,padding:"18px 16px",boxShadow:C.shadow}}>
+            <div style={{fontSize:22,marginBottom:8}}>{k.icon}</div>
+            <div style={{fontSize:24,fontWeight:900,color:k.color,lineHeight:1,marginBottom:4}}>{k.value}</div>
+            <div style={{color:C.muted,fontSize:11,fontWeight:600,marginBottom:2}}>{k.label}</div>
+            <div style={{color:C.muted2,fontSize:10}}>{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
+        {TABS.map(t=>(
+          <button key={t.k} onClick={()=>setTab(t.k)}
+            style={{padding:"7px 16px",borderRadius:10,border:"1px solid",fontSize:13,fontWeight:600,cursor:"pointer",
+              borderColor:tab===t.k?C.accent:C.border,
+              background:tab===t.k?C.accent+"22":"transparent",
+              color:tab===t.k?C.accent:C.muted}}>
+            {t.l}
+          </button>
+        ))}
+      </div>
+
+      {/* Overview */}
+      {tab==="overview" && (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,flexWrap:"wrap"}}>
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
+            <h3 style={{margin:"0 0 16px",color:C.text,fontSize:14,fontWeight:800}}>💰 Ingresos estimados</h3>
+            {[
+              {label:"VIP $9.99/mes",value:`$${(stats.vipCount*9.99).toFixed(2)}`,color:"#a78bfa"},
+              {label:"Webinars (promedio 2/mes)",value:"$0.00 — pendiente Stripe",color:C.muted2},
+              {label:"Cursos",value:"$0.00 — pendiente Stripe",color:C.muted2},
+              {label:"Job Board",value:"$0.00 — pendiente",color:C.muted2},
+            ].map((r,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:i<3?`1px solid ${C.border}`:"none"}}>
+                <span style={{color:C.muted,fontSize:13}}>{r.label}</span>
+                <span style={{color:r.color,fontWeight:700,fontSize:13}}>{r.value}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
+            <h3 style={{margin:"0 0 16px",color:C.text,fontSize:14,fontWeight:800}}>📈 Crecimiento semanal</h3>
+            {[
+              {label:"Nuevos usuarios",value:`+${stats.newWeek}`,color:"#10b981"},
+              {label:"Posts publicados",value:`+${stats.postsHoy} hoy`,color:"#3b82f6"},
+              {label:"Emails newsletter",value:`${stats.totalSubs} total`,color:"#ec4899"},
+              {label:"Ratio VIP/Total",value:`${stats.totalUsers>0?((stats.vipCount/stats.totalUsers)*100).toFixed(1):0}%`,color:"#f59e0b"},
+            ].map((r,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:i<3?`1px solid ${C.border}`:"none"}}>
+                <span style={{color:C.muted,fontSize:13}}>{r.label}</span>
+                <span style={{color:r.color,fontWeight:700,fontSize:13}}>{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Usuarios */}
+      {tab==="usuarios" && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
+          <h3 style={{margin:"0 0 16px",color:C.text,fontSize:14,fontWeight:800}}>👥 Estadísticas de usuarios</h3>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
+            {[
+              {l:"Total registrados",v:stats.totalUsers,c:"#10b981"},
+              {l:"Nuevos esta semana",v:stats.newWeek,c:"#3b82f6"},
+              {l:"Nuevos hoy",v:stats.newToday,c:"#f59e0b"},
+              {l:"Miembros VIP activos",v:stats.vipCount,c:"#a78bfa"},
+              {l:"Usuarios free",v:stats.totalUsers-stats.vipCount,c:C.muted},
+              {l:"Conversión VIP",v:`${stats.totalUsers>0?((stats.vipCount/stats.totalUsers)*100).toFixed(1):0}%`,c:"#ec4899"},
+            ].map((s,i)=>(
+              <div key={i} style={{background:C.bg,borderRadius:12,padding:"14px",border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:20,fontWeight:900,color:s.c}}>{s.v}</div>
+                <div style={{color:C.muted2,fontSize:11,marginTop:2}}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{color:C.muted2,fontSize:12,textAlign:"center",padding:"12px",background:C.bg,borderRadius:10}}>
+            💡 Para ver lista completa de usuarios ve a tu <a href="https://supabase.com/dashboard/project/glvrzrtatekuuhwtzzhd/editor" target="_blank" style={{color:C.accent}}>Supabase Dashboard →</a>
+          </div>
+        </div>
+      )}
+
+      {/* Posts recientes */}
+      {tab==="posts" && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
+          <h3 style={{margin:"0 0 16px",color:C.text,fontSize:14,fontWeight:800}}>📝 Últimos 10 posts publicados</h3>
+          {posts.length===0 ? <div style={{color:C.muted2,textAlign:"center",padding:20}}>No hay posts aún</div> :
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            {posts.map((p,i)=>(
+              <div key={i} style={{background:C.bg,borderRadius:12,padding:"12px 14px",border:`1px solid ${C.border}`,display:"flex",gap:12,alignItems:"flex-start"}}>
+                <div style={{flexShrink:0}}>
+                  <span style={{background:p.tipo==="COMPRA"?"#10b98122":"#ef444422",color:p.tipo==="COMPRA"?"#10b981":"#ef4444",border:`1px solid ${p.tipo==="COMPRA"?"#10b98144":"#ef444444"}`,borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700}}>{p.tipo||"POST"}</span>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{color:C.muted2,fontSize:11,marginBottom:3}}>@{p.username} {p.ticker?`· $${p.ticker}`:""} · {new Date(p.created_at).toLocaleString("es-MX",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div>
+                  <div style={{color:C.text,fontSize:13,lineHeight:1.5,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.content}</div>
+                </div>
+                <div style={{color:C.muted2,fontSize:11,flexShrink:0}}>❤️ {p.likes||0}</div>
+              </div>
+            ))}
+          </div>}
+        </div>
+      )}
+
+      {/* Newsletter emails */}
+      {tab==="emails" && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:10}}>
+            <h3 style={{margin:0,color:C.text,fontSize:14,fontWeight:800}}>📧 Newsletter subscribers ({stats.totalSubs})</h3>
+            <button onClick={()=>{
+              const csv = "email,fecha\n" + subs.map(s=>`${s.email},${s.created_at}`).join("\n");
+              const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="newsletter_nexotrade.csv"; a.click();
+            }} style={{background:C.accent+"22",border:`1px solid ${C.accent}44`,borderRadius:10,padding:"7px 16px",color:C.accent,fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              ⬇️ Exportar CSV
+            </button>
+          </div>
+          {subs.length===0 ? <div style={{color:C.muted2,textAlign:"center",padding:20}}>Sin suscriptores aún</div> :
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {subs.map((s,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"10px 14px",background:C.bg,borderRadius:10,border:`1px solid ${C.border}`}}>
+                <span style={{color:C.text,fontSize:13}}>📧 {s.email}</span>
+                <span style={{color:C.muted2,fontSize:11}}>{new Date(s.created_at).toLocaleDateString("es-MX")}</span>
+              </div>
+            ))}
+            {stats.totalSubs>20&&<div style={{color:C.muted2,fontSize:11,textAlign:"center",padding:8}}>Mostrando últimos 20 de {stats.totalSubs}. Exporta el CSV para ver todos.</div>}
+          </div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    WELCOME MODAL — aparece al registrarse por primera vez
 ═══════════════════════════════════════════════════════════════ */
 function WelcomeModal({name, onClose, onGoVip}){
@@ -6183,6 +6389,7 @@ export default function App(){
     if(page===10) return <JobBoardPage user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
+    if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
     return(
       <>
         {/* Tabs estilo Socimo */}
@@ -6458,7 +6665,7 @@ export default function App(){
   sessionStorage.clear();
   try{ await supabase.auth.signOut(); }catch(e){}
   window.location.replace("/");
-}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} lang={lang}/>
+}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} onAdmin={()=>setPage(99)} lang={lang}/>
               : <><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></>
             }
           </div>
