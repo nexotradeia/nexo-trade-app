@@ -1025,8 +1025,8 @@ function PointToast({show,points,reason}){
 
 // ── COUNT-UP HOOK (para contador animado) ─────────────────────────────────────
 function useCountUp(target, duration=2000){
-  const [count, setCount] = React.useState(0);
-  React.useEffect(()=>{
+  const [count, setCount] = useState(0);
+  useEffect(()=>{
     if(!target) return;
     const startVal = Math.max(0, target - 800);
     const start = Date.now();
@@ -1044,11 +1044,10 @@ function useCountUp(target, duration=2000){
 
 // ── POLYMARKET WIDGET ─────────────────────────────────────────────────────────
 function PolymarketWidget(){
-  const [markets, setMarkets] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(false);
+  const [markets, setMarkets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(()=>{
+  useEffect(()=>{
     // Fallback curado de mercados financieros relevantes mientras la API carga
     const fallback = [
       {question:"¿Habrá recorte de tasas de la Fed en 2025?", probability:0.62, volume:"$1.2M"},
@@ -1056,16 +1055,20 @@ function PolymarketWidget(){
       {question:"¿Bitcoin superará $100K antes de fin de año?", probability:0.71, volume:"$3.1M"},
       {question:"¿La inflación bajará del 3% en EE.UU. en 2025?", probability:0.45, volume:"$670K"},
     ];
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 4000);
     // Intentar API pública de Polymarket
-    fetch("https://gamma-api.polymarket.com/markets?closed=false&limit=8&order=volume&ascending=false&tag_id=finance", {signal: AbortSignal.timeout(4000)})
+    fetch("https://gamma-api.polymarket.com/markets?closed=false&limit=8&order=volume&ascending=false&tag_id=finance", {signal: ctrl.signal})
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
+        clearTimeout(timer);
         const financeMarkets = (Array.isArray(data) ? data : data.markets || [])
-          .filter(m => m.question && m.outcomes)
+          .filter(m => m.question && m.outcomePrices)
           .slice(0, 4)
           .map(m => {
-            const outcomes = Array.isArray(m.outcomes) ? m.outcomes : JSON.parse(m.outcomes || "[]");
-            const prices = Array.isArray(m.outcomePrices) ? m.outcomePrices : JSON.parse(m.outcomePrices || "[0.5]");
+            let prices;
+            try { prices = Array.isArray(m.outcomePrices) ? m.outcomePrices : JSON.parse(m.outcomePrices||"[0.5]"); }
+            catch { prices = [0.5]; }
             const prob = parseFloat(prices[0]) || 0.5;
             return {
               question: m.question,
@@ -1076,7 +1079,7 @@ function PolymarketWidget(){
         setMarkets(financeMarkets.length >= 2 ? financeMarkets : fallback);
         setLoading(false);
       })
-      .catch(() => { setMarkets(fallback); setLoading(false); });
+      .catch(() => { clearTimeout(timer); setMarkets(fallback); setLoading(false); });
   }, []);
 
   const barColor = (p) => p >= 0.6 ? "#10b981" : p >= 0.4 ? "#f59e0b" : "#ef4444";
@@ -1119,7 +1122,7 @@ function PolymarketWidget(){
 
 // ── INVESTING / MERCADOS EN VIVO WIDGET ───────────────────────────────────────
 function MercadosEnVivoWidget(){
-  const [tab, setTab] = React.useState("crypto");
+  const [tab, setTab] = useState("crypto");
   const cryptoData = [
     {s:"BTC",n:"Bitcoin",    color:"#f7931a"},
     {s:"ETH",n:"Ethereum",   color:"#627eea"},
