@@ -511,6 +511,183 @@ function LangSelector({lang, setLang}){
   );
 }
 
+// ── SETTINGS PANEL ────────────────────────────────────────────────────────────
+function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, supabase }) {
+  const notifStatus = typeof Notification !== "undefined" ? Notification.permission : "unsupported";
+  const [hideLeaderboard, setHideLeaderboard] = useState(() => localStorage.getItem("nexo-hide-leaderboard") === "1");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved]   = useState(false);
+
+  const toggleHideLeaderboard = async (val) => {
+    setHideLeaderboard(val);
+    localStorage.setItem("nexo-hide-leaderboard", val ? "1" : "0");
+    if (user && supabase) {
+      setSaving(true);
+      try {
+        await supabase.from("profiles").update({ hide_from_leaderboard: val }).eq("id", user.id);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      } catch(e) {}
+      setSaving(false);
+    }
+  };
+
+  const requestPush = async () => {
+    if (typeof Notification === "undefined") return;
+    const perm = await Notification.requestPermission();
+    if (perm === "granted") {
+      new Notification("NexoTrade", { body: "¡Notificaciones activadas! 🎉", icon: "/logo192.png" });
+    }
+  };
+
+  return (
+    <>
+      {/* Overlay */}
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:9998,backdropFilter:"blur(2px)"}}/>
+      {/* Panel */}
+      <div style={{position:"fixed",top:0,right:0,bottom:0,width:340,maxWidth:"90vw",background:"#1e293b",borderLeft:"1px solid #334155",zIndex:9999,display:"flex",flexDirection:"column",boxShadow:"-8px 0 48px rgba(0,0,0,0.6)",overflowY:"auto"}}>
+        {/* Header */}
+        <div style={{padding:"24px 24px 18px",borderBottom:"1px solid #334155",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div>
+            <div style={{color:"#ffffff",fontWeight:900,fontSize:17,letterSpacing:-0.3}}>⚙️ Configuración</div>
+            <div style={{color:"#64748b",fontSize:12,marginTop:3}}>Personaliza tu experiencia</div>
+          </div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:"#64748b",fontSize:20,cursor:"pointer",padding:4,lineHeight:1}}>✕</button>
+        </div>
+
+        {/* Body */}
+        <div style={{padding:"20px 24px",display:"flex",flexDirection:"column",gap:6,flex:1}}>
+
+          {/* === APARIENCIA === */}
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:4}}>APARIENCIA</div>
+
+          {/* Dark / Light toggle */}
+          <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+            <div>
+              <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>{darkMode ? "🌙 Modo oscuro" : "☀️ Modo claro"}</div>
+              <div style={{color:"#64748b",fontSize:11,marginTop:2}}>Cambia el tema visual</div>
+            </div>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              style={{
+                width:48,height:26,borderRadius:13,border:"none",cursor:"pointer",position:"relative",
+                background:darkMode ? "#00A8FF" : "#334155",
+                transition:"background 0.2s",flexShrink:0
+              }}>
+              <span style={{
+                position:"absolute",top:3,left:darkMode?22:3,width:20,height:20,borderRadius:"50%",
+                background:"#fff",transition:"left 0.2s",display:"block"
+              }}/>
+            </button>
+          </div>
+
+          {/* === IDIOMA === */}
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>IDIOMA</div>
+          <div style={{background:"#0f172a",borderRadius:14,padding:"12px 14px",border:"1px solid #334155",marginBottom:8}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+              {LANG_META.map(l => (
+                <button key={l.code} onClick={() => setLang(l.code)}
+                  style={{display:"flex",alignItems:"center",gap:6,border:`1px solid ${lang===l.code?"#00A8FF":"#334155"}`,
+                    background:lang===l.code?"rgba(0,168,255,0.12)":"transparent",borderRadius:10,
+                    padding:"7px 12px",cursor:"pointer",color:lang===l.code?"#00A8FF":"#94a3b8",fontSize:12,fontWeight:lang===l.code?800:500}}>
+                  <span style={{fontSize:16}}>{l.flag}</span>
+                  <span>{l.label}</span>
+                  {lang===l.code && <span>✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* === NOTIFICACIONES === */}
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>NOTIFICACIONES</div>
+          <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div>
+                <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>🔔 Push notifications</div>
+                <div style={{color:"#64748b",fontSize:11,marginTop:2}}>
+                  {notifStatus === "granted" ? "✅ Activadas" : notifStatus === "denied" ? "🚫 Bloqueadas en el navegador" : notifStatus === "unsupported" ? "No soportado" : "Sin activar"}
+                </div>
+              </div>
+              {notifStatus !== "granted" && notifStatus !== "denied" && notifStatus !== "unsupported" && (
+                <button onClick={requestPush}
+                  style={{background:"linear-gradient(135deg,#00A8FF,#0099dd)",border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                  Activar
+                </button>
+              )}
+              {notifStatus === "granted" && <span style={{fontSize:20}}>✅</span>}
+              {notifStatus === "denied" && <span style={{fontSize:11,color:"#ef4444",maxWidth:100,textAlign:"right",lineHeight:1.4}}>Actívalas en ajustes del navegador</span>}
+            </div>
+          </div>
+
+          {/* === PRIVACIDAD === */}
+          {user && (
+            <>
+              <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>PRIVACIDAD</div>
+              <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div>
+                  <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>👁️ Ocultar del leaderboard</div>
+                  <div style={{color:"#64748b",fontSize:11,marginTop:2}}>No aparecer en el ranking público</div>
+                  {saved && <div style={{color:"#10b981",fontSize:10,marginTop:4}}>✓ Guardado</div>}
+                </div>
+                <button
+                  onClick={() => toggleHideLeaderboard(!hideLeaderboard)}
+                  disabled={saving}
+                  style={{
+                    width:48,height:26,borderRadius:13,border:"none",cursor:"pointer",position:"relative",
+                    background:hideLeaderboard ? "#00A8FF" : "#334155",
+                    transition:"background 0.2s",flexShrink:0,opacity:saving?0.6:1
+                  }}>
+                  <span style={{
+                    position:"absolute",top:3,left:hideLeaderboard?22:3,width:20,height:20,borderRadius:"50%",
+                    background:"#fff",transition:"left 0.2s",display:"block"
+                  }}/>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* === CUENTA === */}
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>CUENTA</div>
+          <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8}}>
+            {user ? (
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <div style={{width:38,height:38,borderRadius:"50%",background:"linear-gradient(135deg,#00A8FF,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
+                  {(user.name||user.email||"?")[0].toUpperCase()}
+                </div>
+                <div>
+                  <div style={{color:"#ffffff",fontWeight:700,fontSize:13}}>{user.name || user.email?.split("@")[0]}</div>
+                  <div style={{color:"#64748b",fontSize:11}}>{user.email}</div>
+                </div>
+              </div>
+            ) : (
+              <div style={{color:"#64748b",fontSize:13}}>No has iniciado sesión</div>
+            )}
+          </div>
+
+          {/* Soporte */}
+          <a href="mailto:mariagalarraga2013@gmail.com?subject=Soporte NexoTrade"
+            style={{display:"flex",alignItems:"center",gap:10,background:"#0f172a",borderRadius:14,padding:"14px 18px",border:"1px solid #334155",color:"#94a3b8",fontSize:13,fontWeight:600,textDecoration:"none",marginBottom:4}}>
+            <span style={{fontSize:18}}>📧</span>
+            <span>Contactar soporte</span>
+            <span style={{marginLeft:"auto",color:"#334155"}}>→</span>
+          </a>
+          <a href="https://nexotradeia.com" target="_blank" rel="noopener"
+            style={{display:"flex",alignItems:"center",gap:10,background:"#0f172a",borderRadius:14,padding:"14px 18px",border:"1px solid #334155",color:"#94a3b8",fontSize:13,fontWeight:600,textDecoration:"none"}}>
+            <span style={{fontSize:18}}>🌐</span>
+            <span>nexotradeia.com</span>
+            <span style={{marginLeft:"auto",color:"#334155"}}>→</span>
+          </a>
+        </div>
+
+        {/* Footer */}
+        <div style={{padding:"16px 24px",borderTop:"1px solid #334155",textAlign:"center",color:"#334155",fontSize:11}}>
+          NexoTrade · v1.0 · Solo educativo
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ── TICKER TAPE ───────────────────────────────────────────────────────────────
 // ── FINNHUB REALTIME PRICES ───────────────────────────────────────────────────
 const FINNHUB_KEY = "d86clthr01qgiu44rtmgd86clthr01qgiu44rtn0";
@@ -6542,6 +6719,7 @@ export default function App(){
 
   const [showLanding, setShowLanding] = useState(false); // Feed visible siempre, sin obligar registro
   const [darkMode, setDarkMode] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
   const [tickerPage,  setTickerPage]   = useState(null); // página completa de ticker (@META)
 
@@ -6724,12 +6902,12 @@ export default function App(){
               {alertCount>0&&<span style={{position:"absolute",top:-3,right:-3,minWidth:16,height:16,background:"#EF4444",borderRadius:"50%",border:"1.5px solid #fff",fontSize:9,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",animation:"nexo-pulse 2s infinite"}}>{alertCount}</span>}
             </button>
 
-            {/* Settings / Dark mode */}
-            <button className="nexo-hide-mobile" onClick={()=>setDarkMode(!darkMode)}
-              title={darkMode?"Modo claro":"Modo oscuro"}
-              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:darkMode?"rgba(0,168,255,0.1)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
+            {/* Settings panel */}
+            <button onClick={()=>setShowSettings(true)}
+              title="Configuración"
+              style={{width:38,height:38,borderRadius:"50%",border:`1.5px solid ${showSettings?"rgba(0,168,255,0.7)":"rgba(0,168,255,0.3)"}`,background:showSettings?"rgba(0,168,255,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
-              onMouseLeave={e=>e.currentTarget.style.background=darkMode?"rgba(0,168,255,0.1)":"transparent"}>
+              onMouseLeave={e=>e.currentTarget.style.background=showSettings?"rgba(0,168,255,0.15)":"transparent"}>
               ⚙️
             </button>
 
@@ -7090,6 +7268,7 @@ export default function App(){
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
       {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
+      {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase}/>}
       <PointToast show={toast.show} points={toast.points} reason={toast.reason}/>
     </div>
     </PriceProvider>
