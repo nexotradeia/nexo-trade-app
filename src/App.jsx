@@ -2598,10 +2598,12 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   ];
 
   const WEBINARS = [
-    {titulo:"Análisis técnico para principiantes", fecha:"Lun 20 May", hora:"19:00 CET", instructor:"SPY_Trader", spots:47, emoji:"📈"},
-    {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 22 May", hora:"20:00 CET", instructor:"CryptoWolf",  spots:32, emoji:"₿"},
-    {titulo:"Cómo leer un earnings report",         fecha:"Vie 24 May", hora:"18:30 CET", instructor:"NvidiaChad",  spots:61, emoji:"📊"},
-    {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 27 May", hora:"19:00 CET", instructor:"SPY_Trader",  spots:28, emoji:"🛡️"},
+    {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar1", nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
+    {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar2", nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
+    {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar3", nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
+    {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:"https://buy.stripe.com/webinar4", nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
+    {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar5", nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
+    {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:"https://buy.stripe.com/webinar6", nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
   ];
 
   const ALERT_TYPES = [
@@ -2877,40 +2879,109 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
       {/* ── WEBINARS TAB ── */}
       {activeTab==="webinars" && <>
-        <div style={{marginBottom:20}}>
-          <h2 style={{margin:"0 0 4px",color:C.text,fontSize:18,fontWeight:800}}>🎓 Webinars Exclusivos</h2>
-          <p style={{margin:0,color:C.muted,fontSize:13}}>Formación en vivo con los mejores traders de NexoTrade</p>
+        <div style={{marginBottom:20,display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+          <div>
+            <h2 style={{margin:"0 0 4px",color:C.text,fontSize:18,fontWeight:800}}>🎓 Webinars en Vivo</h2>
+            <p style={{margin:0,color:C.muted,fontSize:13}}>Formación con traders reales · Grabación incluida · Plazas limitadas</p>
+          </div>
+          {isPremium && <div style={{background:"linear-gradient(135deg,#7C3AED22,#6D28D911)",border:"1px solid #7C3AED44",borderRadius:10,padding:"6px 14px",fontSize:12,fontWeight:700,color:"#a78bfa"}}>✦ VIP: 50% descuento aplicado</div>}
         </div>
-        <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          {WEBINARS.map((w,i)=>(
-            <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px 22px",boxShadow:C.shadow,display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
-              <div style={{width:52,height:52,borderRadius:14,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{w.emoji}</div>
-              <div style={{flex:1,minWidth:200}}>
-                <h3 style={{margin:"0 0 6px",color:C.text,fontSize:15,fontWeight:800}}>{w.titulo}</h3>
-                <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-                  <span style={{color:C.muted,fontSize:12,display:"flex",alignItems:"center",gap:4}}>📅 {w.fecha}</span>
-                  <span style={{color:C.muted,fontSize:12,display:"flex",alignItems:"center",gap:4}}>🕐 {w.hora}</span>
-                  <span style={{color:C.muted,fontSize:12,display:"flex",alignItems:"center",gap:4}}>👤 {w.instructor}</span>
-                  <span style={{color:C.bull,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4}}>👥 {w.spots} plazas</span>
+
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          {WEBINARS.map((w,i)=>{
+            const isUrgent = w.spotsLeft <= 10;
+            const isSoldOut = w.spotsLeft === 0;
+            const spotsPercent = Math.round((w.spotsLeft / w.spots) * 100);
+            const nivelColor = w.nivel==="Avanzado" ? "#ef4444" : w.nivel==="Intermedio" ? "#f59e0b" : "#10b981";
+            const handleBuyWebinar = () => {
+              if(!user){ onNeedAuth(); return; }
+              const link = isPremium
+                ? w.stripeLink + `?prefilled_email=${encodeURIComponent(user?.email||"")}`
+                : w.stripeLink + `?prefilled_email=${encodeURIComponent(user?.email||"")}`;
+              window.open(link, "_blank");
+            };
+            return(
+              <div key={i} style={{background:C.surface,border:`1px solid ${isUrgent&&!isSoldOut ? "#ef444444" : C.border}`,borderRadius:18,padding:"20px 22px",boxShadow:C.shadow,position:"relative",overflow:"hidden"}}>
+                {/* Urgency glow */}
+                {isUrgent && !isSoldOut && <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ef4444,#f59e0b)"}}/>}
+
+                <div style={{display:"flex",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
+                  {/* Emoji icon */}
+                  <div style={{width:54,height:54,borderRadius:14,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>{w.emoji}</div>
+
+                  {/* Content */}
+                  <div style={{flex:1,minWidth:180}}>
+                    {/* Title + level badge */}
+                    <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:6}}>
+                      <h3 style={{margin:0,color:C.text,fontSize:15,fontWeight:800}}>{w.titulo}</h3>
+                      <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:700}}>{w.nivel}</span>
+                    </div>
+
+                    {/* Meta row */}
+                    <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:8}}>
+                      <span style={{color:C.muted,fontSize:12}}>📅 {w.fecha}</span>
+                      <span style={{color:C.muted,fontSize:12}}>🕐 {w.hora}</span>
+                      <span style={{color:C.muted,fontSize:12}}>👤 @{w.instructor}</span>
+                      <span style={{color:C.muted,fontSize:12}}>⏱ {w.duracion}</span>
+                    </div>
+
+                    {/* Description */}
+                    <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.5}}>{w.desc}</p>
+
+                    {/* Spots bar */}
+                    <div style={{marginBottom:4}}>
+                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                        <span style={{fontSize:11,color: isUrgent ? "#ef4444" : C.muted, fontWeight: isUrgent ? 700 : 400}}>
+                          {isSoldOut ? "❌ Agotado" : isUrgent ? `🔥 ¡Solo ${w.spotsLeft} plazas!` : `👥 ${w.spotsLeft} de ${w.spots} plazas`}
+                        </span>
+                        <span style={{fontSize:11,color:C.muted2}}>{spotsPercent}% disponible</span>
+                      </div>
+                      <div style={{background:C.border,borderRadius:20,height:5,overflow:"hidden"}}>
+                        <div style={{height:"100%",borderRadius:20,width:`${spotsPercent}%`,background: isUrgent ? "linear-gradient(90deg,#ef4444,#f59e0b)" : `linear-gradient(90deg,${C.accent},#00e5b0)`,transition:"width 0.5s"}}/>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price + CTA */}
+                  <div style={{flexShrink:0,textAlign:"center",minWidth:110}}>
+                    {isPremium ? (
+                      <>
+                        <div style={{fontSize:10,color:"#a78bfa",fontWeight:700,marginBottom:2}}>✦ PRECIO VIP</div>
+                        <div style={{fontSize:22,fontWeight:900,color:C.accent,lineHeight:1}}>${w.precioVip}</div>
+                        <div style={{fontSize:11,color:C.muted2,textDecoration:"line-through",marginBottom:8}}>${w.precio}</div>
+                        <button
+                          onClick={handleBuyWebinar}
+                          disabled={isSoldOut}
+                          style={{background:isSoldOut?"#374151":`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",width:"100%",opacity:isSoldOut?0.5:1}}
+                        >{isSoldOut ? "Agotado" : "Reservar →"}</button>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{fontSize:10,color:C.muted2,fontWeight:600,marginBottom:2}}>PRECIO</div>
+                        <div style={{fontSize:22,fontWeight:900,color:C.text,lineHeight:1}}>${w.precio}</div>
+                        <div style={{fontSize:10,color:"#a78bfa",marginBottom:8}}>VIP paga ${w.precioVip}</div>
+                        <button
+                          onClick={handleBuyWebinar}
+                          disabled={isSoldOut}
+                          style={{background:isSoldOut?"#374151":"linear-gradient(135deg,#1d4ed8,#7C3AED)",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",width:"100%",opacity:isSoldOut?0.5:1}}
+                        >{isSoldOut ? "Agotado" : "Comprar →"}</button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              {isPremium
-                ? <button style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"9px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>Apuntarme →</button>
-                : <div style={{textAlign:"center",flexShrink:0}}>
-                    <div style={{color:C.muted2,fontSize:11,marginBottom:6}}>🔒 Solo Premium</div>
-                    <button onClick={()=>setActiveTab("planes")} style={{background:C.goldBg,border:`1px solid ${C.gold}44`,borderRadius:10,padding:"7px 14px",color:"#b45309",fontSize:12,fontWeight:700,cursor:"pointer"}}>Desbloquear</button>
-                  </div>
-              }
-            </div>
-          ))}
+            );
+          })}
         </div>
-        {!isPremium&&<div style={{marginTop:20,background:C.goldBg,border:`1px solid ${C.gold}44`,borderRadius:16,padding:20,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
-          <span style={{fontSize:32}}>🎓</span>
+
+        {/* VIP upsell banner at bottom */}
+        {!isPremium && <div style={{marginTop:20,background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #7C3AED44",borderRadius:16,padding:20,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
+          <span style={{fontSize:32}}>✦</span>
           <div style={{flex:1}}>
-            <div style={{fontWeight:800,color:"#92400e",fontSize:15,marginBottom:4}}>Accede a todos los webinars</div>
-            <div style={{color:"#b45309",fontSize:13}}>Formación mensual con traders expertos. Grabaciones disponibles después del evento.</div>
+            <div style={{fontWeight:800,color:"#a78bfa",fontSize:15,marginBottom:4}}>Hazte VIP y ahorra 50% en todos los webinars</div>
+            <div style={{color:"#7c3aed",fontSize:13}}>Por solo $9.99/mes tienes acceso a precios VIP, picks semanales, señales y grabaciones de todos los webinars anteriores.</div>
           </div>
-          <button onClick={()=>setActiveTab("planes")} style={{background:"#b45309",border:"none",borderRadius:10,padding:"9px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>⭐ Ver Premium</button>
+          <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver VIP →</button>
         </div>}
       </>}
 
@@ -3046,6 +3117,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
     {icon:"📰", label:"Noticias",         idx:5},
     {icon:"⚡", label:"Trending",         idx:7},
     {icon:"💼", label:"Empleos Finanzas",  idx:10},
+    {icon:"🎓", label:"Webinars",          idx:11},
     {icon:"🛠️",label:"Herramientas VIP", idx:9, vip:true},
     {icon:"✦",  label:"Premium VIP",      idx:8, premium:true},
   ];
@@ -5066,6 +5138,163 @@ const SAMPLE_JOBS = [
   {id:5,company:"NexoTrade",logo:"🔷",title:"Community Manager — Trading",type:"Part-time",location:"100% Remoto",salary:"$800–$1,500/mes",tags:["Trading","Redes Sociales","Español"],desc:"¿Apasionado del trading y las redes sociales? Ayúdanos a hacer crecer la comunidad de inversores hispanos más grande.",featured:false,date:"hace 2 semanas"},
 ];
 
+/* ═══════════════════════════════════════════════════════════════
+   WEBINARS PAGE — página pública de webinars con compra Stripe
+═══════════════════════════════════════════════════════════════ */
+const WEBINARS_LIST = [
+  {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar1", nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
+  {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar2", nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
+  {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:"https://buy.stripe.com/webinar3", nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
+  {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:"https://buy.stripe.com/webinar4", nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
+  {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:"https://buy.stripe.com/webinar5", nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
+  {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:"https://buy.stripe.com/webinar6", nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
+];
+
+function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
+  const C = useColors();
+  const [filtroNivel, setFiltroNivel] = useState("todos");
+
+  const niveles = ["todos","Principiante","Intermedio","Avanzado"];
+  const filtered = filtroNivel==="todos" ? WEBINARS_LIST : WEBINARS_LIST.filter(w=>w.nivel===filtroNivel);
+
+  const handleBuy = (w) => {
+    if(!user){ onNeedAuth(); return; }
+    const base = isPremium ? w.stripeLink : w.stripeLink;
+    window.open(base + (user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""), "_blank");
+  };
+
+  return(
+    <div style={{maxWidth:860,margin:"0 auto",padding:"0 4px"}}>
+      {/* Hero */}
+      <div style={{background:"linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%)",borderRadius:20,padding:"36px 28px",marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:`radial-gradient(circle at 30% 50%,#10b98115,transparent 60%),radial-gradient(circle at 70% 50%,#7C3AED15,transparent 60%)`,pointerEvents:"none"}}/>
+        <div style={{position:"relative"}}>
+          <div style={{fontSize:44,marginBottom:10}}>🎓</div>
+          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>Webinars de Trading en Vivo</h1>
+          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:500,marginLeft:"auto",marginRight:"auto"}}>Aprende de traders reales. Sesiones en vivo + grabación incluida. Plazas limitadas.</p>
+          <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+            <div style={{background:"#ffffff10",borderRadius:12,padding:"10px 20px",border:"1px solid #ffffff15"}}>
+              <div style={{color:"#fff",fontWeight:800,fontSize:18}}>{WEBINARS_LIST.length}</div>
+              <div style={{color:"#64748b",fontSize:11}}>Webinars este mes</div>
+            </div>
+            <div style={{background:"#ffffff10",borderRadius:12,padding:"10px 20px",border:"1px solid #ffffff15"}}>
+              <div style={{color:"#10b981",fontWeight:800,fontSize:18}}>$29–$79</div>
+              <div style={{color:"#64748b",fontSize:11}}>Precio por sesión</div>
+            </div>
+            <div style={{background:"#7C3AED22",borderRadius:12,padding:"10px 20px",border:"1px solid #7C3AED44"}}>
+              <div style={{color:"#a78bfa",fontWeight:800,fontSize:18}}>50% off</div>
+              <div style={{color:"#64748b",fontSize:11}}>Descuento VIP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* VIP banner if not premium */}
+      {!isPremium && (
+        <div style={{background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #7C3AED44",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
+          <span style={{fontSize:24}}>✦</span>
+          <div style={{flex:1,fontSize:13,color:"#a78bfa"}}><strong>Hazte VIP ($9.99/mes)</strong> y obtén 50% de descuento en todos los webinars automáticamente.</div>
+          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver VIP →</button>
+        </div>
+      )}
+
+      {/* Filtros */}
+      <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+        {niveles.map(n=>(
+          <button key={n} onClick={()=>setFiltroNivel(n)}
+            style={{padding:"6px 16px",borderRadius:20,border:"1px solid",fontSize:12,fontWeight:600,cursor:"pointer",
+              borderColor: filtroNivel===n ? C.accent : C.border,
+              background: filtroNivel===n ? C.accent+"22" : "transparent",
+              color: filtroNivel===n ? C.accent : C.muted}}>
+            {n==="todos" ? "🎯 Todos" : n==="Principiante" ? "🟢 "+n : n==="Intermedio" ? "🟡 "+n : "🔴 "+n}
+          </button>
+        ))}
+      </div>
+
+      {/* Webinar cards */}
+      <div style={{display:"flex",flexDirection:"column",gap:16}}>
+        {filtered.map((w,i)=>{
+          const isUrgent  = w.spotsLeft<=10;
+          const isSoldOut = w.spotsLeft===0;
+          const pct = Math.round((w.spotsLeft/w.spots)*100);
+          const nivelColor = w.nivel==="Avanzado"?"#ef4444":w.nivel==="Intermedio"?"#f59e0b":"#10b981";
+          return(
+            <div key={i} style={{background:C.surface,border:`1px solid ${isUrgent&&!isSoldOut?"#ef444444":C.border}`,borderRadius:18,overflow:"hidden",boxShadow:C.shadow}}>
+              {isUrgent&&!isSoldOut&&<div style={{height:3,background:"linear-gradient(90deg,#ef4444,#f59e0b)"}}/>}
+              <div style={{padding:"20px 22px",display:"flex",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
+                {/* icon */}
+                <div style={{width:56,height:56,borderRadius:14,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,flexShrink:0}}>{w.emoji}</div>
+
+                {/* body */}
+                <div style={{flex:1,minWidth:180}}>
+                  <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
+                    <h3 style={{margin:0,color:C.text,fontSize:15,fontWeight:800}}>{w.titulo}</h3>
+                    <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:700}}>{w.nivel}</span>
+                  </div>
+                  <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:8}}>
+                    <span style={{color:C.muted,fontSize:12}}>📅 {w.fecha}</span>
+                    <span style={{color:C.muted,fontSize:12}}>🕐 {w.hora}</span>
+                    <span style={{color:C.muted,fontSize:12}}>👤 @{w.instructor}</span>
+                    <span style={{color:C.muted,fontSize:12}}>⏱ {w.duracion}</span>
+                  </div>
+                  <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.6}}>{w.desc}</p>
+                  {/* spots */}
+                  <div>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                      <span style={{fontSize:11,color:isUrgent?"#ef4444":C.muted,fontWeight:isUrgent?700:400}}>
+                        {isSoldOut?"❌ Agotado":isUrgent?`🔥 ¡Solo ${w.spotsLeft} plazas!`:`👥 ${w.spotsLeft}/${w.spots} plazas`}
+                      </span>
+                      <span style={{fontSize:11,color:C.muted2}}>{pct}% disp.</span>
+                    </div>
+                    <div style={{background:C.border,borderRadius:20,height:5,overflow:"hidden"}}>
+                      <div style={{height:"100%",borderRadius:20,width:`${pct}%`,background:isUrgent?"linear-gradient(90deg,#ef4444,#f59e0b)":`linear-gradient(90deg,${C.accent},#00e5b0)`}}/>
+                    </div>
+                  </div>
+                </div>
+
+                {/* price + CTA */}
+                <div style={{flexShrink:0,textAlign:"center",minWidth:115}}>
+                  {isPremium ? (
+                    <>
+                      <div style={{fontSize:10,color:"#a78bfa",fontWeight:700,marginBottom:2}}>✦ PRECIO VIP</div>
+                      <div style={{fontSize:24,fontWeight:900,color:C.accent,lineHeight:1}}>${w.precioVip}</div>
+                      <div style={{fontSize:12,color:C.muted2,textDecoration:"line-through",marginBottom:10}}>${w.precio}</div>
+                    </>
+                  ):(
+                    <>
+                      <div style={{fontSize:10,color:C.muted2,fontWeight:600,marginBottom:2}}>PRECIO</div>
+                      <div style={{fontSize:24,fontWeight:900,color:C.text,lineHeight:1}}>${w.precio}</div>
+                      <div style={{fontSize:10,color:"#a78bfa",marginBottom:10}}>VIP paga ${w.precioVip}</div>
+                    </>
+                  )}
+                  <button onClick={()=>handleBuy(w)} disabled={isSoldOut}
+                    style={{background:isSoldOut?"#374151":isPremium?`linear-gradient(135deg,${C.accent},#00a87f)`:"linear-gradient(135deg,#1d4ed8,#7C3AED)",
+                      border:"none",borderRadius:10,padding:"10px 0",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",
+                      width:"100%",opacity:isSoldOut?0.5:1}}>
+                    {isSoldOut?"Agotado":"Reservar →"}
+                  </button>
+                  <div style={{fontSize:10,color:C.muted2,marginTop:6}}>🎬 Grabación incluida</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom CTA */}
+      <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
+        <div style={{fontSize:36,marginBottom:10}}>📬</div>
+        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Tienes preguntas sobre algún webinar?</h3>
+        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Escríbenos a <a href="mailto:hola@nexotradeia.com" style={{color:C.accent}}>hola@nexotradeia.com</a> y te respondemos en menos de 24h.</p>
+        <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+          <button onClick={()=>window.open("mailto:hola@nexotradeia.com","_blank")} style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Contactar →</button>
+          {!isPremium && <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>✦ Ser VIP y ahorrar 50%</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function JobBoardPage({user, onNeedAuth}){
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter]     = useState("todos");
@@ -5246,6 +5475,7 @@ const NAV_ITEMS = (t) => [
   {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"💼 Empleos",idx:10},
+  {label:"🎓 Webinars",idx:11},
   {label:"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
@@ -5587,6 +5817,7 @@ export default function App(){
     if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user}/>;
     if(page===10) return <JobBoardPage user={user} onNeedAuth={()=>setAuth("register")}/>;
+    if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     return(
       <>
         {/* Tabs estilo Socimo */}
