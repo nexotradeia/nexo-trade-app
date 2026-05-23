@@ -6495,6 +6495,43 @@ export default function App(){
   const [showWelcome,setShowWelcome] = useState(false);
   const [welcomeName,setWelcomeName] = useState("");
   const [showPushPrompt,setShowPushPrompt] = useState(false);
+  const [showEmailPopup,setShowEmailPopup] = useState(false);
+  const [emailPopupSent,setEmailPopupSent] = useState(false);
+  const [socialProofMsg,setSocialProofMsg] = useState(null);
+
+  // ── Pop-up email: aparece a los 25s si no se ha visto antes ──────────────
+  useEffect(()=>{
+    if(user) return; // ya está registrado
+    if(localStorage.getItem("nexo-email-popup-seen")) return;
+    const t = setTimeout(()=>setShowEmailPopup(true), 25000);
+    return ()=>clearTimeout(t);
+  },[user]);
+
+  // ── Social proof toasts cada 50-80 segundos ───────────────────────────────
+  useEffect(()=>{
+    const names=[
+      {n:"Carlos M.",loc:"México"},    {n:"Valentina R.",loc:"Colombia"},
+      {n:"Diego F.",loc:"Argentina"},  {n:"María L.",loc:"España"},
+      {n:"Andrés P.",loc:"Chile"},     {n:"Sofía G.",loc:"Miami"},
+      {n:"Luis H.",loc:"Perú"},        {n:"Camila T.",loc:"Venezuela"},
+      {n:"Javier O.",loc:"México"},    {n:"Isabella N.",loc:"Colombia"},
+    ];
+    const actions=["se acaba de registrar 🎉","compró membresía VIP ⭐","hizo su primer pick 🎯","se unió a la comunidad 🚀"];
+    let idx=0;
+    const show=()=>{
+      const p=names[idx%names.length];
+      const a=actions[Math.floor(Math.random()*actions.length)];
+      setSocialProofMsg({name:p.n, loc:p.loc, action:a});
+      idx++;
+      setTimeout(()=>setSocialProofMsg(null), 4500);
+    };
+    const delay = setTimeout(()=>{
+      show();
+      const interval = setInterval(show, 55000 + Math.random()*25000);
+      return ()=>clearInterval(interval);
+    }, 12000);
+    return ()=>clearTimeout(delay);
+  },[]);
   const [newsletterEmail,setNewsletterEmail] = useState("");
   const [newsletterDone,setNewsletterDone]   = useState(false);
   const [showNewsletter,setShowNewsletter]   = useState(
