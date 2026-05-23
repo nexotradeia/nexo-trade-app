@@ -25,22 +25,22 @@ const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
 const STRIPE_LINKS = {
   // ── Suscripciones ──────────────────────────────────────────────
   vip:   "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $9.99/mes
-  pro:   "https://buy.stripe.com/REEMPLAZAR_PRO",          // ⚠️ pendiente $24.99/mes
+  pro:   "https://buy.stripe.com/8x23co0vE2Hvgd29cpaR203",  // ✅ activo $24.99/mes
 
   // ── Webinars (sesión única) ────────────────────────────────────
   // Crear en: dashboard.stripe.com → Payment Links → + Create Link
-  webinar1: "https://buy.stripe.com/WEBINAR_ANALISIS_TECNICO",   // $29 — Análisis técnico principiantes
-  webinar2: "https://buy.stripe.com/WEBINAR_BITCOIN_ONCHAIN",    // $49 — Bitcoin on-chain
-  webinar3: "https://buy.stripe.com/WEBINAR_EARNINGS_REPORT",    // $29 — Cómo leer earnings
-  webinar4: "https://buy.stripe.com/WEBINAR_OPCIONES",           // $79 — Opciones defensivas
-  webinar5: "https://buy.stripe.com/WEBINAR_DEFI_YIELD",         // $49 — DeFi yield farming
-  webinar6: "https://buy.stripe.com/WEBINAR_DIVIDENDOS",         // $39 — Dividendos renta pasiva
+  webinar1: "https://buy.stripe.com/bJe6oAcemeqdf8Y9cpaR204",    // ✅ $29 — Análisis técnico principiantes
+  webinar2: "https://buy.stripe.com/3cI28k1zIci55yo0FTaR205",   // ✅ $49 — Bitcoin on-chain
+  webinar3: "https://buy.stripe.com/eVq6oAdiq0zn0e40FTaR206",   // ✅ $29 — Cómo leer earnings
+  webinar4: "https://buy.stripe.com/5kQ28k6U26XLf8YgERaR207",   // ✅ $79 — Opciones defensivas
+  webinar5: "https://buy.stripe.com/fZu8wI92a6XLgd260daR208",   // ✅ $49 — DeFi yield farming
+  webinar6: "https://buy.stripe.com/3cI7sE4LU2Hvd0QcoBaR209",   // ✅ $39 — Dividendos renta pasiva
 
   // ── Cursos (acceso de por vida) ────────────────────────────────
-  curso1: "https://buy.stripe.com/CURSO_TRADING_ZERO",           // $39 — Trading desde cero
-  curso2: "https://buy.stripe.com/CURSO_ANALISIS_TECNICO",       // $69 — Análisis técnico completo
-  curso3: "https://buy.stripe.com/CURSO_CRYPTO_MASTERCLASS",     // $99 — Crypto Masterclass
-  curso4: "https://buy.stripe.com/CURSO_OPCIONES",               // $79 — Opciones de A a Z
+  curso1: "https://buy.stripe.com/00w00ca6edm90e4coBaR20a",   // ✅ $39 — Trading desde cero
+  curso2: "https://buy.stripe.com/28EaEQdiq81Pe4U1JXaR20b",  // ✅ $69 — Análisis técnico completo
+  curso3: "https://buy.stripe.com/fZuaEQa6eci5gd24W9aR20c",  // ✅ $99 — Crypto Masterclass
+  curso4: "https://buy.stripe.com/aFa6oA0vEgyl1i8fANaR20d",  // ✅ $79 — Opciones de A a Z
 };
 
 // Alias cortos (compatibilidad con código existente)
