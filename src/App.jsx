@@ -7001,6 +7001,7 @@ export default function App(){
       }
       @keyframes nexo-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
       @keyframes nexo-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+      @keyframes nexo-slidein { from{transform:translateX(-30px);opacity:0} to{transform:translateX(0);opacity:1} }
       html, body {
         overflow-x: hidden !important;
         overflow-y: scroll !important;
@@ -7344,30 +7345,106 @@ export default function App(){
           </div>
         </div>
 
-        {/* ── PRICING TEASER ── */}
-        <div style={{background:"#0a1020",padding:"56px 20px",borderBottom:"1px solid #0f172a"}}>
-          <div style={{maxWidth:700,margin:"0 auto",textAlign:"center"}}>
-            <h2 style={{margin:"0 0 8px",color:"#fff",fontSize:"clamp(22px,4vw,36px)",fontWeight:900}}>Empieza gratis. Escala cuando estés listo.</h2>
-            <p style={{margin:"0 0 36px",color:"#64748b",fontSize:15}}>Sin compromisos. Cancela cuando quieras.</p>
-            <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+        {/* ── PRICING — TABLA COMPLETA 3 PLANES ── */}
+        <div style={{background:"#0a1020",padding:"64px 20px",borderBottom:"1px solid #0f172a"}} id="precios">
+          <div style={{maxWidth:1100,margin:"0 auto"}}>
+            <div style={{textAlign:"center",marginBottom:12}}>
+              <h2 style={{margin:"0 0 8px",color:"#fff",fontSize:"clamp(24px,4vw,40px)",fontWeight:900}}>Elige tu plan</h2>
+              <p style={{margin:"0 0 8px",color:"#64748b",fontSize:15}}>Empieza gratis. Escala cuando estés listo. Cancela cuando quieras.</p>
+            </div>
+            {/* Badge ahorro anual */}
+            <div style={{textAlign:"center",marginBottom:36}}>
+              <span style={{background:"rgba(0,210,106,0.12)",border:"1px solid rgba(0,210,106,0.3)",borderRadius:20,padding:"5px 16px",color:"#10b981",fontSize:12,fontWeight:700}}>
+                💡 Plan anual VIP: $79.99/año — ahorra $39.89 (33% OFF)
+              </span>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,alignItems:"start"}}>
               {[
-                {plan:"Free",precio:"$0",color:"#475569",features:["Feed de traders","Watchlist 5 acciones","Paper trading $100k","Leaderboard","Chat IA básico"],cta:"Empezar gratis",action:()=>setAuth("register")},
-                {plan:"VIP ✦",precio:"$9.99/mes",color:"#a78bfa",features:["✓ Todo lo Free","10 picks semanales exclusivos","Señales de trading","Alertas de precio (5)","50% OFF en webinars","Badge VIP en el perfil"],cta:"Probar VIP",action:()=>setAuth("register"),featured:true},
+                {
+                  plan:"Free",badge:null,
+                  precio:"$0",periodo:"para siempre",
+                  color:"#475569",bg:"#0f172a",border:"#1e293b",btnBg:"transparent",btnBorder:"#334155",
+                  features:[
+                    {t:"Feed de traders en tiempo real",ok:true},
+                    {t:"Watchlist hasta 5 acciones",ok:true},
+                    {t:"Paper trading $100k virtuales",ok:true},
+                    {t:"Leaderboard de la comunidad",ok:true},
+                    {t:"Chat IA básico (10 consultas/día)",ok:true},
+                    {t:"Picks VIP semanales",ok:false},
+                    {t:"Señales de trading en vivo",ok:false},
+                    {t:"Alertas de precio",ok:false},
+                    {t:"Descuentos en webinars",ok:false},
+                  ],
+                  cta:"Empezar gratis",action:()=>setAuth("register")
+                },
+                {
+                  plan:"VIP ✦",badge:"⚡ MÁS POPULAR",
+                  precio:"$9.99",periodo:"/mes · o $79.99/año",
+                  color:"#a78bfa",bg:"linear-gradient(135deg,#1a0f2e,#1e1040)",border:"#7C3AED",btnBg:"linear-gradient(135deg,#7C3AED,#4c1d95)",btnBorder:"#7C3AED",
+                  featured:true,
+                  features:[
+                    {t:"Todo lo del plan Free",ok:true},
+                    {t:"10 picks VIP semanales (lunes 9am)",ok:true},
+                    {t:"Señales de trading en vivo",ok:true},
+                    {t:"Alertas de precio ilimitadas",ok:true},
+                    {t:"50% OFF en webinars y cursos",ok:true},
+                    {t:"Badge VIP en tu perfil",ok:true},
+                    {t:"Chat IA ilimitado",ok:true},
+                    {t:"Herramientas VIP exclusivas",ok:true},
+                  ],
+                  cta:"Probar VIP",action:()=>setAuth("register")
+                },
+                {
+                  plan:"PRO 🚀",badge:"Para traders serios",
+                  precio:"$24.99",periodo:"/mes",
+                  color:"#00A8FF",bg:"linear-gradient(135deg,#061828,#082038)",border:"#00A8FF",btnBg:"linear-gradient(135deg,#00A8FF,#0066CC)",btnBorder:"#00A8FF",
+                  features:[
+                    {t:"Todo lo del plan VIP",ok:true},
+                    {t:"Señales PRO con R:R detallado",ok:true},
+                    {t:"Acceso anticipado a picks (dom 8pm)",ok:true},
+                    {t:"Análisis técnico IA sin límite",ok:true},
+                    {t:"Screener de acciones avanzado",ok:true},
+                    {t:"Dashboard de portafolio PRO",ok:true},
+                    {t:"Soporte prioritario 1:1",ok:true},
+                    {t:"Webinars mensuales exclusivos PRO",ok:true},
+                  ],
+                  cta:"Empezar PRO",action:()=>setAuth("register")
+                },
               ].map((p,i)=>(
-                <div key={i} style={{flex:"1 1 240px",maxWidth:300,background:p.featured?"linear-gradient(135deg,#1a0f2e,#1e1040)":"#0f172a",border:`2px solid ${p.featured?"#7C3AED":"#1e293b"}`,borderRadius:20,padding:"28px 24px",position:"relative",boxShadow:p.featured?"0 0 40px #7C3AED33":"none"}}>
-                  {p.featured&&<div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#7C3AED,#4c1d95)",borderRadius:20,padding:"4px 16px",fontSize:11,fontWeight:700,color:"#fff",whiteSpace:"nowrap"}}>⚡ MÁS POPULAR</div>}
-                  <div style={{marginBottom:16}}>
-                    <div style={{color:p.color,fontWeight:800,fontSize:15,marginBottom:4}}>{p.plan}</div>
-                    <div style={{color:"#fff",fontWeight:900,fontSize:28}}>{p.precio}</div>
+                <div key={i} style={{background:p.bg,border:`2px solid ${p.border}`,borderRadius:22,padding:"30px 26px",position:"relative",boxShadow:p.featured?"0 0 50px #7C3AED22":p.color==="#00A8FF"?"0 0 30px #00A8FF11":"none",transition:"transform 0.2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                  {p.badge&&<div style={{position:"absolute",top:-13,left:"50%",transform:"translateX(-50%)",background:p.featured?"linear-gradient(135deg,#7C3AED,#4c1d95)":p.color==="#00A8FF"?"linear-gradient(135deg,#00A8FF,#0066CC)":"#1e293b",borderRadius:20,padding:"4px 18px",fontSize:11,fontWeight:700,color:"#fff",whiteSpace:"nowrap",border:`1px solid ${p.border}44`}}>{p.badge}</div>}
+                  {/* Plan name + precio */}
+                  <div style={{marginBottom:20,paddingBottom:16,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+                    <div style={{color:p.color,fontWeight:800,fontSize:15,marginBottom:8}}>{p.plan}</div>
+                    <div style={{display:"flex",alignItems:"baseline",gap:4}}>
+                      <span style={{color:"#fff",fontWeight:900,fontSize:36}}>{p.precio}</span>
+                    </div>
+                    <div style={{color:"#475569",fontSize:12,marginTop:2}}>{p.periodo}</div>
                   </div>
-                  <div style={{marginBottom:20}}>
-                    {p.features.map((f,j)=><div key={j} style={{color:"#94a3b8",fontSize:13,paddingBottom:6,display:"flex",gap:8,alignItems:"flex-start"}}><span style={{color:p.color,flexShrink:0}}>✓</span>{f}</div>)}
+                  {/* Features */}
+                  <div style={{marginBottom:24}}>
+                    {p.features.map((f,j)=>(
+                      <div key={j} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:9}}>
+                        <span style={{flexShrink:0,fontSize:14,marginTop:1,color:f.ok?p.color:"#1e293b",fontWeight:900}}>{f.ok?"✓":"✕"}</span>
+                        <span style={{color:f.ok?"#94a3b8":"#2d3748",fontSize:13,lineHeight:1.4,textDecoration:f.ok?"none":"line-through"}}>{f.t}</span>
+                      </div>
+                    ))}
                   </div>
-                  <button onClick={p.action} style={{width:"100%",background:p.featured?"linear-gradient(135deg,#7C3AED,#4c1d95)":"transparent",border:`1px solid ${p.featured?"#7C3AED":"#334155"}`,borderRadius:12,padding:"12px",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer"}}>
+                  {/* CTA */}
+                  <button onClick={p.action} style={{width:"100%",background:p.btnBg,border:`1.5px solid ${p.btnBorder}`,borderRadius:13,padding:"13px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",letterSpacing:0.2,transition:"opacity 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
+                    onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
                     {p.cta} →
                   </button>
+                  {p.plan==="VIP ✦"&&<div style={{textAlign:"center",marginTop:10,color:"#475569",fontSize:11}}>o $79.99/año (ahorra $39.89) · sin tarjeta para probar</div>}
                 </div>
               ))}
+            </div>
+            {/* Garantía */}
+            <div style={{textAlign:"center",marginTop:32,color:"#475569",fontSize:13}}>
+              🔒 Pago 100% seguro via Stripe · Cancela en cualquier momento · Soporte en español
             </div>
           </div>
         </div>
@@ -7488,6 +7565,55 @@ export default function App(){
       )}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
+
+      {/* ── SOCIAL PROOF TOAST (esquina inferior izquierda) ── */}
+      {socialProofMsg && (
+        <div style={{position:"fixed",bottom:28,left:20,zIndex:8800,background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 4px 24px rgba(0,0,0,0.3)",maxWidth:280,animation:"nexo-slidein 0.4s ease"}}>
+          <div style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#00A8FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👤</div>
+          <div>
+            <div style={{color:C.text,fontWeight:700,fontSize:12}}>{socialProofMsg.name} <span style={{color:C.muted2,fontWeight:400}}>de {socialProofMsg.loc}</span></div>
+            <div style={{color:"#00A8FF",fontSize:11,marginTop:2}}>{socialProofMsg.action}</div>
+          </div>
+        </div>
+      )}
+
+      {/* ── POP-UP CAPTURA DE EMAIL ── */}
+      {showEmailPopup && !user && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}}>
+          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:24,padding:"40px 36px",maxWidth:440,width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",position:"relative",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",color:"#475569",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
+            {/* Ícono */}
+            <div style={{width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#00A8FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,margin:"0 auto 20px",boxShadow:"0 0 32px rgba(0,168,255,0.4)"}}>🎯</div>
+            <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:22,fontWeight:900}}>Recibe el pick de la semana gratis</h3>
+            <p style={{margin:"0 0 24px",color:"#64748b",fontSize:14,lineHeight:1.6}}>Cada lunes a las 9am te enviamos el pick <strong style={{color:"#fff"}}>más votado por la comunidad</strong> directo a tu email. Sin spam.</p>
+            {!emailPopupSent ? (
+              <form onSubmit={async(e)=>{
+                e.preventDefault();
+                const email = e.target.email.value;
+                if(!email) return;
+                // Guardar en Supabase
+                try{ await supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}); }catch(err){}
+                setEmailPopupSent(true);
+                localStorage.setItem("nexo-email-popup-seen","1");
+              }}>
+                <div style={{display:"flex",gap:8,marginBottom:12}}>
+                  <input name="email" type="email" required placeholder="tu@email.com"
+                    style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:10,padding:"12px 14px",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
+                  <button type="submit" style={{background:"linear-gradient(135deg,#00A8FF,#0066CC)",border:"none",borderRadius:10,padding:"12px 18px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",whiteSpace:"nowrap"}}>Recibir →</button>
+                </div>
+                <div style={{color:"#1e3a5f",fontSize:11}}>🔒 Sin spam. Cancela cuando quieras.</div>
+              </form>
+            ) : (
+              <div style={{background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.3)",borderRadius:12,padding:"18px",color:"#10b981",fontWeight:700,fontSize:15}}>
+                ✅ ¡Listo! Te llegará el pick este lunes.
+              </div>
+            )}
+            <button onClick={()=>setAuth("register")} style={{marginTop:16,background:"transparent",border:"none",color:"#475569",fontSize:12,cursor:"pointer",textDecoration:"underline"}}>
+              O crear cuenta gratis y verlo ahora →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── CHATBOT FLOTANTE IA ── */}
       {!showAI && (
