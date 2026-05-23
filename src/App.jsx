@@ -1068,7 +1068,7 @@ function PolymarketWidget(){
           .map(m => {
             let prices;
             try { prices = Array.isArray(m.outcomePrices) ? m.outcomePrices : JSON.parse(m.outcomePrices||"[0.5]"); }
-            catch { prices = [0.5]; }
+            catch(e) { prices = [0.5]; }
             const prob = parseFloat(prices[0]) || 0.5;
             return {
               question: m.question,
@@ -1157,32 +1157,28 @@ function MercadosEnVivoWidget(){
           ))}
         </div>
       </div>
-      {/* TradingView Mini Charts */}
+      {/* Precios en vivo (via TradingView link) */}
       <div style={{padding:"12px 18px"}}>
         {items.map((item,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<items.length-1?10:0,paddingBottom:i<items.length-1?10:0,borderBottom:i<items.length-1?`1px solid ${C.border}`:"none"}}>
-            <div style={{width:34,height:34,borderRadius:10,background:item.color+"22",border:`1px solid ${item.color}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <a key={i} href={`https://www.tradingview.com/symbols/${tab==="crypto"?item.s+"USD":item.s}/`}
+            target="_blank" rel="noopener noreferrer"
+            style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<items.length-1?10:0,paddingBottom:i<items.length-1?10:0,borderBottom:i<items.length-1?`1px solid ${C.border}`:"none",textDecoration:"none"}}>
+            <div style={{width:36,height:36,borderRadius:10,background:item.color+"22",border:`1px solid ${item.color}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               <span style={{fontWeight:900,fontSize:10,color:item.color}}>{item.s}</span>
             </div>
-            <div style={{flex:1,minWidth:0}}>
+            <div style={{flex:1}}>
               <div style={{color:C.text,fontWeight:700,fontSize:13}}>{item.n}</div>
-              <div style={{color:C.muted2,fontSize:11}}>{item.s}</div>
+              <div style={{color:C.muted2,fontSize:11}}>{item.s} · TradingView</div>
             </div>
-            {/* Mini sparkline embed de TradingView */}
-            <div style={{flexShrink:0}}>
-              <iframe
-                src={`https://www.tradingview.com/embed-widget/mini-symbol-overview/?symbol=${tab==="crypto"?item.s+"USD":item.s}&locale=es&dateRange=1D&colorTheme=dark&isTransparent=true&autosize=false&width=120&height=50`}
-                style={{border:"none",width:120,height:50,borderRadius:8,pointerEvents:"none",overflow:"hidden"}}
-                scrolling="no"
-                allowTransparency="true"
-              />
-            </div>
-          </div>
+            <div style={{color:"#10b981",fontWeight:700,fontSize:12}}>Ver →</div>
+          </a>
         ))}
-        <a href="https://www.investing.com" target="_blank" rel="noopener noreferrer"
-          style={{display:"block",textAlign:"center",marginTop:12,color:C.muted2,fontSize:11,textDecoration:"none"}}>
-          Datos de mercado via Investing.com →
-        </a>
+        <div style={{marginTop:12,padding:"10px",background:"rgba(0,168,255,0.05)",borderRadius:8,textAlign:"center"}}>
+          <a href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer"
+            style={{color:"#00A8FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>
+            📊 Ver gráficos completos en TradingView →
+          </a>
+        </div>
       </div>
     </div>
   );
@@ -6167,14 +6163,14 @@ const _getAdminStatus = () => {
           const payload = JSON.parse(atob(obj.access_token.split('.')[1]));
           if(ADMIN_EMAILS_CONST.includes(payload?.email||"")) return true;
         }
-      } catch {}
+      } catch(e) {}
     }
-  } catch {}
+  } catch(e) {}
   return false;
 };
 const _getSavedUser = () => {
   try { return JSON.parse(localStorage.getItem("nexotrade-user") || "null"); }
-  catch { return null; }
+  catch(e) { return null; }
 };
 
 /* ═══════════════════════════════════════════════════════════════
