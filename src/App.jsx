@@ -2835,12 +2835,17 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         {/* Trust badges */}
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
           {[
-            {icon:"🔒",title:"Pago seguro",desc:"SSL + Stripe"},
-            {icon:"↩️",title:"Cancela ya",desc:"Sin permanencia"},
-            {icon:"📧",title:"Alertas email",desc:"Instantáneas"},
-            {icon:"🛟",title:"Soporte 24/7",desc:"Respuesta en 2h"},
+            {icon:"🔒",title:"Pago seguro",desc:"SSL + Stripe",   href:"https://stripe.com/es/payments/payment-links",tip:"Pagos 100% seguros con Stripe"},
+            {icon:"↩️",title:"Cancela ya", desc:"Sin permanencia",href:STRIPE_PAYMENT_LINK,tip:"Cancela cuando quieras"},
+            {icon:"📧",title:"Alertas email",desc:"Instantáneas", href:null, action:"alerts", tip:"Configura tus alertas"},
+            {icon:"🛟",title:"Soporte 24/7",desc:"Respuesta en 2h",href:"mailto:mariagalarraga2013@gmail.com?subject=Soporte NexoTrade",tip:"Escríbenos"},
           ].map(b=>(
-            <div key={b.title} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 12px",textAlign:"center",boxShadow:C.shadow}}>
+            <div key={b.title}
+              onClick={()=>{ if(b.action==="alerts"){setAlerts(true);} else if(b.href){window.open(b.href,"_blank");} }}
+              title={b.tip}
+              style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 12px",textAlign:"center",boxShadow:C.shadow,cursor:"pointer",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.boxShadow=C.shadowMd;e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.transform="translateY(-2px)";}}
+              onMouseLeave={e=>{e.currentTarget.style.boxShadow=C.shadow;e.currentTarget.style.borderColor=C.border;e.currentTarget.style.transform="translateY(0)";}}>
               <div style={{fontSize:22,marginBottom:6}}>{b.icon}</div>
               <div style={{fontWeight:700,color:C.text,fontSize:12}}>{b.title}</div>
               <div style={{color:C.muted2,fontSize:11}}>{b.desc}</div>
