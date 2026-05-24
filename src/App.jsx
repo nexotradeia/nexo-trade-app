@@ -2666,7 +2666,7 @@ function MarketsMiniWidget(){
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
         {[["mercados","📈 Mercados"],["predicciones","🎯 Predicciones"],["tendencias","🔥 Tendencias"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
-            style={{flex:1,padding:"7px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:11,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            style={{flex:1,padding:"5px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
             {l}{k==="mercados"&&isLive&&<span style={{width:4,height:4,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
           </button>
         ))}
@@ -2677,15 +2677,15 @@ function MarketsMiniWidget(){
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0}}>
           {prices.slice(0,8).map((t,i)=>(
             <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
-              style={{display:"flex",flexDirection:"column",padding:"6px 10px",borderRight:i%4!==3?"1px solid rgba(255,255,255,0.06)":"none",borderBottom:i<4?"1px solid rgba(255,255,255,0.06)":"none",textDecoration:"none",transition:"background 0.15s"}}
+              style={{display:"flex",flexDirection:"column",padding:"5px 8px",borderRight:i%4!==3?"1px solid rgba(255,255,255,0.06)":"none",borderBottom:i<4?"1px solid rgba(255,255,255,0.06)":"none",textDecoration:"none",transition:"background 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
               onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:2}}>
-                <span style={{width:5,height:5,borderRadius:"50%",background:t.col,display:"inline-block",flexShrink:0}}/>
-                <span style={{fontWeight:800,fontSize:10,color:t.col,letterSpacing:0.3}}>{t.s}</span>
+              <div style={{display:"flex",alignItems:"center",gap:3,marginBottom:1}}>
+                <span style={{width:4,height:4,borderRadius:"50%",background:t.col,display:"inline-block",flexShrink:0}}/>
+                <span style={{fontWeight:800,fontSize:9,color:t.col,letterSpacing:0.3}}>{t.s}</span>
               </div>
-              <div style={{fontFamily:"monospace",fontSize:11,fontWeight:700,color:"#e2e8f0"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</div>
-              <div style={{fontSize:10,fontWeight:600,color:t.c>=0?"#22c55e":"#ef4444",marginTop:1}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</div>
+              <div style={{fontFamily:"monospace",fontSize:10,fontWeight:700,color:"#e2e8f0"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</div>
+              <div style={{fontSize:9,fontWeight:600,color:t.c>=0?"#22c55e":"#ef4444",marginTop:1}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</div>
             </a>
           ))}
         </div>
@@ -5095,23 +5095,23 @@ function SocialProofBar({user, onRegister}){
   ];
 
   return(
-    <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 12px"}}>
-      <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:16,padding:"14px 20px",border:"1px solid #1e293b",display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
-        <div style={{display:"flex",gap:20,flexWrap:"wrap",flex:1}}>
+    <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 8px"}}>
+      <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:12,padding:"8px 16px",border:"1px solid #1e293b",display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
+        <div style={{display:"flex",gap:14,flexWrap:"wrap",flex:1}}>
           {items.map((s,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:16}}>{s.icon}</span>
+            <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontSize:13}}>{s.icon}</span>
               <div>
-                <span style={{color:s.highlight?"#10b981":C.accent,fontWeight:800,fontSize:15}}>{s.value}</span>
-                <span style={{color:"#475569",fontSize:12,marginLeft:5}}>{s.label}</span>
+                <span style={{color:s.highlight?"#10b981":C.accent,fontWeight:800,fontSize:12}}>{s.value}</span>
+                <span style={{color:"#475569",fontSize:11,marginLeft:4}}>{s.label}</span>
               </div>
-              {i<items.length-1&&<div style={{width:1,height:20,background:"#1e293b",marginLeft:12}}/>}
+              {i<items.length-1&&<div style={{width:1,height:14,background:"#1e293b",marginLeft:10}}/>}
             </div>
           ))}
         </div>
         {!user && (
           <button onClick={onRegister}
-            style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"9px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
+            style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:8,padding:"6px 14px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
             Únete gratis →
           </button>
         )}
