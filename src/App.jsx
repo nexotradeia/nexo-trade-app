@@ -1976,69 +1976,28 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   );
 }
 
-// ── GIF PICKER (Tenor v2 + Giphy fallback) ───────────────────────────────────
-const TENOR_KEY = "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCDg";
-const GIPHY_KEY = "dc6zaTOxFJmzC"; // Giphy public beta key
-
+// ── GIF PICKER (via /api/gifs proxy — sin CORS) ──────────────────────────────
 function GifPicker({onSelect,onClose}){
-  const [q,setQ]       = useState("");
-  const [gifs,setGifs] = useState([]);
+  const [q,setQ]             = useState("");
+  const [gifs,setGifs]       = useState([]);
   const [loading,setLoading] = useState(false);
   const [error,setError]     = useState(false);
-  const [src,setSrc]         = useState("tenor"); // "tenor" | "giphy"
-
-  const searchGiphy = (query) => {
-    setLoading(true); setError(false);
-    const endpoint = query.trim()
-      ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=16&rating=g`
-      : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=16&rating=g`;
-    fetch(endpoint)
-      .then(r=>r.json())
-      .then(d=>{
-        const results = (d.data||[]).map(g=>({
-          id: g.id,
-          preview: g.images?.fixed_height_small?.url || g.images?.fixed_height?.url,
-          full:    g.images?.fixed_height?.url || g.images?.original?.url,
-          title:   g.title||"gif",
-        }));
-        setGifs(results);
-        setLoading(false);
-      })
-      .catch(()=>{ setError(true); setLoading(false); });
-  };
-
-  const searchTenor = (query) => {
-    setLoading(true); setError(false);
-    // media_filter=tinygif,gif para obtener ambos formatos
-    const endpoint = query.trim()
-      ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${TENOR_KEY}&limit=16&media_filter=tinygif,gif&contentfilter=medium`
-      : `https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=16&media_filter=tinygif,gif&contentfilter=medium`;
-    fetch(endpoint)
-      .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
-      .then(d=>{
-        if(!d.results || d.results.length===0){ throw new Error("empty"); }
-        const results = d.results.map(g=>({
-          id:      g.id,
-          preview: g.media_formats?.tinygif?.url || g.media_formats?.gif?.url || "",
-          full:    g.media_formats?.gif?.url || g.media_formats?.tinygif?.url || "",
-          title:   g.title||"gif",
-        }));
-        setGifs(results);
-        setLoading(false);
-      })
-      .catch(()=>{
-        // Tenor falló → fallback a Giphy
-        setSrc("giphy");
-        searchGiphy(query);
-      });
-  };
+  const [apiSrc,setApiSrc]   = useState("…");
 
   const search = (query) => {
-    if(src==="giphy") searchGiphy(query);
-    else searchTenor(query);
+    setLoading(true); setError(false);
+    const url = `/api/gifs${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ""}`;
+    fetch(url)
+      .then(r => r.json())
+      .then(d => {
+        setGifs(d.gifs || []);
+        setApiSrc(d.source || "");
+        setLoading(false);
+      })
+      .catch(() => { setError(true); setLoading(false); });
   };
 
-  useEffect(()=>{ searchTenor(""); },[]);
+  useEffect(() => { search(""); }, []);
 
   const TAGS = ["📈 bull","📉 bear","🚀 moon","💎 diamond hands","stonks","crypto","trading"];
 
@@ -8122,6 +8081,7 @@ export default function App(){
               style={{flex:1,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,padding:"7px 12px",color:"#F1F5F9",fontSize:13,outline:"none",minWidth:0}}
               onKeyDown={e=>{if(e.key==="Enter"&&newsletterEmail.includes("@")){
                 supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).then(()=>{});
+                fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:newsletterEmail})}).catch(()=>{});
                 setNewsletterDone(true);
               }}}
             />
@@ -8129,6 +8089,7 @@ export default function App(){
               onClick={async()=>{
                 if(!newsletterEmail.includes("@")) return;
                 await supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).catch(()=>{});
+                fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:newsletterEmail})}).catch(()=>{});
                 setNewsletterDone(true);
               }}
               style={{background:"#00A8FF",border:"none",borderRadius:8,padding:"7px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
@@ -8679,8 +8640,9 @@ export default function App(){
                 e.preventDefault();
                 const email = e.target.email.value;
                 if(!email) return;
-                // Guardar en Supabase
+                // Guardar en Supabase + enviar email de bienvenida
                 try{ await supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}); }catch(err){}
+                fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{});
                 setEmailPopupSent(true);
                 localStorage.setItem("nexo-email-popup-seen","1");
               }}>
