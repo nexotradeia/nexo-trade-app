@@ -2258,90 +2258,136 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
   );
 }
 
-// ── CHART — Velas con Lightweight Charts + datos de Yahoo Finance ─────────────
-const LC_CDN = "https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js";
-
+// ── CHART — SVG nativo, prueba proxy luego Yahoo Finance directo ──────────────
 function TVChart({ticker}){
-  const ref    = useRef();
-  const chart  = useRef(null);
-  const [status, setStatus] = useState("loading"); // loading | ok | error
+  const [candles, setCandles] = useState([]);
+  const [status,  setStatus]  = useState("loading");
 
   useEffect(()=>{
-    let destroyed = false;
+    let alive = true;
     setStatus("loading");
+    setCandles([]);
 
-    const loadLC = () => new Promise((res,rej)=>{
-      if(window.LightweightCharts){ res(); return; }
-      const s = document.createElement("script");
-      s.src = LC_CDN; s.async = true;
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
+    const parseYahoo = (d) => {
+      const result = d?.chart?.result?.[0];
+      if(!result) return null;
+      const ts = result.timestamp||[];
+      const q  = result.indicators?.quote?.[0]||{};
+      const arr = ts.map((t,i)=>({time:t,open:q.open?.[i],high:q.high?.[i],low:q.low?.[i],close:q.close?.[i]}))
+                    .filter(c=>c.open&&c.close);
+      return arr.length ? arr : null;
+    };
 
     const run = async () => {
+      // Intento 1: nuestro proxy
       try{
-        await loadLC();
-        const r = await fetch(`/api/chart?ticker=${encodeURIComponent(ticker)}&range=1y&interval=1d`);
-        const data = await r.json();
-        if(destroyed) return;
-        if(!data.candles?.length) throw new Error("sin datos");
+        const r = await fetch(`/api/chart?ticker=${encodeURIComponent(ticker)}&range=6mo&interval=1d`);
+        if(r.ok){
+          const d = await r.json();
+          if(d.candles?.length){ if(alive){setCandles(d.candles.slice(-90));setStatus("ok");} return; }
+        }
+      }catch(e){}
 
-        // Limpiar chart anterior
-        if(chart.current){ try{ chart.current.remove(); }catch(e){} chart.current=null; }
-        if(!ref.current) return;
+      // Intento 2: Yahoo Finance directo (funciona en la mayoría de regiones)
+      try{
+        const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo&includePrePost=false`,
+          {headers:{"Accept":"application/json"}});
+        const d = await r.json();
+        const arr = parseYahoo(d);
+        if(arr){ if(alive){setCandles(arr.slice(-90));setStatus("ok");} return; }
+      }catch(e){}
 
-        const c = window.LightweightCharts.createChart(ref.current,{
-          width:  ref.current.clientWidth || 640,
-          height: 300,
-          layout: { background:{type:"solid",color:"#fff"}, textColor:"#334155", fontSize:11 },
-          grid:   { vertLines:{color:"#f1f5f9"}, horzLines:{color:"#f1f5f9"} },
-          crosshair:{ mode:1 },
-          rightPriceScale:{ borderColor:"#e2e8f0" },
-          timeScale:{ borderColor:"#e2e8f0", timeVisible:true, secondsVisible:false },
-          handleScroll: true, handleScale: true,
-        });
-        chart.current = c;
+      // Intento 3: endpoint alternativo Yahoo
+      try{
+        const r = await fetch(`https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`);
+        const d = await r.json();
+        const arr = parseYahoo(d);
+        if(arr){ if(alive){setCandles(arr.slice(-90));setStatus("ok");} return; }
+      }catch(e){}
 
-        const series = c.addCandlestickSeries({
-          upColor:"#22c55e", downColor:"#ef4444",
-          borderUpColor:"#22c55e", borderDownColor:"#ef4444",
-          wickUpColor:"#22c55e",  wickDownColor:"#ef4444",
-        });
-        series.setData(data.candles);
-        c.timeScale().fitContent();
-
-        // Responsive
-        const ro = new ResizeObserver(()=>{ if(ref.current&&c) c.applyOptions({width:ref.current.clientWidth}); });
-        if(ref.current) ro.observe(ref.current);
-
-        if(!destroyed) setStatus("ok");
-      }catch(e){
-        if(!destroyed) setStatus("error");
-      }
+      if(alive) setStatus("error");
     };
     run();
-    return ()=>{ destroyed=true; if(chart.current){ try{chart.current.remove();}catch(e){} chart.current=null; } };
+    return ()=>{ alive=false; };
   },[ticker]);
 
+  if(status==="loading") return(
+    <div style={{height:260,display:"flex",alignItems:"center",justifyContent:"center",background:"#f8fafc",gap:10}}>
+      <div style={{width:20,height:20,border:"2.5px solid #e2e8f0",borderTopColor:"#00A8FF",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
+      <span style={{color:"#94a3b8",fontSize:12}}>Cargando {ticker}...</span>
+    </div>
+  );
+
+  if(status==="error"||!candles.length) return(
+    <div style={{height:260,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#f8fafc"}}>
+      <span style={{fontSize:36}}>📊</span>
+      <span style={{color:"#64748b",fontSize:13,fontWeight:600}}>Sin datos para {ticker}</span>
+      <a href={`https://finance.yahoo.com/quote/${ticker}`} target="_blank" rel="noopener noreferrer"
+        style={{color:"#00A8FF",fontSize:12,fontWeight:700,textDecoration:"none",background:"rgba(0,168,255,0.08)",padding:"7px 18px",borderRadius:8,border:"1px solid rgba(0,168,255,0.2)"}}>
+        Ver en Yahoo Finance →
+      </a>
+    </div>
+  );
+
+  // ── SVG line chart ────────────────────────────────────────────
+  const W=600, H=230, pl=8, pr=56, pt=12, pb=22;
+  const closes = candles.map(c=>c.close);
+  const minP   = Math.min(...closes);
+  const maxP   = Math.max(...closes);
+  const range  = maxP - minP || 1;
+  const xS = i => pl + (i/(candles.length-1||1))*(W-pl-pr);
+  const yS = p => pt + (1-(p-minP)/range)*(H-pt-pb);
+
+  const linePath = closes.map((p,i)=>`${i===0?"M":"L"}${xS(i).toFixed(1)},${yS(p).toFixed(1)}`).join(" ");
+  const areaPath = linePath+` L${xS(closes.length-1).toFixed(1)},${(H-pb).toFixed(1)} L${pl},${(H-pb).toFixed(1)} Z`;
+  const isUp     = closes[closes.length-1] >= closes[0];
+  const col      = isUp ? "#22c55e" : "#ef4444";
+  const pct      = (((closes[closes.length-1]-closes[0])/closes[0])*100).toFixed(2);
+  const gradId   = `g_${ticker.replace(/[^a-z0-9]/gi,"")}`;
+
+  // 3 horizontal grid lines + price labels
+  const gridVals = [0.2, 0.5, 0.8].map(r=>minP+range*r);
+
   return(
-    <div style={{position:"relative",background:"#fff",minHeight:300}}>
-      {status==="loading"&&(
-        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,background:"#f8fafc",zIndex:2}}>
-          <div style={{width:28,height:28,border:"3px solid #e2e8f0",borderTopColor:"#00A8FF",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
-          <span style={{color:"#94a3b8",fontSize:12}}>Cargando gráfico {ticker}...</span>
-        </div>
-      )}
-      {status==="error"&&(
-        <div style={{height:300,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:"#f8fafc"}}>
-          <span style={{fontSize:36}}>📊</span>
-          <span style={{color:"#64748b",fontSize:13,fontWeight:600}}>{ticker} no disponible en este momento</span>
-          <a href={`https://finance.yahoo.com/quote/${ticker}`} target="_blank" rel="noopener noreferrer"
-            style={{color:"#00A8FF",fontSize:12,fontWeight:700,textDecoration:"none",background:"rgba(0,168,255,0.08)",padding:"7px 18px",borderRadius:8,border:"1px solid rgba(0,168,255,0.2)"}}>
-            Ver en Yahoo Finance →
-          </a>
-        </div>
-      )}
-      <div ref={ref} style={{width:"100%",height:300,display:status==="ok"?"block":"none"}}/>
+    <div style={{background:"#fff",userSelect:"none"}}>
+      {/* Header mini stats */}
+      <div style={{display:"flex",alignItems:"center",gap:12,padding:"8px 14px 4px",borderBottom:"1px solid #f1f5f9"}}>
+        <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#0f172a"}}>{closes[closes.length-1]?.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+        <span style={{background:isUp?"rgba(34,197,94,0.1)":"rgba(239,68,68,0.1)",color:col,fontWeight:700,fontSize:12,padding:"2px 8px",borderRadius:6}}>{isUp?"+":""}{pct}%</span>
+        <span style={{color:"#94a3b8",fontSize:11,marginLeft:"auto"}}>Últimos 90 días</span>
+      </div>
+      {/* SVG */}
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:230,display:"block"}}>
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={col} stopOpacity="0.18"/>
+            <stop offset="100%" stopColor={col} stopOpacity="0.02"/>
+          </linearGradient>
+        </defs>
+        {/* Grid */}
+        {gridVals.map((v,i)=>(
+          <g key={i}>
+            <line x1={pl} x2={W-pr} y1={yS(v).toFixed(1)} y2={yS(v).toFixed(1)} stroke="#f1f5f9" strokeWidth="1"/>
+            <text x={W-pr+6} y={yS(v)+4} fontSize="9" fill="#cbd5e1">{v>=1000?v.toFixed(0):v.toFixed(2)}</text>
+          </g>
+        ))}
+        {/* Area */}
+        <path d={areaPath} fill={`url(#${gradId})`}/>
+        {/* Line */}
+        <path d={linePath} fill="none" stroke={col} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"/>
+        {/* Last price dot */}
+        <circle cx={xS(closes.length-1).toFixed(1)} cy={yS(closes[closes.length-1]).toFixed(1)} r="3" fill={col}/>
+        <text x={W-pr+6} y={yS(closes[closes.length-1])+4} fontSize="10" fill={col} fontWeight="700">
+          {closes[closes.length-1]>=1000?closes[closes.length-1].toFixed(0):closes[closes.length-1].toFixed(2)}
+        </text>
+        {/* X axis dates */}
+        {[0, Math.floor(candles.length/2), candles.length-1].map(i=>(
+          <text key={i} x={xS(i)} y={H-6} fontSize="9" fill="#94a3b8" textAnchor="middle">
+            {candles[i]?.time ? new Date(candles[i].time*1000).toLocaleDateString("es",{month:"short",day:"numeric"}) : ""}
+          </text>
+        ))}
+      </svg>
+      <div style={{padding:"2px 14px 8px",textAlign:"right",fontSize:10,color:"#cbd5e1"}}>Datos: Yahoo Finance</div>
     </div>
   );
 }
@@ -4975,6 +5021,11 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             </div>
           );
         })}
+      </div>
+
+      {/* ── ANUNCIO GOOGLE — posición premium sidebar ── */}
+      <div style={{marginBottom:10}}>
+        <AdBannerSidebar/>
       </div>
 
       {/* ── COMUNIDAD vs IA ── */}
@@ -8726,8 +8777,9 @@ export default function App(){
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
-            <SidebarTickerWidget/>
+            {/* 🔴 ANUNCIO — posición premium, máxima visibilidad */}
             <AdBannerSidebar/>
+            <SidebarTickerWidget/>
             <PolymarketWidget/>
           </div>
         </div>
