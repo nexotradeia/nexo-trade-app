@@ -2258,60 +2258,90 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
   );
 }
 
-// ── TRADINGVIEW CHART — carga via JS oficial (sin iframe directo) ─────────────
-function TVChart({ticker, lang="es"}){
-  const containerId = `tv_${ticker}_${Math.random().toString(36).slice(2,7)}`;
-  const ref = useRef();
-  const idRef = useRef(containerId);
+// ── CHART — Velas con Lightweight Charts + datos de Yahoo Finance ─────────────
+const LC_CDN = "https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js";
+
+function TVChart({ticker}){
+  const ref    = useRef();
+  const chart  = useRef(null);
+  const [status, setStatus] = useState("loading"); // loading | ok | error
 
   useEffect(()=>{
-    const id = idRef.current;
-    // Limpiar widget anterior si existe
-    if(ref.current) ref.current.innerHTML = "";
+    let destroyed = false;
+    setStatus("loading");
 
-    const createWidget = () => {
-      if(!window.TradingView || !ref.current) return;
+    const loadLC = () => new Promise((res,rej)=>{
+      if(window.LightweightCharts){ res(); return; }
+      const s = document.createElement("script");
+      s.src = LC_CDN; s.async = true;
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+
+    const run = async () => {
       try{
-        new window.TradingView.widget({
-          container_id: id,
-          symbol: ticker,
-          interval: "D",
-          timezone: "exchange",
-          theme: "light",
-          style: "1",
-          locale: lang==="en"?"en":"es",
-          toolbar_bg: "#f8fafc",
-          enable_publishing: false,
-          hide_top_toolbar: false,
-          hide_legend: false,
-          save_image: false,
-          width: "100%",
-          height: 340,
-          allow_symbol_change: true,
-          autosize: true,
+        await loadLC();
+        const r = await fetch(`/api/chart?ticker=${encodeURIComponent(ticker)}&range=1y&interval=1d`);
+        const data = await r.json();
+        if(destroyed) return;
+        if(!data.candles?.length) throw new Error("sin datos");
+
+        // Limpiar chart anterior
+        if(chart.current){ try{ chart.current.remove(); }catch(e){} chart.current=null; }
+        if(!ref.current) return;
+
+        const c = window.LightweightCharts.createChart(ref.current,{
+          width:  ref.current.clientWidth || 640,
+          height: 300,
+          layout: { background:{type:"solid",color:"#fff"}, textColor:"#334155", fontSize:11 },
+          grid:   { vertLines:{color:"#f1f5f9"}, horzLines:{color:"#f1f5f9"} },
+          crosshair:{ mode:1 },
+          rightPriceScale:{ borderColor:"#e2e8f0" },
+          timeScale:{ borderColor:"#e2e8f0", timeVisible:true, secondsVisible:false },
+          handleScroll: true, handleScale: true,
         });
-      }catch(e){}
+        chart.current = c;
+
+        const series = c.addCandlestickSeries({
+          upColor:"#22c55e", downColor:"#ef4444",
+          borderUpColor:"#22c55e", borderDownColor:"#ef4444",
+          wickUpColor:"#22c55e",  wickDownColor:"#ef4444",
+        });
+        series.setData(data.candles);
+        c.timeScale().fitContent();
+
+        // Responsive
+        const ro = new ResizeObserver(()=>{ if(ref.current&&c) c.applyOptions({width:ref.current.clientWidth}); });
+        if(ref.current) ro.observe(ref.current);
+
+        if(!destroyed) setStatus("ok");
+      }catch(e){
+        if(!destroyed) setStatus("error");
+      }
     };
-
-    // Si ya está el script cargado, crear directo
-    if(window.TradingView){ createWidget(); return; }
-
-    // Si no, cargar el script
-    const existing = document.getElementById("tv-script");
-    if(existing){ existing.addEventListener("load", createWidget); return ()=>existing.removeEventListener("load",createWidget); }
-
-    const script = document.createElement("script");
-    script.id = "tv-script";
-    script.src = "https://s3.tradingview.com/tv.js";
-    script.async = true;
-    script.onload = createWidget;
-    document.head.appendChild(script);
-    return ()=>{ try{ if(ref.current) ref.current.innerHTML=""; }catch(e){} };
-  },[ticker, lang]);
+    run();
+    return ()=>{ destroyed=true; if(chart.current){ try{chart.current.remove();}catch(e){} chart.current=null; } };
+  },[ticker]);
 
   return(
-    <div style={{height:340,background:"#f8fafc"}}>
-      <div id={idRef.current} ref={ref} style={{width:"100%",height:"100%"}}/>
+    <div style={{position:"relative",background:"#fff",minHeight:300}}>
+      {status==="loading"&&(
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,background:"#f8fafc",zIndex:2}}>
+          <div style={{width:28,height:28,border:"3px solid #e2e8f0",borderTopColor:"#00A8FF",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
+          <span style={{color:"#94a3b8",fontSize:12}}>Cargando gráfico {ticker}...</span>
+        </div>
+      )}
+      {status==="error"&&(
+        <div style={{height:300,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:"#f8fafc"}}>
+          <span style={{fontSize:36}}>📊</span>
+          <span style={{color:"#64748b",fontSize:13,fontWeight:600}}>{ticker} no disponible en este momento</span>
+          <a href={`https://finance.yahoo.com/quote/${ticker}`} target="_blank" rel="noopener noreferrer"
+            style={{color:"#00A8FF",fontSize:12,fontWeight:700,textDecoration:"none",background:"rgba(0,168,255,0.08)",padding:"7px 18px",borderRadius:8,border:"1px solid rgba(0,168,255,0.2)"}}>
+            Ver en Yahoo Finance →
+          </a>
+        </div>
+      )}
+      <div ref={ref} style={{width:"100%",height:300,display:status==="ok"?"block":"none"}}/>
     </div>
   );
 }
