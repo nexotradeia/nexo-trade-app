@@ -2258,6 +2258,64 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
   );
 }
 
+// ── TRADINGVIEW CHART — carga via JS oficial (sin iframe directo) ─────────────
+function TVChart({ticker, lang="es"}){
+  const containerId = `tv_${ticker}_${Math.random().toString(36).slice(2,7)}`;
+  const ref = useRef();
+  const idRef = useRef(containerId);
+
+  useEffect(()=>{
+    const id = idRef.current;
+    // Limpiar widget anterior si existe
+    if(ref.current) ref.current.innerHTML = "";
+
+    const createWidget = () => {
+      if(!window.TradingView || !ref.current) return;
+      try{
+        new window.TradingView.widget({
+          container_id: id,
+          symbol: ticker,
+          interval: "D",
+          timezone: "exchange",
+          theme: "light",
+          style: "1",
+          locale: lang==="en"?"en":"es",
+          toolbar_bg: "#f8fafc",
+          enable_publishing: false,
+          hide_top_toolbar: false,
+          hide_legend: false,
+          save_image: false,
+          width: "100%",
+          height: 340,
+          allow_symbol_change: true,
+          autosize: true,
+        });
+      }catch(e){}
+    };
+
+    // Si ya está el script cargado, crear directo
+    if(window.TradingView){ createWidget(); return; }
+
+    // Si no, cargar el script
+    const existing = document.getElementById("tv-script");
+    if(existing){ existing.addEventListener("load", createWidget); return ()=>existing.removeEventListener("load",createWidget); }
+
+    const script = document.createElement("script");
+    script.id = "tv-script";
+    script.src = "https://s3.tradingview.com/tv.js";
+    script.async = true;
+    script.onload = createWidget;
+    document.head.appendChild(script);
+    return ()=>{ try{ if(ref.current) ref.current.innerHTML=""; }catch(e){} };
+  },[ticker, lang]);
+
+  return(
+    <div style={{height:340,background:"#f8fafc"}}>
+      <div id={idRef.current} ref={ref} style={{width:"100%",height:"100%"}}/>
+    </div>
+  );
+}
+
 function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,isPremium=false,onNeedPremium}){
   const [quote,setQuote]=useState(null);
   const [loadingQ,setLoadingQ]=useState(true);
@@ -2333,14 +2391,7 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
             {showChart ? "▲ Ocultar" : "▼ Mostrar"}
           </button>
         </div>
-        {showChart&&(
-          <div style={{height:320}}>
-            <iframe
-              src={`https://s.tradingview.com/widgetembed/?symbol=${ticker}&interval=D&theme=light&style=1&locale=${lang==="en"?"en":"es"}&hide_top_toolbar=0&hide_legend=0&save_image=0`}
-              style={{width:"100%",height:"100%",border:"none"}}
-              title={`${ticker} chart`}/>
-          </div>
-        )}
+        {showChart&&<TVChart ticker={ticker} lang={lang}/>}
       </div>
 
       {/* Sentimiento Histórico — Premium */}
