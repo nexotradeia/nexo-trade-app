@@ -5654,11 +5654,16 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 // ── NAV TABS ──────────────────────────────────────────────────────────────────
 // ── JOB BOARD ────────────────────────────────────────────────────────────────
 const SAMPLE_JOBS = [
-  {id:1,company:"Robinhood",logo:"🐦",title:"Trader de Renta Variable — LATAM",type:"Full-time",location:"Remoto",salary:"$80,000–$120,000/año",tags:["Trading","Equities","LATAM"],desc:"Buscamos trader experimentado para gestionar posiciones en mercados latinoamericanos. 3+ años de experiencia requeridos.",featured:true,date:"hace 2 días"},
-  {id:2,company:"Bitso",logo:"🟠",title:"Analista de Mercados Crypto",type:"Full-time",location:"Ciudad de México / Remoto",salary:"$60,000–$90,000/año",tags:["Crypto","DeFi","Análisis"],desc:"Únete al exchange de crypto #1 en LATAM. Analizarás mercados, elaborarás reportes y apoyarás decisiones de inversión.",featured:true,date:"hace 3 días"},
-  {id:3,company:"GBM+",logo:"💚",title:"Asesor de Inversiones Senior",type:"Full-time",location:"Ciudad de México",salary:"$70,000–$100,000 MXN/mes",tags:["Inversiones","Acciones","Clientes"],desc:"Administra portafolios de clientes premium. Certificación AMIB requerida. Excelentes comisiones.",featured:false,date:"hace 5 días"},
-  {id:4,company:"Kushki",logo:"🔵",title:"Risk & Compliance Analyst",type:"Full-time",location:"Bogotá / Remoto",salary:"$40,000–$55,000/año",tags:["Riesgo","Fintech","Compliance"],desc:"Analiza y mitiga riesgos en transacciones de pagos digitales. Experiencia en regulación financiera LATAM.",featured:false,date:"hace 1 semana"},
-  {id:5,company:"NexoTrade",logo:"🔷",title:"Community Manager — Trading",type:"Part-time",location:"100% Remoto",salary:"$800–$1,500/mes",tags:["Trading","Redes Sociales","Español"],desc:"¿Apasionado del trading y las redes sociales? Ayúdanos a hacer crecer la comunidad de inversores hispanos más grande.",featured:false,date:"hace 2 semanas"},
+  {id:1,company:"Robinhood",logo:"🐦",title:"Trader de Renta Variable — LATAM",type:"Full-time",location:"Remoto",salary:"$80,000–$120,000/año",tags:["Trading","Equities","LATAM"],desc:"Buscamos trader experimentado para gestionar posiciones en mercados latinoamericanos. 3+ años de experiencia requeridos.",featured:true,date:"hace 2 días",url:"https://careers.robinhood.com"},
+  {id:2,company:"Bitso",logo:"🟠",title:"Analista de Mercados Crypto",type:"Full-time",location:"Ciudad de México / Remoto",salary:"$60,000–$90,000/año",tags:["Crypto","DeFi","Análisis"],desc:"Únete al exchange de crypto #1 en LATAM. Analizarás mercados, elaborarás reportes y apoyarás decisiones de inversión.",featured:true,date:"hace 3 días",url:"https://bitso.com/careers"},
+  {id:3,company:"GBM+",logo:"💚",title:"Asesor de Inversiones Senior",type:"Full-time",location:"Ciudad de México",salary:"$70,000–$100,000 MXN/mes",tags:["Inversiones","Acciones","Clientes"],desc:"Administra portafolios de clientes premium. Certificación AMIB requerida. Excelentes comisiones.",featured:false,date:"hace 5 días",url:"https://gbm.com/carreras"},
+  {id:4,company:"Kushki",logo:"🔵",title:"Risk & Compliance Analyst",type:"Full-time",location:"Bogotá / Remoto",salary:"$40,000–$55,000/año",tags:["Riesgo","Fintech","Compliance"],desc:"Analiza y mitiga riesgos en transacciones de pagos digitales. Experiencia en regulación financiera LATAM.",featured:false,date:"hace 1 semana",url:"https://kushki.com/careers"},
+  {id:5,company:"NexoTrade",logo:"🔷",title:"Community Manager — Trading",type:"Part-time",location:"100% Remoto",salary:"$800–$1,500/mes",tags:["Trading","Redes Sociales","Español"],desc:"¿Apasionado del trading y las redes sociales? Ayúdanos a hacer crecer la comunidad de inversores hispanos más grande.",featured:false,date:"hace 2 semanas",url:"https://nexotradeia.com"},
+  {id:6,company:"FTMO",logo:"🏆",title:"Funded Trader Program — Reclutamiento LATAM",type:"Freelance",location:"100% Remoto",salary:"Hasta $200,000/año (profit share)",tags:["Prop Firm","Funded","Trading"],desc:"FTMO busca traders talentosos de LATAM para su programa de cuentas fondeadas. Demuestra tu habilidad y opera con capital de hasta $200K.",featured:true,date:"hace 1 día",url:"https://ftmo.com"},
+  {id:7,company:"Nubank",logo:"💜",title:"Analista Quant — Portafolios",type:"Full-time",location:"São Paulo / Remoto",salary:"$90,000–$130,000/año",tags:["Quant","Python","Modelos"],desc:"Diseña modelos cuantitativos para gestión de portafolios y riesgo crediticio. Python, SQL y estadística avanzada requeridos.",featured:false,date:"hace 4 días",url:"https://nubank.com.br/careers"},
+  {id:8,company:"Mercado Pago",logo:"💙",title:"Especialista en Inversiones Fintech",type:"Full-time",location:"Buenos Aires / Remoto",salary:"$50,000–$80,000/año",tags:["Fintech","Inversiones","LATAM"],desc:"Desarrolla productos de inversión para millones de usuarios de MercadoPago en LATAM. Experiencia en banca digital requerida.",featured:false,date:"hace 6 días",url:"https://mercadopago.com/careers"},
+  {id:9,company:"Interactive Brokers",logo:"🌐",title:"Financial Advisor — Clientes LATAM",type:"Full-time",location:"Miami / Remoto",salary:"$60,000–$100,000 + comisiones",tags:["Broker","Asesoría","Clientes"],desc:"Asesora clientes latinoamericanos en apertura de cuentas, estrategias de inversión y productos de IBKR. Inglés y español fluido.",featured:false,date:"hace 1 semana",url:"https://ibkr.com/careers"},
+  {id:10,company:"Topstep",logo:"📈",title:"Trading Coach — Comunidad Hispana",type:"Part-time",location:"100% Remoto",salary:"$2,000–$4,000/mes",tags:["Educación","Prop Firm","Coaching"],desc:"Entrena a traders hispanohablantes dentro de la plataforma Topstep. Experiencia en futures o forex requerida.",featured:false,date:"hace 10 días",url:"https://topstep.com"},
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -6031,6 +6036,15 @@ function JobBoardPage({user, onNeedAuth}){
     setSubmitted(true);
   };
 
+  const HIRING_COMPANIES = [
+    {name:"FTMO",logo:"🏆",color:"#f59e0b",count:3},
+    {name:"Bitso",logo:"🟠",color:"#f97316",count:5},
+    {name:"GBM+",logo:"💚",color:"#16a34a",count:2},
+    {name:"Nubank",logo:"💜",color:"#7c3aed",count:4},
+    {name:"IBKR",logo:"🌐",color:"#0090d4",count:2},
+    {name:"Topstep",logo:"📈",color:"#00e58f",count:1},
+  ];
+
   return(
     <div>
       {/* HERO */}
@@ -6042,18 +6056,44 @@ function JobBoardPage({user, onNeedAuth}){
             <span style={{color:"#00A8FF",fontSize:11,fontWeight:700,letterSpacing:1}}>NEXOTRADE JOBS</span>
           </div>
           <h1 style={{margin:"0 0 8px",color:"#F1F5F9",fontSize:24,fontWeight:900,lineHeight:1.2}}>Empleos en Finanzas & Trading</h1>
-          <p style={{margin:"0 0 20px",color:"#64748B",fontSize:14,lineHeight:1.6}}>Los mejores empleos en fintech, trading, crypto e inversiones para hispanohablantes.</p>
+          <p style={{margin:"0 0 16px",color:"#64748B",fontSize:14,lineHeight:1.6}}>Los mejores empleos en fintech, trading, crypto e inversiones para hispanohablantes.</p>
+          {/* Stats */}
+          <div style={{display:"flex",gap:16,flexWrap:"wrap",marginBottom:20}}>
+            {[["💼","10+ empleos activos"],["🌎","LATAM & Remoto"],["🏢","8 empresas contratando"],["⚡","Nuevos cada semana"]].map(([icon,label])=>(
+              <div key={label} style={{display:"flex",alignItems:"center",gap:6,color:"#94a3b8",fontSize:12}}>
+                <span>{icon}</span><span>{label}</span>
+              </div>
+            ))}
+          </div>
           <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
             <div style={{flex:1,minWidth:200,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"8px 14px",display:"flex",alignItems:"center",gap:8}}>
               <span style={{fontSize:13,color:"#64748B"}}>🔍</span>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar puesto, empresa..."
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar puesto, empresa, tag..."
                 style={{background:"none",border:"none",outline:"none",color:"#F1F5F9",fontSize:13,flex:1,fontFamily:"inherit"}}/>
             </div>
             <button onClick={()=>{if(!user){onNeedAuth();return;}setShowForm(true);}}
-              style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"8px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-              + Publicar empleo ($99)
+              style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"8px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 4px 14px rgba(0,168,255,0.3)"}}>
+              + Publicar empleo ($49–$99)
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Empresas contratando */}
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:10,textTransform:"uppercase"}}>Empresas contratando ahora</div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {HIRING_COMPANIES.map(c=>(
+            <div key={c.name} style={{background:"rgba(14,22,40,0.8)",border:`1px solid ${c.color}33`,borderRadius:12,padding:"8px 14px",display:"flex",alignItems:"center",gap:8,cursor:"pointer",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=c.color+"66";e.currentTarget.style.background="rgba(14,22,40,1)";}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=c.color+"33";e.currentTarget.style.background="rgba(14,22,40,0.8)";}}>
+              <span style={{fontSize:18}}>{c.logo}</span>
+              <div>
+                <div style={{color:"#e2e8f0",fontSize:12,fontWeight:700}}>{c.name}</div>
+                <div style={{color:c.color,fontSize:10,fontWeight:600}}>{c.count} puesto{c.count!==1?"s":""}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -6061,120 +6101,150 @@ function JobBoardPage({user, onNeedAuth}){
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
         {filters.map(f=>(
           <button key={f} onClick={()=>setFilter(f)}
-            style={{background:filter===f?"#00A8FF":"#fff",color:filter===f?"#fff":"#475569",border:`1px solid ${filter===f?"#00A8FF":"rgba(15,23,42,0.1)"}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
+            style={{background:filter===f?"#00A8FF":"rgba(14,22,40,0.8)",color:filter===f?"#fff":"#94a3b8",border:`1px solid ${filter===f?"#00A8FF":"rgba(255,255,255,0.08)"}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
             {f}
           </button>
         ))}
-        <span style={{marginLeft:"auto",color:"#94A3B8",fontSize:12,alignSelf:"center"}}>{jobs.length} empleos</span>
+        <span style={{marginLeft:"auto",color:"#475569",fontSize:12,alignSelf:"center"}}>{jobs.length} empleo{jobs.length!==1?"s":""}</span>
       </div>
 
       {/* Lista de empleos */}
       <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:24}}>
         {jobs.map(job=>(
           <div key={job.id} style={{
-            background:"#fff",
-            border:`1.5px solid ${job.featured?"rgba(0,168,255,0.3)":"rgba(15,23,42,0.08)"}`,
+            background:"rgba(14,22,40,0.85)",
+            border:`1.5px solid ${job.featured?"rgba(0,168,255,0.3)":"rgba(255,255,255,0.07)"}`,
             borderRadius:16,padding:"18px 20px",
-            boxShadow:job.featured?"0 4px 20px rgba(0,168,255,0.08)":"0 2px 8px rgba(0,0,0,0.04)",
+            boxShadow:job.featured?"0 4px 20px rgba(0,168,255,0.1)":"none",
             position:"relative",overflow:"hidden",
-            transition:"all 0.15s",cursor:"pointer",
+            transition:"all 0.15s",
           }}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.4)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,168,255,0.1)";e.currentTarget.style.transform="translateY(-1px)";}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor=job.featured?"rgba(0,168,255,0.3)":"rgba(15,23,42,0.08)";e.currentTarget.style.boxShadow=job.featured?"0 4px 20px rgba(0,168,255,0.08)":"0 2px 8px rgba(0,0,0,0.04)";e.currentTarget.style.transform="translateY(0)";}}>
-            {job.featured&&<div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#00A8FF,#0090D4)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 12px",borderRadius:"0 14px 0 10px",letterSpacing:0.8}}>DESTACADO</div>}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor=job.featured?"rgba(0,168,255,0.5)":"rgba(255,255,255,0.14)";e.currentTarget.style.transform="translateY(-1px)";}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor=job.featured?"rgba(0,168,255,0.3)":"rgba(255,255,255,0.07)";e.currentTarget.style.transform="translateY(0)";}}>
+            {job.featured&&<div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#00A8FF,#0090D4)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 12px",borderRadius:"0 14px 0 10px",letterSpacing:0.8}}>⭐ DESTACADO</div>}
             <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
-              <div style={{width:46,height:46,borderRadius:12,background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>
+              <div style={{width:48,height:48,borderRadius:13,background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>
                 {job.logo}
               </div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,flexWrap:"wrap",marginBottom:4}}>
                   <div>
-                    <div style={{fontWeight:800,fontSize:15,color:"#0F172A",marginBottom:2}}>{job.title}</div>
-                    <div style={{fontSize:13,color:"#475569",fontWeight:600}}>{job.company}</div>
+                    <div style={{fontWeight:800,fontSize:15,color:"#F1F5F9",marginBottom:2}}>{job.title}</div>
+                    <div style={{fontSize:13,color:"#64748b",fontWeight:600}}>{job.company}</div>
                   </div>
                   <div style={{textAlign:"right",flexShrink:0}}>
-                    <div style={{fontWeight:700,fontSize:13,color:"#16A34A"}}>{job.salary}</div>
-                    <div style={{fontSize:11,color:"#94A3B8",marginTop:2}}>{job.date}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:"#00E58F"}}>{job.salary}</div>
+                    <div style={{fontSize:11,color:"#475569",marginTop:2}}>{job.date}</div>
                   </div>
                 </div>
-                <div style={{fontSize:12,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{job.desc}</div>
+                <div style={{fontSize:12,color:"#64748B",lineHeight:1.6,marginBottom:12}}>{job.desc}</div>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
-                  <span style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#0090D4",fontWeight:600}}>📍 {job.location}</span>
-                  <span style={{background:"rgba(22,163,74,0.08)",border:"1px solid rgba(22,163,74,0.15)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#16A34A",fontWeight:600}}>⏰ {job.type}</span>
+                  <span style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#00A8FF",fontWeight:600}}>📍 {job.location}</span>
+                  <span style={{background:"rgba(0,229,143,0.08)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#00E58F",fontWeight:600}}>⏰ {job.type}</span>
                   {job.tags.map(tag=>(
-                    <span key={tag} style={{background:"rgba(15,23,42,0.05)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#64748B",fontWeight:500}}>{tag}</span>
+                    <span key={tag} style={{background:"rgba(255,255,255,0.04)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#64748B",fontWeight:500}}>{tag}</span>
                   ))}
+                  <a href={job.url||"#"} target="_blank" rel="noopener noreferrer"
+                    style={{marginLeft:"auto",background:"linear-gradient(135deg,#00A8FF22,#00A8FF11)",border:"1px solid rgba(0,168,255,0.35)",borderRadius:20,padding:"5px 16px",fontSize:12,color:"#00A8FF",fontWeight:700,textDecoration:"none",whiteSpace:"nowrap",transition:"all 0.15s",flexShrink:0}}
+                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.2)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,#00A8FF22,#00A8FF11)";}}>
+                    Aplicar →
+                  </a>
                 </div>
               </div>
             </div>
           </div>
         ))}
+        {jobs.length===0&&(
+          <div style={{textAlign:"center",padding:"40px 20px",color:"#475569"}}>
+            <div style={{fontSize:36,marginBottom:10}}>🔍</div>
+            <div style={{fontWeight:700,marginBottom:6}}>Sin resultados</div>
+            <div style={{fontSize:13}}>Intenta con otro filtro o búsqueda</div>
+          </div>
+        )}
       </div>
 
       {/* CTA para publicar */}
-      <div style={{background:"linear-gradient(135deg,#0F172A,#1E293B)",borderRadius:16,padding:"24px",textAlign:"center",marginBottom:20}}>
-        <div style={{fontSize:32,marginBottom:10}}>💼</div>
-        <div style={{fontWeight:900,color:"#F1F5F9",fontSize:18,marginBottom:6}}>¿Tienes un puesto para traders?</div>
-        <div style={{color:"#64748B",fontSize:13,marginBottom:16,lineHeight:1.6}}>Llega a miles de traders e inversores hispanohablantes activos.<br/>Publicación destacada desde <strong style={{color:"#00A8FF"}}>$99 USD</strong> · Publicación básica desde <strong style={{color:"#94A3B8"}}>$49 USD</strong></div>
-        <button onClick={()=>{if(!user){onNeedAuth();return;}setShowForm(true);}}
-          style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(0,168,255,0.3)"}}>
-          Publicar empleo ahora →
-        </button>
+      <div style={{background:"linear-gradient(135deg,rgba(0,168,255,0.08),rgba(0,144,212,0.04))",border:"1px solid rgba(0,168,255,0.2)",borderRadius:16,padding:"28px",textAlign:"center",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 0%,rgba(0,168,255,0.06),transparent 60%)",pointerEvents:"none"}}/>
+        <div style={{position:"relative"}}>
+          <div style={{fontSize:36,marginBottom:10}}>🏢</div>
+          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:20,marginBottom:6}}>¿Tu empresa busca traders?</div>
+          <div style={{color:"#64748B",fontSize:13,marginBottom:6,lineHeight:1.7}}>Llega a +3,200 traders e inversores hispanohablantes activos.</div>
+          <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:18}}>
+            {[["💼","Publicación básica","$49 USD / 30 días"],["⭐","Publicación destacada","$99 USD / 30 días"],["📧","Newsletter + home","$149 USD"]].map(([ic,ti,pr])=>(
+              <div key={ti} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"12px 16px",minWidth:120}}>
+                <div style={{fontSize:20,marginBottom:4}}>{ic}</div>
+                <div style={{color:"#e2e8f0",fontWeight:700,fontSize:12}}>{ti}</div>
+                <div style={{color:"#00A8FF",fontWeight:800,fontSize:13,marginTop:2}}>{pr}</div>
+              </div>
+            ))}
+          </div>
+          <button onClick={()=>{if(!user){onNeedAuth();return;}setShowForm(true);}}
+            style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:12,padding:"12px 32px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(0,168,255,0.35)"}}>
+            Publicar empleo ahora →
+          </button>
+        </div>
       </div>
 
       {/* Modal publicar empleo */}
       {showForm&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setShowForm(false)}>
-          <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 24px",maxWidth:480,width:"100%",maxHeight:"90vh",overflowY:"auto"}}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setShowForm(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:"#0f172a",border:"1px solid rgba(255,255,255,0.1)",borderRadius:20,padding:"28px 24px",maxWidth:500,width:"100%",maxHeight:"90vh",overflowY:"auto",boxShadow:"0 25px 60px rgba(0,0,0,0.6)"}}>
             {submitted?(
               <div style={{textAlign:"center",padding:"20px 0"}}>
                 <div style={{fontSize:48,marginBottom:12}}>✅</div>
-                <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginBottom:8}}>¡Empleo enviado!</div>
-                <div style={{color:"#64748B",fontSize:13,marginBottom:20}}>Recibirás un email con el link de pago. Tu empleo aparecerá en 24h tras la confirmación.</div>
+                <div style={{fontWeight:900,fontSize:18,color:"#F1F5F9",marginBottom:8}}>¡Empleo enviado!</div>
+                <div style={{color:"#64748B",fontSize:13,marginBottom:20}}>Te enviamos el link de pago a tu email. Tu empleo aparecerá en 24h tras confirmar el pago.</div>
                 <button onClick={()=>{setShowForm(false);setSubmitted(false);}} style={{background:"#00A8FF",border:"none",borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Cerrar</button>
               </div>
             ):(
               <>
-                <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginBottom:4}}>Publicar empleo</div>
-                <div style={{fontSize:12,color:"#64748B",marginBottom:20}}>Completa el formulario — te enviamos link de pago por email</div>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
+                  <div>
+                    <div style={{fontWeight:900,fontSize:18,color:"#F1F5F9",marginBottom:2}}>Publicar empleo</div>
+                    <div style={{fontSize:12,color:"#64748B"}}>Te enviamos link de pago Stripe a tu email</div>
+                  </div>
+                  <button onClick={()=>setShowForm(false)} style={{background:"#1e293b",border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",color:"#94a3b8",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+                </div>
                 {[
-                  {label:"Empresa",key:"company",placeholder:"Ej: Bitso, GBM+, Robinhood"},
+                  {label:"Empresa",key:"company",placeholder:"Ej: Bitso, GBM+, FTMO"},
                   {label:"Título del puesto",key:"title",placeholder:"Ej: Trader de Renta Variable"},
                   {label:"Ubicación",key:"location",placeholder:"Ej: Ciudad de México / Remoto"},
-                  {label:"Salario",key:"salary",placeholder:"Ej: $60,000–$90,000/año"},
-                  {label:"Tu email de contacto",key:"email",placeholder:"para enviarte el link de pago"},
+                  {label:"Salario estimado",key:"salary",placeholder:"Ej: $60,000–$90,000/año"},
+                  {label:"Tu email de contacto",key:"email",placeholder:"Para enviarte el link de pago"},
                   {label:"Tags (separados por coma)",key:"tags",placeholder:"Ej: Trading, Crypto, Remoto"},
                 ].map(field=>(
                   <div key={field.key} style={{marginBottom:12}}>
-                    <div style={{fontSize:12,fontWeight:700,color:"#475569",marginBottom:4}}>{field.label}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#64748b",marginBottom:5,textTransform:"uppercase",letterSpacing:0.4}}>{field.label}</div>
                     <input value={formData[field.key]} onChange={e=>setFormData(p=>({...p,[field.key]:e.target.value}))}
                       placeholder={field.placeholder}
-                      style={{width:"100%",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.12)",borderRadius:8,padding:"9px 12px",fontSize:13,color:"#0F172A",outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}/>
+                      style={{width:"100%",background:"#1e293b",border:"1px solid #334155",borderRadius:8,padding:"10px 12px",fontSize:13,color:"#e2e8f0",outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}/>
                   </div>
                 ))}
                 <div style={{marginBottom:16}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"#475569",marginBottom:4}}>Descripción del puesto</div>
+                  <div style={{fontSize:11,fontWeight:700,color:"#64748b",marginBottom:5,textTransform:"uppercase",letterSpacing:0.4}}>Descripción del puesto</div>
                   <textarea value={formData.desc} onChange={e=>setFormData(p=>({...p,desc:e.target.value}))}
                     placeholder="Describe el rol, requisitos y beneficios..."
                     rows={4}
-                    style={{width:"100%",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.12)",borderRadius:8,padding:"9px 12px",fontSize:13,color:"#0F172A",outline:"none",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"}}/>
+                    style={{width:"100%",background:"#1e293b",border:"1px solid #334155",borderRadius:8,padding:"10px 12px",fontSize:13,color:"#e2e8f0",outline:"none",resize:"vertical",boxSizing:"border-box",fontFamily:"inherit"}}/>
                 </div>
-                <div style={{display:"flex",gap:8,marginBottom:14}}>
+                <div style={{display:"flex",gap:8,marginBottom:16}}>
                   {["Full-time","Part-time","Freelance"].map(t=>(
                     <button key={t} onClick={()=>setFormData(p=>({...p,type:t}))}
-                      style={{flex:1,background:formData.type===t?"#00A8FF":"#F8FAFC",color:formData.type===t?"#fff":"#475569",border:`1px solid ${formData.type===t?"#00A8FF":"rgba(15,23,42,0.1)"}`,borderRadius:8,padding:"8px",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+                      style={{flex:1,background:formData.type===t?"rgba(0,168,255,0.15)":"#1e293b",color:formData.type===t?"#00A8FF":"#64748b",border:`1px solid ${formData.type===t?"rgba(0,168,255,0.4)":"#334155"}`,borderRadius:8,padding:"9px",fontSize:12,fontWeight:600,cursor:"pointer"}}>
                       {t}
                     </button>
                   ))}
                 </div>
-                <div style={{background:"rgba(0,168,255,0.06)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:10,padding:"12px",marginBottom:16,fontSize:12,color:"#475569"}}>
-                  💳 <strong>Precio:</strong> Publicación básica <strong style={{color:"#0F172A"}}>$49</strong> · Destacada (top) <strong style={{color:"#00A8FF"}}>$99</strong><br/>
+                <div style={{background:"rgba(0,168,255,0.06)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:10,padding:"12px",marginBottom:16,fontSize:12,color:"#64748b",lineHeight:1.6}}>
+                  💳 <strong style={{color:"#94a3b8"}}>Precios:</strong> Básica <strong style={{color:"#e2e8f0"}}>$49</strong> · Destacada <strong style={{color:"#00A8FF"}}>$99</strong> · Con newsletter+home <strong style={{color:"#f59e0b"}}>$149</strong><br/>
                   Te enviamos el link de pago Stripe a tu email en menos de 1 hora.
                 </div>
                 <div style={{display:"flex",gap:10}}>
-                  <button onClick={()=>setShowForm(false)} style={{flex:1,background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:10,padding:"11px",color:"#475569",fontSize:13,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
-                  <button onClick={handleSubmit} style={{flex:2,background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}}>
-                    Enviar y pagar →
+                  <button onClick={()=>setShowForm(false)} style={{flex:1,background:"#1e293b",border:"1px solid #334155",borderRadius:10,padding:"11px",color:"#64748b",fontSize:13,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
+                  <button onClick={handleSubmit} style={{flex:2,background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 14px rgba(0,168,255,0.3)"}}>
+                    Enviar y recibir link de pago →
                   </button>
                 </div>
               </>
