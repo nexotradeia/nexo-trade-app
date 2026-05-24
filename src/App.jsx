@@ -2240,7 +2240,9 @@ function NoticiasPage({lang}){
         </div>
       ):(
         news.map((n,i)=>(
-          <a key={i} href={n.url} target="_blank" rel="noopener noreferrer"
+          <div key={i}>
+          {i>0 && i%5===0 && <AdBannerFeed/>}
+          <a href={n.url} target="_blank" rel="noopener noreferrer"
             style={{display:"block",textDecoration:"none",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:10,boxShadow:C.shadow,borderLeft:`4px solid ${cat==="crypto"?"#F59E0B":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accent}`,transition:"box-shadow 0.2s,transform 0.15s"}}
             onMouseEnter={e=>{e.currentTarget.style.boxShadow=C.shadowMd;e.currentTarget.style.transform="translateY(-1px)";}}
             onMouseLeave={e=>{e.currentTarget.style.boxShadow=C.shadow;e.currentTarget.style.transform="translateY(0)";}}>
@@ -2258,6 +2260,7 @@ function NoticiasPage({lang}){
               </div>
             </div>
           </a>
+          </div>
         ))
       )}
     </div>
@@ -2471,6 +2474,42 @@ function MarketsMiniWidget(){
       )}
     </div>
   );
+}
+
+// ── ADSENSE BANNER COMPONENT ─────────────────────────────────────────────────
+const AD_CLIENT = "ca-pub-3490083853866736";
+function AdBanner({slot, format="auto", style={}, className=""}){
+  const ref = useRef(null);
+  const pushed = useRef(false);
+  useEffect(()=>{
+    if(pushed.current) return;
+    try{
+      if(typeof window !== "undefined" && window.adsbygoogle){
+        window.adsbygoogle.push({});
+        pushed.current = true;
+      }
+    }catch(e){}
+  },[]);
+  return(
+    <div style={{overflow:"hidden",textAlign:"center",...style}} className={className}>
+      <ins className="adsbygoogle"
+        style={{display:"block"}}
+        data-ad-client={AD_CLIENT}
+        data-ad-slot={slot}
+        data-ad-format={format}
+        data-full-width-responsive="true"/>
+    </div>
+  );
+}
+
+// Banner horizontal 728×90 / responsive — para feed y noticias
+function AdBannerFeed(){
+  return <AdBanner slot="2847361905" format="auto" style={{margin:"10px 0",borderRadius:8,overflow:"hidden"}}/>;
+}
+
+// Banner cuadrado 300×250 — para sidebar
+function AdBannerSidebar(){
+  return <AdBanner slot="7419283056" format="rectangle" style={{margin:"12px 0",borderRadius:10,overflow:"hidden"}}/>;
 }
 
 // ── SIDEBAR TICKER WIDGET — precios reales CoinGecko + acciones simuladas ─────
@@ -7638,6 +7677,8 @@ export default function App(){
             {(i+1)%8===0 && SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length]}/>
             )}
+            {/* AdSense banner cada 6 posts */}
+            {(i+1)%6===0 && <AdBannerFeed/>}
             {!effectivePremium && (i+1)%5===0 && (
               <VipFeedCard onGoVIP={()=>setPage(8)}/>
             )}
@@ -8225,6 +8266,7 @@ export default function App(){
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
             <SidebarTickerWidget/>
+            <AdBannerSidebar/>
             <PolymarketWidget/>
           </div>
         </div>
