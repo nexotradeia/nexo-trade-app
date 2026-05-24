@@ -348,14 +348,14 @@ const MOCK_NOTICIAS = [
   {id:5,titulo:"Meta earnings: publicidad digital sube 27% interanual",tituloEn:"Meta earnings: digital advertising up 27% YoY",fuente:"CNBC",tiempo:"hace 4h",ticker:"META",urgente:false,emoji:"📘"},
 ];
 const MOCK_EARNINGS = [
-  {ticker:"TSLA", nombre:"Tesla",     fecha:"Hoy",      fechaEn:"Today",    hora:"Tras cierre",    eps_est:"$0.51", rev_est:"$22.3B", sorpresa:null,  bull_pct:34, community_votes:4821, live:true,  live_viewers:3240, live_title:"Q1 2026 Earnings Call",   live_speaker:"Elon Musk — CEO",         ir_url:"https://ir.tesla.com/events-and-presentations",           yt_url:"https://www.youtube.com/@TeslaMotors/streams",       emoji:"🚗", sector:"EV / Auto"},
-  {ticker:"MSFT", nombre:"Microsoft", fecha:"Mañana",   fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$2.82", rev_est:"$60.8B", sorpresa:null,  bull_pct:78, community_votes:3107, live:false, live_viewers:0,    live_title:"Q3 FY2026 Earnings Call", live_speaker:"Satya Nadella — CEO",     ir_url:"https://www.microsoft.com/en-us/investor",               yt_url:"https://www.youtube.com/@MicrosoftInvestorRelations", emoji:"💻", sector:"Cloud / IA"},
-  {ticker:"GOOGL", nombre:"Alphabet", fecha:"Mañana",   fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$1.53", rev_est:"$78.6B", sorpresa:null,  bull_pct:71, community_votes:2654, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Sundar Pichai — CEO",     ir_url:"https://abc.xyz/investor/",                              yt_url:"https://www.youtube.com/@googleinvestorrelations",   emoji:"🔍", sector:"Ads / Cloud"},
-  {ticker:"META",  nombre:"Meta",     fecha:"Miér",     fechaEn:"Wed",      hora:"Tras cierre",    eps_est:"$4.71", rev_est:"$36.2B", sorpresa:null,  bull_pct:82, community_votes:1980, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Mark Zuckerberg — CEO",   ir_url:"https://investor.fb.com/investor-events/",               yt_url:"https://www.youtube.com/@Meta/streams",              emoji:"👁", sector:"Social / VR"},
-  {ticker:"NVDA",  nombre:"NVIDIA",   fecha:"Jue",      fechaEn:"Thu",      hora:"Tras cierre",    eps_est:"$5.52", rev_est:"$24.6B", sorpresa:null,  bull_pct:89, community_votes:5240, live:false, live_viewers:0,    live_title:"Q1 FY2027 Earnings Call", live_speaker:"Jensen Huang — CEO",      ir_url:"https://investor.nvidia.com/events-and-presentations",   yt_url:"https://www.youtube.com/@NVIDIA/streams",            emoji:"🖥️",sector:"IA / Semis"},
-  {ticker:"AAPL",  nombre:"Apple",    fecha:"Jue",      fechaEn:"Thu",      hora:"Tras cierre",    eps_est:"$1.61", rev_est:"$94.2B", sorpresa:null,  bull_pct:74, community_votes:3890, live:false, live_viewers:0,    live_title:"Q2 FY2026 Earnings Call", live_speaker:"Tim Cook — CEO",          ir_url:"https://investor.apple.com/news-events/events",          yt_url:"https://www.youtube.com/apple",                      emoji:"🍎", sector:"Consumer / Services"},
-  {ticker:"NFLX",  nombre:"Netflix",  fecha:"Vie",      fechaEn:"Fri",      hora:"Antes apertura", eps_est:"$4.53", rev_est:"$9.7B",  sorpresa:"+8%", bull_pct:66, community_votes:1432, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Greg Peters — CEO",       ir_url:"https://ir.netflix.net/ir-overview/presentations-events", yt_url:"https://www.youtube.com/@Netflix",                   emoji:"🎬", sector:"Streaming"},
-  {ticker:"AMZN",  nombre:"Amazon",   fecha:"Vie",      fechaEn:"Fri",      hora:"Tras cierre",    eps_est:"$1.29", rev_est:"$142.5B",sorpresa:null,  bull_pct:80, community_votes:2100, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Andy Jassy — CEO",        ir_url:"https://ir.aboutamazon.com/events-and-presentations",    yt_url:"https://www.youtube.com/@AmazonNews/streams",        emoji:"📦", sector:"eCommerce / AWS"},
+  {ticker:"TSLA", nombre:"Tesla",     fecha:"Hoy",      fechaEn:"Today",    hora:"Tras cierre",    eps_est:"$0.51", rev_est:"$22.3B", sorpresa:null,  bull_pct:34, community_votes:4821, live:true,  live_viewers:3240, live_title:"Q1 2026 Earnings Call",   live_speaker:"Elon Musk — CEO",         ir_url:"https://ir.tesla.com/events-and-presentations",           yt_url:"https://www.youtube.com/@TeslaMotors/streams",       yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=TeslaMotors",                emoji:"🚗", sector:"EV / Auto"},
+  {ticker:"MSFT", nombre:"Microsoft", fecha:"Mañana",   fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$2.82", rev_est:"$60.8B", sorpresa:null,  bull_pct:78, community_votes:3107, live:false, live_viewers:0,    live_title:"Q3 FY2026 Earnings Call", live_speaker:"Satya Nadella — CEO",     ir_url:"https://www.microsoft.com/en-us/investor",               yt_url:"https://www.youtube.com/@MicrosoftInvestorRelations", yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=MicrosoftInvestorRelations", emoji:"💻", sector:"Cloud / IA"},
+  {ticker:"GOOGL", nombre:"Alphabet", fecha:"Mañana",   fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$1.53", rev_est:"$78.6B", sorpresa:null,  bull_pct:71, community_votes:2654, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Sundar Pichai — CEO",     ir_url:"https://abc.xyz/investor/",                              yt_url:"https://www.youtube.com/@googleinvestorrelations",   yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=googleinvestorrelations",   emoji:"🔍", sector:"Ads / Cloud"},
+  {ticker:"META",  nombre:"Meta",     fecha:"Miér",     fechaEn:"Wed",      hora:"Tras cierre",    eps_est:"$4.71", rev_est:"$36.2B", sorpresa:null,  bull_pct:82, community_votes:1980, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Mark Zuckerberg — CEO",   ir_url:"https://investor.fb.com/investor-events/",               yt_url:"https://www.youtube.com/@Meta/streams",              yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=MetaInvestorRelations",      emoji:"👁", sector:"Social / VR"},
+  {ticker:"NVDA",  nombre:"NVIDIA",   fecha:"Jue",      fechaEn:"Thu",      hora:"Tras cierre",    eps_est:"$5.52", rev_est:"$24.6B", sorpresa:null,  bull_pct:89, community_votes:5240, live:false, live_viewers:0,    live_title:"Q1 FY2027 Earnings Call", live_speaker:"Jensen Huang — CEO",      ir_url:"https://investor.nvidia.com/events-and-presentations",   yt_url:"https://www.youtube.com/@NVIDIA/streams",            yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=nvidia",                     emoji:"🖥️",sector:"IA / Semis"},
+  {ticker:"AAPL",  nombre:"Apple",    fecha:"Jue",      fechaEn:"Thu",      hora:"Tras cierre",    eps_est:"$1.61", rev_est:"$94.2B", sorpresa:null,  bull_pct:74, community_votes:3890, live:false, live_viewers:0,    live_title:"Q2 FY2026 Earnings Call", live_speaker:"Tim Cook — CEO",          ir_url:"https://investor.apple.com/news-events/events",          yt_url:"https://www.youtube.com/apple",                      yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=apple",                      emoji:"🍎", sector:"Consumer / Services"},
+  {ticker:"NFLX",  nombre:"Netflix",  fecha:"Vie",      fechaEn:"Fri",      hora:"Antes apertura", eps_est:"$4.53", rev_est:"$9.7B",  sorpresa:"+8%", bull_pct:66, community_votes:1432, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Greg Peters — CEO",       ir_url:"https://ir.netflix.net/ir-overview/presentations-events", yt_url:"https://www.youtube.com/@Netflix",                   yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=netflix",                    emoji:"🎬", sector:"Streaming"},
+  {ticker:"AMZN",  nombre:"Amazon",   fecha:"Vie",      fechaEn:"Fri",      hora:"Tras cierre",    eps_est:"$1.29", rev_est:"$142.5B",sorpresa:null,  bull_pct:80, community_votes:2100, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Andy Jassy — CEO",        ir_url:"https://ir.aboutamazon.com/events-and-presentations",    yt_url:"https://www.youtube.com/@AmazonNews/streams",        yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=AmazonNewsUS",               emoji:"📦", sector:"eCommerce / AWS"},
 ];
 const MOCK_TRENDING = [
   {ticker:"SMCI",nombre:"SuperMicro",mentions:2840,change:+18.4,sentiment:92},
@@ -2766,6 +2766,8 @@ function LiveConferenceModal({event, lang, onClose}){
   const [reactions,setReactions] = useState([]);
   const [chatMsg, setChatMsg]    = useState("");
   const [elapsed, setElapsed]    = useState(0);
+  const [showEmbed, setShowEmbed] = useState(true);
+  const [embedError, setEmbedError] = useState(false);
   const [chatLog, setChatLog]    = useState([
     {user:"SPY_Trader 🐂",  avatar:"🐂", msg: lang==="en"?"Watching EPS beat vs miss closely":"Pendiente del EPS vs estimado", time:"2m"},
     {user:"CryptoWolf",     avatar:"🐺", msg: lang==="en"?"Revenue growth YoY? 💹":"¿Crecimiento de ingresos YoY? 💹",  time:"1m"},
@@ -2825,42 +2827,66 @@ function LiveConferenceModal({event, lang, onClose}){
 
           {/* Player area */}
           <div style={{flex:1,display:"flex",flexDirection:"column",borderRight:"1px solid #1e293b"}}>
-            {/* Video placeholder */}
-            <div style={{flex:1,background:"#020617",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",minHeight:260}}>
-              {/* Animated waveform */}
-              <div style={{display:"flex",gap:4,alignItems:"center",marginBottom:24}}>
-                {[40,70,55,90,65,80,45,100,60,85,50,75].map((h,i)=>(
-                  <div key={i} style={{width:5,borderRadius:3,background:`linear-gradient(180deg,#00c49a,#00a87f)`,height:`${h}%`,maxHeight:60,animation:`waveBar 0.8s ease-in-out ${i*0.07}s infinite alternate`,opacity:0.8}}/>
-                ))}
-              </div>
-              {/* Company info + Watch buttons */}
-              <div style={{width:72,height:72,borderRadius:18,background:"#1e293b",border:"2px solid #334155",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,marginBottom:12}}>
-                {event.emoji||"📊"}
-              </div>
-              <div style={{color:"#e2e8f0",fontWeight:900,fontSize:20,marginBottom:2}}>{event.nombre} — {event.ticker}</div>
-              <div style={{color:"#64748b",fontSize:13,marginBottom:4}}>{event.live_title}</div>
-              <div style={{color:"#94a3b8",fontSize:12,marginBottom:20}}>🎙️ {event.live_speaker}</div>
+            {/* Player area */}
+            <div style={{flex:1,background:"#020617",display:"flex",flexDirection:"column",position:"relative",minHeight:280,overflow:"hidden"}}>
 
-              {/* CTA buttons — links reales */}
-              <div style={{display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center",marginBottom:16}}>
-                <a href={event.yt_url} target="_blank" rel="noopener noreferrer"
-                  style={{display:"flex",alignItems:"center",gap:8,background:"#ef4444",borderRadius:12,padding:"11px 22px",color:"#fff",fontWeight:800,fontSize:14,textDecoration:"none",boxShadow:"0 0 20px rgba(239,68,68,0.4)"}}>
-                  ▶ Ver en YouTube
-                </a>
-                <a href={event.ir_url} target="_blank" rel="noopener noreferrer"
-                  style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.4)",borderRadius:12,padding:"11px 22px",color:"#00A8FF",fontWeight:800,fontSize:14,textDecoration:"none"}}>
-                  🏢 Investor Relations
-                </a>
-              </div>
-              <div style={{color:"#334155",fontSize:11,textAlign:"center",maxWidth:320}}>
-                El livestream se activa en los canales oficiales de la empresa durante el call.
-              </div>
-
-              {/* Live indicator */}
-              <div style={{position:"absolute",top:12,left:12,display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.15)",border:"1px solid #ef4444",borderRadius:20,padding:"4px 10px"}}>
+              {/* Live badge */}
+              <div style={{position:"absolute",top:12,left:12,zIndex:10,display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.15)",border:"1px solid #ef4444",borderRadius:20,padding:"4px 10px"}}>
                 <span style={{width:7,height:7,borderRadius:"50%",background:"#ef4444",display:"inline-block",animation:"nexo-pulse 1s infinite"}}/>
                 <span style={{color:"#ef4444",fontSize:11,fontWeight:700}}>EN VIVO · {event.ticker}</span>
               </div>
+
+              {/* Toggle embed/info button */}
+              {event.yt_embed && !embedError && (
+                <button onClick={()=>setShowEmbed(v=>!v)}
+                  style={{position:"absolute",top:12,right:12,zIndex:10,background:"rgba(15,23,42,0.85)",border:"1px solid #334155",borderRadius:10,padding:"5px 12px",cursor:"pointer",color:"#94a3b8",fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
+                  {showEmbed ? "📊 Ver info" : "📺 Ver stream"}
+                </button>
+              )}
+
+              {/* YouTube iframe embed */}
+              {event.yt_embed && showEmbed && !embedError ? (
+                <iframe
+                  key={event.ticker}
+                  src={event.yt_embed}
+                  title={`${event.nombre} — ${event.live_title}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  onError={()=>setEmbedError(true)}
+                  style={{width:"100%",flex:1,border:"none",display:"block",minHeight:280}}
+                />
+              ) : (
+                /* Fallback: waveform + info */
+                <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px"}}>
+                  {/* Animated waveform */}
+                  <div style={{display:"flex",gap:4,alignItems:"center",marginBottom:20}}>
+                    {[40,70,55,90,65,80,45,100,60,85,50,75].map((h,i)=>(
+                      <div key={i} style={{width:5,borderRadius:3,background:"linear-gradient(180deg,#00c49a,#00a87f)",height:`${h}%`,maxHeight:56,animation:`waveBar 0.8s ease-in-out ${i*0.07}s infinite alternate`,opacity:0.8}}/>
+                    ))}
+                  </div>
+
+                  <div style={{width:64,height:64,borderRadius:16,background:"#1e293b",border:"2px solid #334155",display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,marginBottom:10}}>
+                    {event.emoji||"📊"}
+                  </div>
+                  <div style={{color:"#e2e8f0",fontWeight:900,fontSize:18,marginBottom:2}}>{event.nombre} — {event.ticker}</div>
+                  <div style={{color:"#64748b",fontSize:12,marginBottom:3}}>{event.live_title}</div>
+                  <div style={{color:"#94a3b8",fontSize:11,marginBottom:18}}>🎙️ {event.live_speaker}</div>
+
+                  <div style={{display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center",marginBottom:12}}>
+                    <a href={event.yt_url} target="_blank" rel="noopener noreferrer"
+                      style={{display:"flex",alignItems:"center",gap:7,background:"#ef4444",borderRadius:12,padding:"10px 20px",color:"#fff",fontWeight:800,fontSize:13,textDecoration:"none",boxShadow:"0 0 18px rgba(239,68,68,0.4)"}}>
+                      ▶ Ver en YouTube
+                    </a>
+                    <a href={event.ir_url} target="_blank" rel="noopener noreferrer"
+                      style={{display:"flex",alignItems:"center",gap:7,background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.4)",borderRadius:12,padding:"10px 20px",color:"#00A8FF",fontWeight:800,fontSize:13,textDecoration:"none"}}>
+                      🏢 Investor Relations
+                    </a>
+                  </div>
+                  <div style={{color:"#334155",fontSize:11,textAlign:"center",maxWidth:300}}>
+                    {embedError ? "El embed no está disponible — accede desde YouTube directamente." : "El livestream se activa en los canales oficiales de la empresa durante el call."}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Reaction bar */}
