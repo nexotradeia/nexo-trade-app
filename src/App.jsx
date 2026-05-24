@@ -2265,48 +2265,105 @@ function NoticiasPage({lang}){
 }
 
 // ── TICKER STRIP — barra de precios animada ───────────────────────────────────
+// CoinGecko IDs para los 4 crypto principales (API gratis, sin key)
+const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
 const TICKER_DATA_INIT = [
-  {s:"BTC",  n:"Bitcoin",    p:67420,  c:+2.31,  col:"#f7931a"},
-  {s:"ETH",  n:"Ethereum",   p:3184,   c:+1.12,  col:"#627eea"},
-  {s:"SOL",  n:"Solana",     p:172.4,  c:+3.45,  col:"#9945ff"},
-  {s:"BNB",  n:"BNB",        p:608,    c:+0.87,  col:"#f3ba2f"},
-  {s:"NVDA", n:"NVIDIA",     p:875.2,  c:+3.72,  col:"#76b900"},
-  {s:"AAPL", n:"Apple",      p:189.3,  c:-0.34,  col:"#94a3b8"},
-  {s:"TSLA", n:"Tesla",      p:178.5,  c:-2.14,  col:"#e31937"},
-  {s:"SPY",  n:"S&P 500",    p:524.1,  c:-0.42,  col:"#00A8FF"},
-  {s:"MSFT", n:"Microsoft",  p:415.8,  c:+1.23,  col:"#00b4d8"},
-  {s:"GOLD", n:"Gold",       p:2341,   c:+0.61,  col:"#fbbf24"},
+  {s:"BTC",  n:"Bitcoin",    p:67420,  c:+2.31,  col:"#f7931a", cg:"bitcoin"},
+  {s:"ETH",  n:"Ethereum",   p:3184,   c:+1.12,  col:"#627eea", cg:"ethereum"},
+  {s:"SOL",  n:"Solana",     p:172.4,  c:+3.45,  col:"#9945ff", cg:"solana"},
+  {s:"BNB",  n:"BNB",        p:608,    c:+0.87,  col:"#f3ba2f", cg:"binancecoin"},
+  {s:"NVDA", n:"NVIDIA",     p:875.2,  c:+3.72,  col:"#76b900", cg:null},
+  {s:"AAPL", n:"Apple",      p:189.3,  c:-0.34,  col:"#94a3b8", cg:null},
+  {s:"TSLA", n:"Tesla",      p:178.5,  c:-2.14,  col:"#e31937", cg:null},
+  {s:"SPY",  n:"S&P 500",    p:524.1,  c:-0.42,  col:"#00A8FF", cg:null},
+  {s:"MSFT", n:"Microsoft",  p:415.8,  c:+1.23,  col:"#00b4d8", cg:null},
+  {s:"GOLD", n:"Gold",       p:2341,   c:+0.61,  col:"#fbbf24", cg:null},
 ];
-function TickerStrip(){
-  const [tickers, setTickers] = useState(TICKER_DATA_INIT);
+
+// Hook compartido para precios reales de CoinGecko
+function useCryptoPrices(){
+  const [cryptoPrices, setCryptoPrices] = useState({});
+  const [lastUpdate, setLastUpdate] = useState(null);
+
+  const fetchPrices = useCallback(()=>{
+    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${COINGECKO_IDS}&vs_currencies=usd&include_24hr_change=true`)
+      .then(r=>r.ok?r.json():Promise.reject())
+      .then(data=>{
+        const mapped = {
+          BTC:{ p:data.bitcoin?.usd||0,         c:+(data.bitcoin?.usd_24h_change||0).toFixed(2) },
+          ETH:{ p:data.ethereum?.usd||0,         c:+(data.ethereum?.usd_24h_change||0).toFixed(2) },
+          SOL:{ p:data.solana?.usd||0,           c:+(data.solana?.usd_24h_change||0).toFixed(2) },
+          BNB:{ p:data.binancecoin?.usd||0,      c:+(data.binancecoin?.usd_24h_change||0).toFixed(2) },
+        };
+        setCryptoPrices(mapped);
+        setLastUpdate(new Date());
+      })
+      .catch(()=>{}); // silencioso — mantiene datos anteriores
+  },[]);
+
   useEffect(()=>{
-    // Simulación de movimiento en tiempo real (±0.15% cada 4s)
+    fetchPrices();
+    const iv = setInterval(fetchPrices, 60000); // cada 60s (límite gratuito CoinGecko)
+    return ()=>clearInterval(iv);
+  },[fetchPrices]);
+
+  return {cryptoPrices, lastUpdate};
+}
+
+function TickerStrip(){
+  const {cryptoPrices, lastUpdate} = useCryptoPrices();
+  // Acciones simuladas con pequeño movimiento (no hay API gratis para acciones real-time)
+  const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
+  useEffect(()=>{
     const iv = setInterval(()=>{
-      setTickers(prev=>prev.map(t=>({
+      setStocks(prev=>prev.map(t=>({
         ...t,
-        p: +(t.p * (1 + (Math.random()-0.49)*0.003)).toFixed(t.p>1000?1:t.p>10?2:4),
-        c: +(t.c + (Math.random()-0.5)*0.1).toFixed(2),
+        p:+(t.p*(1+(Math.random()-0.49)*0.0015)).toFixed(t.p>100?1:2),
+        c:+(t.c+(Math.random()-0.5)*0.06).toFixed(2),
       })));
-    }, 4000);
+    }, 8000);
     return ()=>clearInterval(iv);
   },[]);
-  // Duplicamos para scroll infinito
+
+  // Mezclar crypto real + acciones simuladas
+  const tickers = TICKER_DATA_INIT.map(t=>{
+    if(t.cg && cryptoPrices[t.s]?.p){
+      return {...t, p:cryptoPrices[t.s].p, c:cryptoPrices[t.s].c};
+    }
+    const stock = stocks.find(s=>s.s===t.s);
+    return stock || t;
+  });
+
   const items = [...tickers, ...tickers];
+  const isLive = Object.keys(cryptoPrices).length > 0;
+
   return(
     <div style={{background:"#060e1c",borderBottom:"1px solid rgba(255,255,255,0.07)",overflow:"hidden",height:34,position:"relative",zIndex:99}}>
       <style>{`
         @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-        .ticker-track { display:flex; gap:0; animation:tickerScroll 38s linear infinite; width:max-content; }
+        .ticker-track { display:flex; gap:0; animation:tickerScroll 42s linear infinite; width:max-content; }
         .ticker-track:hover { animation-play-state:paused; }
       `}</style>
+      {/* Indicador live */}
+      <div style={{position:"absolute",right:0,top:0,bottom:0,zIndex:2,background:"linear-gradient(90deg,transparent,#060e1c 60%)",display:"flex",alignItems:"center",paddingRight:10,paddingLeft:30}}>
+        {isLive
+          ? <span style={{display:"flex",alignItems:"center",gap:4,fontSize:9,color:"#22c55e",fontWeight:700,whiteSpace:"nowrap"}}>
+              <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>LIVE
+            </span>
+          : <span style={{fontSize:9,color:"#334155"}}>~</span>
+        }
+      </div>
       <div className="ticker-track">
         {items.map((t,i)=>(
-          <a key={i} href={`https://www.tradingview.com/symbols/${t.s.includes("SPY")||t.s.includes("GOLD")?"SPY":t.s}USD/`}
+          <a key={i} href={`https://www.tradingview.com/symbols/${t.cg?t.s+"USD":t.s}/`}
             target="_blank" rel="noopener noreferrer"
-            style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",height:34,textDecoration:"none",borderRight:"1px solid rgba(255,255,255,0.05)",flexShrink:0,whiteSpace:"nowrap"}}>
+            style={{display:"flex",alignItems:"center",gap:6,padding:"0 16px",height:34,textDecoration:"none",borderRight:"1px solid rgba(255,255,255,0.05)",flexShrink:0,whiteSpace:"nowrap"}}>
             <span style={{fontWeight:800,fontSize:11,color:t.col,letterSpacing:0.5}}>{t.s}</span>
-            <span style={{fontFamily:"monospace",fontSize:11,color:"#e2e8f0",fontWeight:600}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</span>
+            <span style={{fontFamily:"monospace",fontSize:11,color:"#e2e8f0",fontWeight:600}}>
+              {t.p>0?t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2}):"—"}
+            </span>
             <span style={{fontSize:10,fontWeight:700,color:t.c>=0?"#22c55e":"#ef4444"}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</span>
+            {t.cg&&<span style={{fontSize:8,color:"#22c55e",opacity:0.7}}>●</span>}
           </a>
         ))}
       </div>
@@ -2323,16 +2380,23 @@ function MarketsMiniWidget(){
     {q:"¿Bitcoin supera $100K antes de fin de año?", p:0.71, vol:"$3.1M"},
     {q:"¿Inflación EE.UU. baja del 3% en 2025?", p:0.45, vol:"$670K"},
   ]);
-  const [prices, setPrices] = useState(TICKER_DATA_INIT.slice(0,8));
+  const {cryptoPrices} = useCryptoPrices();
+  const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
   useEffect(()=>{
     const iv = setInterval(()=>{
-      setPrices(prev=>prev.map(t=>({...t,
-        p:+(t.p*(1+(Math.random()-0.49)*0.002)).toFixed(t.p>1000?1:2),
-        c:+(t.c+(Math.random()-0.5)*0.08).toFixed(2),
+      setStocks(prev=>prev.map(t=>({...t,
+        p:+(t.p*(1+(Math.random()-0.49)*0.0015)).toFixed(t.p>100?1:2),
+        c:+(t.c+(Math.random()-0.5)*0.06).toFixed(2),
       })));
-    }, 5000);
+    }, 8000);
     return ()=>clearInterval(iv);
   },[]);
+
+  const prices = TICKER_DATA_INIT.slice(0,8).map(t=>{
+    if(t.cg && cryptoPrices[t.s]?.p) return {...t, p:cryptoPrices[t.s].p, c:cryptoPrices[t.s].c};
+    return stocks.find(s=>s.s===t.s)||t;
+  });
+  const isLive = Object.keys(cryptoPrices).length>0;
 
   const barCol = p => p>=0.6?"#10b981":p>=0.4?"#f59e0b":"#ef4444";
 
@@ -2342,8 +2406,8 @@ function MarketsMiniWidget(){
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
         {[["mercados","📈 Mercados"],["predicciones","🎯 Predicciones"],["tendencias","🔥 Tendencias"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
-            style={{flex:1,padding:"10px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:12,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
-            {l}
+            style={{flex:1,padding:"10px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:12,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+            {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
           </button>
         ))}
       </div>
@@ -2405,6 +2469,58 @@ function MarketsMiniWidget(){
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── SIDEBAR TICKER WIDGET — precios reales CoinGecko + acciones simuladas ─────
+function SidebarTickerWidget(){
+  const {cryptoPrices, lastUpdate} = useCryptoPrices();
+  const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
+  useEffect(()=>{
+    const iv = setInterval(()=>{
+      setStocks(prev=>prev.map(t=>({...t,
+        p:+(t.p*(1+(Math.random()-0.49)*0.0015)).toFixed(t.p>100?1:2),
+        c:+(t.c+(Math.random()-0.5)*0.05).toFixed(2),
+      })));
+    }, 9000);
+    return ()=>clearInterval(iv);
+  },[]);
+
+  const items = TICKER_DATA_INIT.slice(0,6).map(t=>{
+    if(t.cg && cryptoPrices[t.s]?.p) return {...t, p:cryptoPrices[t.s].p, c:cryptoPrices[t.s].c};
+    return stocks.find(s=>s.s===t.s)||t;
+  });
+  const isLive = Object.keys(cryptoPrices).length>0;
+
+  return(
+    <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,marginBottom:14,overflow:"hidden"}}>
+      <div style={{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.07)",display:"flex",alignItems:"center",gap:8}}>
+        <span style={{width:7,height:7,borderRadius:"50%",background:isLive?"#22c55e":"#475569",display:"inline-block",animation:isLive?"nexo-pulse 2s infinite":"none"}}/>
+        <span style={{color:"#94a3b8",fontSize:11,fontWeight:700,letterSpacing:1,flex:1}}>MERCADOS EN TIEMPO REAL</span>
+        {isLive&&<span style={{color:"#22c55e",fontSize:9,fontWeight:700}}>LIVE</span>}
+      </div>
+      {items.map((t,i)=>(
+        <a key={t.s} href={`https://www.tradingview.com/symbols/${t.cg?t.s+"USD":t.s}/`} target="_blank" rel="noopener noreferrer"
+          style={{display:"flex",alignItems:"center",gap:8,padding:"7px 14px",borderBottom:i<5?"1px solid rgba(255,255,255,0.04)":"none",textDecoration:"none",transition:"background 0.1s"}}
+          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
+          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+          <span style={{width:7,height:7,borderRadius:"50%",background:t.col,flexShrink:0}}/>
+          <span style={{fontWeight:700,fontSize:12,color:t.col,minWidth:38}}>{t.s}</span>
+          <span style={{flex:1,fontFamily:"monospace",fontSize:12,color:"#cbd5e1"}}>
+            {t.p>0?t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2}):"—"}
+          </span>
+          <span style={{fontSize:11,fontWeight:700,color:t.c>=0?"#22c55e":"#ef4444"}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</span>
+          {t.cg&&isLive&&<span style={{fontSize:8,color:"#22c55e",opacity:0.6}}>●</span>}
+        </a>
+      ))}
+      <div style={{padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <a href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer"
+          style={{color:"#00A8FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>Ver gráficos →</a>
+        {lastUpdate&&<span style={{color:"#334155",fontSize:9}}>
+          {lastUpdate.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})}
+        </span>}
+      </div>
     </div>
   );
 }
@@ -8082,28 +8198,7 @@ export default function App(){
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
-            {/* Mini ticker vertical */}
-            <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,marginBottom:14,overflow:"hidden"}}>
-              <div style={{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.07)",display:"flex",alignItems:"center",gap:8}}>
-                <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 2s infinite"}}/>
-                <span style={{color:"#94a3b8",fontSize:11,fontWeight:700,letterSpacing:1}}>MERCADOS EN TIEMPO REAL</span>
-              </div>
-              {TICKER_DATA_INIT.slice(0,6).map((t,i)=>(
-                <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
-                  style={{display:"flex",alignItems:"center",gap:8,padding:"7px 14px",borderBottom:i<5?"1px solid rgba(255,255,255,0.04)":"none",textDecoration:"none",transition:"background 0.1s"}}
-                  onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
-                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                  <span style={{width:7,height:7,borderRadius:"50%",background:t.col,flexShrink:0}}/>
-                  <span style={{fontWeight:700,fontSize:12,color:t.col,minWidth:38}}>{t.s}</span>
-                  <span style={{flex:1,fontFamily:"monospace",fontSize:12,color:"#cbd5e1"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</span>
-                  <span style={{fontSize:11,fontWeight:700,color:t.c>=0?"#22c55e":"#ef4444"}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</span>
-                </a>
-              ))}
-              <div style={{padding:"8px 14px"}}>
-                <a href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer"
-                  style={{color:"#00A8FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>Ver gráficos completos →</a>
-              </div>
-            </div>
+            <SidebarTickerWidget/>
             <PolymarketWidget/>
           </div>
         </div>
