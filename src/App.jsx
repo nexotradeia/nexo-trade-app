@@ -2078,6 +2078,22 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   );
 }
 
+// ── GIF PICKER — fallback GIFs cuando la API no está disponible ──────────────
+const GIF_CLIENT_FALLBACK = [
+  {id:"cf1", title:"To the moon 🚀",   preview:"https://media.giphy.com/media/3oEjHFOscgNwdYnpxm/giphy.gif", full:"https://media.giphy.com/media/3oEjHFOscgNwdYnpxm/giphy.gif", src:"fallback"},
+  {id:"cf2", title:"Bull market 📈",   preview:"https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",  full:"https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",  src:"fallback"},
+  {id:"cf3", title:"Money rain 💸",    preview:"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif", full:"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif", src:"fallback"},
+  {id:"cf4", title:"Bear market 📉",   preview:"https://media.giphy.com/media/l0MYB9P2lWRCyMJTW/giphy.gif",  full:"https://media.giphy.com/media/l0MYB9P2lWRCyMJTW/giphy.gif",  src:"fallback"},
+  {id:"cf5", title:"Diamond hands 💎", preview:"https://media.giphy.com/media/h7kbFBm0vAajWfDKqR/giphy.gif", full:"https://media.giphy.com/media/h7kbFBm0vAajWfDKqR/giphy.gif", src:"fallback"},
+  {id:"cf6", title:"Stonks 📊",        preview:"https://media.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif", full:"https://media.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif", src:"fallback"},
+  {id:"cf7", title:"Crypto moon 🌙",   preview:"https://media.giphy.com/media/WraEeHVZcIGRuNPgaE/giphy.gif", full:"https://media.giphy.com/media/WraEeHVZcIGRuNPgaE/giphy.gif", src:"fallback"},
+  {id:"cf8", title:"Celebrate 🎉",     preview:"https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif",  full:"https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif",  src:"fallback"},
+  {id:"cf9", title:"Rocket 🚀",        preview:"https://media.giphy.com/media/xT0xeuOy2Fcl9vDGiA/giphy.gif", full:"https://media.giphy.com/media/xT0xeuOy2Fcl9vDGiA/giphy.gif", src:"fallback"},
+  {id:"cf10",title:"HODL 💪",          preview:"https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",  full:"https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",  src:"fallback"},
+  {id:"cf11",title:"Wait and see 👀",  preview:"https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif",  full:"https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif",  src:"fallback"},
+  {id:"cf12",title:"Panic sell 😱",    preview:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",   full:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",   src:"fallback"},
+];
+
 // ── GIF PICKER (via /api/gifs proxy — sin CORS) ──────────────────────────────
 function GifPicker({onSelect,onClose}){
   const [q,setQ]             = useState("");
@@ -2090,13 +2106,19 @@ function GifPicker({onSelect,onClose}){
     setLoading(true); setError(false);
     const url = `/api/gifs${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ""}`;
     fetch(url)
-      .then(r => r.json())
+      .then(r => { if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(d => {
-        setGifs(d.gifs || []);
-        setApiSrc(d.source || "");
+        setGifs(d.gifs && d.gifs.length > 0 ? d.gifs : GIF_CLIENT_FALLBACK);
+        setApiSrc(d.source || "fallback");
         setLoading(false);
       })
-      .catch(() => { setError(true); setLoading(false); });
+      .catch(() => {
+        // Sin API (dev sin vercel dev, o error de red) → mostrar fallback directamente
+        setGifs(GIF_CLIENT_FALLBACK);
+        setApiSrc("fallback");
+        setError(false);
+        setLoading(false);
+      });
   };
 
   useEffect(() => { search(""); }, []);
@@ -2137,11 +2159,6 @@ function GifPicker({onSelect,onClose}){
         <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>
           <div style={{fontSize:24,marginBottom:6}}>🎞️</div>
           Buscando GIFs...
-        </div>
-      ) : error ? (
-        <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>
-          <div style={{fontSize:24,marginBottom:6}}>😕</div>
-          No se pudo cargar. Intenta buscar otro término.
         </div>
       ) : (
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:220,overflowY:"auto",borderRadius:8,overflow:"hidden"}}>
@@ -4350,17 +4367,21 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
   const [activeNav, setActiveNav] = useState(0);
 
   const navItems = [
-    {icon:"🔥", label:"Feed",             idx:0},
-    {icon:"📊", label:"Tops Traders",     idx:1},
-    {icon:"📈", label:"Acciones",         idx:3},
-    {icon:"📅", label:"Earnings",         idx:6},
-    {icon:"📰", label:"Noticias",         idx:5},
-    {icon:"⚡", label:"Trending",         idx:7},
-    {icon:"💼", label:"Empleos Finanzas",  idx:10},
-    {icon:"🎓", label:"Webinars en Vivo",  idx:11},
-    {icon:"📚", label:"Academia — Cursos", idx:12},
-    {icon:"🛠️",label:"Herramientas VIP", idx:9, vip:true},
-    {icon:"✦",  label:"Premium VIP",      idx:8, premium:true},
+    {icon:"🔥", label:"Feed",               idx:0},
+    {icon:"📊", label:"Tops Traders",       idx:1},
+    {icon:"📈", label:"Acciones",           idx:3},
+    {icon:"📅", label:"Calendario Económico",idx:14},
+    {icon:"💰", label:"Dividendos",         idx:15},
+    {icon:"🚀", label:"IPOs 2026",          idx:16},
+    {icon:"🔍", label:"Stock Screener",     idx:17, vip:true},
+    {icon:"📅", label:"Earnings",           idx:6},
+    {icon:"📰", label:"Noticias",           idx:5},
+    {icon:"⚡", label:"Trending",           idx:7},
+    {icon:"💼", label:"Empleos Finanzas",   idx:10},
+    {icon:"🎓", label:"Webinars en Vivo",   idx:11},
+    {icon:"📚", label:"Academia — Cursos",  idx:12},
+    {icon:"🛠️",label:"Herramientas VIP",  idx:9, vip:true},
+    {icon:"✦",  label:"Premium VIP",        idx:8, premium:true},
   ];
 
   return(
@@ -6925,6 +6946,397 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
   );
 }
 
+// ── ECONOMIC CALENDAR DATA 2026 ───────────────────────────────────────────────
+const ECON_2026 = [
+  {date:"2026-05-29",event:"PCE Inflación (Abr)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"2.6%",est:"2.5%"},
+  {date:"2026-06-01",event:"ISM Manufactura",                cat:"Manufactura", country:"🇺🇸",imp:"med", prev:"49.0", est:"49.5"},
+  {date:"2026-06-05",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"177K", est:"165K"},
+  {date:"2026-06-05",event:"Tasa de Desempleo",              cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"4.2%", est:"4.2%"},
+  {date:"2026-06-10",event:"IPC / CPI (May)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"3.4%", est:"3.2%"},
+  {date:"2026-06-16",event:"Ventas al Por Menor (May)",      cat:"Consumo",     country:"🇺🇸",imp:"med", prev:"0.1%", est:"0.3%"},
+  {date:"2026-06-17",event:"FOMC — Decisión de Tasas",      cat:"Banco Central",country:"🇺🇸",imp:"high",prev:"4.25-4.50%",est:"4.00-4.25%"},
+  {date:"2026-06-26",event:"PCE Inflación (May)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"2.5%", est:"2.4%"},
+  {date:"2026-06-30",event:"Confianza del Consumidor",       cat:"Consumo",     country:"🇺🇸",imp:"med", prev:"98.1", est:"99.0"},
+  {date:"2026-07-01",event:"ISM Manufactura",                cat:"Manufactura", country:"🇺🇸",imp:"med", prev:"49.5", est:"50.0"},
+  {date:"2026-07-10",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"165K", est:"170K"},
+  {date:"2026-07-15",event:"IPC / CPI (Jun)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"3.2%", est:"3.0%"},
+  {date:"2026-07-16",event:"Ventas al Por Menor (Jun)",      cat:"Consumo",     country:"🇺🇸",imp:"med", prev:"0.3%", est:"0.2%"},
+  {date:"2026-07-29",event:"FOMC — Decisión de Tasas",      cat:"Banco Central",country:"🇺🇸",imp:"high",prev:"4.00-4.25%",est:"3.75-4.00%"},
+  {date:"2026-07-30",event:"PIB EEUU Q2 2026 (avance)",     cat:"Economía",    country:"🇺🇸",imp:"high",prev:"2.8%", est:"2.5%"},
+  {date:"2026-07-31",event:"PCE Inflación (Jun)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"2.4%", est:"2.3%"},
+  {date:"2026-08-07",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"170K", est:"—"},
+  {date:"2026-08-12",event:"IPC / CPI (Jul)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"3.0%", est:"—"},
+  {date:"2026-08-15",event:"Ventas al Por Menor (Jul)",      cat:"Consumo",     country:"🇺🇸",imp:"med", prev:"—",    est:"—"},
+  {date:"2026-08-28",event:"PCE Inflación (Jul)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-09-04",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-09-11",event:"IPC / CPI (Ago)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-09-16",event:"FOMC — Decisión de Tasas",      cat:"Banco Central",country:"🇺🇸",imp:"high",prev:"—",   est:"—"},
+  {date:"2026-09-25",event:"PCE Inflación (Ago)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-10-02",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-10-14",event:"IPC / CPI (Sep)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-10-28",event:"FOMC — Decisión de Tasas",      cat:"Banco Central",country:"🇺🇸",imp:"high",prev:"—",   est:"—"},
+  {date:"2026-10-29",event:"PIB EEUU Q3 2026 (avance)",     cat:"Economía",    country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-10-30",event:"PCE Inflación (Sep)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-11-06",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-11-12",event:"IPC / CPI (Oct)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-11-25",event:"PCE Inflación (Oct)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-12-04",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-12-08",event:"FOMC — Decisión de Tasas",      cat:"Banco Central",country:"🇺🇸",imp:"high",prev:"—",   est:"—"},
+  {date:"2026-12-09",event:"IPC / CPI (Nov)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+  {date:"2026-12-18",event:"PCE Inflación (Nov)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
+];
+
+function EconCalendarPage() {
+  const [filter,    setFilter]    = useState("upcoming");
+  const [catFilter, setCatFilter] = useState("todas");
+  const today = new Date().toISOString().split("T")[0];
+  const CATS  = ["todas","Inflación","Empleo","Banco Central","Economía","Consumo","Manufactura"];
+  const IMP   = {high:{bg:"#FEF2F2",color:C.bear,label:"Alta"},med:{bg:"#FFFBEB",color:C.gold,label:"Media"},low:{bg:"#F0FDF4",color:C.bull,label:"Baja"}};
+  const fmtDate = d => new Date(d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"});
+
+  const rows = ECON_2026.filter(e=>{
+    const past = e.date < today;
+    if(filter==="upcoming" && past) return false;
+    if(filter==="past"     && !past) return false;
+    if(catFilter!=="todas" && e.cat!==catFilter) return false;
+    return true;
+  });
+
+  return(
+    <div style={{maxWidth:860,margin:"0 auto"}}>
+      <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+          <span style={{fontSize:30}}>📅</span>
+          <div>
+            <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario Económico</div>
+            <div style={{fontSize:12,color:C.muted}}>Eventos macro que mueven los mercados — FOMC · CPI · NFP · GDP · PCE</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {[{k:"all",l:"Todos"},{k:"upcoming",l:"📌 Próximos"},{k:"past",l:"Pasados"}].map(({k,l})=>(
+            <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?C.accent:"transparent",color:filter===k?"#fff":C.muted,border:`1.5px solid ${filter===k?C.accent:C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+          ))}
+          <span style={{width:1,background:C.border,margin:"0 2px"}}/>
+          {CATS.map(cat=>(
+            <button key={cat} onClick={()=>setCatFilter(cat)} style={{background:catFilter===cat?C.purpleBg:"transparent",color:catFilter===cat?C.purple:C.muted,border:`1.5px solid ${catFilter===cat?C.purple+"55":C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{cat}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{display:"flex",gap:14,marginBottom:12,padding:"0 2px"}}>
+        {Object.entries(IMP).map(([k,v])=>(
+          <span key={k} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:C.muted}}>
+            <span style={{width:8,height:8,borderRadius:"50%",background:v.color}}/>
+            {v.label} importancia
+          </span>
+        ))}
+      </div>
+
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {rows.length===0 && <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>Sin eventos con ese filtro.</div>}
+        {rows.map((ev,i)=>{
+          const past    = ev.date < today;
+          const isToday = ev.date === today;
+          const imp     = IMP[ev.imp] || IMP.low;
+          return(
+            <div key={i} style={{background:isToday?"rgba(0,168,255,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past?0.6:1,display:"grid",gridTemplateColumns:"140px 1fr 120px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none"}}>
+              <div>
+                <div style={{fontSize:12,fontWeight:700,color:past?C.muted:C.text}}>{fmtDate(ev.date)}</div>
+                <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{ev.country} {ev.cat}</div>
+              </div>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:past?C.muted:C.text}}>{ev.event}</div>
+                <div style={{display:"flex",gap:6,marginTop:4,alignItems:"center"}}>
+                  <span style={{fontSize:10,fontWeight:700,color:imp.color,background:imp.bg,borderRadius:10,padding:"2px 8px"}}>{imp.label}</span>
+                  {isToday && <span style={{fontSize:10,fontWeight:700,color:C.accent,background:C.accentDim,borderRadius:10,padding:"2px 8px"}}>HOY</span>}
+                  {ev.cat==="Banco Central" && <span style={{fontSize:10,fontWeight:700,color:"#7C3AED",background:"rgba(124,58,237,0.09)",borderRadius:10,padding:"2px 8px"}}>🏦 FED</span>}
+                </div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                {ev.prev!=="—" && <div style={{fontSize:11,color:C.muted,marginBottom:2}}><b>Ant:</b> {ev.prev}</div>}
+                {ev.est !=="—" && <div style={{fontSize:11,color:past?C.muted:C.accent}}><b>Est:</b> {ev.est}</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>Fuentes: Federal Reserve, BLS, BEA · Fechas orientativas sujetas a confirmación oficial</div>
+    </div>
+  );
+}
+
+// ── DIVIDEND CALENDAR PAGE (page 15) ─────────────────────────────────────────
+const DIV_FALLBACK = [
+  {ticker:"AAPL",  name:"Apple Inc",          price:248.2, divRate:1.00, yield:0.40, quarterly:"0.25",exDate:"2026-05-09",payDate:"2026-05-15",sector:"Tecnología"},
+  {ticker:"MSFT",  name:"Microsoft Corp",     price:440.5, divRate:3.32, yield:0.75, quarterly:"0.83",exDate:"2026-05-15",payDate:"2026-06-12",sector:"Tecnología"},
+  {ticker:"JNJ",   name:"Johnson & Johnson",  price:160.3, divRate:4.96, yield:3.10, quarterly:"1.24",exDate:"2026-05-27",payDate:"2026-06-10",sector:"Salud"},
+  {ticker:"KO",    name:"Coca-Cola Co",       price:67.8,  divRate:1.94, yield:2.86, quarterly:"0.485",exDate:"2026-06-13",payDate:"2026-07-01",sector:"Consumo"},
+  {ticker:"MCD",   name:"McDonald's Corp",    price:307.4, divRate:7.08, yield:2.30, quarterly:"1.77",exDate:"2026-06-04",payDate:"2026-06-16",sector:"Consumo"},
+  {ticker:"PG",    name:"Procter & Gamble",   price:167.9, divRate:4.02, yield:2.40, quarterly:"1.006",exDate:"2026-07-18",payDate:"2026-08-15",sector:"Consumo"},
+  {ticker:"T",     name:"AT&T Inc",           price:23.1,  divRate:1.11, yield:4.81, quarterly:"0.2775",exDate:"2026-07-10",payDate:"2026-08-01",sector:"Telecomunicaciones"},
+  {ticker:"VZ",    name:"Verizon Comm",       price:45.0,  divRate:2.66, yield:5.91, quarterly:"0.665",exDate:"2026-07-08",payDate:"2026-08-02",sector:"Telecomunicaciones"},
+  {ticker:"XOM",   name:"ExxonMobil Corp",    price:117.5, divRate:3.96, yield:3.37, quarterly:"0.99",exDate:"2026-05-13",payDate:"2026-06-10",sector:"Energía"},
+  {ticker:"CVX",   name:"Chevron Corp",       price:145.8, divRate:6.84, yield:4.69, quarterly:"1.71",exDate:"2026-05-19",payDate:"2026-06-10",sector:"Energía"},
+  {ticker:"ABBV",  name:"AbbVie Inc",         price:188.2, divRate:6.40, yield:3.40, quarterly:"1.60",exDate:"2026-07-14",payDate:"2026-08-15",sector:"Salud"},
+  {ticker:"PFE",   name:"Pfizer Inc",         price:27.4,  divRate:1.68, yield:6.13, quarterly:"0.42",exDate:"2026-07-30",payDate:"2026-09-03",sector:"Salud"},
+  {ticker:"IBM",   name:"IBM Corp",           price:214.9, divRate:6.68, yield:3.11, quarterly:"1.67",exDate:"2026-08-07",payDate:"2026-09-10",sector:"Tecnología"},
+  {ticker:"WMT",   name:"Walmart Inc",        price:98.3,  divRate:0.88, yield:0.90, quarterly:"0.22",exDate:"2026-08-06",payDate:"2026-09-03",sector:"Consumo"},
+  {ticker:"HD",    name:"Home Depot Inc",     price:388.1, divRate:9.00, yield:2.32, quarterly:"2.25",exDate:"2026-09-03",payDate:"2026-09-18",sector:"Consumo"},
+];
+
+function DividendCalendarPage() {
+  const [divs,    setDivs]    = useState(DIV_FALLBACK);
+  const [loading, setLoading] = useState(true);
+  const [sector,  setSector]  = useState("todos");
+  const today = new Date().toISOString().split("T")[0];
+  const sectors = ["todos","Tecnología","Salud","Consumo","Energía","Telecomunicaciones"];
+
+  useEffect(()=>{
+    fetch("/api/dividends")
+      .then(r=>r.json())
+      .then(d=>{ if(d.dividends && d.dividends.length>3) setDivs(d.dividends); })
+      .catch(()=>{})
+      .finally(()=>setLoading(false));
+  },[]);
+
+  const rows = divs.filter(d=> sector==="todos" || d.sector===sector);
+  const soon = (dateStr) => dateStr && dateStr >= today && new Date(dateStr)-new Date(today) < 30*864e5;
+  const fmt  = d => d ? new Date(d+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"}) : "—";
+
+  return(
+    <div style={{maxWidth:900,margin:"0 auto"}}>
+      <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+          <span style={{fontSize:30}}>💰</span>
+          <div>
+            <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de Dividendos</div>
+            <div style={{fontSize:12,color:C.muted}}>Próximas fechas ex-dividendo y pagos de las principales empresas</div>
+          </div>
+          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",marginLeft:"auto"}}>Actualizando...</span>}
+        </div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {sectors.map(s=>(
+            <button key={s} onClick={()=>setSector(s)} style={{background:sector===s?C.bull+"22":"transparent",color:sector===s?C.bull:C.muted,border:`1.5px solid ${sector===s?C.bull+"44":C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{s}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{background:C.card,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
+        <div style={{display:"grid",gridTemplateColumns:"90px 1fr 90px 90px 80px 80px",gap:0,background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px"}}>
+          {["Ticker","Empresa","Ex-Fecha","Pago","Trimestral","Yield"].map(h=>(
+            <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
+          ))}
+        </div>
+        {rows.map((d,i)=>{
+          const isSoon = soon(d.exDate);
+          return(
+            <div key={i} style={{display:"grid",gridTemplateColumns:"90px 1fr 90px 90px 80px 80px",gap:0,padding:"13px 20px",borderBottom:`1px solid ${C.border}`,background:isSoon?"rgba(22,163,74,0.03)":"transparent",transition:"background 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background=isSoon?"rgba(22,163,74,0.06)":C.card2}
+              onMouseLeave={e=>e.currentTarget.style.background=isSoon?"rgba(22,163,74,0.03)":"transparent"}>
+              <div style={{fontWeight:800,fontSize:13,color:C.accent}}>{d.ticker}</div>
+              <div>
+                <div style={{fontSize:13,fontWeight:600,color:C.text}}>{d.name}</div>
+                <div style={{fontSize:10,color:C.muted2,marginTop:1}}>{d.sector}</div>
+              </div>
+              <div>
+                <div style={{fontSize:13,fontWeight:isSoon?700:500,color:isSoon?C.bull:C.text}}>{fmt(d.exDate)}</div>
+                {isSoon && <div style={{fontSize:9,color:C.bull,fontWeight:700,marginTop:1}}>PRÓXIMO</div>}
+              </div>
+              <div style={{fontSize:13,color:C.muted}}>{fmt(d.payDate)}</div>
+              <div style={{fontSize:13,fontWeight:600,color:C.text}}>${d.quarterly}</div>
+              <div style={{fontSize:13,fontWeight:700,color:parseFloat(d.yield)>=4?C.bull:C.text}}>{parseFloat(d.yield).toFixed(2)}%</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{textAlign:"center",padding:"14px 0",fontSize:11,color:C.muted2}}>Ex-fecha es el último día para comprar y recibir el dividendo · Datos orientativos</div>
+    </div>
+  );
+}
+
+// ── IPO CALENDAR PAGE (page 16) ───────────────────────────────────────────────
+const IPOS_2026 = [
+  {company:"Klarna Bank AB",       ticker:"KLAR",  exchange:"NYSE",    date:"2026-06-12",range:"$15–$18",raise:"$1.0B",  sector:"Fintech",     status:"upcoming",  desc:"Plataforma BNPL líder en Europa y EEUU, 85M usuarios"},
+  {company:"Cerebras Systems",     ticker:"CBRS",  exchange:"NASDAQ",  date:"2026-06-20",range:"$28–$32",raise:"$450M",  sector:"Semicond.",   status:"upcoming",  desc:"Chips de IA para entrenar LLMs, rival de NVIDIA en data centers"},
+  {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2026-07-08",range:"$22–$26",raise:"$600M",  sector:"Neobank",     status:"upcoming",  desc:"Neobank con 22M cuentas activas en EEUU, sin cargos por overdraft"},
+  {company:"SHEIN Group Ltd",      ticker:"SHEI",  exchange:"NYSE",    date:"2026-07-22",range:"$60–$70",raise:"$5.0B",  sector:"Moda/Retail", status:"upcoming",  desc:"Moda rápida digital, valuación estimada $65B, controversias ESG"},
+  {company:"Discord Inc",          ticker:"DCRD",  exchange:"NASDAQ",  date:"2026-08-14",range:"$35–$42",raise:"$800M",  sector:"Social",      status:"upcoming",  desc:"Plataforma de comunidades 150M usuarios mensuales, gaming y más"},
+  {company:"Turo Inc",             ticker:"TURO",  exchange:"NASDAQ",  date:"2026-08-28",range:"$14–$17",raise:"$300M",  sector:"Marketplace", status:"upcoming",  desc:"Airbnb para autos, marketplace peer-to-peer de vehículos"},
+  {company:"Medline Industries",   ticker:"MDLN",  exchange:"NYSE",    date:"2026-09-15",range:"$20–$24",raise:"$1.5B",  sector:"Salud",       status:"upcoming",  desc:"Mayor proveedor privado de suministros médicos en EEUU"},
+  {company:"Panera Brands",        ticker:"PNRA",  exchange:"NYSE",    date:"2026-09-30",range:"$16–$20",raise:"$900M",  sector:"Restaurantes",status:"upcoming",  desc:"Cadena de panaderías/restaurantes con 2,100+ locales en EEUU"},
+  {company:"eToro Group Ltd",      ticker:"ETOR",  exchange:"NASDAQ",  date:"2026-04-30",range:"$52",     raise:"$620M",  sector:"Fintech",     status:"priced",    desc:"Plataforma social de trading, 35M usuarios registrados globales"},
+  {company:"CoreWeave Inc",        ticker:"CRWV",  exchange:"NASDAQ",  date:"2026-03-28",range:"$40",     raise:"$1.5B",  sector:"Cloud/IA",    status:"trading",   desc:"Nube especializada en GPU para IA, cliente principal de OpenAI"},
+  {company:"Venture Global LNG",   ticker:"VG",    exchange:"NYSE",    date:"2026-01-24",range:"$25",     raise:"$1.75B", sector:"Energía",     status:"trading",   desc:"Exportador de GNL, uno de los IPOs más grandes del año"},
+];
+
+function IpoCalendarPage() {
+  const [filter, setFilter] = useState("all");
+  const today = new Date().toISOString().split("T")[0];
+  const STATUS = {
+    upcoming:{color:C.accent,   bg:C.accentDim,        label:"Próximo"},
+    priced:  {color:C.purple,   bg:C.purpleBg,         label:"Precio fijado"},
+    trading: {color:C.bull,     bg:C.bullBg,           label:"Cotizando"},
+  };
+  const rows = IPOS_2026.filter(ipo => filter==="all" || ipo.status===filter);
+
+  return(
+    <div style={{maxWidth:920,margin:"0 auto"}}>
+      <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+          <span style={{fontSize:30}}>🚀</span>
+          <div>
+            <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de IPOs 2026</div>
+            <div style={{fontSize:12,color:C.muted}}>Salidas a bolsa más esperadas — precios estimados, fechas y sectores</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:6}}>
+          {[{k:"all",l:"Todos"},  {k:"upcoming",l:"🔜 Próximos"},{k:"priced",l:"💜 Precio fijado"},{k:"trading",l:"✅ Cotizando"}].map(({k,l})=>(
+            <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?C.accent:"transparent",color:filter===k?"#fff":C.muted,border:`1.5px solid ${filter===k?C.accent:C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{display:"grid",gap:12}}>
+        {rows.map((ipo,i)=>{
+          const st = STATUS[ipo.status];
+          return(
+            <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"18px 22px",boxShadow:C.shadow,display:"grid",gridTemplateColumns:"1fr auto",gap:16,alignItems:"center"}}>
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+                  <div style={{fontWeight:900,fontSize:16,color:C.text}}>{ipo.company}</div>
+                  <div style={{fontWeight:800,fontSize:12,color:C.accent,background:C.accentDim,borderRadius:8,padding:"2px 8px"}}>{ipo.ticker}</div>
+                  <div style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"2px 8px",border:`1px solid ${C.border}`}}>{ipo.exchange}</div>
+                  <span style={{fontSize:11,fontWeight:700,color:st.color,background:st.bg,borderRadius:10,padding:"2px 9px",marginLeft:"auto"}}>{st.label}</span>
+                </div>
+                <div style={{fontSize:13,color:C.muted,marginBottom:8,lineHeight:1.5}}>{ipo.desc}</div>
+                <div style={{display:"flex",gap:16,alignItems:"center"}}>
+                  <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Sector:</b> {ipo.sector}</span>
+                  <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Recaudación:</b> {ipo.raise}</span>
+                </div>
+              </div>
+              <div style={{textAlign:"right",minWidth:130}}>
+                <div style={{fontSize:22,fontWeight:900,color:C.text,marginBottom:4}}>{ipo.range}</div>
+                <div style={{fontSize:12,color:C.muted,marginBottom:6}}>precio/acción estimado</div>
+                <div style={{fontSize:12,fontWeight:700,color:ipo.date>=today?C.accent:C.muted}}>
+                  {new Date(ipo.date+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"long",year:"numeric"})}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>Datos estimados sujetos a cambio · Siempre verifica en SEC EDGAR antes de invertir</div>
+    </div>
+  );
+}
+
+// ── STOCK SCREENER PAGE (page 17) — VIP ───────────────────────────────────────
+const SCREENER_PRESETS = [
+  {k:"gainers",    label:"📈 Top Ganadores",   desc:"Las más alcistas hoy"},
+  {k:"losers",     label:"📉 Top Perdedores",  desc:"Las más bajistas hoy"},
+  {k:"active",     label:"🔥 Más Activas",     desc:"Mayor volumen del mercado"},
+  {k:"undervalued",label:"💎 Subvaloradas",    desc:"Crecimiento con buen precio"},
+  {k:"growth",     label:"🚀 Crecimiento Tech",desc:"Tecnología con alto potencial"},
+  {k:"dividend",   label:"💰 Dividendos",      desc:"Carteras anchor de dividendo"},
+];
+
+function ScreenerPage({isPremium, onNeedPremium}) {
+  const [screen,  setScreen]  = useState("gainers");
+  const [quotes,  setQuotes]  = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(false);
+
+  useEffect(()=>{
+    if(!isPremium) return;
+    setLoading(true); setError(false);
+    fetch(`/api/screener?screen=${screen}`)
+      .then(r=>r.json())
+      .then(d=>{ setQuotes(d.quotes||[]); setLoading(false); })
+      .catch(()=>{ setError(true); setLoading(false); });
+  },[screen, isPremium]);
+
+  const fmt$ = v => v>=1e9 ? `$${(v/1e9).toFixed(1)}B` : v>=1e6 ? `$${(v/1e6).toFixed(0)}M` : v ? `$${v.toFixed(2)}` : "—";
+  const fmtPct = v => v ? `${v>0?"+":""}${v.toFixed(2)}%` : "—";
+
+  if(!isPremium) return(
+    <div style={{maxWidth:700,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:64,marginBottom:16}}>🔒</div>
+      <div style={{fontSize:28,fontWeight:900,color:C.text,marginBottom:8}}>Stock Screener VIP</div>
+      <div style={{fontSize:15,color:C.muted,marginBottom:28,lineHeight:1.6}}>
+        Filtra más de 10,000 acciones por momentum, valoración, dividendo y crecimiento.<br/>
+        Descubre oportunidades antes que el mercado.
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:28,textAlign:"left"}}>
+        {["📈 Top Ganadores del día","📉 Top Perdedores","🔥 Más Activas por volumen","💎 Acciones Subvaloradas","🚀 Tech de alto crecimiento","💰 Mejores dividendos"].map((f,i)=>(
+          <div key={i} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px",fontSize:12,fontWeight:600,color:C.muted}}>{f}</div>
+        ))}
+      </div>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
+        ✦ Activar VIP — $9.99/mes
+      </button>
+      <div style={{fontSize:11,color:C.muted2,marginTop:12}}>Cancela cuando quieras · Acceso inmediato</div>
+    </div>
+  );
+
+  const preset = SCREENER_PRESETS.find(p=>p.k===screen);
+
+  return(
+    <div style={{maxWidth:960,margin:"0 auto"}}>
+      <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+          <span style={{fontSize:30}}>🔍</span>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>Stock Screener</div>
+              <span style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px"}}>VIP</span>
+            </div>
+            <div style={{fontSize:12,color:C.muted}}>{preset?.desc} · {quotes.length} resultados</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {SCREENER_PRESETS.map(({k,label})=>(
+            <button key={k} onClick={()=>setScreen(k)} style={{background:screen===k?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",color:screen===k?"#fff":C.muted,border:`1.5px solid ${screen===k?"transparent":C.border}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s",boxShadow:screen===k?"0 4px 12px rgba(124,58,237,0.3)":"none"}}>{label}</button>
+          ))}
+        </div>
+      </div>
+
+      {loading && <div style={{textAlign:"center",padding:"40px",color:C.muted,fontSize:14}}>Cargando screener... ⏳</div>}
+      {error   && <div style={{textAlign:"center",padding:"40px",color:C.bear,fontSize:14}}>Error al cargar datos. Intenta de nuevo.</div>}
+
+      {!loading && !error && quotes.length > 0 && (
+        <div style={{background:C.card,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
+          <div style={{display:"grid",gridTemplateColumns:"80px 1fr 90px 90px 80px 90px 90px",background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px",gap:8}}>
+            {["Ticker","Empresa","Precio","Cambio %","P/E","Mkt Cap","Volumen"].map(h=>(
+              <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
+            ))}
+          </div>
+          {quotes.slice(0,25).map((q,i)=>{
+            const chg    = q.regularMarketChangePercent || 0;
+            const isPos  = chg >= 0;
+            return(
+              <div key={i} style={{display:"grid",gridTemplateColumns:"80px 1fr 90px 90px 80px 90px 90px",gap:8,padding:"12px 20px",borderBottom:`1px solid ${C.border}`,cursor:"pointer",transition:"background 0.12s"}}
+                onMouseEnter={e=>e.currentTarget.style.background=C.card2}
+                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div style={{fontWeight:800,fontSize:13,color:C.accent}}>{q.symbol}</div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,color:C.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{q.shortName||q.longName||q.symbol}</div>
+                  <div style={{fontSize:10,color:C.muted2}}>{q.exchange||""}</div>
+                </div>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>${q.regularMarketPrice?.toFixed(2)||"—"}</div>
+                <div style={{fontSize:13,fontWeight:700,color:isPos?C.bull:C.bear}}>{fmtPct(chg)}</div>
+                <div style={{fontSize:12,color:C.muted}}>{q.trailingPE?.toFixed(1)||"—"}</div>
+                <div style={{fontSize:12,color:C.muted}}>{fmt$(q.marketCap)}</div>
+                <div style={{fontSize:12,color:C.muted}}>{q.regularMarketVolume ? (q.regularMarketVolume/1e6).toFixed(1)+"M" : "—"}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {!loading && !error && quotes.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Sin resultados. Intenta otro filtro.</div>}
+    </div>
+  );
+}
+
 // ── PROP FIRMS PAGE ───────────────────────────────────────────────────────────
 function PropFirmsPage({user, onNeedAuth}){
   const [selected, setSelected] = useState(null);
@@ -8110,6 +8522,10 @@ export default function App(){
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===13) return <PropFirmsPage user={user} onNeedAuth={()=>setAuth("register")}/>;
+    if(page===14) return <EconCalendarPage/>;
+    if(page===15) return <DividendCalendarPage/>;
+    if(page===16) return <IpoCalendarPage/>;
+    if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
     return(
       <>
