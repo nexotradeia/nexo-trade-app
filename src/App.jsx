@@ -5050,46 +5050,46 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       </div>
 
       {/* ── COMUNIDAD vs IA ── */}
-      <div style={card}>
-        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
+      <div style={{...card,padding:"10px 14px"}}>
+        <div style={{fontSize:11,fontWeight:800,color:"#0F172A",marginBottom:8,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
         {[{label:"Comunidad",pct:78,col:"#16A34A",bg:"rgba(22,163,74,0.1)"},{label:"IA Análisis",pct:61,col:"#0EA5E9",bg:"rgba(14,165,233,0.1)"}].map(({label,pct,col,bg})=>(
-          <div key={label} style={{marginBottom:10}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-              <span style={{fontSize:11,color:"#64748B",fontWeight:600}}>{label}</span>
-              <span style={{fontSize:10,color:col,fontWeight:800,background:bg,borderRadius:20,padding:"2px 8px"}}>BULLISH {pct}%</span>
+          <div key={label} style={{marginBottom:7}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+              <span style={{fontSize:10,color:"#64748B",fontWeight:600}}>{label}</span>
+              <span style={{fontSize:9,color:col,fontWeight:800,background:bg,borderRadius:20,padding:"1px 6px"}}>BULLISH {pct}%</span>
             </div>
-            <div style={{height:5,background:"rgba(15,23,42,0.06)",borderRadius:5,overflow:"hidden"}}>
-              <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:5,opacity:0.9}}/>
+            <div style={{height:4,background:"rgba(15,23,42,0.06)",borderRadius:4,overflow:"hidden"}}>
+              <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:4,opacity:0.9}}/>
             </div>
           </div>
         ))}
-        <div style={{fontSize:10,color:"#CBD5E1",marginTop:4,borderTop:"1px solid rgba(15,23,42,0.05)",paddingTop:8}}>Basado en 2,847 posts de hoy</div>
+        <div style={{fontSize:9,color:"#CBD5E1",marginTop:3,borderTop:"1px solid rgba(15,23,42,0.05)",paddingTop:6}}>Basado en 2,847 posts de hoy</div>
       </div>
 
       {/* ── FEAR & GREED ── */}
-      <div style={card}>
-        <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12}}>Fear & Greed Index</div>
-        <div style={{display:"flex",alignItems:"center",gap:14}}>
-          <div style={{position:"relative",width:60,height:60,flexShrink:0}}>
-            <svg viewBox="0 0 60 60" style={{width:60,height:60,transform:"rotate(-90deg)"}}>
+      <div style={{...card,padding:"10px 14px"}}>
+        <div style={{fontSize:11,fontWeight:800,color:"#0F172A",marginBottom:8}}>Fear & Greed Index</div>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{position:"relative",width:46,height:46,flexShrink:0}}>
+            <svg viewBox="0 0 60 60" style={{width:46,height:46,transform:"rotate(-90deg)"}}>
               <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(15,23,42,0.07)" strokeWidth="7"/>
               <circle cx="30" cy="30" r="24" fill="none" stroke="#22C55E" strokeWidth="7"
                 strokeDasharray={`${0.72*150.8} 150.8`} strokeLinecap="round"/>
             </svg>
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
-              <span style={{fontSize:14,fontWeight:900,color:"#0F172A",lineHeight:1}}>72</span>
+              <span style={{fontSize:12,fontWeight:900,color:"#0F172A",lineHeight:1}}>72</span>
             </div>
           </div>
           <div>
-            <div style={{fontSize:15,fontWeight:900,color:"#16A34A",letterSpacing:-0.3}}>Codicia 🟢</div>
-            <div style={{fontSize:10,color:"#64748B",marginTop:4,lineHeight:1.6}}>Inversores optimistas.<br/>Mercado en modo alcista.</div>
+            <div style={{fontSize:13,fontWeight:900,color:"#16A34A",letterSpacing:-0.3}}>Codicia 🟢</div>
+            <div style={{fontSize:9,color:"#64748B",marginTop:3,lineHeight:1.5}}>Inversores optimistas.<br/>Mercado en modo alcista.</div>
           </div>
         </div>
         {/* Escala */}
-        <div style={{marginTop:12,height:4,borderRadius:4,background:"linear-gradient(90deg,#EF4444,#F59E0B,#22C55E)",position:"relative"}}>
-          <div style={{position:"absolute",left:"72%",top:-4,width:12,height:12,borderRadius:"50%",background:"#fff",border:"2px solid #22C55E",boxShadow:"0 2px 6px rgba(0,0,0,0.12)",transform:"translateX(-50%)"}}/>
+        <div style={{marginTop:8,height:3,borderRadius:4,background:"linear-gradient(90deg,#EF4444,#F59E0B,#22C55E)",position:"relative"}}>
+          <div style={{position:"absolute",left:"72%",top:-4,width:10,height:10,borderRadius:"50%",background:"#fff",border:"2px solid #22C55E",boxShadow:"0 2px 6px rgba(0,0,0,0.12)",transform:"translateX(-50%)"}}/>
         </div>
-        <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
           <span style={{fontSize:9,color:"#EF4444",fontWeight:600}}>Miedo</span>
           <span style={{fontSize:9,color:"#22C55E",fontWeight:600}}>Codicia</span>
         </div>
@@ -5165,10 +5165,10 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       })()}
 
       {/* ── GOOGLE ADSENSE ── */}
-      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",minHeight:120,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#F8FAFC",border:"1px dashed rgba(15,23,42,0.1)"}}>
-        <div style={{fontSize:9,color:"#CBD5E1",fontWeight:600,letterSpacing:1,marginBottom:6,textTransform:"uppercase"}}>Publicidad</div>
+      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",minHeight:480,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",background:"#F8FAFC",border:"1px dashed rgba(15,23,42,0.1)"}}>
+        <div style={{fontSize:9,color:"#CBD5E1",fontWeight:600,letterSpacing:1,margin:"10px 0 6px",textTransform:"uppercase"}}>Publicidad</div>
         <ins className="adsbygoogle"
-          style={{display:"block",width:"100%",minHeight:100}}
+          style={{display:"block",width:"100%",minHeight:450}}
           data-ad-client="ca-pub-3490083853866736"
           data-ad-slot="auto"
           data-ad-format="auto"
@@ -6989,12 +6989,30 @@ const ECON_2026 = [
 function EconCalendarPage() {
   const [filter,    setFilter]    = useState("upcoming");
   const [catFilter, setCatFilter] = useState("todas");
+  const [events,    setEvents]    = useState(ECON_2026);
+  const [loading,   setLoading]   = useState(true);
+  const [source,    setSource]    = useState("local");
+  const [lastUpd,   setLastUpd]   = useState(null);
   const today = new Date().toISOString().split("T")[0];
   const CATS  = ["todas","Inflación","Empleo","Banco Central","Economía","Consumo","Manufactura"];
   const IMP   = {high:{bg:"#FEF2F2",color:C.bear,label:"Alta"},med:{bg:"#FFFBEB",color:C.gold,label:"Media"},low:{bg:"#F0FDF4",color:C.bull,label:"Baja"}};
   const fmtDate = d => new Date(d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"});
 
-  const rows = ECON_2026.filter(e=>{
+  useEffect(()=>{
+    fetch("/api/econCalendar")
+      .then(r=>r.json())
+      .then(d=>{
+        if(d.events && d.events.length > 5){
+          setEvents(d.events);
+          setSource(d.source==="fmp" ? "live" : "local");
+          setLastUpd(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
+        }
+      })
+      .catch(()=>{})
+      .finally(()=>setLoading(false));
+  },[]);
+
+  const rows = events.filter(e=>{
     const past = e.date < today;
     if(filter==="upcoming" && past) return false;
     if(filter==="past"     && !past) return false;
@@ -7007,10 +7025,20 @@ function EconCalendarPage() {
       <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
           <span style={{fontSize:30}}>📅</span>
-          <div>
-            <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario Económico</div>
-            <div style={{fontSize:12,color:C.muted}}>Eventos macro que mueven los mercados — FOMC · CPI · NFP · GDP · PCE</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario Económico</div>
+              {source==="live"
+                ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● EN VIVO</span>
+                : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>MODO LOCAL</span>
+              }
+            </div>
+            <div style={{fontSize:12,color:C.muted}}>
+              Eventos macro que mueven los mercados — FOMC · CPI · NFP · GDP · PCE
+              {lastUpd && <span style={{marginLeft:8,color:C.muted2}}>· Actualizado {lastUpd}</span>}
+            </div>
           </div>
+          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",border:`1px solid ${C.border}`}}>⏳ Cargando...</span>}
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {[{k:"all",l:"Todos"},{k:"upcoming",l:"📌 Próximos"},{k:"past",l:"Pasados"}].map(({k,l})=>(
@@ -7023,13 +7051,16 @@ function EconCalendarPage() {
         </div>
       </div>
 
-      <div style={{display:"flex",gap:14,marginBottom:12,padding:"0 2px"}}>
-        {Object.entries(IMP).map(([k,v])=>(
-          <span key={k} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:C.muted}}>
-            <span style={{width:8,height:8,borderRadius:"50%",background:v.color}}/>
-            {v.label} importancia
-          </span>
-        ))}
+      <div style={{display:"flex",gap:14,marginBottom:12,padding:"0 2px",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{display:"flex",gap:14}}>
+          {Object.entries(IMP).map(([k,v])=>(
+            <span key={k} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:C.muted}}>
+              <span style={{width:8,height:8,borderRadius:"50%",background:v.color}}/>
+              {v.label} importancia
+            </span>
+          ))}
+        </div>
+        <span style={{fontSize:11,color:C.muted2}}>{rows.length} eventos</span>
       </div>
 
       <div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -7038,29 +7069,41 @@ function EconCalendarPage() {
           const past    = ev.date < today;
           const isToday = ev.date === today;
           const imp     = IMP[ev.imp] || IMP.low;
+          const hasActual = ev.actual && ev.actual !== "—" && ev.actual !== null;
           return(
-            <div key={i} style={{background:isToday?"rgba(0,168,255,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past?0.6:1,display:"grid",gridTemplateColumns:"140px 1fr 120px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none"}}>
+            <div key={i} style={{background:isToday?"rgba(0,168,255,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past&&!hasActual?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past&&!hasActual?0.55:1,display:"grid",gridTemplateColumns:"140px 1fr 150px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none",transition:"opacity 0.2s"}}>
               <div>
                 <div style={{fontSize:12,fontWeight:700,color:past?C.muted:C.text}}>{fmtDate(ev.date)}</div>
                 <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{ev.country} {ev.cat}</div>
+                {ev.time && <div style={{fontSize:10,color:C.muted2,marginTop:1}}>🕗 {ev.time} ET</div>}
               </div>
               <div>
-                <div style={{fontSize:14,fontWeight:700,color:past?C.muted:C.text}}>{ev.event}</div>
-                <div style={{display:"flex",gap:6,marginTop:4,alignItems:"center"}}>
+                <div style={{fontSize:14,fontWeight:700,color:past&&!hasActual?C.muted:C.text}}>{ev.event}</div>
+                <div style={{display:"flex",gap:6,marginTop:4,alignItems:"center",flexWrap:"wrap"}}>
                   <span style={{fontSize:10,fontWeight:700,color:imp.color,background:imp.bg,borderRadius:10,padding:"2px 8px"}}>{imp.label}</span>
                   {isToday && <span style={{fontSize:10,fontWeight:700,color:C.accent,background:C.accentDim,borderRadius:10,padding:"2px 8px"}}>HOY</span>}
+                  {hasActual && <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>✓ PUBLICADO</span>}
                   {ev.cat==="Banco Central" && <span style={{fontSize:10,fontWeight:700,color:"#7C3AED",background:"rgba(124,58,237,0.09)",borderRadius:10,padding:"2px 8px"}}>🏦 FED</span>}
                 </div>
               </div>
               <div style={{textAlign:"right"}}>
-                {ev.prev!=="—" && <div style={{fontSize:11,color:C.muted,marginBottom:2}}><b>Ant:</b> {ev.prev}</div>}
-                {ev.est !=="—" && <div style={{fontSize:11,color:past?C.muted:C.accent}}><b>Est:</b> {ev.est}</div>}
+                {hasActual && (
+                  <div style={{fontSize:14,fontWeight:800,color:C.bull,marginBottom:4}}>
+                    <span style={{fontSize:10,color:C.muted2,fontWeight:500,display:"block",marginBottom:1}}>ACTUAL</span>
+                    {ev.actual}
+                  </div>
+                )}
+                {ev.est!=="—" && !hasActual && <div style={{fontSize:11,color:past?C.muted:C.accent,marginBottom:2}}><b>Est:</b> {ev.est}</div>}
+                {ev.prev!=="—" && <div style={{fontSize:11,color:C.muted}}><b>Ant:</b> {ev.prev}</div>}
               </div>
             </div>
           );
         })}
       </div>
-      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>Fuentes: Federal Reserve, BLS, BEA · Fechas orientativas sujetas a confirmación oficial</div>
+      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
+        {source==="live" ? "⚡ Datos en tiempo real via Financial Modeling Prep (FMP)" : "📋 Datos base — agrega FMP_API_KEY en Vercel para tiempo real"}
+        {" · "}Fuentes: Federal Reserve, BLS, BEA
+      </div>
     </div>
   );
 }
@@ -7170,62 +7213,127 @@ const IPOS_2026 = [
 ];
 
 function IpoCalendarPage() {
-  const [filter, setFilter] = useState("all");
+  const [filter,  setFilter]  = useState("all");
+  const [ipos,    setIpos]    = useState(IPOS_2026);
+  const [loading, setLoading] = useState(true);
+  const [source,  setSource]  = useState("local");
+  const [total,   setTotal]   = useState(IPOS_2026.length);
   const today = new Date().toISOString().split("T")[0];
   const STATUS = {
-    upcoming:{color:C.accent,   bg:C.accentDim,        label:"Próximo"},
-    priced:  {color:C.purple,   bg:C.purpleBg,         label:"Precio fijado"},
-    trading: {color:C.bull,     bg:C.bullBg,           label:"Cotizando"},
+    upcoming:{color:C.accent, bg:C.accentDim, label:"Próximo"},
+    priced:  {color:C.purple, bg:C.purpleBg,  label:"Precio fijado"},
+    trading: {color:C.bull,   bg:C.bullBg,    label:"Cotizando"},
   };
-  const rows = IPOS_2026.filter(ipo => filter==="all" || ipo.status===filter);
+
+  useEffect(()=>{
+    fetch("/api/ipos")
+      .then(r=>r.json())
+      .then(d=>{
+        if(d.ipos && d.ipos.length > 0){
+          // Merge: datos FMP + datos curados de IPOS_2026
+          // Los curados tienen desc y sector, FMP tiene datos reales de precio
+          const merged = [...d.ipos];
+          IPOS_2026.forEach(seed=>{
+            const exists = merged.find(x=>x.ticker===seed.ticker||x.company.toLowerCase().includes(seed.company.split(" ")[0].toLowerCase()));
+            if(!exists) merged.push(seed);
+            else {
+              // Enriquecer datos FMP con descripción y sector curados
+              exists.desc   = exists.desc   || seed.desc;
+              exists.sector = exists.sector || seed.sector;
+            }
+          });
+          merged.sort((a,b)=>{
+            if(a.status==="upcoming" && b.status!=="upcoming") return -1;
+            if(a.status!=="upcoming" && b.status==="upcoming") return  1;
+            return a.date.localeCompare(b.date);
+          });
+          setIpos(merged);
+          setSource(d.source==="fmp"?"live":"local");
+          setTotal(merged.length);
+        }
+      })
+      .catch(()=>{})
+      .finally(()=>setLoading(false));
+  },[]);
+
+  const rows = ipos.filter(ipo => filter==="all" || ipo.status===filter);
+  const counts = {all:ipos.length, upcoming:ipos.filter(x=>x.status==="upcoming").length, priced:ipos.filter(x=>x.status==="priced").length, trading:ipos.filter(x=>x.status==="trading").length};
 
   return(
     <div style={{maxWidth:920,margin:"0 auto"}}>
       <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
           <span style={{fontSize:30}}>🚀</span>
-          <div>
-            <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de IPOs 2026</div>
-            <div style={{fontSize:12,color:C.muted}}>Salidas a bolsa más esperadas — precios estimados, fechas y sectores</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de IPOs {new Date().getFullYear()}</div>
+              {source==="live"
+                ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● EN VIVO</span>
+                : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>CURADO</span>
+              }
+              <span style={{fontSize:11,color:C.muted2,marginLeft:"auto"}}>{total} IPOs</span>
+            </div>
+            <div style={{fontSize:12,color:C.muted}}>Salidas a bolsa — precios, fechas, sectores y estado en tiempo real</div>
           </div>
+          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",border:`1px solid ${C.border}`}}>⏳</span>}
         </div>
-        <div style={{display:"flex",gap:6}}>
-          {[{k:"all",l:"Todos"},  {k:"upcoming",l:"🔜 Próximos"},{k:"priced",l:"💜 Precio fijado"},{k:"trading",l:"✅ Cotizando"}].map(({k,l})=>(
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {[{k:"all",l:`Todos (${counts.all})`},{k:"upcoming",l:`🔜 Próximos (${counts.upcoming})`},{k:"priced",l:`💜 Precio fijado (${counts.priced})`},{k:"trading",l:`✅ Cotizando (${counts.trading})`}].map(({k,l})=>(
             <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?C.accent:"transparent",color:filter===k?"#fff":C.muted,border:`1.5px solid ${filter===k?C.accent:C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
       </div>
 
-      <div style={{display:"grid",gap:12}}>
+      <div style={{display:"grid",gap:10}}>
+        {rows.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Sin IPOs con ese filtro.</div>}
         {rows.map((ipo,i)=>{
-          const st = STATUS[ipo.status];
+          const st = STATUS[ipo.status] || STATUS.upcoming;
+          const isFuture = ipo.date >= today;
           return(
-            <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"18px 22px",boxShadow:C.shadow,display:"grid",gridTemplateColumns:"1fr auto",gap:16,alignItems:"center"}}>
+            <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 22px",boxShadow:C.shadow,display:"grid",gridTemplateColumns:"1fr auto",gap:16,alignItems:"center",transition:"box-shadow 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.boxShadow=C.shadowMd}
+              onMouseLeave={e=>e.currentTarget.style.boxShadow=C.shadow}>
               <div>
-                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-                  <div style={{fontWeight:900,fontSize:16,color:C.text}}>{ipo.company}</div>
-                  <div style={{fontWeight:800,fontSize:12,color:C.accent,background:C.accentDim,borderRadius:8,padding:"2px 8px"}}>{ipo.ticker}</div>
-                  <div style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"2px 8px",border:`1px solid ${C.border}`}}>{ipo.exchange}</div>
-                  <span style={{fontSize:11,fontWeight:700,color:st.color,background:st.bg,borderRadius:10,padding:"2px 9px",marginLeft:"auto"}}>{st.label}</span>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}>
+                  <div style={{fontWeight:900,fontSize:15,color:C.text}}>{ipo.company}</div>
+                  {ipo.ticker && ipo.ticker!=="—" && <div style={{fontWeight:800,fontSize:11,color:C.accent,background:C.accentDim,borderRadius:8,padding:"2px 8px"}}>{ipo.ticker}</div>}
+                  {ipo.exchange && ipo.exchange!=="—" && <div style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"2px 8px",border:`1px solid ${C.border}`}}>{ipo.exchange}</div>}
+                  <span style={{fontSize:11,fontWeight:700,color:st.color,background:st.bg,borderRadius:10,padding:"2px 9px"}}>{st.label}</span>
                 </div>
-                <div style={{fontSize:13,color:C.muted,marginBottom:8,lineHeight:1.5}}>{ipo.desc}</div>
-                <div style={{display:"flex",gap:16,alignItems:"center"}}>
-                  <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Sector:</b> {ipo.sector}</span>
-                  <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Recaudación:</b> {ipo.raise}</span>
+                {ipo.desc && <div style={{fontSize:12,color:C.muted,marginBottom:6,lineHeight:1.5}}>{ipo.desc}</div>}
+                <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
+                  {ipo.sector && ipo.sector!=="Mercado" && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Sector:</b> {ipo.sector}</span>}
+                  {ipo.raise  && ipo.raise!=="—"  && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Recaudación:</b> {ipo.raise}</span>}
+                  {ipo.shares && ipo.shares!=="—" && <span style={{fontSize:12,color:C.muted}}>{ipo.shares}</span>}
                 </div>
               </div>
-              <div style={{textAlign:"right",minWidth:130}}>
-                <div style={{fontSize:22,fontWeight:900,color:C.text,marginBottom:4}}>{ipo.range}</div>
-                <div style={{fontSize:12,color:C.muted,marginBottom:6}}>precio/acción estimado</div>
-                <div style={{fontSize:12,fontWeight:700,color:ipo.date>=today?C.accent:C.muted}}>
-                  {new Date(ipo.date+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"long",year:"numeric"})}
-                </div>
+              <div style={{textAlign:"right",minWidth:120}}>
+                {ipo.range && ipo.range!=="Por definir" && (
+                  <>
+                    <div style={{fontSize:20,fontWeight:900,color:C.text,marginBottom:2}}>{ipo.range}</div>
+                    <div style={{fontSize:10,color:C.muted2,marginBottom:6}}>precio/acción</div>
+                  </>
+                )}
+                {ipo.date && ipo.date!=="—" && (
+                  <div style={{fontSize:12,fontWeight:700,color:isFuture?C.accent:C.muted}}>
+                    {(() => { try { return new Date(ipo.date+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short",year:"numeric"}); } catch(e){ return ipo.date; } })()}
+                  </div>
+                )}
+                {ipo.url && (
+                  <a href={ipo.url} target="_blank" rel="noopener noreferrer"
+                    style={{fontSize:11,color:C.accent,textDecoration:"none",display:"block",marginTop:4}}>
+                    Ver prospecto →
+                  </a>
+                )}
               </div>
             </div>
           );
         })}
       </div>
-      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>Datos estimados sujetos a cambio · Siempre verifica en SEC EDGAR antes de invertir</div>
+      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
+        {source==="live" ? "⚡ Datos en tiempo real via Financial Modeling Prep (FMP)" : "📋 Lista curada — agrega FMP_API_KEY en Vercel para tiempo real"}
+        {" · "}Siempre verifica en SEC EDGAR antes de invertir
+      </div>
     </div>
   );
 }
