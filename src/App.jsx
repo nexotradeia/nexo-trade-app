@@ -3989,6 +3989,98 @@ const AFFILIATES = [
   },
 ];
 
+// ── PROP FIRMS DATA ───────────────────────────────────────────────────────────
+const PROP_FIRMS = [
+  {
+    id:"ftmo",
+    name:"FTMO",
+    logo:"🏆",
+    color:"#00b4d8",
+    bg:"linear-gradient(135deg,#001a2c,#002d45)",
+    pais:"República Checa",
+    desde:2015,
+    capital_max:"$200,000",
+    profit_split:"80% — 90%",
+    fee_min:"$155",
+    fee_desc:"Evaluación única · Si la pasas, te regresan el fee",
+    reglas:"Máx. pérdida diaria 5% · Pérdida total 10% · Meta 10%",
+    badge:"EL MÁS POPULAR",
+    badgeColor:"#00b4d8",
+    cta:"Empezar evaluación en FTMO →",
+    url:"https://ftmo.com/?affiliates=nexotrade",
+    comision_aff:"$100–$300 por referido aprobado",
+    ventajas:["Cuenta desde $10K hasta $200K","90% split para cuentas con historial","Sin límite de tiempo en la evaluación","App móvil y dashboard profesional"],
+    rating:4.8,
+    reviews:"47,000+",
+  },
+  {
+    id:"topstep",
+    name:"Topstep",
+    logo:"📈",
+    color:"#00e58f",
+    bg:"linear-gradient(135deg,#001a0f,#002d1a)",
+    pais:"EE.UU.",
+    desde:2012,
+    capital_max:"$150,000",
+    profit_split:"90%",
+    fee_min:"$49/mes",
+    fee_desc:"Suscripción mensual · Acceso ilimitado a intentos",
+    reglas:"Futuros CME · Máx. pérdida diaria $1,000 · Meta $6,000",
+    badge:"MEJOR EN FUTUROS",
+    badgeColor:"#00e58f",
+    cta:"Probar Topstep 14 días gratis →",
+    url:"https://www.topstep.com/?ref=nexotrade",
+    comision_aff:"$50–$150 por referido + % recurrente",
+    ventajas:["Especializado en futuros CME","14 días de prueba gratis","90% de las ganancias desde el día 1","Soporte en tiempo real durante el mercado"],
+    rating:4.6,
+    reviews:"18,000+",
+  },
+  {
+    id:"apex",
+    name:"Apex Trader Funding",
+    logo:"🦅",
+    color:"#f59e0b",
+    bg:"linear-gradient(135deg,#1a1000,#2d1a00)",
+    pais:"EE.UU.",
+    desde:2021,
+    capital_max:"$300,000",
+    profit_split:"100% primer mes · 90% después",
+    fee_min:"$137/mes",
+    fee_desc:"Sin límite de tiempo · Múltiples cuentas simultáneas",
+    reglas:"Futuros · Máx. pérdida $2,500 · Meta 6%",
+    badge:"100% PRIMER MES",
+    badgeColor:"#f59e0b",
+    cta:"Empezar en Apex →",
+    url:"https://apextraderfunding.com/?ref=nexotrade",
+    comision_aff:"$100–$250 por referido",
+    ventajas:["100% de ganancias el primer mes","Sin límite de tiempo para pasar la eval","Hasta 20 cuentas simultáneas","Cuentas de hasta $300K"],
+    rating:4.5,
+    reviews:"12,000+",
+  },
+  {
+    id:"myforexfunds",
+    name:"The Funded Trader",
+    logo:"💹",
+    color:"#8b5cf6",
+    bg:"linear-gradient(135deg,#0d0117,#1a0330)",
+    pais:"EE.UU.",
+    desde:2021,
+    capital_max:"$400,000",
+    profit_split:"80% — 90%",
+    fee_min:"$119",
+    fee_desc:"Pago único · Forex, Crypto, Acciones y Futuros",
+    reglas:"Máx. pérdida diaria 5% · Meta 8–10% · Sin restricciones de noticias",
+    badge:"MÁS ACTIVOS",
+    badgeColor:"#8b5cf6",
+    cta:"Ver programas de The Funded Trader →",
+    url:"https://thefundedtraderprogram.com/?ref=nexotrade",
+    comision_aff:"$100–$200 por referido",
+    ventajas:["Forex, Crypto, Acciones, Commodities","Sin restricción durante noticias","Cuentas de hasta $400K","Dashboard con métricas avanzadas"],
+    rating:4.4,
+    reviews:"8,000+",
+  },
+];
+
 // Afiliados por categoría para mostrar contextualmente en posts
 const AFFILIATE_BY_TICKER = (ticker) => {
   const crypto = ["BTC","ETH","SOL","ADA","DOT","MATIC","AVAX","LINK","DOGE","SHIB","BNB","UNI","AAVE"];
@@ -6161,6 +6253,223 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
   );
 }
 
+// ── PROP FIRMS PAGE ───────────────────────────────────────────────────────────
+function PropFirmsPage({user, onNeedAuth}){
+  const [selected, setSelected] = useState(null);
+  const [showCalc, setShowCalc] = useState(false);
+  const [calcCap, setCalcCap] = useState(50000);
+  const [calcProfit, setCalcProfit] = useState(5);
+  const firm = selected ? PROP_FIRMS.find(f=>f.id===selected) : null;
+
+  const calcGanancia = Math.round(calcCap * (calcProfit/100) * 0.85);
+
+  return(
+    <div>
+      {/* HERO */}
+      <div style={{background:"linear-gradient(135deg,#060e1c,#0a1628)",borderRadius:20,padding:"32px 28px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 20% 50%,rgba(0,180,216,0.07),transparent 55%),radial-gradient(circle at 80% 30%,rgba(0,229,143,0.06),transparent 55%)",pointerEvents:"none"}}/>
+        <div style={{position:"relative"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.2)",borderRadius:20,padding:"5px 14px",marginBottom:14}}>
+            <span style={{width:7,height:7,borderRadius:"50%",background:"#00e58f",display:"inline-block"}}/>
+            <span style={{color:"#00e58f",fontSize:11,fontWeight:700,letterSpacing:1}}>CUENTAS FONDEADAS — PROP TRADING</span>
+          </div>
+          <h1 style={{margin:"0 0 10px",color:"#F1F5F9",fontSize:24,fontWeight:900,lineHeight:1.2}}>Opera con capital de hasta $400,000 sin arriesgar el tuyo</h1>
+          <p style={{margin:"0 0 20px",color:"#64748b",fontSize:14,lineHeight:1.7,maxWidth:600}}>Las <strong style={{color:"#e2e8f0"}}>Prop Firms</strong> te prestan capital real para operar. Demuestras tu habilidad en una evaluación y te quedas entre el 80% y 100% de las ganancias. Sin fondo propio. Sin límites.</p>
+          {/* Stats */}
+          <div style={{display:"flex",gap:20,flexWrap:"wrap"}}>
+            {[["🏦","$400K","Capital máximo disponible"],["💰","80–100%","Tu parte de las ganancias"],["🌎","4 Firmas","Curadas para LATAM"],["⚡","14 días","Prueba gratis en Topstep"]].map(([icon,val,label])=>(
+              <div key={label} style={{textAlign:"center"}}>
+                <div style={{fontSize:18}}>{icon}</div>
+                <div style={{color:"#00e58f",fontWeight:900,fontSize:16}}>{val}</div>
+                <div style={{color:"#475569",fontSize:10,maxWidth:80}}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CALCULADORA DE GANANCIAS */}
+      <div style={{background:"rgba(0,229,143,0.04)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:16,padding:"20px 22px",marginBottom:20}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,cursor:"pointer"}} onClick={()=>setShowCalc(!showCalc)}>
+          <span style={{fontSize:20}}>🧮</span>
+          <div style={{flex:1}}>
+            <div style={{color:"#e2e8f0",fontWeight:800,fontSize:15}}>Calculadora de ganancias como trader fondeado</div>
+            <div style={{color:"#475569",fontSize:12}}>¿Cuánto puedes ganar al mes? Descúbrelo aquí</div>
+          </div>
+          <span style={{color:"#00e58f",fontSize:18,transition:"transform 0.2s",transform:showCalc?"rotate(90deg)":"none"}}>›</span>
+        </div>
+        {showCalc&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            <div>
+              <div style={{color:"#64748b",fontSize:12,fontWeight:700,marginBottom:8,letterSpacing:0.3}}>Capital de la cuenta</div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {[10000,25000,50000,100000,200000].map(v=>(
+                  <button key={v} onClick={()=>setCalcCap(v)}
+                    style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${calcCap===v?"#00e58f":"rgba(255,255,255,0.1)"}`,background:calcCap===v?"rgba(0,229,143,0.15)":"transparent",color:calcCap===v?"#00e58f":"#94a3b8",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+                    ${(v/1000).toFixed(0)}K
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{color:"#64748b",fontSize:12,fontWeight:700,marginBottom:8,letterSpacing:0.3}}>Retorno mensual estimado</div>
+              <div style={{display:"flex",gap:6}}>
+                {[3,5,8,10].map(v=>(
+                  <button key={v} onClick={()=>setCalcProfit(v)}
+                    style={{padding:"6px 14px",borderRadius:8,border:`1px solid ${calcProfit===v?"#00e58f":"rgba(255,255,255,0.1)"}`,background:calcProfit===v?"rgba(0,229,143,0.15)":"transparent",color:calcProfit===v?"#00e58f":"#94a3b8",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+                    {v}%
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{gridColumn:"1/-1",background:"rgba(0,0,0,0.3)",borderRadius:12,padding:"16px 20px",display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
+              <div>
+                <div style={{color:"#475569",fontSize:12}}>Con ${calcCap.toLocaleString()} al {calcProfit}% mensual:</div>
+                <div style={{color:"#00e58f",fontWeight:900,fontSize:28,fontFamily:"monospace"}}>${calcGanancia.toLocaleString()} <span style={{fontSize:14,color:"#64748b"}}>/ mes tuyo</span></div>
+                <div style={{color:"#334155",fontSize:11,marginTop:4}}>Asumiendo 85% profit split promedio</div>
+              </div>
+              <div style={{flex:1,textAlign:"right"}}>
+                <div style={{color:"#f59e0b",fontSize:12,marginBottom:4}}>Al año → <strong style={{color:"#fbbf24",fontSize:16}}>${(calcGanancia*12).toLocaleString()}</strong></div>
+                <div style={{color:"#475569",fontSize:11}}>Si mantienes consistencia</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* CÓMO FUNCIONA */}
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>¿Cómo funciona?</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+          {[
+            {n:"1",icon:"💳",title:"Paga la evaluación",desc:"$49–$300 única vez. Es la \"prueba de empleo\" del trader."},
+            {n:"2",icon:"📊",title:"Demuestra tu habilidad",desc:"Opera siguiendo las reglas: máx. pérdida y meta de ganancia."},
+            {n:"3",icon:"✅",title:"Recibe la cuenta fondeada",desc:"La firma te da capital real. $10K hasta $400K según el programa."},
+            {n:"4",icon:"💰",title:"Gana y cobra",desc:"80–100% de las ganancias. Retiros semanales o mensuales."},
+          ].map(s=>(
+            <div key={s.n} style={{background:"rgba(14,22,40,0.8)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"16px 14px",textAlign:"center"}}>
+              <div style={{fontSize:24,marginBottom:8}}>{s.icon}</div>
+              <div style={{color:"#e2e8f0",fontWeight:700,fontSize:13,marginBottom:4}}>{s.title}</div>
+              <div style={{color:"#475569",fontSize:11,lineHeight:1.5}}>{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* PROP FIRMS CARDS */}
+      <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>Elige tu firma</div>
+      <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
+        {PROP_FIRMS.map(f=>{
+          const isSel = selected===f.id;
+          return(
+            <div key={f.id}>
+              <div onClick={()=>setSelected(isSel?null:f.id)}
+                style={{background:isSel?`rgba(${f.color.includes("00b4")?'0,180,216':'0,229,143'},0.06)`:"rgba(14,22,40,0.85)",border:`1.5px solid ${isSel?f.color+"55":"rgba(255,255,255,0.08)"}`,borderRadius:14,padding:"18px 20px",cursor:"pointer",transition:"all 0.15s"}}
+                onMouseEnter={e=>{if(!isSel){e.currentTarget.style.borderColor="rgba(255,255,255,0.15)";}}}
+                onMouseLeave={e=>{if(!isSel){e.currentTarget.style.borderColor="rgba(255,255,255,0.08)";}}}
+              >
+                <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+                  {/* Logo */}
+                  <div style={{width:52,height:52,borderRadius:14,background:f.bg,border:`1px solid ${f.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,flexShrink:0}}>
+                    {f.logo}
+                  </div>
+                  {/* Info */}
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,flexWrap:"wrap"}}>
+                      <span style={{fontWeight:900,fontSize:16,color:"#F1F5F9"}}>{f.name}</span>
+                      <span style={{background:f.color+"22",color:f.color,border:`1px solid ${f.color}44`,borderRadius:20,padding:"2px 10px",fontSize:10,fontWeight:800,letterSpacing:0.5}}>{f.badge}</span>
+                      <span style={{color:"#334155",fontSize:11}}>⭐ {f.rating} ({f.reviews} reviews)</span>
+                    </div>
+                    <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
+                      <span style={{color:"#64748b",fontSize:12}}>💰 Hasta <strong style={{color:"#e2e8f0"}}>{f.capital_max}</strong></span>
+                      <span style={{color:"#64748b",fontSize:12}}>📊 <strong style={{color:"#00e58f"}}>{f.profit_split}</strong> para ti</span>
+                      <span style={{color:"#64748b",fontSize:12}}>💳 Desde <strong style={{color:"#e2e8f0"}}>{f.fee_min}</strong></span>
+                    </div>
+                  </div>
+                  {/* CTA */}
+                  <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end",flexShrink:0}}>
+                    <a href={f.url} target="_blank" rel="noopener noreferrer"
+                      onClick={e=>e.stopPropagation()}
+                      style={{background:`linear-gradient(135deg,${f.color},${f.color}bb)`,border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:12,fontWeight:800,textDecoration:"none",whiteSpace:"nowrap",boxShadow:`0 4px 14px ${f.color}40`}}>
+                      {f.cta}
+                    </a>
+                    <span style={{color:"#334155",fontSize:10}}>Tu comisión: {f.comision_aff}</span>
+                  </div>
+                  <span style={{color:"#334155",fontSize:16,transform:isSel?"rotate(90deg)":"none",transition:"transform 0.2s",flexShrink:0}}>›</span>
+                </div>
+
+                {/* EXPANDED DETAIL */}
+                {isSel&&(
+                  <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.07)",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                    <div>
+                      <div style={{color:"#64748b",fontSize:11,fontWeight:700,marginBottom:8,letterSpacing:0.5}}>VENTAJAS</div>
+                      {f.ventajas.map((v,i)=>(
+                        <div key={i} style={{display:"flex",gap:8,marginBottom:6,alignItems:"flex-start"}}>
+                          <span style={{color:"#00e58f",fontSize:14,lineHeight:1.2,flexShrink:0}}>✓</span>
+                          <span style={{color:"#cbd5e1",fontSize:12,lineHeight:1.5}}>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <div style={{color:"#64748b",fontSize:11,fontWeight:700,marginBottom:8,letterSpacing:0.5}}>REGLAS CLAVE</div>
+                      <div style={{color:"#94a3b8",fontSize:12,lineHeight:1.7,background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 12px"}}>{f.reglas}</div>
+                      <div style={{marginTop:10}}>
+                        <div style={{color:"#64748b",fontSize:11,fontWeight:700,marginBottom:4}}>FEE / EVALUACIÓN</div>
+                        <div style={{color:"#e2e8f0",fontSize:12}}>{f.fee_desc}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* COMPARATIVA RÁPIDA */}
+      <div style={{background:"rgba(14,22,40,0.85)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"20px",marginBottom:20,overflowX:"auto"}}>
+        <div style={{fontSize:13,fontWeight:800,color:"#e2e8f0",marginBottom:14}}>📊 Comparativa rápida</div>
+        <table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:480}}>
+          <thead>
+            <tr style={{borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
+              {["Firma","Capital","Profit Split","Fee inicial","Mejor para"].map(h=>(
+                <th key={h} style={{textAlign:"left",padding:"6px 10px",color:"#475569",fontWeight:600,letterSpacing:0.3}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {PROP_FIRMS.map((f,i)=>(
+              <tr key={f.id} style={{borderBottom:i<PROP_FIRMS.length-1?"1px solid rgba(255,255,255,0.05)":"none"}}>
+                <td style={{padding:"9px 10px",color:f.color,fontWeight:800}}>{f.logo} {f.name}</td>
+                <td style={{padding:"9px 10px",color:"#e2e8f0",fontFamily:"monospace"}}>{f.capital_max}</td>
+                <td style={{padding:"9px 10px",color:"#00e58f",fontWeight:700}}>{f.profit_split}</td>
+                <td style={{padding:"9px 10px",color:"#e2e8f0"}}>{f.fee_min}</td>
+                <td style={{padding:"9px 10px",color:"#94a3b8"}}>{f.id==="ftmo"?"Forex / Acciones":f.id==="topstep"?"Futuros CME":f.id==="apex"?"Futuros multi-cuenta":"Forex / Crypto"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* FAQ RÁPIDO */}
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>Preguntas frecuentes</div>
+        {[
+          {q:"¿Puedo operar desde cualquier país de LATAM?",a:"Sí. FTMO, Topstep, Apex y The Funded Trader aceptan traders de México, Colombia, Argentina, Chile, Perú y todos los países de LATAM sin restricciones."},
+          {q:"¿Qué pasa si pierdo el capital fondeado?",a:"Nada. El dinero es de la firma, no tuyo. Si pierdes, simplemente no recibes pago ese período. Solo pierdes el fee de la evaluación inicial (no el capital)."},
+          {q:"¿Es legal? ¿Es una estafa?",a:"Las firmas listadas son legítimas y reguladas. FTMO tiene más de 47,000 traders activos. Topstep cotiza públicamente. Son negocios establecidos desde 2012–2021."},
+          {q:"¿Cuánto tiempo tarda la evaluación?",a:"FTMO: sin límite de tiempo. Topstep: suscripción mensual con intentos ilimitados. Apex: sin límite. En promedio los traders tardan 3–8 semanas."},
+        ].map((faq,i)=>(
+          <div key={i} style={{background:"rgba(14,22,40,0.7)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:12,padding:"14px 16px",marginBottom:8}}>
+            <div style={{color:"#e2e8f0",fontWeight:700,fontSize:13,marginBottom:6}}>❓ {faq.q}</div>
+            <div style={{color:"#64748b",fontSize:12,lineHeight:1.6}}>{faq.a}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function JobBoardPage({user, onNeedAuth}){
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter]     = useState("todos");
@@ -6406,6 +6715,7 @@ const NAV_ITEMS = (t) => [
   {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"💼 Empleos",idx:10},
+  {label:"🏆 Prop Firms",idx:13},
   {label:"🎓 Webinars",idx:11},
   {label:"📚 Academia",idx:12},
   {label:"🛠️ Herramientas",idx:9,vip:true},
@@ -7125,6 +7435,7 @@ export default function App(){
     if(page===10) return <JobBoardPage user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
+    if(page===13) return <PropFirmsPage user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
     return(
       <>
