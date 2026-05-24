@@ -2264,6 +2264,151 @@ function NoticiasPage({lang}){
   );
 }
 
+// ── TICKER STRIP — barra de precios animada ───────────────────────────────────
+const TICKER_DATA_INIT = [
+  {s:"BTC",  n:"Bitcoin",    p:67420,  c:+2.31,  col:"#f7931a"},
+  {s:"ETH",  n:"Ethereum",   p:3184,   c:+1.12,  col:"#627eea"},
+  {s:"SOL",  n:"Solana",     p:172.4,  c:+3.45,  col:"#9945ff"},
+  {s:"BNB",  n:"BNB",        p:608,    c:+0.87,  col:"#f3ba2f"},
+  {s:"NVDA", n:"NVIDIA",     p:875.2,  c:+3.72,  col:"#76b900"},
+  {s:"AAPL", n:"Apple",      p:189.3,  c:-0.34,  col:"#94a3b8"},
+  {s:"TSLA", n:"Tesla",      p:178.5,  c:-2.14,  col:"#e31937"},
+  {s:"SPY",  n:"S&P 500",    p:524.1,  c:-0.42,  col:"#00A8FF"},
+  {s:"MSFT", n:"Microsoft",  p:415.8,  c:+1.23,  col:"#00b4d8"},
+  {s:"GOLD", n:"Gold",       p:2341,   c:+0.61,  col:"#fbbf24"},
+];
+function TickerStrip(){
+  const [tickers, setTickers] = useState(TICKER_DATA_INIT);
+  useEffect(()=>{
+    // Simulación de movimiento en tiempo real (±0.15% cada 4s)
+    const iv = setInterval(()=>{
+      setTickers(prev=>prev.map(t=>({
+        ...t,
+        p: +(t.p * (1 + (Math.random()-0.49)*0.003)).toFixed(t.p>1000?1:t.p>10?2:4),
+        c: +(t.c + (Math.random()-0.5)*0.1).toFixed(2),
+      })));
+    }, 4000);
+    return ()=>clearInterval(iv);
+  },[]);
+  // Duplicamos para scroll infinito
+  const items = [...tickers, ...tickers];
+  return(
+    <div style={{background:"#060e1c",borderBottom:"1px solid rgba(255,255,255,0.07)",overflow:"hidden",height:34,position:"relative",zIndex:99}}>
+      <style>{`
+        @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+        .ticker-track { display:flex; gap:0; animation:tickerScroll 38s linear infinite; width:max-content; }
+        .ticker-track:hover { animation-play-state:paused; }
+      `}</style>
+      <div className="ticker-track">
+        {items.map((t,i)=>(
+          <a key={i} href={`https://www.tradingview.com/symbols/${t.s.includes("SPY")||t.s.includes("GOLD")?"SPY":t.s}USD/`}
+            target="_blank" rel="noopener noreferrer"
+            style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",height:34,textDecoration:"none",borderRight:"1px solid rgba(255,255,255,0.05)",flexShrink:0,whiteSpace:"nowrap"}}>
+            <span style={{fontWeight:800,fontSize:11,color:t.col,letterSpacing:0.5}}>{t.s}</span>
+            <span style={{fontFamily:"monospace",fontSize:11,color:"#e2e8f0",fontWeight:600}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</span>
+            <span style={{fontSize:10,fontWeight:700,color:t.c>=0?"#22c55e":"#ef4444"}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── MARKETS MINI WIDGET — tabs Mercados / Predicciones / Tendencias ───────────
+function MarketsMiniWidget(){
+  const [tab, setTab] = useState("mercados");
+  const [polyData] = useState([
+    {q:"¿Recorte de tasas Fed en 2025?", p:0.62, vol:"$1.2M"},
+    {q:"¿S&P 500 cierra sobre 5,500 en 2025?", p:0.58, vol:"$890K"},
+    {q:"¿Bitcoin supera $100K antes de fin de año?", p:0.71, vol:"$3.1M"},
+    {q:"¿Inflación EE.UU. baja del 3% en 2025?", p:0.45, vol:"$670K"},
+  ]);
+  const [prices, setPrices] = useState(TICKER_DATA_INIT.slice(0,8));
+  useEffect(()=>{
+    const iv = setInterval(()=>{
+      setPrices(prev=>prev.map(t=>({...t,
+        p:+(t.p*(1+(Math.random()-0.49)*0.002)).toFixed(t.p>1000?1:2),
+        c:+(t.c+(Math.random()-0.5)*0.08).toFixed(2),
+      })));
+    }, 5000);
+    return ()=>clearInterval(iv);
+  },[]);
+
+  const barCol = p => p>=0.6?"#10b981":p>=0.4?"#f59e0b":"#ef4444";
+
+  return(
+    <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,marginBottom:16,overflow:"hidden"}}>
+      {/* Tabs */}
+      <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
+        {[["mercados","📈 Mercados"],["predicciones","🎯 Predicciones"],["tendencias","🔥 Tendencias"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setTab(k)}
+            style={{flex:1,padding:"10px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:12,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {/* Mercados */}
+      {tab==="mercados"&&(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0}}>
+          {prices.slice(0,8).map((t,i)=>(
+            <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
+              style={{display:"flex",flexDirection:"column",padding:"10px 12px",borderRight:i%4!==3?"1px solid rgba(255,255,255,0.06)":"none",borderBottom:i<4?"1px solid rgba(255,255,255,0.06)":"none",textDecoration:"none",transition:"background 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:t.col,display:"inline-block",flexShrink:0}}/>
+                <span style={{fontWeight:800,fontSize:11,color:t.col,letterSpacing:0.3}}>{t.s}</span>
+              </div>
+              <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#e2e8f0"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</div>
+              <div style={{fontSize:11,fontWeight:600,color:t.c>=0?"#22c55e":"#ef4444",marginTop:1}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</div>
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* Predicciones */}
+      {tab==="predicciones"&&(
+        <div style={{padding:"10px 14px",display:"flex",flexDirection:"column",gap:10}}>
+          {polyData.map((m,i)=>(
+            <div key={i}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4,gap:8}}>
+                <span style={{color:"#cbd5e1",fontSize:12,flex:1,lineHeight:1.4}}>{m.q}</span>
+                <span style={{fontWeight:900,fontSize:15,color:barCol(m.p),flexShrink:0}}>{Math.round(m.p*100)}%</span>
+              </div>
+              <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${m.p*100}%`,background:barCol(m.p),borderRadius:4,transition:"width 1s"}}/>
+              </div>
+              <div style={{color:"#475569",fontSize:10,marginTop:2}}>Vol: {m.vol}</div>
+            </div>
+          ))}
+          <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer"
+            style={{textAlign:"center",color:"#6366f1",fontSize:11,fontWeight:700,textDecoration:"none",marginTop:2}}>
+            Ver todos en Polymarket →
+          </a>
+        </div>
+      )}
+
+      {/* Tendencias */}
+      {tab==="tendencias"&&(
+        <div style={{padding:"10px 14px",display:"flex",flexDirection:"column",gap:8}}>
+          {MOCK_TRENDING.map((t,i)=>(
+            <div key={t.ticker} style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{color:"#334155",fontWeight:800,fontSize:12,minWidth:16}}>{i+1}</span>
+              <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:"#00A8FF",minWidth:48}}>${t.ticker}</span>
+              <div style={{flex:1,height:4,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${t.sentiment}%`,background:t.change>=0?"#22c55e":"#ef4444",borderRadius:4}}/>
+              </div>
+              <span style={{fontSize:11,fontWeight:700,color:t.change>=0?"#22c55e":"#ef4444",minWidth:44,textAlign:"right"}}>{t.change>=0?"+":""}{t.change}%</span>
+              <span style={{color:"#334155",fontSize:10,minWidth:36}}>{(t.mentions/1000).toFixed(1)}K 💬</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EarningsPage({lang}){
   const [liveEvent,   setLiveEvent]  = useState(null);
   const [selected,    setSelected]   = useState(null);   // ticker seleccionado para el panel detalle
@@ -7079,10 +7224,10 @@ export default function App(){
     <PriceProvider>
     <style>{`
       @media (min-width: 1024px) {
-        .nexo-body-grid { grid-template-columns: 240px minmax(0,1fr) 280px !important; }
+        .nexo-body-grid { grid-template-columns: 240px minmax(0,1fr) 300px !important; }
       }
       @media (min-width: 768px) and (max-width: 1023px) {
-        .nexo-body-grid { grid-template-columns: minmax(0,1fr) 260px !important; }
+        .nexo-body-grid { grid-template-columns: minmax(0,1fr) 280px !important; }
         .nexo-left-sidebar { display: none !important; }
       }
       @media (max-width: 767px) {
@@ -7290,6 +7435,9 @@ export default function App(){
           })}
         </div>
       </nav>
+
+      {/* TICKER STRIP — barra de precios en tiempo real */}
+      <TickerStrip/>
 
       {/* HERO LANDING */}
       {showLanding && page===0 && (
@@ -7593,6 +7741,13 @@ export default function App(){
       {/* SOCIAL PROOF STATS BAR — visible a todos */}
       {page===0 && !showLanding && <SocialProofBar user={user} onRegister={()=>setAuth("register")}/>}
 
+      {/* MARKETS MINI WIDGET — Mercados / Predicciones / Tendencias */}
+      {page===0 && !showLanding && (
+        <div style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
+          <MarketsMiniWidget/>
+        </div>
+      )}
+
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
         <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
@@ -7616,8 +7771,29 @@ export default function App(){
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
+            {/* Mini ticker vertical */}
+            <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,marginBottom:14,overflow:"hidden"}}>
+              <div style={{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.07)",display:"flex",alignItems:"center",gap:8}}>
+                <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 2s infinite"}}/>
+                <span style={{color:"#94a3b8",fontSize:11,fontWeight:700,letterSpacing:1}}>MERCADOS EN TIEMPO REAL</span>
+              </div>
+              {TICKER_DATA_INIT.slice(0,6).map((t,i)=>(
+                <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
+                  style={{display:"flex",alignItems:"center",gap:8,padding:"7px 14px",borderBottom:i<5?"1px solid rgba(255,255,255,0.04)":"none",textDecoration:"none",transition:"background 0.1s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                  <span style={{width:7,height:7,borderRadius:"50%",background:t.col,flexShrink:0}}/>
+                  <span style={{fontWeight:700,fontSize:12,color:t.col,minWidth:38}}>{t.s}</span>
+                  <span style={{flex:1,fontFamily:"monospace",fontSize:12,color:"#cbd5e1"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</span>
+                  <span style={{fontSize:11,fontWeight:700,color:t.c>=0?"#22c55e":"#ef4444"}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</span>
+                </a>
+              ))}
+              <div style={{padding:"8px 14px"}}>
+                <a href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer"
+                  style={{color:"#00A8FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>Ver gráficos completos →</a>
+              </div>
+            </div>
             <PolymarketWidget/>
-            <MercadosEnVivoWidget/>
           </div>
         </div>
       </div>
