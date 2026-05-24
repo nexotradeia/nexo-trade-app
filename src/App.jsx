@@ -348,11 +348,14 @@ const MOCK_NOTICIAS = [
   {id:5,titulo:"Meta earnings: publicidad digital sube 27% interanual",tituloEn:"Meta earnings: digital advertising up 27% YoY",fuente:"CNBC",tiempo:"hace 4h",ticker:"META",urgente:false,emoji:"📘"},
 ];
 const MOCK_EARNINGS = [
-  {ticker:"TSLA",nombre:"Tesla",   fecha:"Hoy",     fechaEn:"Today",    hora:"Tras cierre",    eps_est:"$0.51",rev_est:"$22.3B",sorpresa:null,  bull_pct:34, community_votes:4821, live:true,  live_viewers:3240, live_title:"Q1 2026 Earnings Call",     live_speaker:"Elon Musk — CEO"},
-  {ticker:"MSFT",nombre:"Microsoft",fecha:"Mañana", fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$2.82",rev_est:"$60.8B",sorpresa:null,  bull_pct:78, community_votes:3107, live:false, live_viewers:0,    live_title:"Q3 FY2026 Earnings Call",   live_speaker:"Satya Nadella — CEO"},
-  {ticker:"GOOGL",nombre:"Alphabet",fecha:"Mañana", fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$1.53",rev_est:"$78.6B",sorpresa:null,  bull_pct:71, community_votes:2654, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",     live_speaker:"Sundar Pichai — CEO"},
-  {ticker:"META", nombre:"Meta",    fecha:"Miér 21", fechaEn:"Wed 21",  hora:"Tras cierre",    eps_est:"$4.71",rev_est:"$36.2B",sorpresa:null,  bull_pct:82, community_votes:1980, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",     live_speaker:"Mark Zuckerberg — CEO"},
-  {ticker:"NFLX", nombre:"Netflix", fecha:"Vie 23",  fechaEn:"Fri 23",  hora:"Antes apertura", eps_est:"$4.53",rev_est:"$9.7B", sorpresa:"+8%", bull_pct:66, community_votes:1432, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",     live_speaker:"Greg Peters — CEO"},
+  {ticker:"TSLA", nombre:"Tesla",     fecha:"Hoy",      fechaEn:"Today",    hora:"Tras cierre",    eps_est:"$0.51", rev_est:"$22.3B", sorpresa:null,  bull_pct:34, community_votes:4821, live:true,  live_viewers:3240, live_title:"Q1 2026 Earnings Call",   live_speaker:"Elon Musk — CEO",         ir_url:"https://ir.tesla.com/events-and-presentations",           yt_url:"https://www.youtube.com/@TeslaMotors/streams",       emoji:"🚗", sector:"EV / Auto"},
+  {ticker:"MSFT", nombre:"Microsoft", fecha:"Mañana",   fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$2.82", rev_est:"$60.8B", sorpresa:null,  bull_pct:78, community_votes:3107, live:false, live_viewers:0,    live_title:"Q3 FY2026 Earnings Call", live_speaker:"Satya Nadella — CEO",     ir_url:"https://www.microsoft.com/en-us/investor",               yt_url:"https://www.youtube.com/@MicrosoftInvestorRelations", emoji:"💻", sector:"Cloud / IA"},
+  {ticker:"GOOGL", nombre:"Alphabet", fecha:"Mañana",   fechaEn:"Tomorrow", hora:"Tras cierre",    eps_est:"$1.53", rev_est:"$78.6B", sorpresa:null,  bull_pct:71, community_votes:2654, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Sundar Pichai — CEO",     ir_url:"https://abc.xyz/investor/",                              yt_url:"https://www.youtube.com/@googleinvestorrelations",   emoji:"🔍", sector:"Ads / Cloud"},
+  {ticker:"META",  nombre:"Meta",     fecha:"Miér",     fechaEn:"Wed",      hora:"Tras cierre",    eps_est:"$4.71", rev_est:"$36.2B", sorpresa:null,  bull_pct:82, community_votes:1980, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Mark Zuckerberg — CEO",   ir_url:"https://investor.fb.com/investor-events/",               yt_url:"https://www.youtube.com/@Meta/streams",              emoji:"👁", sector:"Social / VR"},
+  {ticker:"NVDA",  nombre:"NVIDIA",   fecha:"Jue",      fechaEn:"Thu",      hora:"Tras cierre",    eps_est:"$5.52", rev_est:"$24.6B", sorpresa:null,  bull_pct:89, community_votes:5240, live:false, live_viewers:0,    live_title:"Q1 FY2027 Earnings Call", live_speaker:"Jensen Huang — CEO",      ir_url:"https://investor.nvidia.com/events-and-presentations",   yt_url:"https://www.youtube.com/@NVIDIA/streams",            emoji:"🖥️",sector:"IA / Semis"},
+  {ticker:"AAPL",  nombre:"Apple",    fecha:"Jue",      fechaEn:"Thu",      hora:"Tras cierre",    eps_est:"$1.61", rev_est:"$94.2B", sorpresa:null,  bull_pct:74, community_votes:3890, live:false, live_viewers:0,    live_title:"Q2 FY2026 Earnings Call", live_speaker:"Tim Cook — CEO",          ir_url:"https://investor.apple.com/news-events/events",          yt_url:"https://www.youtube.com/apple",                      emoji:"🍎", sector:"Consumer / Services"},
+  {ticker:"NFLX",  nombre:"Netflix",  fecha:"Vie",      fechaEn:"Fri",      hora:"Antes apertura", eps_est:"$4.53", rev_est:"$9.7B",  sorpresa:"+8%", bull_pct:66, community_votes:1432, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Greg Peters — CEO",       ir_url:"https://ir.netflix.net/ir-overview/presentations-events", yt_url:"https://www.youtube.com/@Netflix",                   emoji:"🎬", sector:"Streaming"},
+  {ticker:"AMZN",  nombre:"Amazon",   fecha:"Vie",      fechaEn:"Fri",      hora:"Tras cierre",    eps_est:"$1.29", rev_est:"$142.5B",sorpresa:null,  bull_pct:80, community_votes:2100, live:false, live_viewers:0,    live_title:"Q1 2026 Earnings Call",   live_speaker:"Andy Jassy — CEO",        ir_url:"https://ir.aboutamazon.com/events-and-presentations",    yt_url:"https://www.youtube.com/@AmazonNews/streams",        emoji:"📦", sector:"eCommerce / AWS"},
 ];
 const MOCK_TRENDING = [
   {ticker:"SMCI",nombre:"SuperMicro",mentions:2840,change:+18.4,sentiment:92},
@@ -2321,6 +2324,32 @@ function EarningsPage({lang}){
             :<span style={{marginLeft:"auto",color:C.bull,fontSize:11,fontWeight:700}}>🟢 En vivo</span>}
         </div>
 
+        {/* ── PRÓXIMA CALL COUNTDOWN ── */}
+        {(()=>{
+          const next = earnings.find(e=>!e.live);
+          if(!next) return null;
+          return(
+            <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03))",border:"1px solid rgba(245,158,11,0.2)",borderRadius:12,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+              <div style={{fontSize:28}}>{next.emoji||"📅"}</div>
+              <div style={{flex:1}}>
+                <div style={{color:"#f59e0b",fontSize:11,fontWeight:700,letterSpacing:1,marginBottom:2}}>PRÓXIMA EARNINGS CALL</div>
+                <div style={{color:"#e2e8f0",fontWeight:800,fontSize:14}}>{next.ticker} — {next.nombre}</div>
+                <div style={{color:"#64748b",fontSize:12}}>{next.live_speaker} · {next.fecha} · {next.hora}</div>
+              </div>
+              <div style={{display:"flex",gap:8,flexShrink:0}}>
+                <a href={next.ir_url} target="_blank" rel="noopener noreferrer"
+                  style={{background:"rgba(245,158,11,0.15)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 14px",color:"#f59e0b",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>
+                  🏢 IR Page →
+                </a>
+                <a href={next.yt_url} target="_blank" rel="noopener noreferrer"
+                  style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"7px 14px",color:"#ef4444",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>
+                  ▶ YouTube →
+                </a>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* By-date groups */}
         {dates.map(fecha=>{
           const group=earnings.filter(e=>(lang==="en"?e.fechaEn:e.fecha)===fecha);
@@ -2346,14 +2375,24 @@ function EarningsPage({lang}){
                     onMouseEnter={e2=>{if(!isSel){e2.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e2.currentTarget.style.background="rgba(14,22,40,0.9)";}}}
                     onMouseLeave={e2=>{if(!isSel){e2.currentTarget.style.borderColor=isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)";e2.currentTarget.style.background=isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)";}}}
                   >
-                    {/* Ticker */}
-                    <span style={{fontFamily:"monospace",fontSize:13,fontWeight:800,color:isToday?C.gold:C.accent,minWidth:50,letterSpacing:0.5}}>{e.ticker}</span>
-                    {/* Company */}
-                    <span style={{fontSize:13,fontWeight:600,color:"#CBD5E1",flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</span>
+                    {/* Emoji + Ticker */}
+                    <span style={{fontSize:18,flexShrink:0}}>{e.emoji||"📊"}</span>
+                    <span style={{fontFamily:"monospace",fontSize:13,fontWeight:800,color:isToday?C.gold:C.accent,minWidth:46,letterSpacing:0.5}}>{e.ticker}</span>
+                    {/* Company + sector */}
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:13,fontWeight:600,color:"#CBD5E1",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
+                      {e.sector&&<div style={{fontSize:10,color:"#475569"}}>{e.sector}</div>}
+                    </div>
                     {/* Time */}
                     <span style={{fontSize:11,color:"#475569",whiteSpace:"nowrap"}}>{e.hora}</span>
+                    {/* IR link */}
+                    {e.ir_url&&<a href={e.ir_url} target="_blank" rel="noopener noreferrer"
+                      onClick={ev=>ev.stopPropagation()}
+                      style={{background:"rgba(255,255,255,0.04)",border:"1px solid #1e293b",borderRadius:7,padding:"3px 8px",fontSize:10,fontWeight:600,color:"#64748b",textDecoration:"none",whiteSpace:"nowrap",flexShrink:0}}>
+                      🏢 IR
+                    </a>}
                     {/* Live badge */}
-                    {e.live&&<span onClick={ev=>{ev.stopPropagation();setLiveEvent(e);}} style={{background:"#ef4444",borderRadius:12,padding:"2px 8px",fontSize:10,fontWeight:800,color:"#fff",whiteSpace:"nowrap",cursor:"pointer"}}>🔴 LIVE</span>}
+                    {e.live&&<span onClick={ev=>{ev.stopPropagation();setLiveEvent(e);}} style={{background:"#ef4444",borderRadius:12,padding:"3px 10px",fontSize:10,fontWeight:800,color:"#fff",whiteSpace:"nowrap",cursor:"pointer",animation:"nexo-pulse 2s infinite",boxShadow:"0 0 10px rgba(239,68,68,0.5)"}}>🔴 EN VIVO</span>}
                     {/* Bull % pill */}
                     <div style={{display:"flex",gap:0,background:"rgba(255,255,255,0.04)",borderRadius:8,overflow:"hidden",border:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
                       <span style={{fontSize:10,fontWeight:800,color:C.bull,padding:"3px 7px",background:"rgba(0,229,143,0.08)"}}>{bull}%</span>
@@ -2533,17 +2572,33 @@ function LiveConferenceModal({event, lang, onClose}){
                   <div key={i} style={{width:5,borderRadius:3,background:`linear-gradient(180deg,#00c49a,#00a87f)`,height:`${h}%`,maxHeight:60,animation:`waveBar 0.8s ease-in-out ${i*0.07}s infinite alternate`,opacity:0.8}}/>
                 ))}
               </div>
-              {/* Company logo */}
-              <div style={{width:64,height:64,borderRadius:16,background:"#1e293b",border:"2px solid #334155",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,marginBottom:14}}>
-                {event.ticker==="TSLA"?"🚗":event.ticker==="MSFT"?"💻":event.ticker==="GOOGL"?"🔍":event.ticker==="META"?"👁":event.ticker==="NFLX"?"🎬":"📊"}
+              {/* Company info + Watch buttons */}
+              <div style={{width:72,height:72,borderRadius:18,background:"#1e293b",border:"2px solid #334155",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,marginBottom:12}}>
+                {event.emoji||"📊"}
               </div>
-              <div style={{color:"#e2e8f0",fontWeight:800,fontSize:18,marginBottom:4}}>{event.nombre}</div>
-              <div style={{color:"#64748b",fontSize:13,marginBottom:16}}>{event.live_title}</div>
-              <div style={{color:"#94a3b8",fontSize:12,background:"#0f172a",borderRadius:8,padding:"6px 14px",border:"1px solid #1e293b"}}>🎙️ {event.live_speaker}</div>
+              <div style={{color:"#e2e8f0",fontWeight:900,fontSize:20,marginBottom:2}}>{event.nombre} — {event.ticker}</div>
+              <div style={{color:"#64748b",fontSize:13,marginBottom:4}}>{event.live_title}</div>
+              <div style={{color:"#94a3b8",fontSize:12,marginBottom:20}}>🎙️ {event.live_speaker}</div>
+
+              {/* CTA buttons — links reales */}
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center",marginBottom:16}}>
+                <a href={event.yt_url} target="_blank" rel="noopener noreferrer"
+                  style={{display:"flex",alignItems:"center",gap:8,background:"#ef4444",borderRadius:12,padding:"11px 22px",color:"#fff",fontWeight:800,fontSize:14,textDecoration:"none",boxShadow:"0 0 20px rgba(239,68,68,0.4)"}}>
+                  ▶ Ver en YouTube
+                </a>
+                <a href={event.ir_url} target="_blank" rel="noopener noreferrer"
+                  style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.4)",borderRadius:12,padding:"11px 22px",color:"#00A8FF",fontWeight:800,fontSize:14,textDecoration:"none"}}>
+                  🏢 Investor Relations
+                </a>
+              </div>
+              <div style={{color:"#334155",fontSize:11,textAlign:"center",maxWidth:320}}>
+                El livestream se activa en los canales oficiales de la empresa durante el call.
+              </div>
+
               {/* Live indicator */}
               <div style={{position:"absolute",top:12,left:12,display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.15)",border:"1px solid #ef4444",borderRadius:20,padding:"4px 10px"}}>
-                <span style={{width:7,height:7,borderRadius:"50%",background:"#ef4444",display:"inline-block"}}/>
-                <span style={{color:"#ef4444",fontSize:11,fontWeight:700}}>LIVE · ${event.ticker}</span>
+                <span style={{width:7,height:7,borderRadius:"50%",background:"#ef4444",display:"inline-block",animation:"nexo-pulse 1s infinite"}}/>
+                <span style={{color:"#ef4444",fontSize:11,fontWeight:700}}>EN VIVO · {event.ticker}</span>
               </div>
             </div>
 
