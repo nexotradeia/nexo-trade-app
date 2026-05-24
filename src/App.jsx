@@ -5095,23 +5095,23 @@ function SocialProofBar({user, onRegister}){
   ];
 
   return(
-    <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 8px"}}>
-      <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:12,padding:"8px 16px",border:"1px solid #1e293b",display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
-        <div style={{display:"flex",gap:14,flexWrap:"wrap",flex:1}}>
+    <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 6px"}}>
+      <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:10,padding:"6px 14px",border:"1px solid #1e293b",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap",flex:1}}>
           {items.map((s,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
-              <span style={{fontSize:13}}>{s.icon}</span>
+            <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
+              <span style={{fontSize:11}}>{s.icon}</span>
               <div>
-                <span style={{color:s.highlight?"#10b981":C.accent,fontWeight:800,fontSize:12}}>{s.value}</span>
-                <span style={{color:"#475569",fontSize:11,marginLeft:4}}>{s.label}</span>
+                <span style={{color:s.highlight?"#10b981":C.accent,fontWeight:800,fontSize:11}}>{s.value}</span>
+                <span style={{color:"#475569",fontSize:10,marginLeft:3}}>{s.label}</span>
               </div>
-              {i<items.length-1&&<div style={{width:1,height:14,background:"#1e293b",marginLeft:10}}/>}
+              {i<items.length-1&&<div style={{width:1,height:12,background:"#334155",marginLeft:8}}/>}
             </div>
           ))}
         </div>
         {!user && (
           <button onClick={onRegister}
-            style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:8,padding:"6px 14px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
+            style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
             Únete gratis →
           </button>
         )}
@@ -5131,14 +5131,14 @@ function PredictionBanner(){
     setVoted(dir);
   };
   return(
-    <div style={{background:`linear-gradient(135deg,rgba(0,210,106,0.05),rgba(60,142,250,0.05))`,borderBottom:`1px solid ${C.glassBorder}`,padding:"12px 20px"}}>
-      <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
-        <span style={{background:C.gold+"22",color:C.gold,border:`1px solid ${C.gold}44`,borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,letterSpacing:0.5,flexShrink:0}}>🔥 PREDICCIÓN DEL DÍA</span>
-        <span style={{color:"#fff",fontWeight:700,fontSize:14,flex:1}}>¿NVDA sube o baja mañana?</span>
-        <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
-          <button onClick={()=>vote("up")} style={{background:voted==="up"?`${C.bull}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="up"?C.bull:C.glassBorder}`,borderRadius:10,padding:"6px 16px",color:voted==="up"?C.bull:C.muted,cursor:voted?"default":"pointer",fontSize:12,fontWeight:700}}>▲ Sube {voted&&`(${Math.round(votes.up/total*100)}%)`}</button>
-          <button onClick={()=>vote("down")} style={{background:voted==="down"?`${C.bear}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="down"?C.bear:C.glassBorder}`,borderRadius:10,padding:"6px 16px",color:voted==="down"?C.bear:C.muted,cursor:voted?"default":"pointer",fontSize:12,fontWeight:700}}>▼ Baja {voted&&`(${100-Math.round(votes.up/total*100)}%)`}</button>
-          <span style={{color:C.muted2,fontSize:11,flexShrink:0}}>{(total).toLocaleString()} votos</span>
+    <div style={{background:`linear-gradient(135deg,rgba(0,210,106,0.04),rgba(60,142,250,0.04))`,borderBottom:`1px solid ${C.glassBorder}`,padding:"6px 16px"}}>
+      <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+        <span style={{background:C.gold+"22",color:C.gold,border:`1px solid ${C.gold}44`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0}}>🔥 PREDICCIÓN DEL DÍA</span>
+        <span style={{color:"#fff",fontWeight:700,fontSize:12,flex:1}}>¿NVDA sube o baja mañana?</span>
+        <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
+          <button onClick={()=>vote("up")} style={{background:voted==="up"?`${C.bull}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="up"?C.bull:C.glassBorder}`,borderRadius:8,padding:"4px 12px",color:voted==="up"?C.bull:C.muted,cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▲ Sube {voted&&`(${Math.round(votes.up/total*100)}%)`}</button>
+          <button onClick={()=>vote("down")} style={{background:voted==="down"?`${C.bear}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="down"?C.bear:C.glassBorder}`,borderRadius:8,padding:"4px 12px",color:voted==="down"?C.bear:C.muted,cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▼ Baja {voted&&`(${100-Math.round(votes.up/total*100)}%)`}</button>
+          <span style={{color:C.muted2,fontSize:10,flexShrink:0}}>{(total).toLocaleString()} votos</span>
         </div>
         {voted&&<div style={{width:"100%",height:3,background:C.card2,borderRadius:3,marginTop:4}}>
           <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${C.bull},${C.blue})`,borderRadius:3,transition:"width 0.5s"}}/>
