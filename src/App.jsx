@@ -832,12 +832,16 @@ function TickerTape() {
 }
 
 // ── SEARCH BAR ────────────────────────────────────────────────────────────────
-function SearchBar({lang, onTickerNav}) {
+function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}) {
   const t = LANGS[lang];
   const [q,setQ]=useState(""),[res,setRes]=useState([]),[foc,setFoc]=useState(false);
   const [selected,setSelected]=useState(null);
+  const [searchTab, setSearchTab]=useState("tickers"); // "tickers"|"posts"|"users"
   const ref=useRef();
-  useEffect(()=>{if(!q){setRes([]);return;}setRes(SEARCH_TICKERS.filter(x=>x.toLowerCase().includes(q.toLowerCase())).slice(0,8));},[q]);
+  useEffect(()=>{
+    if(!q){setRes([]);return;}
+    setRes(SEARCH_TICKERS.filter(x=>x.toLowerCase().includes(q.toLowerCase())).slice(0,8));
+  },[q]);
   useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target)){setFoc(false);setSelected(null);}};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
 
   const handleSelect=(ticker)=>{
@@ -864,9 +868,20 @@ function SearchBar({lang, onTickerNav}) {
       </div>
 
       {/* Dropdown de resultados */}
-      {res.length>0&&foc&&!selected&&(
+      {foc&&q.length>0&&!selected&&(
         <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.1)",borderRadius:12,boxShadow:"0 8px 30px rgba(0,0,0,0.12)",zIndex:200,overflow:"hidden"}}>
-          {res.map(ticker=>{
+          {/* Tabs de búsqueda */}
+          <div style={{display:"flex",borderBottom:"1px solid rgba(15,23,42,0.07)",background:"#fafafa"}}>
+            {[["tickers","📊 Tickers"],["posts","✍️ Posts"],["users","👤 Traders"]].map(([k,l])=>(
+              <button key={k} onClick={()=>setSearchTab(k)}
+                style={{flex:1,padding:"8px 4px",border:"none",borderBottom:`2px solid ${searchTab===k?"#00A8FF":"transparent"}`,background:"transparent",fontSize:11,fontWeight:searchTab===k?700:500,color:searchTab===k?"#00A8FF":"#64748B",cursor:"pointer"}}>
+                {l}
+              </button>
+            ))}
+          </div>
+
+          {/* Resultados: Tickers */}
+          {searchTab==="tickers" && res.map(ticker=>{
             const tp=TAPE_ITEMS.find(x=>x.ticker===ticker);
             const isUp=tp&&tp.change>=0;
             return(
@@ -891,7 +906,59 @@ function SearchBar({lang, onTickerNav}) {
               </div>
             );
           })}
-          <div style={{padding:"6px 14px",fontSize:10,color:"#94A3B8",background:"#FAFAFA"}}>Haz clic en un ticker para ver detalles</div>
+          {searchTab==="tickers" && res.length===0 && <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>No se encontró "${ q.toUpperCase()}"</div>}
+
+          {/* Resultados: Posts */}
+          {searchTab==="posts" && (()=>{
+            const matchPosts = posts.filter(p=>p.text?.toLowerCase().includes(q.toLowerCase())||p.ticker?.toLowerCase().includes(q.toLowerCase())).slice(0,5);
+            return matchPosts.length===0
+              ? <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>No hay posts con "{q}"</div>
+              : matchPosts.map(p=>(
+                <div key={p.id} style={{padding:"10px 14px",borderBottom:"1px solid rgba(15,23,42,0.06)",cursor:"pointer",transition:"background 0.12s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.04)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                  onClick={()=>{setQ("");setFoc(false);if(onPostNav)onPostNav(p);}}>
+                  <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+                    <span style={{fontSize:18,flexShrink:0}}>{p.avatar||"🦅"}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:2}}>
+                        <span style={{fontWeight:700,color:"#0F172A",fontSize:12}}>{p.user}</span>
+                        {p.ticker&&<span style={{background:"rgba(0,168,255,0.08)",color:"#0284C7",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700,fontFamily:"monospace"}}>${p.ticker}</span>}
+                        <span style={{color:p.sentiment==="bull"?"#16A34A":"#DC2626",fontSize:10,fontWeight:700}}>{p.sentiment==="bull"?"▲":"▼"}</span>
+                      </div>
+                      <div style={{color:"#475569",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.text}</div>
+                    </div>
+                  </div>
+                </div>
+              ));
+          })()}
+
+          {/* Resultados: Usuarios */}
+          {searchTab==="users" && (()=>{
+            const matchUsers = users.filter(u=>u.name?.toLowerCase().includes(q.toLowerCase())).slice(0,5);
+            return matchUsers.length===0
+              ? <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>No se encontró "{q}"</div>
+              : matchUsers.map(u=>{
+                const lvl=getLevel(u.points);
+                return(
+                  <div key={u.id} style={{padding:"10px 14px",borderBottom:"1px solid rgba(15,23,42,0.06)",cursor:"pointer",display:"flex",alignItems:"center",gap:10,transition:"background 0.12s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.04)"}
+                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                    onClick={()=>{setQ("");setFoc(false);if(onUserNav)onUserNav(u);}}>
+                    <AvatarBubble emoji={u.emoji} color={u.avatarColor||C.accent} size={34}/>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:700,color:"#0F172A",fontSize:13}}>{u.name}</div>
+                      <div style={{fontSize:10,color:lvl.color,fontWeight:600}}>{lvl.emoji} {lvl.name} · {fmtNum(u.followers)} seguidores</div>
+                    </div>
+                    {u.badges?.includes("verified")&&<span style={{fontSize:14}}>✅</span>}
+                  </div>
+                );
+              });
+          })()}
+
+          <div style={{padding:"6px 14px",fontSize:10,color:"#94A3B8",background:"#FAFAFA"}}>
+            {searchTab==="tickers"?"Clic en un ticker para ver detalles":"Clic para navegar"}
+          </div>
         </div>
       )}
 
@@ -1637,6 +1704,25 @@ function AlertsPanel({lang,onClose,onAlertChange}){
   );
 }
 
+// ── COPY LINK BUTTON ─────────────────────────────────────────────────────────
+function CopyLinkBtn({postId, ticker}){
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    const url = `https://nexotradeia.com/?post=${postId}&ticker=${ticker||""}`;
+    try{ navigator.clipboard.writeText(url); }catch(e){ }
+    setCopied(true);
+    setTimeout(()=>setCopied(false), 1800);
+  };
+  return(
+    <button onClick={copy} title="Copiar enlace"
+      style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:3,color:copied?"#00A8FF":"#94A3B8",fontSize:11,fontWeight:600,padding:"4px 8px",borderRadius:7,transition:"all 0.15s"}}
+      onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.07)";e.currentTarget.style.color="#00A8FF";}}
+      onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=copied?"#00A8FF":"#94A3B8";}}>
+      {copied ? "✓" : "🔗"}
+    </button>
+  );
+}
+
 // ── POST CARD ─────────────────────────────────────────────────────────────────
 const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col:"#F59E0B"},{min:0,label:"Baja",col:"#64748B"}];
 // Mini sparkline data per post
@@ -1726,8 +1812,22 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
                 <span style={{fontSize:13}}>{icon}</span><span style={{fontVariantNumeric:"tabular-nums"}}>{val}</span>
               </button>
             ))}
+            {/* Share en X/Twitter */}
+            <button
+              onClick={()=>{
+                const txt=`${post.sentiment==="bull"?"📈":"📉"} $${post.ticker} — ${post.text.slice(0,180)}${post.text.length>180?"...":""}\n\nvía @NexoTradeIA nexotradeia.com`;
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(txt)}`,"_blank","width=560,height=420");
+              }}
+              title="Compartir en X / Twitter"
+              style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:3,color:"#94A3B8",fontSize:12,fontWeight:600,padding:"4px 8px",borderRadius:7,transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,0,0,0.05)";e.currentTarget.style.color="#000";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color="#94A3B8";}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.26 5.638 5.905-5.638zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </button>
+            {/* Copiar link */}
+            <CopyLinkBtn postId={post.id} ticker={post.ticker}/>
             <div style={{marginLeft:"auto",fontSize:10,color:"#94A3B8",fontWeight:500}}>
-              {`${91-((post.id||0)%30)} traders coinciden`}
+              {`${91-((typeof post.id==="number"?post.id:1)%30)} traders coinciden`}
             </div>
           </div>
         </div>
@@ -7820,21 +7920,28 @@ export default function App(){
     if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
     return(
       <>
-        {/* Tabs estilo Socimo */}
-        <div style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"0 16px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",display:"flex",gap:4,alignItems:"center"}}>
-          {[["all",lang==="en"?"Home":"Inicio"],["bull",lang==="en"?"Bullish":"Alcistas"],["bear",lang==="en"?"Bearish":"Bajistas"]].map(([v,l])=>(
+        {/* Feed tabs */}
+        <div style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"0 12px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",display:"flex",gap:0,alignItems:"center",overflowX:"auto"}}>
+          {[
+            {v:"all",   l:lang==="en"?"🏠 For You":"🏠 Para Ti"},
+            {v:"bull",  l:lang==="en"?"📈 Bullish":"📈 Alcistas"},
+            {v:"bear",  l:lang==="en"?"📉 Bearish":"📉 Bajistas"},
+            {v:"crypto",l:"₿ Cripto"},
+            {v:"stocks",l:"🏦 Acciones"},
+            {v:"viral", l:"🔥 Viral"},
+          ].map(({v,l})=>(
             <button key={v} onClick={()=>setSent(v)}
-              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?"#00A8FF":"transparent"}`,padding:"14px 18px",cursor:"pointer",color:sent===v?"#00A8FF":"#64748B",fontSize:14,fontWeight:sent===v?700:500,transition:"all 0.15s",whiteSpace:"nowrap"}}>
+              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?"#00A8FF":"transparent"}`,padding:"13px 14px",cursor:"pointer",color:sent===v?"#00A8FF":"#64748B",fontSize:13,fontWeight:sent===v?700:500,transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0}}>
               {l}
             </button>
           ))}
           {tickerFilter&&(
-            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:20,padding:"4px 12px"}}>
+            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:20,padding:"4px 12px",flexShrink:0}}>
               <span style={{color:"#00A8FF",fontWeight:800,fontSize:12}}>${tickerFilter}</span>
               <button onClick={()=>setTickerFilter(null)} style={{background:"none",border:"none",color:"#94A3B8",cursor:"pointer",fontSize:13,lineHeight:1}}>✕</button>
             </div>
           )}
-          <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:12,whiteSpace:"nowrap"}}>{filtered2.length} posts</span>
+          <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:11,whiteSpace:"nowrap",flexShrink:0,paddingRight:4}}>{filtered2.length} posts</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
         {/* Banner de error de conexión */}
@@ -7911,7 +8018,17 @@ export default function App(){
   const filteredByTicker = tickerFilter
     ? sortedPosts.filter(p => p.text?.toUpperCase().includes(`$${tickerFilter}`) || p.ticker===tickerFilter)
     : sortedPosts;
-  const filtered2 = sent==="all" ? filteredByTicker : filteredByTicker.filter(p=>p.sentiment===sent);
+  const CRYPTO_TICKERS = new Set(["BTC","ETH","SOL","BNB","DOGE","XRP","ADA","AVAX","MATIC","LINK","COIN","MSTR","IBIT"]);
+  const STOCK_TICKERS  = new Set(["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META","SPY","AMD","NFLX","JPM","V","BABA"]);
+  const filtered2 = (()=>{
+    let base = filteredByTicker;
+    if(sent==="bull")   base = base.filter(p=>p.sentiment==="bull");
+    else if(sent==="bear")   base = base.filter(p=>p.sentiment==="bear");
+    else if(sent==="crypto") base = base.filter(p=>CRYPTO_TICKERS.has(p.ticker?.toUpperCase()));
+    else if(sent==="stocks") base = base.filter(p=>STOCK_TICKERS.has(p.ticker?.toUpperCase()));
+    else if(sent==="viral")  base = [...base].sort((a,b)=>(b.likes||0)+(b.comments||0)-(a.likes||0)-(a.comments||0));
+    return base;
+  })();
   const showingMockData = false; // ya no usamos mock posts
 
   return(
@@ -8044,7 +8161,7 @@ export default function App(){
           </div>
 
           {/* Search — centrado */}
-          <div className="nexo-nav-search" style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460,minWidth:0}}><SearchBar lang={lang} onTickerNav={(tk)=>{setTickerPage(tk);setShowLanding(false);}}/></div>
+          <div className="nexo-nav-search" style={{flex:1,display:"flex",justifyContent:"center",maxWidth:460,minWidth:0}}><SearchBar lang={lang} posts={posts} users={MOCK_USERS} onTickerNav={(tk)=>{setTickerPage(tk);setShowLanding(false);}} onUserNav={(u)=>setProfUser(u)} onPostNav={(p)=>{setSent("all");setPage(0);}}/></div>
 
           {/* Right — iconos estilo Socimo */}
           <div className="nexo-nav-icons" style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
