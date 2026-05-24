@@ -1390,69 +1390,203 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
   const userBadges=BADGES.filter(b=>user.badges?.includes(b.id));
   const progressToNext=LEVELS.find(l=>l.min>user.points);
   const progress=progressToNext?((user.points-lvl.min)/(progressToNext.min-lvl.min)*100):100;
+  const accent=user.avatarColor||C.accent;
+  const [activeTab,setActiveTab]=useState("posts");
+  const [counted,setCounted]=useState(false);
+  const [displayStats,setDisplayStats]=useState({followers:0,following:0,posts:0,points:0});
+
+  // Animate counters on open
+  useEffect(()=>{
+    if(counted) return;
+    const targets={followers:user.followers,following:user.following,posts:user.posts,points:user.points};
+    const dur=900, steps=40, interval=dur/steps;
+    let step=0;
+    const iv=setInterval(()=>{
+      step++;
+      const pct=step/steps;
+      const ease=1-Math.pow(1-pct,3);
+      setDisplayStats({
+        followers:Math.round(targets.followers*ease),
+        following:Math.round(targets.following*ease),
+        posts:Math.round(targets.posts*ease),
+        points:Math.round(targets.points*ease),
+      });
+      if(step>=steps){ clearInterval(iv); setCounted(true); }
+    },interval);
+    return ()=>clearInterval(iv);
+  },[]);
+
+  // Infer trading style tags from posts
+  const topTickers=[...new Set(userPosts.map(p=>p.ticker).filter(Boolean))].slice(0,4);
+  const tradeStyle=user.points>5000?"💎 Diamond Trader":user.points>2000?"⚡ Active Trader":user.points>500?"📈 Growing Trader":"🌱 New Trader";
+  const joinYear=user.joined||"2024";
+
+  // All achievements (locked + unlocked)
+  const ACHIEVEMENTS=[
+    {id:"first_post",  emoji:"✍️", name:"Primer Post",     desc:"Publicaste tu primer análisis",   unlocked:user.posts>=1},
+    {id:"10posts",     emoji:"🔥", name:"En Racha",        desc:"10 publicaciones",                 unlocked:user.posts>=10},
+    {id:"100likes",    emoji:"❤️", name:"100 Likes",       desc:"Recibiste 100 likes en total",     unlocked:(user.followers||0)>=50},
+    {id:"verified",    emoji:"✅", name:"Verificado",      desc:"Identidad verificada",             unlocked:user.badges?.includes("verified")},
+    {id:"vip",         emoji:"👑", name:"Miembro VIP",     desc:"Suscripción VIP activa",           unlocked:user.badges?.includes("vip")},
+    {id:"top5",        emoji:"🏆", name:"Top 5 Trader",    desc:"Entraste al top 5 del leaderboard",unlocked:user.points>=3000},
+    {id:"earlybird",   emoji:"🐦", name:"Early Adopter",   desc:"Usuario desde los inicios",        unlocked:true},
+    {id:"pro",         emoji:"⚡", name:"Miembro PRO",     desc:"Suscripción PRO activa",           unlocked:user.badges?.includes("pro")},
+  ];
+
   return(
-    <div style={{position:"fixed",inset:0,background:"#00000066",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{background:C.surface,borderRadius:24,width:520,maxWidth:"94vw",maxHeight:"88vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.15)",border:`1px solid ${C.border}`}}>
-        {/* Cover */}
-        <div style={{height:90,background:`linear-gradient(135deg,${user.avatarColor||C.accent}44,${C.blueBg})`,borderRadius:"24px 24px 0 0",position:"relative"}}>
-          <button onClick={onClose} style={{position:"absolute",top:12,right:12,background:"rgba(255,255,255,0.8)",border:"none",borderRadius:8,padding:"4px 10px",cursor:"pointer",fontSize:13,color:C.muted}}>✕</button>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}}
+      onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{background:C.surface,borderRadius:28,width:560,maxWidth:"96vw",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.35)",border:`1px solid ${C.border}`,position:"relative"}}>
+
+        {/* ── COVER ── */}
+        <div style={{height:160,borderRadius:"28px 28px 0 0",position:"relative",overflow:"hidden",
+          background:`linear-gradient(135deg, ${accent}cc 0%, ${accent}44 40%, ${C.blueBg} 100%)`}}>
+          {/* Decorative chart lines SVG */}
+          <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",opacity:0.18}} viewBox="0 0 560 160" preserveAspectRatio="none">
+            <polyline points="0,120 60,95 120,105 180,70 240,85 300,45 360,60 420,30 480,50 560,20" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="0,145 80,130 160,135 240,115 320,125 400,100 480,110 560,90" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="6 4"/>
+          </svg>
+          {/* Level glow */}
+          <div style={{position:"absolute",top:18,left:18,background:"rgba(0,0,0,0.35)",backdropFilter:"blur(8px)",borderRadius:20,padding:"5px 14px",border:`1px solid ${accent}66`,display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontSize:14}}>{lvl.emoji}</span>
+            <span style={{color:"#fff",fontSize:12,fontWeight:800,letterSpacing:0.5}}>{lang==="en"?lvl.nameEn:lvl.name}</span>
+          </div>
+          {/* Close button */}
+          <button onClick={onClose} style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,0.35)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:10,width:34,height:34,cursor:"pointer",color:"#fff",fontSize:17,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
-        <div style={{padding:"0 24px 24px"}}>
-          <div style={{display:"flex",alignItems:"flex-end",gap:14,marginTop:-28,marginBottom:16}}>
-            <AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} size={72} online level={user.points}/>
-            <div style={{flex:1,paddingBottom:4}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-                <span style={{fontSize:20,fontWeight:900,color:C.text}}>{user.name}</span>
-                {user.badges?.includes("verified")&&<span title="Verificado" style={{fontSize:16}}>✅</span>}
+
+        {/* ── AVATAR + HEADER ── */}
+        <div style={{padding:"0 24px 20px"}}>
+          <div style={{display:"flex",alignItems:"flex-end",gap:14,marginTop:-44,marginBottom:14,position:"relative",zIndex:2}}>
+            {/* Avatar with ring */}
+            <div style={{position:"relative",flexShrink:0}}>
+              <div style={{width:88,height:88,borderRadius:24,background:`linear-gradient(135deg,${accent},${accent}88)`,padding:3,boxShadow:`0 0 0 3px ${C.surface}, 0 0 20px ${accent}55`}}>
+                <div style={{width:"100%",height:"100%",borderRadius:21,background:C.surface,display:"flex",alignItems:"center",justifyContent:"center",fontSize:40}}>
+                  {user.emoji}
+                </div>
               </div>
-              <LevelBadge points={user.points} lang={lang}/>
+              <div style={{position:"absolute",bottom:-4,right:-4,width:22,height:22,borderRadius:8,background:C.bull,border:`2px solid ${C.surface}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>🟢</div>
+            </div>
+            <div style={{flex:1,paddingBottom:6}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:4}}>
+                <span style={{fontSize:22,fontWeight:900,color:C.text,letterSpacing:-0.3}}>{user.name}</span>
+                {user.badges?.includes("verified")&&<span title="Verificado" style={{fontSize:16}}>✅</span>}
+                {user.badges?.includes("vip")&&<span style={{background:`linear-gradient(90deg,#f59e0b,#d97706)`,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800,color:"#fff"}}>VIP</span>}
+              </div>
+              <div style={{display:"flex",align:"center",gap:8,flexWrap:"wrap"}}>
+                <span style={{fontSize:12,color:C.muted2}}>📅 Desde {joinYear}</span>
+                <span style={{fontSize:12,color:accent,fontWeight:700}}>{tradeStyle}</span>
+              </div>
             </div>
             {currentUser&&currentUser.id!==user.id&&(
-              <Btn variant={isFollowing?"unfollow":"follow"} small onClick={()=>onFollow(user.id)}>{isFollowing?t.following_btn:t.follow}</Btn>
+              <button onClick={()=>onFollow(user.id)}
+                style={{flexShrink:0,background:isFollowing?C.card2:accent,border:`1.5px solid ${isFollowing?C.border:accent}`,borderRadius:12,padding:"9px 20px",cursor:"pointer",color:isFollowing?C.muted:C.surface==="white"||C.surface==="#fff"?"#fff":"#fff",fontSize:13,fontWeight:800,transition:"all 0.15s"}}>
+                {isFollowing?(lang==="en"?"✓ Following":"✓ Siguiendo"):(lang==="en"?"+ Follow":"+ Seguir")}
+              </button>
             )}
           </div>
-          <p style={{color:C.muted,fontSize:14,lineHeight:1.6,margin:"0 0 16px"}}>{user.bio}</p>
-          {/* Progress bar */}
-          {progressToNext&&<div style={{marginBottom:16}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-              <span style={{fontSize:11,color:C.muted2}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</span>
-              <span style={{fontSize:11,color:C.muted2}}>{lang==="en"?getLevel(progressToNext.min).nameEn:getLevel(progressToNext.min).name} {getLevel(progressToNext.min).emoji}</span>
+
+          {/* Bio */}
+          {user.bio&&<p style={{color:C.muted,fontSize:13.5,lineHeight:1.6,margin:"0 0 16px",padding:"10px 14px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>{user.bio}</p>}
+
+          {/* Tickers favoritos */}
+          {topTickers.length>0&&(
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+              {topTickers.map(tk=>(
+                <span key={tk} style={{background:`${accent}18`,border:`1px solid ${accent}44`,borderRadius:8,padding:"3px 10px",fontSize:12,fontWeight:700,color:accent,fontFamily:"monospace"}}>${tk}</span>
+              ))}
+              <span style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,padding:"3px 10px",fontSize:11,color:C.muted2}}>tickers frecuentes</span>
             </div>
-            <div style={{background:C.border,borderRadius:20,height:8,overflow:"hidden"}}>
-              <div style={{height:"100%",borderRadius:20,width:`${progress}%`,background:`linear-gradient(90deg,${C.accent},#00a87f)`,transition:"width 0.5s"}}/>
-            </div>
-            <div style={{fontSize:11,color:C.muted2,marginTop:4}}>{user.points.toLocaleString()} / {progressToNext.min.toLocaleString()} pts</div>
-          </div>}
-          {/* Stats */}
-          <div style={{display:"flex",gap:0,marginBottom:20,background:C.card2,borderRadius:14,overflow:"hidden",border:`1px solid ${C.border}`}}>
-            {[[t.followers,fmtNum(user.followers)],[t.following,fmtNum(user.following)],[t.posts,user.posts],[t.points,user.points.toLocaleString()]].map(([l,v])=>(
-              <div key={l} style={{flex:1,textAlign:"center",padding:"14px 8px",borderRight:`1px solid ${C.border}`}}>
-                <div style={{fontWeight:800,color:C.text,fontSize:16}}>{v}</div>
-                <div style={{color:C.muted2,fontSize:11}}>{l}</div>
+          )}
+
+          {/* ── STATS ANIMADAS ── */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:20}}>
+            {[
+              {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), icon:"👥", color:accent},
+              {label:lang==="en"?"Following":"Siguiendo",  value:fmtNum(displayStats.following),  icon:"➕", color:C.purple||"#8b5cf6"},
+              {label:lang==="en"?"Posts":"Posts",          value:displayStats.posts,               icon:"✍️", color:"#f59e0b"},
+              {label:lang==="en"?"Points":"Puntos",        value:fmtNum(displayStats.points),      icon:"⭐", color:C.bull},
+            ].map(s=>(
+              <div key={s.label} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 8px",textAlign:"center",transition:"transform 0.15s",cursor:"default"}}
+                onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                <div style={{fontSize:18,marginBottom:3}}>{s.icon}</div>
+                <div style={{fontWeight:900,color:s.color,fontSize:17,letterSpacing:-0.5}}>{s.value}</div>
+                <div style={{color:C.muted2,fontSize:10,fontWeight:600,marginTop:1}}>{s.label}</div>
               </div>
             ))}
           </div>
-          {/* Badges */}
-          {userBadges.length>0&&<div style={{marginBottom:20}}>
-            <h4 style={{margin:"0 0 10px",color:C.muted,fontSize:12,letterSpacing:1,fontWeight:700}}>INSIGNIAS</h4>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              {userBadges.map(b=>(
-                <div key={b.id} title={b.desc} style={{background:C.goldBg,border:`1px solid ${C.gold}44`,borderRadius:10,padding:"6px 12px",display:"flex",alignItems:"center",gap:6,cursor:"help"}}>
-                  <span style={{fontSize:16}}>{b.emoji}</span>
-                  <span style={{fontSize:12,fontWeight:600,color:C.text}}>{lang==="en"?b.nameEn:b.name}</span>
+
+          {/* ── PROGRESS BAR ── */}
+          {progressToNext&&(
+            <div style={{marginBottom:20,background:C.card2,borderRadius:14,padding:"12px 16px",border:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <span style={{fontSize:12,fontWeight:800,color:C.text}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</span>
+                <span style={{fontSize:11,color:C.muted2}}>{user.points.toLocaleString()} / {progressToNext.min.toLocaleString()} pts</span>
+                <span style={{fontSize:12,fontWeight:800,color:C.muted}}>{getLevel(progressToNext.min).emoji} {lang==="en"?getLevel(progressToNext.min).nameEn:getLevel(progressToNext.min).name}</span>
+              </div>
+              <div style={{background:C.border,borderRadius:20,height:10,overflow:"hidden"}}>
+                <div style={{height:"100%",borderRadius:20,width:`${progress}%`,background:`linear-gradient(90deg,${accent},#00c49a)`,transition:"width 1s ease",boxShadow:`0 0 8px ${accent}88`}}/>
+              </div>
+              <div style={{fontSize:11,color:C.muted2,marginTop:5,textAlign:"right"}}>{Math.round(progress)}% hacia el siguiente nivel</div>
+            </div>
+          )}
+
+          {/* ── TABS ── */}
+          <div style={{display:"flex",gap:4,marginBottom:16,background:C.card2,borderRadius:12,padding:4,border:`1px solid ${C.border}`}}>
+            {[["posts","✍️ Posts"],["badges","🏆 Logros"]].map(([k,l])=>(
+              <button key={k} onClick={()=>setActiveTab(k)}
+                style={{flex:1,background:activeTab===k?C.surface:"transparent",border:activeTab===k?`1px solid ${C.border}`:"1px solid transparent",borderRadius:9,padding:"8px 0",cursor:"pointer",color:activeTab===k?C.text:C.muted,fontSize:13,fontWeight:activeTab===k?800:600,transition:"all 0.15s",boxShadow:activeTab===k?"0 1px 4px rgba(0,0,0,0.08)":"none"}}>
+                {l}
+              </button>
+            ))}
+          </div>
+
+          {/* ── TAB: POSTS ── */}
+          {activeTab==="posts"&&(
+            userPosts.length===0
+              ?<div style={{textAlign:"center",padding:"32px 0",color:C.muted2}}>
+                  <div style={{fontSize:36,marginBottom:8}}>📭</div>
+                  <div style={{fontSize:13}}>Sin publicaciones aún</div>
+                </div>
+              :userPosts.slice(0,8).map(p=>(
+                <div key={p.id} style={{background:C.card2,borderRadius:14,padding:"14px 16px",marginBottom:10,border:`1px solid ${C.border}`,transition:"box-shadow 0.15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.boxShadow=C.shadowMd}
+                  onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
+                  <div style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}>
+                    <TickerBadge ticker={p.ticker} sentiment={p.sentiment}/>
+                    <SentPill sentiment={p.sentiment} lang={lang}/>
+                    <span style={{marginLeft:"auto",color:C.muted2,fontSize:11}}>{p.time}</span>
+                  </div>
+                  <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.6}}>{p.text}</p>
+                  <div style={{display:"flex",gap:14,color:C.muted2,fontSize:12}}>
+                    <span>❤️ {p.likes}</span>
+                    <span>💬 {p.comments}</span>
+                    <span style={{marginLeft:"auto",color:accent,fontSize:11,fontWeight:700,cursor:"pointer"}}>Ver →</span>
+                  </div>
+                </div>
+              ))
+          )}
+
+          {/* ── TAB: BADGES / LOGROS ── */}
+          {activeTab==="badges"&&(
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10}}>
+              {ACHIEVEMENTS.map(a=>(
+                <div key={a.id} style={{background:a.unlocked?C.card2:"#f8fafc",border:`1px solid ${a.unlocked?accent+"44":C.border}`,borderRadius:14,padding:"14px 16px",display:"flex",gap:12,alignItems:"flex-start",opacity:a.unlocked?1:0.5,transition:"transform 0.15s",cursor:a.unlocked?"default":"not-allowed"}}
+                  onMouseEnter={e=>{if(a.unlocked)e.currentTarget.style.transform="translateY(-2px)";}}
+                  onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                  <div style={{width:40,height:40,borderRadius:12,background:a.unlocked?`${accent}22`:"#f1f5f9",border:`1px solid ${a.unlocked?accent+"44":"#e2e8f0"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+                    {a.unlocked?a.emoji:"🔒"}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:800,color:a.unlocked?C.text:C.muted,fontSize:13}}>{a.name}</div>
+                    <div style={{color:C.muted2,fontSize:11,marginTop:2,lineHeight:1.4}}>{a.desc}</div>
+                    {a.unlocked&&<div style={{fontSize:10,color:accent,fontWeight:700,marginTop:4}}>✓ Desbloqueado</div>}
+                  </div>
                 </div>
               ))}
             </div>
-          </div>}
-          {/* Posts */}
-          <h4 style={{margin:"0 0 12px",color:C.muted,fontSize:12,letterSpacing:1,fontWeight:700}}>PUBLICACIONES RECIENTES</h4>
-          {userPosts.length===0?<p style={{color:C.muted2,fontSize:13}}>Sin publicaciones aún.</p>:userPosts.map(p=>(
-            <div key={p.id} style={{background:C.card2,borderRadius:12,padding:"12px 14px",marginBottom:10,border:`1px solid ${C.border}`}}>
-              <div style={{display:"flex",gap:8,marginBottom:8}}><TickerBadge ticker={p.ticker} sentiment={p.sentiment}/><SentPill sentiment={p.sentiment} lang={lang}/></div>
-              <p style={{margin:"0 0 8px",color:C.text,fontSize:13,lineHeight:1.5}}>{p.text}</p>
-              <div style={{color:C.muted2,fontSize:11}}>♥ {p.likes} · 💬 {p.comments} · {p.time}</div>
-            </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
