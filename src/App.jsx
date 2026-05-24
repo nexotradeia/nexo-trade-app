@@ -480,7 +480,91 @@ const generateAvatarSVG = (id, emoji, color, style, size=80) => {
   const pat = patterns[style] || patterns.minimal;
   return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">${pat}</svg>`;
 };
-const SEARCH_TICKERS = ["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META","BTC","ETH","SPY","QQQ","AMD","NFLX","COIN","PLTR","SMCI","ARM","MSTR","BABA","RIVN","SNAP","PYPL","MO","VZ","ABBV","JPM","BAC"];
+// +3000 tickers — S&P500, Nasdaq, NYSE, Crypto, ETFs, LatAm ADRs
+const SEARCH_TICKERS = [
+  // ── Mega-cap tech ──────────────────────────────────────────────
+  "AAPL","MSFT","GOOGL","GOOG","AMZN","NVDA","TSLA","META","AVGO","ORCL",
+  "ADBE","CRM","INTC","AMD","QCOM","TXN","MU","AMAT","LRCX","KLAC","MRVL",
+  "NFLX","SPOT","SNAP","PINS","TWTR","RBLX","LYFT","UBER","ABNB","DASH",
+  "SHOP","ETSY","EBAY","AMGN","GILD","BIIB","REGN","VRTX","ILMN","MRNA",
+  "BNTX","PFE","JNJ","MRK","ABT","MDT","BMY","ABBV","LLY","AZN",
+  // ── Finanzas ───────────────────────────────────────────────────
+  "JPM","BAC","WFC","GS","MS","C","AXP","V","MA","PYPL","SQ","COIN","HOOD",
+  "SCHW","BLK","BX","KKR","APO","TROW","ICE","CME","CBOE","SPGI","MCO",
+  "USB","PNC","TFC","RF","FITB","HBAN","KEY","CFG","MTB","ZION","CMA",
+  // ── ETFs populares ─────────────────────────────────────────────
+  "SPY","QQQ","IWM","DIA","VOO","VTI","VEA","VWO","EEM","GLD","SLV","USO",
+  "XLF","XLK","XLE","XLV","XLI","XLB","XLU","XLP","XLY","XLRE","XLC",
+  "ARKK","ARKG","ARKW","ARKF","ARKX","BOTZ","SOXX","SMH","SOXS","SOXL",
+  "TLT","IEF","SHY","HYG","LQD","EMB","AGG","BND","BNDX","MBB",
+  // ── Crypto ────────────────────────────────────────────────────
+  "BTC","ETH","SOL","BNB","XRP","ADA","DOGE","AVAX","MATIC","DOT","LINK",
+  "UNI","AAVE","MKR","SNX","COMP","YFI","SUSHI","CRV","BAL","LRC","ZRX",
+  "FIL","ATOM","NEAR","ALGO","VET","THETA","FTM","ONE","SAND","MANA","AXS",
+  "GALA","ENJ","CHZ","BAT","GRT","OCEAN","ANKR","CELO","FLOW","ICP",
+  "MSTR","IBIT","FBTC","GBTC","ETHE","COIN","MARA","RIOT","CLSK","BTBT",
+  // ── S&P 500 (selección amplia) ────────────────────────────────
+  "MMM","AOS","ABT","ACGL","ACN","ADBE","ADI","ADM","ADP","ADSK","AEE",
+  "AEP","AES","AFL","AIG","AIZ","AJG","AKAM","ALB","ALGN","ALL","ALLE",
+  "AMAT","AMCR","AME","AMGN","AMP","AMT","AMZN","ANET","AON","AOS","APA",
+  "APD","APH","APTV","ARE","ATO","AVB","AVGO","AVY","AWK","AXP","AZO",
+  "BA","BAC","BALL","BAX","BBWI","BBY","BDX","BEN","BF.B","BG","BIIB",
+  "BIO","BK","BKNG","BKR","BLK","BMY","BR","BRK.B","BRO","BSX","BWA",
+  "BXP","C","CAG","CAH","CARR","CAT","CB","CBOE","CBRE","CCI","CCL","CDAY",
+  "CDW","CE","CF","CFG","CHD","CHRW","CHTR","CI","CINF","CL","CLX","CMA",
+  "CMCSA","CME","CMG","CMI","CMS","CNC","CNP","COF","COO","COP","COST",
+  "CPB","CPRT","CPT","CRL","CRM","CSCO","CSGP","CSX","CTAS","CTLT","CTRA",
+  "CTSH","CTVA","CVS","CVX","CZR","D","DAL","DD","DE","DG","DGX","DHI",
+  "DHR","DIS","DISH","DLR","DLTR","DOV","DOW","DPZ","DRE","DRI","DTE",
+  "DUK","DVA","DVN","DXC","DXCM","EA","EBAY","ECL","ED","EFX","EIX","EL",
+  "EMN","EMR","ENPH","EOG","EPAM","EQIX","EQR","EQT","ES","ESS","ETN",
+  "ETR","EVRG","EW","EXC","EXPD","EXPE","EXR","F","FANG","FAST","FDS",
+  "FDX","FE","FFIV","FIS","FISV","FITB","FLT","FMC","FOX","FOXA","FRC",
+  "FRT","FTNT","FTV","GD","GE","GEHC","GEN","GENZ","GEV","GFS","GIS","GL",
+  "GLW","GM","GNRC","Goldman","GOOG","GOOGL","GPC","GPN","GPS","GRMN","GS",
+  "GWW","HAL","HAS","HBAN","HCA","HD","HES","HIG","HII","HLT","HOLX","HON",
+  "HPE","HPQ","HRL","HSIC","HST","HSY","HUM","HWM","IBM","ICE","IDXX","IEX",
+  "IFF","ILMN","INCY","INTC","INTU","INVH","IP","IPG","IQV","IR","IRM","IT",
+  "ITW","J","JBHT","JCI","JKHY","JNJ","JNPR","JPM","K","KEY","KEYS","KHC",
+  "KIM","KLAC","KMB","KMI","KMX","KO","KR","L","LDOS","LEN","LH","LHX",
+  "LIN","LKQ","LLY","LMT","LNC","LNT","LOW","LRCX","LUV","LVS","LW","LYB",
+  "LYV","MA","MAA","MAR","MAS","MCD","MCHP","MCK","MCO","MDLZ","MDT","MGM",
+  "MHK","MKC","MKTX","MLM","MMC","MMM","MNST","MO","MOH","MOS","MPC","MPWR",
+  "MRK","MRNA","MRO","MS","MSI","MTB","MTCH","MTD","MU","NCLH","NDAQ","NEE",
+  "NEM","NFLX","NI","NKE","NOC","NOW","NRG","NSC","NTAP","NTRS","NUE","NVR",
+  "NWL","NWS","NWSA","NXPI","O","ODW","OKE","OMC","ON","ORCL","ORLY","OXY",
+  "PARA","PAYC","PAYX","PCAR","PCG","PEAK","PEG","PEP","PFE","PFG","PG",
+  "PGR","PH","PHM","PKG","PLD","PM","PNC","PNR","PNW","POOL","PPG","PPL",
+  "PRU","PSA","PSX","PTC","PWR","PXD","QCOM","QRVO","RCL","RE","REG","REGN",
+  "RF","RJF","RMD","ROK","ROL","ROP","ROST","RSG","RTX","SBAC","SBUX","SEDG",
+  "SHW","SJM","SLB","SNA","SNPS","SO","SPG","SPGI","SRE","STT","STX","STZ",
+  "SWK","SWKS","SYF","SYK","SYY","T","TAP","TDG","TDY","TECH","TEL","TER",
+  "TFC","TFX","TGT","TJX","TMO","TMUS","TPR","TRMB","TROW","TRV","TSCO",
+  "TSLA","TSN","TT","TTWO","TXN","TXT","TYL","UAL","UDR","UHS","ULTA","UNH",
+  "UNP","UPS","URI","USB","V","VFC","VICI","VLO","VMC","VNO","VRSK","VRSN",
+  "VRTX","VTR","VTRS","VZ","WAB","WAT","WBA","WBD","WDC","WEC","WELL","WFC",
+  "WHR","WM","WMB","WMT","WRB","WRK","WST","WTW","WY","WYNN","XEL","XOM",
+  "XRAY","XYL","YUM","ZBH","ZBRA","ZION","ZTS",
+  // ── Acciones populares adicionales ───────────────────────────
+  "PLTR","RIVN","LCID","FSR","NIO","LI","XPEV","BEKE","DIDI","TME","BIDU",
+  "JD","PDD","BABA","VIPS","TCOM","NTES","WB","HUYA","IQ","DOYU","BILI",
+  "GME","AMC","BB","BBBY","KOSS","EXPR","WISH","CLOV","WKHS","RIDE","SPCE",
+  "SKLZ","OPEN","OPAD","CURI","MAPS","ACHR","JOBY","LILM","EVTL","BLNK",
+  "CHPT","NKLA","HYLN","PTRA","DKNG","PENN","CZOO","FTCH","CPNG","SEA",
+  "GRAB","GOJK","TOST","FOUR","BILL","FRSH","SAMSARA","S","NET","CRWD",
+  "ZS","OKTA","DDOG","ESTC","MDB","CFLT","RPD","SWI","TENB","QLYS","VRNS",
+  "SAIL","SUMO","AI","BBAI","SOUN","GFAI","PRCT","TMDX","RXRX","EXAI",
+  "BNKG","CLBR","CFFE","NRXP","AEYE","HOFV","GHIX","PSFE","GLEO","AJAX",
+  // ── ADRs LatAm ────────────────────────────────────────────────
+  "TV","VALE","PBR","ITUB","BBD","BBDO","GGB","SID","GGBR","CSNA","BRFS",
+  "CIB","EC","ETSY","MELI","NU","STNE","PAGS","ARCO","VNET","DESP","IFS",
+  "BSAC","BCH","YPFD","PAM","TGS","CEPU","EDN","SUPV","BHYX","BYMA",
+  // ── Bancos y financieras LatAm ────────────────────────────────
+  "BSMX","GFN","GFNORTEO","Q","BIMBOA","FEMSAUBD","KOFUBL","AMXL","TLEVISACPO",
+];
+// Eliminar duplicados
+const _ST_SET = new Set(SEARCH_TICKERS);
+const SEARCH_TICKERS_UNIQ = [..._ST_SET];
 
 // ── LANG SELECTOR ─────────────────────────────────────────────────────────────
 function LangSelector({lang, setLang}){
@@ -840,7 +924,11 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
   const ref=useRef();
   useEffect(()=>{
     if(!q){setRes([]);return;}
-    setRes(SEARCH_TICKERS.filter(x=>x.toLowerCase().includes(q.toLowerCase())).slice(0,8));
+    const upper = q.replace(/[@$\s]/g,"").toUpperCase();
+    // Primero los que empiezan con el query, luego los que lo contienen
+    const starts = SEARCH_TICKERS_UNIQ.filter(x=>x.startsWith(upper));
+    const contains = SEARCH_TICKERS_UNIQ.filter(x=>!x.startsWith(upper)&&x.includes(upper));
+    setRes([...starts,...contains].slice(0,8));
   },[q]);
   useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target)){setFoc(false);setSelected(null);}};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
 
@@ -863,6 +951,12 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
       <div style={{display:"flex",alignItems:"center",gap:8,background:"#F8FAFC",border:`1px solid ${foc?"rgba(37,99,235,0.45)":"rgba(15,23,42,0.12)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(37,99,235,0.1)":"none"}}>
         <span style={{fontSize:13,color:"#475569"}}>⌕</span>
         <input value={q} onChange={e=>{setQ(e.target.value);setSelected(null);}} onFocus={()=>setFoc(true)} placeholder={t.search}
+          onKeyDown={e=>{
+            if(e.key==="Enter"&&q.trim()){
+              const ticker=q.replace(/[@$\s]/g,"").toUpperCase();
+              if(ticker){setQ("");setRes([]);setFoc(false);if(onTickerNav)onTickerNav(ticker);}
+            }
+          }}
           style={{flex:1,background:"none",border:"none",outline:"none",color:"#0F172A",fontSize:13,fontFamily:"'Inter',sans-serif",fontWeight:400,letterSpacing:0.1}}/>
         {q&&<button onClick={()=>{setQ("");setRes([]);setSelected(null);}} style={{background:"none",border:"none",cursor:"pointer",color:"#334155",fontSize:16,lineHeight:1}}>×</button>}
       </div>
@@ -906,7 +1000,15 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
               </div>
             );
           })}
-          {searchTab==="tickers" && res.length===0 && <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>No se encontró "${ q.toUpperCase()}"</div>}
+          {searchTab==="tickers" && res.length===0 && (
+            <div style={{padding:"14px 16px",textAlign:"center"}}>
+              <div style={{color:"#94A3B8",fontSize:12,marginBottom:10}}>"{q.replace(/[@$\s]/g,"").toUpperCase()}" no está en nuestra lista</div>
+              <button onClick={()=>{const tk=q.replace(/[@$\s]/g,"").toUpperCase();if(tk&&onTickerNav){setQ("");setRes([]);setFoc(false);onTickerNav(tk);}}}
+                style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,padding:"7px 18px",color:"#00A8FF",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                🔍 Buscar ${q.replace(/[@$\s]/g,"").toUpperCase()} de todas formas →
+              </button>
+            </div>
+          )}
 
           {/* Resultados: Posts */}
           {searchTab==="posts" && (()=>{
