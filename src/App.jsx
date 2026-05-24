@@ -1876,70 +1876,134 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   );
 }
 
-// ── GIF PICKER (Tenor — funciona sin registro) ────────────────────────────────
-const TENOR_KEY="AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCDg"; // Tenor v2 demo key
-function GifPicker({onSelect,onClose}){
-  const [q,setQ]=useState("");
-  const [gifs,setGifs]=useState([]);
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState(false);
+// ── GIF PICKER (Tenor v2 + Giphy fallback) ───────────────────────────────────
+const TENOR_KEY = "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCDg";
+const GIPHY_KEY = "dc6zaTOxFJmzC"; // Giphy public beta key
 
-  const search=(query)=>{
+function GifPicker({onSelect,onClose}){
+  const [q,setQ]       = useState("");
+  const [gifs,setGifs] = useState([]);
+  const [loading,setLoading] = useState(false);
+  const [error,setError]     = useState(false);
+  const [src,setSrc]         = useState("tenor"); // "tenor" | "giphy"
+
+  const searchGiphy = (query) => {
     setLoading(true); setError(false);
     const endpoint = query.trim()
-      ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${TENOR_KEY}&limit=16&media_filter=gif`
-      : `https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=16&media_filter=gif`;
+      ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=16&rating=g`
+      : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=16&rating=g`;
     fetch(endpoint)
       .then(r=>r.json())
       .then(d=>{
-        setGifs(d.results||[]);
+        const results = (d.data||[]).map(g=>({
+          id: g.id,
+          preview: g.images?.fixed_height_small?.url || g.images?.fixed_height?.url,
+          full:    g.images?.fixed_height?.url || g.images?.original?.url,
+          title:   g.title||"gif",
+        }));
+        setGifs(results);
         setLoading(false);
       })
-      .catch(()=>{setError(true);setLoading(false);});
+      .catch(()=>{ setError(true); setLoading(false); });
   };
 
-  useEffect(()=>{search("");},[]);
+  const searchTenor = (query) => {
+    setLoading(true); setError(false);
+    // media_filter=tinygif,gif para obtener ambos formatos
+    const endpoint = query.trim()
+      ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${TENOR_KEY}&limit=16&media_filter=tinygif,gif&contentfilter=medium`
+      : `https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=16&media_filter=tinygif,gif&contentfilter=medium`;
+    fetch(endpoint)
+      .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(d=>{
+        if(!d.results || d.results.length===0){ throw new Error("empty"); }
+        const results = d.results.map(g=>({
+          id:      g.id,
+          preview: g.media_formats?.tinygif?.url || g.media_formats?.gif?.url || "",
+          full:    g.media_formats?.gif?.url || g.media_formats?.tinygif?.url || "",
+          title:   g.title||"gif",
+        }));
+        setGifs(results);
+        setLoading(false);
+      })
+      .catch(()=>{
+        // Tenor falló → fallback a Giphy
+        setSrc("giphy");
+        searchGiphy(query);
+      });
+  };
+
+  const search = (query) => {
+    if(src==="giphy") searchGiphy(query);
+    else searchTenor(query);
+  };
+
+  useEffect(()=>{ searchTenor(""); },[]);
+
+  const TAGS = ["📈 bull","📉 bear","🚀 moon","💎 diamond hands","stonks","crypto","trading"];
 
   return(
-    <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"1px solid rgba(15,23,42,0.12)",borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.15)",zIndex:300,padding:12,marginTop:4}}>
-      <div style={{display:"flex",gap:6,marginBottom:10}}>
+    <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"1px solid rgba(15,23,42,0.12)",borderRadius:14,boxShadow:"0 12px 40px rgba(0,0,0,0.15)",zIndex:300,padding:12,marginTop:6}}>
+      {/* Search bar */}
+      <div style={{display:"flex",gap:6,marginBottom:8}}>
         <input value={q} onChange={e=>setQ(e.target.value)}
           onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();search(q);}}}
-          placeholder="Buscar GIF: trading, moon, bull..." autoFocus
-          style={{flex:1,border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"6px 10px",fontSize:12,outline:"none"}}/>
-        <button onClick={()=>search(q)} style={{background:C.accent,border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>🔍</button>
-        <button onClick={onClose} style={{background:"transparent",border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>✕</button>
+          placeholder="🔍 Buscar GIF: bull, moon, trading..." autoFocus
+          style={{flex:1,border:"1px solid rgba(15,23,42,0.12)",borderRadius:9,padding:"7px 11px",fontSize:12,outline:"none",background:"#f8fafc"}}/>
+        <button onClick={()=>search(q)}
+          style={{background:C.accent,border:"none",borderRadius:9,padding:"7px 14px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>Buscar</button>
+        <button onClick={onClose}
+          style={{background:"transparent",border:"1px solid rgba(15,23,42,0.1)",borderRadius:9,padding:"7px 10px",cursor:"pointer",fontSize:14,color:C.muted}}>✕</button>
       </div>
-      {/* Sugerencias rápidas */}
-      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:8}}>
-        {["📈 bull","📉 bear","🚀 moon","💎 diamond hands","stonks","crypto"].map(tag=>(
-          <button key={tag} onClick={()=>{const w=tag.replace(/^.*?\s/,"");setQ(w);search(w);}}
-            style={{background:"rgba(0,168,255,0.07)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:20,padding:"2px 9px",fontSize:11,cursor:"pointer",color:C.accentText,fontWeight:600}}>{tag}</button>
-        ))}
+
+      {/* Quick tags */}
+      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
+        {TAGS.map(tag=>{
+          const w=tag.split(" ").pop();
+          return(
+            <button key={tag} onClick={()=>{setQ(w);search(w);}}
+              style={{background:"rgba(0,168,255,0.07)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,cursor:"pointer",color:C.accentText,fontWeight:600,transition:"all 0.12s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.15)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,168,255,0.07)";}}>
+              {tag}
+            </button>
+          );
+        })}
       </div>
-      {loading?(
-        <div style={{textAlign:"center",padding:20,color:C.muted,fontSize:13}}>⏳ Buscando GIFs...</div>
-      ):error?(
-        <div style={{textAlign:"center",padding:20,color:C.muted,fontSize:13}}>😕 No se pudo cargar. Revisa tu conexión.</div>
-      ):(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:200,overflowY:"auto"}}>
+
+      {/* Results */}
+      {loading ? (
+        <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>
+          <div style={{fontSize:24,marginBottom:6}}>🎞️</div>
+          Buscando GIFs...
+        </div>
+      ) : error ? (
+        <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>
+          <div style={{fontSize:24,marginBottom:6}}>😕</div>
+          No se pudo cargar. Intenta buscar otro término.
+        </div>
+      ) : (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:220,overflowY:"auto",borderRadius:8,overflow:"hidden"}}>
           {gifs.length===0
-            ? <div style={{gridColumn:"1/-1",textAlign:"center",padding:20,color:C.muted,fontSize:13}}>No se encontraron GIFs</div>
-            : gifs.map(g=>{
-              const preview=g.media_formats?.tinygif?.url||g.media_formats?.gif?.url;
-              const full=g.media_formats?.gif?.url||preview;
-              return(
-                <img key={g.id} src={preview} alt={g.title||"gif"}
-                  style={{width:"100%",borderRadius:6,cursor:"pointer",transition:"opacity 0.15s",aspectRatio:"1",objectFit:"cover"}}
-                  onClick={()=>onSelect(full)}
-                  onMouseEnter={e=>e.target.style.opacity="0.75"}
-                  onMouseLeave={e=>e.target.style.opacity="1"}/>
-              );
-            })
+            ? <div style={{gridColumn:"1/-1",textAlign:"center",padding:20,color:C.muted,fontSize:13}}>
+                No se encontraron GIFs para "{q}"
+              </div>
+            : gifs.map(g=>(
+                <div key={g.id} style={{position:"relative",borderRadius:7,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:"#f1f5f9"}}
+                  onClick={()=>onSelect(g.full||g.preview)}
+                  onMouseEnter={e=>e.currentTarget.querySelector("img").style.opacity="0.75"}
+                  onMouseLeave={e=>e.currentTarget.querySelector("img").style.opacity="1"}>
+                  <img src={g.preview} alt={g.title}
+                    style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity 0.15s"}}
+                    onError={e=>{e.target.parentElement.style.display="none";}}/>
+                </div>
+              ))
           }
         </div>
       )}
-      <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:6}}>Powered by Tenor</div>
+      <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:6,opacity:0.7}}>
+        Powered by {src==="giphy"?"Giphy":"Tenor"}
+      </div>
     </div>
   );
 }
@@ -2538,13 +2602,13 @@ function MarketsMiniWidget(){
   const barCol = p => p>=0.6?"#10b981":p>=0.4?"#f59e0b":"#ef4444";
 
   return(
-    <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,marginBottom:16,overflow:"hidden"}}>
+    <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,marginBottom:12,overflow:"hidden"}}>
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
         {[["mercados","📈 Mercados"],["predicciones","🎯 Predicciones"],["tendencias","🔥 Tendencias"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
-            style={{flex:1,padding:"10px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:12,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
-            {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
+            style={{flex:1,padding:"7px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:11,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            {l}{k==="mercados"&&isLive&&<span style={{width:4,height:4,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
           </button>
         ))}
       </div>
@@ -2554,15 +2618,15 @@ function MarketsMiniWidget(){
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0}}>
           {prices.slice(0,8).map((t,i)=>(
             <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
-              style={{display:"flex",flexDirection:"column",padding:"10px 12px",borderRight:i%4!==3?"1px solid rgba(255,255,255,0.06)":"none",borderBottom:i<4?"1px solid rgba(255,255,255,0.06)":"none",textDecoration:"none",transition:"background 0.15s"}}
+              style={{display:"flex",flexDirection:"column",padding:"6px 10px",borderRight:i%4!==3?"1px solid rgba(255,255,255,0.06)":"none",borderBottom:i<4?"1px solid rgba(255,255,255,0.06)":"none",textDecoration:"none",transition:"background 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
               onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3}}>
-                <span style={{width:6,height:6,borderRadius:"50%",background:t.col,display:"inline-block",flexShrink:0}}/>
-                <span style={{fontWeight:800,fontSize:11,color:t.col,letterSpacing:0.3}}>{t.s}</span>
+              <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:2}}>
+                <span style={{width:5,height:5,borderRadius:"50%",background:t.col,display:"inline-block",flexShrink:0}}/>
+                <span style={{fontWeight:800,fontSize:10,color:t.col,letterSpacing:0.3}}>{t.s}</span>
               </div>
-              <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#e2e8f0"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</div>
-              <div style={{fontSize:11,fontWeight:600,color:t.c>=0?"#22c55e":"#ef4444",marginTop:1}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</div>
+              <div style={{fontFamily:"monospace",fontSize:11,fontWeight:700,color:"#e2e8f0"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</div>
+              <div style={{fontSize:10,fontWeight:600,color:t.c>=0?"#22c55e":"#ef4444",marginTop:1}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</div>
             </a>
           ))}
         </div>
@@ -2570,21 +2634,21 @@ function MarketsMiniWidget(){
 
       {/* Predicciones */}
       {tab==="predicciones"&&(
-        <div style={{padding:"10px 14px",display:"flex",flexDirection:"column",gap:10}}>
+        <div style={{padding:"8px 12px",display:"flex",flexDirection:"column",gap:7}}>
           {polyData.map((m,i)=>(
             <div key={i}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4,gap:8}}>
-                <span style={{color:"#cbd5e1",fontSize:12,flex:1,lineHeight:1.4}}>{m.q}</span>
-                <span style={{fontWeight:900,fontSize:15,color:barCol(m.p),flexShrink:0}}>{Math.round(m.p*100)}%</span>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3,gap:8}}>
+                <span style={{color:"#cbd5e1",fontSize:11,flex:1,lineHeight:1.3}}>{m.q}</span>
+                <span style={{fontWeight:900,fontSize:13,color:barCol(m.p),flexShrink:0}}>{Math.round(m.p*100)}%</span>
               </div>
-              <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
+              <div style={{height:3,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
                 <div style={{height:"100%",width:`${m.p*100}%`,background:barCol(m.p),borderRadius:4,transition:"width 1s"}}/>
               </div>
-              <div style={{color:"#475569",fontSize:10,marginTop:2}}>Vol: {m.vol}</div>
+              <div style={{color:"#475569",fontSize:9,marginTop:1}}>Vol: {m.vol}</div>
             </div>
           ))}
           <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer"
-            style={{textAlign:"center",color:"#6366f1",fontSize:11,fontWeight:700,textDecoration:"none",marginTop:2}}>
+            style={{textAlign:"center",color:"#6366f1",fontSize:10,fontWeight:700,textDecoration:"none",marginTop:2}}>
             Ver todos en Polymarket →
           </a>
         </div>
@@ -2592,16 +2656,16 @@ function MarketsMiniWidget(){
 
       {/* Tendencias */}
       {tab==="tendencias"&&(
-        <div style={{padding:"10px 14px",display:"flex",flexDirection:"column",gap:8}}>
+        <div style={{padding:"8px 12px",display:"flex",flexDirection:"column",gap:6}}>
           {MOCK_TRENDING.map((t,i)=>(
-            <div key={t.ticker} style={{display:"flex",alignItems:"center",gap:10}}>
-              <span style={{color:"#334155",fontWeight:800,fontSize:12,minWidth:16}}>{i+1}</span>
-              <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:"#00A8FF",minWidth:48}}>${t.ticker}</span>
-              <div style={{flex:1,height:4,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
+            <div key={t.ticker} style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{color:"#334155",fontWeight:800,fontSize:10,minWidth:14}}>{i+1}</span>
+              <span style={{fontFamily:"monospace",fontWeight:800,fontSize:10,color:"#00A8FF",minWidth:42}}>${t.ticker}</span>
+              <div style={{flex:1,height:3,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
                 <div style={{height:"100%",width:`${t.sentiment}%`,background:t.change>=0?"#22c55e":"#ef4444",borderRadius:4}}/>
               </div>
-              <span style={{fontSize:11,fontWeight:700,color:t.change>=0?"#22c55e":"#ef4444",minWidth:44,textAlign:"right"}}>{t.change>=0?"+":""}{t.change}%</span>
-              <span style={{color:"#334155",fontSize:10,minWidth:36}}>{(t.mentions/1000).toFixed(1)}K 💬</span>
+              <span style={{fontSize:10,fontWeight:700,color:t.change>=0?"#22c55e":"#ef4444",minWidth:40,textAlign:"right"}}>{t.change>=0?"+":""}{t.change}%</span>
+              <span style={{color:"#334155",fontSize:9,minWidth:32}}>{(t.mentions/1000).toFixed(1)}K 💬</span>
             </div>
           ))}
         </div>
@@ -7597,6 +7661,7 @@ export default function App(){
             comments:   p.comments_count||0,
             reposts:    p.reposts_count||0,
             tags:       p.tags||[p.ticker||"GENERAL"],
+            image:      p.image_url||null,
           }));
           // Solo actualiza si hay posts nuevos — no mueve el scroll innecesariamente
           setPosts(prev => {
@@ -7694,7 +7759,8 @@ export default function App(){
       const tryInsert = async () => {
         const {data,error}=await supabase.from("posts").insert({
           user_id:user.id, text, ticker, sentiment, tags:[ticker],
-          likes_count:0, comments_count:0, reposts_count:0
+          likes_count:0, comments_count:0, reposts_count:0,
+          ...(image ? {image_url: image} : {})
         }).select().single();
         return {data,error};
       };
