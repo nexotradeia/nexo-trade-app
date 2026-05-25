@@ -1867,7 +1867,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
           {/* Aviso: post no guardado */}
           {post._failed && (
             <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:8,padding:"5px 10px",marginBottom:6,fontSize:11,color:"#EF4444",fontWeight:600}}>
-              ⚠️ No se guardó — recarga la página e inténtalo de nuevo.
+              ⚠️ No se guardó{post._errMsg ? ` — ${post._errMsg}` : " — abre consola del navegador (F12) para ver el error"}.
             </div>
           )}
           {/* Post text */}
@@ -8558,17 +8558,27 @@ export default function App(){
     // 2. Guardar en Supabase (con 1 reintento automático si falla)
     if(user?.id && user.id!=="local"){
       const tryInsert = async () => {
-        const {data,error}=await supabase.from("posts").insert({
-          user_id:user.id, content:text, text, ticker, sentiment, tags:[ticker],
-          likes_count:0, comments_count:0, reposts_count:0,
-          ...(image ? {image_url: image} : {})
-        }).select().single();
+        // Solo escribimos a "content" — columna original y segura
+        const payload = {
+          user_id:   user.id,
+          content:   text,
+          ticker:    ticker  || "GENERAL",
+          sentiment: sentiment || "bull",
+          tags:      [ticker || "GENERAL"],
+          likes_count:    0,
+          comments_count: 0,
+          reposts_count:  0,
+        };
+        if(image) payload.image_url = image;
+        const {data,error}=await supabase.from("posts").insert(payload).select().single();
         return {data,error};
       };
       try{
         let {data,error} = await tryInsert();
         // Si falla, espera 2s y reintenta una vez más
         if(error){
+          console.error("Post error (1er intento):", error?.code, error?.message, error?.details);
+          window.__lastPostError = error;
           await new Promise(r=>setTimeout(r,2000));
           const retry = await tryInsert();
           data  = retry.data;
@@ -8583,10 +8593,13 @@ export default function App(){
           setTimeout(()=>setNewPostId(null), 800);
         } else {
           // Ambos intentos fallaron — marcar como no guardado
-          console.error("Post no guardado:", error);
-          setPosts(prev=>prev.map(p=>p.id===localId?{...p,_failed:true}:p));
+          console.error("Post no guardado (2do intento):", error?.code, error?.message, error?.details);
+          window.__lastPostError = error;
+          const errMsg = error?.message || error?.code || "unknown";
+          setPosts(prev=>prev.map(p=>p.id===localId?{...p,_failed:true,_errMsg:errMsg}:p));
         }
       }catch(e){
+        console.error("Post exception:", e);
         setPosts(prev=>prev.map(p=>p.id===localId?{...p,_failed:true}:p));
       }
     }
