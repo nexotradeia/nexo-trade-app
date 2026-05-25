@@ -1831,8 +1831,11 @@ const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col
 // Mini sparkline data per post
 const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
 
-function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
-  const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes),[repost,setRepost]=useState(false);
+function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost}){
+  const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes);
+  const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch{return false;}});
+  const [reposts,setReposts]=useState(post.reposts||0);
+  const [reposting,setReposting]=useState(false);
   // Convertir id a número de forma segura (soporta "local-123..." y números reales)
   const idNum = typeof post.id==="number" ? post.id : (parseInt(String(post.id).replace(/\D/g,""))||1);
   const conf=55+Math.floor(idNum%40);
@@ -1898,9 +1901,9 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
           </div>}
           {/* Action row */}
           <div style={{display:"flex",gap:0,alignItems:"center",borderTop:"1px solid var(--c-border)",paddingTop:8,marginTop:4}}>
-            {[{icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
+            {[
+              {icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
               {icon:"💬",val:post.comments,active:false,col:"#3B82F6",fn:()=>{}},
-              {icon:"↗",val:post.reposts,active:repost,col:"#16A34A",fn:()=>setRepost(!repost)}
             ].map(({icon,val,active,col,fn},i)=>(
               <button key={i} onClick={fn}
                 style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"var(--c-muted2)",fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:8,transition:"all 0.15s",fontFamily:"inherit"}}
@@ -1909,6 +1912,25 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
                 <span style={{fontSize:14}}>{icon}</span><span style={{fontVariantNumeric:"tabular-nums"}}>{val}</span>
               </button>
             ))}
+            {/* Botón Replicar */}
+            <button
+              disabled={reposting}
+              onClick={async()=>{
+                if(reposting) return;
+                setReposting(true);
+                const newVal = reposted ? reposts-1 : reposts+1;
+                setReposts(newVal);
+                setReposted(!reposted);
+                try{ localStorage.setItem("nx-rp-"+post.id, JSON.stringify(!reposted)); }catch{}
+                if(onRepost) await onRepost(post.id, !reposted);
+                if(!reposted) onPoints(POINT_ACTIONS.repost||2, lang==="en"?"Reposted! ↗":"¡Replicado! ↗");
+                setReposting(false);
+              }}
+              style={{background:"none",border:"none",cursor:reposting?"wait":"pointer",display:"flex",alignItems:"center",gap:4,color:reposted?"#16A34A":"var(--c-muted2)",fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:8,transition:"all 0.15s",fontFamily:"inherit",opacity:reposting?0.6:1}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(22,163,74,0.06)";e.currentTarget.style.color="#16A34A";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=reposted?"#16A34A":"var(--c-muted2)";}}>
+              <span style={{fontSize:14}}>↗</span><span style={{fontVariantNumeric:"tabular-nums"}}>{reposts}</span>
+            </button>
             <button
               onClick={()=>{
                 const txt=`${post.sentiment==="bull"?"📈":"📉"} $${post.ticker} — ${post.text.slice(0,180)}${post.text.length>180?"...":""}\n\nvía @NexoTradeIA nexotradeia.com`;
@@ -2402,7 +2424,7 @@ function TVChart({ticker}){
   );
 }
 
-function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,isPremium=false,onNeedPremium}){
+function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,isPremium=false,onNeedPremium,onRepost}){
   const [quote,setQuote]=useState(null);
   const [loadingQ,setLoadingQ]=useState(true);
   const [showChart,setShowChart]=useState(true);
@@ -2500,7 +2522,7 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
           <div style={{fontSize:14}}>{lang==="en"?`Be the first to post about $${ticker}!`:`¡Sé el primero en comentar $${ticker}!`}</div>
         </div>
       ):(
-        tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang}/>)
+        tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang} onRepost={onRepost}/>)
       )}
 
     </div>
@@ -8607,11 +8629,23 @@ export default function App(){
 
   const filtered = sent==="all"?posts:posts.filter(p=>p.sentiment===sent);
 
+  // ── Replicar (repost) ─────────────────────────────────────────────────────
+  const handleRepost = async (postId, isReposting) => {
+    try {
+      // Actualiza el contador en Supabase
+      const { data: current } = await supabase.from("posts").select("reposts_count").eq("id", postId).single();
+      const newCount = Math.max(0, (current?.reposts_count || 0) + (isReposting ? 1 : -1));
+      await supabase.from("posts").update({ reposts_count: newCount }).eq("id", postId);
+      // Actualiza localmente también
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, reposts: newCount } : p));
+    } catch(e) { console.error("Error repost:", e); }
+  };
+
   // VIP definitivo: admin emails siempre tienen acceso sin importar el state
   const effectivePremium = isPremium || ADMIN_EMAILS.includes(user?.email || '');
 
   const renderPage = () => {
-    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} onRepost={handleRepost}/>;
     if(page===1) return <TopsPage posts={posts}/>;
     if(page===2||page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
@@ -8675,7 +8709,7 @@ export default function App(){
         )}
         {filtered2.map((p,i)=>(
           <div key={p.id}>
-            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId}/>
+            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost}/>
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
