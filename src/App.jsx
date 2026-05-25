@@ -2007,85 +2007,79 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   };
 
   return(
-    <div style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"14px 16px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.06)"}}>
-      {modMsg&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:12,color:C.bear}}>{modMsg}</div>}
+    <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:10,boxShadow:"var(--c-shadow)"}}>
+      {modMsg&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:12,color:"#EF4444"}}>{modMsg}</div>}
       <div style={{display:"flex",gap:10}}>
-        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:38,height:38,borderRadius:"50%",background:"rgba(15,23,42,0.06)",border:"1px solid rgba(15,23,42,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
+        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:36,height:36,borderRadius:"50%",background:"var(--c-border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
         <div style={{flex:1,position:"relative"}}>
-          {!user&&<div style={{background:"rgba(0,160,96,0.05)",border:"1px solid rgba(0,160,96,0.18)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:13,color:C.muted}}>
-            <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}} onClick={onNeedAuth}>{t.login}</span> {lang==="en"?"to share your analysis":"para compartir tu análisis"}
-          </div>}
-          {user&&<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-            <LevelBadge points={user.points} lang={lang}/>
-            <span style={{color:"#94A3B8",fontSize:11}}>+{POINT_ACTIONS.post} pts</span>
+          {!user&&<div style={{fontSize:13,color:"var(--c-muted)",marginBottom:8}}>
+            <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}} onClick={onNeedAuth}>{t.login}</span> para compartir tu análisis
           </div>}
           <textarea ref={taRef} value={text} onChange={handleTextChange}
-            placeholder="¿Qué piensas del mercado? Usa $NVDA para cashtags y @META para mencionar activos · Enter para publicar"
-            style={{width:"100%",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:9,color:"#0F172A",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:72,fontFamily:"inherit",lineHeight:1.6,boxSizing:"border-box",transition:"border-color 0.15s"}}
-            onFocus={e=>e.target.style.borderColor="rgba(0,160,96,0.4)"}
-            onBlur={e=>{e.target.style.borderColor="rgba(15,23,42,0.1)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
+            placeholder="¿Qué piensas del mercado? Usa $NVDA o @META · Enter para publicar"
+            style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:68,fontFamily:"inherit",lineHeight:1.55,boxSizing:"border-box",transition:"border-color 0.15s"}}
+            onFocus={e=>e.target.style.borderColor="rgba(0,168,255,0.4)"}
+            onBlur={e=>{e.target.style.borderColor="var(--c-border)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
             onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}/>
-          {/* @Mention autocomplete dropdown */}
+          {/* @Mention autocomplete */}
           {mentionBox.open&&(
-            <div style={{position:"absolute",top:user?108:80,left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(37,99,235,0.25)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.1)",zIndex:200,overflow:"hidden"}}>
-              <div style={{padding:"6px 10px 4px",fontSize:10,color:"#3B82F6",fontWeight:700,letterSpacing:0.8,borderBottom:"1px solid rgba(15,23,42,0.07)"}}>MENCIONAR ACTIVO</div>
+            <div style={{position:"absolute",top:72,left:0,right:0,background:"var(--c-card)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.12)",zIndex:200,overflow:"hidden"}}>
+              <div style={{padding:"5px 10px 4px",fontSize:10,color:C.accent,fontWeight:700,letterSpacing:0.8,borderBottom:"1px solid var(--c-border)"}}>MENCIONAR ACTIVO</div>
               {mentionBox.results.map(sym=>(
                 <div key={sym} onMouseDown={()=>insertMention(sym)}
-                  style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",cursor:"pointer",transition:"background 0.1s",borderBottom:"1px solid rgba(15,23,42,0.06)"}}
-                  onMouseEnter={e=>e.currentTarget.style.background="rgba(37,99,235,0.06)"}
+                  style={{display:"flex",alignItems:"center",gap:10,padding:"7px 12px",cursor:"pointer",transition:"background 0.1s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.06)"}
                   onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                  <span style={{background:"rgba(37,99,235,0.07)",color:"#2563EB",borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace",border:"1px solid rgba(37,99,235,0.2)"}} >@{sym}</span>
-                  <span style={{color:"#475569",fontSize:11}}>Mencionar {sym}</span>
+                  <span style={{background:"rgba(0,168,255,0.08)",color:C.accent,borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace"}}>@{sym}</span>
+                  <span style={{color:"var(--c-muted)",fontSize:11}}>Mencionar {sym}</span>
                 </div>
               ))}
             </div>
           )}
-          {/* Bullish / Bearish — outline minimalista */}
-          <div style={{display:"flex",gap:8,marginTop:10,marginBottom:10}}>
-            {[
-              {v:"bull",label:"▲ Alcista",col:"#16A34A"},
-              {v:"bear",label:"▼ Bajista",col:"#DC2626"},
-            ].map(({v,label,col})=>{
-              const active=sent===v;
-              return(
-                <button key={v} onClick={()=>setSent(v)}
-                  style={{flex:1,background:active?`${col}10`:"#FFFFFF",border:`1.5px solid ${active?col:"rgba(15,23,42,0.12)"}`,borderRadius:9,padding:"8px 0",cursor:"pointer",textAlign:"center",transition:"all 0.15s",boxShadow:"none"}}>
-                  <span style={{color:active?col:"#94A3B8",fontWeight:active?800:600,fontSize:12.5,letterSpacing:0.3}}>{label}</span>
-                </button>
-              );
-            })}
-          </div>
           {/* Preview imagen/GIF */}
           {image&&(
-            <div style={{position:"relative",marginBottom:8,display:"inline-block"}}>
-              <img src={image} alt="preview" style={{maxHeight:160,maxWidth:"100%",borderRadius:10,border:`1px solid ${C.border}`,display:"block"}}/>
+            <div style={{position:"relative",marginTop:8,display:"inline-block"}}>
+              <img src={image} alt="preview" style={{maxHeight:140,maxWidth:"100%",borderRadius:10,border:"1px solid var(--c-border)",display:"block"}}/>
               <button onClick={()=>setImage(null)} style={{position:"absolute",top:5,right:5,background:"rgba(0,0,0,0.6)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
             </div>
           )}
-          {/* GIF Picker */}
           {showGif&&<GifPicker onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)}/>}
-          <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
-            {/* Foto upload */}
+
+          {/* ── Bottom bar: todo en una línea ── */}
+          <div style={{display:"flex",gap:6,alignItems:"center",marginTop:10}}>
+            {/* Adjuntar foto */}
             <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}}
               onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImage(ev.target.result);r.readAsDataURL(f);e.target.value="";}}/>
             <button onClick={()=>fileRef.current?.click()} title="Subir foto"
-              style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:15,color:C.muted,transition:"all 0.15s",lineHeight:1}}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.color=C.accent;}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.color=C.muted;}}>
-              📷
-            </button>
-            {/* GIF button */}
-            <button onClick={()=>setShowGif(v=>!v)} title="Buscar GIF animado"
-              style={{background:showGif?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${showGif?"#7C3AED":C.border}`,borderRadius:8,padding:"5px 11px",cursor:"pointer",fontSize:11,fontWeight:900,color:showGif?"#fff":"#7C3AED",letterSpacing:0.8,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
-              onMouseEnter={e=>{if(!showGif){e.currentTarget.style.background="rgba(124,58,237,0.08)";e.currentTarget.style.borderColor="#7C3AED";}}}
-              onMouseLeave={e=>{if(!showGif){e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor=C.border;}}}>
-              <span style={{fontSize:13}}>🎞️</span> GIF
-            </button>
+              style={{background:"none",border:"none",cursor:"pointer",fontSize:17,color:"var(--c-muted2)",padding:"4px",borderRadius:7,transition:"color 0.15s",lineHeight:1}}
+              onMouseEnter={e=>e.currentTarget.style.color=C.accent}
+              onMouseLeave={e=>e.currentTarget.style.color="var(--c-muted2)"}>📷</button>
+            {/* GIF */}
+            <button onClick={()=>setShowGif(v=>!v)} title="GIF"
+              style={{background:showGif?"rgba(124,58,237,0.12)":"none",border:"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#7C3AED":"var(--c-muted2)",padding:"4px 7px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.color="#7C3AED";}}
+              onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#7C3AED":"var(--c-muted2)";}}>GIF</button>
+            {/* Ticker */}
             <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
-              style={{background:"rgba(0,160,96,0.06)",border:"1px solid rgba(0,160,96,0.2)",borderRadius:7,color:"#007A48",padding:"7px 10px",fontSize:12,outline:"none",width:90,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
-              onFocus={e=>e.target.style.borderColor="rgba(0,160,96,0.4)"}
-              onBlur={e=>e.target.style.borderColor="rgba(0,160,96,0.2)"}/>
-            <Btn onClick={submit} style={{marginLeft:"auto",padding:"8px 22px",fontSize:13,opacity:posting?0.6:1}}>{posting?"Publicando...":user?t.publish:t.login}</Btn>
+              style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:7,color:C.accent,padding:"5px 8px",fontSize:11,outline:"none",width:78,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
+              onFocus={e=>e.target.style.borderColor="rgba(0,168,255,0.45)"}
+              onBlur={e=>e.target.style.borderColor="rgba(0,168,255,0.18)"}/>
+            {/* Sentiment — chips compactos */}
+            <div style={{display:"flex",gap:4,marginLeft:"auto",alignItems:"center"}}>
+              {[{v:"bull",label:"▲",full:"Alcista",col:"#16A34A"},{v:"bear",label:"▼",full:"Bajista",col:"#DC2626"}].map(({v,label,full,col})=>{
+                const active=sent===v;
+                return(
+                  <button key={v} onClick={()=>setSent(v)} title={full}
+                    style={{background:active?`${col}12`:"transparent",border:`1.5px solid ${active?col:"var(--c-border)"}`,borderRadius:8,padding:"5px 10px",cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:3}}>
+                    <span style={{color:active?col:"var(--c-muted2)",fontWeight:active?800:600,fontSize:11}}>{label} {full}</span>
+                  </button>
+                );
+              })}
+              {/* Publicar */}
+              <Btn onClick={submit} style={{padding:"6px 18px",fontSize:12.5,opacity:posting?0.6:1}}>
+                {posting?"...":(user?t.publish:"Entrar")}
+              </Btn>
+            </div>
           </div>
         </div>
       </div>
@@ -4380,23 +4374,27 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
   const t=LANGS[lang];
   const lvl = user ? getLevel(user.points) : null;
   const [activeNav, setActiveNav] = useState(0);
+  const [showMore, setShowMore] = useState(false);
 
   const navItems = [
     {icon:"🔥", label:"Feed",               idx:0},
     {icon:"📊", label:"Tops Traders",       idx:1},
-    {icon:"📈", label:"Acciones",           idx:3},
-    {icon:"📅", label:"Calendario Económico",idx:14},
-    {icon:"💰", label:"Dividendos",         idx:15},
-    {icon:"🚀", label:"IPOs 2026",          idx:16},
-    {icon:"🔍", label:"Stock Screener",     idx:17, vip:true},
-    {icon:"📅", label:"Earnings",           idx:6},
-    {icon:"📰", label:"Noticias",           idx:5},
-    {icon:"⚡", label:"Trending",           idx:7},
-    {icon:"💼", label:"Empleos Finanzas",   idx:10},
-    {icon:"🎓", label:"Webinars en Vivo",   idx:11},
-    {icon:"📚", label:"Academia — Cursos",  idx:12},
-    {icon:"🛠️",label:"Herramientas VIP",  idx:9, vip:true},
+    {icon:"📈", label:"Mercados",           idx:3},
+    {icon:"🛠️",label:"Herramientas IA",   idx:9, vip:true, ai:true},
     {icon:"✦",  label:"Premium VIP",        idx:8, premium:true},
+  ];
+  const navMore = [
+    {icon:"📅", label:"Calendario",        idx:14},
+    {icon:"💰", label:"Dividendos",        idx:15},
+    {icon:"🚀", label:"IPOs 2026",         idx:16},
+    {icon:"🔍", label:"Screener",          idx:17, vip:true},
+    {icon:"📰", label:"Noticias",          idx:5},
+    {icon:"📅", label:"Earnings",          idx:6},
+    {icon:"⚡", label:"Trending",          idx:7},
+    {icon:"💼", label:"Empleos",           idx:10},
+    {icon:"🎓", label:"Webinars",          idx:11},
+    {icon:"📚", label:"Academia",          idx:12},
+    {icon:"🏆", label:"Prop Firms",        idx:13},
   ];
 
   return(
@@ -4473,7 +4471,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
       <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(15,23,42,0.08)",border:"1px solid rgba(15,23,42,0.07)"}}>
         <div style={{padding:"14px 14px 10px"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#CBD5E1",letterSpacing:1.2,marginBottom:10,paddingLeft:4}}>MENÚ</div>
-          {navItems.map(({icon,label,idx,vip,premium})=>{
+          {navItems.map(({icon,label,idx,vip,premium,ai})=>{
             const isActive = activeNav===idx;
             return(
               <div key={label} onClick={()=>{setActiveNav(idx);onNavigate&&onNavigate(idx);}}
@@ -4492,10 +4490,41 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
                   flex:1
                 }}>{label}</span>
                 {premium && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>VIP</span>}
-                {vip && !premium && <span style={{fontSize:9,fontWeight:700,color:"#0EA5E9",background:"rgba(14,165,233,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
+                {vip && !premium && !ai && <span style={{fontSize:9,fontWeight:700,color:"#0EA5E9",background:"rgba(14,165,233,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
+                {ai && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#6366F1,#8B5CF6)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>IA</span>}
               </div>
             );
           })}
+
+          {/* ── Botón "Más" ── */}
+          <div onClick={()=>setShowMore(v=>!v)}
+            style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,cursor:"pointer",marginBottom:2,transition:"background 0.15s",color:"var(--c-muted)"}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(14,165,233,0.05)"}
+            onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+            <span style={{fontSize:14,width:18,textAlign:"center"}}>{showMore?"▴":"▾"}</span>
+            <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>
+              {showMore ? "Menos" : "Más secciones"}
+            </span>
+          </div>
+
+          {/* ── Ítems secundarios colapsables ── */}
+          {showMore && (
+            <div style={{borderTop:"1px solid var(--c-border)",paddingTop:6,marginTop:2}}>
+              {navMore.map(({icon,label,idx,vip})=>{
+                const isActive=activeNav===idx;
+                return(
+                  <div key={label} onClick={()=>{setActiveNav(idx);onNavigate&&onNavigate(idx);}}
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",borderRadius:9,cursor:"pointer",marginBottom:1,transition:"all 0.15s",background:isActive?"rgba(14,165,233,0.07)":"transparent",borderLeft:isActive?"3px solid #0EA5E9":"3px solid transparent"}}
+                    onMouseEnter={e=>{if(!isActive)e.currentTarget.style.background="rgba(14,165,233,0.04)";}}
+                    onMouseLeave={e=>{if(!isActive)e.currentTarget.style.background="transparent";}}>
+                    <span style={{fontSize:13,width:18,textAlign:"center"}}>{icon}</span>
+                    <span style={{fontSize:12,fontWeight:isActive?700:400,color:isActive?"#0EA5E9":"var(--c-muted)",flex:1}}>{label}</span>
+                    {vip && <span style={{fontSize:9,fontWeight:700,color:"#0EA5E9",background:"rgba(14,165,233,0.1)",borderRadius:20,padding:"2px 6px"}}>PRO</span>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -4983,17 +5012,19 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
       {/* ── AI MARKET PULSE ── */}
       <div onClick={onAI} style={{...card,
-        background:"linear-gradient(145deg,#F0F7FF,#F5F0FF)",
-        border:"1px solid rgba(99,102,241,0.18)",
-        cursor:"pointer",transition:"all 0.2s"}}
-        onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(99,102,241,0.14)";e.currentTarget.style.borderColor="rgba(99,102,241,0.3)";}}
-        onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 2px 16px rgba(15,23,42,0.06)";e.currentTarget.style.borderColor="rgba(99,102,241,0.18)";}}>
+        background:"linear-gradient(145deg,rgba(99,102,241,0.06),rgba(139,92,246,0.08))",
+        border:"1px solid rgba(99,102,241,0.22)",
+        cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden"}}
+        onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(99,102,241,0.18)";e.currentTarget.style.borderColor="rgba(99,102,241,0.4)";}}
+        onMouseLeave={e=>{e.currentTarget.style.boxShadow="var(--c-shadow)";e.currentTarget.style.borderColor="rgba(99,102,241,0.22)";}}>
+        {/* Glow decorativo */}
+        <div style={{position:"absolute",top:-30,right:-30,width:100,height:100,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,0.12),transparent 70%)",pointerEvents:"none"}}/>
 
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
           <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#3B82F6,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,boxShadow:"0 4px 14px rgba(99,102,241,0.35)"}}>🧠</div>
           <div style={{flex:1}}>
-            <div style={{fontWeight:800,color:"#0F172A",fontSize:13,letterSpacing:-0.2}}>AI Market Pulse</div>
+            <div style={{fontWeight:800,color:"var(--c-text)",fontSize:13,letterSpacing:-0.2}}>AI Market Pulse</div>
             <div style={{display:"flex",alignItems:"center",gap:5,marginTop:2}}>
               <span style={{width:6,height:6,borderRadius:"50%",background:"#22C55E",display:"inline-block",boxShadow:"0 0 8px #22C55E"}}/>
               <span style={{fontSize:10,color:"#22C55E",fontWeight:700,letterSpacing:0.5}}>EN VIVO</span>
