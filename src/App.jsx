@@ -2189,7 +2189,7 @@ function GifPicker({onSelect,onClose}){
         </div>
       )}
       <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:6,opacity:0.7}}>
-        Powered by {src==="giphy"?"Giphy":"Tenor"}
+        Powered by {apiSrc==="giphy"?"Giphy":"Tenor"}
       </div>
     </div>
   );
@@ -5107,6 +5107,9 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         <div style={{fontSize:8,color:"#CBD5E1",marginTop:3,borderTop:"1px solid rgba(15,23,42,0.05)",paddingTop:4}}>Basado en 2,847 posts de hoy</div>
       </div>
 
+      {/* ── PUBLICIDAD — entre Comunidad vs IA y Fear & Greed ── */}
+      <AdBannerSidebar/>
+
       {/* ── FEAR & GREED ── */}
       <div style={{...card,padding:"7px 12px"}}>
         <div style={{fontSize:10,fontWeight:800,color:"#0F172A",marginBottom:6}}>Fear & Greed Index</div>
@@ -7263,26 +7266,38 @@ function IpoCalendarPage() {
     trading: {color:C.bull,   bg:C.bullBg,    label:"Cotizando"},
   };
 
+  // Calcula el status real basado en la fecha de hoy
+  const autoStatus = (ipo) => {
+    const d = new Date(ipo.date);
+    const now = new Date();
+    const diffDays = (d - now) / (1000*60*60*24);
+    if(diffDays > 7)  return "upcoming";
+    if(diffDays > -3) return "priced";   // dentro de ±3 días = precio fijado
+    return "trading";                     // ya salió a bolsa
+  };
+
   useEffect(()=>{
+    // Aplicar status automático a los datos locales primero
+    const withAutoStatus = IPOS_2026.map(ipo => ({...ipo, status: autoStatus(ipo)}));
+    setIpos(withAutoStatus);
+
     fetch("/api/ipos")
       .then(r=>r.json())
       .then(d=>{
         if(d.ipos && d.ipos.length > 0){
-          // Merge: datos FMP + datos curados de IPOS_2026
-          // Los curados tienen desc y sector, FMP tiene datos reales de precio
           const merged = [...d.ipos];
           IPOS_2026.forEach(seed=>{
             const exists = merged.find(x=>x.ticker===seed.ticker||x.company.toLowerCase().includes(seed.company.split(" ")[0].toLowerCase()));
-            if(!exists) merged.push(seed);
+            if(!exists) merged.push({...seed, status: autoStatus(seed)});
             else {
-              // Enriquecer datos FMP con descripción y sector curados
               exists.desc   = exists.desc   || seed.desc;
               exists.sector = exists.sector || seed.sector;
+              exists.status = autoStatus(exists); // siempre recalcular con fecha real
             }
           });
           merged.sort((a,b)=>{
-            if(a.status==="upcoming" && b.status!=="upcoming") return -1;
-            if(a.status!=="upcoming" && b.status==="upcoming") return  1;
+            const order = {upcoming:0, priced:1, trading:2};
+            if(order[a.status] !== order[b.status]) return order[a.status]-order[b.status];
             return a.date.localeCompare(b.date);
           });
           setIpos(merged);
@@ -9423,8 +9438,6 @@ export default function App(){
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
-            {/* 🔴 ANUNCIO — posición premium, máxima visibilidad */}
-            <AdBannerSidebar/>
             <SidebarTickerWidget/>
             <PolymarketWidget/>
           </div>
