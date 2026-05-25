@@ -2916,33 +2916,54 @@ function MarketsMiniWidget(){
   const barCol = p => p>=0.6?"#10b981":p>=0.4?"#f59e0b":"#ef4444";
 
   return(
-    <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,marginBottom:12,overflow:"hidden"}}>
+    <div style={{background:"linear-gradient(160deg,#0D1117,#111827)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.3)"}}>
       {/* Tabs */}
-      <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
+      <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"0 8px"}}>
         {[["mercados","📈 Mercados"],["predicciones","🎯 Predicciones"],["tendencias","🔥 Tendencias"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
-            style={{flex:1,padding:"5px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#475569",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
-            {l}{k==="mercados"&&isLive&&<span style={{width:4,height:4,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
+            style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#4B5563",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
           </button>
         ))}
       </div>
 
-      {/* Mercados */}
+      {/* Mercados — cards coloridos estilo moderno */}
       {tab==="mercados"&&(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0}}>
-          {prices.slice(0,8).map((t,i)=>(
-            <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
-              style={{display:"flex",flexDirection:"column",padding:"5px 8px",borderRight:i%4!==3?"1px solid rgba(255,255,255,0.06)":"none",borderBottom:i<4?"1px solid rgba(255,255,255,0.06)":"none",textDecoration:"none",transition:"background 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <div style={{display:"flex",alignItems:"center",gap:3,marginBottom:1}}>
-                <span style={{width:4,height:4,borderRadius:"50%",background:t.col,display:"inline-block",flexShrink:0}}/>
-                <span style={{fontWeight:800,fontSize:9,color:t.col,letterSpacing:0.3}}>{t.s}</span>
-              </div>
-              <div style={{fontFamily:"monospace",fontSize:10,fontWeight:700,color:"#e2e8f0"}}>{t.p.toLocaleString("en-US",{minimumFractionDigits:t.p>100?1:2,maximumFractionDigits:t.p>100?1:2})}</div>
-              <div style={{fontSize:9,fontWeight:600,color:t.c>=0?"#22c55e":"#ef4444",marginTop:1}}>{t.c>=0?"+":""}{t.c.toFixed(2)}%</div>
-            </a>
-          ))}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,padding:"10px"}}>
+          {prices.slice(0,8).map((t)=>{
+            const up = t.c >= 0;
+            const bull = up ? "#16A34A" : "#DC2626";
+            const bullBg = up ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)";
+            // Mini sparkline sintético basado en el color del ticker
+            const spark = [0,1,0.6,1.2,0.8,1.5,1,up?2:0.3].map((v,i,a)=>
+              `${(i/(a.length-1))*44},${12-v*(up?4:3)}`).join(" ");
+            return(
+              <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
+                style={{display:"flex",flexDirection:"column",gap:3,padding:"8px",borderRadius:12,background:bullBg,border:`1px solid ${bull}22`,textDecoration:"none",transition:"all 0.18s",cursor:"pointer"}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 20px ${bull}22`;}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
+                {/* Icono + ticker */}
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div style={{width:22,height:22,borderRadius:7,background:t.col,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:"#fff",flexShrink:0,boxShadow:`0 2px 8px ${t.col}55`}}>
+                    {t.s.slice(0,1)}
+                  </div>
+                  <svg viewBox="0 0 44 14" style={{width:34,height:11}}>
+                    <polyline points={spark} fill="none" stroke={bull} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                {/* Nombre */}
+                <div style={{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.45)",letterSpacing:0.2,lineHeight:1}}>{t.n}</div>
+                {/* Precio */}
+                <div style={{fontFamily:"monospace",fontSize:11,fontWeight:800,color:"#e2e8f0",letterSpacing:-0.3,lineHeight:1}}>
+                  {t.p>=1000 ? t.p.toLocaleString("en-US",{maximumFractionDigits:0}) : t.p.toFixed(2)}
+                </div>
+                {/* Cambio */}
+                <div style={{fontSize:9,fontWeight:700,color:bull,background:bullBg,borderRadius:20,padding:"1px 5px",display:"inline-flex",alignItems:"center",gap:2,width:"fit-content"}}>
+                  {up?"▲":"▼"} {Math.abs(t.c).toFixed(2)}%
+                </div>
+              </a>
+            );
+          })}
         </div>
       )}
 
