@@ -7190,176 +7190,209 @@ const ECON_2026 = [
 
 // ── COMMODITIES PAGE ──────────────────────────────────────────────────────────
 const COMMODITIES = [
-  // Metals
-  {id:"GC=F",  sym:"COMEX:GC1!", name:"Gold",         unit:"/oz",  icon:"🥇", color:"#f59e0b", bg:"#fef3c7", cat:"Metals"},
-  {id:"SI=F",  sym:"COMEX:SI1!", name:"Silver",        unit:"/oz",  icon:"🥈", color:"#94a3b8", bg:"#f1f5f9", cat:"Metals"},
-  {id:"HG=F",  sym:"COMEX:HG1!", name:"Copper",        unit:"/lb",  icon:"🔶", color:"#ea580c", bg:"#fff7ed", cat:"Metals"},
-  {id:"PL=F",  sym:"COMEX:PL1!", name:"Platinum",      unit:"/oz",  icon:"💎", color:"#6366f1", bg:"#eef2ff", cat:"Metals"},
-  // Energy
-  {id:"CL=F",  sym:"NYMEX:CL1!", name:"Crude Oil WTI", unit:"/bbl", icon:"🛢️", color:"#1d4ed8", bg:"#eff6ff", cat:"Energy"},
-  {id:"BZ=F",  sym:"NYMEX:BB1!", name:"Brent Oil",     unit:"/bbl", icon:"⚫", color:"#374151", bg:"#f9fafb", cat:"Energy"},
-  {id:"NG=F",  sym:"NYMEX:NG1!", name:"Natural Gas",   unit:"/MMBtu",icon:"🔥",color:"#dc2626", bg:"#fef2f2", cat:"Energy"},
-  {id:"RB=F",  sym:"NYMEX:RB1!", name:"Gasoline",      unit:"/gal", icon:"⛽", color:"#7c3aed", bg:"#f5f3ff", cat:"Energy"},
-  // Agriculture
-  {id:"ZW=F",  sym:"CBOT:ZW1!",  name:"Wheat",         unit:"/bu",  icon:"🌾", color:"#d97706", bg:"#fffbeb", cat:"Agriculture"},
-  {id:"ZC=F",  sym:"CBOT:ZC1!",  name:"Corn",          unit:"/bu",  icon:"🌽", color:"#16a34a", bg:"#f0fdf4", cat:"Agriculture"},
-  {id:"ZS=F",  sym:"CBOT:ZS1!",  name:"Soybeans",      unit:"/bu",  icon:"🫘", color:"#15803d", bg:"#f0fdf4", cat:"Agriculture"},
-  {id:"KC=F",  sym:"NYMEX:KC1!", name:"Coffee",        unit:"/lb",  icon:"☕", color:"#92400e", bg:"#fef3c7", cat:"Agriculture"},
-  {id:"CC=F",  sym:"NYMEX:CC1!", name:"Cocoa",         unit:"/MT",  icon:"🍫", color:"#7c2d12", bg:"#fff7ed", cat:"Agriculture"},
-  {id:"SB=F",  sym:"NYMEX:SB1!", name:"Sugar",         unit:"/lb",  icon:"🍬", color:"#ec4899", bg:"#fdf2f8", cat:"Agriculture"},
+  {id:"GC=F", name:"Gold",         icon:"🥇", color:"#f59e0b", cat:"Metals",      unit:"/oz"},
+  {id:"SI=F", name:"Silver",       icon:"🥈", color:"#94a3b8", cat:"Metals",      unit:"/oz"},
+  {id:"HG=F", name:"Copper",       icon:"🔶", color:"#ea580c", cat:"Metals",      unit:"/lb"},
+  {id:"PL=F", name:"Platinum",     icon:"💎", color:"#8b5cf6", cat:"Metals",      unit:"/oz"},
+  {id:"CL=F", name:"Crude Oil WTI",icon:"🛢️", color:"#2563eb", cat:"Energy",      unit:"/bbl"},
+  {id:"BZ=F", name:"Brent Oil",    icon:"⚫", color:"#475569", cat:"Energy",      unit:"/bbl"},
+  {id:"NG=F", name:"Natural Gas",  icon:"🔥", color:"#dc2626", cat:"Energy",      unit:"/MMBtu"},
+  {id:"RB=F", name:"Gasoline",     icon:"⛽", color:"#7c3aed", cat:"Energy",      unit:"/gal"},
+  {id:"ZW=F", name:"Wheat",        icon:"🌾", color:"#d97706", cat:"Agriculture", unit:"/bu"},
+  {id:"ZC=F", name:"Corn",         icon:"🌽", color:"#16a34a", cat:"Agriculture", unit:"/bu"},
+  {id:"ZS=F", name:"Soybeans",     icon:"🫘", color:"#15803d", cat:"Agriculture", unit:"/bu"},
+  {id:"KC=F", name:"Coffee",       icon:"☕", color:"#92400e", cat:"Agriculture", unit:"/lb"},
+  {id:"CC=F", name:"Cocoa",        icon:"🍫", color:"#7c2d12", cat:"Agriculture", unit:"/MT"},
+  {id:"SB=F", name:"Sugar",        icon:"🍬", color:"#ec4899", cat:"Agriculture", unit:"/lb"},
 ];
 
-const CHART_SYMS = [
-  {sym:"COMEX:GC1!", name:"Gold",          color:"#f59e0b"},
-  {sym:"NYMEX:CL1!", name:"Crude Oil WTI", color:"#1d4ed8"},
-  {sym:"COMEX:SI1!", name:"Silver",         color:"#94a3b8"},
-  {sym:"NYMEX:NG1!", name:"Natural Gas",   color:"#dc2626"},
-];
+function CommoditySparkline({pts=[],color}){
+  if(!pts||pts.length<2) return <span style={{color:"#94a3b8",fontSize:11}}>—</span>;
+  const min=Math.min(...pts),max=Math.max(...pts),range=max-min||1;
+  const w=80,h=28;
+  const coords=pts.map((v,i)=>`${(i/(pts.length-1))*w},${h-((v-min)/range)*(h-4)+2}`).join(" ");
+  return(
+    <svg width={w} height={h} style={{display:"block"}}>
+      <polyline points={coords} fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
 
 function CommoditiesPage(){
-  const [prices, setPrices]     = useState({});
-  const [loading, setLoading]   = useState(true);
-  const [lastUp, setLastUp]     = useState("");
-  const [cat, setCat]           = useState("All");
-  const [selChart, setSelChart] = useState(CHART_SYMS[0]);
-  const isDark = document.documentElement.getAttribute("data-theme")==="dark";
-  const theme  = isDark ? "dark" : "light";
+  const [rows, setRows]       = useState({});
+  const [loading, setLoading] = useState(true);
+  const [lastUp, setLastUp]   = useState("");
+  const [cat, setCat]         = useState("All");
+  const [sort, setSort]       = useState("default");
 
   const fetchPrices = async () => {
+    setLoading(true);
     try {
-      const results = await Promise.all(
-        COMMODITIES.map(async c => {
-          try {
-            const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${c.id}&token=${FINNHUB_KEY}`);
-            const d = await r.json();
-            if(d.c > 0) return {id:c.id, price:d.c, change:d.dp||0, prev:d.pc||0};
-          } catch{}
-          return null;
-        })
-      );
-      const map = {};
-      results.forEach(r => { if(r) map[r.id] = r; });
-      setPrices(map);
+      const now = Math.floor(Date.now()/1000);
+      const y3ago = now - 3*365*24*3600;
+      const newRows = {};
+      await Promise.all(COMMODITIES.map(async c => {
+        try {
+          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(c.id)}?interval=1d&period1=${y3ago}&period2=${now}&includePrePost=false`;
+          const r = await fetch(url);
+          const d = await r.json();
+          const closes = d?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(v=>v!=null) || [];
+          const timestamps = d?.chart?.result?.[0]?.timestamp || [];
+          if(closes.length < 2) return;
+          const last = closes[closes.length-1];
+          const prev = closes[closes.length-2] || last;
+          const ago5  = closes[Math.max(0,closes.length-6)]  || last;
+          const ago21 = closes[Math.max(0,closes.length-22)] || last;
+          const ago63 = closes[Math.max(0,closes.length-64)] || last;
+          const ago252= closes[Math.max(0,closes.length-253)]|| last;
+          // YTD: find first close of this year
+          const thisYear = new Date().getFullYear();
+          let ytdBase = last;
+          for(let i=0;i<timestamps.length;i++){
+            if(new Date(timestamps[i]*1000).getFullYear()===thisYear){ ytdBase=closes[i]||last; break; }
+          }
+          const pct = (a,b) => b&&a ? +((b-a)/a*100).toFixed(2) : null;
+          newRows[c.id] = {
+            price: last,
+            daily:  pct(prev, last),
+            week:   pct(ago5, last),
+            month:  pct(ago21, last),
+            month3: pct(ago63, last),
+            ytd:    pct(ytdBase, last),
+            year1:  pct(ago252, last),
+            spark:  closes.slice(-30),
+          };
+        } catch{}
+      }));
+      setRows(newRows);
       setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
     } catch(e){}
     setLoading(false);
   };
 
-  useEffect(()=>{ fetchPrices(); const iv=setInterval(fetchPrices,60000); return()=>clearInterval(iv); },[]);
+  useEffect(()=>{ fetchPrices(); const iv=setInterval(fetchPrices,300000); return()=>clearInterval(iv); },[]);
 
-  const fmt = (id, p) => {
-    if(!p) return "—";
-    if(["GC=F","SI=F","PL=F"].includes(id)) return "$"+p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-    if(["CL=F","BZ=F"].includes(id)) return "$"+p.toFixed(2);
-    if(p>=1000) return "$"+p.toLocaleString("en-US",{maximumFractionDigits:0});
+  const fmt=(id,p)=>{
+    if(p==null) return "—";
+    if(p>=1000) return "$"+p.toLocaleString("en-US",{maximumFractionDigits:2});
     return "$"+p.toFixed(2);
   };
+  const fmtPct=(v)=>{
+    if(v==null) return <span style={{color:"var(--c-muted2)"}}>—</span>;
+    const up=v>=0;
+    return <span style={{color:up?"#16a34a":"#dc2626",fontWeight:700}}>{up?"+":""}{v.toFixed(2)}%</span>;
+  };
 
-  const cats = ["All","Metals","Energy","Agriculture"];
-  const filtered = cat==="All" ? COMMODITIES : COMMODITIES.filter(c=>c.cat===cat);
+  const cats=["All","Metals","Energy","Agriculture"];
+  let list = cat==="All" ? COMMODITIES : COMMODITIES.filter(c=>c.cat===cat);
+  if(sort==="gainers") list=[...list].sort((a,b)=>(rows[b.id]?.daily||0)-(rows[a.id]?.daily||0));
+  if(sort==="losers")  list=[...list].sort((a,b)=>(rows[a.id]?.daily||0)-(rows[b.id]?.daily||0));
+
+  const COLS = [
+    {k:"daily",  l:"Daily"},
+    {k:"week",   l:"1 Week"},
+    {k:"month",  l:"1 Month"},
+    {k:"month3", l:"3 Months"},
+    {k:"ytd",    l:"YTD"},
+    {k:"year1",  l:"1 Year"},
+  ];
 
   return(
-    <div style={{maxWidth:1100,margin:"0 auto",padding:"20px 16px"}}>
+    <div style={{maxWidth:1200,margin:"0 auto",padding:"20px 16px"}}>
 
-      {/* ── HERO HEADER ── */}
-      <div style={{background:"linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%)",borderRadius:20,padding:"24px 28px",marginBottom:24,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-20,right:-20,width:120,height:120,borderRadius:"50%",background:"rgba(245,158,11,0.08)"}}/>
-        <div style={{position:"absolute",bottom:-30,left:60,width:80,height:80,borderRadius:"50%",background:"rgba(0,168,255,0.06)"}}/>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
-          <div>
-            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-              <span style={{fontSize:28}}>⛏️</span>
-              <h1 style={{margin:0,fontSize:24,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>Commodities</h1>
-              <span style={{background:"#22c55e",color:"#fff",fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:20,animation:"nexo-pulse 2s infinite"}}>LIVE</span>
-            </div>
-            <p style={{margin:0,fontSize:13,color:"#94a3b8"}}>Real-time futures prices · Gold, Oil, Grains & more · 24/7</p>
+      {/* ── HEADER ── */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginBottom:20}}>
+        <div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:24}}>⛏️</span>
+            <h1 style={{margin:0,fontSize:22,fontWeight:900,color:"var(--c-text)"}}>Commodities</h1>
+            <span style={{background:"#22c55e",color:"#fff",fontSize:9,fontWeight:800,padding:"2px 8px",borderRadius:10,letterSpacing:1}}>LIVE</span>
           </div>
-          <div style={{display:"flex",gap:16}}>
-            {[{l:"Gold",id:"GC=F",c:"#f59e0b"},{l:"Oil WTI",id:"CL=F",c:"#3b82f6"},{l:"Silver",id:"SI=F",c:"#94a3b8"}].map(h=>{
-              const p=prices[h.id];
+          <div style={{color:"var(--c-muted2)",fontSize:12,marginTop:2}}>
+            {lastUp?`Updated ${lastUp}`:"Loading..."}
+            <button onClick={fetchPrices} style={{marginLeft:8,background:"transparent",border:"none",color:"#00A8FF",fontSize:12,cursor:"pointer",padding:0,fontFamily:"inherit"}}>⟳ Refresh</button>
+          </div>
+        </div>
+        {/* Filters */}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {cats.map(c=>(
+            <button key={c} onClick={()=>setCat(c)}
+              style={{padding:"6px 14px",borderRadius:20,border:`1.5px solid ${cat===c?"#00A8FF":"var(--c-border)"}`,background:cat===c?"#00A8FF":"var(--c-card)",color:cat===c?"#fff":"var(--c-muted2)",fontWeight:700,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>
+              {c==="All"?"All":c==="Metals"?"🥇 Metals":c==="Energy"?"🛢️ Energy":"🌾 Agriculture"}
+            </button>
+          ))}
+          <select value={sort} onChange={e=>setSort(e.target.value)}
+            style={{padding:"6px 10px",borderRadius:12,border:"1px solid var(--c-border)",background:"var(--c-card)",color:"var(--c-muted2)",fontSize:11,cursor:"pointer",fontFamily:"inherit",outline:"none"}}>
+            <option value="default">↕ Default</option>
+            <option value="gainers">▲ Top Gainers</option>
+            <option value="losers">▼ Top Losers</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── PERFORMANCE TABLE ── */}
+      <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,overflow:"auto",marginBottom:16}}>
+        <table style={{width:"100%",borderCollapse:"collapse",minWidth:750}}>
+          <thead>
+            <tr style={{borderBottom:"2px solid var(--c-border)"}}>
+              <th style={{padding:"12px 18px",textAlign:"left",color:"var(--c-muted2)",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>Name</th>
+              <th style={{padding:"12px 12px",textAlign:"right",color:"var(--c-muted2)",fontSize:11,fontWeight:700}}>Price</th>
+              {COLS.map(col=>(
+                <th key={col.k} style={{padding:"12px 12px",textAlign:"right",color:"var(--c-muted2)",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>{col.l}</th>
+              ))}
+              <th style={{padding:"12px 12px",textAlign:"center",color:"var(--c-muted2)",fontSize:11,fontWeight:700}}>Chart</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr><td colSpan={9} style={{padding:"40px",textAlign:"center",color:"var(--c-muted2)",fontSize:13}}>
+                Loading performance data...
+              </td></tr>
+            )}
+            {!loading && list.map((c,i)=>{
+              const row=rows[c.id];
+              const up=row&&row.daily>=0;
               return(
-                <div key={h.id} style={{textAlign:"center"}}>
-                  <div style={{color:h.c,fontWeight:900,fontSize:15,fontFamily:"monospace"}}>{fmt(h.id,p?.price)}</div>
-                  <div style={{color:p&&p.change>=0?"#22c55e":"#ef4444",fontSize:11,fontWeight:700}}>{p?`${p.change>=0?"▲":"▼"}${Math.abs(p.change).toFixed(2)}%`:"—"}</div>
-                  <div style={{color:"#64748b",fontSize:10}}>{h.l}</div>
-                </div>
+                <tr key={c.id}
+                  style={{borderBottom:i<list.length-1?"1px solid var(--c-border)":"none",cursor:"pointer",transition:"background 0.1s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="var(--c-card2)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                  onClick={()=>window.open(`https://finance.yahoo.com/quote/${c.id}`,"_blank")}>
+                  {/* Name */}
+                  <td style={{padding:"13px 18px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{width:34,height:34,borderRadius:9,background:c.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>{c.icon}</div>
+                      <div>
+                        <div style={{color:"var(--c-text)",fontWeight:700,fontSize:13,whiteSpace:"nowrap"}}>{c.name}</div>
+                        <div style={{color:"var(--c-muted2)",fontSize:10}}>{c.cat} · {c.unit}</div>
+                      </div>
+                    </div>
+                  </td>
+                  {/* Price */}
+                  <td style={{padding:"13px 12px",textAlign:"right",fontWeight:800,fontSize:13,fontFamily:"monospace",color:"var(--c-text)",whiteSpace:"nowrap"}}>
+                    {fmt(c.id, row?.price)}
+                  </td>
+                  {/* Period columns */}
+                  {COLS.map(col=>(
+                    <td key={col.k} style={{padding:"13px 12px",textAlign:"right",fontSize:12,whiteSpace:"nowrap"}}>
+                      {fmtPct(row?.[col.k])}
+                    </td>
+                  ))}
+                  {/* Sparkline */}
+                  <td style={{padding:"8px 12px",textAlign:"center"}}>
+                    <div style={{display:"flex",justifyContent:"center"}}>
+                      <CommoditySparkline pts={row?.spark||[]} color={up?"#16a34a":"#dc2626"}/>
+                    </div>
+                  </td>
+                </tr>
               );
             })}
-          </div>
-        </div>
-        <div style={{marginTop:16,display:"flex",alignItems:"center",gap:6}}>
-          <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block"}}/>
-          <span style={{color:"#64748b",fontSize:11}}>{lastUp ? `Updated ${lastUp} · Refreshes every 60s` : "Fetching live data..."}</span>
-          <button onClick={fetchPrices} style={{marginLeft:8,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",color:"#94a3b8",borderRadius:8,padding:"3px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>⟳ Refresh</button>
-        </div>
-      </div>
-
-      {/* ── CATEGORY FILTER ── */}
-      <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
-        {cats.map(c=>(
-          <button key={c} onClick={()=>setCat(c)}
-            style={{padding:"7px 18px",borderRadius:20,border:`1.5px solid ${cat===c?"#00A8FF":"var(--c-border)"}`,background:cat===c?"#00A8FF":"var(--c-card)",color:cat===c?"#fff":"var(--c-muted2)",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
-            {c==="All"?"🌐 All":c==="Metals"?"🥇 Metals":c==="Energy"?"🛢️ Energy":"🌾 Agriculture"}
-          </button>
-        ))}
-        {loading && <span style={{color:"var(--c-muted2)",fontSize:12,alignSelf:"center",marginLeft:8}}>Loading prices...</span>}
-      </div>
-
-      {/* ── COMMODITY CARDS ── */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12,marginBottom:28}}>
-        {filtered.map(c=>{
-          const p=prices[c.id];
-          const up=p&&p.change>=0;
-          return(
-            <a key={c.id} href={`https://www.tradingview.com/symbols/${c.sym.replace(":","-")}/`}
-              target="_blank" rel="noopener noreferrer"
-              style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"16px",textDecoration:"none",display:"block",transition:"all 0.18s",cursor:"pointer"}}
-              onMouseEnter={e=>{e.currentTarget.style.border=`1px solid ${c.color}55`;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 24px ${c.color}18`;}}
-              onMouseLeave={e=>{e.currentTarget.style.border="1px solid var(--c-border)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                <div style={{width:40,height:40,borderRadius:12,background:c.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{c.icon}</div>
-                {p && <div style={{background:up?"#dcfce7":"#fee2e2",color:up?"#15803d":"#dc2626",borderRadius:8,padding:"3px 8px",fontSize:11,fontWeight:800}}>{up?"▲":"▼"}{Math.abs(p.change).toFixed(2)}%</div>}
-              </div>
-              <div style={{color:"var(--c-text)",fontWeight:800,fontSize:13,marginBottom:2}}>{c.name}</div>
-              <div style={{color:"var(--c-muted2)",fontSize:10,marginBottom:8}}>{c.cat} · {c.unit}</div>
-              <div style={{color:c.color,fontWeight:900,fontSize:18,fontFamily:"monospace"}}>{fmt(c.id,p?.price)}</div>
-              {!p && !loading && <div style={{color:"var(--c-muted2)",fontSize:11,marginTop:4}}>Tap to view →</div>}
-            </a>
-          );
-        })}
-      </div>
-
-      {/* ── LIVE CHART ── */}
-      <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:20,overflow:"hidden",marginBottom:20}}>
-        <div style={{padding:"14px 18px",borderBottom:"1px solid var(--c-border)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:16}}>📊</span>
-            <span style={{fontWeight:800,fontSize:15,color:"var(--c-text)"}}>Live Chart</span>
-          </div>
-          <div style={{display:"flex",gap:6}}>
-            {CHART_SYMS.map(s=>(
-              <button key={s.sym} onClick={()=>setSelChart(s)}
-                style={{padding:"5px 12px",borderRadius:12,border:`1.5px solid ${selChart.sym===s.sym?s.color:"var(--c-border)"}`,background:selChart.sym===s.sym?s.color+"18":"transparent",color:selChart.sym===s.sym?s.color:"var(--c-muted2)",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
-                {s.name}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div style={{height:380}}>
-          <iframe
-            key={selChart.sym}
-            src={`https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(selChart.sym)}&interval=60&theme=${theme}&style=1&locale=en&hide_top_toolbar=0&hide_legend=0&save_image=0&hide_volume=0`}
-            style={{width:"100%",height:"100%",border:"none"}}
-            allowTransparency="true"
-            scrolling="no"
-            allow="clipboard-write"
-            title={selChart.name}
-          />
-        </div>
+          </tbody>
+        </table>
       </div>
 
       <div style={{textAlign:"center",color:"var(--c-muted2)",fontSize:11,paddingBottom:8}}>
-        Futures prices via Finnhub & TradingView · Not financial advice · NexoTrade
+        Historical data via Yahoo Finance · Click any row for full chart · Not financial advice · NexoTrade
       </div>
     </div>
   );
