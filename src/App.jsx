@@ -7271,10 +7271,11 @@ function CommoditiesPage(){
             </div>
             <div style={{height:200}}>
               <iframe
-                src={`https://s.tradingview.com/widgetembed/?frameElementId=tv_${sym.replace(/[^a-z0-9]/gi,"")}&symbol=${encodeURIComponent(sym)}&interval=60&theme=${theme}&style=1&locale=en&hide_top_toolbar=1&hide_legend=1&save_image=0&hide_volume=1`}
+                src={`https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(sym)}&interval=60&theme=${theme}&style=1&locale=en&hide_top_toolbar=1&hide_legend=0&save_image=0&hide_volume=0&utm_source=nexotradeia.com`}
                 style={{width:"100%",height:"100%",border:"none"}}
                 allowTransparency="true"
                 scrolling="no"
+                allow="clipboard-write"
                 title={name}
               />
             </div>
@@ -7289,34 +7290,36 @@ function CommoditiesPage(){
   );
 }
 
-function TradingViewWidget({symbols, theme}){
+function TradingViewWidget({symbols, theme, height=480}){
   const ref = useRef(null);
   const loaded = useRef(false);
   useEffect(()=>{
     if(!ref.current || loaded.current) return;
     loaded.current = true;
+    // Limpiar y agregar widget div
+    ref.current.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
     const script = document.createElement("script");
+    script.type = "text/javascript";
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
     script.async = true;
-    script.innerHTML = JSON.stringify({
+    // CLAVE: usar .text (no .innerHTML) para que TradingView lo lea correctamente
+    script.text = JSON.stringify({
       colorTheme: theme||"light",
       dateRange:"1D",
-      showChart:false,
+      showChart:true,
       locale:"en",
       width:"100%",
-      height:"400",
+      height: height,
       largeChartUrl:"",
       isTransparent:true,
       showSymbolLogo:true,
-      showFloatingTooltip:false,
+      showFloatingTooltip:true,
       tabs:[{title:"Commodities",symbols:symbols,originalTitle:"Commodities"}]
     });
     ref.current.appendChild(script);
   },[]);
   return(
-    <div className="tradingview-widget-container" ref={ref} style={{height:400}}>
-      <div className="tradingview-widget-container__widget"/>
-    </div>
+    <div className="tradingview-widget-container" ref={ref} style={{height,minHeight:height,width:"100%"}}/>
   );
 }
 // ── FIN COMMODITIES ───────────────────────────────────────────────────────────
