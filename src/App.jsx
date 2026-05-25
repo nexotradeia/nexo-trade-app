@@ -8457,7 +8457,7 @@ export default function App(){
             time:       fmtTimeAgo(p.created_at),
             ticker:     p.ticker||"GENERAL",
             sentiment:  p.sentiment||"bull",
-            text:       p.text,
+            text:       p.content || p.text || "",
             likes:      p.likes_count||0,
             comments:   p.comments_count||0,
             reposts:    p.reposts_count||0,
@@ -8493,7 +8493,7 @@ export default function App(){
           avatar:profile?.avatar_emoji||"🦅",
           avatarColor:profile?.avatar_color||C.accent,
           time:"ahora",ticker:p.ticker,sentiment:p.sentiment,
-          text:p.text,likes:0,comments:0,reposts:0,tags:p.tags||[p.ticker],
+          text:p.content||p.text||"",likes:0,comments:0,reposts:0,tags:p.tags||[p.ticker],
         };
         setPosts(prev=>{
           // Si ya existe con ese UUID (confirmado desde addPost) → no duplicar
@@ -8559,7 +8559,7 @@ export default function App(){
     if(user?.id && user.id!=="local"){
       const tryInsert = async () => {
         const {data,error}=await supabase.from("posts").insert({
-          user_id:user.id, text, ticker, sentiment, tags:[ticker],
+          user_id:user.id, content:text, text, ticker, sentiment, tags:[ticker],
           likes_count:0, comments_count:0, reposts_count:0,
           ...(image ? {image_url: image} : {})
         }).select().single();
