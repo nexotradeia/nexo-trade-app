@@ -1296,60 +1296,109 @@ function PolymarketWidget(){
 // ── INVESTING / MERCADOS EN VIVO WIDGET ───────────────────────────────────────
 function MercadosEnVivoWidget(){
   const [tab, setTab] = useState("crypto");
+  const [prices, setPrices] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
+
   const cryptoData = [
-    {s:"BTC",n:"Bitcoin",    color:"#f7931a"},
-    {s:"ETH",n:"Ethereum",   color:"#627eea"},
-    {s:"SOL",n:"Solana",     color:"#9945ff"},
-    {s:"BNB",n:"BNB",        color:"#f3ba2f"},
+    {s:"BTC", n:"Bitcoin",  color:"#f7931a", cgId:"bitcoin"},
+    {s:"ETH", n:"Ethereum", color:"#627eea", cgId:"ethereum"},
+    {s:"SOL", n:"Solana",   color:"#9945ff", cgId:"solana"},
+    {s:"BNB", n:"BNB",      color:"#f3ba2f", cgId:"binancecoin"},
   ];
-  const stocks = [
-    {s:"NVDA",n:"NVIDIA",   color:"#76b900"},
-    {s:"AAPL",n:"Apple",    color:"#555"},
-    {s:"TSLA",n:"Tesla",    color:"#e31937"},
-    {s:"SPY", n:"S&P 500",  color:"#00A8FF"},
+  const stocksData = [
+    {s:"NVDA", n:"NVIDIA",  color:"#76b900", fhSym:"NVDA"},
+    {s:"AAPL", n:"Apple",   color:"#555555", fhSym:"AAPL"},
+    {s:"TSLA", n:"Tesla",   color:"#e31937", fhSym:"TSLA"},
+    {s:"SPY",  n:"S&P 500", color:"#00A8FF", fhSym:"SPY"},
   ];
-  const items = tab === "crypto" ? cryptoData : stocks;
+
+  const fetchPrices = async () => {
+    try {
+      // Crypto: CoinGecko (free, no key needed)
+      const cgIds = cryptoData.map(c=>c.cgId).join(",");
+      const cgRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgIds}&vs_currencies=usd&include_24hr_change=true`);
+      if(cgRes.ok){
+        const cgData = await cgRes.json();
+        const newPrices = {};
+        cryptoData.forEach(c=>{
+          const d = cgData[c.cgId];
+          if(d){ newPrices[c.s] = {price: d.usd, change: d.usd_24h_change||0}; }
+        });
+        // Stocks: Finnhub
+        await Promise.all(stocksData.map(async st=>{
+          try{
+            const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${st.fhSym}&token=${FINNHUB_KEY}`);
+            if(r.ok){ const d=await r.json(); if(d.c>0) newPrices[st.s]={price:d.c, change:d.dp||0}; }
+          }catch{}
+        }));
+        setPrices(newPrices);
+        setLastUpdate(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
+      }
+    } catch(e){}
+    setLoading(false);
+  };
+
+  useEffect(()=>{ fetchPrices(); const iv=setInterval(fetchPrices,60000); return()=>clearInterval(iv); },[]);
+
+  const fmtPrice = (sym, p) => {
+    if(!p) return "—";
+    if(["BTC","ETH"].includes(sym)) return "$"+Math.round(p).toLocaleString("en-US");
+    if(p>=1000) return "$"+p.toLocaleString("en-US",{maximumFractionDigits:2});
+    return "$"+p.toFixed(2);
+  };
+
+  const items = tab==="crypto" ? cryptoData : stocksData;
 
   return(
     <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:18,overflow:"hidden",marginBottom:20}}>
-      {/* Header */}
       <div style={{padding:"16px 18px 0",borderBottom:`1px solid ${C.border}`}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-          <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#00A8FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📈</div>
-          <div>
-            <div style={{color:C.text,fontWeight:800,fontSize:14}}>Mercados en Vivo</div>
-            <div style={{color:C.muted2,fontSize:11}}>Powered by TradingView</div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#00A8FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📈</div>
+            <div>
+              <div style={{color:C.text,fontWeight:800,fontSize:14}}>Live Markets</div>
+              <div style={{color:C.muted2,fontSize:11}}>{lastUpdate ? `Updated ${lastUpdate}` : "Loading..."}</div>
+            </div>
           </div>
+          <button onClick={fetchPrices} title="Refresh" style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:16,padding:4}}>⟳</button>
         </div>
         <div style={{display:"flex",gap:0,marginBottom:-1}}>
-          {["crypto","stocks"].map(t=>(
-            <button key={t} onClick={()=>setTab(t)}
-              style={{flex:1,padding:"7px",border:"none",borderBottom:`2px solid ${tab===t?"#00A8FF":"transparent"}`,background:"transparent",color:tab===t?"#00A8FF":C.muted2,fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
-              {t==="crypto"?"🔷 Crypto":"📊 Acciones"}
+          {[{k:"crypto",l:"🔷 Crypto"},{k:"stocks",l:"📊 Stocks"}].map(({k,l})=>(
+            <button key={k} onClick={()=>setTab(k)}
+              style={{flex:1,padding:"7px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":C.muted2,fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
+              {l}
             </button>
           ))}
         </div>
       </div>
-      {/* Precios en vivo (via TradingView link) */}
       <div style={{padding:"12px 18px"}}>
-        {items.map((item,i)=>(
-          <a key={i} href={`https://www.tradingview.com/symbols/${tab==="crypto"?item.s+"USD":item.s}/`}
-            target="_blank" rel="noopener noreferrer"
-            style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<items.length-1?10:0,paddingBottom:i<items.length-1?10:0,borderBottom:i<items.length-1?`1px solid ${C.border}`:"none",textDecoration:"none"}}>
-            <div style={{width:36,height:36,borderRadius:10,background:item.color+"22",border:`1px solid ${item.color}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              <span style={{fontWeight:900,fontSize:10,color:item.color}}>{item.s}</span>
-            </div>
-            <div style={{flex:1}}>
-              <div style={{color:C.text,fontWeight:700,fontSize:13}}>{item.n}</div>
-              <div style={{color:C.muted2,fontSize:11}}>{item.s} · TradingView</div>
-            </div>
-            <div style={{color:"#10b981",fontWeight:700,fontSize:12}}>Ver →</div>
-          </a>
-        ))}
-        <div style={{marginTop:12,padding:"10px",background:"rgba(0,168,255,0.05)",borderRadius:8,textAlign:"center"}}>
+        {loading && <div style={{textAlign:"center",color:C.muted2,fontSize:12,padding:"16px 0"}}>Fetching live prices...</div>}
+        {!loading && items.map((item,i)=>{
+          const p = prices[item.s];
+          const up = p && p.change >= 0;
+          return(
+            <a key={i} href={`https://www.tradingview.com/symbols/${tab==="crypto"?item.s+"USD":item.s}/`}
+              target="_blank" rel="noopener noreferrer"
+              style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<items.length-1?10:0,paddingBottom:i<items.length-1?10:0,borderBottom:i<items.length-1?`1px solid ${C.border}`:"none",textDecoration:"none"}}>
+              <div style={{width:36,height:36,borderRadius:10,background:item.color+"22",border:`1px solid ${item.color}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <span style={{fontWeight:900,fontSize:10,color:item.color}}>{item.s[0]}</span>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{color:C.text,fontWeight:700,fontSize:13}}>{item.n}</div>
+                <div style={{color:C.muted2,fontSize:11}}>{item.s}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{color:C.text,fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{fmtPrice(item.s, p?.price)}</div>
+                {p && <div style={{color:up?"#10b981":"#ef4444",fontSize:11,fontWeight:700}}>{up?"▲":"▼"}{Math.abs(p.change).toFixed(2)}%</div>}
+              </div>
+            </a>
+          );
+        })}
+        <div style={{marginTop:12,padding:"8px",background:"rgba(0,168,255,0.05)",borderRadius:8,textAlign:"center"}}>
           <a href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer"
             style={{color:"#00A8FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>
-            📊 Ver gráficos completos en TradingView →
+            📊 Full charts on TradingView →
           </a>
         </div>
       </div>
@@ -2832,7 +2881,7 @@ function NoticiasPage({lang}){
       ):(
         news.map((n,i)=>(
           <div key={i}>
-          {i>0 && i%5===0 && <AdBannerFeed/>}
+          {i>0 && i%5===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
           <a href={n.url} target="_blank" rel="noopener noreferrer"
             style={{display:"block",textDecoration:"none",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:10,boxShadow:C.shadow,borderLeft:`4px solid ${cat==="crypto"?"#F59E0B":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accent}`,transition:"box-shadow 0.2s,transform 0.15s"}}
             onMouseEnter={e=>{e.currentTarget.style.boxShadow=C.shadowMd;e.currentTarget.style.transform="translateY(-1px)";}}
@@ -2969,10 +3018,10 @@ function TickerStrip(){
 function MarketsMiniWidget(){
   const [tab, setTab] = useState("mercados");
   const [polyData] = useState([
-    {q:"¿Recorte de tasas Fed en 2025?", p:0.62, vol:"$1.2M"},
-    {q:"¿S&P 500 cierra sobre 5,500 en 2025?", p:0.58, vol:"$890K"},
-    {q:"¿Bitcoin supera $100K antes de fin de año?", p:0.71, vol:"$3.1M"},
-    {q:"¿Inflación EE.UU. baja del 3% en 2025?", p:0.45, vol:"$670K"},
+    {q:"Fed rate cut in 2025?", p:0.62, vol:"$1.2M"},
+    {q:"S&P 500 closes above 5,500 in 2025?", p:0.58, vol:"$890K"},
+    {q:"Bitcoin hits $100K before year end?", p:0.71, vol:"$3.1M"},
+    {q:"US inflation drops below 3% in 2025?", p:0.45, vol:"$670K"},
   ]);
   const {cryptoPrices} = useCryptoPrices();
   const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
@@ -2998,7 +3047,7 @@ function MarketsMiniWidget(){
     <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:"var(--c-shadow)"}}>
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:"1px solid var(--c-border)",padding:"0 8px"}}>
-        {[["mercados","📈 Mercados"],["predicciones","🎯 Predicciones"],["tendencias","🔥 Tendencias"]].map(([k,l])=>(
+        {[["mercados","📈 Markets"],["predicciones","🎯 Predictions"],["tendencias","🔥 Trending"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
             style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"var(--c-muted)",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
             {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
@@ -3064,7 +3113,7 @@ function MarketsMiniWidget(){
           ))}
           <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer"
             style={{textAlign:"center",color:"#6366f1",fontSize:10,fontWeight:700,textDecoration:"none",marginTop:2}}>
-            Ver todos en Polymarket →
+            View all on Polymarket →
           </a>
         </div>
       )}
@@ -3124,6 +3173,54 @@ function AdBannerFeed(){
 function AdBannerSidebar(){
   return <AdBanner slot="8915846882" format="auto" style={{margin:"6px 0",borderRadius:10,overflow:"hidden",minHeight:0}}/>;
 }
+
+// ── MEDIA.NET ADS ─────────────────────────────────────────────────────────────
+// INSTRUCCIONES:
+// 1. Regístrate en https://www.media.net → Apply Now → pon nexotradeia.com
+// 2. Cuando te aprueben (2-3 días), activa el script en index.html descomentando la línea
+// 3. En tu panel Media.net: Ad Units → Create → copia el CID y los TAG IDs
+// 4. Reemplaza REEMPLAZAR_CID, REEMPLAZAR_TAG_FEED y REEMPLAZAR_TAG_SIDEBAR abajo
+// 5. Corre python3 fix_everything.py para deploy
+const MN_CID = "REEMPLAZAR_CID_MEDIANET"; // ej: "8CU57YRJN"
+
+function MediaNetBannerFeed(){
+  const ref = useRef(null);
+  const pushed = useRef(false);
+  useEffect(()=>{
+    if(pushed.current || MN_CID.includes("REEMPLAZAR")) return;
+    try{
+      if(window._mNHandle){
+        window._mNHandle.queue = window._mNHandle.queue||[];
+        window._mNHandle.queue.push(function(){
+          window._mNDetails.loadTag("REEMPLAZAR_TAG_FEED","728x90","mn-banner-feed");
+        });
+        pushed.current = true;
+      }
+    }catch(e){}
+  },[]);
+  if(MN_CID.includes("REEMPLAZAR")) return null; // oculto hasta tener CID real
+  return <div id="mn-banner-feed" style={{margin:"10px 0",textAlign:"center",minHeight:90}} ref={ref}/>;
+}
+
+function MediaNetBannerSidebar(){
+  const ref = useRef(null);
+  const pushed = useRef(false);
+  useEffect(()=>{
+    if(pushed.current || MN_CID.includes("REEMPLAZAR")) return;
+    try{
+      if(window._mNHandle){
+        window._mNHandle.queue = window._mNHandle.queue||[];
+        window._mNHandle.queue.push(function(){
+          window._mNDetails.loadTag("REEMPLAZAR_TAG_SIDEBAR","300x250","mn-banner-sidebar");
+        });
+        pushed.current = true;
+      }
+    }catch(e){}
+  },[]);
+  if(MN_CID.includes("REEMPLAZAR")) return null;
+  return <div id="mn-banner-sidebar" style={{margin:"6px 0",textAlign:"center",minHeight:250}} ref={ref}/>;
+}
+// ── FIN MEDIA.NET ─────────────────────────────────────────────────────────────
 
 // ── SIDEBAR TICKER WIDGET — precios reales CoinGecko + acciones simuladas ─────
 function SidebarTickerWidget(){
@@ -5153,6 +5250,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
       {/* ── PUBLICIDAD — entre Comunidad vs IA y Fear & Greed ── */}
       <AdBannerSidebar/>
+      <MediaNetBannerSidebar/>
 
       {/* ── FEAR & GREED ── */}
       <div style={{...card,padding:"7px 12px"}}>
@@ -8381,7 +8479,7 @@ export default function App(){
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length]}/>
             )}
             {/* AdSense banner cada 6 posts */}
-            {(i+1)%6===0 && <AdBannerFeed/>}
+            {(i+1)%6===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
             {!effectivePremium && (i+1)%5===0 && (
               <VipFeedCard onGoVIP={()=>setPage(8)}/>
             )}
