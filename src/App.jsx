@@ -2916,12 +2916,12 @@ function MarketsMiniWidget(){
   const barCol = p => p>=0.6?"#10b981":p>=0.4?"#f59e0b":"#ef4444";
 
   return(
-    <div style={{background:"linear-gradient(160deg,#0D1117,#111827)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.3)"}}>
+    <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:"var(--c-shadow)"}}>
       {/* Tabs */}
-      <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"0 8px"}}>
+      <div style={{display:"flex",borderBottom:"1px solid var(--c-border)",padding:"0 8px"}}>
         {[["mercados","📈 Mercados"],["predicciones","🎯 Predicciones"],["tendencias","🔥 Tendencias"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
-            style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"#4B5563",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"var(--c-muted)",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
             {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
           </button>
         ))}
@@ -2953,9 +2953,9 @@ function MarketsMiniWidget(){
                   </svg>
                 </div>
                 {/* Nombre */}
-                <div style={{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.45)",letterSpacing:0.2,lineHeight:1}}>{t.n}</div>
+                <div style={{fontSize:9,fontWeight:600,color:"var(--c-muted2)",letterSpacing:0.2,lineHeight:1}}>{t.n}</div>
                 {/* Precio */}
-                <div style={{fontFamily:"monospace",fontSize:11,fontWeight:800,color:"#e2e8f0",letterSpacing:-0.3,lineHeight:1}}>
+                <div style={{fontFamily:"monospace",fontSize:11,fontWeight:800,color:"var(--c-text)",letterSpacing:-0.3,lineHeight:1}}>
                   {t.p>=1000 ? t.p.toLocaleString("en-US",{maximumFractionDigits:0}) : t.p.toFixed(2)}
                 </div>
                 {/* Cambio */}
@@ -3041,9 +3041,9 @@ function AdBannerFeed(){
   return <AdBanner slot="6515017049" format="auto" style={{margin:"10px 0",borderRadius:8,overflow:"hidden"}}/>;
 }
 
-// Banner cuadrado 300×250 — para sidebar
+// Banner cuadrado 300×250 — para sidebar (sin minHeight para no crear espacio vacío)
 function AdBannerSidebar(){
-  return <AdBanner slot="8915846882" format="auto" style={{margin:"12px 0",borderRadius:10,overflow:"hidden"}}/>;
+  return <AdBanner slot="8915846882" format="auto" style={{margin:"6px 0",borderRadius:10,overflow:"hidden",minHeight:0}}/>;
 }
 
 // ── SIDEBAR TICKER WIDGET — precios reales CoinGecko + acciones simuladas ─────
@@ -5112,22 +5112,59 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         })}
       </div>
 
-      {/* ── COMUNIDAD vs IA ── */}
-      <div style={{...card,padding:"7px 12px"}}>
-        <div style={{fontSize:10,fontWeight:800,color:"#0F172A",marginBottom:6,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
-        {[{label:"Comunidad",pct:78,col:"#16A34A",bg:"rgba(22,163,74,0.1)"},{label:"IA Análisis",pct:61,col:"#0EA5E9",bg:"rgba(14,165,233,0.1)"}].map(({label,pct,col,bg})=>(
-          <div key={label} style={{marginBottom:5}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:2}}>
-              <span style={{fontSize:9,color:"#64748B",fontWeight:600}}>{label}</span>
-              <span style={{fontSize:8,color:col,fontWeight:800,background:bg,borderRadius:20,padding:"1px 5px"}}>BULLISH {pct}%</span>
+      {/* ── COMUNIDAD vs IA — votación real ── */}
+      {(()=>{
+        const storageKey = "nexo-sentiment-vote";
+        const [vote, setVote] = useState(()=>{try{return localStorage.getItem(storageKey)||null;}catch{return null;}});
+        const [bullPct, setBullPct] = useState(()=>{try{return parseInt(localStorage.getItem("nexo-sent-pct")||"71");}catch{return 71;}});
+        const castVote = (v) => {
+          if(vote) return; // ya votó
+          const newPct = v==="bull" ? Math.min(95, bullPct+1) : Math.max(20, bullPct-1);
+          setBullPct(newPct);
+          setVote(v);
+          try{localStorage.setItem(storageKey,v);localStorage.setItem("nexo-sent-pct",String(newPct));}catch{}
+        };
+        const bearPct = 100-bullPct;
+        return(
+          <div style={{...card,padding:"10px 12px"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+              <span style={{fontSize:11,fontWeight:800,color:"var(--c-text)",letterSpacing:-0.2}}>📊 Sentimiento</span>
+              {!vote && <span style={{fontSize:9,color:"var(--c-muted2)",fontWeight:500}}>¿Alcista o bajista hoy?</span>}
+              {vote && <span style={{fontSize:9,color:"#22C55E",fontWeight:700}}>✓ Votado</span>}
             </div>
-            <div style={{height:3,background:"rgba(15,23,42,0.06)",borderRadius:4,overflow:"hidden"}}>
-              <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:4,opacity:0.9}}/>
-            </div>
+            {/* Botones de voto */}
+            {!vote && (
+              <div style={{display:"flex",gap:5,marginBottom:8}}>
+                <button onClick={()=>castVote("bull")}
+                  style={{flex:1,background:"rgba(22,163,74,0.1)",border:"1.5px solid rgba(22,163,74,0.3)",borderRadius:8,padding:"6px 0",cursor:"pointer",color:"#16A34A",fontWeight:700,fontSize:11,transition:"all 0.15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(22,163,74,0.2)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="rgba(22,163,74,0.1)"}>
+                  ▲ Alcista
+                </button>
+                <button onClick={()=>castVote("bear")}
+                  style={{flex:1,background:"rgba(220,38,38,0.08)",border:"1.5px solid rgba(220,38,38,0.25)",borderRadius:8,padding:"6px 0",cursor:"pointer",color:"#DC2626",fontWeight:700,fontSize:11,transition:"all 0.15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(220,38,38,0.18)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="rgba(220,38,38,0.08)"}>
+                  ▼ Bajista
+                </button>
+              </div>
+            )}
+            {/* Barras resultado */}
+            {[{label:"▲ Alcista",pct:bullPct,col:"#16A34A",bg:"rgba(22,163,74,0.08)"},{label:"▼ Bajista",pct:bearPct,col:"#DC2626",bg:"rgba(220,38,38,0.07)"}].map(({label,pct,col,bg})=>(
+              <div key={label} style={{marginBottom:5}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:2}}>
+                  <span style={{fontSize:9,color:"var(--c-muted)",fontWeight:600}}>{label}</span>
+                  <span style={{fontSize:9,color:col,fontWeight:800}}>{pct}%</span>
+                </div>
+                <div style={{height:4,background:"var(--c-border)",borderRadius:4,overflow:"hidden"}}>
+                  <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:4,transition:"width 0.5s"}}/>
+                </div>
+              </div>
+            ))}
+            <div style={{fontSize:8,color:"var(--c-muted2)",marginTop:4}}>Basado en votos de la comunidad hoy</div>
           </div>
-        ))}
-        <div style={{fontSize:8,color:"#CBD5E1",marginTop:3,borderTop:"1px solid rgba(15,23,42,0.05)",paddingTop:4}}>Basado en 2,847 posts de hoy</div>
-      </div>
+        );
+      })()}
 
       {/* ── PUBLICIDAD — entre Comunidad vs IA y Fear & Greed ── */}
       <AdBannerSidebar/>
@@ -5231,10 +5268,9 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       })()}
 
       {/* ── GOOGLE ADSENSE ── */}
-      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",minHeight:260,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",background:"#F8FAFC",border:"1px dashed rgba(15,23,42,0.1)"}}>
-        <div style={{fontSize:9,color:"#CBD5E1",fontWeight:600,letterSpacing:1,margin:"8px 0 4px",textTransform:"uppercase"}}>Publicidad</div>
+      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",background:"transparent",border:"none"}}>
         <ins className="adsbygoogle"
-          style={{display:"block",width:"100%",minHeight:240}}
+          style={{display:"block",width:"100%"}}
           data-ad-client="ca-pub-3490083853866736"
           data-ad-slot="8915846882"
           data-ad-format="auto"
