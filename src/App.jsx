@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-21 21:00:00
+// NEXO TRADE — build: 2026-05-25 12:00:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5246,23 +5246,55 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
       {/* ── A QUIÉN SEGUIR ── */}
       {(()=>{
-        const sug=MOCK_USERS.filter(u=>u.id!==user?.id&&!following.includes(u.id)).slice(0,3);
-        if(!sug.length)return null;
+        const [realUsers, setRealUsers] = useState([]);
+        const [followed, setFollowed] = useState({});
+        useEffect(()=>{
+          // Cargar usuarios reales de Supabase ordenados por puntos
+          supabase.from("profiles")
+            .select("id,username,avatar_emoji,avatar_color,points,followers_count")
+            .order("points",{ascending:false})
+            .limit(10)
+            .then(({data})=>{
+              if(data && data.length > 0){
+                // Excluir al usuario actual
+                const filtered = data.filter(u=>u.id !== user?.id).slice(0,3);
+                setRealUsers(filtered);
+              }
+            })
+            .catch(()=>{});
+        },[user?.id]);
+
+        const handleFollow = async (uid) => {
+          if(!user){ onNeedAuth(); return; }
+          if(followed[uid]) return;
+          setFollowed(prev=>({...prev,[uid]:true}));
+          try{
+            await supabase.from("follows").insert({follower_id:user.id, following_id:uid});
+          }catch(e){}
+        };
+
+        if(!realUsers.length) return null;
         return(
           <div style={card}>
-            <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12,letterSpacing:-0.2}}>{t.whofollow}</div>
-            {sug.map((u,i)=>(
-              <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<sug.length-1?"1px solid rgba(15,23,42,0.05)":"none"}}>
-                <div style={{cursor:"pointer"}} onClick={()=>onProfile(u)}>
-                  <AvatarBubble emoji={u.emoji} color={u.color} size={30}/>
-                </div>
+            <div style={{fontSize:12,fontWeight:800,color:"var(--c-text)",marginBottom:12,letterSpacing:-0.2}}>{t.whofollow}</div>
+            {realUsers.map((u,i)=>(
+              <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<realUsers.length-1?"1px solid var(--c-border)":"none"}}>
+                <AvatarBubble emoji={u.avatar_emoji||"🦅"} color={u.avatar_color||"#00A8FF"} size={30}/>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:700,color:"#0F172A",fontSize:12,cursor:"pointer"}} onClick={()=>onProfile(u)}>{u.name}</div>
-                  <div style={{color:"#94A3B8",fontSize:10}}>{fmtNum(u.followers)} {t.followers}</div>
+                  <div style={{fontWeight:700,color:"var(--c-text)",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                    {u.username||"Usuario"}
+                  </div>
+                  <div style={{color:"var(--c-muted2)",fontSize:10}}>
+                    {fmtNum(u.followers_count||0)} {t.followers} · {fmtNum(u.points||0)} pts
+                  </div>
                 </div>
-                <Btn variant="follow" small onClick={()=>user?onFollow(u.id):onNeedAuth()}>{t.follow}</Btn>
+                <button onClick={()=>handleFollow(u.id)}
+                  style={{background:followed[u.id]?"rgba(22,163,74,0.1)":"rgba(0,168,255,0.08)",border:`1.5px solid ${followed[u.id]?"#16A34A":"rgba(0,168,255,0.3)"}`,borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,color:followed[u.id]?"#16A34A":"#00A8FF",cursor:followed[u.id]?"default":"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+                  {followed[u.id]?"✓ Siguiendo":t.follow}
+                </button>
               </div>
             ))}
+            <div style={{fontSize:9,color:"var(--c-muted2)",marginTop:8,textAlign:"center"}}>Usuarios reales de NexoTrade</div>
           </div>
         );
       })()}
