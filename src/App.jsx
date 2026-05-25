@@ -76,17 +76,18 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
 
 // ── THEME — Dark Luxury Fintech ───────────────────────────────────────────────
 const C = {
-  bg:"#F0F4F8", surface:"#FFFFFF", card:"#FFFFFF", card2:"#F8FAFC",
-  border:"rgba(15,23,42,0.09)", borderHover:"rgba(0,168,255,0.4)",
+  bg:"var(--c-bg)", surface:"var(--c-surface)", card:"var(--c-card)", card2:"var(--c-card2)",
+  border:"var(--c-border)", borderHover:"rgba(0,168,255,0.4)",
   accent:"#00A8FF", accentDim:"rgba(0,168,255,0.09)", accentText:"#0090D4",
   bull:"#16A34A", bullBg:"rgba(22,163,74,0.09)", bear:"#DC2626", bearBg:"rgba(220,38,38,0.09)",
   gold:"#D97706", goldBg:"rgba(217,119,6,0.1)", purple:"#7C3AED", purpleBg:"rgba(124,58,237,0.08)",
   blue:"#00A8FF", blueBg:"rgba(0,168,255,0.08)", orange:"#EA580C", orangeBg:"rgba(234,88,12,0.08)",
-  text:"#0F172A", muted:"#64748B", muted2:"#94A3B8",
-  shadow:"0 2px 12px rgba(0,0,0,0.07)", shadowMd:"0 8px 32px rgba(0,0,0,0.1)",
+  text:"var(--c-text)", muted:"var(--c-muted)", muted2:"var(--c-muted2)",
+  shadow:"var(--c-shadow)", shadowMd:"var(--c-shadowMd)",
   shadowGlow:"0 0 24px rgba(0,168,255,0.12)", shadowGlowBlue:"0 0 24px rgba(0,168,255,0.1)",
-  glass:"rgba(255,255,255,0.88)", glassBorder:"rgba(15,23,42,0.09)",
+  glass:"var(--c-glass)", glassBorder:"var(--c-glassBorder)",
   vip:"#7C3AED", vipGlow:"rgba(124,58,237,0.2)",
+  nav:"var(--c-nav)",
 };
 
 // ── LANGS ─────────────────────────────────────────────────────────────────────
@@ -1845,92 +1846,84 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew}){
   return(
     <div
       className={isNew ? "post-card-new" : ""}
-      style={{background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.09)",borderRadius:14,padding:"10px 14px",marginBottom:4,transition:"border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,160,96,0.25)";e.currentTarget.style.boxShadow="0 4px 20px rgba(0,0,0,0.08)";e.currentTarget.style.transform="translateY(-1px)";}}
-      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(15,23,42,0.09)";e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.05)";e.currentTarget.style.transform="translateY(0)";}}>
-      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+      style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:6,transition:"border-color 0.18s, box-shadow 0.18s, transform 0.18s",boxShadow:"var(--c-shadow)"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor=isBull?"rgba(22,163,74,0.3)":"rgba(220,38,38,0.2)";e.currentTarget.style.boxShadow="var(--c-shadowMd)";e.currentTarget.style.transform="translateY(-1px)";}}
+      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="var(--c-shadow)";e.currentTarget.style.transform="translateY(0)";}}>
+      <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
         <div style={{cursor:"pointer",flexShrink:0}} onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>
           <AvatarBubble emoji={post.avatar} color={post.avatarColor||C.accent} online={post.id%2===0}/>
         </div>
         <div style={{flex:1,minWidth:0}}>
           {/* Header row */}
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
-            <span style={{fontWeight:700,color:"#0F172A",fontSize:13.5,cursor:"pointer",letterSpacing:-0.2}}
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6,flexWrap:"wrap"}}>
+            <span style={{fontWeight:700,color:"var(--c-text)",fontSize:14,cursor:"pointer",letterSpacing:-0.3}}
               onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
-            {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#000",borderRadius:20,padding:"2px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
-            {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"2px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦VIP</span>}
+            {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#000",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
+            {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦VIP</span>}
             <TickerBadge ticker={post.ticker} sentiment={post.sentiment}/>
             <SentPill sentiment={post.sentiment} lang={lang}/>
-            <span style={{color:"#94A3B8",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
+            <span style={{color:"var(--c-muted2)",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
           </div>
-          {/* Aviso: post no guardado en servidor */}
+          {/* Aviso: post no guardado */}
           {post._failed && (
-            <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:8,padding:"5px 10px",marginBottom:6,fontSize:11,color:"#EF4444",fontWeight:600}}>
-              ⚠️ No se guardó — solo visible en este dispositivo. Recarga la página e inténtalo de nuevo.
+            <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:8,padding:"5px 10px",marginBottom:6,fontSize:11,color:"#EF4444",fontWeight:600}}>
+              ⚠️ No se guardó — recarga la página e inténtalo de nuevo.
             </div>
           )}
           {/* Post text */}
-          <p style={{margin:"0 0 8px",color:"#475569",fontSize:13.5,lineHeight:1.6,fontWeight:400}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
+          <p style={{margin:"0 0 10px",color:"var(--c-text)",fontSize:14,lineHeight:1.65,fontWeight:400,opacity:0.88}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
           {/* Imagen / GIF */}
-          {post.image&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:10,marginBottom:8,border:`1px solid ${C.border}`,display:"block"}} onError={e=>e.target.style.display="none"}/>}
-          {/* Metrics row — target + confidence + sparkline + AI agreement */}
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
-            {/* Target */}
-            <div style={{display:"flex",alignItems:"center",gap:4,background:isBull?"rgba(0,229,143,0.07)":"rgba(255,77,106,0.07)",border:`1px solid ${isBull?"rgba(0,229,143,0.15)":"rgba(255,77,106,0.15)"}`,borderRadius:7,padding:"3px 8px"}}>
-              <span style={{fontSize:10,color:C.muted,fontWeight:500}}>🎯</span>
-              <span style={{fontSize:11,fontWeight:800,color:isBull?C.bull:C.bear,fontFamily:"monospace"}}>{target}</span>
+          {post.image&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
+          {/* Metrics row — compacto */}
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+            <div style={{display:"flex",alignItems:"center",gap:3,background:isBull?"rgba(22,163,74,0.08)":"rgba(220,38,38,0.08)",borderRadius:8,padding:"3px 9px",border:`1px solid ${isBull?"rgba(22,163,74,0.18)":"rgba(220,38,38,0.18)"}`}}>
+              <span style={{fontSize:10,fontWeight:700,color:isBull?C.bull:C.bear,fontFamily:"monospace"}}>🎯 {target}</span>
             </div>
-            {/* Confidence */}
-            <div style={{display:"flex",alignItems:"center",gap:5,flex:1,minWidth:120}}>
-              <div style={{flex:1,height:2.5,background:"rgba(15,23,42,0.09)",borderRadius:3,overflow:"hidden"}}>
-                <div style={{width:`${conf}%`,height:"100%",background:confLevel.col,borderRadius:3,transition:"width 0.6s ease"}}/>
+            <div style={{display:"flex",alignItems:"center",gap:4,flex:1,minWidth:100}}>
+              <div style={{flex:1,height:2,background:"var(--c-border)",borderRadius:3,overflow:"hidden"}}>
+                <div style={{width:`${conf}%`,height:"100%",background:confLevel.col,borderRadius:3}}/>
               </div>
-              <span style={{fontSize:10,color:confLevel.col,fontWeight:700,fontVariantNumeric:"tabular-nums",whiteSpace:"nowrap"}}>{conf}%</span>
+              <span style={{fontSize:10,color:confLevel.col,fontWeight:700,whiteSpace:"nowrap"}}>{conf}%</span>
             </div>
-            {/* Mini sparkline */}
-            <svg viewBox={`0 0 80 20`} style={{width:48,height:14,flexShrink:0}}>
-              <polyline points={sparkPts} fill="none" stroke={isBull?"#00E58F":"#FF4D6A"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg viewBox="0 0 80 20" style={{width:44,height:13,flexShrink:0}}>
+              <polyline points={sparkPts} fill="none" stroke={isBull?"#16A34A":"#DC2626"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {/* AI agreement */}
-            <div style={{display:"flex",alignItems:"center",gap:4,background:"rgba(59,130,246,0.07)",border:"1px solid rgba(59,130,246,0.15)",borderRadius:7,padding:"3px 8px"}}>
-              <span style={{fontSize:10}}>🧠</span>
-              <span style={{fontSize:10,fontWeight:700,color:C.blue,fontVariantNumeric:"tabular-nums"}}>{aiPct}%</span>
+            <div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(59,130,246,0.07)",border:"1px solid rgba(59,130,246,0.14)",borderRadius:8,padding:"3px 8px"}}>
+              <span style={{fontSize:10,fontWeight:700,color:"#3B82F6"}}>🧠 {aiPct}%</span>
             </div>
           </div>
           {/* Tags */}
-          {post.tags?.length>0&&<div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:9}}>
-            {post.tags.map(tg=><span key={tg} style={{background:"rgba(37,99,235,0.07)",color:"#2563EB",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:600}}>#{tg}</span>)}
+          {post.tags?.length>0&&<div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+            {post.tags.map(tg=><span key={tg} style={{background:"rgba(0,168,255,0.07)",color:"#00A8FF",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:600,letterSpacing:0.2}}>#{tg}</span>)}
           </div>}
           {/* Action row */}
-          <div style={{display:"flex",gap:0,alignItems:"center",marginTop:2}}>
-            {[{icon:"♥",val:likes,active:liked,col:C.bear,fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
-              {icon:"💬",val:post.comments,active:false,col:C.blue,fn:()=>{}},
-              {icon:"↗",val:post.reposts,active:repost,col:C.bull,fn:()=>setRepost(!repost)}
+          <div style={{display:"flex",gap:0,alignItems:"center",borderTop:"1px solid var(--c-border)",paddingTop:8,marginTop:4}}>
+            {[{icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
+              {icon:"💬",val:post.comments,active:false,col:"#3B82F6",fn:()=>{}},
+              {icon:"↗",val:post.reposts,active:repost,col:"#16A34A",fn:()=>setRepost(!repost)}
             ].map(({icon,val,active,col,fn},i)=>(
               <button key={i} onClick={fn}
-                style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"#94A3B8",fontSize:12,fontWeight:600,padding:"4px 10px",borderRadius:7,transition:"all 0.15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,23,42,0.05)";e.currentTarget.style.color=col;}}
-                onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=active?col:"#334155";}}>
-                <span style={{fontSize:13}}>{icon}</span><span style={{fontVariantNumeric:"tabular-nums"}}>{val}</span>
+                style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"var(--c-muted2)",fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:8,transition:"all 0.15s",fontFamily:"inherit"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.06)";e.currentTarget.style.color=col;}}
+                onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=active?col:"var(--c-muted2)";}}>
+                <span style={{fontSize:14}}>{icon}</span><span style={{fontVariantNumeric:"tabular-nums"}}>{val}</span>
               </button>
             ))}
-            {/* Share en X/Twitter */}
             <button
               onClick={()=>{
                 const txt=`${post.sentiment==="bull"?"📈":"📉"} $${post.ticker} — ${post.text.slice(0,180)}${post.text.length>180?"...":""}\n\nvía @NexoTradeIA nexotradeia.com`;
                 window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(txt)}`,"_blank","width=560,height=420");
               }}
-              title="Compartir en X / Twitter"
-              style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:3,color:"#94A3B8",fontSize:12,fontWeight:600,padding:"4px 8px",borderRadius:7,transition:"all 0.15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,0,0,0.05)";e.currentTarget.style.color="#000";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color="#94A3B8";}}>
+              title="Compartir en X"
+              style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:3,color:"var(--c-muted2)",padding:"5px 8px",borderRadius:8,transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,0,0,0.05)";e.currentTarget.style.color="var(--c-text)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color="var(--c-muted2)";}}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.26 5.638 5.905-5.638zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </button>
-            {/* Copiar link */}
             <CopyLinkBtn postId={post.id} ticker={post.ticker}/>
-            <div style={{marginLeft:"auto",fontSize:10,color:"#94A3B8",fontWeight:500}}>
-              {`${91-((typeof post.id==="number"?post.id:1)%30)} traders coinciden`}
-            </div>
+            <span style={{marginLeft:"auto",fontSize:10,color:"var(--c-muted2)",fontWeight:500}}>
+              {`${91-((typeof post.id==="number"?post.id:1)%30)} traders`}
+            </span>
           </div>
         </div>
       </div>
@@ -8746,6 +8739,56 @@ export default function App(){
   return(
     <PriceProvider>
     <style>{`
+      /* ── LIGHT MODE (default) ── */
+      :root, [data-dark="false"] {
+        --c-bg:         #F4F6FB;
+        --c-surface:    #FFFFFF;
+        --c-card:       #FFFFFF;
+        --c-card2:      #F8FAFD;
+        --c-border:     rgba(15,23,42,0.08);
+        --c-text:       #0F172A;
+        --c-muted:      #64748B;
+        --c-muted2:     #94A3B8;
+        --c-glass:      rgba(255,255,255,0.90);
+        --c-glassBorder:rgba(15,23,42,0.08);
+        --c-shadow:     0 2px 12px rgba(0,0,0,0.06);
+        --c-shadowMd:   0 8px 32px rgba(0,0,0,0.09);
+        --c-nav:        #FFFFFF;
+        --c-navBorder:  rgba(15,23,42,0.07);
+        --c-inputBg:    #F8FAFC;
+        --c-inputBorder:rgba(15,23,42,0.10);
+      }
+      /* ── DARK MODE ── */
+      [data-dark="true"] {
+        --c-bg:         #080D18;
+        --c-surface:    #0F1623;
+        --c-card:       #141C2E;
+        --c-card2:      #1A2236;
+        --c-border:     rgba(255,255,255,0.07);
+        --c-text:       #E8EDF5;
+        --c-muted:      #8892A4;
+        --c-muted2:     #5A6478;
+        --c-glass:      rgba(14,20,35,0.92);
+        --c-glassBorder:rgba(255,255,255,0.08);
+        --c-shadow:     0 2px 12px rgba(0,0,0,0.35);
+        --c-shadowMd:   0 8px 32px rgba(0,0,0,0.45);
+        --c-nav:        #0C1220;
+        --c-navBorder:  rgba(255,255,255,0.06);
+        --c-inputBg:    rgba(255,255,255,0.04);
+        --c-inputBorder:rgba(255,255,255,0.10);
+      }
+      [data-dark="true"] body,
+      [data-dark="true"] { color-scheme: dark; }
+
+      /* Cards auto-dark */
+      [data-dark="true"] .nexo-card-auto {
+        background: var(--c-card) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text) !important;
+      }
+      /* Scrollbar dark */
+      [data-dark="true"] ::-webkit-scrollbar-thumb { background: rgba(0,168,255,0.18); }
+
       @media (min-width: 1024px) {
         .nexo-body-grid { grid-template-columns: 240px minmax(0,1fr) 300px !important; }
       }
@@ -8817,7 +8860,7 @@ export default function App(){
         animation: postSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) both, postPulse 0.9s ease 0.35s;
       }
     `}</style>
-    <div style={{minHeight:"100vh",background:C.bg,color:darkMode?C.text:"#0f172a",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.3s,color 0.3s"}}>
+    <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s"}}>
       <TickerTape/>
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
@@ -8859,8 +8902,8 @@ export default function App(){
         </div>
       )}
 
-      {/* NAVBAR — Estilo Socimo */}
-      <nav style={{background:"#FFFFFF",borderBottom:"1px solid rgba(15,23,42,0.09)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(0,0,0,0.06)",width:"100%",boxSizing:"border-box"}}>
+      {/* NAVBAR */}
+      <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,height:58,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Logo — integrado al navbar */}
@@ -8869,8 +8912,8 @@ export default function App(){
               style={{height:54,width:"auto",objectFit:"contain",borderRadius:8,display:"block"}}
               onError={e=>{e.target.style.display="none";}}/>
             <div className="nexo-logo-text" style={{display:"flex",flexDirection:"column",lineHeight:1.15}}>
-              <span style={{fontWeight:900,fontSize:22,color:"#0F172A",letterSpacing:-0.5}}>NEXO<span style={{color:"#00A8FF"}}>TRADE</span></span>
-              <span style={{fontSize:10,fontWeight:600,color:"#94A3B8",letterSpacing:1.5,textTransform:"uppercase"}}>AI Trading Community</span>
+              <span style={{fontWeight:900,fontSize:22,color:"var(--c-text)",letterSpacing:-0.5}}>NEXO<span style={{color:"#00A8FF"}}>TRADE</span></span>
+              <span style={{fontSize:10,fontWeight:600,color:"var(--c-muted2)",letterSpacing:1.5,textTransform:"uppercase"}}>AI Trading Community</span>
             </div>
           </div>
 
@@ -8908,10 +8951,19 @@ export default function App(){
               {alertCount>0&&<span style={{position:"absolute",top:-3,right:-3,minWidth:16,height:16,background:"#EF4444",borderRadius:"50%",border:"1.5px solid #fff",fontSize:9,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",animation:"nexo-pulse 2s infinite"}}>{alertCount}</span>}
             </button>
 
+            {/* Dark mode toggle */}
+            <button onClick={()=>setDarkMode(!darkMode)}
+              title={darkMode ? "Modo claro" : "Modo oscuro"}
+              style={{width:38,height:38,borderRadius:12,border:`1.5px solid ${darkMode?"rgba(250,204,21,0.5)":"rgba(100,116,139,0.25)"}`,background:darkMode?"rgba(250,204,21,0.08)":"rgba(100,116,139,0.06)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.2s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.15)":"rgba(100,116,139,0.12)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.08)":"rgba(100,116,139,0.06)";}}>
+              {darkMode ? "☀️" : "🌙"}
+            </button>
+
             {/* Settings panel */}
             <button onClick={()=>setShowSettings(true)}
               title="Configuración"
-              style={{width:38,height:38,borderRadius:"50%",border:`1.5px solid ${showSettings?"rgba(0,168,255,0.7)":"rgba(0,168,255,0.3)"}`,background:showSettings?"rgba(0,168,255,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
+              style={{width:38,height:38,borderRadius:12,border:`1.5px solid ${showSettings?"rgba(0,168,255,0.7)":"rgba(0,168,255,0.2)"}`,background:showSettings?"rgba(0,168,255,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
               onMouseLeave={e=>e.currentTarget.style.background=showSettings?"rgba(0,168,255,0.15)":"transparent"}>
               ⚙️
@@ -8938,7 +8990,7 @@ export default function App(){
           </div>
         </div>
         {/* Tabs — bigger, professional */}
-        <div className="nexo-tabs" style={{display:"flex",gap:0,borderTop:`1px solid ${C.border}`,overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
+        <div className="nexo-tabs" style={{display:"flex",gap:0,borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
           {NAV_ITEMS(t).map(n=>{
             if(n.premium){
               const active=page===n.idx;
@@ -8951,9 +9003,9 @@ export default function App(){
             }
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,margin:"0",padding:"15px 24px",cursor:"pointer",color:page===n.idx?"#00A8FF":"#64748B",fontSize:15,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5}}
+                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,margin:"0",padding:"13px 20px",cursor:"pointer",color:page===n.idx?"#00A8FF":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5,fontFamily:"inherit"}}
                 onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}}
-                onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#64748B";e.currentTarget.style.background="transparent";}}}>
+                onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";e.currentTarget.style.background="transparent";}}}>
                 {n.label}
               </button>
             );
