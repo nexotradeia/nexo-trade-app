@@ -5044,54 +5044,49 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         })}
       </div>
 
-      {/* ── ANUNCIO GOOGLE — posición premium sidebar ── */}
-      <div style={{marginBottom:10}}>
-        <AdBannerSidebar/>
-      </div>
-
       {/* ── COMUNIDAD vs IA ── */}
-      <div style={{...card,padding:"10px 14px"}}>
-        <div style={{fontSize:11,fontWeight:800,color:"#0F172A",marginBottom:8,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
+      <div style={{...card,padding:"7px 12px"}}>
+        <div style={{fontSize:10,fontWeight:800,color:"#0F172A",marginBottom:6,letterSpacing:-0.2}}>📊 Comunidad vs IA</div>
         {[{label:"Comunidad",pct:78,col:"#16A34A",bg:"rgba(22,163,74,0.1)"},{label:"IA Análisis",pct:61,col:"#0EA5E9",bg:"rgba(14,165,233,0.1)"}].map(({label,pct,col,bg})=>(
-          <div key={label} style={{marginBottom:7}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
-              <span style={{fontSize:10,color:"#64748B",fontWeight:600}}>{label}</span>
-              <span style={{fontSize:9,color:col,fontWeight:800,background:bg,borderRadius:20,padding:"1px 6px"}}>BULLISH {pct}%</span>
+          <div key={label} style={{marginBottom:5}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:2}}>
+              <span style={{fontSize:9,color:"#64748B",fontWeight:600}}>{label}</span>
+              <span style={{fontSize:8,color:col,fontWeight:800,background:bg,borderRadius:20,padding:"1px 5px"}}>BULLISH {pct}%</span>
             </div>
-            <div style={{height:4,background:"rgba(15,23,42,0.06)",borderRadius:4,overflow:"hidden"}}>
+            <div style={{height:3,background:"rgba(15,23,42,0.06)",borderRadius:4,overflow:"hidden"}}>
               <div style={{width:`${pct}%`,height:"100%",background:col,borderRadius:4,opacity:0.9}}/>
             </div>
           </div>
         ))}
-        <div style={{fontSize:9,color:"#CBD5E1",marginTop:3,borderTop:"1px solid rgba(15,23,42,0.05)",paddingTop:6}}>Basado en 2,847 posts de hoy</div>
+        <div style={{fontSize:8,color:"#CBD5E1",marginTop:3,borderTop:"1px solid rgba(15,23,42,0.05)",paddingTop:4}}>Basado en 2,847 posts de hoy</div>
       </div>
 
       {/* ── FEAR & GREED ── */}
-      <div style={{...card,padding:"10px 14px"}}>
-        <div style={{fontSize:11,fontWeight:800,color:"#0F172A",marginBottom:8}}>Fear & Greed Index</div>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{position:"relative",width:46,height:46,flexShrink:0}}>
-            <svg viewBox="0 0 60 60" style={{width:46,height:46,transform:"rotate(-90deg)"}}>
+      <div style={{...card,padding:"7px 12px"}}>
+        <div style={{fontSize:10,fontWeight:800,color:"#0F172A",marginBottom:6}}>Fear & Greed Index</div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <div style={{position:"relative",width:36,height:36,flexShrink:0}}>
+            <svg viewBox="0 0 60 60" style={{width:36,height:36,transform:"rotate(-90deg)"}}>
               <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(15,23,42,0.07)" strokeWidth="7"/>
               <circle cx="30" cy="30" r="24" fill="none" stroke="#22C55E" strokeWidth="7"
                 strokeDasharray={`${0.72*150.8} 150.8`} strokeLinecap="round"/>
             </svg>
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
-              <span style={{fontSize:12,fontWeight:900,color:"#0F172A",lineHeight:1}}>72</span>
+              <span style={{fontSize:10,fontWeight:900,color:"#0F172A",lineHeight:1}}>72</span>
             </div>
           </div>
           <div>
-            <div style={{fontSize:13,fontWeight:900,color:"#16A34A",letterSpacing:-0.3}}>Codicia 🟢</div>
-            <div style={{fontSize:9,color:"#64748B",marginTop:3,lineHeight:1.5}}>Inversores optimistas.<br/>Mercado en modo alcista.</div>
+            <div style={{fontSize:11,fontWeight:900,color:"#16A34A",letterSpacing:-0.3}}>Codicia 🟢</div>
+            <div style={{fontSize:8,color:"#64748B",marginTop:2,lineHeight:1.4}}>Inversores optimistas.<br/>Mercado en modo alcista.</div>
           </div>
         </div>
         {/* Escala */}
-        <div style={{marginTop:8,height:3,borderRadius:4,background:"linear-gradient(90deg,#EF4444,#F59E0B,#22C55E)",position:"relative"}}>
-          <div style={{position:"absolute",left:"72%",top:-4,width:10,height:10,borderRadius:"50%",background:"#fff",border:"2px solid #22C55E",boxShadow:"0 2px 6px rgba(0,0,0,0.12)",transform:"translateX(-50%)"}}/>
+        <div style={{marginTop:6,height:3,borderRadius:4,background:"linear-gradient(90deg,#EF4444,#F59E0B,#22C55E)",position:"relative"}}>
+          <div style={{position:"absolute",left:"72%",top:-3,width:8,height:8,borderRadius:"50%",background:"#fff",border:"2px solid #22C55E",boxShadow:"0 2px 6px rgba(0,0,0,0.12)",transform:"translateX(-50%)"}}/>
         </div>
-        <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
-          <span style={{fontSize:9,color:"#EF4444",fontWeight:600}}>Miedo</span>
-          <span style={{fontSize:9,color:"#22C55E",fontWeight:600}}>Codicia</span>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
+          <span style={{fontSize:8,color:"#EF4444",fontWeight:600}}>Miedo</span>
+          <span style={{fontSize:8,color:"#22C55E",fontWeight:600}}>Codicia</span>
         </div>
       </div>
 
@@ -5165,15 +5160,15 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       })()}
 
       {/* ── GOOGLE ADSENSE ── */}
-      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",minHeight:480,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",background:"#F8FAFC",border:"1px dashed rgba(15,23,42,0.1)"}}>
-        <div style={{fontSize:9,color:"#CBD5E1",fontWeight:600,letterSpacing:1,margin:"10px 0 6px",textTransform:"uppercase"}}>Publicidad</div>
+      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",minHeight:260,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",background:"#F8FAFC",border:"1px dashed rgba(15,23,42,0.1)"}}>
+        <div style={{fontSize:9,color:"#CBD5E1",fontWeight:600,letterSpacing:1,margin:"8px 0 4px",textTransform:"uppercase"}}>Publicidad</div>
         <ins className="adsbygoogle"
-          style={{display:"block",width:"100%",minHeight:450}}
+          style={{display:"block",width:"100%",minHeight:240}}
           data-ad-client="ca-pub-3490083853866736"
           data-ad-slot="auto"
           data-ad-format="auto"
           data-full-width-responsive="true"/>
-        <div style={{width:"100%",padding:"8px",fontSize:10,color:"#CBD5E1"}}>
+        <div style={{width:"100%",padding:"6px",fontSize:9,color:"#CBD5E1"}}>
           Google AdSense — pendiente de aprobación
         </div>
       </div>
