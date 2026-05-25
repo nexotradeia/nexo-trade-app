@@ -2929,7 +2929,8 @@ function MarketsMiniWidget(){
 
       {/* Mercados — cards coloridos estilo moderno */}
       {tab==="mercados"&&(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,padding:"10px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,padding:"10px",overflowX:"auto",WebkitOverflowScrolling:"touch",minWidth:0}}
+          className="nexo-market-grid">
           {prices.slice(0,8).map((t)=>{
             const up = t.c >= 0;
             const bull = up ? "#16A34A" : "#DC2626";
@@ -8927,6 +8928,23 @@ export default function App(){
         .nexo-tabs button { padding: 10px 12px !important; font-size: 12px !important; }
         .nexo-hide-mobile { display: none !important; }
         .nexo-logout-mobile { display: flex !important; }
+        /* Market cards — scroll horizontal en móvil */
+        .nexo-market-grid {
+          display: flex !important;
+          flex-wrap: nowrap !important;
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+          scroll-snap-type: x mandatory !important;
+          gap: 8px !important;
+          padding: 10px 10px !important;
+          scrollbar-width: none !important;
+        }
+        .nexo-market-grid::-webkit-scrollbar { display: none !important; }
+        .nexo-market-grid > a {
+          min-width: 100px !important;
+          flex-shrink: 0 !important;
+          scroll-snap-align: start !important;
+        }
         /* Logo compacto en móvil */
         .nexo-logo-text { display: none !important; }
         .nexo-logo-img { height: 38px !important; }
