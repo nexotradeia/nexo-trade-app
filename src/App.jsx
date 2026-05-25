@@ -4585,6 +4585,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
     {icon:"📅", label:"Calendario",        idx:14},
     {icon:"💰", label:"Dividendos",        idx:15},
     {icon:"🚀", label:"IPOs 2026",         idx:16},
+    {icon:"⛏️", label:"Commodities",       idx:18},
     {icon:"🔍", label:"Screener",          idx:17, vip:true},
     {icon:"📰", label:"Noticias",          idx:5},
     {icon:"📅", label:"Earnings",          idx:6},
@@ -7187,6 +7188,139 @@ const ECON_2026 = [
   {date:"2026-12-18",event:"PCE Inflación (Nov)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"—",    est:"—"},
 ];
 
+// ── COMMODITIES PAGE ──────────────────────────────────────────────────────────
+function CommoditiesPage(){
+  const isDark = document.documentElement.getAttribute("data-theme")==="dark";
+  const theme = isDark ? "dark" : "light";
+
+  const widgets = [
+    {
+      title:"Metals & Energy",
+      icon:"🏅",
+      symbols:[
+        {s:"COMEX:GC1!",d:"Gold"},
+        {s:"COMEX:SI1!",d:"Silver"},
+        {s:"COMEX:HG1!",d:"Copper"},
+        {s:"COMEX:PL1!",d:"Platinum"},
+        {s:"NYMEX:CL1!",d:"Crude Oil WTI"},
+        {s:"NYMEX:RB1!",d:"Gasoline"},
+        {s:"NYMEX:NG1!",d:"Natural Gas"},
+        {s:"NYMEX:HO1!",d:"Heating Oil"},
+      ]
+    },
+    {
+      title:"Agriculture & Grains",
+      icon:"🌾",
+      symbols:[
+        {s:"CBOT:ZW1!",d:"Wheat"},
+        {s:"CBOT:ZC1!",d:"Corn"},
+        {s:"CBOT:ZS1!",d:"Soybeans"},
+        {s:"CBOT:ZO1!",d:"Oats"},
+        {s:"CBOT:ZR1!",d:"Rice"},
+        {s:"NYMEX:CC1!",d:"Cocoa"},
+        {s:"NYMEX:KC1!",d:"Coffee"},
+        {s:"NYMEX:SB1!",d:"Sugar"},
+      ]
+    }
+  ];
+
+  return(
+    <div style={{maxWidth:1100,margin:"0 auto",padding:"20px 16px"}}>
+      {/* Header */}
+      <div style={{marginBottom:24}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
+          <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#f59e0b,#d97706)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>⛏️</div>
+          <div>
+            <h1 style={{margin:0,fontSize:22,fontWeight:800,color:"var(--c-text)"}}>Commodities</h1>
+            <p style={{margin:0,fontSize:13,color:"var(--c-muted2)"}}>Real-time prices · 24/7 · Powered by TradingView</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Live dot */}
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:20}}>
+        <span style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
+        <span style={{fontSize:12,color:"#22c55e",fontWeight:700}}>LIVE — Markets open 24/7 for metals & energy</span>
+      </div>
+
+      {/* TradingView Market Overview Widget — Metals & Energy + Agri */}
+      {widgets.map((w,wi)=>(
+        <div key={wi} style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,overflow:"hidden",marginBottom:20}}>
+          <div style={{padding:"14px 18px",borderBottom:"1px solid var(--c-border)",display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:18}}>{w.icon}</span>
+            <span style={{fontWeight:800,fontSize:15,color:"var(--c-text)"}}>{w.title}</span>
+          </div>
+          <div style={{padding:0}}>
+            <TradingViewWidget symbols={w.symbols} theme={theme}/>
+          </div>
+        </div>
+      ))}
+
+      {/* Brent Oil + Gold mini charts */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:16,marginBottom:20}}>
+        {[
+          {sym:"COMEX:GC1!",name:"Gold",color:"#f59e0b"},
+          {sym:"NYMEX:CL1!",name:"Crude Oil WTI",color:"#6366f1"},
+          {sym:"COMEX:SI1!",name:"Silver",color:"#94a3b8"},
+          {sym:"NYMEX:NG1!",name:"Natural Gas",color:"#22c55e"},
+        ].map(({sym,name,color})=>(
+          <div key={sym} style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:14,overflow:"hidden"}}>
+            <div style={{padding:"10px 14px",borderBottom:"1px solid var(--c-border)",display:"flex",alignItems:"center",gap:8}}>
+              <div style={{width:10,height:10,borderRadius:"50%",background:color}}/>
+              <span style={{fontWeight:700,fontSize:13,color:"var(--c-text)"}}>{name}</span>
+            </div>
+            <div style={{height:200}}>
+              <iframe
+                src={`https://s.tradingview.com/widgetembed/?frameElementId=tv_${sym.replace(/[^a-z0-9]/gi,"")}&symbol=${encodeURIComponent(sym)}&interval=60&theme=${theme}&style=1&locale=en&hide_top_toolbar=1&hide_legend=1&save_image=0&hide_volume=1`}
+                style={{width:"100%",height:"100%",border:"none"}}
+                allowTransparency="true"
+                scrolling="no"
+                title={name}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{textAlign:"center",color:"var(--c-muted2)",fontSize:11,marginTop:8}}>
+        Data provided by TradingView · Futures prices · Not financial advice
+      </div>
+    </div>
+  );
+}
+
+function TradingViewWidget({symbols, theme}){
+  const ref = useRef(null);
+  const loaded = useRef(false);
+  useEffect(()=>{
+    if(!ref.current || loaded.current) return;
+    loaded.current = true;
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      colorTheme: theme||"light",
+      dateRange:"1D",
+      showChart:false,
+      locale:"en",
+      width:"100%",
+      height:"400",
+      largeChartUrl:"",
+      isTransparent:true,
+      showSymbolLogo:true,
+      showFloatingTooltip:false,
+      tabs:[{title:"Commodities",symbols:symbols,originalTitle:"Commodities"}]
+    });
+    ref.current.appendChild(script);
+  },[]);
+  return(
+    <div className="tradingview-widget-container" ref={ref} style={{height:400}}>
+      <div className="tradingview-widget-container__widget"/>
+    </div>
+  );
+}
+// ── FIN COMMODITIES ───────────────────────────────────────────────────────────
+
 function EconCalendarPage() {
   const [filter,    setFilter]    = useState("upcoming");
   const [catFilter, setCatFilter] = useState("todas");
@@ -8408,6 +8542,7 @@ export default function App(){
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===14) return <EconCalendarPage/>;
+    if(page===18) return <CommoditiesPage/>;
     if(page===15) return <DividendCalendarPage/>;
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
