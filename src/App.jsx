@@ -1831,11 +1831,48 @@ const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col
 // Mini sparkline data per post
 const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
 
-function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost}){
+function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes);
   const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch{return false;}});
   const [reposts,setReposts]=useState(post.reposts||0);
   const [reposting,setReposting]=useState(false);
+  const [showComments,setShowComments]=useState(false);
+  const [comments,setComments]=useState([]);
+  const [commentText,setCommentText]=useState("");
+  const [commentCount,setCommentCount]=useState(post.comments||0);
+  const [loadingComments,setLoadingComments]=useState(false);
+  const [postingComment,setPostingComment]=useState(false);
+
+  const loadComments=async()=>{
+    if(loadingComments) return;
+    setLoadingComments(true);
+    try{
+      const {data}=await supabase.from("post_comments").select("id,text,created_at,user_id").eq("post_id",post.id).order("created_at",{ascending:true}).limit(50);
+      if(data) setComments(data);
+    }catch(e){}
+    setLoadingComments(false);
+  };
+
+  const toggleComments=()=>{
+    const next=!showComments;
+    setShowComments(next);
+    if(next && comments.length===0) loadComments();
+  };
+
+  const submitComment=async()=>{
+    if(!user){onNeedAuth&&onNeedAuth();return;}
+    if(!commentText.trim()||postingComment) return;
+    setPostingComment(true);
+    try{
+      const {data,error}=await supabase.from("post_comments").insert({post_id:post.id,user_id:user.id,text:commentText.trim()}).select().single();
+      if(!error&&data){
+        setComments(prev=>[...prev,{...data,username:user.username}]);
+        setCommentCount(c=>c+1);
+        setCommentText("");
+      }
+    }catch(e){}
+    setPostingComment(false);
+  };
   // Convertir id a número de forma segura (soporta "local-123..." y números reales)
   const idNum = typeof post.id==="number" ? post.id : (parseInt(String(post.id).replace(/\D/g,""))||1);
   const conf=55+Math.floor(idNum%40);
@@ -1903,7 +1940,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost}){
           <div style={{display:"flex",gap:0,alignItems:"center",borderTop:"1px solid var(--c-border)",paddingTop:8,marginTop:4}}>
             {[
               {icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
-              {icon:"💬",val:post.comments,active:false,col:"#3B82F6",fn:()=>{}},
+              {icon:"💬",val:commentCount,active:showComments,col:"#3B82F6",fn:toggleComments},
             ].map(({icon,val,active,col,fn},i)=>(
               <button key={i} onClick={fn}
                 style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"var(--c-muted2)",fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:8,transition:"all 0.15s",fontFamily:"inherit"}}
@@ -1947,6 +1984,46 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost}){
               {`${91-((typeof post.id==="number"?post.id:1)%30)} traders`}
             </span>
           </div>
+
+          {/* ── Panel de comentarios ── */}
+          {showComments&&(
+            <div style={{borderTop:"1px solid var(--c-border)",marginTop:8,paddingTop:10}}>
+              {loadingComments&&<div style={{color:"var(--c-muted2)",fontSize:12,textAlign:"center",padding:"8px 0"}}>Cargando...</div>}
+              {!loadingComments&&comments.length===0&&(
+                <div style={{color:"var(--c-muted2)",fontSize:12,textAlign:"center",padding:"6px 0"}}>
+                  {lang==="en"?"No replies yet. Be the first!":"Sin respuestas aún. ¡Sé el primero!"}
+                </div>
+              )}
+              {comments.map((c,i)=>(
+                <div key={c.id||i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"flex-start"}}>
+                  <div style={{width:28,height:28,borderRadius:"50%",background:"var(--c-card2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:"var(--c-muted2)",flexShrink:0}}>
+                    {(c.username||"U")[0].toUpperCase()}
+                  </div>
+                  <div style={{background:"var(--c-card2)",borderRadius:10,padding:"6px 10px",flex:1,minWidth:0}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"var(--c-accent)",marginBottom:2}}>{c.username||"Usuario"}</div>
+                    <div style={{fontSize:13,color:"var(--c-text)",wordBreak:"break-word"}}>{c.text}</div>
+                  </div>
+                </div>
+              ))}
+              {/* Input para nuevo comentario */}
+              <div style={{display:"flex",gap:8,marginTop:6,alignItems:"center"}}>
+                <input
+                  value={commentText}
+                  onChange={e=>setCommentText(e.target.value)}
+                  onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submitComment();}}}
+                  placeholder={lang==="en"?"Write a reply...":"Escribe una respuesta..."}
+                  maxLength={300}
+                  style={{flex:1,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:20,padding:"7px 14px",fontSize:13,color:"var(--c-text)",outline:"none",fontFamily:"inherit"}}
+                />
+                <button
+                  onClick={submitComment}
+                  disabled={!commentText.trim()||postingComment}
+                  style={{background:"var(--c-accent)",border:"none",borderRadius:20,padding:"7px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:commentText.trim()&&!postingComment?"pointer":"not-allowed",opacity:commentText.trim()&&!postingComment?1:0.5,fontFamily:"inherit",whiteSpace:"nowrap"}}>
+                  {postingComment?"...":lang==="en"?"Reply":"Responder"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -2518,7 +2595,7 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
           <div style={{fontSize:14}}>{lang==="en"?`Be the first to post about $${ticker}!`:`¡Sé el primero en comentar $${ticker}!`}</div>
         </div>
       ):(
-        tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang} onRepost={onRepost}/>)
+        tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang} onRepost={onRepost} user={user} onNeedAuth={onNeedAuth}/>)
       )}
 
     </div>
@@ -8589,7 +8666,7 @@ export default function App(){
         )}
         {filtered2.map((p,i)=>(
           <div key={p.id}>
-            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost}/>
+            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")}/>
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
