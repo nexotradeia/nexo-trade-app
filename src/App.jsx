@@ -1954,7 +1954,8 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost}){
 }
 
 // ── NEW POST ──────────────────────────────────────────────────────────────────
-const MENTION_TICKERS = ["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META","BTC","ETH","SPY","AMD","NFLX","COIN","PLTR","SMCI","ARM","JPM","V","BABA","RIVN"];
+const MENTION_TICKERS_FALLBACK = ["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META","BTC","ETH","SPY","AMD","NFLX","COIN","PLTR","SMCI","ARM","JPM","V","BABA","RIVN"];
+const getMentionTickers=()=>{try{return typeof SEARCH_TICKERS!=="undefined"&&SEARCH_TICKERS.length>0?SEARCH_TICKERS:MENTION_TICKERS_FALLBACK;}catch{return MENTION_TICKERS_FALLBACK;}};
 
 function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   const t=LANGS[lang];
@@ -1976,8 +1977,9 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
     const match=before.match(/@([A-Z0-9]*)$/i);
     if(match){
       const q=match[1].toUpperCase();
-      const results=MENTION_TICKERS.filter(t=>t.startsWith(q)).slice(0,6);
-      setMentionBox({open:results.length>0||q.length===0,query:q,results:q.length===0?MENTION_TICKERS.slice(0,6):results,caretPos:pos});
+      const allTk=getMentionTickers();
+      const results=allTk.filter(t=>t.startsWith(q)).slice(0,8);
+      setMentionBox({open:results.length>0||q.length===0,query:q,results:q.length===0?allTk.slice(0,8):results,caretPos:pos});
     }else{
       setMentionBox(m=>({...m,open:false}));
     }
