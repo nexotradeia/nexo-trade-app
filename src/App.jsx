@@ -3016,12 +3016,12 @@ function AdBanner({slot, format="auto", style={}, className=""}){
 
 // Banner horizontal 728×90 / responsive — para feed y noticias
 function AdBannerFeed(){
-  return <AdBanner slot="2847361905" format="auto" style={{margin:"10px 0",borderRadius:8,overflow:"hidden"}}/>;
+  return <AdBanner slot="6515017049" format="auto" style={{margin:"10px 0",borderRadius:8,overflow:"hidden"}}/>;
 }
 
 // Banner cuadrado 300×250 — para sidebar
 function AdBannerSidebar(){
-  return <AdBanner slot="7419283056" format="rectangle" style={{margin:"12px 0",borderRadius:10,overflow:"hidden"}}/>;
+  return <AdBanner slot="8915846882" format="auto" style={{margin:"12px 0",borderRadius:10,overflow:"hidden"}}/>;
 }
 
 // ── SIDEBAR TICKER WIDGET — precios reales CoinGecko + acciones simuladas ─────
@@ -5211,12 +5211,9 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         <ins className="adsbygoogle"
           style={{display:"block",width:"100%",minHeight:240}}
           data-ad-client="ca-pub-3490083853866736"
-          data-ad-slot="auto"
+          data-ad-slot="8915846882"
           data-ad-format="auto"
           data-full-width-responsive="true"/>
-        <div style={{width:"100%",padding:"6px",fontSize:9,color:"#CBD5E1"}}>
-          Google AdSense — pendiente de aprobación
-        </div>
       </div>
 
       {/* ── BANNERS AFILIADOS ROTATIVOS ── */}
