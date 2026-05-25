@@ -7189,137 +7189,179 @@ const ECON_2026 = [
 ];
 
 // ── COMMODITIES PAGE ──────────────────────────────────────────────────────────
-function CommoditiesPage(){
-  const isDark = document.documentElement.getAttribute("data-theme")==="dark";
-  const theme = isDark ? "dark" : "light";
+const COMMODITIES = [
+  // Metals
+  {id:"GC=F",  sym:"COMEX:GC1!", name:"Gold",         unit:"/oz",  icon:"🥇", color:"#f59e0b", bg:"#fef3c7", cat:"Metals"},
+  {id:"SI=F",  sym:"COMEX:SI1!", name:"Silver",        unit:"/oz",  icon:"🥈", color:"#94a3b8", bg:"#f1f5f9", cat:"Metals"},
+  {id:"HG=F",  sym:"COMEX:HG1!", name:"Copper",        unit:"/lb",  icon:"🔶", color:"#ea580c", bg:"#fff7ed", cat:"Metals"},
+  {id:"PL=F",  sym:"COMEX:PL1!", name:"Platinum",      unit:"/oz",  icon:"💎", color:"#6366f1", bg:"#eef2ff", cat:"Metals"},
+  // Energy
+  {id:"CL=F",  sym:"NYMEX:CL1!", name:"Crude Oil WTI", unit:"/bbl", icon:"🛢️", color:"#1d4ed8", bg:"#eff6ff", cat:"Energy"},
+  {id:"BZ=F",  sym:"NYMEX:BB1!", name:"Brent Oil",     unit:"/bbl", icon:"⚫", color:"#374151", bg:"#f9fafb", cat:"Energy"},
+  {id:"NG=F",  sym:"NYMEX:NG1!", name:"Natural Gas",   unit:"/MMBtu",icon:"🔥",color:"#dc2626", bg:"#fef2f2", cat:"Energy"},
+  {id:"RB=F",  sym:"NYMEX:RB1!", name:"Gasoline",      unit:"/gal", icon:"⛽", color:"#7c3aed", bg:"#f5f3ff", cat:"Energy"},
+  // Agriculture
+  {id:"ZW=F",  sym:"CBOT:ZW1!",  name:"Wheat",         unit:"/bu",  icon:"🌾", color:"#d97706", bg:"#fffbeb", cat:"Agriculture"},
+  {id:"ZC=F",  sym:"CBOT:ZC1!",  name:"Corn",          unit:"/bu",  icon:"🌽", color:"#16a34a", bg:"#f0fdf4", cat:"Agriculture"},
+  {id:"ZS=F",  sym:"CBOT:ZS1!",  name:"Soybeans",      unit:"/bu",  icon:"🫘", color:"#15803d", bg:"#f0fdf4", cat:"Agriculture"},
+  {id:"KC=F",  sym:"NYMEX:KC1!", name:"Coffee",        unit:"/lb",  icon:"☕", color:"#92400e", bg:"#fef3c7", cat:"Agriculture"},
+  {id:"CC=F",  sym:"NYMEX:CC1!", name:"Cocoa",         unit:"/MT",  icon:"🍫", color:"#7c2d12", bg:"#fff7ed", cat:"Agriculture"},
+  {id:"SB=F",  sym:"NYMEX:SB1!", name:"Sugar",         unit:"/lb",  icon:"🍬", color:"#ec4899", bg:"#fdf2f8", cat:"Agriculture"},
+];
 
-  const widgets = [
-    {
-      title:"Metals & Energy",
-      icon:"🏅",
-      symbols:[
-        {s:"COMEX:GC1!",d:"Gold"},
-        {s:"COMEX:SI1!",d:"Silver"},
-        {s:"COMEX:HG1!",d:"Copper"},
-        {s:"COMEX:PL1!",d:"Platinum"},
-        {s:"NYMEX:CL1!",d:"Crude Oil WTI"},
-        {s:"NYMEX:RB1!",d:"Gasoline"},
-        {s:"NYMEX:NG1!",d:"Natural Gas"},
-        {s:"NYMEX:HO1!",d:"Heating Oil"},
-      ]
-    },
-    {
-      title:"Agriculture & Grains",
-      icon:"🌾",
-      symbols:[
-        {s:"CBOT:ZW1!",d:"Wheat"},
-        {s:"CBOT:ZC1!",d:"Corn"},
-        {s:"CBOT:ZS1!",d:"Soybeans"},
-        {s:"CBOT:ZO1!",d:"Oats"},
-        {s:"CBOT:ZR1!",d:"Rice"},
-        {s:"NYMEX:CC1!",d:"Cocoa"},
-        {s:"NYMEX:KC1!",d:"Coffee"},
-        {s:"NYMEX:SB1!",d:"Sugar"},
-      ]
-    }
-  ];
+const CHART_SYMS = [
+  {sym:"COMEX:GC1!", name:"Gold",          color:"#f59e0b"},
+  {sym:"NYMEX:CL1!", name:"Crude Oil WTI", color:"#1d4ed8"},
+  {sym:"COMEX:SI1!", name:"Silver",         color:"#94a3b8"},
+  {sym:"NYMEX:NG1!", name:"Natural Gas",   color:"#dc2626"},
+];
+
+function CommoditiesPage(){
+  const [prices, setPrices]     = useState({});
+  const [loading, setLoading]   = useState(true);
+  const [lastUp, setLastUp]     = useState("");
+  const [cat, setCat]           = useState("All");
+  const [selChart, setSelChart] = useState(CHART_SYMS[0]);
+  const isDark = document.documentElement.getAttribute("data-theme")==="dark";
+  const theme  = isDark ? "dark" : "light";
+
+  const fetchPrices = async () => {
+    try {
+      const results = await Promise.all(
+        COMMODITIES.map(async c => {
+          try {
+            const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${c.id}&token=${FINNHUB_KEY}`);
+            const d = await r.json();
+            if(d.c > 0) return {id:c.id, price:d.c, change:d.dp||0, prev:d.pc||0};
+          } catch{}
+          return null;
+        })
+      );
+      const map = {};
+      results.forEach(r => { if(r) map[r.id] = r; });
+      setPrices(map);
+      setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
+    } catch(e){}
+    setLoading(false);
+  };
+
+  useEffect(()=>{ fetchPrices(); const iv=setInterval(fetchPrices,60000); return()=>clearInterval(iv); },[]);
+
+  const fmt = (id, p) => {
+    if(!p) return "—";
+    if(["GC=F","SI=F","PL=F"].includes(id)) return "$"+p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+    if(["CL=F","BZ=F"].includes(id)) return "$"+p.toFixed(2);
+    if(p>=1000) return "$"+p.toLocaleString("en-US",{maximumFractionDigits:0});
+    return "$"+p.toFixed(2);
+  };
+
+  const cats = ["All","Metals","Energy","Agriculture"];
+  const filtered = cat==="All" ? COMMODITIES : COMMODITIES.filter(c=>c.cat===cat);
 
   return(
     <div style={{maxWidth:1100,margin:"0 auto",padding:"20px 16px"}}>
-      {/* Header */}
-      <div style={{marginBottom:24}}>
-        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
-          <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#f59e0b,#d97706)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>⛏️</div>
+
+      {/* ── HERO HEADER ── */}
+      <div style={{background:"linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%)",borderRadius:20,padding:"24px 28px",marginBottom:24,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-20,right:-20,width:120,height:120,borderRadius:"50%",background:"rgba(245,158,11,0.08)"}}/>
+        <div style={{position:"absolute",bottom:-30,left:60,width:80,height:80,borderRadius:"50%",background:"rgba(0,168,255,0.06)"}}/>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
-            <h1 style={{margin:0,fontSize:22,fontWeight:800,color:"var(--c-text)"}}>Commodities</h1>
-            <p style={{margin:0,fontSize:13,color:"var(--c-muted2)"}}>Real-time prices · 24/7 · Powered by TradingView</p>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+              <span style={{fontSize:28}}>⛏️</span>
+              <h1 style={{margin:0,fontSize:24,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>Commodities</h1>
+              <span style={{background:"#22c55e",color:"#fff",fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:20,animation:"nexo-pulse 2s infinite"}}>LIVE</span>
+            </div>
+            <p style={{margin:0,fontSize:13,color:"#94a3b8"}}>Real-time futures prices · Gold, Oil, Grains & more · 24/7</p>
           </div>
+          <div style={{display:"flex",gap:16}}>
+            {[{l:"Gold",id:"GC=F",c:"#f59e0b"},{l:"Oil WTI",id:"CL=F",c:"#3b82f6"},{l:"Silver",id:"SI=F",c:"#94a3b8"}].map(h=>{
+              const p=prices[h.id];
+              return(
+                <div key={h.id} style={{textAlign:"center"}}>
+                  <div style={{color:h.c,fontWeight:900,fontSize:15,fontFamily:"monospace"}}>{fmt(h.id,p?.price)}</div>
+                  <div style={{color:p&&p.change>=0?"#22c55e":"#ef4444",fontSize:11,fontWeight:700}}>{p?`${p.change>=0?"▲":"▼"}${Math.abs(p.change).toFixed(2)}%`:"—"}</div>
+                  <div style={{color:"#64748b",fontSize:10}}>{h.l}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div style={{marginTop:16,display:"flex",alignItems:"center",gap:6}}>
+          <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block"}}/>
+          <span style={{color:"#64748b",fontSize:11}}>{lastUp ? `Updated ${lastUp} · Refreshes every 60s` : "Fetching live data..."}</span>
+          <button onClick={fetchPrices} style={{marginLeft:8,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",color:"#94a3b8",borderRadius:8,padding:"3px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>⟳ Refresh</button>
         </div>
       </div>
 
-      {/* Live dot */}
-      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:20}}>
-        <span style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
-        <span style={{fontSize:12,color:"#22c55e",fontWeight:700}}>LIVE — Markets open 24/7 for metals & energy</span>
-      </div>
-
-      {/* TradingView Market Overview Widget — Metals & Energy + Agri */}
-      {widgets.map((w,wi)=>(
-        <div key={wi} style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,overflow:"hidden",marginBottom:20}}>
-          <div style={{padding:"14px 18px",borderBottom:"1px solid var(--c-border)",display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:18}}>{w.icon}</span>
-            <span style={{fontWeight:800,fontSize:15,color:"var(--c-text)"}}>{w.title}</span>
-          </div>
-          <div style={{padding:0}}>
-            <TradingViewWidget symbols={w.symbols} theme={theme}/>
-          </div>
-        </div>
-      ))}
-
-      {/* Brent Oil + Gold mini charts */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:16,marginBottom:20}}>
-        {[
-          {sym:"COMEX:GC1!",name:"Gold",color:"#f59e0b"},
-          {sym:"NYMEX:CL1!",name:"Crude Oil WTI",color:"#6366f1"},
-          {sym:"COMEX:SI1!",name:"Silver",color:"#94a3b8"},
-          {sym:"NYMEX:NG1!",name:"Natural Gas",color:"#22c55e"},
-        ].map(({sym,name,color})=>(
-          <div key={sym} style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:14,overflow:"hidden"}}>
-            <div style={{padding:"10px 14px",borderBottom:"1px solid var(--c-border)",display:"flex",alignItems:"center",gap:8}}>
-              <div style={{width:10,height:10,borderRadius:"50%",background:color}}/>
-              <span style={{fontWeight:700,fontSize:13,color:"var(--c-text)"}}>{name}</span>
-            </div>
-            <div style={{height:200}}>
-              <iframe
-                src={`https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(sym)}&interval=60&theme=${theme}&style=1&locale=en&hide_top_toolbar=1&hide_legend=0&save_image=0&hide_volume=0&utm_source=nexotradeia.com`}
-                style={{width:"100%",height:"100%",border:"none"}}
-                allowTransparency="true"
-                scrolling="no"
-                allow="clipboard-write"
-                title={name}
-              />
-            </div>
-          </div>
+      {/* ── CATEGORY FILTER ── */}
+      <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+        {cats.map(c=>(
+          <button key={c} onClick={()=>setCat(c)}
+            style={{padding:"7px 18px",borderRadius:20,border:`1.5px solid ${cat===c?"#00A8FF":"var(--c-border)"}`,background:cat===c?"#00A8FF":"var(--c-card)",color:cat===c?"#fff":"var(--c-muted2)",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
+            {c==="All"?"🌐 All":c==="Metals"?"🥇 Metals":c==="Energy"?"🛢️ Energy":"🌾 Agriculture"}
+          </button>
         ))}
+        {loading && <span style={{color:"var(--c-muted2)",fontSize:12,alignSelf:"center",marginLeft:8}}>Loading prices...</span>}
       </div>
 
-      <div style={{textAlign:"center",color:"var(--c-muted2)",fontSize:11,marginTop:8}}>
-        Data provided by TradingView · Futures prices · Not financial advice
+      {/* ── COMMODITY CARDS ── */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12,marginBottom:28}}>
+        {filtered.map(c=>{
+          const p=prices[c.id];
+          const up=p&&p.change>=0;
+          return(
+            <a key={c.id} href={`https://www.tradingview.com/symbols/${c.sym.replace(":","-")}/`}
+              target="_blank" rel="noopener noreferrer"
+              style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"16px",textDecoration:"none",display:"block",transition:"all 0.18s",cursor:"pointer"}}
+              onMouseEnter={e=>{e.currentTarget.style.border=`1px solid ${c.color}55`;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 24px ${c.color}18`;}}
+              onMouseLeave={e=>{e.currentTarget.style.border="1px solid var(--c-border)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                <div style={{width:40,height:40,borderRadius:12,background:c.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{c.icon}</div>
+                {p && <div style={{background:up?"#dcfce7":"#fee2e2",color:up?"#15803d":"#dc2626",borderRadius:8,padding:"3px 8px",fontSize:11,fontWeight:800}}>{up?"▲":"▼"}{Math.abs(p.change).toFixed(2)}%</div>}
+              </div>
+              <div style={{color:"var(--c-text)",fontWeight:800,fontSize:13,marginBottom:2}}>{c.name}</div>
+              <div style={{color:"var(--c-muted2)",fontSize:10,marginBottom:8}}>{c.cat} · {c.unit}</div>
+              <div style={{color:c.color,fontWeight:900,fontSize:18,fontFamily:"monospace"}}>{fmt(c.id,p?.price)}</div>
+              {!p && !loading && <div style={{color:"var(--c-muted2)",fontSize:11,marginTop:4}}>Tap to view →</div>}
+            </a>
+          );
+        })}
+      </div>
+
+      {/* ── LIVE CHART ── */}
+      <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:20,overflow:"hidden",marginBottom:20}}>
+        <div style={{padding:"14px 18px",borderBottom:"1px solid var(--c-border)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:16}}>📊</span>
+            <span style={{fontWeight:800,fontSize:15,color:"var(--c-text)"}}>Live Chart</span>
+          </div>
+          <div style={{display:"flex",gap:6}}>
+            {CHART_SYMS.map(s=>(
+              <button key={s.sym} onClick={()=>setSelChart(s)}
+                style={{padding:"5px 12px",borderRadius:12,border:`1.5px solid ${selChart.sym===s.sym?s.color:"var(--c-border)"}`,background:selChart.sym===s.sym?s.color+"18":"transparent",color:selChart.sym===s.sym?s.color:"var(--c-muted2)",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{height:380}}>
+          <iframe
+            key={selChart.sym}
+            src={`https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(selChart.sym)}&interval=60&theme=${theme}&style=1&locale=en&hide_top_toolbar=0&hide_legend=0&save_image=0&hide_volume=0`}
+            style={{width:"100%",height:"100%",border:"none"}}
+            allowTransparency="true"
+            scrolling="no"
+            allow="clipboard-write"
+            title={selChart.name}
+          />
+        </div>
+      </div>
+
+      <div style={{textAlign:"center",color:"var(--c-muted2)",fontSize:11,paddingBottom:8}}>
+        Futures prices via Finnhub & TradingView · Not financial advice · NexoTrade
       </div>
     </div>
-  );
-}
-
-function TradingViewWidget({symbols, theme, height=480}){
-  const ref = useRef(null);
-  const loaded = useRef(false);
-  useEffect(()=>{
-    if(!ref.current || loaded.current) return;
-    loaded.current = true;
-    // Limpiar y agregar widget div
-    ref.current.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
-    script.async = true;
-    // CLAVE: usar .text (no .innerHTML) para que TradingView lo lea correctamente
-    script.text = JSON.stringify({
-      colorTheme: theme||"light",
-      dateRange:"1D",
-      showChart:true,
-      locale:"en",
-      width:"100%",
-      height: height,
-      largeChartUrl:"",
-      isTransparent:true,
-      showSymbolLogo:true,
-      showFloatingTooltip:true,
-      tabs:[{title:"Commodities",symbols:symbols,originalTitle:"Commodities"}]
-    });
-    ref.current.appendChild(script);
-  },[]);
-  return(
-    <div className="tradingview-widget-container" ref={ref} style={{height,minHeight:height,width:"100%"}}/>
   );
 }
 // ── FIN COMMODITIES ───────────────────────────────────────────────────────────
