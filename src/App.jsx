@@ -2693,11 +2693,11 @@ function TopsPage({posts=[]}){
   const [tab,setTab]=useState("activas");
   const [quotes,setQuotes]=useState([]);
   const [loading,setLoading]=useState(true);
-  const tabs=[["activas","🔥 Más Activas"],["ganadoras","📈 Ganadoras"],["perdedoras","📉 Perdedoras"],["leaderboard","🏆 Leaderboard"]];
+  const [marketClosed,setMarketClosed]=useState(false);
+  const tabs=[["activas","🔥 Most Active"],["ganadoras","📈 Top Gainers"],["perdedoras","📉 Top Losers"],["leaderboard","🏆 Leaderboard"]];
 
-  useEffect(()=>{
+  const fetchData=()=>{
     setLoading(true);
-    // Traer cotizaciones reales de Finnhub para todos los tickers
     Promise.all(
       TOPS_TICKERS.map(({ticker,name})=>
         fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
@@ -2706,10 +2706,26 @@ function TopsPage({posts=[]}){
           .catch(()=>null)
       )
     ).then(results=>{
-      setQuotes(results.filter(r=>r&&r.price>0));
+      const valid=results.filter(r=>r&&r.price>0);
+      // Detect market closed: all changes are 0 or null
+      const allZero=valid.length>0&&valid.every(q=>!q.change||q.change===0);
+      setMarketClosed(allZero);
+      if(allZero){
+        // Calculate synthetic change from prevClose vs price
+        const withChange=valid.map(q=>({
+          ...q,
+          change:q.prevClose&&q.price?+((q.price-q.prevClose)/q.prevClose*100).toFixed(2):0,
+          changeAbs:q.prevClose&&q.price?+(q.price-q.prevClose).toFixed(2):0,
+        }));
+        setQuotes(withChange);
+      } else {
+        setQuotes(valid);
+      }
       setLoading(false);
-    });
-  },[]);
+    }).catch(()=>setLoading(false));
+  };
+
+  useEffect(()=>{ fetchData(); },[]);
 
   const sorted=[...quotes].sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
   const ganadoras=[...quotes].filter(q=>q.change>0).sort((a,b)=>b.change-a.change).slice(0,5);
@@ -2739,12 +2755,14 @@ function TopsPage({posts=[]}){
 
   return(
     <div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📊 Tops del Mercado</h2>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
+        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📊 Market Tops</h2>
         {loading
-          ?<span style={{fontSize:11,color:C.muted}}>⏳ Cargando precios...</span>
-          :<span style={{fontSize:11,color:C.bull,fontWeight:700}}>🟢 Precios en vivo · Finnhub</span>}
-        <button onClick={()=>{setLoading(true);setQuotes([]);setTimeout(()=>setLoading(false),100);}}
+          ?<span style={{fontSize:11,color:C.muted}}>⏳ Loading prices...</span>
+          :marketClosed
+            ?<span style={{fontSize:11,color:C.gold,fontWeight:700}}>🟡 Markets closed · Last close prices</span>
+            :<span style={{fontSize:11,color:C.bull,fontWeight:700}}>🟢 Live prices · Finnhub</span>}
+        <button onClick={fetchData}
           style={{marginLeft:"auto",background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"4px 10px",cursor:"pointer",fontSize:11,color:C.muted,fontWeight:600}}
           title="Actualizar">🔄 Refresh</button>
       </div>
@@ -2758,9 +2776,9 @@ function TopsPage({posts=[]}){
         </div>
       ):(
         <>
-          {tab==="activas"&&(activas.length>0?activas.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin datos</div>)}
-          {tab==="ganadoras"&&(ganadoras.length>0?ganadoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin ganadoras por ahora</div>)}
-          {tab==="perdedoras"&&(perdedoras.length>0?perdedoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>Sin perdedoras por ahora</div>)}
+          {tab==="activas"&&(activas.length>0?activas.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>No data available</div>)}
+          {tab==="ganadoras"&&(ganadoras.length>0?ganadoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32,fontSize:13}}>🟡 No gainers detected — market may be closed or prices unchanged</div>)}
+          {tab==="perdedoras"&&(perdedoras.length>0?perdedoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32,fontSize:13}}>🟡 No losers detected — market may be closed or prices unchanged</div>)}
           {tab==="leaderboard"&&(()=>{
             // Calcular top traders esta semana por posts
             const weekAgo=Date.now()-7*24*60*60*1000;
