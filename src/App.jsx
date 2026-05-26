@@ -7870,32 +7870,34 @@ function ScreenerPage({isPremium, onNeedPremium}) {
       {error   && <div style={{textAlign:"center",padding:"40px",color:C.bear,fontSize:14}}>Error al cargar datos. Intenta de nuevo.</div>}
 
       {!loading && !error && quotes.length > 0 && (
-        <div style={{background:C.card,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
-          <div style={{display:"grid",gridTemplateColumns:"80px 1fr 90px 90px 80px 90px 90px",background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px",gap:8}}>
-            {["Ticker","Empresa","Precio","Cambio %","P/E","Mkt Cap","Volumen"].map(h=>(
-              <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
-            ))}
-          </div>
-          {quotes.slice(0,25).map((q,i)=>{
-            const chg    = q.regularMarketChangePercent || 0;
-            const isPos  = chg >= 0;
-            return(
-              <div key={i} style={{display:"grid",gridTemplateColumns:"80px 1fr 90px 90px 80px 90px 90px",gap:8,padding:"12px 20px",borderBottom:`1px solid ${C.border}`,cursor:"pointer",transition:"background 0.12s"}}
-                onMouseEnter={e=>e.currentTarget.style.background=C.card2}
-                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <div style={{fontWeight:800,fontSize:13,color:C.accent}}>{q.symbol}</div>
-                <div>
-                  <div style={{fontSize:12,fontWeight:600,color:C.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{q.shortName||q.longName||q.symbol}</div>
-                  <div style={{fontSize:10,color:C.muted2}}>{q.exchange||""}</div>
+        <div style={{background:C.card,borderRadius:16,boxShadow:C.shadow,border:`1px solid ${C.border}`,overflowX:"auto"}}>
+          <div style={{minWidth:720}}>
+            <div style={{display:"grid",gridTemplateColumns:"80px minmax(140px,1fr) 90px 90px 70px 100px 90px",background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px",gap:8,borderRadius:"16px 16px 0 0"}}>
+              {["Ticker","Empresa","Precio","Cambio %","P/E","Mkt Cap","Volumen"].map(h=>(
+                <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
+              ))}
+            </div>
+            {quotes.slice(0,25).map((q,i)=>{
+              const chg    = q.regularMarketChangePercent || 0;
+              const isPos  = chg >= 0;
+              return(
+                <div key={i} style={{display:"grid",gridTemplateColumns:"80px minmax(140px,1fr) 90px 90px 70px 100px 90px",gap:8,padding:"12px 20px",borderBottom:`1px solid ${C.border}`,cursor:"pointer",transition:"background 0.12s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background=C.card2}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                  <div style={{fontWeight:800,fontSize:13,color:C.accent}}>{q.symbol}</div>
+                  <div style={{minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:600,color:C.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{q.shortName||q.longName||q.symbol}</div>
+                    <div style={{fontSize:10,color:C.muted2}}>{q.exchange||""}</div>
+                  </div>
+                  <div style={{fontSize:13,fontWeight:700,color:C.text}}>${q.regularMarketPrice?.toFixed(2)||"—"}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:isPos?C.bull:C.bear}}>{fmtPct(chg)}</div>
+                  <div style={{fontSize:12,color:C.muted}}>{q.trailingPE?.toFixed(1)||"—"}</div>
+                  <div style={{fontSize:12,color:C.muted}}>{fmt$(q.marketCap)}</div>
+                  <div style={{fontSize:12,color:C.muted}}>{q.regularMarketVolume ? (q.regularMarketVolume/1e6).toFixed(1)+"M" : "—"}</div>
                 </div>
-                <div style={{fontSize:13,fontWeight:700,color:C.text}}>${q.regularMarketPrice?.toFixed(2)||"—"}</div>
-                <div style={{fontSize:13,fontWeight:700,color:isPos?C.bull:C.bear}}>{fmtPct(chg)}</div>
-                <div style={{fontSize:12,color:C.muted}}>{q.trailingPE?.toFixed(1)||"—"}</div>
-                <div style={{fontSize:12,color:C.muted}}>{fmt$(q.marketCap)}</div>
-                <div style={{fontSize:12,color:C.muted}}>{q.regularMarketVolume ? (q.regularMarketVolume/1e6).toFixed(1)+"M" : "—"}</div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
       {!loading && !error && quotes.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Sin resultados. Intenta otro filtro.</div>}
