@@ -7246,45 +7246,26 @@ function CommoditiesPage(){
   const fetchPrices = async () => {
     setLoading(true);
     try {
-      const now = Math.floor(Date.now()/1000);
-      const y3ago = now - 3*365*24*3600;
-      const newRows = {};
-      await Promise.all(COMMODITIES.map(async c => {
-        try {
-          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(c.id)}?interval=1d&period1=${y3ago}&period2=${now}&includePrePost=false`;
-          const r = await fetch(url);
-          const d = await r.json();
-          const closes = d?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(v=>v!=null) || [];
-          const timestamps = d?.chart?.result?.[0]?.timestamp || [];
-          if(closes.length < 2) return;
-          const last = closes[closes.length-1];
-          const prev = closes[closes.length-2] || last;
-          const ago5  = closes[Math.max(0,closes.length-6)]  || last;
-          const ago21 = closes[Math.max(0,closes.length-22)] || last;
-          const ago63 = closes[Math.max(0,closes.length-64)] || last;
-          const ago252= closes[Math.max(0,closes.length-253)]|| last;
-          // YTD: find first close of this year
-          const thisYear = new Date().getFullYear();
-          let ytdBase = last;
-          for(let i=0;i<timestamps.length;i++){
-            if(new Date(timestamps[i]*1000).getFullYear()===thisYear){ ytdBase=closes[i]||last; break; }
-          }
-          const pct = (a,b) => b&&a ? +((b-a)/a*100).toFixed(2) : null;
+      const r = await fetch("/api/commodities");
+      const d = await r.json();
+      if(d.commodities && d.commodities.length > 0){
+        const newRows = {};
+        d.commodities.forEach(c => {
           newRows[c.id] = {
-            price: last,
-            daily:  pct(prev, last),
-            week:   pct(ago5, last),
-            month:  pct(ago21, last),
-            month3: pct(ago63, last),
-            ytd:    pct(ytdBase, last),
-            year1:  pct(ago252, last),
-            spark:  closes.slice(-30),
+            price:  c.price,
+            daily:  c.daily,
+            week:   c.week,
+            month:  c.month,
+            month3: c.month3,
+            ytd:    c.ytd,
+            year1:  c.year1,
+            spark:  c.spark || [],
           };
-        } catch{}
-      }));
-      setRows(newRows);
-      setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
-    } catch(e){}
+        });
+        setRows(newRows);
+        setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
+      }
+    } catch(e){ console.error("Commodities fetch error:",e); }
     setLoading(false);
   };
 
@@ -7632,17 +7613,21 @@ function DividendCalendarPage() {
 
 // ── IPO CALENDAR PAGE (page 16) ───────────────────────────────────────────────
 const IPOS_2026 = [
-  {company:"Klarna Bank AB",       ticker:"KLAR",  exchange:"NYSE",    date:"2026-06-12",range:"$15–$18",raise:"$1.0B",  sector:"Fintech",     status:"upcoming",  desc:"Plataforma BNPL líder en Europa y EEUU, 85M usuarios"},
-  {company:"Cerebras Systems",     ticker:"CBRS",  exchange:"NASDAQ",  date:"2026-06-20",range:"$28–$32",raise:"$450M",  sector:"Semicond.",   status:"upcoming",  desc:"Chips de IA para entrenar LLMs, rival de NVIDIA en data centers"},
-  {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2026-07-08",range:"$22–$26",raise:"$600M",  sector:"Neobank",     status:"upcoming",  desc:"Neobank con 22M cuentas activas en EEUU, sin cargos por overdraft"},
-  {company:"SHEIN Group Ltd",      ticker:"SHEI",  exchange:"NYSE",    date:"2026-07-22",range:"$60–$70",raise:"$5.0B",  sector:"Moda/Retail", status:"upcoming",  desc:"Moda rápida digital, valuación estimada $65B, controversias ESG"},
-  {company:"Discord Inc",          ticker:"DCRD",  exchange:"NASDAQ",  date:"2026-08-14",range:"$35–$42",raise:"$800M",  sector:"Social",      status:"upcoming",  desc:"Plataforma de comunidades 150M usuarios mensuales, gaming y más"},
-  {company:"Turo Inc",             ticker:"TURO",  exchange:"NASDAQ",  date:"2026-08-28",range:"$14–$17",raise:"$300M",  sector:"Marketplace", status:"upcoming",  desc:"Airbnb para autos, marketplace peer-to-peer de vehículos"},
-  {company:"Medline Industries",   ticker:"MDLN",  exchange:"NYSE",    date:"2026-09-15",range:"$20–$24",raise:"$1.5B",  sector:"Salud",       status:"upcoming",  desc:"Mayor proveedor privado de suministros médicos en EEUU"},
-  {company:"Panera Brands",        ticker:"PNRA",  exchange:"NYSE",    date:"2026-09-30",range:"$16–$20",raise:"$900M",  sector:"Restaurantes",status:"upcoming",  desc:"Cadena de panaderías/restaurantes con 2,100+ locales en EEUU"},
-  {company:"eToro Group Ltd",      ticker:"ETOR",  exchange:"NASDAQ",  date:"2026-04-30",range:"$52",     raise:"$620M",  sector:"Fintech",     status:"priced",    desc:"Plataforma social de trading, 35M usuarios registrados globales"},
-  {company:"CoreWeave Inc",        ticker:"CRWV",  exchange:"NASDAQ",  date:"2026-03-28",range:"$40",     raise:"$1.5B",  sector:"Cloud/IA",    status:"trading",   desc:"Nube especializada en GPU para IA, cliente principal de OpenAI"},
-  {company:"Venture Global LNG",   ticker:"VG",    exchange:"NYSE",    date:"2026-01-24",range:"$25",     raise:"$1.75B", sector:"Energía",     status:"trading",   desc:"Exportador de GNL, uno de los IPOs más grandes del año"},
+  // ── Already trading ────────────────────────────────────────────────────────
+  {company:"CoreWeave Inc",        ticker:"CRWV",  exchange:"NASDAQ",  date:"2026-03-28",range:"$40",     raise:"$1.5B",  sector:"Cloud/AI",    status:"trading",   desc:"GPU cloud provider for AI workloads, OpenAI's primary infrastructure partner. Up ~140% since IPO."},
+  {company:"Venture Global LNG",   ticker:"VG",    exchange:"NYSE",    date:"2026-01-24",range:"$25",     raise:"$1.75B", sector:"Energy",      status:"trading",   desc:"Major U.S. LNG exporter. One of the biggest IPOs of the year by capital raised."},
+  {company:"eToro Group Ltd",      ticker:"ETOR",  exchange:"NASDAQ",  date:"2026-05-14",range:"$52",     raise:"$620M",  sector:"Fintech",     status:"trading",   desc:"Social trading platform with 35M registered users worldwide. Debuted above range."},
+  {company:"Klarna Bank AB",       ticker:"KLAR",  exchange:"NYSE",    date:"2026-07-01",range:"$68–$72", raise:"$1.0B",  sector:"Fintech",     status:"upcoming",  desc:"Europe's leading BNPL platform with 85M users across 45 countries. Highly anticipated."},
+  // ── Coming soon ─────────────────────────────────────────────────────────────
+  {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2026-07-08",range:"$22–$26", raise:"$600M",  sector:"Neobank",     status:"upcoming",  desc:"U.S. neobank with 22M active accounts. No overdraft fees model disrupting traditional banking."},
+  {company:"SHEIN Group Ltd",      ticker:"SHEI",  exchange:"NYSE",    date:"2026-07-22",range:"$60–$70", raise:"$5.0B",  sector:"Retail",      status:"upcoming",  desc:"Ultra-fast fashion e-commerce giant. Est. valuation $65B. Highly controversial ESG profile."},
+  {company:"Discord Inc",          ticker:"DCRD",  exchange:"NASDAQ",  date:"2026-08-14",range:"$35–$42", raise:"$800M",  sector:"Social",      status:"upcoming",  desc:"Community platform with 150M monthly users. Expanding beyond gaming into business and education."},
+  {company:"Turo Inc",             ticker:"TURO",  exchange:"NASDAQ",  date:"2026-08-28",range:"$14–$17", raise:"$300M",  sector:"Marketplace", status:"upcoming",  desc:"Peer-to-peer car sharing marketplace — the Airbnb for cars. 350K+ vehicles listed in the U.S."},
+  {company:"Medline Industries",   ticker:"MDLN",  exchange:"NYSE",    date:"2026-09-15",range:"$20–$24", raise:"$1.5B",  sector:"Healthcare",  status:"upcoming",  desc:"Largest private U.S. medical supplies manufacturer. Over $20B in annual revenue."},
+  {company:"Panera Brands",        ticker:"PNRA",  exchange:"NYSE",    date:"2026-09-30",range:"$16–$20", raise:"$900M",  sector:"Food",        status:"upcoming",  desc:"Bakery-café chain with 2,100+ locations in the U.S. Re-listing after going private in 2017."},
+  {company:"Cerebras Systems",     ticker:"CBRS",  exchange:"NASDAQ",  date:"2026-10-10",range:"$28–$35", raise:"$450M",  sector:"Semiconductors",status:"upcoming",desc:"AI chip designer building wafer-scale processors for LLM training. Direct NVIDIA competitor."},
+  {company:"Databricks Inc",       ticker:"DBRK",  exchange:"NASDAQ",  date:"2026-Q4",   range:"TBD",     raise:"$2.0B+", sector:"Cloud/AI",    status:"upcoming",  desc:"Data and AI platform valued at $62B in last private round. One of the most anticipated tech IPOs."},
+  {company:"OpenAI",               ticker:"TBD",   exchange:"TBD",     date:"2027+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"upcoming",  desc:"Creator of ChatGPT. No confirmed IPO timeline but widely expected. Most anticipated offering ever."},
 ];
 
 function IpoCalendarPage() {
@@ -7650,29 +7635,29 @@ function IpoCalendarPage() {
   const [ipos,    setIpos]    = useState(IPOS_2026);
   const [loading, setLoading] = useState(true);
   const [source,  setSource]  = useState("local");
+  const [lastUp,  setLastUp]  = useState("");
   const [total,   setTotal]   = useState(IPOS_2026.length);
   const today = new Date().toISOString().split("T")[0];
   const STATUS = {
-    upcoming:{color:C.accent, bg:C.accentDim, label:"Próximo"},
-    priced:  {color:C.purple, bg:C.purpleBg,  label:"Precio fijado"},
-    trading: {color:C.bull,   bg:C.bullBg,    label:"Cotizando"},
+    upcoming:{color:C.accent, bg:C.accentDim, label:"Upcoming"},
+    priced:  {color:C.purple, bg:C.purpleBg,  label:"Priced"},
+    trading: {color:C.bull,   bg:C.bullBg,    label:"Trading"},
   };
 
-  // Calcula el status real basado en la fecha de hoy
   const autoStatus = (ipo) => {
+    if(!ipo.date||ipo.date.includes("Q")||ipo.date.includes("+")) return "upcoming";
     const d = new Date(ipo.date);
     const now = new Date();
     const diffDays = (d - now) / (1000*60*60*24);
     if(diffDays > 7)  return "upcoming";
-    if(diffDays > -3) return "priced";   // dentro de ±3 días = precio fijado
-    return "trading";                     // ya salió a bolsa
+    if(diffDays > -3) return "priced";
+    return "trading";
   };
 
-  useEffect(()=>{
-    // Aplicar status automático a los datos locales primero
+  const fetchData = () => {
+    setLoading(true);
     const withAutoStatus = IPOS_2026.map(ipo => ({...ipo, status: autoStatus(ipo)}));
     setIpos(withAutoStatus);
-
     fetch("/api/ipos")
       .then(r=>r.json())
       .then(d=>{
@@ -7684,13 +7669,13 @@ function IpoCalendarPage() {
             else {
               exists.desc   = exists.desc   || seed.desc;
               exists.sector = exists.sector || seed.sector;
-              exists.status = autoStatus(exists); // siempre recalcular con fecha real
+              exists.status = autoStatus(exists);
             }
           });
           merged.sort((a,b)=>{
             const order = {upcoming:0, priced:1, trading:2};
             if(order[a.status] !== order[b.status]) return order[a.status]-order[b.status];
-            return a.date.localeCompare(b.date);
+            return (a.date||"9999").localeCompare(b.date||"9999");
           });
           setIpos(merged);
           setSource(d.source==="fmp"?"live":"local");
@@ -7698,8 +7683,13 @@ function IpoCalendarPage() {
         }
       })
       .catch(()=>{})
-      .finally(()=>setLoading(false));
-  },[]);
+      .finally(()=>{
+        setLoading(false);
+        setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
+      });
+  };
+
+  useEffect(()=>{ fetchData(); },[]);
 
   const rows = ipos.filter(ipo => filter==="all" || ipo.status===filter);
   const counts = {all:ipos.length, upcoming:ipos.filter(x=>x.status==="upcoming").length, priced:ipos.filter(x=>x.status==="priced").length, trading:ipos.filter(x=>x.status==="trading").length};
@@ -7708,22 +7698,28 @@ function IpoCalendarPage() {
     <div style={{maxWidth:920,margin:"0 auto"}}>
       <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-          <span style={{fontSize:30}}>🚀</span>
           <div style={{flex:1}}>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de IPOs {new Date().getFullYear()}</div>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>🚀 IPO Calendar {new Date().getFullYear()}</div>
               {source==="live"
-                ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● EN VIVO</span>
-                : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>CURADO</span>
+                ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● LIVE</span>
+                : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>CURATED</span>
               }
-              <span style={{fontSize:11,color:C.muted2,marginLeft:"auto"}}>{total} IPOs</span>
+              <span style={{fontSize:11,color:C.muted2}}>{total} IPOs</span>
+              {lastUp && <span style={{fontSize:10,color:C.muted2}}>· Updated {lastUp}</span>}
             </div>
-            <div style={{fontSize:12,color:C.muted}}>Salidas a bolsa — precios, fechas, sectores y estado en tiempo real</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Public offerings — prices, dates, sectors and real-time status</div>
           </div>
-          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",border:`1px solid ${C.border}`}}>⏳</span>}
+          <button onClick={fetchData} disabled={loading}
+            style={{display:"flex",alignItems:"center",gap:6,padding:"7px 14px",borderRadius:10,border:`1.5px solid ${C.border}`,background:C.card2,color:C.accent,fontSize:12,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.6:1,transition:"all 0.15s"}}
+            onMouseEnter={e=>{if(!loading){e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.background=C.accentDim;}}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.background=C.card2;}}>
+            <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none"}}>⟳</span>
+            {loading?"Loading...":"Refresh"}
+          </button>
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          {[{k:"all",l:`Todos (${counts.all})`},{k:"upcoming",l:`🔜 Próximos (${counts.upcoming})`},{k:"priced",l:`💜 Precio fijado (${counts.priced})`},{k:"trading",l:`✅ Cotizando (${counts.trading})`}].map(({k,l})=>(
+          {[{k:"all",l:`All (${counts.all})`},{k:"upcoming",l:`🔜 Upcoming (${counts.upcoming})`},{k:"priced",l:`💜 Priced (${counts.priced})`},{k:"trading",l:`✅ Trading (${counts.trading})`}].map(({k,l})=>(
             <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?C.accent:"transparent",color:filter===k?"#fff":C.muted,border:`1.5px solid ${filter===k?C.accent:C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
