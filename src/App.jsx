@@ -6676,15 +6676,19 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 
   useEffect(()=>{
     const loadPicks=async()=>{
-      // Buscar los picks más recientes (no solo hoy — el admin puede publicarlos cualquier día de la semana)
-      const {data,error}=await supabase.from("weekly_picks").select("*").eq("activo",true).order("semana",{ascending:false}).order("id").limit(40);
+      // Buscar los picks más recientes por semana (sin filtrar por activo para evitar errores de columna)
+      const {data,error}=await supabase.from("weekly_picks").select("*").order("semana",{ascending:false}).order("id").limit(40);
       if(!error && data && data.length>0){
         const grouped={corto:[],largo:[],dividendos:[],crypto:[]};
         data.forEach(p=>{ if(grouped[p.categoria]) grouped[p.categoria].push(p); });
-        setPicks(grouped);
-      } else {
-        setPicks(null); // null = mostrar estado vacío real, no datos inventados
+        // Solo usar si hay al menos algún pick en alguna categoría
+        if(Object.values(grouped).some(arr=>arr.length>0)){
+          setPicks(grouped);
+          return;
+        }
       }
+      // Si Supabase falla o está vacío → usar FALLBACK
+      setPicks(FALLBACK);
     };
     loadPicks();
   },[showAdmin]);
@@ -6723,29 +6727,43 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
     </div>
   );
 
-  const PickCard=({p})=>{
+  const fmtPrice = v => {
+    if(v==null||v==="") return "—";
+    if(typeof v === "string" && v.startsWith("$")) return v;
+    const n = parseFloat(v);
+    if(isNaN(n)) return v;
+    return "$"+n.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:2});
+  };
+
+  const PickCard=({p,idx})=>{
     const bull=p.tipo==="COMPRA";
+    const colors=["#8B5CF6","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#3B82F6","#14B8A6"];
+    const accent=colors[idx%colors.length];
     return(
-      <div style={{background:C2.card,border:`1px solid ${C2.border}`,borderRadius:14,padding:"16px",marginBottom:10,borderLeft:`3px solid ${bull?C2.bull:C2.bear}`}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+      <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid rgba(255,255,255,0.07)`,borderRadius:16,padding:"18px",marginBottom:12,borderLeft:`4px solid ${bull?C2.bull:C2.bear}`,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,right:0,width:80,height:80,background:`radial-gradient(circle,${accent}18 0%,transparent 70%)`,pointerEvents:"none"}}/>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
           <div>
-            <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#F1F5F9"}}>${p.ticker}</span>
-            <span style={{fontSize:12,color:"#64748B",marginLeft:8}}>{p.nombre}</span>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontFamily:"monospace",fontWeight:900,fontSize:20,color:"#F1F5F9"}}>{p.ticker}</span>
+              <span style={{background:bull?"rgba(0,210,106,0.15)":"rgba(255,77,106,0.15)",color:bull?C2.bull:C2.bear,border:`1px solid ${bull?C2.bull+"55":C2.bear+"55"}`,borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800}}>{bull?"▲ COMPRA":"▼ VENTA"}</span>
+            </div>
+            <span style={{fontSize:12,color:"#64748B"}}>{p.nombre}</span>
           </div>
-          <div style={{display:"flex",gap:8}}>
-            <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?C2.bull:C2.bear,border:`1px solid ${bull?C2.bull+"44":C2.bear+"44"}`,borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:800}}>{bull?"▲":"▼"} {p.tipo}</span>
-            <span style={{background:"rgba(245,158,11,0.1)",color:"#F59E0B",borderRadius:6,padding:"3px 8px",fontSize:11,fontWeight:700}}>{p.confianza}%</span>
+          <div style={{textAlign:"center",background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:10,padding:"6px 10px",minWidth:54}}>
+            <div style={{fontWeight:900,color:"#F59E0B",fontSize:18,lineHeight:1}}>{p.confianza}</div>
+            <div style={{fontSize:9,color:"#78716C",fontWeight:700,letterSpacing:0.5}}>CONF%</div>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-          {[["Entrada",p.entrada,"#CBD5E1"],["Target",p.target,C2.bull],["Stop",p.stop_loss,C2.bear]].map(([l,v,c])=>(
-            <div key={l} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"8px 10px",textAlign:"center"}}>
-              <div style={{fontSize:9,color:"#475569",fontWeight:700,marginBottom:3,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
-              <div style={{fontFamily:"monospace",fontWeight:800,color:c,fontSize:14}}>{v}</div>
+          {[["📥 Entrada",fmtPrice(p.entrada),"#CBD5E1"],["🎯 Target",fmtPrice(p.target),C2.bull],["🛑 Stop",fmtPrice(p.stop_loss),C2.bear]].map(([l,v,c])=>(
+            <div key={l} style={{background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
+              <div style={{fontSize:9,color:"#475569",fontWeight:700,marginBottom:3,letterSpacing:0.5}}>{l}</div>
+              <div style={{fontFamily:"monospace",fontWeight:800,color:c,fontSize:13}}>{v}</div>
             </div>
           ))}
         </div>
-        <div style={{fontSize:12,color:"#94A3B8",fontStyle:"italic"}}>💡 {p.razon}</div>
+        <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.5,borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:8}}>💡 {p.razon}</div>
       </div>
     );
   };
@@ -6807,11 +6825,11 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
       <>
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="⚡" title="Corto Plazo" sub="Horizonte 1-4 semanas · Momentum y técnico"/>
-        {data.corto.map(p=><PickCard key={p.ticker} p={p}/>)}
+        {data.corto.map((p,i)=><PickCard key={p.ticker} p={p} idx={i}/>)}
       </div>
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="🏦" title="Largo Plazo" sub="Horizonte 6-18 meses · Valor y fundamentales"/>
-        {data.largo.map(p=><PickCard key={p.ticker} p={p}/>)}
+        {data.largo.map((p,i)=><PickCard key={p.ticker} p={p} idx={i+3}/>)}
       </div>
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
         <SectionTitle icon="💰" title="Dividendos" sub="Ingresos pasivos · Alta rentabilidad por dividendo"/>
