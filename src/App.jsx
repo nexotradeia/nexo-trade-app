@@ -2171,7 +2171,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
               <button onClick={()=>setImage(null)} style={{position:"absolute",top:5,right:5,background:"rgba(0,0,0,0.6)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
             </div>
           )}
-          {showGif&&<GifPicker onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)}/>}
+          {showGif&&<GifPicker onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)} onText={txt=>{setText(prev=>prev+txt);}}/>}
 
           {/* ── Bottom bar: todo en una línea ── */}
           <div style={{display:"flex",gap:6,alignItems:"center",marginTop:10}}>
@@ -2182,11 +2182,13 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
               style={{background:"none",border:"none",cursor:"pointer",fontSize:17,color:"var(--c-muted2)",padding:"4px",borderRadius:7,transition:"color 0.15s",lineHeight:1}}
               onMouseEnter={e=>e.currentTarget.style.color=C.accent}
               onMouseLeave={e=>e.currentTarget.style.color="var(--c-muted2)"}>📷</button>
-            {/* GIF */}
-            <button onClick={()=>setShowGif(v=>!v)} title="GIF"
-              style={{background:showGif?"rgba(124,58,237,0.12)":"none",border:"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#7C3AED":"var(--c-muted2)",padding:"4px 7px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s"}}
+            {/* Media picker button */}
+            <button onClick={()=>setShowGif(v=>!v)} title="GIF · Emojis · Stickers"
+              style={{background:showGif?"rgba(124,58,237,0.12)":"none",border:showGif?"1px solid rgba(124,58,237,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#7C3AED":"var(--c-muted2)",padding:"4px 9px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
               onMouseEnter={e=>{e.currentTarget.style.color="#7C3AED";}}
-              onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#7C3AED":"var(--c-muted2)";}}>GIF</button>
+              onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#7C3AED":"var(--c-muted2)";}}>
+              <span>🎭</span><span>Media</span>
+            </button>
             {/* Ticker */}
             <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
               style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:7,color:C.accent,padding:"5px 8px",fontSize:11,outline:"none",width:78,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
@@ -2231,93 +2233,145 @@ const GIF_CLIENT_FALLBACK = [
   {id:"cf12",title:"Panic sell 😱",    preview:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",   full:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",   src:"fallback"},
 ];
 
-// ── GIF PICKER (via /api/gifs proxy — sin CORS) ──────────────────────────────
-function GifPicker({onSelect,onClose}){
+// ── MEDIA PICKER — GIFs + Emojis + Stickers + Reacciones ────────────────────
+const TRADING_EMOJIS = [
+  "🚀","📈","📉","💎","🙌","💰","🔥","⚡","🎯","💸","🏆","🤑","😱","🧠","👀","💪",
+  "🐂","🐻","🌙","⭐","✅","❌","📊","🔔","💡","🎉","😤","🥳","😎","🤔","💯","🫡",
+  "⬆️","⬇️","🟢","🔴","🟡","📌","🏦","🛑","🎰","🌊","🏄","🧲","🪙","₿","Ξ","🦅"
+];
+
+const QUICK_REACTIONS = [
+  {label:"🚀 To the moon!",   text:"🚀 To the moon! "},
+  {label:"💎 Diamond hands",  text:"💎 Diamond hands! "},
+  {label:"📈 Alcista total",  text:"📈 Alcista total en este ticker! "},
+  {label:"📉 Cuidado",        text:"📉 Cuidado con esta posición! "},
+  {label:"🔥 En llamas",      text:"🔥 Este ticker está en llamas! "},
+  {label:"🤑 Profits!",       text:"🤑 Tomando profits aquí! "},
+  {label:"🛑 Stop loss",      text:"🛑 Activé stop loss. Gestión de riesgo primero. "},
+  {label:"💡 Mi tesis",       text:"💡 Mi tesis de inversión: "},
+  {label:"⚡ Breakout",       text:"⚡ Breakout confirmado! Volumen altísimo! "},
+  {label:"🧠 DYOR",           text:"🧠 Recuerden hacer su propio research (DYOR). "},
+  {label:"🎯 Target hit",     text:"🎯 Target alcanzado! "},
+  {label:"😱 WTF market",     text:"😱 El mercado hoy está loco... "},
+];
+
+const STICKERS = [
+  {id:"s1", label:"Bullish 🐂",    emoji:"🐂", bg:"linear-gradient(135deg,#16a34a,#15803d)", text:"BULLISH"},
+  {id:"s2", label:"Bearish 🐻",    emoji:"🐻", bg:"linear-gradient(135deg,#dc2626,#b91c1c)", text:"BEARISH"},
+  {id:"s3", label:"Moon 🌙",       emoji:"🚀", bg:"linear-gradient(135deg,#7c3aed,#5b21b6)", text:"TO THE MOON"},
+  {id:"s4", label:"HODL 💎",       emoji:"💎", bg:"linear-gradient(135deg,#0891b2,#0e7490)", text:"HODL"},
+  {id:"s5", label:"Buy the dip",   emoji:"📉", bg:"linear-gradient(135deg,#d97706,#b45309)", text:"BUY THE DIP"},
+  {id:"s6", label:"Profits 💰",    emoji:"💰", bg:"linear-gradient(135deg,#059669,#047857)", text:"TAKING PROFITS"},
+  {id:"s7", label:"Rekt 😭",       emoji:"😭", bg:"linear-gradient(135deg,#9f1239,#881337)", text:"REKT"},
+  {id:"s8", label:"LFG! ⚡",       emoji:"⚡", bg:"linear-gradient(135deg,#ea580c,#c2410c)", text:"LFG!"},
+];
+
+function GifPicker({onSelect,onClose,onText}){
+  const [tab,setTab]         = useState("gif");
   const [q,setQ]             = useState("");
   const [gifs,setGifs]       = useState([]);
   const [loading,setLoading] = useState(false);
-  const [error,setError]     = useState(false);
   const [apiSrc,setApiSrc]   = useState("…");
 
   const search = (query) => {
-    setLoading(true); setError(false);
+    setLoading(true);
     const url = `/api/gifs${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ""}`;
     fetch(url)
-      .then(r => { if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then(d => {
-        setGifs(d.gifs && d.gifs.length > 0 ? d.gifs : GIF_CLIENT_FALLBACK);
-        setApiSrc(d.source || "fallback");
-        setLoading(false);
-      })
-      .catch(() => {
-        // Sin API (dev sin vercel dev, o error de red) → mostrar fallback directamente
-        setGifs(GIF_CLIENT_FALLBACK);
-        setApiSrc("fallback");
-        setError(false);
-        setLoading(false);
-      });
+      .then(r=>r.json())
+      .then(d=>{ setGifs(d.gifs&&d.gifs.length>0?d.gifs:GIF_CLIENT_FALLBACK); setApiSrc(d.source||"fallback"); setLoading(false); })
+      .catch(()=>{ setGifs(GIF_CLIENT_FALLBACK); setApiSrc("fallback"); setLoading(false); });
   };
 
-  useEffect(() => { search(""); }, []);
+  useEffect(()=>{ if(tab==="gif") search(""); },[tab]);
 
-  const TAGS = ["📈 bull","📉 bear","🚀 moon","💎 diamond hands","stonks","crypto","trading"];
+  const TAGS = ["📈 bull","📉 bear","🚀 moon","💎 hodl","stonks","crypto","trading","celebrate"];
+  const tabs = [{k:"gif",l:"GIF 🎞️"},{k:"emoji",l:"Emojis 😎"},{k:"reaction",l:"Frases ⚡"},{k:"sticker",l:"Stickers 🎨"}];
 
   return(
-    <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"1px solid rgba(15,23,42,0.12)",borderRadius:14,boxShadow:"0 12px 40px rgba(0,0,0,0.15)",zIndex:300,padding:12,marginTop:6}}>
-      {/* Search bar */}
-      <div style={{display:"flex",gap:6,marginBottom:8}}>
-        <input value={q} onChange={e=>setQ(e.target.value)}
-          onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();search(q);}}}
-          placeholder="🔍 Buscar GIF: bull, moon, trading..." autoFocus
-          style={{flex:1,border:"1px solid rgba(15,23,42,0.12)",borderRadius:9,padding:"7px 11px",fontSize:12,outline:"none",background:"#f8fafc"}}/>
-        <button onClick={()=>search(q)}
-          style={{background:C.accent,border:"none",borderRadius:9,padding:"7px 14px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>Buscar</button>
-        <button onClick={onClose}
-          style={{background:"transparent",border:"1px solid rgba(15,23,42,0.1)",borderRadius:9,padding:"7px 10px",cursor:"pointer",fontSize:14,color:C.muted}}>✕</button>
+    <div style={{position:"absolute",top:"100%",left:0,right:0,background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 48px rgba(0,0,0,0.18)",zIndex:300,marginTop:6,overflow:"hidden"}}>
+      {/* Tabs */}
+      <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.card2||"#f8fafc"}}>
+        {tabs.map(t=>(
+          <button key={t.k} onClick={()=>setTab(t.k)}
+            style={{flex:1,padding:"9px 4px",border:"none",background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:tab===t.k?C.accent:C.muted,borderBottom:tab===t.k?`2px solid ${C.accent}`:"2px solid transparent",transition:"all 0.15s"}}>
+            {t.l}
+          </button>
+        ))}
+        <button onClick={onClose} style={{padding:"9px 12px",border:"none",background:"none",cursor:"pointer",fontSize:16,color:C.muted}}>✕</button>
       </div>
 
-      {/* Quick tags */}
-      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
-        {TAGS.map(tag=>{
-          const w=tag.split(" ").pop();
-          return(
-            <button key={tag} onClick={()=>{setQ(w);search(w);}}
-              style={{background:"rgba(0,168,255,0.07)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,cursor:"pointer",color:C.accentText,fontWeight:600,transition:"all 0.12s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.15)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,168,255,0.07)";}}>
-              {tag}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Results */}
-      {loading ? (
-        <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>
-          <div style={{fontSize:24,marginBottom:6}}>🎞️</div>
-          Buscando GIFs...
-        </div>
-      ) : (
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:220,overflowY:"auto",borderRadius:8,overflow:"hidden"}}>
-          {gifs.length===0
-            ? <div style={{gridColumn:"1/-1",textAlign:"center",padding:20,color:C.muted,fontSize:13}}>
-                No se encontraron GIFs para "{q}"
-              </div>
-            : gifs.map(g=>(
-                <div key={g.id} style={{position:"relative",borderRadius:7,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:"#f1f5f9"}}
-                  onClick={()=>onSelect(g.full||g.preview)}
-                  onMouseEnter={e=>e.currentTarget.querySelector("img").style.opacity="0.75"}
-                  onMouseLeave={e=>e.currentTarget.querySelector("img").style.opacity="1"}>
-                  <img src={g.preview} alt={g.title}
-                    style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity 0.15s"}}
-                    onError={e=>{e.target.parentElement.style.display="none";}}/>
+      <div style={{padding:10}}>
+        {/* ── GIF TAB ── */}
+        {tab==="gif"&&<>
+          <div style={{display:"flex",gap:6,marginBottom:8}}>
+            <input value={q} onChange={e=>setQ(e.target.value)}
+              onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();search(q);}}}
+              placeholder="🔍 Buscar: bull, moon, trading..." autoFocus
+              style={{flex:1,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 11px",fontSize:12,outline:"none",background:C.card2||"#f8fafc",color:C.text}}/>
+            <button onClick={()=>search(q)} style={{background:C.accent,border:"none",borderRadius:9,padding:"7px 14px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>⟳</button>
+          </div>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>
+            {TAGS.map(tag=>{const w=tag.split(" ").pop();return(
+              <button key={tag} onClick={()=>{setQ(w);search(w);}}
+                style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:20,padding:"2px 9px",fontSize:10,cursor:"pointer",color:C.accentText,fontWeight:600}}>{tag}</button>
+            );})}
+          </div>
+          {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ Buscando GIFs...</div>:(
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:200,overflowY:"auto"}}>
+              {gifs.map(g=>(
+                <div key={g.id} style={{borderRadius:7,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:"#f1f5f9"}}
+                  onClick={()=>onSelect(g.full||g.preview)}>
+                  <img src={g.preview} alt={g.title} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={e=>{e.target.parentElement.style.display="none";}}/>
                 </div>
-              ))
-          }
-        </div>
-      )}
-      <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:6,opacity:0.7}}>
-        Powered by {apiSrc==="giphy"?"Giphy":"Tenor"}
+              ))}
+            </div>
+          )}
+          <div style={{fontSize:9,color:C.muted2,textAlign:"right",marginTop:4}}>Powered by {apiSrc==="giphy"?"Giphy":"Tenor"}</div>
+        </>}
+
+        {/* ── EMOJI TAB ── */}
+        {tab==="emoji"&&<>
+          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Toca un emoji para añadirlo a tu post:</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(8,1fr)",gap:4,maxHeight:240,overflowY:"auto"}}>
+            {TRADING_EMOJIS.map(e=>(
+              <button key={e} onClick={()=>{ onText&&onText(e+" "); onClose(); }}
+                style={{background:"none",border:`1px solid ${C.border}`,borderRadius:8,padding:"7px 4px",cursor:"pointer",fontSize:20,transition:"all 0.12s",lineHeight:1}}
+                onMouseEnter={ev=>ev.currentTarget.style.background=C.card2||"#f0f9ff"}
+                onMouseLeave={ev=>ev.currentTarget.style.background="none"}>{e}</button>
+            ))}
+          </div>
+        </>}
+
+        {/* ── FRASES RÁPIDAS TAB ── */}
+        {tab==="reaction"&&<>
+          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Inserta una frase rápida en tu post:</div>
+          <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:260,overflowY:"auto"}}>
+            {QUICK_REACTIONS.map(r=>(
+              <button key={r.label} onClick={()=>{ onText&&onText(r.text); onClose(); }}
+                style={{background:"none",border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 12px",cursor:"pointer",textAlign:"left",fontSize:12,color:C.text,fontWeight:600,transition:"all 0.12s"}}
+                onMouseEnter={ev=>{ev.currentTarget.style.background=C.card2||"#f0f9ff";ev.currentTarget.style.borderColor=C.accent;}}
+                onMouseLeave={ev=>{ev.currentTarget.style.background="none";ev.currentTarget.style.borderColor=C.border;}}>
+                {r.label}
+              </button>
+            ))}
+          </div>
+        </>}
+
+        {/* ── STICKERS TAB ── */}
+        {tab==="sticker"&&<>
+          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Stickers de trading para tu post:</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,maxHeight:260,overflowY:"auto"}}>
+            {STICKERS.map(s=>(
+              <button key={s.id} onClick={()=>{ onText&&onText(s.emoji+" "+s.text+" "); onClose(); }}
+                style={{background:s.bg,border:"none",borderRadius:12,padding:"14px 10px",cursor:"pointer",color:"#fff",fontWeight:900,fontSize:13,letterSpacing:0.5,transition:"transform 0.12s,opacity 0.12s",display:"flex",alignItems:"center",gap:8}}
+                onMouseEnter={ev=>{ev.currentTarget.style.transform="scale(1.03)";ev.currentTarget.style.opacity="0.9";}}
+                onMouseLeave={ev=>{ev.currentTarget.style.transform="scale(1)";ev.currentTarget.style.opacity="1";}}>
+                <span style={{fontSize:22}}>{s.emoji}</span>
+                <span>{s.text}</span>
+              </button>
+            ))}
+          </div>
+        </>}
       </div>
     </div>
   );
@@ -2835,21 +2889,24 @@ function NoticiasPage({lang}){
   const [cat,setCat]=useState("general");
   const [news,setNews]=useState([]);
   const [loading,setLoading]=useState(true);
+  const [lastUp,setLastUp]=useState(null);
+  const [spinning,setSpinning]=useState(false);
 
-  useEffect(()=>{
-    setLoading(true);
-    // Finnhub news API — gratis ilimitado (30 req/min)
-    fetch(`https://finnhub.io/api/v1/news?category=${cat}&token=${FINNHUB_KEY}`)
+  const fetchNews=(c=cat)=>{
+    setLoading(true);setSpinning(true);
+    fetch(`https://finnhub.io/api/v1/news?category=${c}&token=${FINNHUB_KEY}`)
       .then(r=>r.json())
       .then(data=>{
         if(Array.isArray(data)){
-          // Mostrar las 30 más recientes con imagen y headline
           setNews(data.filter(n=>n.headline&&n.source).slice(0,30));
+          setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
         }
       })
       .catch(()=>{})
-      .finally(()=>setLoading(false));
-  },[cat]);
+      .finally(()=>{setLoading(false);setTimeout(()=>setSpinning(false),600);});
+  };
+
+  useEffect(()=>{ fetchNews(cat); },[cat]);
 
   const cats=[
     {k:"general",  l:lang==="en"?"📰 Macro News":"📰 Macro",     color:C.accent},
@@ -2872,7 +2929,12 @@ function NoticiasPage({lang}){
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
         <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📰 {lang==="en"?"Market News":"Noticias del Mercado"}</h2>
         <span style={{background:"#fef2f2",color:C.bear,border:`1px solid ${C.bear}33`,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>🔴 LIVE</span>
-        <span style={{color:C.muted2,fontSize:11,marginLeft:"auto"}}>Finnhub · {lang==="en"?"Updated now":"Actualizado ahora"}</span>
+        <span style={{color:C.muted2,fontSize:11}}>{lastUp?`${lang==="en"?"Updated":"Actualizado"} ${lastUp}`:"Finnhub"}</span>
+        <button onClick={()=>fetchNews(cat)} disabled={loading}
+          style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:5,background:C.card2,border:`1px solid ${C.border}`,borderRadius:20,padding:"6px 14px",cursor:loading?"not-allowed":"pointer",color:C.muted,fontSize:12,fontWeight:700,transition:"all 0.2s"}}>
+          <span style={{display:"inline-block",transition:"transform 0.6s",transform:spinning?"rotate(360deg)":"rotate(0deg)"}}>⟳</span>
+          {loading?(lang==="en"?"Loading...":"Cargando..."):(lang==="en"?"Refresh":"Actualizar")}
+        </button>
       </div>
 
       {/* Category tabs */}
