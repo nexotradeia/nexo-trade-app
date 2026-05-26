@@ -6649,6 +6649,7 @@ function AdminPicksModal({onClose}){
 function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
   const [picks,setPicks]=useState(null);
   const [showAdmin,setShowAdmin]=useState(false);
+  const [livePrices,setLivePrices]=useState({});
   const semana = new Date().toLocaleDateString("es",{day:"numeric",month:"long",year:"numeric"});
 
   // Picks semana 26 mayo 2026 — fuente: Wall Street analysts (TipRanks, CNBC, Motley Fool)
@@ -6692,6 +6693,29 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
     };
     loadPicks();
   },[showAdmin]);
+
+  // Fetch precios en tiempo real de Finnhub para todos los tickers de picks
+  useEffect(()=>{
+    if(!picks) return;
+    const tickers=[...new Set([
+      ...(picks.corto||[]).map(p=>p.ticker),
+      ...(picks.largo||[]).map(p=>p.ticker),
+      ...(picks.crypto||[]).map(p=>p.ticker),
+    ].filter(t=>!["BTC","ETH","SOL","BNB"].includes(t)))]; // solo stocks, no crypto
+    if(!tickers.length) return;
+    Promise.all(tickers.map(async t=>{
+      try{
+        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${t}&token=${FINNHUB_KEY}`);
+        const d=await r.json();
+        if(d.c>0) return {ticker:t,price:d.c,change:d.dp||0};
+      }catch{}
+      return null;
+    })).then(results=>{
+      const map={};
+      results.filter(Boolean).forEach(r=>{map[r.ticker]={price:r.price,change:r.change};});
+      setLivePrices(map);
+    });
+  },[picks]);
 
   const data = picks;
   const C2={bull:"#00D26A",bear:"#FF4D6A",card:"rgba(10,16,30,0.98)",border:"rgba(255,255,255,0.08)"};
@@ -6758,6 +6782,9 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
     const gain=entry>0&&target>0?((target-entry)/entry*100).toFixed(1):null;
     const risk=entry>0&&stop>0?((entry-stop)/entry*100).toFixed(1):null;
     const rr=gain&&risk&&risk>0?(gain/risk).toFixed(1):null;
+    const live=livePrices[p.ticker];
+    const liveChg=live?.change||0;
+    const liveIsPos=liveChg>=0;
     return(
       <div style={{position:"relative",borderRadius:20,marginBottom:14,overflow:"hidden",background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",boxShadow:`0 4px 24px rgba(0,0,0,0.4),0 0 0 1px ${th.from}25,inset 0 1px 0 rgba(255,255,255,0.04)`}}>
         {/* top gradient bar */}
@@ -6770,11 +6797,18 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
           {/* Row 1: ticker + direction + confidence ring */}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
             <div>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:3}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
                 <span style={{fontFamily:"monospace",fontWeight:900,fontSize:26,background:`linear-gradient(135deg,${th.from},${th.to})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:`drop-shadow(0 0 10px ${th.from}50)`}}>{p.ticker}</span>
                 <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?"#00D26A":"#FF4D6A",border:`1px solid ${bull?"#00D26A44":"#FF4D6A44"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>{bull?"▲ COMPRA":"▼ VENTA"}</span>
               </div>
-              <div style={{fontSize:12,color:"#475569",fontWeight:500}}>{p.nombre}</div>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <div style={{fontSize:12,color:"#475569",fontWeight:500}}>{p.nombre}</div>
+                {live&&<div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,padding:"2px 8px"}}>
+                  <span style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5}}>PRECIO HOY</span>
+                  <span style={{fontFamily:"monospace",fontWeight:800,color:"#F1F5F9",fontSize:13}}>${live.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+                  <span style={{fontSize:11,fontWeight:700,color:liveIsPos?"#00D26A":"#FF4D6A"}}>{liveIsPos?"+":""}{liveChg.toFixed(2)}%</span>
+                </div>}
+              </div>
             </div>
             {/* SVG confidence ring */}
             <div style={{position:"relative",width:54,height:54,flexShrink:0}}>
