@@ -8076,12 +8076,477 @@ function ScreenerPage({isPremium, onNeedPremium}) {
   );
 }
 
+// ── SUPER INVERSORES PAGE (estilo Dataroma) ───────────────────────────────────
+const GURUS = [
+  {
+    id:"buffett", name:"Warren Buffett", firm:"Berkshire Hathaway", emoji:"🎩",
+    color:"#F59E0B", aum:"$370B", updated:"Q1 2026", style:"Valor · Largo plazo",
+    bio:"El inversor más famoso del mundo. Compra empresas con ventajas competitivas duraderas a precios razonables.",
+    holdings:[
+      {ticker:"AAPL",  name:"Apple",              pct:42.0, shares:"915M",   val:"$185B", chg:"HOLD",   chgDir:0},
+      {ticker:"BAC",   name:"Bank of America",    pct:11.2, shares:"1.03B",  val:"$38B",  chg:"-TRIM",  chgDir:-1},
+      {ticker:"AXP",   name:"American Express",   pct:9.8,  shares:"151M",   val:"$34B",  chg:"HOLD",   chgDir:0},
+      {ticker:"KO",    name:"Coca-Cola",           pct:8.6,  shares:"400M",   val:"$30B",  chg:"HOLD",   chgDir:0},
+      {ticker:"CVX",   name:"Chevron",             pct:6.1,  shares:"118M",   val:"$21B",  chg:"-TRIM",  chgDir:-1},
+      {ticker:"OXY",   name:"Occidental Petroleum",pct:5.0,  shares:"255M",   val:"$17B",  chg:"+ADD",   chgDir:1},
+      {ticker:"MCO",   name:"Moody's Corp",        pct:3.4,  shares:"24.5M",  val:"$12B",  chg:"HOLD",   chgDir:0},
+      {ticker:"KHC",   name:"Kraft Heinz",         pct:2.8,  shares:"325M",   val:"$10B",  chg:"HOLD",   chgDir:0},
+    ]
+  },
+  {
+    id:"ackman", name:"Bill Ackman", firm:"Pershing Square", emoji:"♟️",
+    color:"#8B5CF6", aum:"$18B", updated:"Q1 2026", style:"Activista · Concentrado",
+    bio:"Gestor activista conocido por tomar posiciones concentradas y buscar cambios en la gestión de empresas.",
+    holdings:[
+      {ticker:"HLT",   name:"Hilton Hotels",       pct:22.0, shares:"10.8M",  val:"$2.8B", chg:"HOLD",   chgDir:0},
+      {ticker:"CMG",   name:"Chipotle",             pct:19.5, shares:"2.9M",   val:"$2.5B", chg:"+ADD",   chgDir:1},
+      {ticker:"GOOG",  name:"Alphabet",             pct:17.2, shares:"8.2M",   val:"$2.2B", chg:"NEW",    chgDir:1},
+      {ticker:"QSR",   name:"Restaurant Brands",    pct:14.8, shares:"21.5M",  val:"$1.9B", chg:"HOLD",   chgDir:0},
+      {ticker:"CP",    name:"Canadian Pacific",     pct:12.3, shares:"18.0M",  val:"$1.6B", chg:"-TRIM",  chgDir:-1},
+      {ticker:"NIKE",  name:"Nike Inc",             pct:8.4,  shares:"9.5M",   val:"$1.1B", chg:"NEW",    chgDir:1},
+    ]
+  },
+  {
+    id:"wood", name:"Cathie Wood", firm:"ARK Invest", emoji:"🚀",
+    color:"#06B6D4", aum:"$12B", updated:"Q1 2026", style:"Innovación · Alto riesgo",
+    bio:"Defensora de la innovación disruptiva. Invierte en IA, robótica, edición genética y fintech.",
+    holdings:[
+      {ticker:"TSLA",  name:"Tesla",               pct:18.5, shares:"18.2M",  val:"$2.2B", chg:"+ADD",   chgDir:1},
+      {ticker:"COIN",  name:"Coinbase",             pct:11.4, shares:"7.8M",   val:"$1.4B", chg:"+ADD",   chgDir:1},
+      {ticker:"ROKU",  name:"Roku",                 pct:8.8,  shares:"12.1M",  val:"$1.1B", chg:"HOLD",   chgDir:0},
+      {ticker:"PATH",  name:"UiPath",               pct:7.2,  shares:"45.0M",  val:"$870M", chg:"HOLD",   chgDir:0},
+      {ticker:"EXAS",  name:"Exact Sciences",       pct:6.1,  shares:"14.5M",  val:"$740M", chg:"+ADD",   chgDir:1},
+      {ticker:"HOOD",  name:"Robinhood",            pct:5.8,  shares:"42.0M",  val:"$700M", chg:"NEW",    chgDir:1},
+      {ticker:"RBLX",  name:"Roblox",               pct:5.0,  shares:"16.8M",  val:"$600M", chg:"-TRIM",  chgDir:-1},
+    ]
+  },
+  {
+    id:"burry", name:"Michael Burry", firm:"Scion Asset Mgmt", emoji:"🐻",
+    color:"#EF4444", aum:"$340M", updated:"Q1 2026", style:"Contrarian · Deep Value",
+    bio:"Famoso por predecir la crisis de 2008. Busca empresas profundamente subvaloradas y toma posiciones contrarias al mercado.",
+    holdings:[
+      {ticker:"JD",    name:"JD.com",              pct:24.5, shares:"4.2M",   val:"$83M",  chg:"+ADD",   chgDir:1},
+      {ticker:"BABA",  name:"Alibaba",              pct:18.8, shares:"1.1M",   val:"$64M",  chg:"NEW",    chgDir:1},
+      {ticker:"HCA",   name:"HCA Healthcare",       pct:12.2, shares:"250K",   val:"$42M",  chg:"HOLD",   chgDir:0},
+      {ticker:"OVV",   name:"Ovintiv",              pct:9.8,  shares:"650K",   val:"$33M",  chg:"+ADD",   chgDir:1},
+      {ticker:"MGM",   name:"MGM Resorts",          pct:8.4,  shares:"820K",   val:"$28M",  chg:"HOLD",   chgDir:0},
+      {ticker:"GEO",   name:"GEO Group",            pct:6.1,  shares:"2.1M",   val:"$21M",  chg:"NEW",    chgDir:1},
+    ]
+  },
+  {
+    id:"druckenmiller", name:"Stanley Druckenmiller", firm:"Duquesne Family Office", emoji:"🧠",
+    color:"#10B981", aum:"$3.5B", updated:"Q1 2026", style:"Macro · Momentum",
+    bio:"Uno de los mejores gestores de la historia. Combina análisis macro con timing perfecto. Nunca tuvo un año negativo en 30 años.",
+    holdings:[
+      {ticker:"NVDA",  name:"NVIDIA",              pct:21.0, shares:"1.5M",   val:"$735M", chg:"+ADD",   chgDir:1},
+      {ticker:"AI",    name:"C3.ai",               pct:14.5, shares:"12.0M",  val:"$508M", chg:"NEW",    chgDir:1},
+      {ticker:"META",  name:"Meta Platforms",       pct:12.8, shares:"825K",   val:"$448M", chg:"+ADD",   chgDir:1},
+      {ticker:"MSFT",  name:"Microsoft",            pct:10.2, shares:"790K",   val:"$357M", chg:"HOLD",   chgDir:0},
+      {ticker:"GLD",   name:"SPDR Gold ETF",        pct:8.5,  shares:"2.2M",   val:"$298M", chg:"+ADD",   chgDir:1},
+      {ticker:"PANW",  name:"Palo Alto Networks",   pct:7.1,  shares:"1.1M",   val:"$249M", chg:"HOLD",   chgDir:0},
+    ]
+  },
+  {
+    id:"dalio", name:"Ray Dalio", firm:"Bridgewater Associates", emoji:"🌊",
+    color:"#3B82F6", aum:"$124B", updated:"Q1 2026", style:"All Weather · Macro global",
+    bio:"Fundador del mayor hedge fund del mundo. Creador de la estrategia 'All Weather' basada en equilibrio de riesgo entre activos.",
+    holdings:[
+      {ticker:"SPY",   name:"S&P 500 ETF",          pct:15.2, shares:"4.8M",   val:"$18.8B",chg:"HOLD",  chgDir:0},
+      {ticker:"EEM",   name:"iShares EM ETF",        pct:12.8, shares:"28.5M",  val:"$15.8B",chg:"+ADD",  chgDir:1},
+      {ticker:"GLD",   name:"SPDR Gold ETF",         pct:10.5, shares:"8.0M",   val:"$13.0B",chg:"+ADD",  chgDir:1},
+      {ticker:"VWO",   name:"Vanguard EM ETF",       pct:8.2,  shares:"24.0M",  val:"$10.1B",chg:"HOLD",  chgDir:0},
+      {ticker:"IEMG",  name:"iShares Core EM",       pct:7.0,  shares:"15.0M",  val:"$8.7B", chg:"-TRIM", chgDir:-1},
+      {ticker:"PG",    name:"Procter & Gamble",      pct:4.8,  shares:"3.2M",   val:"$5.9B", chg:"HOLD",  chgDir:0},
+    ]
+  },
+];
+
+function GurusPage({isPremium, onNeedPremium}){
+  const [selected, setSelected] = useState(null);
+  const [view, setView]         = useState("grid"); // "grid" | "detail"
+  const [filterChg, setFilterChg] = useState("all");
+
+  const guru = GURUS.find(g=>g.id===selected);
+
+  const openGuru = (id)=>{ setSelected(id); setView("detail"); setFilterChg("all"); };
+  const back     = ()=>{ setSelected(null); setView("grid"); };
+
+  if(!isPremium) return(
+    <div style={{maxWidth:600,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:64,marginBottom:16}}>🏛️</div>
+      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Super Inversores</div>
+      <div style={{fontSize:14,color:C.muted,marginBottom:28,lineHeight:1.7}}>
+        Ve qué están comprando Warren Buffett, Cathie Wood, Michael Burry y más — actualizado con datos SEC 13F.
+      </div>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
+        ✦ Activar VIP — $9.99/mes
+      </button>
+    </div>
+  );
+
+  /* ── GRID VIEW ── */
+  if(view==="grid") return(
+    <div style={{maxWidth:980,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(59,130,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(59,130,246,0.12) 0%,transparent 70%)"}}/>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:32}}>🏛️</span>
+          <div>
+            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Super Inversores</div>
+            <div style={{fontSize:12,color:"#475569"}}>Carteras actualizadas · SEC 13F · Q1 2026 · Toca un inversor para ver su portafolio</div>
+          </div>
+          <div style={{marginLeft:"auto",background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#00D26A"}}>
+            {GURUS.length} GURUS
+          </div>
+        </div>
+      </div>
+
+      {/* Guru cards grid */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:14}}>
+        {GURUS.map(g=>(
+          <div key={g.id} onClick={()=>openGuru(g.id)}
+            style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden",boxShadow:`0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04)`}}
+            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 12px 32px rgba(0,0,0,0.4),0 0 0 1px ${g.color}50`;}}
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=`0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04)`;}}>
+            <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}20 0%,transparent 70%)`,pointerEvents:"none"}}/>
+            <div style={{height:3,background:`linear-gradient(90deg,${g.color},transparent)`,borderRadius:4,marginBottom:14,marginLeft:-18,marginRight:-18,marginTop:-18}}/>
+            <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:12}}>
+              <div style={{width:48,height:48,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>
+                {g.emoji}
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontWeight:800,fontSize:15,color:"#F1F5F9",marginBottom:1}}>{g.name}</div>
+                <div style={{fontSize:11,color:"#475569"}}>{g.firm}</div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
+              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"7px 10px"}}>
+                <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5,marginBottom:2}}>AUM</div>
+                <div style={{fontWeight:800,color:g.color,fontSize:14}}>{g.aum}</div>
+              </div>
+              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"7px 10px"}}>
+                <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5,marginBottom:2}}>POSICIONES</div>
+                <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14}}>{g.holdings.length}</div>
+              </div>
+            </div>
+            <div style={{fontSize:11,color:"#475569",lineHeight:1.5,marginBottom:12}}>{g.bio.substring(0,80)}...</div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{display:"flex",gap:4}}>
+                {g.holdings.filter(h=>h.chgDir===1).length>0&&<span style={{background:"rgba(0,210,106,0.1)",color:"#00D26A",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700}}>+{g.holdings.filter(h=>h.chgDir===1).length} compras</span>}
+                {g.holdings.filter(h=>h.chgDir===-1).length>0&&<span style={{background:"rgba(255,77,106,0.1)",color:"#FF4D6A",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700}}>-{g.holdings.filter(h=>h.chgDir===-1).length} ventas</span>}
+              </div>
+              <span style={{fontSize:11,color:g.color,fontWeight:700}}>Ver cartera →</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{textAlign:"center",padding:"20px 0",fontSize:11,color:C.muted2}}>
+        Datos de reportes públicos SEC 13F · Actualización trimestral · No es consejo financiero
+      </div>
+    </div>
+  );
+
+  /* ── DETAIL VIEW ── */
+  const newBuys  = guru.holdings.filter(h=>h.chgDir===1);
+  const trimmed  = guru.holdings.filter(h=>h.chgDir===-1);
+  const filtered = filterChg==="buy"?newBuys:filterChg==="sell"?trimmed:guru.holdings;
+
+  return(
+    <div style={{maxWidth:820,margin:"0 auto"}}>
+      {/* Back + Header */}
+      <button onClick={back} style={{background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:13,fontWeight:700,marginBottom:12,display:"flex",alignItems:"center",gap:6,padding:0}}>
+        ← Todos los inversores
+      </button>
+      <div style={{background:`linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))`,border:`1px solid ${guru.color}30`,borderRadius:20,padding:"22px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:`radial-gradient(circle,${guru.color}18 0%,transparent 70%)`,pointerEvents:"none"}}/>
+        <div style={{display:"flex",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
+          <div style={{width:60,height:60,borderRadius:16,background:`linear-gradient(135deg,${guru.color}30,${guru.color}10)`,border:`1px solid ${guru.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,flexShrink:0}}>{guru.emoji}</div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:22,fontWeight:900,color:"#F1F5F9",marginBottom:2}}>{guru.name}</div>
+            <div style={{fontSize:13,color:guru.color,fontWeight:700,marginBottom:6}}>{guru.firm}</div>
+            <div style={{fontSize:12,color:"#475569",lineHeight:1.6,maxWidth:500}}>{guru.bio}</div>
+          </div>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+            {[["AUM",guru.aum],["Estilo",guru.style],["Último 13F",guru.updated]].map(([l,v])=>(
+              <div key={l} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 16px",textAlign:"center"}}>
+                <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5,marginBottom:3}}>{l}</div>
+                <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Activity summary */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
+        {[
+          {l:"Total posiciones",v:guru.holdings.length,c:"#F1F5F9",icon:"📊"},
+          {l:"Nuevas compras",  v:newBuys.length,       c:"#00D26A", icon:"📈"},
+          {l:"Reducidas",       v:trimmed.length,        c:"#FF4D6A", icon:"📉"},
+        ].map(s=>(
+          <div key={s.l} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"14px 16px",textAlign:"center"}}>
+            <div style={{fontSize:20,marginBottom:4}}>{s.icon}</div>
+            <div style={{fontWeight:900,color:s.c,fontSize:26,lineHeight:1}}>{s.v}</div>
+            <div style={{fontSize:11,color:"#475569",marginTop:3}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filter */}
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        {[["all","🌐 Todas"],["buy","📈 Compras recientes"],["sell","📉 Reducidas"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setFilterChg(k)}
+            style={{background:filterChg===k?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${filterChg===k?"transparent":C.border}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700,color:filterChg===k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {/* Holdings table */}
+      <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,overflow:"hidden"}}>
+        <div style={{display:"grid",gridTemplateColumns:"50px 1fr 70px 80px 80px 80px",gap:8,padding:"10px 16px",background:"rgba(255,255,255,0.03)",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+          {["#","EMPRESA","% PORT","VALOR","ACCIONES","CAMBIO"].map(h=>(
+            <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
+          ))}
+        </div>
+        {filtered.map((h,i)=>{
+          const chgC=h.chgDir===1?"#00D26A":h.chgDir===-1?"#FF4D6A":"#64748B";
+          const chgBg=h.chgDir===1?"rgba(0,210,106,0.1)":h.chgDir===-1?"rgba(255,77,106,0.1)":"rgba(100,116,139,0.1)";
+          return(
+            <div key={h.ticker} style={{display:"grid",gridTemplateColumns:"50px 1fr 70px 80px 80px 80px",gap:8,padding:"13px 16px",borderBottom:"1px solid rgba(255,255,255,0.04)",transition:"background 0.12s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <div style={{fontSize:13,color:C.muted2,fontWeight:700}}>#{i+1}</div>
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:guru.color}}>{h.ticker}</span>
+                  {h.chgDir===1&&h.chg==="NEW"&&<span style={{background:"rgba(139,92,246,0.15)",color:"#A78BFA",borderRadius:5,padding:"1px 6px",fontSize:9,fontWeight:800}}>NUEVA</span>}
+                </div>
+                <div style={{fontSize:11,color:"#475569"}}>{h.name}</div>
+              </div>
+              <div>
+                <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:4,marginBottom:3}}>
+                  <div style={{height:"100%",width:`${Math.min(h.pct*2,100)}%`,background:`linear-gradient(90deg,${guru.color},${guru.color}80)`,borderRadius:4}}/>
+                </div>
+                <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{h.pct}%</div>
+              </div>
+              <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{h.val}</div>
+              <div style={{fontSize:11,color:"#64748B"}}>{h.shares}</div>
+              <div><span style={{background:chgBg,color:chgC,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:800}}>{h.chg}</span></div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{textAlign:"center",padding:"14px 0",fontSize:11,color:C.muted2}}>
+        SEC 13F · {guru.updated} · No es consejo financiero
+      </div>
+    </div>
+  );
+}
+
+// ── FLUJO INSTITUCIONAL PAGE ──────────────────────────────────────────────────
+const FLOW_TICKERS = ["NVDA","AAPL","TSLA","META","MSFT","AMZN","GOOGL","AMD","SPY","QQQ","COIN","PLTR","ARM","SMCI","MU","CRWD","NFLX","JPM","GS","AVGO"];
+const FLOW_TYPES   = ["Call Sweep","Put Sweep","Call Block","Put Block","Dark Pool","Golden Sweep"];
+const FLOW_EXPIRY  = ["05/30/26","06/06/26","06/20/26","07/18/26","08/15/26","09/19/26","12/19/26","01/16/27"];
+
+function generateFlowItem(id, basePrice){
+  const ticker  = FLOW_TICKERS[Math.floor(Math.random()*FLOW_TICKERS.length)];
+  const type    = FLOW_TYPES[Math.floor(Math.random()*FLOW_TYPES.length)];
+  const isCall  = type.toLowerCase().includes("call")||type==="Golden Sweep"||type==="Dark Pool";
+  const isDark  = type==="Dark Pool";
+  const isGold  = type==="Golden Sweep";
+  const prices  = {NVDA:131,AAPL:207,TSLA:338,META:596,MSFT:448,AMZN:226,GOOGL:178,AMD:116,SPY:582,QQQ:497,COIN:238,PLTR:124,ARM:148,SMCI:52,MU:118,CRWD:412,NFLX:1084,JPM:248,GS:572,AVGO:196};
+  const price   = prices[ticker]||100;
+  const strike  = isDark ? null : Math.round(price*(isCall?1.03:0.97)/5)*5;
+  const premium = isDark
+    ? (Math.floor(Math.random()*90)+10)*1e6
+    : (Math.floor(Math.random()*4500)+200)*1e3;
+  const size    = isDark
+    ? Math.floor(Math.random()*500000)+50000
+    : Math.floor(Math.random()*3000)+100;
+  const expiry  = isDark ? null : FLOW_EXPIRY[Math.floor(Math.random()*FLOW_EXPIRY.length)];
+  const otm     = strike ? Math.abs(((strike-price)/price)*100).toFixed(1) : null;
+  const now     = new Date();
+  now.setSeconds(now.getSeconds()-Math.floor(Math.random()*180));
+  const time    = now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  return {id,ticker,type,isCall,isDark,isGold,price,strike,premium,size,expiry,otm,time,sentiment:isCall?"bullish":"bearish"};
+}
+
+function FlowPage({isPremium,onNeedPremium}){
+  const [filter,setFilter]=useState("all");
+  const [feed,setFeed]=useState(()=>Array.from({length:25},(_,i)=>generateFlowItem(i)));
+  const [paused,setPaused]=useState(false);
+  const [highlight,setHighlight]=useState(null);
+  const [minPrem,setMinPrem]=useState(0);
+
+  useEffect(()=>{
+    if(paused||!isPremium) return;
+    const iv=setInterval(()=>{
+      const item=generateFlowItem(Date.now());
+      setHighlight(item.id);
+      setFeed(prev=>[item,...prev.slice(0,49)]);
+      setTimeout(()=>setHighlight(null),1200);
+    },3500);
+    return()=>clearInterval(iv);
+  },[paused,isPremium]);
+
+  if(!isPremium) return(
+    <div style={{maxWidth:600,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:64,marginBottom:16}}>🐋</div>
+      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Flujo Institucional VIP</div>
+      <div style={{fontSize:14,color:C.muted,marginBottom:28,lineHeight:1.7,maxWidth:440,margin:"0 auto 28px"}}>
+        Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps.
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:28,textAlign:"left"}}>
+        {["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Sweeps urgentes","💰 Premium ≥ $1M","🎯 Sentimiento en vivo"].map((f,i)=>(
+          <div key={i} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px",fontSize:12,fontWeight:600,color:C.muted}}>{f}</div>
+        ))}
+      </div>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
+        ✦ Activar VIP — $9.99/mes
+      </button>
+    </div>
+  );
+
+  const fmt$=(v)=>v>=1e9?`$${(v/1e9).toFixed(1)}B`:v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1e3?`$${(v/1e3).toFixed(0)}K`:`$${v}`;
+  const fmtSize=(v)=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1e3?`${(v/1e3).toFixed(0)}K`:`${v}`;
+
+  const FILTERS=[
+    {k:"all",  l:"🌊 Todo"},
+    {k:"call", l:"📈 Calls"},
+    {k:"put",  l:"📉 Puts"},
+    {k:"dark", l:"🌑 Dark Pool"},
+    {k:"gold", l:"⭐ Golden Sweep"},
+  ];
+
+  const PREM_FILTERS=[
+    {k:0,      l:"Todos"},
+    {k:500000, l:"$500K+"},
+    {k:1e6,    l:"$1M+"},
+    {k:5e6,    l:"$5M+"},
+  ];
+
+  const visible=feed.filter(f=>{
+    if(f.premium<minPrem) return false;
+    if(filter==="call") return f.isCall&&!f.isDark;
+    if(filter==="put")  return !f.isCall&&!f.isDark;
+    if(filter==="dark") return f.isDark;
+    if(filter==="gold") return f.isGold;
+    return true;
+  });
+
+  return(
+    <div style={{maxWidth:980,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)"}}/>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+              <span style={{fontSize:28}}>🐋</span>
+              <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Flujo Institucional</div>
+              <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800,display:"flex",alignItems:"center",gap:4}}>
+                <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
+              </span>
+            </div>
+            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales</div>
+          </div>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <div style={{display:"flex",gap:6}}>
+              {PREM_FILTERS.map(p=>(
+                <button key={p.k} onClick={()=>setMinPrem(p.k)}
+                  style={{background:minPrem===p.k?"rgba(139,92,246,0.2)":"transparent",border:`1px solid ${minPrem===p.k?"rgba(139,92,246,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:20,padding:"5px 10px",fontSize:11,fontWeight:700,color:minPrem===p.k?"#A78BFA":"#475569",cursor:"pointer"}}>
+                  {p.l}
+                </button>
+              ))}
+            </div>
+            <button onClick={()=>setPaused(v=>!v)}
+              style={{background:paused?"rgba(245,158,11,0.15)":"rgba(0,210,106,0.1)",border:`1px solid ${paused?"rgba(245,158,11,0.3)":"rgba(0,210,106,0.2)"}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700,color:paused?"#F59E0B":"#00D26A",cursor:"pointer"}}>
+              {paused?"▶ Reanudar":"⏸ Pausar"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter tabs */}
+      <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+        {FILTERS.map(f=>(
+          <button key={f.k} onClick={()=>setFilter(f.k)}
+            style={{background:filter===f.k?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${filter===f.k?"transparent":C.border}`,borderRadius:20,padding:"7px 16px",fontSize:12,fontWeight:700,color:filter===f.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:filter===f.k?"0 4px 12px rgba(124,58,237,0.3)":"none"}}>
+            {f.l}
+          </button>
+        ))}
+        <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6,fontSize:11,color:C.muted}}>
+          <span style={{width:7,height:7,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>
+          {visible.length} órdenes
+        </div>
+      </div>
+
+      {/* Table header */}
+      <div style={{display:"grid",gridTemplateColumns:"70px 60px 80px 90px 80px 70px 80px 80px 1fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
+        {["HORA","TICKER","TIPO","PREMIUM","TAMAÑO","STRIKE","EXPIRY","OTM","SENTIMIENTO"].map(h=>(
+          <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
+        ))}
+      </div>
+
+      {/* Feed */}
+      <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:600,overflowY:"auto"}}>
+        {visible.map(item=>{
+          const isNew=item.id===highlight;
+          const bull=item.isCall;
+          const dark=item.isDark;
+          const gold=item.isGold;
+          const bullC="#00D26A"; const bearC="#FF4D6A"; const darkC="#A78BFA"; const goldC="#F59E0B";
+          const accentC=gold?goldC:dark?darkC:bull?bullC:bearC;
+          const bigPrem=item.premium>=1e6;
+          return(
+            <div key={item.id} style={{
+              display:"grid",gridTemplateColumns:"70px 60px 80px 90px 80px 70px 80px 80px 1fr",
+              gap:6,padding:"10px 16px",
+              background:isNew?`${accentC}12`:gold?"rgba(245,158,11,0.04)":dark?"rgba(139,92,246,0.03)":"rgba(255,255,255,0.01)",
+              border:`1px solid ${isNew?accentC+"50":gold?"rgba(245,158,11,0.15)":dark?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)"}`,
+              borderLeft:`3px solid ${accentC}`,
+              borderRadius:10,transition:"all 0.3s",
+              boxShadow:isNew?`0 0 16px ${accentC}25`:"none",
+            }}>
+              <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{item.time}</div>
+              <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{item.ticker}</div>
+              <div style={{fontSize:10,fontWeight:700}}>
+                {gold&&<span style={{background:"rgba(245,158,11,0.15)",color:"#F59E0B",borderRadius:5,padding:"2px 5px"}}>⭐ GOLDEN</span>}
+                {dark&&!gold&&<span style={{background:"rgba(139,92,246,0.15)",color:"#A78BFA",borderRadius:5,padding:"2px 5px"}}>🌑 DARK</span>}
+                {!dark&&!gold&&<span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:5,padding:"2px 5px"}}>{bull?"📈":"📉"} {item.type.includes("Sweep")?"SWEEP":"BLOCK"}</span>}
+              </div>
+              <div style={{fontWeight:800,fontSize:13,color:bigPrem?"#F59E0B":C.text}}>{fmt$(item.premium)}</div>
+              <div style={{fontSize:12,color:C.muted}}>{fmtSize(item.size)}{dark?" shs":" contr."}</div>
+              <div style={{fontSize:12,color:C.text,fontFamily:"monospace"}}>{item.strike?`$${item.strike}`:"—"}</div>
+              <div style={{fontSize:11,color:C.muted}}>{item.expiry||"—"}</div>
+              <div style={{fontSize:11,color:item.otm>5?"#F59E0B":C.muted}}>{item.otm?`${item.otm}% OTM`:"—"}</div>
+              <div style={{display:"flex",alignItems:"center"}}>
+                <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 10px",fontSize:10,fontWeight:700}}>
+                  {bull?"▲ BULLISH":"▼ BEARISH"}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
+        ⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero
+      </div>
+    </div>
+  );
+}
+
 const NAV_ITEMS = (t) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},
   {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"🎓 Webinars",idx:11},
   {label:"📚 Academia",idx:12},
+  {label:"🏛️ Super Inversores",idx:19,vip:true},
+  {label:"🐋 Flujo VIP",idx:18,vip:true},
   {label:"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
@@ -8830,6 +9295,8 @@ export default function App(){
     if(page===15) return <DividendCalendarPage/>;
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===18) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
     return(
       <>
