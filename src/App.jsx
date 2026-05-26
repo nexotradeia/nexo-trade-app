@@ -6717,13 +6717,25 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
     </div>
   );
 
-  const SectionTitle=({icon,title,sub})=>(
-    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,paddingBottom:10,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-      <span style={{fontSize:22}}>{icon}</span>
+  const THEMES=[
+    {from:"#8B5CF6",to:"#6D28D9",glow:"#8B5CF6"},
+    {from:"#06B6D4",to:"#0891B2",glow:"#06B6D4"},
+    {from:"#10B981",to:"#059669",glow:"#10B981"},
+    {from:"#F59E0B",to:"#D97706",glow:"#F59E0B"},
+    {from:"#EF4444",to:"#DC2626",glow:"#EF4444"},
+    {from:"#EC4899",to:"#DB2777",glow:"#EC4899"},
+    {from:"#3B82F6",to:"#2563EB",glow:"#3B82F6"},
+    {from:"#14B8A6",to:"#0D9488",glow:"#14B8A6"},
+  ];
+
+  const SectionTitle=({icon,title,sub,color="#8B5CF6"})=>(
+    <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+      <div style={{width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${color}30,${color}10)`,border:`1px solid ${color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{icon}</div>
       <div>
-        <div style={{fontWeight:800,color:"#F1F5F9",fontSize:16}}>{title}</div>
-        {sub&&<div style={{fontSize:11,color:"#64748B",marginTop:1}}>{sub}</div>}
+        <div style={{fontWeight:800,color:"#F1F5F9",fontSize:15,letterSpacing:-0.3}}>{title}</div>
+        {sub&&<div style={{fontSize:11,color:"#475569",marginTop:1}}>{sub}</div>}
       </div>
+      <div style={{flex:1,height:1,background:`linear-gradient(90deg,${color}30,transparent)`,marginLeft:8}}/>
     </div>
   );
 
@@ -6737,33 +6749,69 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 
   const PickCard=({p,idx})=>{
     const bull=p.tipo==="COMPRA";
-    const colors=["#8B5CF6","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#3B82F6","#14B8A6"];
-    const accent=colors[idx%colors.length];
+    const th=THEMES[idx%THEMES.length];
+    const conf=p.confianza||0;
+    const circ=Math.PI*2*22;
+    const entry=parseFloat(p.entrada)||0;
+    const target=parseFloat(p.target)||0;
+    const stop=parseFloat(p.stop_loss)||0;
+    const gain=entry>0&&target>0?((target-entry)/entry*100).toFixed(1):null;
+    const risk=entry>0&&stop>0?((entry-stop)/entry*100).toFixed(1):null;
+    const rr=gain&&risk&&risk>0?(gain/risk).toFixed(1):null;
     return(
-      <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid rgba(255,255,255,0.07)`,borderRadius:16,padding:"18px",marginBottom:12,borderLeft:`4px solid ${bull?C2.bull:C2.bear}`,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:0,right:0,width:80,height:80,background:`radial-gradient(circle,${accent}18 0%,transparent 70%)`,pointerEvents:"none"}}/>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-          <div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontFamily:"monospace",fontWeight:900,fontSize:20,color:"#F1F5F9"}}>{p.ticker}</span>
-              <span style={{background:bull?"rgba(0,210,106,0.15)":"rgba(255,77,106,0.15)",color:bull?C2.bull:C2.bear,border:`1px solid ${bull?C2.bull+"55":C2.bear+"55"}`,borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800}}>{bull?"▲ COMPRA":"▼ VENTA"}</span>
+      <div style={{position:"relative",borderRadius:20,marginBottom:14,overflow:"hidden",background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",boxShadow:`0 4px 24px rgba(0,0,0,0.4),0 0 0 1px ${th.from}25,inset 0 1px 0 rgba(255,255,255,0.04)`}}>
+        {/* top gradient bar */}
+        <div style={{height:2,background:`linear-gradient(90deg,${th.from},${th.to},transparent)`}}/>
+        {/* glow orb */}
+        <div style={{position:"absolute",top:-30,right:-30,width:130,height:130,background:`radial-gradient(circle,${th.from}22 0%,transparent 70%)`,pointerEvents:"none"}}/>
+        <div style={{position:"absolute",bottom:-20,left:0,width:80,height:80,background:`radial-gradient(circle,${bull?"#00D26A":"#FF4D6A"}12 0%,transparent 70%)`,pointerEvents:"none"}}/>
+
+        <div style={{padding:"18px 20px"}}>
+          {/* Row 1: ticker + direction + confidence ring */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:3}}>
+                <span style={{fontFamily:"monospace",fontWeight:900,fontSize:26,background:`linear-gradient(135deg,${th.from},${th.to})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:`drop-shadow(0 0 10px ${th.from}50)`}}>{p.ticker}</span>
+                <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?"#00D26A":"#FF4D6A",border:`1px solid ${bull?"#00D26A44":"#FF4D6A44"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>{bull?"▲ COMPRA":"▼ VENTA"}</span>
+              </div>
+              <div style={{fontSize:12,color:"#475569",fontWeight:500}}>{p.nombre}</div>
             </div>
-            <span style={{fontSize:12,color:"#64748B"}}>{p.nombre}</span>
+            {/* SVG confidence ring */}
+            <div style={{position:"relative",width:54,height:54,flexShrink:0}}>
+              <svg width="54" height="54" viewBox="0 0 54 54" style={{transform:"rotate(-90deg)"}}>
+                <circle cx="27" cy="27" r="22" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4"/>
+                <circle cx="27" cy="27" r="22" fill="none" stroke={`url(#cg${idx})`} strokeWidth="4"
+                  strokeDasharray={`${(conf/100)*circ} ${circ}`} strokeLinecap="round"/>
+                <defs>
+                  <linearGradient id={`cg${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={th.from}/><stop offset="100%" stopColor={th.to}/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+                <div style={{fontWeight:900,fontSize:13,color:"#F1F5F9",lineHeight:1}}>{conf}</div>
+                <div style={{fontSize:7,color:"#475569",fontWeight:700,letterSpacing:0.3}}>CONF%</div>
+              </div>
+            </div>
           </div>
-          <div style={{textAlign:"center",background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:10,padding:"6px 10px",minWidth:54}}>
-            <div style={{fontWeight:900,color:"#F59E0B",fontSize:18,lineHeight:1}}>{p.confianza}</div>
-            <div style={{fontSize:9,color:"#78716C",fontWeight:700,letterSpacing:0.5}}>CONF%</div>
+
+          {/* Row 2: prices */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:12}}>
+            {[["📥","Entrada",fmtPrice(p.entrada),"#64748B"],["🎯","Target",fmtPrice(p.target),"#00D26A"],["🛑","Stop",fmtPrice(p.stop_loss),"#FF4D6A"]].map(([ico,lbl,val,col])=>(
+              <div key={lbl} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:12,padding:"10px 8px",textAlign:"center"}}>
+                <div style={{fontSize:14,marginBottom:2}}>{ico}</div>
+                <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,textTransform:"uppercase",marginBottom:4}}>{lbl}</div>
+                <div style={{fontFamily:"monospace",fontWeight:800,color:col,fontSize:14}}>{val}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Row 3: R:R badge + analysis */}
+          <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+            {rr&&<div style={{flexShrink:0,background:`linear-gradient(135deg,${th.from}20,${th.to}10)`,border:`1px solid ${th.from}40`,borderRadius:8,padding:"4px 8px",fontSize:10,fontWeight:800,color:th.from,whiteSpace:"nowrap"}}>R:R {rr}x</div>}
+            <div style={{fontSize:12,color:"#64748B",lineHeight:1.6,flex:1}}>💡 {p.razon}</div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-          {[["📥 Entrada",fmtPrice(p.entrada),"#CBD5E1"],["🎯 Target",fmtPrice(p.target),C2.bull],["🛑 Stop",fmtPrice(p.stop_loss),C2.bear]].map(([l,v,c])=>(
-            <div key={l} style={{background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
-              <div style={{fontSize:9,color:"#475569",fontWeight:700,marginBottom:3,letterSpacing:0.5}}>{l}</div>
-              <div style={{fontFamily:"monospace",fontWeight:800,color:c,fontSize:13}}>{v}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.5,borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:8}}>💡 {p.razon}</div>
       </div>
     );
   };
@@ -6789,19 +6837,28 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
     <div style={{maxWidth:680,margin:"0 auto"}}>
       {showAdmin && <AdminPicksModal onClose={()=>setShowAdmin(false)}/>}
 
-      {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.15),rgba(0,168,255,0.08))",border:"1px solid rgba(124,58,237,0.2)",borderRadius:16,padding:"20px 24px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <span style={{background:"rgba(124,58,237,0.2)",color:"#A78BFA",border:"1px solid rgba(124,58,237,0.3)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>✦ EXCLUSIVO VIP</span>
-          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:20,margin:"6px 0 2px"}}>Picks de la Semana</h2>
-          <div style={{fontSize:12,color:"#64748B"}}>Actualizado: {semana}</div>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
-          <div style={{textAlign:"center",background:"rgba(0,0,0,0.3)",borderRadius:12,padding:"10px 16px"}}>
-            <div style={{fontWeight:900,color:"#F1F5F9",fontSize:28}}>10</div>
-            <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>PICKS</div>
+      {/* Header premium */}
+      <div style={{position:"relative",borderRadius:22,padding:"22px 24px",marginBottom:20,overflow:"hidden",background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.25)",boxShadow:"0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05)"}}>
+        <div style={{position:"absolute",top:-40,right:-40,width:180,height:180,background:"radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{position:"absolute",bottom:-30,left:-20,width:120,height:120,background:"radial-gradient(circle,rgba(6,182,212,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span style={{background:"linear-gradient(135deg,rgba(139,92,246,0.3),rgba(109,40,217,0.2))",color:"#A78BFA",border:"1px solid rgba(139,92,246,0.4)",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:1}}>✦ EXCLUSIVO VIP</span>
+              <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:700,color:"#00D26A"}}>
+                <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>EN VIVO
+              </span>
+            </div>
+            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5}}>🧠 Picks IA · Semana {new Date().toLocaleDateString("es",{day:"numeric",month:"short"})}</h2>
+            <div style={{fontSize:11,color:"#475569"}}>Selección algorítmica + análisis fundamental · Wall Street consensus</div>
           </div>
-          {isAdmin && <button onClick={()=>setShowAdmin(true)} style={{background:"rgba(0,168,255,0.15)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,padding:"6px 12px",color:"#00A8FF",fontSize:11,fontWeight:700,cursor:"pointer"}}>✏️ Editar picks</button>}
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
+            <div style={{textAlign:"center",background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(109,40,217,0.1))",border:"1px solid rgba(139,92,246,0.25)",borderRadius:14,padding:"10px 18px"}}>
+              <div style={{fontWeight:900,background:"linear-gradient(135deg,#A78BFA,#7C3AED)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:32,lineHeight:1}}>{(data?.corto?.length||0)+(data?.largo?.length||0)+(data?.crypto?.length||0)+(data?.dividendos?.length||0)}</div>
+              <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.8}}>PICKS</div>
+            </div>
+            {isAdmin && <button onClick={()=>setShowAdmin(true)} style={{background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:8,padding:"6px 12px",color:"#38BDF8",fontSize:11,fontWeight:700,cursor:"pointer"}}>✏️ Admin</button>}
+          </div>
         </div>
       </div>
 
@@ -6823,21 +6880,21 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         </div>
       ) : (
       <>
-      <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="⚡" title="Corto Plazo" sub="Horizonte 1-4 semanas · Momentum y técnico"/>
+      <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(139,92,246,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
+        <SectionTitle icon="⚡" title="Corto Plazo" sub="Horizonte 1-4 semanas · Momentum y técnico" color="#8B5CF6"/>
         {data.corto.map((p,i)=><PickCard key={p.ticker} p={p} idx={i}/>)}
       </div>
-      <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="🏦" title="Largo Plazo" sub="Horizonte 6-18 meses · Valor y fundamentales"/>
+      <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(6,182,212,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
+        <SectionTitle icon="🏦" title="Largo Plazo" sub="Horizonte 6-18 meses · Valor y fundamentales" color="#06B6D4"/>
         {data.largo.map((p,i)=><PickCard key={p.ticker} p={p} idx={i+3}/>)}
       </div>
-      <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="💰" title="Dividendos" sub="Ingresos pasivos · Alta rentabilidad por dividendo"/>
+      <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(245,158,11,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
+        <SectionTitle icon="💰" title="Dividendos" sub="Ingresos pasivos · Alta rentabilidad por dividendo" color="#F59E0B"/>
         {data.dividendos.map(p=><DivCard key={p.ticker} p={p}/>)}
       </div>
-      <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="₿" title="Crypto" sub="Alta volatilidad · Solo con capital que puedas perder"/>
-        {data.crypto.map(p=><PickCard key={p.ticker} p={p}/>)}
+      <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(247,147,26,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
+        <SectionTitle icon="₿" title="Crypto" sub="Alta volatilidad · Solo con capital que puedas perder" color="#F7931A"/>
+        {data.crypto.map((p,i)=><PickCard key={p.ticker} p={p} idx={i+7}/>)}
       </div>
       </>
       )}
