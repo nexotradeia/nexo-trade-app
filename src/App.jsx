@@ -319,10 +319,10 @@ const moderateText = (text) => {
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 const TAPE_ITEMS = [
-  {ticker:"NVDA",price:"$875.40",change:+2.8,earning:false},{ticker:"BTC",price:"$68,420",change:+4.2,earning:false},
-  {ticker:"TSLA",price:"$172.80",change:-3.1,earning:true},{ticker:"AAPL",price:"$189.50",change:+0.4,earning:false},
-  {ticker:"SPY",price:"$521.30",change:-0.8,earning:false},{ticker:"MSFT",price:"$415.20",change:+1.2,earning:true},
-  {ticker:"ETH",price:"$3,820",change:+5.7,earning:false},{ticker:"AMZN",price:"$186.40",change:+0.9,earning:false},
+  {ticker:"NVDA",price:"$131.50",change:+1.2,earning:false},{ticker:"BTC",price:"$95,200",change:+1.8,earning:false},
+  {ticker:"TSLA",price:"$338.50",change:-1.1,earning:false},{ticker:"AAPL",price:"$207.20",change:-0.3,earning:false},
+  {ticker:"SPY",price:"$582.40",change:-0.2,earning:false},{ticker:"MSFT",price:"$448.20",change:+0.9,earning:false},
+  {ticker:"ETH",price:"$2,100",change:+0.9,earning:false},{ticker:"AMZN",price:"$225.80",change:+0.6,earning:false},
   {ticker:"SMCI",price:"$950.20",change:+18.4,earning:true},{ticker:"META",price:"$512.80",change:+2.1,earning:true},
   {ticker:"COIN",price:"$248.90",change:+7.3,earning:false},{ticker:"PLTR",price:"$24.80",change:+6.1,earning:false},
   {ticker:"AMD",price:"$168.30",change:+3.2,earning:false},{ticker:"GOOGL",price:"$172.50",change:+0.6,earning:true},
@@ -2929,16 +2929,16 @@ function NoticiasPage({lang}){
 // CoinGecko IDs para los 4 crypto principales (API gratis, sin key)
 const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
 const TICKER_DATA_INIT = [
-  {s:"BTC",  n:"Bitcoin",    p:67420,  c:+2.31,  col:"#f7931a", cg:"bitcoin"},
-  {s:"ETH",  n:"Ethereum",   p:3184,   c:+1.12,  col:"#627eea", cg:"ethereum"},
-  {s:"SOL",  n:"Solana",     p:172.4,  c:+3.45,  col:"#9945ff", cg:"solana"},
-  {s:"BNB",  n:"BNB",        p:608,    c:+0.87,  col:"#f3ba2f", cg:"binancecoin"},
-  {s:"NVDA", n:"NVIDIA",     p:875.2,  c:+3.72,  col:"#76b900", cg:null},
-  {s:"AAPL", n:"Apple",      p:189.3,  c:-0.34,  col:"#94a3b8", cg:null},
-  {s:"TSLA", n:"Tesla",      p:178.5,  c:-2.14,  col:"#e31937", cg:null},
-  {s:"SPY",  n:"S&P 500",    p:524.1,  c:-0.42,  col:"#00A8FF", cg:null},
-  {s:"MSFT", n:"Microsoft",  p:415.8,  c:+1.23,  col:"#00b4d8", cg:null},
-  {s:"GOLD", n:"Gold",       p:2341,   c:+0.61,  col:"#fbbf24", cg:null},
+  {s:"BTC",  n:"Bitcoin",    p:95000,  c:+1.80,  col:"#f7931a", cg:"bitcoin"},
+  {s:"ETH",  n:"Ethereum",   p:2100,   c:+0.90,  col:"#627eea", cg:"ethereum"},
+  {s:"SOL",  n:"Solana",     p:148,    c:+2.10,  col:"#9945ff", cg:"solana"},
+  {s:"BNB",  n:"BNB",        p:620,    c:+0.55,  col:"#f3ba2f", cg:"binancecoin"},
+  {s:"NVDA", n:"NVIDIA",     p:131.5,  c:+1.20,  col:"#76b900", cg:null, fh:"NVDA"},
+  {s:"AAPL", n:"Apple",      p:207.2,  c:-0.30,  col:"#94a3b8", cg:null, fh:"AAPL"},
+  {s:"TSLA", n:"Tesla",      p:338.5,  c:-1.10,  col:"#e31937", cg:null, fh:"TSLA"},
+  {s:"SPY",  n:"S&P 500",    p:582.4,  c:-0.25,  col:"#00A8FF", cg:null, fh:"SPY"},
+  {s:"MSFT", n:"Microsoft",  p:448.2,  c:+0.90,  col:"#00b4d8", cg:null, fh:"MSFT"},
+  {s:"GOLD", n:"Gold",       p:3320,   c:+0.40,  col:"#fbbf24", cg:null},
 ];
 
 // Hook compartido para precios reales de CoinGecko
@@ -3036,21 +3036,37 @@ function TickerStrip(){
 function MarketsMiniWidget(){
   const [tab, setTab] = useState("mercados");
   const [polyData] = useState([
-    {q:"Fed rate cut in 2025?", p:0.62, vol:"$1.2M"},
-    {q:"S&P 500 closes above 5,500 in 2025?", p:0.58, vol:"$890K"},
-    {q:"Bitcoin hits $100K before year end?", p:0.71, vol:"$3.1M"},
-    {q:"US inflation drops below 3% in 2025?", p:0.45, vol:"$670K"},
+    {q:"Fed rate cut in 2026?", p:0.55, vol:"$1.8M"},
+    {q:"S&P 500 closes above 6,000 in 2026?", p:0.63, vol:"$2.1M"},
+    {q:"Bitcoin hits $120K before year end?", p:0.48, vol:"$5.2M"},
+    {q:"US inflation stays below 3% all 2026?", p:0.61, vol:"$940K"},
   ]);
   const {cryptoPrices} = useCryptoPrices();
   const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
+
+  // Fetch real stock prices from Finnhub
   useEffect(()=>{
-    const iv = setInterval(()=>{
-      setStocks(prev=>prev.map(t=>({...t,
-        p:+(t.p*(1+(Math.random()-0.49)*0.0015)).toFixed(t.p>100?1:2),
-        c:+(t.c+(Math.random()-0.5)*0.06).toFixed(2),
-      })));
-    }, 8000);
-    return ()=>clearInterval(iv);
+    const fetchStocks = async () => {
+      const stockItems = TICKER_DATA_INIT.filter(t=>t.fh);
+      const updates = await Promise.all(stockItems.map(async t=>{
+        try{
+          const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${t.fh}&token=${FINNHUB_KEY}`);
+          const d = await r.json();
+          if(d.c>0) return {s:t.s, p:d.c, c:d.dp||0};
+        }catch{}
+        return null;
+      }));
+      const valid = updates.filter(Boolean);
+      if(valid.length>0){
+        setStocks(prev=>prev.map(t=>{
+          const live=valid.find(v=>v.s===t.s);
+          return live?{...t,p:live.p,c:live.c}:t;
+        }));
+      }
+    };
+    fetchStocks();
+    const iv=setInterval(fetchStocks,60000);
+    return()=>clearInterval(iv);
   },[]);
 
   const prices = TICKER_DATA_INIT.slice(0,8).map(t=>{
