@@ -7190,20 +7190,20 @@ const ECON_2026 = [
 
 // ── COMMODITIES PAGE ──────────────────────────────────────────────────────────
 const COMMODITIES = [
-  {id:"GC=F", name:"Gold",         icon:"🥇", color:"#f59e0b", cat:"Metals",      unit:"/oz"},
-  {id:"SI=F", name:"Silver",       icon:"🥈", color:"#94a3b8", cat:"Metals",      unit:"/oz"},
-  {id:"HG=F", name:"Copper",       icon:"🔶", color:"#ea580c", cat:"Metals",      unit:"/lb"},
-  {id:"PL=F", name:"Platinum",     icon:"💎", color:"#8b5cf6", cat:"Metals",      unit:"/oz"},
-  {id:"CL=F", name:"Crude Oil WTI",icon:"🛢️", color:"#2563eb", cat:"Energy",      unit:"/bbl"},
-  {id:"BZ=F", name:"Brent Oil",    icon:"⚫", color:"#475569", cat:"Energy",      unit:"/bbl"},
-  {id:"NG=F", name:"Natural Gas",  icon:"🔥", color:"#dc2626", cat:"Energy",      unit:"/MMBtu"},
-  {id:"RB=F", name:"Gasoline",     icon:"⛽", color:"#7c3aed", cat:"Energy",      unit:"/gal"},
-  {id:"ZW=F", name:"Wheat",        icon:"🌾", color:"#d97706", cat:"Agriculture", unit:"/bu"},
-  {id:"ZC=F", name:"Corn",         icon:"🌽", color:"#16a34a", cat:"Agriculture", unit:"/bu"},
-  {id:"ZS=F", name:"Soybeans",     icon:"🫘", color:"#15803d", cat:"Agriculture", unit:"/bu"},
-  {id:"KC=F", name:"Coffee",       icon:"☕", color:"#92400e", cat:"Agriculture", unit:"/lb"},
-  {id:"CC=F", name:"Cocoa",        icon:"🍫", color:"#7c2d12", cat:"Agriculture", unit:"/MT"},
-  {id:"SB=F", name:"Sugar",        icon:"🍬", color:"#ec4899", cat:"Agriculture", unit:"/lb"},
+  {id:"GC=F", name:"Gold",         ticker:"XAU", color:"#d97706", cat:"Metals",      unit:"USD/oz"},
+  {id:"SI=F", name:"Silver",       ticker:"XAG", color:"#94a3b8", cat:"Metals",      unit:"USD/oz"},
+  {id:"HG=F", name:"Copper",       ticker:"HG",  color:"#ea580c", cat:"Metals",      unit:"USD/lb"},
+  {id:"PL=F", name:"Platinum",     ticker:"XPT", color:"#8b5cf6", cat:"Metals",      unit:"USD/oz"},
+  {id:"CL=F", name:"Crude Oil WTI",ticker:"WTI", color:"#1d4ed8", cat:"Energy",      unit:"USD/bbl"},
+  {id:"BZ=F", name:"Brent Oil",    ticker:"BRT", color:"#475569", cat:"Energy",      unit:"USD/bbl"},
+  {id:"NG=F", name:"Natural Gas",  ticker:"NG",  color:"#dc2626", cat:"Energy",      unit:"USD/MMBtu"},
+  {id:"RB=F", name:"Gasoline RBOB",ticker:"RB",  color:"#7c3aed", cat:"Energy",      unit:"USD/gal"},
+  {id:"ZW=F", name:"Wheat",        ticker:"ZW",  color:"#b45309", cat:"Agriculture", unit:"USc/bu"},
+  {id:"ZC=F", name:"Corn",         ticker:"ZC",  color:"#16a34a", cat:"Agriculture", unit:"USc/bu"},
+  {id:"ZS=F", name:"Soybeans",     ticker:"ZS",  color:"#15803d", cat:"Agriculture", unit:"USc/bu"},
+  {id:"KC=F", name:"Coffee",       ticker:"KC",  color:"#92400e", cat:"Agriculture", unit:"USc/lb"},
+  {id:"CC=F", name:"Cocoa",        ticker:"CC",  color:"#7c2d12", cat:"Agriculture", unit:"USD/MT"},
+  {id:"SB=F", name:"Sugar No.11",  ticker:"SB",  color:"#db2777", cat:"Agriculture", unit:"USc/lb"},
 ];
 
 function CommoditySparkline({pts=[],color}){
@@ -7304,7 +7304,6 @@ function CommoditiesPage(){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginBottom:20}}>
         <div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:24}}>⛏️</span>
             <h1 style={{margin:0,fontSize:22,fontWeight:900,color:"var(--c-text)"}}>Commodities</h1>
             <span style={{background:"#22c55e",color:"#fff",fontSize:9,fontWeight:800,padding:"2px 8px",borderRadius:10,letterSpacing:1}}>LIVE</span>
           </div>
@@ -7318,7 +7317,7 @@ function CommoditiesPage(){
           {cats.map(c=>(
             <button key={c} onClick={()=>setCat(c)}
               style={{padding:"6px 14px",borderRadius:20,border:`1.5px solid ${cat===c?"#00A8FF":"var(--c-border)"}`,background:cat===c?"#00A8FF":"var(--c-card)",color:cat===c?"#fff":"var(--c-muted2)",fontWeight:700,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>
-              {c==="All"?"All":c==="Metals"?"🥇 Metals":c==="Energy"?"🛢️ Energy":"🌾 Agriculture"}
+              {c==="All"?"All":c==="Metals"?"Metals":c==="Energy"?"Energy":"Agriculture"}
             </button>
           ))}
           <select value={sort} onChange={e=>setSort(e.target.value)}
@@ -7361,7 +7360,10 @@ function CommoditiesPage(){
                   {/* Name */}
                   <td style={{padding:"13px 18px"}}>
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <div style={{width:34,height:34,borderRadius:9,background:c.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>{c.icon}</div>
+                      <div style={{width:4,height:34,borderRadius:2,background:c.color,flexShrink:0}}/>
+                      <div style={{width:38,height:22,borderRadius:5,background:c.color+"18",border:`1px solid ${c.color}40`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <span style={{fontSize:9,fontWeight:800,color:c.color,letterSpacing:0.5,fontFamily:"monospace"}}>{c.ticker}</span>
+                      </div>
                       <div>
                         <div style={{color:"var(--c-text)",fontWeight:700,fontSize:13,whiteSpace:"nowrap"}}>{c.name}</div>
                         <div style={{color:"var(--c-muted2)",fontSize:10}}>{c.cat} · {c.unit}</div>
