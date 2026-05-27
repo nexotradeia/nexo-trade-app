@@ -8161,7 +8161,8 @@ const GURUS = [
   },
 ];
 
-function GurusPage({isPremium, onNeedPremium}){
+// Old GurusPage removed — replaced by GURUS_13F version below
+function _OldGurusPageUnused({isPremium, onNeedPremium}){
   const [selected, setSelected] = useState(null);
   const [view, setView]         = useState("grid"); // "grid" | "detail"
   const [filterChg, setFilterChg] = useState("all");
@@ -8539,6 +8540,412 @@ function FlowPage({isPremium,onNeedPremium}){
   );
 }
 
+// ── GURÚS / INVERSORES INFLUYENTES PAGE ──────────────────────────────────────
+const GURUS_13F = [
+  { id:"ackman", name:"Bill Ackman", fund:"Pershing Square Capital Management", emoji:"♟️", color:"#06B6D4",
+    aum:"$13.7B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:11,
+    bio:"Activista agresivo. Alta convicción, pocas posiciones. Conocido por sus campañas en Herbalife y Valeant.",
+    style:"Activista · Concentrado · Largo plazo",
+    holdings:[
+      {t:"BN",   n:"Brookfield Corp.",              pct:17.62, act:"Reduce", actPct:-2.78,  shares:59697208, rPrice:40.47,  val:2415946000, w52l:37.32, w52h:49.48},
+      {t:"AMZN", n:"Amazon.com Inc.",                pct:17.39, act:"Add",    actPct:19.19,  shares:11451981, rPrice:208.27, val:2385104000, w52l:196.00,w52h:278.56},
+      {t:"UBER", n:"Uber Technologies Inc.",         pct:15.71, act:"Reduce", actPct:-0.82,  shares:29958771, rPrice:71.93,  val:2154934000, w52l:68.46, w52h:101.99},
+      {t:"MSFT", n:"Microsoft Corp.",                pct:15.26, act:"Buy",    actPct:null,   shares:5654078,  rPrice:370.17, val:2092970000, w52l:355.51,w52h:551.05},
+      {t:"QSR",  n:"Restaurant Brands Intl.",        pct:12.20, act:"Reduce", actPct:-0.97,  shares:22645483, rPrice:73.90,  val:1673501000, w52l:59.68, w52h:81.96},
+      {t:"META", n:"Meta Platforms Inc.",             pct:11.10, act:"Reduce", actPct:-0.48,  shares:2660861,  rPrice:572.13, val:1522358000, w52l:520.26,w52h:794.38},
+      {t:"HHH",  n:"Howard Hughes Holdings Inc.",    pct:8.70,  act:null,    actPct:null,   shares:18852064, rPrice:63.26,  val:1192582000, w52l:61.01, w52h:91.07},
+      {t:"SEG",  n:"Seaport Entertainment Group",    pct:0.79,  act:null,    actPct:null,   shares:5023780,  rPrice:21.48,  val:107911000,  w52l:17.28, w52h:28.34},
+      {t:"GOOG", n:"Alphabet Inc. CL C",             pct:0.65,  act:"Reduce", actPct:-94.94, shares:311726,   rPrice:286.86, val:89422000,   w52l:162.96,w52h:404.47},
+      {t:"HTZ",  n:"Hertz Global Holdings Inc.",     pct:0.51,  act:null,    actPct:null,   shares:15241127, rPrice:4.61,   val:70262000,   w52l:3.78,  w52h:8.44},
+      {t:"GOOGL",n:"Alphabet Inc.",                  pct:0.07,  act:"Reduce", actPct:-95.23, shares:32376,    rPrice:287.56, val:9310000,    w52l:161.64,w52h:408.61},
+    ]},
+  { id:"buffett", name:"Warren Buffett", fund:"Berkshire Hathaway Inc.", emoji:"🎩", color:"#F59E0B",
+    aum:"$370B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:45,
+    bio:"El Oráculo de Omaha. Value investing puro. Compra negocios extraordinarios a precios razonables.",
+    style:"Value · Largo plazo · Dividendos",
+    holdings:[
+      {t:"AAPL", n:"Apple Inc.",                    pct:42.0, act:"Reduce", actPct:-13.0,  shares:915000000,rPrice:172.00, val:157380000000,w52l:164.08,w52h:237.23},
+      {t:"BAC",  n:"Bank of America Corp.",          pct:10.8, act:"Reduce", actPct:-8.0,   shares:1032852006,rPrice:37.48, val:38695000000, w52l:33.51, w52h:45.56},
+      {t:"AXP",  n:"American Express Co.",           pct:9.5,  act:"Hold",   actPct:null,   shares:151610700,rPrice:226.01,val:34251000000, w52l:211.67,w52h:305.76},
+      {t:"KO",   n:"Coca-Cola Co.",                  pct:8.3,  act:"Hold",   actPct:null,   shares:400000000,rPrice:59.74, val:23896000000, w52l:57.71, w52h:73.51},
+      {t:"CVX",  n:"Chevron Corp.",                  pct:5.8,  act:"Reduce", actPct:-17.0,  shares:118610534,rPrice:164.53,val:19519000000, w52l:133.48,w52h:173.34},
+      {t:"OXY",  n:"Occidental Petroleum Corp.",     pct:4.5,  act:"Add",    actPct:2.4,    shares:255280424,rPrice:48.00, val:12253000000, w52l:43.97, w52h:68.21},
+      {t:"MCO",  n:"Moody's Corp.",                  pct:3.2,  act:"Hold",   actPct:null,   shares:24669778, rPrice:434.95,val:10726000000, w52l:391.66,w52h:530.50},
+      {t:"KHC",  n:"Kraft Heinz Co.",                pct:2.6,  act:"Hold",   actPct:null,   shares:325634818,rPrice:28.36, val:9232000000, w52l:26.49, w52h:38.11},
+    ]},
+  { id:"burry", name:"Michael Burry", fund:"Scion Asset Management", emoji:"🐻", color:"#EF4444",
+    aum:"$145M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:8,
+    bio:"El del 'Big Short'. Contrarian extremo. Apostó contra el mercado hipotecario en 2007 y ganó $800M.",
+    style:"Contrarian · Value profundo · Shorts",
+    holdings:[
+      {t:"JD",   n:"JD.com Inc.",                    pct:18.2, act:"Add",    actPct:12.4,  shares:750000,   rPrice:35.44,  val:26580000,   w52l:20.82, w52h:41.51},
+      {t:"BABA", n:"Alibaba Group Holding Ltd.",      pct:15.1, act:"New",    actPct:null,  shares:200000,   rPrice:79.86,  val:15972000,   w52l:63.24, w52h:117.82},
+      {t:"HCA",  n:"HCA Healthcare Inc.",             pct:12.4, act:"Reduce", actPct:-10.0, shares:50000,    rPrice:318.24, val:15912000,   w52l:280.52,w52h:422.06},
+      {t:"GOOGL",n:"Alphabet Inc.",                   pct:9.8,  act:"Hold",   actPct:null,  shares:85000,    rPrice:161.48, val:13725800,   w52l:140.53,w52h:207.05},
+      {t:"WBA",  n:"Walgreens Boots Alliance",        pct:8.7,  act:"New",    actPct:null,  shares:1200000,  rPrice:10.15,  val:12180000,   w52l:8.14,  w52h:22.54},
+      {t:"CVS",  n:"CVS Health Corp.",                pct:7.9,  act:"Add",    actPct:25.0,  shares:220000,   rPrice:49.28,  val:10841600,   w52l:44.71, w52h:80.88},
+    ]},
+  { id:"druckenmiller", name:"Stanley Druckenmiller", fund:"Duquesne Family Office", emoji:"🧠", color:"#10B981",
+    aum:"$3.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:28,
+    bio:"El mejor macro trader de todos los tiempos. Retornos de +30%/año por 30 años sin un año negativo.",
+    style:"Macro · Momentum · Flexible",
+    holdings:[
+      {t:"NVDA", n:"NVIDIA Corp.",                   pct:14.2, act:"Add",    actPct:8.3,   shares:3400000,  rPrice:80.14,  val:272476000,  w52l:47.32, w52h:153.13},
+      {t:"META", n:"Meta Platforms Inc.",             pct:11.8, act:"Hold",   actPct:null,  shares:620000,   rPrice:508.59, val:315325800,  w52l:414.50,w52h:740.91},
+      {t:"MSFT", n:"Microsoft Corp.",                 pct:9.4,  act:"Reduce", actPct:-5.2,  shares:620000,   rPrice:407.70, val:252774000,  w52l:385.58,w52h:468.35},
+      {t:"AAPL", n:"Apple Inc.",                      pct:8.1,  act:"Hold",   actPct:null,  shares:1270000,  rPrice:170.03, val:215938100,  w52l:164.08,w52h:237.23},
+      {t:"AI",   n:"C3.ai Inc.",                      pct:7.6,  act:"New",    actPct:null,  shares:4500000,  rPrice:31.10,  val:139950000,  w52l:18.97, w52h:50.94},
+      {t:"AMZN", n:"Amazon.com Inc.",                 pct:6.9,  act:"Add",    actPct:14.0,  shares:700000,   rPrice:186.55, val:130585000,  w52l:171.81,w52h:242.52},
+    ]},
+  { id:"soros", name:"George Soros", fund:"Soros Fund Management", emoji:"🌐", color:"#EC4899",
+    aum:"$6.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:52,
+    bio:"Quebró el Banco de Inglaterra en 1992. Teoría de la reflexividad. Macro global y trades políticos.",
+    style:"Macro global · Político · Reflexividad",
+    holdings:[
+      {t:"RIVN", n:"Rivian Automotive Inc.",          pct:7.8,  act:"Add",    actPct:45.0,  shares:21000000, rPrice:14.82,  val:311220000,  w52l:8.26,  w52h:19.84},
+      {t:"NVDA", n:"NVIDIA Corp.",                    pct:6.4,  act:"New",    actPct:null,  shares:1100000,  rPrice:80.14,  val:88154000,   w52l:47.32, w52h:153.13},
+      {t:"JD",   n:"JD.com Inc.",                     pct:5.2,  act:"Reduce", actPct:-8.0,  shares:4200000,  rPrice:35.44,  val:148848000,  w52l:20.82, w52h:41.51},
+      {t:"MDLZ", n:"Mondelez Intl Inc.",               pct:4.8,  act:"Hold",   actPct:null,  shares:4100000,  rPrice:60.58,  val:248378000,  w52l:54.23, w52h:73.89},
+      {t:"NVS",  n:"Novartis AG ADR",                 pct:4.1,  act:"Hold",   actPct:null,  shares:2800000,  rPrice:100.25, val:280700000,  w52l:89.20, w52h:118.44},
+    ]},
+];
+
+function GurusPage({ isPremium, onNeedPremium }) {
+  const [tab, setTab]           = useState("gurus");
+  const [arkFund, setArkFund]   = useState("ARKK");
+  const [arkData, setArkData]   = useState(null);
+  const [arkLoad, setArkLoad]   = useState(false);
+  const [insiders, setInsiders] = useState(null);
+  const [insLoad, setInsLoad]   = useState(false);
+  const [livePx, setLivePx]     = useState({});
+  const [selGuru, setSelGuru]   = useState(null);
+  const [detailTab, setDetailTab] = useState("holdings");
+
+  // Fetch live prices for all guru holdings
+  useEffect(() => {
+    const tickers = [...new Set(GURUS_13F.flatMap(g => g.holdings.map(h => h.t)))];
+    Promise.all(tickers.map(async t => {
+      try {
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${t}&token=${FINNHUB_KEY}`);
+        const d = await r.json();
+        if (d.c > 0) return { t, price: d.c, change: d.dp || 0, high52: d.h || 0, low52: d.l || 0 };
+      } catch {}
+      return null;
+    })).then(results => {
+      const map = {};
+      results.filter(Boolean).forEach(r => { map[r.t] = r; });
+      setLivePx(map);
+    });
+  }, []);
+
+  // Fetch ARK data
+  useEffect(() => {
+    if (tab !== "ark") return;
+    setArkLoad(true);
+    fetch(`/api/ark?fund=${arkFund}`)
+      .then(r => r.json())
+      .then(d => { setArkData(d); setArkLoad(false); })
+      .catch(() => setArkLoad(false));
+  }, [tab, arkFund]);
+
+  // Fetch insiders
+  useEffect(() => {
+    if (tab !== "insiders") return;
+    setInsLoad(true);
+    fetch("/api/insiders")
+      .then(r => r.json())
+      .then(d => { setInsiders(d); setInsLoad(false); })
+      .catch(() => setInsLoad(false));
+  }, [tab]);
+
+  if (!isPremium) return (
+    <div style={{maxWidth:560,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:60,marginBottom:12}}>🐋</div>
+      <div style={{fontSize:24,fontWeight:900,color:C.text,marginBottom:8}}>Inversores Influyentes</div>
+      <div style={{fontSize:14,color:C.muted,lineHeight:1.7,marginBottom:28}}>
+        Sigue en tiempo real a Buffett, Cathie Wood, Burry y los insiders corporativos.
+      </div>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer"}}>
+        ✦ Activar VIP — $9.99/mes
+      </button>
+    </div>
+  );
+
+  const fmt$ = v => v >= 1e9 ? `$${(v/1e9).toFixed(1)}B` : v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v/1e3).toFixed(0)}K` : `$${v}`;
+  const TABS = [{k:"gurus",l:"🏛️ Gurús"},{k:"ark",l:"🚀 ARK Daily"},{k:"insiders",l:"🕵️ Insiders SEC"}];
+  const ARK_FUNDS = ["ARKK","ARKQ","ARKW","ARKG","ARKF"];
+
+  return (
+    <div style={{maxWidth:980,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)"}}/>
+        <div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
+          <span style={{fontSize:32}}>👁️</span>
+          <div>
+            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Inversores Influyentes</div>
+            <div style={{fontSize:12,color:"#475569"}}>Gurús · ARK en tiempo real · Insiders corporativos SEC</div>
+          </div>
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6,background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:20,padding:"5px 12px"}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>
+            <span style={{fontSize:11,fontWeight:700,color:"#00D26A"}}>LIVE</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:6,marginBottom:16}}>
+        {TABS.map(t => (
+          <button key={t.k} onClick={()=>setTab(t.k)}
+            style={{background:tab===t.k?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${tab===t.k?"transparent":C.border}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(124,58,237,0.3)":"none"}}>
+            {t.l}
+          </button>
+        ))}
+      </div>
+
+      {/* ── GURÚS TAB ── */}
+      {tab==="gurus" && !selGuru && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
+          {GURUS_13F.map(g => (
+            <div key={g.id} onClick={()=>{setSelGuru(g.id);setDetailTab("holdings");}}
+              style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden"}}
+              onMouseEnter={e=>{e.currentTarget.style.border=`1px solid ${g.color}60`;e.currentTarget.style.boxShadow=`0 8px 24px ${g.color}15`;}}
+              onMouseLeave={e=>{e.currentTarget.style.border=`1px solid ${g.color}30`;e.currentTarget.style.boxShadow="none";}}>
+              <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}12 0%,transparent 70%)`,pointerEvents:"none"}}/>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                <div style={{width:46,height:46,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{g.emoji}</div>
+                <div>
+                  <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14}}>{g.name}</div>
+                  <div style={{fontSize:11,color:"#475569"}}>{g.fund}</div>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:10,marginBottom:10}}>
+                <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                  <div style={{fontSize:11,fontWeight:800,color:g.color}}>{g.aum}</div>
+                  <div style={{fontSize:9,color:"#475569"}}>AUM</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                  <div style={{fontSize:11,fontWeight:800,color:"#F1F5F9"}}>{g.numStocks}</div>
+                  <div style={{fontSize:9,color:"#475569"}}>Posiciones</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"#F1F5F9"}}>{g.period}</div>
+                  <div style={{fontSize:9,color:"#475569"}}>Período</div>
+                </div>
+              </div>
+              <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{g.bio}</div>
+              <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                {g.holdings.slice(0,5).map(h=>{
+                  const px=livePx[h.t]; const pos=(px?.change||0)>=0;
+                  return(<span key={h.t} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:g.color}}>
+                    {h.t} <span style={{color:pos?"#00D26A":"#FF4D6A",fontSize:9}}>{px?`${pos?"+":""}${px.change.toFixed(1)}%`:""}</span>
+                  </span>);
+                })}
+              </div>
+              <div style={{marginTop:10,textAlign:"right",fontSize:10,color:g.color,fontWeight:700}}>Ver portafolio completo →</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── DETAIL VIEW (like the screenshot) ── */}
+      {tab==="gurus" && selGuru && (()=>{
+        const g = GURUS_13F.find(x=>x.id===selGuru);
+        if(!g) return null;
+        const buys    = g.holdings.filter(h=>h.act==="Buy"||h.act==="Add"||h.act==="New");
+        const sells   = g.holdings.filter(h=>h.act==="Reduce"||h.act==="Sold");
+        const viewMap = {holdings:g.holdings, buys, sells};
+        const rows    = viewMap[detailTab]||g.holdings;
+        const fmt$B   = v=>v>=1e9?`$${(v/1e9).toFixed(2)}B`:v>=1e6?`$${(v/1e6).toFixed(1)}M`:`$${v?.toLocaleString()||0}`;
+        return(
+          <div>
+            {/* Back */}
+            <button onClick={()=>setSelGuru(null)} style={{background:"none",border:"none",cursor:"pointer",color:C.muted,fontSize:13,fontWeight:700,marginBottom:14,padding:0,display:"flex",alignItems:"center",gap:6}}>
+              ← Volver a todos los inversores
+            </button>
+            {/* Guru header */}
+            <div style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"20px 24px",marginBottom:16}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+                <div style={{width:52,height:52,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>{g.emoji}</div>
+                <div>
+                  <div style={{fontWeight:900,color:"#F1F5F9",fontSize:18}}>{g.name}</div>
+                  <div style={{fontSize:12,color:"#475569"}}>{g.fund}</div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+                {[["Período",g.period],["Fecha portafolio",g.portfolioDate],["N° de acciones",g.numStocks],["Valor portafolio",g.aum]].map(([l,v])=>(
+                  <div key={l} style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 14px"}}>
+                    <div style={{fontSize:10,color:"#475569",marginBottom:3}}>{l}</div>
+                    <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Sub-tabs */}
+            <div style={{display:"flex",gap:6,marginBottom:14}}>
+              {[["holdings","📊 Holdings"],["buys","🟢 Compras"],["sells","🔴 Ventas"]].map(([k,l])=>(
+                <button key={k} onClick={()=>setDetailTab(k)}
+                  style={{background:detailTab===k?g.color+"20":"transparent",border:`1.5px solid ${detailTab===k?g.color:C.border}`,borderRadius:20,padding:"6px 16px",fontSize:12,fontWeight:700,color:detailTab===k?g.color:C.muted,cursor:"pointer",transition:"all 0.15s"}}>
+                  {l}
+                </button>
+              ))}
+              <div style={{marginLeft:"auto",fontSize:11,color:C.muted2,alignSelf:"center"}}>Fuente: SEC 13F · {g.period} · Precios en vivo: Finnhub</div>
+            </div>
+            {/* Table header */}
+            <div style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 90px 90px 80px 80px",gap:6,padding:"8px 14px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`,overflowX:"auto"}}>
+              {["ACCIÓN","EMPRESA","% PORT.","ACTIVIDAD","ACCIONES","PRECIO REP.","VALOR","PRECIO HOY","+/- REP.","52W RANGO"].map(h=>(
+                <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.5,whiteSpace:"nowrap"}}>{h}</div>
+              ))}
+            </div>
+            {/* Rows */}
+            <div style={{overflowX:"auto"}}>
+              {rows.map((h,i)=>{
+                const px   = livePx[h.t];
+                const curr = px?.price||null;
+                const diff = curr&&h.rPrice ? ((curr-h.rPrice)/h.rPrice*100) : null;
+                const pos  = (diff||0)>=0;
+                const actColor = h.act==="Buy"||h.act==="Add"||h.act==="New"?"#00D26A":h.act==="Reduce"||h.act==="Sold"?"#FF4D6A":"#64748B";
+                return(
+                  <div key={h.t} style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 100px 90px 90px 80px",gap:6,padding:"11px 14px",background:i%2===0?"rgba(255,255,255,0.01)":"transparent",borderRadius:10,marginBottom:3,border:"1px solid rgba(255,255,255,0.03)",transition:"background 0.15s",minWidth:900}}
+                    onMouseEnter={e=>e.currentTarget.style.background=`${g.color}08`}
+                    onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"rgba(255,255,255,0.01)":"transparent"}>
+                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:g.color}}>{h.t}</div>
+                    <div style={{fontSize:11,color:C.muted,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.n}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{h.pct?.toFixed(2)}%</div>
+                    <div style={{fontSize:11,fontWeight:700,color:actColor}}>
+                      {h.act?`${h.act}${h.actPct?` ${h.actPct>0?"+":""}${h.actPct?.toFixed(2)}%`:""}`:"—"}
+                    </div>
+                    <div style={{fontSize:11,color:C.muted}}>{h.shares?.toLocaleString()||"—"}</div>
+                    <div style={{fontSize:12,fontWeight:600,color:"#F1F5F9"}}>${h.rPrice?.toFixed(2)||"—"}</div>
+                    <div style={{fontSize:11,color:C.muted}}>{fmt$B(h.val)}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{curr?`$${curr.toFixed(2)}`:"—"}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:diff===null?"#64748B":pos?"#00D26A":"#FF4D6A"}}>
+                      {diff!==null?`${pos?"+":""}${diff.toFixed(2)}%`:"—"}
+                    </div>
+                    <div style={{fontSize:10,color:"#475569",whiteSpace:"nowrap"}}>
+                      {h.w52l&&h.w52h?`$${h.w52l} - $${h.w52h}`:"—"}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{textAlign:"center",padding:"12px 0",fontSize:11,color:C.muted2}}>
+              * Precio reportado = precio al cierre del trimestre · Precio actual en tiempo real vía Finnhub
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── ARK TAB ── */}
+      {tab==="ark" && (
+        <div>
+          <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+            <span style={{fontSize:12,color:C.muted,fontWeight:600}}>ETF:</span>
+            {ARK_FUNDS.map(f => (
+              <button key={f} onClick={()=>setArkFund(f)}
+                style={{background:arkFund===f?"rgba(139,92,246,0.2)":"transparent",border:`1px solid ${arkFund===f?"rgba(139,92,246,0.5)":C.border}`,borderRadius:20,padding:"5px 12px",fontSize:12,fontWeight:700,color:arkFund===f?"#A78BFA":C.muted,cursor:"pointer"}}>
+                {f}
+              </button>
+            ))}
+            <span style={{marginLeft:"auto",fontSize:11,color:C.muted2}}>🚀 Cathie Wood · Actualizado: {arkData?.date||"hoy"}</span>
+          </div>
+
+          {arkLoad ? (
+            <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
+              <div style={{fontSize:32,marginBottom:8}}>🚀</div>
+              <div>Cargando holdings de ARK...</div>
+            </div>
+          ) : (
+            <>
+              <div style={{display:"grid",gridTemplateColumns:"50px 1fr 80px 80px 80px",gap:8,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
+                {["#","EMPRESA","PESO","PRECIO","HOY"].map(h=>(
+                  <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
+                ))}
+              </div>
+              {(arkData?.holdings||[]).map((h,i) => {
+                const pos = h.change >= 0;
+                return (
+                  <div key={h.ticker} style={{display:"grid",gridTemplateColumns:"50px 1fr 80px 80px 80px",gap:8,padding:"12px 16px",background:"rgba(255,255,255,0.01)",border:"1px solid rgba(255,255,255,0.04)",borderRadius:12,marginBottom:5,transition:"background 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.05)"}
+                    onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.01)"}>
+                    <div style={{fontSize:12,color:C.muted2,fontWeight:700}}>#{i+1}</div>
+                    <div>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <span style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:"#8B5CF6"}}>{h.ticker}</span>
+                        <span style={{fontSize:11,color:C.muted}}>{h.company}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{h.weight?.toFixed(1)||"—"}%</div>
+                      <div style={{width:"100%",height:3,background:"rgba(255,255,255,0.05)",borderRadius:2,marginTop:3}}>
+                        <div style={{width:`${Math.min((h.weight||0)*5,100)}%`,height:"100%",background:"linear-gradient(90deg,#8B5CF6,#6D28D9)",borderRadius:2}}/>
+                      </div>
+                    </div>
+                    <div style={{fontSize:13,fontWeight:700,color:"#F1F5F9"}}>{h.price?`$${h.price.toFixed(2)}`:"—"}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:pos?"#00D26A":"#FF4D6A"}}>{h.change!=null?`${pos?"+":""}${h.change.toFixed(2)}%`:"—"}</div>
+                  </div>
+                );
+              })}
+              {arkData?.fallback && <div style={{textAlign:"center",fontSize:11,color:C.muted2,padding:"8px 0"}}>* Datos del último reporte disponible</div>}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── INSIDERS TAB ── */}
+      {tab==="insiders" && (
+        <div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+            <div style={{fontSize:12,color:C.muted}}>Compras y ventas de ejecutivos · Fuente: SEC EDGAR Form 4</div>
+            <button onClick={()=>{setInsLoad(true);fetch("/api/insiders").then(r=>r.json()).then(d=>{setInsiders(d);setInsLoad(false);}).catch(()=>setInsLoad(false));}}
+              style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:C.muted,cursor:"pointer"}}>
+              ⟳ Actualizar
+            </button>
+          </div>
+
+          {insLoad ? (
+            <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
+              <div style={{fontSize:32,marginBottom:8}}>🕵️</div>
+              <div>Cargando datos de SEC EDGAR...</div>
+            </div>
+          ) : (
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {(insiders?.transactions||[]).map((t,i) => {
+                const isCompra = t.type==="COMPRA";
+                return (
+                  <div key={i} style={{background:"rgba(255,255,255,0.01)",border:`1px solid rgba(255,255,255,0.05)`,borderLeft:`3px solid ${isCompra?"#00D26A":"#FF4D6A"}`,borderRadius:14,padding:"14px 18px",display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
+                    <div style={{width:40,height:40,borderRadius:12,background:isCompra?"rgba(0,210,106,0.1)":"rgba(255,77,106,0.1)",border:`1px solid ${isCompra?"rgba(0,210,106,0.2)":"rgba(255,77,106,0.2)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
+                      {isCompra?"💚":"❤️"}
+                    </div>
+                    <div style={{flex:1,minWidth:180}}>
+                      <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{t.name}</div>
+                      <div style={{fontSize:11,color:"#475569"}}>{t.role} · {t.company}</div>
+                    </div>
+                    <div style={{textAlign:"center"}}>
+                      <div style={{fontFamily:"monospace",fontWeight:800,fontSize:14,color:t.ticker?.includes("BTC")?"#F7931A":"#A78BFA"}}>{t.ticker}</div>
+                      <span style={{background:isCompra?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:isCompra?"#00D26A":"#FF4D6A",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800}}>
+                        {isCompra?"▲ COMPRA":"▼ VENTA"}
+                      </span>
+                    </div>
+                    {t.value>0&&<div style={{textAlign:"right"}}>
+                      <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{fmt$(t.value)}</div>
+                      <div style={{fontSize:10,color:"#475569"}}>{t.shares?.toLocaleString()||"—"} acciones</div>
+                    </div>}
+                    <div style={{fontSize:10,color:C.muted2,textAlign:"right",minWidth:60}}>{t.filed}</div>
+                  </div>
+                );
+              })}
+              <div style={{textAlign:"center",fontSize:11,color:C.muted2,padding:"8px 0"}}>
+                Fuente: SEC EDGAR · Form 4 · {insiders?.source||""}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const NAV_ITEMS = (t) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},
   {label:t.acciones,idx:3},
@@ -8546,7 +8953,7 @@ const NAV_ITEMS = (t) => [
   {label:"🎓 Webinars",idx:11},
   {label:"📚 Academia",idx:12},
   {label:"🏛️ Super Inversores",idx:19,vip:true},
-  {label:"🐋 Flujo VIP",idx:18,vip:true},
+  {label:"🐋 Flujo VIP",idx:20,vip:true},
   {label:"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
@@ -9292,10 +9699,10 @@ export default function App(){
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===14) return <EconCalendarPage/>;
     if(page===18) return <CommoditiesPage/>;
+    if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===15) return <DividendCalendarPage/>;
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
-    if(page===18) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
     return(
