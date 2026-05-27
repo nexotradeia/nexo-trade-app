@@ -10233,83 +10233,103 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
   );
 
   return (
-    <div style={{maxWidth:900,margin:"0 auto",height:"calc(100vh - 140px)",display:"flex",flexDirection:"column"}}>
+    <div className="nexo-messages-wrapper" style={{maxWidth:920,margin:"0 auto",height:"calc(100vh - 130px)",display:"flex",flexDirection:"column",gap:0}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:18,padding:"14px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:12}}>
-        <span style={{fontSize:24}}>💬</span>
+      <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(109,40,217,0.08))",border:"1px solid rgba(139,92,246,0.25)",borderRadius:"18px 18px 0 0",padding:"14px 20px",display:"flex",alignItems:"center",gap:12,borderBottom:"none"}}>
+        <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>💬</div>
         <div>
-          <div style={{fontSize:17,fontWeight:900,color:C.text}}>Mensajes Privados</div>
-          <div style={{fontSize:11,color:C.muted}}>Solo entre usuarios que se siguen mutuamente · {mutuals.length} conexiones</div>
+          <div style={{fontSize:16,fontWeight:900,color:C.text,letterSpacing:"-0.3px"}}>Mensajes Privados</div>
+          <div style={{fontSize:11,color:C.muted,marginTop:1}}>
+            {mutuals.length > 0
+              ? <span><span style={{color:"#10B981",fontWeight:700}}>{mutuals.length}</span> conexión{mutuals.length!==1?"es":""} mutua{mutuals.length!==1?"s":""}</span>
+              : "Solo entre usuarios que se siguen mutuamente"}
+          </div>
         </div>
-        <button onClick={()=>{setNewDM(true);setSelConv(null);}} style={{marginLeft:"auto",background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:20,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>
-          ✏️ Nuevo mensaje
+        <button onClick={()=>{setNewDM(true);setSelConv(null);}}
+          style={{marginLeft:"auto",background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:20,padding:"8px 18px",fontSize:12,fontWeight:800,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:6,boxShadow:"0 2px 12px rgba(139,92,246,0.35)",whiteSpace:"nowrap"}}>
+          ✏️ <span className="nexo-msg-btn-text">Nuevo mensaje</span>
         </button>
       </div>
 
-      <div className="nexo-messages-grid" style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:10,flex:1,minHeight:0}}>
+      <div className="nexo-messages-grid" style={{display:"grid",gridTemplateColumns:"300px 1fr",flex:1,minHeight:0,border:`1px solid rgba(139,92,246,0.2)`,borderRadius:"0 0 18px 18px",overflow:"hidden"}}>
         {/* ── LISTA DE CONVERSACIONES ── */}
-        <div className="nexo-messages-list" style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"auto",display:"flex",flexDirection:"column"}}>
-          <div style={{padding:"10px 12px",borderBottom:`1px solid ${C.border}`}}>
+        <div className="nexo-messages-list" style={{background:C.card,borderRight:`1px solid rgba(139,92,246,0.15)`,overflow:"auto",display:"flex",flexDirection:"column"}}>
+          {/* Search */}
+          <div style={{padding:"10px 12px",borderBottom:`1px solid rgba(139,92,246,0.1)`,background:"rgba(139,92,246,0.04)"}}>
             <div style={{position:"relative"}}>
-              <span style={{position:"absolute",left:8,top:"50%",transform:"translateY(-50%)",fontSize:11,color:C.muted2}}>🔍</span>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar…"
-                style={{width:"100%",background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:20,padding:"6px 8px 6px 26px",fontSize:12,color:C.text,outline:"none",boxSizing:"border-box"}}/>
+              <svg style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",opacity:0.4}} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar conversación…"
+                style={{width:"100%",background:"rgba(255,255,255,0.05)",border:`1px solid rgba(139,92,246,0.2)`,borderRadius:20,padding:"7px 10px 7px 28px",fontSize:12,color:C.text,outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}/>
             </div>
           </div>
-          {loading && <div style={{padding:20,textAlign:"center",color:C.muted,fontSize:12}}>Cargando…</div>}
-          {!loading && mutuals.length === 0 && (
-            <div style={{padding:20,textAlign:"center"}}>
-              <div style={{fontSize:32,marginBottom:8}}>👥</div>
-              <div style={{fontSize:13,color:C.muted,lineHeight:1.6}}>Aún no tienes conexiones mutuas. Sigue a alguien y espera que te sigan de vuelta para poder chatear.</div>
+
+          {loading && (
+            <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8,padding:24,color:C.muted}}>
+              <div style={{width:28,height:28,borderRadius:"50%",border:"2px solid rgba(139,92,246,0.3)",borderTopColor:"#8B5CF6",animation:"spin 1s linear infinite"}}/>
+              <span style={{fontSize:12}}>Cargando…</span>
             </div>
           )}
+
+          {!loading && mutuals.length === 0 && (
+            <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 16px",textAlign:"center"}}>
+              <div style={{width:52,height:52,borderRadius:16,background:"rgba(139,92,246,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,marginBottom:12}}>👥</div>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:6}}>Sin conexiones aún</div>
+              <div style={{fontSize:12,color:C.muted,lineHeight:1.6}}>Sigue a alguien y espera que te siga de vuelta para poder chatear.</div>
+            </div>
+          )}
+
           {/* Mutuales disponibles para chatear */}
-          {allFollowers.filter(p => !search || p.username?.toLowerCase().includes(search.toLowerCase())).map(prof => {
-            const conv = conversations.find(c => c.userId === prof.id);
-            const isSelected = selConv?.id === prof.id;
-            return (
-              <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
-                style={{display:"flex",gap:10,alignItems:"center",padding:"10px 12px",cursor:"pointer",background:isSelected?"rgba(139,92,246,0.12)":"transparent",borderLeft:`3px solid ${isSelected?"#8B5CF6":"transparent"}`,transition:"all 0.15s"}}
-                onMouseEnter={e=>{ if(!isSelected) e.currentTarget.style.background="rgba(255,255,255,0.03)"; }}
-                onMouseLeave={e=>{ if(!isSelected) e.currentTarget.style.background="transparent"; }}>
-                <div style={{width:38,height:38,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{prof.avatar_emoji||"👤"}</div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:700,color:C.text,fontSize:13,display:"flex",alignItems:"center",gap:4}}>
-                    {prof.username}
-                    <span style={{fontSize:9,background:"rgba(16,185,129,0.15)",color:"#10B981",borderRadius:4,padding:"1px 5px",fontWeight:700}}>MUTUO</span>
+          <div style={{overflowY:"auto",flex:1}}>
+            {allFollowers.filter(p => !search || p.username?.toLowerCase().includes(search.toLowerCase())).map(prof => {
+              const conv = conversations.find(c => c.userId === prof.id);
+              const isSelected = selConv?.id === prof.id;
+              return (
+                <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
+                  style={{display:"flex",gap:10,alignItems:"center",padding:"11px 14px",cursor:"pointer",background:isSelected?"rgba(139,92,246,0.13)":"transparent",borderLeft:`3px solid ${isSelected?"#8B5CF6":"transparent"}`,transition:"all 0.15s",position:"relative"}}
+                  onMouseEnter={e=>{ if(!isSelected){e.currentTarget.style.background="rgba(255,255,255,0.04)";} }}
+                  onMouseLeave={e=>{ if(!isSelected){e.currentTarget.style.background="transparent";} }}>
+                  {/* Avatar */}
+                  <div style={{width:40,height:40,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,border:isSelected?"2px solid rgba(139,92,246,0.5)":"2px solid transparent",transition:"border 0.15s"}}>
+                    {prof.avatar_emoji||"👤"}
                   </div>
-                  <div style={{fontSize:11,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{conv?.lastMsg || "Iniciar conversación"}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:700,color:isSelected?"#A78BFA":C.text,fontSize:13,marginBottom:2}}>{prof.username}</div>
+                    <div style={{fontSize:11,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{conv?.lastMsg || <span style={{color:"rgba(139,92,246,0.6)",fontStyle:"italic"}}>Iniciar conversación…</span>}</div>
+                  </div>
+                  {/* Online dot (decorativo) */}
+                  <div style={{width:8,height:8,borderRadius:"50%",background:"#10B981",flexShrink:0,opacity:0.7}}/>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* ── PANEL DE CHAT ── */}
-        <div className="nexo-messages-chat" style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        <div className="nexo-messages-chat" style={{background:C.bg||"#0a0e1a",display:"flex",flexDirection:"column",overflow:"hidden"}}>
           {/* ── NUEVO MENSAJE UI ── */}
           {newDM && !selConv && (
-            <div style={{padding:24,flex:1,overflow:"auto"}}>
-              <div style={{fontWeight:800,color:C.text,fontSize:16,marginBottom:4}}>✏️ Nuevo mensaje</div>
-              <div style={{fontSize:12,color:C.muted,marginBottom:16}}>Solo puedes escribir a usuarios que también te siguen a ti.</div>
+            <div style={{flex:1,overflow:"auto",padding:"20px 24px"}}>
+              <div style={{fontWeight:900,color:C.text,fontSize:16,marginBottom:4,letterSpacing:"-0.3px"}}>✏️ Nuevo mensaje</div>
+              <div style={{fontSize:12,color:C.muted,marginBottom:20}}>Solo puedes escribir a usuarios que también te siguen a ti.</div>
               {filteredMutualsForNew.length === 0 && (
-                <div style={{textAlign:"center",padding:24,color:C.muted}}>
-                  <div style={{fontSize:32,marginBottom:8}}>🔒</div>
-                  <div style={{fontSize:13,lineHeight:1.7}}>No tienes seguidores mutuos aún.<br/>Sigue a alguien y espera que te sigan de vuelta.</div>
+                <div style={{textAlign:"center",padding:"32px 24px",background:"rgba(139,92,246,0.04)",borderRadius:16,border:"1px dashed rgba(139,92,246,0.2)"}}>
+                  <div style={{fontSize:36,marginBottom:10}}>🔒</div>
+                  <div style={{fontWeight:700,color:C.text,fontSize:14,marginBottom:6}}>Sin conexiones mutuas</div>
+                  <div style={{fontSize:12,color:C.muted,lineHeight:1.7}}>Sigue a alguien y espera que te sigan de vuelta para poder chatear.</div>
                 </div>
               )}
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 {filteredMutualsForNew.map(prof => (
                   <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
-                    style={{display:"flex",gap:10,alignItems:"center",padding:"10px 14px",background:"rgba(255,255,255,0.03)",border:`1px solid ${C.border}`,borderRadius:12,cursor:"pointer",transition:"all 0.15s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.08)"}
-                    onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}>
-                    <div style={{width:40,height:40,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{prof.avatar_emoji||"👤"}</div>
-                    <div>
+                    style={{display:"flex",gap:12,alignItems:"center",padding:"12px 16px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(139,92,246,0.15)",borderRadius:14,cursor:"pointer",transition:"all 0.15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(139,92,246,0.08)";e.currentTarget.style.borderColor="rgba(139,92,246,0.3)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.03)";e.currentTarget.style.borderColor="rgba(139,92,246,0.15)";}}>
+                    <div style={{width:44,height:44,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{prof.avatar_emoji||"👤"}</div>
+                    <div style={{flex:1,minWidth:0}}>
                       <div style={{fontWeight:700,color:C.text,fontSize:14}}>{prof.username}</div>
-                      <div style={{fontSize:11,color:"#10B981"}}>✓ Seguidor mutuo — Puedes enviarle mensajes</div>
+                      <div style={{fontSize:11,color:"#10B981",marginTop:2}}>✓ Seguidor mutuo — Puedes enviarle mensajes</div>
                     </div>
-                    <div style={{marginLeft:"auto",color:"#8B5CF6",fontSize:13,fontWeight:700}}>Chat →</div>
+                    <div style={{color:"#8B5CF6",fontSize:18,opacity:0.8}}>→</div>
                   </div>
                 ))}
               </div>
@@ -10320,13 +10340,16 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
           {selConv && (
             <>
               {/* Chat header */}
-              <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:36,height:36,borderRadius:"50%",background:selConv.avatarColor||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{selConv.avatar||"👤"}</div>
-                <div>
-                  <div style={{fontWeight:800,color:C.text,fontSize:14}}>{selConv.username}</div>
-                  <div style={{fontSize:10,color:"#10B981"}}>✓ Seguidor mutuo · Chat privado</div>
+              <div style={{padding:"12px 18px",borderBottom:"1px solid rgba(139,92,246,0.15)",display:"flex",alignItems:"center",gap:12,background:"rgba(139,92,246,0.05)"}}>
+                <div style={{position:"relative"}}>
+                  <div style={{width:38,height:38,borderRadius:"50%",background:selConv.avatarColor||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19}}>{selConv.avatar||"👤"}</div>
+                  <div style={{position:"absolute",bottom:0,right:0,width:10,height:10,borderRadius:"50%",background:"#10B981",border:"2px solid #0a0e1a"}}/>
                 </div>
-                <button onClick={()=>setSelConv(null)} style={{marginLeft:"auto",background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:18}}>✕</button>
+                <div>
+                  <div style={{fontWeight:800,color:C.text,fontSize:14,letterSpacing:"-0.2px"}}>@{selConv.username}</div>
+                  <div style={{fontSize:10,color:"#10B981",marginTop:1}}>● En línea · Chat privado cifrado</div>
+                </div>
+                <button onClick={()=>setSelConv(null)} style={{marginLeft:"auto",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,color:C.muted,cursor:"pointer",fontSize:14,padding:"4px 8px",lineHeight:1}}>✕</button>
               </div>
 
               {/* Check mutual */}
@@ -10366,14 +10389,17 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
                   </div>
 
                   {/* Input */}
-                  <div style={{padding:"10px 14px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,alignItems:"center"}}>
+                  <div style={{padding:"10px 14px",borderTop:"1px solid rgba(139,92,246,0.15)",display:"flex",gap:8,alignItems:"center",background:"rgba(139,92,246,0.03)"}}>
                     <input value={msgText} onChange={e=>setMsgText(e.target.value)}
                       onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
-                      placeholder={`Mensaje para ${selConv.username}…`}
+                      placeholder={`Escribe a @${selConv.username}…`}
                       maxLength={500}
-                      style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:20,padding:"9px 16px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit"}}/>
+                      style={{flex:1,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:22,padding:"10px 18px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit",transition:"border 0.15s"}}
+                      onFocus={e=>e.target.style.borderColor="rgba(139,92,246,0.5)"}
+                      onBlur={e=>e.target.style.borderColor="rgba(139,92,246,0.2)"}
+                    />
                     <button onClick={sendMessage} disabled={!msgText.trim()||sending}
-                      style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:20,padding:"9px 18px",fontSize:13,fontWeight:700,color:"#fff",cursor:msgText.trim()&&!sending?"pointer":"not-allowed",opacity:msgText.trim()&&!sending?1:0.5,whiteSpace:"nowrap",transition:"all 0.15s"}}>
+                      style={{background:msgText.trim()&&!sending?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"rgba(139,92,246,0.2)",border:"none",borderRadius:22,padding:"10px 18px",fontSize:13,fontWeight:800,color:msgText.trim()&&!sending?"#fff":"rgba(139,92,246,0.5)",cursor:msgText.trim()&&!sending?"pointer":"not-allowed",whiteSpace:"nowrap",transition:"all 0.2s",boxShadow:msgText.trim()&&!sending?"0 2px 12px rgba(139,92,246,0.35)":"none"}}>
                       {sending?"…":"Enviar ↗"}
                     </button>
                   </div>
@@ -10384,13 +10410,24 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
 
           {/* Estado vacío */}
           {!selConv && !newDM && (
-            <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12}}>
-              <div style={{fontSize:48}}>💬</div>
-              <div style={{fontWeight:800,color:C.text,fontSize:16}}>Tus mensajes</div>
-              <div style={{fontSize:13,color:C.muted,textAlign:"center",maxWidth:280,lineHeight:1.7}}>
-                Selecciona una conversación o empieza una nueva. Solo con seguidores mutuos.
+            <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:14,padding:"0 20px"}}>
+              {/* Ilustración */}
+              <div style={{position:"relative",marginBottom:4}}>
+                <div style={{width:72,height:72,borderRadius:22,background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(109,40,217,0.08))",border:"1px solid rgba(139,92,246,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>💬</div>
+                <div style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",fontWeight:800,boxShadow:"0 2px 8px rgba(139,92,246,0.5)"}}>
+                  {mutuals.length}
+                </div>
               </div>
-              <button onClick={()=>setNewDM(true)} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:12,padding:"9px 24px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",marginTop:8}}>
+              <div>
+                <div style={{fontWeight:900,color:C.text,fontSize:17,textAlign:"center",letterSpacing:"-0.4px",marginBottom:6}}>Tus mensajes privados</div>
+                <div style={{fontSize:13,color:C.muted,textAlign:"center",maxWidth:260,lineHeight:1.7}}>
+                  Selecciona una conversación o empieza una nueva. Solo con seguidores mutuos.
+                </div>
+              </div>
+              <button onClick={()=>setNewDM(true)}
+                style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:14,padding:"11px 28px",fontSize:13,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(139,92,246,0.4)",transition:"transform 0.15s,box-shadow 0.15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 20px rgba(139,92,246,0.5)";}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 4px 16px rgba(139,92,246,0.4)";}}>
                 ✏️ Nuevo mensaje
               </button>
             </div>
@@ -10398,12 +10435,6 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
         </div>
       </div>
 
-      {/* Nota SQL para el admin */}
-      {user?.email && ["mariangat26@gmail.com","mariagalarraga2013@gmail.com"].includes(user.email) && (
-        <div style={{marginTop:8,background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:10,padding:"8px 14px",fontSize:11,color:"#F59E0B"}}>
-          ⚠️ <strong>Admin:</strong> Asegúrate de tener la tabla <code>direct_messages</code> en Supabase. SQL: <code>CREATE TABLE public.direct_messages (id BIGSERIAL PRIMARY KEY, sender_id UUID REFERENCES auth.users(id), receiver_id UUID REFERENCES auth.users(id), content TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW()); ALTER TABLE public.direct_messages ENABLE ROW LEVEL SECURITY; CREATE POLICY "own_messages" ON public.direct_messages USING (auth.uid()=sender_id OR auth.uid()=receiver_id); CREATE POLICY "insert_msg" ON public.direct_messages FOR INSERT WITH CHECK (auth.uid()=sender_id);</code>
-        </div>
-      )}
     </div>
   );
 }
@@ -11405,12 +11436,19 @@ export default function App(){
         .nexo-gurus-grid { grid-template-columns: 1fr !important; }
 
         /* ── MESSAGES PAGE ── */
+        .nexo-messages-wrapper { height: calc(100vh - 110px) !important; border-radius: 16px !important; }
         .nexo-messages-grid {
           grid-template-columns: 1fr !important;
+          grid-template-rows: 42vh 1fr !important;
           height: auto !important;
         }
-        .nexo-messages-list { max-height: 220px !important; border-radius: 14px !important; margin-bottom: 8px !important; }
-        .nexo-messages-chat { border-radius: 14px !important; height: calc(100vh - 380px) !important; min-height: 300px !important; }
+        .nexo-messages-list {
+          border-right: none !important;
+          border-bottom: 1px solid rgba(139,92,246,0.15) !important;
+          max-height: 42vh !important;
+        }
+        .nexo-messages-chat { min-height: 44vh !important; }
+        .nexo-msg-btn-text { display: none !important; }
 
         /* ── PROFILE PAGE ── */
         .nexo-profile-stats { grid-template-columns: repeat(3,1fr) !important; gap: 6px !important; }
