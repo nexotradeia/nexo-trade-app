@@ -62,12 +62,12 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
       >{part}</span>;
     }
     if(/^@[A-Z0-9]{1,15}$/.test(part)){
-      // @Mención — chip oscuro azulado, abre vista del ticker
+      // @Mención — chip azul, abre vista del ticker
       const sym = part.slice(1);
       return <span key={i} onClick={()=>onMentionClick&&onMentionClick(sym)}
-        style={{color:"#2563EB",fontWeight:700,cursor:"pointer",background:"rgba(37,99,235,0.07)",borderRadius:5,padding:"1px 7px",border:"1px solid rgba(37,99,235,0.25)",fontSize:"0.88em",letterSpacing:0.2,fontFamily:"monospace",display:"inline-block"}}
-        onMouseEnter={e=>{e.currentTarget.style.background="rgba(30,41,59,0.98)";e.currentTarget.style.borderColor="rgba(59,130,246,0.55)";e.currentTarget.style.color="#93C5FD";e.currentTarget.style.boxShadow="0 0 10px rgba(59,130,246,0.25)";}}
-        onMouseLeave={e=>{e.currentTarget.style.background="rgba(15,23,42,0.95)";e.currentTarget.style.borderColor="rgba(71,85,105,0.55)";e.currentTarget.style.color="#0F172A";e.currentTarget.style.boxShadow="none";}}
+        style={{color:"#3B82F6",fontWeight:700,cursor:"pointer",background:"rgba(59,130,246,0.1)",borderRadius:6,padding:"2px 8px",border:"1px solid rgba(59,130,246,0.3)",fontSize:"0.88em",letterSpacing:0.2,fontFamily:"monospace",display:"inline-block",transition:"all 0.15s"}}
+        onMouseEnter={e=>{e.currentTarget.style.background="rgba(59,130,246,0.2)";e.currentTarget.style.borderColor="rgba(59,130,246,0.55)";e.currentTarget.style.color="#60A5FA";e.currentTarget.style.boxShadow="0 0 8px rgba(59,130,246,0.2)";}}
+        onMouseLeave={e=>{e.currentTarget.style.background="rgba(59,130,246,0.1)";e.currentTarget.style.borderColor="rgba(59,130,246,0.3)";e.currentTarget.style.color="#3B82F6";e.currentTarget.style.boxShadow="none";}}
       >{part}</span>;
     }
     return part;
@@ -1926,21 +1926,116 @@ const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col
 const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
 
 function LinkPreviewCard({url}){
-  let domain="";
-  try{ domain=new URL(url).hostname.replace(/^www\./,""); }catch{}
-  if(!domain) return null;
-  return(
-    <a href={url} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
-      style={{display:"flex",alignItems:"center",gap:10,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:12,padding:"10px 14px",marginBottom:10,textDecoration:"none",transition:"all 0.15s",boxSizing:"border-box",width:"100%"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.35)";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}
-      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.background="var(--c-card2)";}}>
-      <img src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`} alt="" width={22} height={22}
-        style={{borderRadius:5,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:10,color:"var(--c-muted2)",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:2}}>{domain}</div>
-        <div style={{fontSize:12,color:"var(--c-accent)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{url}</div>
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errored, setErrored] = useState(false);
+
+  let domain = "";
+  try { domain = new URL(url).hostname.replace(/^www\./, ""); } catch {}
+
+  useEffect(() => {
+    if (!url) return;
+    let cancelled = false;
+    setLoading(true);
+    setErrored(false);
+    // Usar microlink.io — gratis, sin API key, devuelve OG title/description/image
+    fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}&screenshot=false`)
+      .then(r => r.json())
+      .then(d => {
+        if (cancelled) return;
+        if (d.status === "success" && d.data) {
+          setMeta({
+            title:       d.data.title || "",
+            description: d.data.description || "",
+            image:       d.data.image?.url || d.data.logo?.url || null,
+            logo:        d.data.logo?.url || null,
+            publisher:   d.data.publisher || domain,
+          });
+        } else {
+          setErrored(true);
+        }
+        setLoading(false);
+      })
+      .catch(() => { if (!cancelled) { setErrored(true); setLoading(false); } });
+    return () => { cancelled = true; };
+  }, [url]);
+
+  if (!domain) return null;
+
+  // Fallback minimalista si falla la API
+  if (errored || (!loading && !meta)) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
+        style={{display:"flex",alignItems:"center",gap:10,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:12,padding:"10px 14px",marginBottom:10,textDecoration:"none",boxSizing:"border-box",width:"100%"}}>
+        <img src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`} alt="" width={20} height={20} style={{borderRadius:4,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:11,color:"var(--c-muted2)",fontWeight:700,textTransform:"uppercase",letterSpacing:0.4}}>{domain}</div>
+          <div style={{fontSize:11,color:"var(--c-accent)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{url}</div>
+        </div>
+        <span style={{fontSize:13,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
+      </a>
+    );
+  }
+
+  // Skeleton mientras carga
+  if (loading) {
+    return (
+      <div style={{border:"1px solid var(--c-border)",borderRadius:14,overflow:"hidden",marginBottom:10,background:"var(--c-card2)"}}>
+        <div style={{height:160,background:"linear-gradient(90deg,var(--c-border) 25%,var(--c-card2) 50%,var(--c-border) 75%)",backgroundSize:"200% 100%",animation:"shimmer 1.4s infinite"}}/>
+        <div style={{padding:"12px 14px"}}>
+          <div style={{height:12,width:"70%",background:"var(--c-border)",borderRadius:4,marginBottom:8}}/>
+          <div style={{height:10,width:"90%",background:"var(--c-border)",borderRadius:4}}/>
+        </div>
+        <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
       </div>
-      <span style={{fontSize:14,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
+    );
+  }
+
+  // Card rica con imagen del artículo
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
+      style={{display:"block",border:"1px solid var(--c-border)",borderRadius:14,overflow:"hidden",marginBottom:10,textDecoration:"none",background:"var(--c-card2)",transition:"border-color 0.18s, box-shadow 0.18s",boxSizing:"border-box",width:"100%"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.4)";e.currentTarget.style.boxShadow="0 4px 16px rgba(0,168,255,0.1)";}}
+      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="none";}}>
+
+      {/* Imagen del artículo */}
+      {meta.image && (
+        <div style={{width:"100%",height:180,overflow:"hidden",background:"var(--c-border)"}}>
+          <img src={meta.image} alt={meta.title}
+            style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"transform 0.3s"}}
+            onError={e=>{e.target.parentElement.style.display="none";}}
+            onMouseEnter={e=>{e.target.style.transform="scale(1.03)";}}
+            onMouseLeave={e=>{e.target.style.transform="scale(1)";}}
+          />
+        </div>
+      )}
+
+      {/* Texto del artículo */}
+      <div style={{padding:"12px 14px"}}>
+        {/* Publisher + favicon */}
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+          {meta.logo
+            ? <img src={meta.logo} alt="" width={14} height={14} style={{borderRadius:3,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
+            : <img src={`https://www.google.com/s2/favicons?sz=16&domain=${domain}`} alt="" width={14} height={14} style={{borderRadius:3,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
+          }
+          <span style={{fontSize:10,fontWeight:700,color:"var(--c-muted2)",textTransform:"uppercase",letterSpacing:0.5}}>{meta.publisher || domain}</span>
+          <span style={{marginLeft:"auto",fontSize:12,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
+        </div>
+
+        {/* Título */}
+        {meta.title && (
+          <div style={{fontSize:13,fontWeight:700,color:"var(--c-text)",lineHeight:1.4,marginBottom:4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
+            {meta.title}
+          </div>
+        )}
+
+        {/* Descripción */}
+        {meta.description && (
+          <div style={{fontSize:11,color:"var(--c-muted)",lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
+            {meta.description}
+          </div>
+        )}
+      </div>
     </a>
   );
 }
@@ -2134,8 +2229,9 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.26 5.638 5.905-5.638zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </button>
             <CopyLinkBtn postId={post.id} ticker={post.ticker}/>
-            <span style={{marginLeft:"auto",fontSize:10,color:"var(--c-muted2)",fontWeight:500}}>
-              {`${91-((typeof post.id==="number"?post.id:1)%30)} traders`}
+            <span style={{marginLeft:"auto",fontSize:10,color:"var(--c-muted2)",fontWeight:500,display:"flex",alignItems:"center",gap:3}}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              {((post.likes||0)*3 + (post.comments||0)*5 + (post.reposts||0)*8 + 12).toLocaleString()}
             </span>
             {/* Botón Eliminar — solo dueño del post */}
             {isOwner && !delConfirm && (
@@ -2316,17 +2412,9 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
                 {link&&<button onClick={()=>setLink("")} style={{background:"none",border:"none",color:"var(--c-muted2)",cursor:"pointer",fontSize:14,padding:"2px 4px",borderRadius:4,flexShrink:0}}>✕</button>}
               </div>
               {isValidUrl(link)&&(
-                <a href={link} target="_blank" rel="noopener noreferrer"
-                  style={{display:"flex",alignItems:"center",gap:10,background:"var(--c-card2)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,padding:"10px 12px",marginTop:6,textDecoration:"none",cursor:"pointer",transition:"all 0.15s"}}
-                  onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.45)";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.2)";e.currentTarget.style.background="var(--c-card2)";}}>
-                  <img src={`https://www.google.com/s2/favicons?sz=32&domain=${getDomain(link)}`} alt="" width={20} height={20} style={{borderRadius:4,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:10,color:"var(--c-muted2)",fontWeight:700,letterSpacing:0.5,marginBottom:1,textTransform:"uppercase"}}>{getDomain(link)}</div>
-                    <div style={{fontSize:12,color:C.accent,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{link}</div>
-                  </div>
-                  <span style={{fontSize:13,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
-                </a>
+                <div style={{marginTop:8}}>
+                  <LinkPreviewCard url={link}/>
+                </div>
               )}
             </div>
           )}
