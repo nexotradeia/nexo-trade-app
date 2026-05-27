@@ -2227,40 +2227,41 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
           )}
           {showGif&&<GifPicker onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)} onText={txt=>{setText(prev=>prev+txt);}}/>}
 
-          {/* ── Bottom bar: todo en una línea ── */}
-          <div style={{display:"flex",gap:6,alignItems:"center",marginTop:10}}>
-            {/* Adjuntar foto */}
-            <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}}
-              onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImage(ev.target.result);r.readAsDataURL(f);e.target.value="";}}/>
-            <button onClick={()=>fileRef.current?.click()} title="Subir foto"
-              style={{background:"none",border:"none",cursor:"pointer",fontSize:17,color:"var(--c-muted2)",padding:"4px",borderRadius:7,transition:"color 0.15s",lineHeight:1}}
-              onMouseEnter={e=>e.currentTarget.style.color=C.accent}
-              onMouseLeave={e=>e.currentTarget.style.color="var(--c-muted2)"}>📷</button>
-            {/* Media picker button */}
-            <button onClick={()=>setShowGif(v=>!v)} title="GIF · Emojis · Stickers"
-              style={{background:showGif?"rgba(124,58,237,0.12)":"none",border:showGif?"1px solid rgba(124,58,237,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#7C3AED":"var(--c-muted2)",padding:"4px 9px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
-              onMouseEnter={e=>{e.currentTarget.style.color="#7C3AED";}}
-              onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#7C3AED":"var(--c-muted2)";}}>
-              <span>🎭</span><span>Media</span>
-            </button>
-            {/* Ticker */}
-            <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
-              style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:7,color:C.accent,padding:"5px 8px",fontSize:11,outline:"none",width:78,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
-              onFocus={e=>e.target.style.borderColor="rgba(0,168,255,0.45)"}
-              onBlur={e=>e.target.style.borderColor="rgba(0,168,255,0.18)"}/>
-            {/* Sentiment — chips compactos */}
-            <div style={{display:"flex",gap:4,marginLeft:"auto",alignItems:"center"}}>
+          {/* ── Bottom bar: dos filas en móvil ── */}
+          <div style={{marginTop:10}}>
+            {/* Fila 1: herramientas */}
+            <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+              {/* Adjuntar foto */}
+              <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}}
+                onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImage(ev.target.result);r.readAsDataURL(f);e.target.value="";}}/>
+              <button onClick={()=>fileRef.current?.click()} title="Subir foto"
+                style={{background:"none",border:"none",cursor:"pointer",fontSize:17,color:"var(--c-muted2)",padding:"4px",borderRadius:7,transition:"color 0.15s",lineHeight:1}}
+                onMouseEnter={e=>e.currentTarget.style.color=C.accent}
+                onMouseLeave={e=>e.currentTarget.style.color="var(--c-muted2)"}>📷</button>
+              {/* Media picker button */}
+              <button onClick={()=>setShowGif(v=>!v)} title="GIF · Emojis · Stickers"
+                style={{background:showGif?"rgba(124,58,237,0.12)":"none",border:showGif?"1px solid rgba(124,58,237,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#7C3AED":"var(--c-muted2)",padding:"4px 9px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
+                onMouseEnter={e=>{e.currentTarget.style.color="#7C3AED";}}
+                onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#7C3AED":"var(--c-muted2)";}}>
+                <span>🎭</span><span>Media</span>
+              </button>
+              {/* Ticker */}
+              <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
+                style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:7,color:C.accent,padding:"5px 8px",fontSize:11,outline:"none",width:72,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
+                onFocus={e=>e.target.style.borderColor="rgba(0,168,255,0.45)"}
+                onBlur={e=>e.target.style.borderColor="rgba(0,168,255,0.18)"}/>
+              {/* Sentiment — chips compactos */}
               {[{v:"bull",label:"▲",full:"Alcista",col:"#16A34A"},{v:"bear",label:"▼",full:"Bajista",col:"#DC2626"}].map(({v,label,full,col})=>{
                 const active=sent===v;
                 return(
                   <button key={v} onClick={()=>setSent(v)} title={full}
-                    style={{background:active?`${col}12`:"transparent",border:`1.5px solid ${active?col:"var(--c-border)"}`,borderRadius:8,padding:"5px 10px",cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:3}}>
+                    style={{background:active?`${col}12`:"transparent",border:`1.5px solid ${active?col:"var(--c-border)"}`,borderRadius:8,padding:"5px 9px",cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:3}}>
                     <span style={{color:active?col:"var(--c-muted2)",fontWeight:active?800:600,fontSize:11}}>{label} {full}</span>
                   </button>
                 );
               })}
-              {/* Publicar */}
-              <Btn onClick={submit} style={{padding:"6px 18px",fontSize:12.5,opacity:posting?0.6:1}}>
+              {/* Publicar — siempre visible, al final de la fila o en nueva línea */}
+              <Btn onClick={submit} style={{padding:"6px 18px",fontSize:12.5,opacity:posting?0.6:1,marginLeft:"auto"}}>
                 {posting?"...":(user?t.publish:"Entrar")}
               </Btn>
             </div>
@@ -11091,7 +11092,7 @@ export default function App(){
         animation: postSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) both, postPulse 0.9s ease 0.35s;
       }
     `}</style>
-    <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s"}}>
+    <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s",overflowX:"hidden"}}>
       <TickerTape/>
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
