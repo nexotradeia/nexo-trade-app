@@ -5797,58 +5797,162 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
 }
 
 // ── FOOTER ────────────────────────────────────────────────────────────────────
-function Footer(){
-  const social=[
-    {name:"Instagram",icon:"📸",url:"https://www.instagram.com/nexotradeia",color:"#e1306c"},
-    {name:"Threads",  icon:"🧵",url:"https://www.threads.com/@nexotradeia", color:"#000000"},
-    {name:"X / Twitter",icon:"𝕏",url:"https://x.com/Nexotradeia",          color:"#1da1f2"},
-    {name:"TikTok",  icon:"🎵",url:"https://www.tiktok.com/@nexotradeia",  color:"#ff0050"},
+function Footer({ setPage, onAuth }){
+  const nav = (idx) => { if(setPage) setPage(idx); };
+
+  // SVG icons para social
+  const IgIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>;
+  const XIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>;
+  const TkIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>;
+  const ThIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.821-2.171 1.579-1.66 1.958-3.908 1.236-6.468-.471-1.695-1.7-3.21-3.327-3.96-1.36-.626-2.81-.625-4.145.036-.736.365-1.325.957-1.746 1.762-.391.75-.555 1.664-.461 2.7.13 1.42.69 2.5 1.66 3.203.93.67 2.059.91 3.189.648l.504 2.013c-1.576.394-3.188.163-4.538-.64C9.014 18.23 8.048 16.76 7.88 14.87c-.134-1.46.113-2.806.736-3.999.647-1.235 1.609-2.181 2.782-2.735 1.738-.861 3.713-.86 5.467.003 2.316 1.067 3.959 3.17 4.632 5.863.956 3.454.367 6.508-1.672 8.634-1.75 1.826-4.18 2.743-7.239 2.764l-.4-.4z"/></svg>;
+
+  const social = [
+    { name:"Instagram", icon:<IgIcon/>, url:"https://www.instagram.com/nexotradeia",  accent:"#e1306c" },
+    { name:"X",         icon:<XIcon/>,  url:"https://x.com/Nexotradeia",              accent:"#e2e8f0" },
+    { name:"TikTok",    icon:<TkIcon/>, url:"https://www.tiktok.com/@nexotradeia",    accent:"#ff3b5c" },
+    { name:"Threads",   icon:<ThIcon/>, url:"https://www.threads.com/@nexotradeia",   accent:"#a78bfa" },
   ];
-  const links=[
-    {titulo:"Plataforma",items:["Feed","Tops de Mercado","Noticias","Earnings","Trending","IA Asistente"]},
-    {titulo:"Comunidad",items:["Top Foristas","A quién seguir","Leaderboard","Insignias","Alertas"]},
-    {titulo:"Empresa",items:["Sobre nosotros","Blog","Careers","Prensa","Contacto"]},
-    {titulo:"Legal",items:["Términos de uso","Privacidad","Aviso legal","Cookies","No somos asesores"]},
+
+  const cols = [
+    {
+      title:"Plataforma",
+      items:[
+        {label:"Feed",            page:0},
+        {label:"Tops de Mercado", page:1},
+        {label:"Noticias",        page:5},
+        {label:"Earnings",        page:6},
+        {label:"IA Asistente",    page:9},
+        {label:"Ideas VIP ✦",     page:21},
+      ]
+    },
+    {
+      title:"Herramientas",
+      items:[
+        {label:"Screener VIP ✦",        page:17},
+        {label:"Flujo Institucional ✦",  page:20},
+        {label:"Super Inversores ✦",     page:19},
+        {label:"Calendario Económico",   page:14},
+        {label:"IPOs 2026",              page:16},
+        {label:"Dividendos",             page:15},
+      ]
+    },
+    {
+      title:"Comunidad",
+      items:[
+        {label:"Trending",           page:7},
+        {label:"Webinars",           page:11},
+        {label:"Academia",           page:12},
+        {label:"Mensajes",           page:22},
+        {label:"VIP $9.99/mes ✦",    page:8},
+        {label:"Únete gratis →",     action:"auth"},
+      ]
+    },
+    {
+      title:"Legal",
+      items:[
+        {label:"Términos de uso",    href:"#"},
+        {label:"Privacidad",         href:"#"},
+        {label:"Aviso legal",        href:"#"},
+        {label:"No somos asesores",  href:"#"},
+        {label:"Contacto",           href:"mailto:hola@nexotradeia.com"},
+      ]
+    },
   ];
+
   return(
-    <footer style={{background:"#0f172a",color:"#e2e8f0",marginTop:40}}>
-      <div style={{maxWidth:1140,margin:"0 auto",padding:"40px 20px",display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr",gap:32,flexWrap:"wrap"}}>
-        <div>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-            <div style={{width:38,height:38,borderRadius:10,background:`linear-gradient(135deg,${C.accent},#00a87f)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff"}}>N</div>
+    <footer style={{background:"#060a14",borderTop:"1px solid rgba(139,92,246,0.12)",marginTop:48,fontFamily:"Inter,sans-serif"}}>
+
+      {/* ── TOP STRIP — tagline IA ── */}
+      <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)",padding:"22px 20px"}}>
+        <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            {/* Logo */}
+            <div style={{width:34,height:34,borderRadius:9,background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#fff",fontSize:16,letterSpacing:-1,flexShrink:0}}>N</div>
             <div>
-              <div style={{fontSize:18,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>NexoTrade</div>
-              <div style={{fontSize:9,color:"#64748b",letterSpacing:2}}>COMUNIDAD INVERSORA</div>
+              <span style={{fontSize:16,fontWeight:900,color:"#f1f5f9",letterSpacing:"-0.5px"}}>NexoTrade</span>
+              <span style={{fontSize:10,color:"rgba(139,92,246,0.8)",marginLeft:8,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>IA · Trading</span>
             </div>
           </div>
-          <p style={{color:"#64748b",fontSize:13,lineHeight:1.7,marginBottom:20}}>La comunidad de inversores hispanohablantes más activa. Comparte ideas, gana reputación y aprende con la IA.</p>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {/* Tagline */}
+          <p style={{color:"#475569",fontSize:12,margin:0,lineHeight:1.6,maxWidth:420,textAlign:"center"}}>
+            La comunidad de inversores hispanohablantes más activa.<br/>
+            <span style={{color:"rgba(139,92,246,0.7)"}}>Señales reales · IA integrada · Sin comisiones</span>
+          </p>
+          {/* CTA */}
+          <button onClick={()=>onAuth&&onAuth()}
+            style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:10,padding:"9px 22px",fontSize:13,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 0 20px rgba(139,92,246,0.25)",whiteSpace:"nowrap",transition:"box-shadow 0.2s"}}
+            onMouseEnter={e=>e.currentTarget.style.boxShadow="0 0 28px rgba(139,92,246,0.45)"}
+            onMouseLeave={e=>e.currentTarget.style.boxShadow="0 0 20px rgba(139,92,246,0.25)"}>
+            Empieza gratis →
+          </button>
+        </div>
+      </div>
+
+      {/* ── MAIN GRID ── */}
+      <div style={{maxWidth:1140,margin:"0 auto",padding:"36px 20px",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"24px 32px"}}>
+        {cols.map(col=>(
+          <div key={col.title}>
+            <div style={{fontSize:11,fontWeight:700,color:"rgba(139,92,246,0.7)",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>{col.title}</div>
+            {col.items.map(item=>{
+              const isVip = item.label?.includes("✦");
+              const isJoin = item.action==="auth";
+              const base = {display:"block",fontSize:13,textDecoration:"none",marginBottom:9,transition:"color 0.15s",lineHeight:1.4,cursor:"pointer",background:"none",border:"none",padding:0,fontFamily:"inherit",textAlign:"left"};
+              if(item.page!==undefined){
+                return(
+                  <button key={item.label} onClick={()=>nav(item.page)}
+                    style={{...base,color:isVip?"rgba(167,139,250,0.8)":isJoin?"#8B5CF6":"#475569",fontWeight:isJoin?700:400}}
+                    onMouseEnter={e=>e.currentTarget.style.color=isVip?"#A78BFA":"#c4b5fd"}
+                    onMouseLeave={e=>e.currentTarget.style.color=isVip?"rgba(167,139,250,0.8)":isJoin?"#8B5CF6":"#475569"}>
+                    {item.label}
+                  </button>
+                );
+              }
+              if(item.action==="auth"){
+                return(
+                  <button key={item.label} onClick={()=>onAuth&&onAuth()}
+                    style={{...base,color:"#8B5CF6",fontWeight:700}}
+                    onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"}
+                    onMouseLeave={e=>e.currentTarget.style.color="#8B5CF6"}>
+                    {item.label}
+                  </button>
+                );
+              }
+              return(
+                <a key={item.label} href={item.href||"#"}
+                  style={{...base,color:"#475569"}}
+                  onMouseEnter={e=>e.currentTarget.style.color="#94a3b8"}
+                  onMouseLeave={e=>e.currentTarget.style.color="#475569"}>
+                  {item.label}
+                </a>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* ── BOTTOM BAR ── */}
+      <div style={{borderTop:"1px solid rgba(255,255,255,0.04)",padding:"14px 20px"}}>
+        <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+          {/* Copyright */}
+          <span style={{color:"#334155",fontSize:11}}>© 2026 NexoTrade · nexotradeia.com · Todos los derechos reservados</span>
+
+          {/* Disclaimer */}
+          <span style={{color:"#1e293b",fontSize:11}}>No somos asesores financieros. Las señales son educativas.</span>
+
+          {/* Social icons */}
+          <div style={{display:"flex",gap:6,alignItems:"center"}}>
             {social.map(s=>(
-              <a key={s.name} href={s.url} style={{display:"flex",alignItems:"center",gap:6,background:"#1e293b",border:"1px solid #334155",borderRadius:8,padding:"7px 12px",color:"#e2e8f0",fontSize:12,fontWeight:600,textDecoration:"none",transition:"all 0.15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.background=s.color+"22";e.currentTarget.style.borderColor=s.color+"66";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="#1e293b";e.currentTarget.style.borderColor="#334155";}}>
-                <span style={{fontSize:14}}>{s.icon}</span><span>{s.name}</span>
+              <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" title={s.name}
+                style={{width:32,height:32,borderRadius:8,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",color:"#334155",textDecoration:"none",transition:"all 0.15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.color=s.accent;e.currentTarget.style.borderColor=s.accent+"44";e.currentTarget.style.background=s.accent+"11";}}
+                onMouseLeave={e=>{e.currentTarget.style.color="#334155";e.currentTarget.style.borderColor="rgba(255,255,255,0.06)";e.currentTarget.style.background="rgba(255,255,255,0.03)";}}>
+                {s.icon}
               </a>
             ))}
           </div>
         </div>
-        {links.map(col=>(
-          <div key={col.titulo}>
-            <h4 style={{color:"#fff",fontSize:13,fontWeight:700,margin:"0 0 14px",letterSpacing:0.5}}>{col.titulo}</h4>
-            {col.items.map(item=>(
-              <a key={item} href="#" style={{display:"block",color:"#64748b",fontSize:13,textDecoration:"none",marginBottom:8,transition:"color 0.15s"}}
-                onMouseEnter={e=>e.currentTarget.style.color=C.accent}
-                onMouseLeave={e=>e.currentTarget.style.color="#64748b"}>{item}</a>
-            ))}
-          </div>
-        ))}
       </div>
-      <div style={{borderTop:"1px solid #1e293b",padding:"16px 20px"}}>
-        <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
-          <span style={{color:"#475569",fontSize:12}}>© 2026 NEXO TRADE · Todos los derechos reservados</span>
-          <span style={{color:"#475569",fontSize:12}}>⚠️ No somos asesores financieros. Invierte con responsabilidad.</span>
-        </div>
-      </div>
+
     </footer>
   );
 }
@@ -12041,7 +12145,7 @@ export default function App(){
         </div>
       </div>
 
-      <Footer/>
+      <Footer setPage={(p)=>{setPage(p);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} onAuth={()=>setAuth("register")}/>
 
       {/* BANNER AFILIADOS MÓVIL — fijo al pie, solo en móvil */}
       <MobileAffiliateBanner/>
