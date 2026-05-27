@@ -8946,12 +8946,400 @@ function GurusPage({ isPremium, onNeedPremium }) {
   );
 }
 
+// ── IDEAS DE INVERSIÓN PAGE ───────────────────────────────────────────────────
+const IDEAS_DATA = [
+  // ── COMPRAS ──
+  {id:1,ticker:"NVDA",name:"NVIDIA Corp",icon:"🖥️",sector:"Tecnología",signal:"COMPRA",entry:120,target:185,stop:102,horizon:"3-6 meses",risk:"Medio",riskN:2,tags:["IA","Chips","GPU"],thesis:"NVIDIA mantiene dominio absoluto en GPUs de IA con arquitectura Blackwell. La demanda de centros de datos de hyperscalers no muestra desaceleración. Márgenes brutos >75% y backlog récord justifican valoración premium. Cada nuevo modelo de IA requiere más cómputo — NVIDIA captura ese crecimiento exponencial.",published:"2026-05-15",analyst:"NexoTrade Research"},
+  {id:2,ticker:"META",name:"Meta Platforms",icon:"📘",sector:"Tecnología",signal:"COMPRA",entry:560,target:750,stop:490,horizon:"3-6 meses",risk:"Bajo",riskN:1,tags:["IA","Publicidad","Social"],thesis:"Meta combina el mejor negocio publicitario del mundo con inversión agresiva en IA generativa. Llama y sus modelos de recomendación mejoran el ROI publicitario. Threads crece aceleradamente. Reels monetiza mejor que Stories. Cotiza a múltiplos razonables con recompra de acciones masiva.",published:"2026-05-18",analyst:"NexoTrade Research"},
+  {id:3,ticker:"AMZN",name:"Amazon.com Inc",icon:"📦",sector:"Tecnología",signal:"COMPRA",entry:210,target:285,stop:185,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["Cloud","IA","E-commerce"],thesis:"AWS recupera momentum con contratos de IA enterprise. El negocio publicitario supera $56B anuales. El segmento de terceros y logística mejora márgenes. Prime Video y Alexa+ aceleran el ecosistema. Gestión de costos clase mundial con Jassy en el timón.",published:"2026-05-12",analyst:"NexoTrade Research"},
+  {id:4,ticker:"CRWD",name:"CrowdStrike Holdings",icon:"🛡️",sector:"Ciberseguridad",signal:"COMPRA",entry:395,target:520,stop:345,horizon:"6-12 meses",risk:"Medio",riskN:2,tags:["Ciberseguridad","SaaS","Zero-Trust"],thesis:"CrowdStrike es el líder indiscutible en ciberseguridad basada en IA. Su plataforma Falcon consolida más de 28 módulos reemplazando soluciones legacy. Net Revenue Retention >120%. El incidente de julio 2025 ya fue superado — los clientes confiaron en la empresa. Crecimiento de 30%+ sostenido.",published:"2026-05-10",analyst:"NexoTrade Research"},
+  {id:5,ticker:"PLTR",name:"Palantir Technologies",icon:"🔮",sector:"Tecnología",signal:"COMPRA",entry:118,target:160,stop:98,horizon:"3-6 meses",risk:"Alto",riskN:3,tags:["IA","Gobierno","Defensa"],thesis:"Palantir tiene contratos críticos con el ejército americano y agencias de inteligencia. AIP (plataforma de IA) genera crecimiento acelerado en sector comercial (+55% YoY). Único entre empresas de software con acceso a datos clasificados del gobierno. Alta visibilidad de ingresos recurrentes.",published:"2026-05-08",analyst:"NexoTrade Research"},
+  {id:6,ticker:"MU",name:"Micron Technology",icon:"💾",sector:"Semiconductores",signal:"COMPRA",entry:112,target:160,stop:94,horizon:"6-12 meses",risk:"Medio",riskN:2,tags:["Memoria","HBM","IA"],thesis:"Micron es el mayor beneficiario del ciclo de IA en memorias. HBM3E para GPUs de NVIDIA se vende con precios premium y backlog hasta 2027. El ciclo DRAM se normaliza con precios subiendo. La memoria para IA crece 3-5x más rápido que DRAM tradicional. Valoración atractiva vs peers.",published:"2026-05-14",analyst:"NexoTrade Research"},
+  {id:7,ticker:"COIN",name:"Coinbase Global",icon:"🪙",sector:"Cripto/Fintech",signal:"COMPRA",entry:225,target:320,stop:190,horizon:"3-6 meses",risk:"Alto",riskN:3,tags:["Cripto","Exchange","Base"],thesis:"Coinbase se beneficia directamente del bull market cripto con mayor volumen de trading. Su red Base (L2 de Ethereum) genera nuevas fuentes de ingresos. El ETF de Bitcoin aprobado aumentó flujos institucionales. USDC genera ingresos de interés con tasas altas. Regulación más favorable bajo nueva administración.",published:"2026-05-17",analyst:"NexoTrade Research"},
+  {id:8,ticker:"GS",name:"Goldman Sachs",icon:"🏦",sector:"Financiero",signal:"COMPRA",entry:558,target:680,stop:488,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["Banca","M&A","Trading"],thesis:"Goldman lidera el resurgimiento de M&A con pipeline robusto de deals para H2 2026. Trading de renta fija y equities supera expectativas. Banca de inversión se reactiva con IPO market en recuperación. El retiro de IA en gestión de activos genera eficiencias de costos. Dividendo creciente.",published:"2026-05-06",analyst:"NexoTrade Research"},
+  {id:9,ticker:"HOOD",name:"Robinhood Markets",icon:"🏹",sector:"Fintech",signal:"COMPRA",entry:44,target:68,stop:37,horizon:"3-6 meses",risk:"Alto",riskN:3,tags:["Fintech","Retail","Opciones"],thesis:"Robinhood se convierte en plataforma financiera completa: opciones, cripto, IRA, tarjeta de crédito, y próximamente banca. La generación millennial y Z adopta su plataforma como banco principal. Gold subscription crece aceleradamente. Cada nuevo producto cross-sells al usuario base existente.",published:"2026-05-20",analyst:"NexoTrade Research"},
+  {id:10,ticker:"RXRX",name:"Recursion Pharma",icon:"🧬",sector:"Biotech",signal:"COMPRA",entry:7,target:14,stop:5,horizon:"12+ meses",risk:"Alto",riskN:3,tags:["IA Médica","Drug Discovery","Biotech"],thesis:"Recursion usa IA y biología computacional para descubrir medicamentos 10x más rápido que métodos tradicionales. Partnership con NVIDIA para acceso a supercomputing. Pipeline de +40 programas. El modelo de descubrimiento de fármacos con IA tiene valor exponencial cuando los primeros programas lleguen a Fase 3.",published:"2026-05-01",analyst:"NexoTrade Research"},
+  {id:11,ticker:"AVGO",name:"Broadcom Inc",icon:"📡",sector:"Semiconductores",signal:"COMPRA",entry:188,target:250,stop:162,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["ASIC","IA","Networking"],thesis:"Broadcom diseña chips ASIC personalizados de IA para Google, Meta y Apple — una alternativa rentable a las GPUs de NVIDIA. Su segmento VMware post-adquisición genera FCF masivo. El negocio de networking para centros de datos crece con la demanda de IA. Dividendo sólido y recompras agresivas.",published:"2026-05-09",analyst:"NexoTrade Research"},
+  {id:12,ticker:"MSTR",name:"MicroStrategy Inc",icon:"₿",sector:"Cripto",signal:"COMPRA",entry:365,target:520,stop:290,horizon:"3-6 meses",risk:"Alto",riskN:3,tags:["Bitcoin","Leverage","Cripto"],thesis:"MicroStrategy es el vehículo de exposición a Bitcoin más líquido del mercado para instituciones. Michael Saylor continúa acumulando BTC con equity offerings. Cotiza con premium sobre NAV de Bitcoin, pero ese premium se justifica por su capacidad de seguir emitiendo acciones para comprar más BTC en un mercado alcista.",published:"2026-05-13",analyst:"NexoTrade Research"},
+  {id:13,ticker:"ARM",name:"Arm Holdings",icon:"⚙️",sector:"Semiconductores",signal:"COMPRA",entry:140,target:195,stop:118,horizon:"6-12 meses",risk:"Medio",riskN:2,tags:["IP","Chips","IA","Mobile"],thesis:"Arm licencia su arquitectura a prácticamente todos los chipmakers del mundo. Sus royalties crecen con cada generación de iPhone, servidor, y ahora chips de IA. El CSS (Compute Subsystems) acelera el tiempo al mercado para clientes, aumentando royalties por chip. Posición de monopolio natural difícilmente atacable.",published:"2026-05-03",analyst:"NexoTrade Research"},
+  {id:14,ticker:"SPOT",name:"Spotify Technology",icon:"🎵",sector:"Tecnología/Media",signal:"COMPRA",entry:610,target:800,stop:528,horizon:"6-12 meses",risk:"Medio",riskN:2,tags:["Streaming","Audio","IA"],thesis:"Spotify alcanzó 678M de usuarios y primera rentabilidad GAAP sostenida. Su ventaja en podcasts, audiolibros y música con IA de recomendación es imposible de replicar. La monetización premium crece y el mercado publicitario de audio digital se expande. Margenes EBIT en expansión consistente.",published:"2026-04-28",analyst:"NexoTrade Research"},
+  {id:15,ticker:"UBER",name:"Uber Technologies",icon:"🚗",sector:"Tecnología/Transporte",signal:"COMPRA",entry:78,target:108,stop:65,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["Rides","Delivery","Autonomous"],thesis:"Uber alcanzó FCF positivo y rentabilidad GAAP. Su red de 150M de usuarios activos y 7M de conductores es imposible de replicar. Delivery crece con Uber Eats. La llegada de robotaxis de Waymo y Tesla usará la plataforma Uber — no la competirá. Múltiplo atractivo relativo a crecimiento de 20%+.",published:"2026-05-02",analyst:"NexoTrade Research"},
+  // ── VENTAS ──
+  {id:16,ticker:"INTC",name:"Intel Corp",icon:"🔵",sector:"Semiconductores",signal:"VENTA",entry:22,target:14,stop:27,horizon:"3-6 meses",risk:"Medio",riskN:2,tags:["Chips","Foundry","Declive"],thesis:"Intel pierde cuota de mercado aceleradamente en CPUs de servidor ante AMD, y en foundry ante TSMC y Samsung. La estrategia de IDM 2.0 no convence al mercado. 18A sigue con problemas de yield. Los clientes foundry prefieren TSMC. El recorte de dividendo 2025 destruyó la tesis de inversión de income. El CEO Pat Gelsinger fue reemplazado — falta de visión clara.",published:"2026-05-05",analyst:"NexoTrade Research"},
+  {id:17,ticker:"PFE",name:"Pfizer Inc",icon:"💊",sector:"Farmacéutico",signal:"VENTA",entry:26,target:18,stop:30,horizon:"6-12 meses",risk:"Medio",riskN:2,tags:["Pharma","Patent Cliff","COVID"],thesis:"Pfizer enfrenta acantilado de patentes brutal: ingresos de COVID (Paxlovid, vacuna) colapsaron de $56B a $13B. La adquisición de Seagen fue cara y dilutiva. El pipeline no tiene blockbusters inminentes. La deuda sigue elevada post-adquisiciones. El dividendo puede ser insostenible si los flujos no se recuperan en 2027.",published:"2026-05-07",analyst:"NexoTrade Research"},
+  {id:18,ticker:"DIS",name:"Walt Disney Co",icon:"🏰",sector:"Entretenimiento",signal:"VENTA",entry:100,target:78,stop:112,horizon:"3-6 meses",risk:"Medio",riskN:2,tags:["Streaming","Parks","Media"],thesis:"Disney+ no logra rentabilidad sostenida. Los parques temáticos muestran señales de saturación de demanda post-COVID. El lineal TV (ABC, ESPN) sigue en declive estructural. La batalla por los derechos de ESPN con sports leagues es cara. Bob Iger no ha presentado un plan de sucesión claro. El contenido cinematográfico decepcionó en 2025.",published:"2026-05-04",analyst:"NexoTrade Research"},
+  {id:19,ticker:"BA",name:"Boeing Co",icon:"✈️",sector:"Aeroespacial",signal:"VENTA",entry:185,target:140,stop:205,horizon:"6-12 meses",risk:"Alto",riskN:3,tags:["Aeroespacial","Manufactura","Seguridad"],thesis:"Boeing atraviesa su crisis más profunda. La huelga de trabajadores costó >$5B. Las certificaciones del 737 MAX siguen retrasadas por problemas de calidad. La deuda supera $58B. Airbus toma cuota de mercado de manera permanente. El CEO Kelly Ortberg enfrenta desafíos culturales sistémicos. La recuperación tomará años.",published:"2026-04-25",analyst:"NexoTrade Research"},
+  {id:20,ticker:"SNAP",name:"Snap Inc",icon:"👻",sector:"Social Media",signal:"VENTA",entry:10,target:6,stop:13,horizon:"3-6 meses",risk:"Alto",riskN:3,tags:["Social","Publicidad","Decrecimiento"],thesis:"Snap pierde terreno frente a TikTok e Instagram en el segmento joven. Su modelo publicitario de Direct Response sigue rezagado vs Meta. DAU estancada. Evan Spiegel no ha encontrado el modelo de monetización correcto. Sin ventaja estructural clara — ni en contenido, ni en anuncios, ni en hardware (Spectacles fracasó).",published:"2026-04-30",analyst:"NexoTrade Research"},
+  {id:21,ticker:"BYND",name:"Beyond Meat Inc",icon:"🌱",sector:"Alimentos",signal:"VENTA",entry:5,target:2,stop:7,horizon:"3-6 meses",risk:"Alto",riskN:3,tags:["Alt-Protein","Consumo","Declive"],thesis:"Beyond Meat destruyó valor de manera consistente. Los ingresos cayeron de $465M en 2021 a <$80M en 2025. La tendencia de proteína alternativa no despegó como se esperaba. Deuda alta relativa a ingresos. La marca ha perdido presencia en restaurantes y retail. La probabilidad de quiebra en 2027 es real.",published:"2026-04-22",analyst:"NexoTrade Research"},
+  // ── NEUTRO ──
+  {id:22,ticker:"AAPL",name:"Apple Inc",icon:"🍎",sector:"Tecnología",signal:"NEUTRO",entry:207,target:215,stop:188,horizon:"3-6 meses",risk:"Bajo",riskN:1,tags:["iPhone","Services","IA"],thesis:"Apple tiene el mejor ecosistema del mundo y márgenes de servicios superiores al 74%. Sin embargo, el crecimiento de iPhone se desaceleró significativamente en China (-20% YoY). Apple Intelligence no generó el upgrade cycle esperado. A 30x P/E, el upside limitado versus otras tecnológicas. Mantener pero no añadir posición.",published:"2026-05-16",analyst:"NexoTrade Research"},
+  {id:23,ticker:"TSLA",name:"Tesla Inc",icon:"⚡",sector:"Automotriz/IA",signal:"NEUTRO",entry:338,target:355,stop:298,horizon:"3-6 meses",risk:"Alto",riskN:3,tags:["EV","FSD","Robotaxi"],thesis:"Tesla es una empresa dividida: el negocio de EVs bajo presión competitiva china, pero con el potencial de FSD/Robotaxi que podría ser transformador. Las entregas Q1 2026 decepcionaron. Musk distrae con actividades políticas. La promesa del Cybercab podría revaluar la empresa en 2027. Esperar más claridad antes de aumentar exposición.",published:"2026-05-11",analyst:"NexoTrade Research"},
+  {id:24,ticker:"MSFT",name:"Microsoft Corp",icon:"🪟",sector:"Tecnología",signal:"NEUTRO",entry:448,target:470,stop:410,horizon:"3-6 meses",risk:"Bajo",riskN:1,tags:["Cloud","IA","Copilot"],thesis:"Microsoft es la empresa mejor posicionada en IA enterprise con Copilot y Azure OpenAI. Azure crece 33% YoY pero el mercado ya descuenta crecimiento premium. A 35x earnings, poca sorpresa positiva disponible en el corto plazo. Empresa de alta calidad pero upside limitado hasta que Copilot mueva la aguja significativamente en ingresos.",published:"2026-05-13",analyst:"NexoTrade Research"},
+  {id:25,ticker:"NFLX",name:"Netflix Inc",icon:"📺",sector:"Entretenimiento",signal:"NEUTRO",entry:1080,target:1120,stop:980,horizon:"3-6 meses",risk:"Medio",riskN:2,tags:["Streaming","Publicidad","Contenido"],thesis:"Netflix logró rentabilidad y su nivel con anuncios crece, pero el múltiplo de 40x P/E descuenta gran parte del crecimiento. El contenido sigue siendo caro y la competencia de Amazon, Disney+ y Apple TV se intensifica. Los juegos no generan impacto material. Empresa excelente a valoración elevada — Neutro a niveles actuales.",published:"2026-05-08",analyst:"NexoTrade Research"},
+  {id:26,ticker:"JPM",name:"JPMorgan Chase",icon:"🏛️",sector:"Financiero",signal:"NEUTRO",entry:248,target:265,stop:228,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["Banca","Dividendo","Consumo"],thesis:"JPMorgan es el banco mejor gestionado del mundo bajo Jamie Dimon. Sus resultados Q1 2026 fueron sólidos, pero el NIM (margen de interés neto) bajará cuando la Fed recorte tasas. El guidance conservador de Dimon sobre riesgos macroeconómicos merece atención. Banco de calidad a precio justo.",published:"2026-05-03",analyst:"NexoTrade Research"},
+  {id:27,ticker:"AMD",name:"AMD Inc",icon:"🔴",sector:"Semiconductores",signal:"NEUTRO",entry:116,target:130,stop:96,horizon:"3-6 meses",risk:"Medio",riskN:2,tags:["Chips","IA","Gaming"],thesis:"AMD MI300 gana terreno en IA aunque lejos de NVIDIA. En CPUs server sigue robando cuota a Intel. El segmento gaming/consumer está débil. La adquisición de Xilinx aporta FPGAs para networking. El problema: cotiza a múltiplo premium que descuenta ejecución perfecta. Su posición en IA sigue siendo 'challenger'.",published:"2026-04-29",analyst:"NexoTrade Research"},
+  {id:28,ticker:"V",name:"Visa Inc",icon:"💳",sector:"Financiero/Pagos",signal:"NEUTRO",entry:305,target:325,stop:280,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["Pagos","Red","Consumo"],thesis:"Visa es uno de los mejores negocios del mundo: red imbatible, márgenes del 65%+, pricing power. Sin embargo, el crecimiento de volúmenes se modera con la economía. Los márgenes ya son máximos. Regulación de interchange fees es riesgo latente. Empresa que siempre vale más — pero el upside de corto plazo es limitado.",published:"2026-05-01",analyst:"NexoTrade Research"},
+  {id:29,ticker:"GOOGL",name:"Alphabet Inc",icon:"🔍",sector:"Tecnología",signal:"COMPRA",entry:175,target:225,stop:152,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["IA","Search","Cloud","YouTube"],thesis:"Alphabet es la compañía de IA más infravalorada del mercado. Google Search integra Gemini y mantiene 91% de market share. GCP crece 35%+ con AI workloads. YouTube supera $40B en ingresos publicitarios. Waymo lidera robotaxis. A 22x earnings con crecimiento de 15%+ es una ganga vs peers. Programa de recompra agresivo.",published:"2026-05-19",analyst:"NexoTrade Research"},
+  {id:30,ticker:"LLY",name:"Eli Lilly & Co",icon:"💉",sector:"Farmacéutico",signal:"COMPRA",entry:780,target:1050,stop:680,horizon:"12+ meses",risk:"Bajo",riskN:1,tags:["GLP-1","Obesidad","Diabetes"],thesis:"Eli Lilly tiene el pipeline farmacéutico más valioso del mundo en GLP-1 (Ozempic/Mounjaro). El mercado global de obesidad es >$100B anual y apenas comienza a desarrollarse. Tirzepatide es superior a semaglutida en estudios clínicos. La demanda supera su capacidad de manufactura — un problema de lujo. Orforglipron oral puede ser el game-changer de 2027.",published:"2026-05-18",analyst:"NexoTrade Research"},
+];
+
+function IdeasPage({ isPremium, onNeedPremium }) {
+  const [filter, setFilter]     = useState("todos");
+  const [sectorF, setSectorF]   = useState("todos");
+  const [riskF, setRiskF]       = useState("todos");
+  const [sortBy, setSortBy]     = useState("fecha");
+  const [livePx, setLivePx]     = useState({});
+  const [loading, setLoading]   = useState(true);
+  const [selIdea, setSelIdea]   = useState(null);
+  const [page, setPage]         = useState(1);
+  const PER_PAGE = 12;
+
+  const FINNHUB_KEY = "d86clthr01qgiu44rtmgd86clthr01qgiu44rtn0";
+
+  useEffect(() => {
+    const tickers = [...new Set(IDEAS_DATA.map(i => i.ticker))];
+    setLoading(true);
+    Promise.all(tickers.map(async t => {
+      try {
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${t}&token=${FINNHUB_KEY}`);
+        const d = await r.json();
+        if (d.c > 0) return { t, price: d.c, change: d.dp || 0, prevClose: d.pc || 0 };
+      } catch {}
+      return null;
+    })).then(results => {
+      const map = {};
+      results.filter(Boolean).forEach(r => { map[r.t] = r; });
+      setLivePx(map);
+      setLoading(false);
+    });
+  }, []);
+
+  if (!isPremium) return (
+    <div style={{maxWidth:560,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:72,marginBottom:16}}>💡</div>
+      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Ideas de Inversión VIP</div>
+      <div style={{fontSize:14,color:C.muted,marginBottom:10,lineHeight:1.8}}>
+        30+ ideas analizadas por nuestro equipo: señal de compra/venta, precio objetivo, upside real, tesis completa y seguimiento en tiempo real.
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:28,textAlign:"left",background:"rgba(139,92,246,0.06)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:14,padding:"16px 20px"}}>
+        {["✅ Señales Compra/Venta/Neutro actualizadas","📊 Precio en vivo vs precio objetivo","📈 Upside % calculado en tiempo real","📝 Tesis completa del analista","🎯 Stop loss y horizonte de inversión","🔄 Nuevas ideas cada semana"].map(f=>(
+          <div key={f} style={{fontSize:13,color:C.muted,fontWeight:600}}>{f}</div>
+        ))}
+      </div>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
+        ✦ Activar VIP — $9.99/mes
+      </button>
+    </div>
+  );
+
+  const sectors = ["todos", ...new Set(IDEAS_DATA.map(i => i.sector))];
+
+  const filtered = IDEAS_DATA
+    .filter(i => filter === "todos" || i.signal.toLowerCase() === filter)
+    .filter(i => sectorF === "todos" || i.sector === sectorF)
+    .filter(i => riskF === "todos" || i.riskN === Number(riskF))
+    .sort((a, b) => {
+      if (sortBy === "upside") {
+        const ua = livePx[a.ticker] ? ((a.target - livePx[a.ticker].price) / livePx[a.ticker].price * 100) : ((a.target - a.entry) / a.entry * 100);
+        const ub = livePx[b.ticker] ? ((b.target - livePx[b.ticker].price) / livePx[b.ticker].price * 100) : ((b.target - b.entry) / b.entry * 100);
+        return ub - ua;
+      }
+      if (sortBy === "señal") return a.signal.localeCompare(b.signal);
+      return new Date(b.published) - new Date(a.published);
+    });
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  const compras = IDEAS_DATA.filter(i => i.signal === "COMPRA").length;
+  const ventas  = IDEAS_DATA.filter(i => i.signal === "VENTA").length;
+  const neutros = IDEAS_DATA.filter(i => i.signal === "NEUTRO").length;
+
+  const SIGNAL_COLOR = { "COMPRA":"#10B981", "VENTA":"#EF4444", "NEUTRO":"#F59E0B" };
+  const SIGNAL_BG    = { "COMPRA":"rgba(16,185,129,0.12)", "VENTA":"rgba(239,68,68,0.12)", "NEUTRO":"rgba(245,158,11,0.12)" };
+  const SIGNAL_ICON  = { "COMPRA":"↑", "VENTA":"↓", "NEUTRO":"→" };
+  const RISK_LABEL   = { 1:"Bajo", 2:"Medio", 3:"Alto" };
+  const RISK_COLOR   = { 1:"#10B981", 2:"#F59E0B", 3:"#EF4444" };
+
+  const IdeaCard = ({ idea }) => {
+    const live       = livePx[idea.ticker];
+    const curPrice   = live?.price || idea.entry;
+    const change     = live?.change || 0;
+    const isPos      = change >= 0;
+    const sc         = SIGNAL_COLOR[idea.signal];
+    const isBuy      = idea.signal === "COMPRA";
+    const upside     = ((idea.target - curPrice) / curPrice * 100);
+    const upsideAbs  = Math.abs(upside).toFixed(1);
+    const upsidePos  = (isBuy && upside > 0) || (!isBuy && idea.signal === "VENTA");
+    // Progress: where current price is between entry and target
+    const lo = Math.min(idea.entry, idea.target, idea.stop);
+    const hi = Math.max(idea.entry, idea.target, idea.stop);
+    const pctEntry  = ((idea.entry  - lo) / (hi - lo) * 100).toFixed(1);
+    const pctTarget = ((idea.target - lo) / (hi - lo) * 100).toFixed(1);
+    const pctStop   = ((idea.stop   - lo) / (hi - lo) * 100).toFixed(1);
+    const pctCur    = Math.max(0, Math.min(100, ((curPrice - lo) / (hi - lo) * 100))).toFixed(1);
+    const daysPub   = Math.floor((new Date() - new Date(idea.published)) / 86400000);
+
+    return (
+      <div onClick={() => setSelIdea(idea)}
+        style={{background:"linear-gradient(145deg,rgba(10,14,26,0.98),rgba(15,22,40,0.96))",border:`1px solid ${sc}25`,borderRadius:18,overflow:"hidden",cursor:"pointer",transition:"all 0.22s",position:"relative",boxShadow:`0 4px 24px rgba(0,0,0,0.35)`}}
+        onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-3px)"; e.currentTarget.style.boxShadow=`0 16px 40px rgba(0,0,0,0.45),0 0 0 1px ${sc}40`; }}
+        onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)";   e.currentTarget.style.boxShadow=`0 4px 24px rgba(0,0,0,0.35)`; }}>
+        {/* Top accent bar */}
+        <div style={{height:3,background:`linear-gradient(90deg,${sc},${sc}30)`}}/>
+        <div style={{padding:"14px 16px"}}>
+          {/* Row 1: icon + ticker + signal badge */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{width:36,height:36,borderRadius:10,background:`${sc}18`,border:`1px solid ${sc}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>{idea.icon}</div>
+              <div>
+                <div style={{fontFamily:"monospace",fontWeight:900,fontSize:15,color:sc,letterSpacing:-0.5}}>{idea.ticker}</div>
+                <div style={{fontSize:10,color:"#475569",fontWeight:600,maxWidth:130,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{idea.name}</div>
+              </div>
+            </div>
+            <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:20,padding:"4px 10px",display:"flex",alignItems:"center",gap:4}}>
+              <span style={{fontSize:11,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {idea.signal}</span>
+            </div>
+          </div>
+
+          {/* Row 2: Current price + change */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:10}}>
+            <div>
+              <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,marginBottom:2}}>PRECIO ACTUAL</div>
+              <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>
+                ${curPrice.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
+              </div>
+              <div style={{fontSize:11,fontWeight:700,color:isPos?"#10B981":"#EF4444"}}>
+                {isPos?"▲":"▼"} {Math.abs(change).toFixed(2)}% hoy
+              </div>
+            </div>
+            {/* Upside circle */}
+            <div style={{textAlign:"center"}}>
+              <div style={{width:56,height:56,borderRadius:"50%",background:`conic-gradient(${sc} ${Math.min(Math.abs(upside),100)*3.6}deg,rgba(255,255,255,0.04) 0deg)`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+                <div style={{width:42,height:42,borderRadius:"50%",background:"rgba(10,14,26,0.97)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+                  <div style={{fontSize:12,fontWeight:900,color:upsidePos?sc:"#EF4444",lineHeight:1}}>{upsidePos?"+":"-"}{upsideAbs}%</div>
+                </div>
+              </div>
+              <div style={{fontSize:8,color:"#334155",fontWeight:700,letterSpacing:0.5,marginTop:2}}>UPSIDE</div>
+            </div>
+          </div>
+
+          {/* Price track */}
+          <div style={{position:"relative",height:6,background:"rgba(255,255,255,0.05)",borderRadius:4,marginBottom:6}}>
+            {/* Stop */}
+            <div style={{position:"absolute",left:`${pctStop}%`,top:-2,width:2,height:10,background:"#EF4444",borderRadius:2}}/>
+            {/* Entry */}
+            <div style={{position:"absolute",left:`${pctEntry}%`,top:-2,width:2,height:10,background:"#F59E0B",borderRadius:2}}/>
+            {/* Target */}
+            <div style={{position:"absolute",left:`${Math.min(parseFloat(pctTarget),98)}%`,top:-2,width:2,height:10,background:sc,borderRadius:2}}/>
+            {/* Current position dot */}
+            <div style={{position:"absolute",left:`${pctCur}%`,top:-3,width:12,height:12,borderRadius:"50%",background:sc,boxShadow:`0 0 6px ${sc}`,transform:"translateX(-6px)",border:"2px solid rgba(10,14,26,0.9)"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+            <div style={{fontSize:9,color:"#EF4444"}}>Stop ${idea.stop}</div>
+            <div style={{fontSize:9,color:"#F59E0B"}}>Entrada ${idea.entry}</div>
+            <div style={{fontSize:9,color:sc}}>Obj. ${idea.target}</div>
+          </div>
+
+          {/* Tags row */}
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+            {idea.tags.slice(0,3).map(tag=>(
+              <span key={tag} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:5,padding:"2px 7px",fontSize:9,color:"#64748B",fontWeight:700}}>{tag}</span>
+            ))}
+          </div>
+
+          {/* Bottom row: horizon + risk + days */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:8}}>
+            <div style={{display:"flex",gap:6}}>
+              <span style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.2)",borderRadius:5,padding:"2px 7px",fontSize:9,color:"#818CF8",fontWeight:700}}>⏱ {idea.horizon}</span>
+              <span style={{background:`rgba(${RISK_COLOR[idea.riskN]==="#10B981"?"16,185,129":RISK_COLOR[idea.riskN]==="#F59E0B"?"245,158,11":"239,68,68"},0.1)`,borderRadius:5,padding:"2px 7px",fontSize:9,color:RISK_COLOR[idea.riskN],fontWeight:700}}>
+                ⚡ Riesgo {RISK_LABEL[idea.riskN]}
+              </span>
+            </div>
+            <span style={{fontSize:9,color:"#334155"}}>{daysPub === 0 ? "Hoy" : `Hace ${daysPub}d`}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ── MODAL DETAIL ──
+  const ModalDetail = ({ idea, onClose }) => {
+    if (!idea) return null;
+    const live     = livePx[idea.ticker];
+    const curPrice = live?.price || idea.entry;
+    const change   = live?.change || 0;
+    const isPos    = change >= 0;
+    const sc       = SIGNAL_COLOR[idea.signal];
+    const upside   = ((idea.target - curPrice) / curPrice * 100);
+    const rr       = Math.abs(idea.target - idea.entry) / Math.abs(idea.entry - idea.stop);
+
+    return (
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(8px)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+        <div onClick={e=>e.stopPropagation()}
+          style={{background:"linear-gradient(145deg,rgba(10,14,26,0.99),rgba(15,22,40,0.97))",border:`1px solid ${sc}30`,borderRadius:22,padding:0,maxWidth:580,width:"100%",maxHeight:"90vh",overflow:"auto",boxShadow:`0 32px 80px rgba(0,0,0,0.7),0 0 0 1px ${sc}20`}}>
+          {/* Top bar */}
+          <div style={{height:4,background:`linear-gradient(90deg,${sc},${sc}40,transparent)`}}/>
+          <div style={{padding:"20px 24px"}}>
+            {/* Header */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:18}}>
+              <div style={{display:"flex",gap:12,alignItems:"center"}}>
+                <div style={{width:52,height:52,borderRadius:14,background:`${sc}18`,border:`1px solid ${sc}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{idea.icon}</div>
+                <div>
+                  <div style={{fontFamily:"monospace",fontWeight:900,fontSize:22,color:sc}}>{idea.ticker}</div>
+                  <div style={{fontSize:13,color:"#64748B",fontWeight:600}}>{idea.name}</div>
+                  <div style={{fontSize:11,color:"#334155"}}>{idea.sector}</div>
+                </div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
+                <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:20,padding:"5px 14px"}}>
+                  <span style={{fontSize:13,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {idea.signal}</span>
+                </div>
+                <button onClick={onClose} style={{background:"transparent",border:"none",color:"#475569",cursor:"pointer",fontSize:18,padding:"2px 6px"}}>✕</button>
+              </div>
+            </div>
+
+            {/* Price stats grid */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
+              {[
+                {l:"PRECIO ACTUAL", v:`$${curPrice.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`, sub:`${isPos?"▲":"▼"} ${Math.abs(change).toFixed(2)}% hoy`, sc2:isPos?"#10B981":"#EF4444"},
+                {l:"PRECIO OBJETIVO", v:`$${idea.target}`, sub:`${upside >= 0?"+":""}${upside.toFixed(1)}% upside`, sc2:upside>=0?"#10B981":"#EF4444"},
+                {l:"STOP LOSS", v:`$${idea.stop}`, sub:`R:R ${rr.toFixed(1)}:1`, sc2:"#EF4444"},
+              ].map(s=>(
+                <div key={s.l} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px"}}>
+                  <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,marginBottom:4}}>{s.l}</div>
+                  <div style={{fontSize:18,fontWeight:900,color:"#F1F5F9",marginBottom:2}}>{s.v}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:s.sc2}}>{s.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* More metadata */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:18}}>
+              {[
+                {l:"ENTRADA SUGERIDA", v:`$${idea.entry}`},
+                {l:"HORIZONTE", v:idea.horizon},
+                {l:"RIESGO", v:RISK_LABEL[idea.riskN], c:RISK_COLOR[idea.riskN]},
+              ].map(s=>(
+                <div key={s.l} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:10,padding:"10px 12px",textAlign:"center"}}>
+                  <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,marginBottom:4}}>{s.l}</div>
+                  <div style={{fontSize:14,fontWeight:800,color:s.c||"#F1F5F9"}}>{s.v}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tags */}
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+              {idea.tags.map(tag=>(
+                <span key={tag} style={{background:`${sc}15`,border:`1px solid ${sc}30`,borderRadius:6,padding:"4px 10px",fontSize:11,color:sc,fontWeight:700}}>{tag}</span>
+              ))}
+            </div>
+
+            {/* Thesis */}
+            <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px 18px",marginBottom:14}}>
+              <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8}}>📝 TESIS DE INVERSIÓN</div>
+              <div style={{fontSize:13,color:"#CBD5E1",lineHeight:1.75}}>{idea.thesis}</div>
+            </div>
+
+            {/* Footer */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,color:"#334155"}}>
+              <span>Publicado: {new Date(idea.published).toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})}</span>
+              <span>{idea.analyst}</span>
+              <span style={{color:"#1E293B",fontSize:10}}>⚠️ No es consejo financiero</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{maxWidth:1100,margin:"0 auto"}}>
+      {/* ── HEADER ── */}
+      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(99,102,241,0.2)",borderRadius:20,padding:"18px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:"radial-gradient(circle,rgba(99,102,241,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+          <span style={{fontSize:28}}>💡</span>
+          <div>
+            <div style={{fontSize:19,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Ideas de Inversión</div>
+            <div style={{fontSize:12,color:"#475569"}}>Señales analizadas por NexoTrade Research · Precios en tiempo real · {IDEAS_DATA.length} ideas activas</div>
+          </div>
+          <div style={{marginLeft:"auto",display:"flex",gap:8,flexWrap:"wrap"}}>
+            {[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}].map(s=>(
+              <div key={s.l} style={{background:s.bg,border:`1px solid ${s.c}30`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:800,color:s.c}}>{s.l}</div>
+            ))}
+            {loading && <div style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.3)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8"}}>⟳ Cargando precios…</div>}
+          </div>
+        </div>
+      </div>
+
+      {/* ── FILTERS ── */}
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
+        {/* Signal filter */}
+        <div style={{display:"flex",gap:4}}>
+          {[["todos","🌐 Todos"],["compra","↑ Compras"],["venta","↓ Ventas"],["neutro","→ Neutro"]].map(([k,l])=>(
+            <button key={k} onClick={()=>{setFilter(k);setPage(1);}}
+              style={{background:filter===k?"linear-gradient(135deg,#6366F1,#4F46E5)":"transparent",border:`1.5px solid ${filter===k?"transparent":C.border}`,borderRadius:20,padding:"6px 13px",fontSize:11,fontWeight:700,color:filter===k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
+              {l}
+            </button>
+          ))}
+        </div>
+        <div style={{width:1,height:24,background:C.border}}/>
+        {/* Risk filter */}
+        {[["todos","⚡ Todo riesgo"],["1","🟢 Bajo"],["2","🟡 Medio"],["3","🔴 Alto"]].map(([k,l])=>(
+          <button key={k} onClick={()=>{setRiskF(k);setPage(1);}}
+            style={{background:riskF===k?"rgba(99,102,241,0.2)":"transparent",border:`1.5px solid ${riskF===k?"#6366F1":C.border}`,borderRadius:20,padding:"6px 12px",fontSize:11,fontWeight:700,color:riskF===k?"#A5B4FC":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
+            {l}
+          </button>
+        ))}
+        {/* Sort */}
+        <div style={{marginLeft:"auto"}}>
+          <select value={sortBy} onChange={e=>{setSortBy(e.target.value);setPage(1);}}
+            style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:10,padding:"6px 12px",fontSize:12,color:C.muted,cursor:"pointer"}}>
+            <option value="fecha">Más recientes</option>
+            <option value="upside">Mayor upside</option>
+            <option value="señal">Por señal</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── IDEA CARDS GRID ── */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(310px,1fr))",gap:14,marginBottom:20}}>
+        {paged.map(idea => <IdeaCard key={idea.id} idea={idea}/>)}
+      </div>
+      {filtered.length === 0 && (
+        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>No hay ideas con esos filtros</div>
+      )}
+
+      {/* ── PAGINATION ── */}
+      {totalPages > 1 && (
+        <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:20}}>
+          {Array.from({length:totalPages},(_,i)=>i+1).map(n=>(
+            <button key={n} onClick={()=>setPage(n)}
+              style={{width:34,height:34,borderRadius:8,border:`1.5px solid ${page===n?"#6366F1":C.border}`,background:page===n?"linear-gradient(135deg,#6366F1,#4F46E5)":"transparent",color:page===n?"#fff":C.muted,fontWeight:700,fontSize:13,cursor:"pointer"}}>
+              {n}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div style={{textAlign:"center",padding:"8px 0 16px",fontSize:10,color:"#1E293B"}}>
+        ⚠️ Las ideas son análisis informativos del equipo NexoTrade. No constituyen consejo financiero. Invierte con responsabilidad.
+      </div>
+
+      {/* Modal */}
+      {selIdea && <ModalDetail idea={selIdea} onClose={()=>setSelIdea(null)}/>}
+    </div>
+  );
+}
+
 const NAV_ITEMS = (t) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},
   {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"🎓 Webinars",idx:11},
   {label:"📚 Academia",idx:12},
+  {label:"💡 Ideas VIP",idx:21,vip:true},
   {label:"🏛️ Super Inversores",idx:19,vip:true},
   {label:"🐋 Flujo VIP",idx:20,vip:true},
   {label:"🛠️ Herramientas",idx:9,vip:true},
@@ -9700,6 +10088,7 @@ export default function App(){
     if(page===14) return <EconCalendarPage/>;
     if(page===18) return <CommoditiesPage/>;
     if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===15) return <DividendCalendarPage/>;
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
