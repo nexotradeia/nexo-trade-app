@@ -2001,6 +2001,23 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           <p style={{margin:"0 0 10px",color:"var(--c-text)",fontSize:14,lineHeight:1.65,fontWeight:400,opacity:0.88}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
           {/* Imagen / GIF */}
           {post.image&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
+          {/* Link preview card */}
+          {post.link&&(()=>{
+            let domain="";try{domain=new URL(post.link).hostname.replace(/^www\./,"");}catch{}
+            return(
+              <a href={post.link} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
+                style={{display:"flex",alignItems:"center",gap:10,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:12,padding:"10px 14px",marginBottom:10,textDecoration:"none",transition:"all 0.15s",boxSizing:"border-box"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.35)";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.background="var(--c-card2)";}}>
+                <img src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`} alt="" width={22} height={22} style={{borderRadius:5,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:10,color:"var(--c-muted2)",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:1}}>{domain}</div>
+                  <div style={{fontSize:12,color:"var(--c-accent)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{post.link}</div>
+                </div>
+                <span style={{fontSize:14,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
+              </a>
+            );
+          })()}
           {/* Metrics row — compacto */}
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
             <div style={{display:"flex",alignItems:"center",gap:3,background:isBull?"rgba(22,163,74,0.08)":"rgba(220,38,38,0.08)",borderRadius:8,padding:"3px 9px",border:`1px solid ${isBull?"rgba(22,163,74,0.18)":"rgba(220,38,38,0.18)"}`}}>
@@ -2143,9 +2160,14 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   const [posting,setPosting]=useState(false);
   const [image,setImage]=useState(null);
   const [showGif,setShowGif]=useState(false);
+  const [link,setLink]=useState("");
+  const [showLink,setShowLink]=useState(false);
   const fileRef=useRef(null);
   const [mentionBox,setMentionBox]=useState({open:false,query:"",results:[],caretPos:0});
   const taRef=useRef();
+
+  const isValidUrl=url=>{try{const u=new URL(url);return u.protocol==="http:"||u.protocol==="https:";}catch{return false;}};
+  const getDomain=url=>{try{return new URL(url).hostname.replace(/^www\./,"");}catch{return url;}};
 
   // Detectar @ en el textarea y mostrar autocomplete
   const handleTextChange=(e)=>{
@@ -2183,8 +2205,8 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
     const mod=moderateText(text);
     if(!mod.ok){setModMsg(t.modWarning);setTimeout(()=>setModMsg(""),4000);return;}
     setPosting(true);
-    await onPost({text,ticker:ticker.toUpperCase()||"GENERAL",sentiment:sent,image:image||null});
-    setText("");setTicker("");setModMsg("");setImage(null);setShowGif(false);
+    await onPost({text,ticker:ticker.toUpperCase()||"GENERAL",sentiment:sent,image:image||null,link:link.trim()&&isValidUrl(link.trim())?link.trim():null});
+    setText("");setTicker("");setModMsg("");setImage(null);setShowGif(false);setLink("");setShowLink(false);
     setPosting(false);
   };
 
@@ -2227,6 +2249,38 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
           )}
           {showGif&&<GifPicker onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)} onText={txt=>{setText(prev=>prev+txt);}}/>}
 
+          {/* ── Link input + preview ── */}
+          {showLink&&(
+            <div style={{marginTop:8}}>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:14,flexShrink:0}}>🔗</span>
+                <input
+                  value={link}
+                  onChange={e=>setLink(e.target.value)}
+                  placeholder="https://..."
+                  autoFocus
+                  style={{flex:1,background:"var(--c-card2)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:8,padding:"7px 11px",fontSize:13,color:"var(--c-text)",outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}
+                  onFocus={e=>e.target.style.borderColor="rgba(0,168,255,0.5)"}
+                  onBlur={e=>e.target.style.borderColor="rgba(0,168,255,0.25)"}
+                />
+                {link&&<button onClick={()=>setLink("")} style={{background:"none",border:"none",color:"var(--c-muted2)",cursor:"pointer",fontSize:14,padding:"2px 4px",borderRadius:4,flexShrink:0}}>✕</button>}
+              </div>
+              {isValidUrl(link)&&(
+                <a href={link} target="_blank" rel="noopener noreferrer"
+                  style={{display:"flex",alignItems:"center",gap:10,background:"var(--c-card2)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,padding:"10px 12px",marginTop:6,textDecoration:"none",cursor:"pointer",transition:"all 0.15s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.45)";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.2)";e.currentTarget.style.background="var(--c-card2)";}}>
+                  <img src={`https://www.google.com/s2/favicons?sz=32&domain=${getDomain(link)}`} alt="" width={20} height={20} style={{borderRadius:4,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:10,color:"var(--c-muted2)",fontWeight:700,letterSpacing:0.5,marginBottom:1,textTransform:"uppercase"}}>{getDomain(link)}</div>
+                    <div style={{fontSize:12,color:C.accent,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{link}</div>
+                  </div>
+                  <span style={{fontSize:13,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
+                </a>
+              )}
+            </div>
+          )}
+
           {/* ── Bottom bar: dos filas en móvil ── */}
           <div style={{marginTop:10}}>
             {/* Fila 1: herramientas */}
@@ -2244,6 +2298,13 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
                 onMouseEnter={e=>{e.currentTarget.style.color="#7C3AED";}}
                 onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#7C3AED":"var(--c-muted2)";}}>
                 <span>🎭</span><span>Media</span>
+              </button>
+              {/* Link button */}
+              <button onClick={()=>setShowLink(v=>!v)} title="Agregar enlace"
+                style={{background:showLink||isValidUrl(link)?"rgba(0,168,255,0.1)":"none",border:showLink||isValidUrl(link)?"1px solid rgba(0,168,255,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showLink||isValidUrl(link)?C.accent:"var(--c-muted2)",padding:"4px 9px",borderRadius:7,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
+                onMouseEnter={e=>{e.currentTarget.style.color=C.accent;}}
+                onMouseLeave={e=>{e.currentTarget.style.color=showLink||isValidUrl(link)?C.accent:"var(--c-muted2)";}}>
+                <span>🔗</span><span>Link</span>
               </button>
               {/* Ticker */}
               <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
@@ -10650,6 +10711,7 @@ export default function App(){
             reposts:    p.reposts_count||0,
             tags:       p.tags||[p.ticker||"GENERAL"],
             image:      p.image_url||null,
+            link:       p.link_url||null,
           }));
           // Solo actualiza si hay posts nuevos — no mueve el scroll innecesariamente
           setPosts(prev => {
@@ -10728,13 +10790,13 @@ export default function App(){
     }
   };
 
-  const addPost = async({text,ticker,sentiment,image}) => {
+  const addPost = async({text,ticker,sentiment,image,link}) => {
     const localId = `local-${Date.now()}`;
     // 1. Mostrar el post INMEDIATAMENTE en la pantalla (optimista)
     const localPost={
       id:localId, userId:user?.id, user:user?.name||"Tú",
       avatar:user?.emoji||"🦅", avatarColor:user?.avatarColor||C.accent,
-      time:"ahora", ticker, sentiment, text, image:image||null,
+      time:"ahora", ticker, sentiment, text, image:image||null, link:link||null,
       likes:0, comments:0, reposts:0, tags:[ticker]
     };
     setPosts(prev=>[localPost,...prev]);
@@ -10757,6 +10819,7 @@ export default function App(){
           reposts_count:  0,
         };
         if(image) payload.image_url = image;
+        if(link) payload.link_url = link;
         const {data,error}=await supabase.from("posts").insert(payload).select().single();
         return {data,error};
       };
