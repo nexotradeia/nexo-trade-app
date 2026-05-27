@@ -567,6 +567,51 @@ const SEARCH_TICKERS = [
 const _ST_SET = new Set(SEARCH_TICKERS);
 const SEARCH_TICKERS_UNIQ = [..._ST_SET];
 
+// ── SVG ICON COMPONENTS ───────────────────────────────────────────────────────
+const IcoHome = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9 22 9 12 15 12 15 22"/>
+  </svg>
+);
+const IcoBot = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="10" rx="2"/>
+    <circle cx="12" cy="5" r="2"/>
+    <path d="M12 7v4M9 16h.01M15 16h.01"/>
+  </svg>
+);
+const IcoBell = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </svg>
+);
+const IcoMoon = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+);
+const IcoSun = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/>
+    <line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/>
+    <line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+);
+const IcoSettings = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+);
+
 // ── LANG SELECTOR ─────────────────────────────────────────────────────────────
 function LangSelector({lang, setLang}){
   const [open, setOpen] = useState(false);
@@ -1978,8 +2023,8 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
   return(
     <div
       className={isNew ? "post-card-new" : ""}
-      style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:6,transition:"border-color 0.18s, box-shadow 0.18s, transform 0.18s",boxShadow:"var(--c-shadow)"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor=isBull?"rgba(22,163,74,0.3)":"rgba(220,38,38,0.2)";e.currentTarget.style.boxShadow="var(--c-shadowMd)";e.currentTarget.style.transform="translateY(-1px)";}}
+      style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:6,transition:"border-color 0.2s, box-shadow 0.2s, transform 0.2s",boxShadow:"var(--c-shadow)"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor=isBull?"rgba(22,163,74,0.35)":"rgba(220,38,38,0.25)";e.currentTarget.style.boxShadow=isBull?"0 6px 24px rgba(22,163,74,0.1), 0 2px 8px rgba(0,0,0,0.08)":"0 6px 24px rgba(220,38,38,0.1), 0 2px 8px rgba(0,0,0,0.08)";e.currentTarget.style.transform="translateY(-3px)";}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="var(--c-shadow)";e.currentTarget.style.transform="translateY(0)";}}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
         <div style={{cursor:"pointer",flexShrink:0}} onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>
@@ -4316,15 +4361,24 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 </div>
               </>
             : <>
-                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:C.gold+"22",border:`1px solid ${C.gold}44`,borderRadius:20,padding:"6px 16px",marginBottom:16}}>
-                  <span style={{fontSize:14}}>⭐</span>
-                  <span style={{color:C.gold,fontSize:12,fontWeight:700,letterSpacing:1}}>NEXOTRADE PREMIUM</span>
+                {/* Urgency banner */}
+                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:20,padding:"6px 16px",marginBottom:14}}>
+                  <span style={{width:7,height:7,borderRadius:"50%",background:"#ef4444",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
+                  <span style={{color:"#f87171",fontSize:12,fontWeight:700,letterSpacing:0.5}}>🔥 Solo quedan 23 spots VIP este mes</span>
                 </div>
-                <h1 style={{margin:"0 0 10px",color:"#fff",fontSize:28,fontWeight:900,lineHeight:1.2}}>Lleva tu trading al siguiente nivel</h1>
-                <p style={{margin:"0 0 24px",color:"#94a3b8",fontSize:15,maxWidth:480,margin:"0 auto 24px"}}>Señales en tiempo real, IA sin límites, alertas por email y formación exclusiva.</p>
+                <h1 style={{margin:"0 0 10px",color:"#fff",fontSize:"clamp(22px,4vw,30px)",fontWeight:900,lineHeight:1.2}}>Lleva tu trading al siguiente nivel</h1>
+                <p style={{margin:"0 auto 20px",color:"#94a3b8",fontSize:15,maxWidth:480}}>Señales en tiempo real, IA sin límites, alertas por email y formación exclusiva.</p>
+                {/* CTA prominente en el hero */}
+                <button onClick={handleSubscribe}
+                  style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:14,padding:"16px 36px",fontSize:16,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 32px rgba(124,58,237,0.6)",marginBottom:12,display:"inline-flex",alignItems:"center",gap:8,transition:"transform 0.15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                  ✦ Empieza gratis 7 días — $9.99/mes después
+                </button>
+                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>Sin tarjeta requerida · Cancela cuando quieras · 840+ traders VIP activos</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {["💡 Ideas VIP","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🤖 IA Ilimitada","📅 Calendarios"].map(b=>(
-                    <span key={b} style={{background:"#ffffff15",border:"1px solid #ffffff22",borderRadius:20,padding:"6px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
+                    <span key={b} style={{background:"#ffffff15",border:"1px solid #ffffff22",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
                   ))}
                 </div>
               </>
@@ -4386,11 +4440,17 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 {isPremium
                   ?<div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>✅ Plan activo — ¡Gracias por ser VIP!</div>
                   :<>
+                    {/* Trial badge */}
+                    <div style={{background:"rgba(0,200,100,0.1)",border:"1px solid rgba(0,200,100,0.25)",borderRadius:10,padding:"8px 12px",marginBottom:10,textAlign:"center"}}>
+                      <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>🎁 7 días GRATIS · Luego solo $9.99/mes</span>
+                    </div>
                     <button onClick={handleSubscribe}
-                      style={{width:"100%",background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:10,padding:"14px",fontSize:14,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 4px 24px rgba(124,58,237,0.5)",marginBottom:8}}>
-                      ✦ Hazte VIP — ${price.toFixed(2)}/mes →
+                      style={{width:"100%",background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(124,58,237,0.55)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
+                      onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 36px rgba(124,58,237,0.7)";}}
+                      onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 28px rgba(124,58,237,0.55)";}}>
+                      ✦ Comenzar prueba gratis →
                     </button>
-                    <div style={{textAlign:"center",fontSize:11,color:"#475569",marginTop:4}}>7 días gratis · Sin compromiso · Cancela cuando quieras</div>
+                    <div style={{textAlign:"center",fontSize:11,color:"#475569"}}>Sin tarjeta · Cancela cuando quieras · Acceso inmediato</div>
                   </>
                 }
               </div>
@@ -4872,45 +4932,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
       </div>
 
       {/* ── PROGRAMA DE REFERIDOS ── */}
-      {user && (
-        <div id="nexo-referral-section" style={{background:"#fff",borderRadius:16,padding:"16px",boxShadow:"0 2px 16px rgba(15,23,42,0.08)",border:"1px solid rgba(15,23,42,0.07)"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <span style={{fontSize:18}}>🔗</span>
-            <div>
-              <div style={{fontWeight:800,fontSize:13,color:"#0F172A"}}>Programa de Referidos</div>
-              <div style={{fontSize:10,color:"#64748B"}}>Gana por cada amigo VIP</div>
-            </div>
-          </div>
-          <div style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:10,padding:"10px 12px",marginBottom:10}}>
-            <div style={{fontSize:11,color:"#475569",marginBottom:6,lineHeight:1.5}}>
-              Comparte tu link y gana <strong style={{color:"#00A8FF"}}>500 puntos</strong> por cada amigo que se registre y <strong style={{color:"#7C3AED"}}>1 mes VIP gratis</strong> cuando se suscriba.
-            </div>
-            <div style={{display:"flex",gap:6,alignItems:"center"}}>
-              <div style={{flex:1,background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:7,padding:"6px 10px",fontSize:10,color:"#64748B",fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                nexotradeia.com?ref={user.id?.slice(0,8)||"xxxxxxxx"}
-              </div>
-              <button
-                onClick={()=>{
-                  const link=`https://nexotradeia.com?ref=${user.id}`;
-                  navigator.clipboard.writeText(link).then(()=>alert("✅ Link copiado al portapapeles"));
-                }}
-                style={{background:"#00A8FF",border:"none",borderRadius:7,padding:"6px 10px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0}}>
-                Copiar
-              </button>
-            </div>
-          </div>
-          <div style={{display:"flex",gap:6}}>
-            <a href={`https://wa.me/?text=Únete a NexoTrade, la comunidad de traders en español 📈 https://nexotradeia.com?ref=${user.id}`} target="_blank" rel="noopener noreferrer"
-              style={{flex:1,background:"#25D366",border:"none",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",textDecoration:"none",textAlign:"center"}}>
-              📱 WhatsApp
-            </a>
-            <a href={`https://twitter.com/intent/tweet?text=Acabo de unirme a NexoTrade, la comunidad de traders en español 📈 Únete aquí: https://nexotradeia.com?ref=${user.id}`} target="_blank" rel="noopener noreferrer"
-              style={{flex:1,background:"#0F172A",border:"none",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",textDecoration:"none",textAlign:"center"}}>
-              𝕏 Twitter
-            </a>
-          </div>
-        </div>
-      )}
+      {user && <ReferralSection user={user}/>}
 
       {/* ── LOGOUT + FOOTER ── */}
       {user && onLogout && (
@@ -5545,6 +5567,108 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       {/* ── DISCLAIMER ── */}
       <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
         <strong>⚠️</strong> {t.disclaimer}
+      </div>
+    </div>
+  );
+}
+
+// ── REFERRAL SECTION ──────────────────────────────────────────────────────────
+function ReferralSection({ user }) {
+  const [copied, setCopied] = useState(false);
+  const [refCount, setRefCount] = useState(null);
+  const [refCode, setRefCode] = useState(null);
+
+  // Generar código legible: primeras 6 letras del username + 3 dígitos del id
+  useEffect(() => {
+    if (!user) return;
+    const base = (user.username || user.name || "trader").replace(/[^a-zA-Z0-9]/g,"").toUpperCase().slice(0,6);
+    const digits = (user.id || "").replace(/\D/g,"").slice(0,3) || "001";
+    const code = base + digits;
+    setRefCode(code);
+    // Contar cuántos usuarios se registraron con ref=user.id
+    supabase.from("profiles").select("id", {count:"exact", head:true})
+      .eq("referred_by", user.id)
+      .then(({count}) => setRefCount(count || 0))
+      .catch(() => setRefCount(0));
+  }, [user]);
+
+  const refLink = `https://nexotradeia.com?ref=${user.id}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(refLink).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
+
+  return (
+    <div id="nexo-referral-section" style={{background:"linear-gradient(135deg,rgba(0,168,255,0.05),rgba(124,58,237,0.05))",borderRadius:16,padding:"16px",border:"1px solid rgba(0,168,255,0.15)"}}>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+        <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#00A8FF22,#7C3AED22)",border:"1px solid rgba(0,168,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🔗</div>
+        <div>
+          <div style={{fontWeight:800,fontSize:13,color:"var(--c-text,#0F172A)"}}>Programa de Referidos</div>
+          <div style={{fontSize:10,color:"#64748B"}}>Gana 1 mes VIP gratis por cada amigo que se suscriba</div>
+        </div>
+        {refCount !== null && (
+          <div style={{marginLeft:"auto",textAlign:"center",background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,padding:"5px 10px"}}>
+            <div style={{fontSize:18,fontWeight:900,color:"#00A8FF"}}>{refCount}</div>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>referidos</div>
+          </div>
+        )}
+      </div>
+
+      {/* Rewards */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}}>
+        {[
+          {icon:"🎁",title:"Tú ganas",val:"1 mes VIP gratis",sub:"por cada referido VIP"},
+          {icon:"🤝",title:"Tu amigo gana",val:"7 días gratis",sub:"al suscribirse VIP"},
+        ].map((r,i)=>(
+          <div key={i} style={{background:"rgba(255,255,255,0.5)",border:"1px solid rgba(0,0,0,0.06)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
+            <div style={{fontSize:16,marginBottom:2}}>{r.icon}</div>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600,marginBottom:2}}>{r.title}</div>
+            <div style={{fontSize:12,fontWeight:800,color:"var(--c-text,#0F172A)"}}>{r.val}</div>
+            <div style={{fontSize:9,color:"#94A3B8"}}>{r.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tu código */}
+      {refCode && (
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+          <div style={{fontSize:10,color:"#64748B",fontWeight:600,whiteSpace:"nowrap"}}>Tu código:</div>
+          <div style={{background:"rgba(0,168,255,0.07)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:6,padding:"4px 10px",fontSize:12,fontWeight:800,color:"#00A8FF",fontFamily:"monospace",letterSpacing:1}}>{refCode}</div>
+        </div>
+      )}
+
+      {/* Link + Copiar */}
+      <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:8}}>
+        <div style={{flex:1,background:"rgba(0,0,0,0.04)",border:"1px solid rgba(0,0,0,0.08)",borderRadius:7,padding:"7px 10px",fontSize:10,color:"#64748B",fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+          nexotradeia.com?ref={user.id?.slice(0,8)}
+        </div>
+        <button onClick={handleCopy}
+          style={{background:copied?"#10b981":"#00A8FF",border:"none",borderRadius:7,padding:"7px 12px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap"}}>
+          {copied ? "✓ Copiado" : "Copiar link"}
+        </button>
+      </div>
+
+      {/* Compartir */}
+      <div style={{display:"flex",gap:6}}>
+        <a href={`https://wa.me/?text=📈 Te invito a NexoTrade, la comunidad de traders en español. Señales VIP, IA de trading y más. Únete gratis: ${refLink}`}
+          target="_blank" rel="noopener noreferrer"
+          style={{flex:1,background:"#25D366",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
+          📱 WhatsApp
+        </a>
+        <a href={`https://twitter.com/intent/tweet?text=📈 Acabo de unirme a NexoTrade, la red social de traders en español. Picks VIP, IA y más. Únete aquí: ${refLink}`}
+          target="_blank" rel="noopener noreferrer"
+          style={{flex:1,background:"#0F172A",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
+          𝕏 Twitter/X
+        </a>
+        <a href={`https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=📈 Únete a NexoTrade - comunidad de traders en español`}
+          target="_blank" rel="noopener noreferrer"
+          style={{flex:1,background:"#2AABEE",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
+          ✈️ Telegram
+        </a>
       </div>
     </div>
   );
@@ -9138,18 +9262,7 @@ function GurusPage({ isPremium, onNeedPremium }) {
       .catch(() => setInsLoad(false));
   }, [tab]);
 
-  if (!isPremium) return (
-    <div style={{maxWidth:560,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
-      <div style={{fontSize:60,marginBottom:12}}>🐋</div>
-      <div style={{fontSize:24,fontWeight:900,color:C.text,marginBottom:8}}>Inversores Influyentes</div>
-      <div style={{fontSize:14,color:C.muted,lineHeight:1.7,marginBottom:28}}>
-        Sigue en tiempo real a Buffett, Cathie Wood, Burry y los insiders corporativos.
-      </div>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer"}}>
-        ✦ Activar VIP — $9.99/mes
-      </button>
-    </div>
-  );
+  // Free users ven 5 gurús, el resto con blur
 
   const fmt$ = v => v >= 1e9 ? `$${(v/1e9).toFixed(1)}B` : v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v/1e3).toFixed(0)}K` : `$${v}`;
   const TABS = [{k:"gurus",l:"🏛️ Gurús"},{k:"ark",l:"🚀 ARK Daily"},{k:"insiders",l:"🕵️ Insiders SEC"}];
@@ -9202,49 +9315,90 @@ function GurusPage({ isPremium, onNeedPremium }) {
       </div>
 
       {/* ── GURÚS TAB ── */}
-      {tab==="gurus" && !selGuru && (
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
-          {GURUS_13F.filter(g => !search || g.name.toLowerCase().includes(search.toLowerCase()) || g.fund.toLowerCase().includes(search.toLowerCase())).map(g => (
-            <div key={g.id} onClick={()=>{setSelGuru(g.id);setDetailTab("holdings");}}
-              style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden"}}
-              onMouseEnter={e=>{e.currentTarget.style.border=`1px solid ${g.color}60`;e.currentTarget.style.boxShadow=`0 8px 24px ${g.color}15`;}}
-              onMouseLeave={e=>{e.currentTarget.style.border=`1px solid ${g.color}30`;e.currentTarget.style.boxShadow="none";}}>
-              <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}12 0%,transparent 70%)`,pointerEvents:"none"}}/>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                <div style={{width:46,height:46,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{g.emoji}</div>
-                <div>
-                  <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14}}>{g.name}</div>
-                  <div style={{fontSize:11,color:"#475569"}}>{g.fund}</div>
-                </div>
-              </div>
-              <div style={{display:"flex",gap:10,marginBottom:10}}>
-                <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
-                  <div style={{fontSize:11,fontWeight:800,color:g.color}}>{g.aum}</div>
-                  <div style={{fontSize:9,color:"#475569"}}>AUM</div>
-                </div>
-                <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
-                  <div style={{fontSize:11,fontWeight:800,color:"#F1F5F9"}}>{g.numStocks}</div>
-                  <div style={{fontSize:9,color:"#475569"}}>Posiciones</div>
-                </div>
-                <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
-                  <div style={{fontSize:10,fontWeight:700,color:"#F1F5F9"}}>{g.period}</div>
-                  <div style={{fontSize:9,color:"#475569"}}>Período</div>
-                </div>
-              </div>
-              <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{g.bio || `${g.fund} · ${g.period} · ${g.numStocks} posiciones`}</div>
-              <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                {g.holdings.slice(0,5).map(h=>{
-                  const px=livePx[h.t]; const pos=(px?.change||0)>=0;
-                  return(<span key={h.t} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:g.color}}>
-                    {h.t} <span style={{color:pos?"#00D26A":"#FF4D6A",fontSize:9}}>{px?`${pos?"+":""}${px.change.toFixed(1)}%`:""}</span>
-                  </span>);
-                })}
-              </div>
-              <div style={{marginTop:10,textAlign:"right",fontSize:10,color:g.color,fontWeight:700}}>Ver portafolio completo →</div>
+      {tab==="gurus" && !selGuru && (() => {
+        const visibleGurus = GURUS_13F.filter(g => !search || g.name.toLowerCase().includes(search.toLowerCase()) || g.fund.toLowerCase().includes(search.toLowerCase()));
+        const FREE_LIMIT = 5;
+        return (
+          <div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
+              {visibleGurus.map((g, idx) => {
+                const isLocked = !isPremium && idx >= FREE_LIMIT;
+                return (
+                  <div key={g.id} style={{position:"relative",userSelect:isLocked?"none":"auto"}}>
+                    <div
+                      style={{filter:isLocked?"blur(5px)":"none",pointerEvents:isLocked?"none":"auto",transition:"filter 0.2s"}}
+                      onClick={()=>{ if(!isLocked){setSelGuru(g.id);setDetailTab("holdings");} }}>
+                      <div
+                        style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden"}}
+                        onMouseEnter={e=>{if(!isLocked){e.currentTarget.style.border=`1px solid ${g.color}60`;e.currentTarget.style.boxShadow=`0 8px 24px ${g.color}15`;}}}
+                        onMouseLeave={e=>{e.currentTarget.style.border=`1px solid ${g.color}30`;e.currentTarget.style.boxShadow="none";}}>
+                        <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}12 0%,transparent 70%)`,pointerEvents:"none"}}/>
+                        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                          <div style={{width:46,height:46,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{g.emoji}</div>
+                          <div>
+                            <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14}}>{g.name}</div>
+                            <div style={{fontSize:11,color:"#475569"}}>{g.fund}</div>
+                          </div>
+                        </div>
+                        <div style={{display:"flex",gap:10,marginBottom:10}}>
+                          <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                            <div style={{fontSize:11,fontWeight:800,color:g.color}}>{g.aum}</div>
+                            <div style={{fontSize:9,color:"#475569"}}>AUM</div>
+                          </div>
+                          <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                            <div style={{fontSize:11,fontWeight:800,color:"#F1F5F9"}}>{g.numStocks}</div>
+                            <div style={{fontSize:9,color:"#475569"}}>Posiciones</div>
+                          </div>
+                          <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                            <div style={{fontSize:10,fontWeight:700,color:"#F1F5F9"}}>{g.period}</div>
+                            <div style={{fontSize:9,color:"#475569"}}>Período</div>
+                          </div>
+                        </div>
+                        <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{g.bio || `${g.fund} · ${g.period} · ${g.numStocks} posiciones`}</div>
+                        <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                          {g.holdings.slice(0,5).map(h=>{
+                            const px=livePx[h.t]; const pos=(px?.change||0)>=0;
+                            return(<span key={h.t} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:g.color}}>
+                              {h.t} <span style={{color:pos?"#00D26A":"#FF4D6A",fontSize:9}}>{px?`${pos?"+":""}${px.change.toFixed(1)}%`:""}</span>
+                            </span>);
+                          })}
+                        </div>
+                        <div style={{marginTop:10,textAlign:"right",fontSize:10,color:g.color,fontWeight:700}}>Ver portafolio completo →</div>
+                      </div>
+                    </div>
+                    {/* Lock overlay — solo en el 6to elemento */}
+                    {isLocked && idx === FREE_LIMIT && (
+                      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:2}}>
+                        <div style={{background:"rgba(12,10,30,0.96)",border:"1px solid rgba(124,58,237,0.4)",borderRadius:16,padding:"18px 22px",textAlign:"center",maxWidth:220,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
+                          <div style={{fontSize:26,marginBottom:6}}>🔒</div>
+                          <div style={{fontWeight:800,color:"#fff",fontSize:13,marginBottom:5}}>{GURUS_13F.length - FREE_LIMIT} gurús más bloqueados</div>
+                          <div style={{fontSize:11,color:"#94a3b8",marginBottom:12}}>Desbloquea todos: Buffett, Ackman, Burry, ARK y más</div>
+                          <button onClick={onNeedPremium}
+                            style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:800,cursor:"pointer",width:"100%"}}>
+                            ✦ Ver todos — $9.99/mes
+                          </button>
+                          <div style={{fontSize:10,color:"#475569",marginTop:5}}>7 días gratis</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      )}
+            {/* Banner CTA si es free */}
+            {!isPremium && (
+              <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.1),rgba(99,102,241,0.07))",border:"1px solid rgba(124,58,237,0.22)",borderRadius:16,padding:"18px 24px",marginTop:16,textAlign:"center"}}>
+                <div style={{fontWeight:800,color:"#A78BFA",fontSize:14,marginBottom:4}}>🏛️ Accede a los {GURUS_13F.length} portafolios institucionales con VIP</div>
+                <div style={{fontSize:12,color:"#64748b",marginBottom:12}}>Buffett · Ackman · Burry · ARK · Insiders SEC · Dark Pools</div>
+                <button onClick={onNeedPremium}
+                  style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(124,58,237,0.4)"}}>
+                  ✦ Activar VIP — 7 días gratis →
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── DETAIL VIEW (like the screenshot) ── */}
       {tab==="gurus" && selGuru && (()=>{
@@ -9512,23 +9666,7 @@ function IdeasPage({ isPremium, onNeedPremium }) {
     });
   }, []);
 
-  if (!isPremium) return (
-    <div style={{maxWidth:560,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
-      <div style={{fontSize:72,marginBottom:16}}>💡</div>
-      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Ideas de Inversión VIP</div>
-      <div style={{fontSize:14,color:C.muted,marginBottom:10,lineHeight:1.8}}>
-        30+ ideas analizadas por nuestro equipo: señal de compra/venta, precio objetivo, upside real, tesis completa y seguimiento en tiempo real.
-      </div>
-      <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:28,textAlign:"left",background:"rgba(139,92,246,0.06)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:14,padding:"16px 20px"}}>
-        {["✅ Señales Compra/Venta/Neutro actualizadas","📊 Precio en vivo vs precio objetivo","📈 Upside % calculado en tiempo real","📝 Tesis completa del analista","🎯 Stop loss y horizonte de inversión","🔄 Nuevas ideas cada semana"].map(f=>(
-          <div key={f} style={{fontSize:13,color:C.muted,fontWeight:600}}>{f}</div>
-        ))}
-      </div>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
-        ✦ Activar VIP — $9.99/mes
-      </button>
-    </div>
-  );
+  // No bloqueamos a free — muestran 3 ideas, el resto con blur
 
   const sectors = ["todos", ...new Set(IDEAS_DATA.map(i => i.sector))];
 
@@ -9802,8 +9940,44 @@ function IdeasPage({ isPremium, onNeedPremium }) {
       </div>
 
       {/* ── IDEA CARDS GRID ── */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(310px,1fr))",gap:14,marginBottom:20}}>
-        {paged.map(idea => <IdeaCard key={idea.id} idea={idea}/>)}
+      <div style={{position:"relative"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(310px,1fr))",gap:14,marginBottom:20}}>
+          {paged.map((idea, idx) => {
+            const isLocked = !isPremium && idx >= 3;
+            return (
+              <div key={idea.id} style={{position:"relative",userSelect:isLocked?"none":"auto"}}>
+                <div style={{filter:isLocked?"blur(6px)":"none",pointerEvents:isLocked?"none":"auto",transition:"filter 0.2s"}}>
+                  <IdeaCard idea={idea}/>
+                </div>
+                {isLocked && idx === 3 && (
+                  <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"rgba(10,14,26,0.3)",borderRadius:18,backdropFilter:"blur(2px)",zIndex:2}}>
+                    <div style={{background:"rgba(12,10,30,0.97)",border:"1px solid rgba(124,58,237,0.4)",borderRadius:16,padding:"20px 24px",textAlign:"center",maxWidth:240,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
+                      <div style={{fontSize:28,marginBottom:8}}>🔒</div>
+                      <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:6}}>+{filtered.length - 3} ideas bloqueadas</div>
+                      <div style={{fontSize:12,color:"#94a3b8",marginBottom:14}}>Hazte VIP para ver todas las señales, tesis y precios objetivo</div>
+                      <button onClick={onNeedPremium}
+                        style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"10px 20px",fontSize:13,fontWeight:800,cursor:"pointer",width:"100%"}}>
+                        ✦ Ver todas — $9.99/mes
+                      </button>
+                      <div style={{fontSize:10,color:"#475569",marginTop:6}}>7 días gratis · Cancela cuando quieras</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {/* Banner debajo si hay más páginas y es free */}
+        {!isPremium && page === 1 && (
+          <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.12),rgba(99,102,241,0.08))",border:"1px solid rgba(124,58,237,0.25)",borderRadius:16,padding:"20px 24px",marginTop:4,marginBottom:20,textAlign:"center"}}>
+            <div style={{fontWeight:800,color:"#A78BFA",fontSize:15,marginBottom:6}}>✦ Desbloquea {IDEAS_DATA.length - 3} ideas más con VIP</div>
+            <div style={{fontSize:13,color:"#64748b",marginBottom:14}}>Señales de compra/venta, tesis completa, precio objetivo y stop loss actualizado en tiempo real</div>
+            <button onClick={onNeedPremium}
+              style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"12px 32px",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(124,58,237,0.4)"}}>
+              ✦ Activar VIP — 7 días gratis →
+            </button>
+          </div>
+        )}
       </div>
       {filtered.length === 0 && (
         <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>No hay ideas con esos filtros</div>
@@ -11227,47 +11401,47 @@ export default function App(){
             {/* Home */}
             <button onClick={()=>{setPage(0);setShowLanding(false);}}
               title="Inicio — Página principal"
-              style={{width:42,height:42,borderRadius:12,border:`2px solid ${page===0?"#00A8FF":"rgba(0,168,255,0.3)"}`,background:page===0?"rgba(0,168,255,0.18)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:"#00A8FF",transition:"all 0.15s",boxShadow:page===0?"0 0 12px rgba(0,168,255,0.3)":"none"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.18)";e.currentTarget.style.boxShadow="0 0 12px rgba(0,168,255,0.3)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background=page===0?"rgba(0,168,255,0.18)":"transparent";e.currentTarget.style.boxShadow=page===0?"0 0 12px rgba(0,168,255,0.3)":"none";}}>
-              🏠
+              style={{width:40,height:40,borderRadius:11,border:`2px solid ${page===0?"#00A8FF":"rgba(0,168,255,0.25)"}`,background:page===0?"rgba(0,168,255,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#00A8FF",transition:"all 0.15s",boxShadow:page===0?"0 0 14px rgba(0,168,255,0.28)":"none"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.15)";e.currentTarget.style.boxShadow="0 0 14px rgba(0,168,255,0.25)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=page===0?"rgba(0,168,255,0.15)":"transparent";e.currentTarget.style.boxShadow=page===0?"0 0 14px rgba(0,168,255,0.28)":"none";}}>
+              <IcoHome/>
             </button>
 
             {/* IA */}
             <button onClick={()=>setShowAI(true)}
               title="IA de NexoTrade"
-              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#00A8FF",transition:"all 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              🤖
+              style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(0,168,255,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#00A8FF",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.12)";e.currentTarget.style.borderColor="rgba(0,168,255,0.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(0,168,255,0.25)";}}>
+              <IcoBot/>
             </button>
 
-            {/* Alertas — oculto en móvil, accesible desde menú de perfil */}
+            {/* Alertas */}
             <button className="nexo-btn-alerts" onClick={()=>setAlerts(true)}
               title="Alertas"
-              style={{width:38,height:38,borderRadius:"50%",border:"1.5px solid rgba(0,168,255,0.3)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,position:"relative",transition:"all 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              🔔
-              {alertCount>0&&<span style={{position:"absolute",top:-3,right:-3,minWidth:16,height:16,background:"#EF4444",borderRadius:"50%",border:"1.5px solid #fff",fontSize:9,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",animation:"nexo-pulse 2s infinite"}}>{alertCount}</span>}
+              style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(0,168,255,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#00A8FF",position:"relative",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.12)";e.currentTarget.style.borderColor="rgba(0,168,255,0.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(0,168,255,0.25)";}}>
+              <IcoBell/>
+              {alertCount>0&&<span style={{position:"absolute",top:-3,right:-3,minWidth:16,height:16,background:"#EF4444",borderRadius:"50%",border:"2px solid var(--c-nav,#fff)",fontSize:9,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 2px",animation:"nexo-pulse 2s infinite"}}>{alertCount}</span>}
             </button>
 
             {/* Dark mode toggle */}
             <button onClick={()=>setDarkMode(!darkMode)}
               title={darkMode ? "Modo claro" : "Modo oscuro"}
-              style={{width:38,height:38,borderRadius:12,border:`1.5px solid ${darkMode?"rgba(250,204,21,0.5)":"rgba(100,116,139,0.25)"}`,background:darkMode?"rgba(250,204,21,0.08)":"rgba(100,116,139,0.06)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.2s"}}
+              style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${darkMode?"rgba(250,204,21,0.45)":"rgba(100,116,139,0.22)"}`,background:darkMode?"rgba(250,204,21,0.07)":"rgba(100,116,139,0.05)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:darkMode?"#FCD34D":"#64748B",transition:"all 0.2s"}}
               onMouseEnter={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.15)":"rgba(100,116,139,0.12)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.08)":"rgba(100,116,139,0.06)";}}>
-              {darkMode ? "☀️" : "🌙"}
+              onMouseLeave={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.07)":"rgba(100,116,139,0.05)";}}>
+              {darkMode ? <IcoSun/> : <IcoMoon/>}
             </button>
 
             {/* Settings panel */}
             <button onClick={()=>setShowSettings(true)}
               title="Configuración"
-              style={{width:38,height:38,borderRadius:12,border:`1.5px solid ${showSettings?"rgba(0,168,255,0.7)":"rgba(0,168,255,0.2)"}`,background:showSettings?"rgba(0,168,255,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.12)"}
-              onMouseLeave={e=>e.currentTarget.style.background=showSettings?"rgba(0,168,255,0.15)":"transparent"}>
-              ⚙️
+              style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${showSettings?"rgba(0,168,255,0.6)":"rgba(0,168,255,0.2)"}`,background:showSettings?"rgba(0,168,255,0.13)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#00A8FF",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,168,255,0.12)";e.currentTarget.style.borderColor="rgba(0,168,255,0.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=showSettings?"rgba(0,168,255,0.13)":"transparent";e.currentTarget.style.borderColor=showSettings?"rgba(0,168,255,0.6)":"rgba(0,168,255,0.2)";}}>
+              <IcoSettings/>
             </button>
 
             {/* Idioma */}
@@ -11339,26 +11513,41 @@ export default function App(){
               <p style={{fontSize:17,color:"#94a3b8",lineHeight:1.75,margin:"0 0 32px",maxWidth:480}}>
                 La plataforma de trading social <strong style={{color:"#fff"}}>en español</strong> donde miles de inversores comparten análisis, picks semanales y estrategias reales — potenciada por IA.
               </p>
-              <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:36}}>
+              {/* CTA principal — más grande y urgente */}
+              <div style={{marginBottom:20}}>
                 <button onClick={()=>setAuth("register")}
-                  style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:14,padding:"16px 34px",fontSize:16,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 32px ${C.accent}55`,letterSpacing:0.2}}>
-                  Crear cuenta gratis →
+                  style={{display:"block",width:"100%",maxWidth:420,background:`linear-gradient(135deg,${C.accent} 0%,#00c070 100%)`,border:"none",borderRadius:16,padding:"20px 38px",fontSize:18,fontWeight:900,color:"#000",cursor:"pointer",boxShadow:`0 4px 40px ${C.accent}55, 0 0 0 1px ${C.accent}33`,letterSpacing:0.2,transition:"transform 0.15s, box-shadow 0.15s",textAlign:"center"}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 48px ${C.accent}70, 0 0 0 1px ${C.accent}55`;}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=`0 4px 40px ${C.accent}55, 0 0 0 1px ${C.accent}33`;}}>
+                  🚀 Crear cuenta gratis — 30 segundos
                 </button>
-                <button onClick={()=>setShowLanding(false)}
-                  style={{background:"rgba(255,255,255,0.05)",border:`1px solid rgba(255,255,255,0.15)`,borderRadius:14,padding:"16px 28px",fontSize:15,fontWeight:700,color:"#fff",cursor:"pointer"}}>
-                  Ver el feed →
-                </button>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginTop:10,paddingLeft:4}}>
+                  <span style={{fontSize:12,color:"#64748b"}}>✓ Sin tarjeta de crédito</span>
+                  <span style={{fontSize:12,color:"#334155"}}>·</span>
+                  <span style={{fontSize:12,color:"#64748b"}}>✓ Cancela cuando quieras</span>
+                  <span style={{fontSize:12,color:"#334155"}}>·</span>
+                  <span style={{fontSize:12,color:"#64748b"}}>✓ Gratis para siempre</span>
+                </div>
               </div>
-              <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+
+              {/* Social proof — avatares + contador + estrellas */}
+              <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",padding:"14px 16px",background:"rgba(0,210,106,0.05)",border:"1px solid rgba(0,210,106,0.12)",borderRadius:14}}>
                 <div style={{display:"flex"}}>
                   {["#00D26A","#3B8EFA","#FFB800","#FF4D6A","#a78bfa"].map((c,i)=>(
-                    <div key={i} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${c},${c}88)`,border:"2px solid #0B1020",marginLeft:i>0?-10:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:"#fff"}}>{["MC","JR","AT","FP","LG"][i]}</div>
+                    <div key={i} style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(135deg,${c},${c}88)`,border:"2.5px solid #0B1020",marginLeft:i>0?-11:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"#fff",boxShadow:"0 2px 8px rgba(0,0,0,0.4)"}}>{["MC","JR","AT","FP","LG"][i]}</div>
                   ))}
                 </div>
-                <div>
-                  <div style={{color:"#fff",fontWeight:700,fontSize:14}}>🔥 +{animatedCount.toLocaleString("es-MX")} traders activos</div>
-                  <div style={{color:"#64748b",fontSize:12}}>México · Colombia · Argentina · España</div>
+                <div style={{flex:1}}>
+                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{animatedCount.toLocaleString("es-MX")} traders activos</div>
+                  <div style={{display:"flex",gap:2,marginTop:2}}>
+                    {"⭐⭐⭐⭐⭐".split("").map((s,i)=><span key={i} style={{fontSize:12}}>{s}</span>)}
+                    <span style={{fontSize:11,color:"#94a3b8",marginLeft:4}}>4.9/5 · 840+ reseñas</span>
+                  </div>
                 </div>
+                <button onClick={()=>setShowLanding(false)}
+                  style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 16px",fontSize:13,fontWeight:700,color:"#94a3b8",cursor:"pointer",whiteSpace:"nowrap"}}>
+                  Ver feed →
+                </button>
               </div>
             </div>
 
