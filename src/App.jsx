@@ -4484,7 +4484,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
       {/* ── PLANES TAB ── */}
       {activeTab==="planes" && <>
         {/* ── GRID 2 COLUMNAS ── */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0,marginBottom:28,borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
+        <div className="nexo-premium-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0,marginBottom:28,borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
 
           {/* FREE */}
           <div style={{background:"rgba(10,16,30,0.98)",padding:"28px 24px",borderRight:"1px solid rgba(255,255,255,0.06)",position:"relative",overflow:"hidden"}}>
@@ -4556,7 +4556,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         </div>}
 
         {/* Trust badges */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
+        <div className="nexo-trust-badges" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
           {[
             {icon:"🔒",title:"Pago seguro",desc:"SSL + Stripe",   href:"https://stripe.com/es/payments/payment-links",tip:"Pagos 100% seguros con Stripe"},
             {icon:"↩️",title:"Cancela ya", desc:"Sin permanencia",href:STRIPE_PAYMENT_LINK,tip:"Cancela cuando quieras"},
@@ -8715,8 +8715,8 @@ function FlowPage({isPremium,onNeedPremium}){
             </div>
             <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales</div>
           </div>
-          <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <div style={{display:"flex",gap:6}}>
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
               {PREM_FILTERS.map(p=>(
                 <button key={p.k} onClick={()=>setMinPrem(p.k)}
                   style={{background:minPrem===p.k?"rgba(139,92,246,0.2)":"transparent",border:`1px solid ${minPrem===p.k?"rgba(139,92,246,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:20,padding:"5px 10px",fontSize:11,fontWeight:700,color:minPrem===p.k?"#A78BFA":"#475569",cursor:"pointer"}}>
@@ -8746,6 +8746,9 @@ function FlowPage({isPremium,onNeedPremium}){
         </div>
       </div>
 
+      {/* Table — scrollable on mobile */}
+      <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+      <div style={{minWidth:680}}>
       {/* Table header */}
       <div style={{display:"grid",gridTemplateColumns:"70px 60px 80px 90px 80px 70px 80px 80px 1fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
         {["HORA","TICKER","TIPO","PREMIUM","TAMAÑO","STRIKE","EXPIRY","OTM","SENTIMIENTO"].map(h=>(
@@ -8794,6 +8797,8 @@ function FlowPage({isPremium,onNeedPremium}){
           );
         })}
       </div>
+      </div>{/* end minWidth wrapper */}
+      </div>{/* end overflow-x:auto */}
 
       <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
         ⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero
@@ -10241,9 +10246,9 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
         </button>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:10,flex:1,minHeight:0}}>
+      <div className="nexo-messages-grid" style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:10,flex:1,minHeight:0}}>
         {/* ── LISTA DE CONVERSACIONES ── */}
-        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"auto",display:"flex",flexDirection:"column"}}>
+        <div className="nexo-messages-list" style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"auto",display:"flex",flexDirection:"column"}}>
           <div style={{padding:"10px 12px",borderBottom:`1px solid ${C.border}`}}>
             <div style={{position:"relative"}}>
               <span style={{position:"absolute",left:8,top:"50%",transform:"translateY(-50%)",fontSize:11,color:C.muted2}}>🔍</span>
@@ -10281,7 +10286,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
         </div>
 
         {/* ── PANEL DE CHAT ── */}
-        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        <div className="nexo-messages-chat" style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,display:"flex",flexDirection:"column",overflow:"hidden"}}>
           {/* ── NUEVO MENSAJE UI ── */}
           {newDM && !selConv && (
             <div style={{padding:24,flex:1,overflow:"auto"}}>
@@ -11343,53 +11348,120 @@ export default function App(){
         .nexo-left-sidebar { display: none !important; }
       }
       @media (max-width: 767px) {
+        /* ── LAYOUT BASE ── */
         .nexo-sidebar { display: none !important; }
         .nexo-left-sidebar { display: none !important; }
         .nexo-mobile-affiliate-banner { display: flex !important; }
         body { padding-bottom: 130px; }
-        .nexo-nav-search { display: none !important; }
-        .nexo-mobile-search { display: flex !important; }
         .nexo-body-grid {
-          padding: 8px !important;
-          gap: 10px !important;
+          padding: 6px 8px !important;
+          gap: 8px !important;
           grid-template-columns: 1fr !important;
         }
-        .nexo-nav-icons { gap: 1px !important; }
-        .nexo-nav-icons > button { width: 30px !important; height: 30px !important; font-size: 13px !important; }
-        .nexo-auth-btns { display: flex; gap: 3px; align-items: center; }
+
+        /* ── NAVBAR ── */
+        .nexo-nav-search { display: none !important; }
+        .nexo-mobile-search { display: flex !important; }
+        .nexo-nav-icons { gap: 2px !important; }
+        .nexo-nav-icons > button { width: 34px !important; height: 34px !important; }
+        .nexo-auth-btns { display: flex !important; gap: 3px !important; align-items: center !important; }
         .nexo-auth-btns button { width: auto !important; height: auto !important; padding: 5px 9px !important; font-size: 11px !important; white-space: nowrap !important; border-radius: 8px !important; }
-        .nexo-tabs { justify-content: flex-start !important; }
-        .nexo-tabs button { padding: 10px 12px !important; font-size: 12px !important; }
+        .nexo-logo-text { display: none !important; }
+        .nexo-logo-img { height: 36px !important; }
+        .nexo-usermenu-dropdown { right: 0 !important; left: auto !important; min-width: 180px !important; max-width: calc(100vw - 16px) !important; }
+        .nexo-usermenu-trigger { padding: 2px !important; border: none !important; background: transparent !important; gap: 2px !important; border-radius: 50% !important; }
+        .nexo-usermenu-arrow { display: none !important; }
+        .nexo-btn-alerts { display: flex !important; }
         .nexo-hide-mobile { display: none !important; }
         .nexo-logout-mobile { display: flex !important; }
-        /* Market cards — scroll horizontal en móvil */
+
+        /* ── TABS ── */
+        .nexo-tabs { justify-content: flex-start !important; }
+        .nexo-tabs button { padding: 10px 10px !important; font-size: 11px !important; }
+
+        /* ── MARKET CARDS scroll horizontal ── */
         .nexo-market-grid {
-          display: flex !important;
-          flex-wrap: nowrap !important;
-          overflow-x: auto !important;
-          -webkit-overflow-scrolling: touch !important;
+          display: flex !important; flex-wrap: nowrap !important;
+          overflow-x: auto !important; -webkit-overflow-scrolling: touch !important;
           scroll-snap-type: x mandatory !important;
-          gap: 8px !important;
-          padding: 10px 10px !important;
-          scrollbar-width: none !important;
+          gap: 8px !important; padding: 10px 8px !important; scrollbar-width: none !important;
         }
         .nexo-market-grid::-webkit-scrollbar { display: none !important; }
-        .nexo-market-grid > a {
-          min-width: 100px !important;
-          flex-shrink: 0 !important;
-          scroll-snap-align: start !important;
+        .nexo-market-grid > a { min-width: 100px !important; flex-shrink: 0 !important; scroll-snap-align: start !important; }
+
+        /* ── LANDING HERO ── */
+        .nexo-landing-mockup { display: none !important; }
+
+        /* ── PREMIUM PAGE ── */
+        .nexo-premium-grid { grid-template-columns: 1fr !important; }
+        .nexo-trust-badges { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+
+        /* ── GRIDS GENERALES 2 columnas → 1 columna en móvil ── */
+        /* PostCard métricas */
+        .nexo-post-metrics { flex-wrap: wrap !important; gap: 4px !important; }
+        /* Ideas grid */
+        .nexo-ideas-grid { grid-template-columns: 1fr !important; }
+        /* Gurus grid */
+        .nexo-gurus-grid { grid-template-columns: 1fr !important; }
+
+        /* ── MESSAGES PAGE ── */
+        .nexo-messages-grid {
+          grid-template-columns: 1fr !important;
+          height: auto !important;
         }
-        /* Logo compacto en móvil */
-        .nexo-logo-text { display: none !important; }
-        .nexo-logo-img { height: 38px !important; }
-        /* UserMenu dropdown no se salga de pantalla */
-        .nexo-usermenu-dropdown { right: 0 !important; left: auto !important; min-width: 180px !important; }
-        /* UserMenu trigger — solo avatar en móvil, igual tamaño que los otros botones */
-        .nexo-usermenu-trigger { padding: 2px !important; border: none !important; background: transparent !important; gap: 2px !important; border-radius: 50% !important; }
-        /* Ocultar flecha ▾ en móvil para ahorrar espacio */
-        .nexo-usermenu-arrow { display: none !important; }
-        /* Campana visible en móvil */
-        .nexo-btn-alerts { display: flex !important; }
+        .nexo-messages-list { max-height: 220px !important; border-radius: 14px !important; margin-bottom: 8px !important; }
+        .nexo-messages-chat { border-radius: 14px !important; height: calc(100vh - 380px) !important; min-height: 300px !important; }
+
+        /* ── PROFILE PAGE ── */
+        .nexo-profile-stats { grid-template-columns: repeat(3,1fr) !important; gap: 6px !important; }
+
+        /* ── SCREENER — scroll horizontal forzado ── */
+        .nexo-screener-table { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+        .nexo-screener-table > div { min-width: 640px !important; }
+
+        /* ── SEÑALES / SIGNALS grid → 1 col ── */
+        .nexo-signals-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+
+        /* ── WEBINARS / ACADEMIA grid → 1 col ── */
+        .nexo-webinars-grid { grid-template-columns: 1fr !important; }
+        .nexo-courses-grid  { grid-template-columns: 1fr !important; }
+
+        /* ── FEATURES landing → 1 col ── */
+        .nexo-features-grid { grid-template-columns: 1fr !important; }
+
+        /* ── GENERAL: evitar overflow en cualquier container ── */
+        * { max-width: 100% !important; box-sizing: border-box !important; }
+        img { max-width: 100% !important; height: auto !important; }
+
+        /* ── Padding/margin reducidos en móvil ── */
+        .nexo-page-pad { padding: 12px 8px !important; }
+        .nexo-card-pad { padding: 12px 12px !important; }
+
+        /* ── Fix overflow en hero del landing ── */
+        .nexo-hero-section { padding: 32px 16px 28px !important; }
+        .nexo-hero-section h1 { font-size: 28px !important; letter-spacing: -1px !important; }
+        .nexo-hero-cta { max-width: 100% !important; font-size: 15px !important; padding: 15px 20px !important; }
+
+        /* ── Fix flex items que se salen ── */
+        .nexo-post-header { flex-wrap: wrap !important; gap: 4px !important; }
+        .nexo-action-row { gap: 0 !important; }
+        .nexo-action-row button { padding: 5px 8px !important; font-size: 11px !important; }
+
+        /* ── Modales full screen en móvil ── */
+        .nexo-modal-inner {
+          width: 100% !important; max-width: 100% !important;
+          min-width: 0 !important; border-radius: 20px 20px 0 0 !important;
+          position: fixed !important; bottom: 0 !important; left: 0 !important;
+          max-height: 90vh !important; overflow-y: auto !important;
+        }
+
+        /* ── Fix ideas/gurus cards en móvil ── */
+        .nexo-blur-lock { position: static !important; }
+        .nexo-blur-lock > div:first-child { filter: blur(4px) !important; }
+
+        /* ── Ticker strip más compacto ── */
+        .nexo-ticker-strip { font-size: 11px !important; }
+        .nexo-ticker-strip > div { padding: 0 12px !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
@@ -11589,7 +11661,7 @@ export default function App(){
           <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:48,flexWrap:"wrap",position:"relative"}}>
 
             {/* LEFT — Text */}
-            <div style={{flex:"1 1 400px",minWidth:300}}>
+            <div style={{flex:"1 1 300px",minWidth:0}}>
               <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,210,106,0.1)",border:`1px solid ${C.accent}33`,borderRadius:30,padding:"6px 16px",marginBottom:28}}>
                 <span style={{width:7,height:7,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 10px ${C.accent}`}}/>
                 <span style={{color:C.accent,fontSize:11,fontWeight:700,letterSpacing:1.2}}>🇲🇽🇨🇴🇦🇷 COMUNIDAD HISPANA DE TRADING</span>
@@ -11640,7 +11712,7 @@ export default function App(){
             </div>
 
             {/* RIGHT — Feed Mockup */}
-            <div style={{flex:"0 0 auto",position:"relative",width:370}}>
+            <div className="nexo-landing-mockup" style={{flex:"0 0 auto",position:"relative",width:370}}>
               <div style={{background:"rgba(15,23,42,0.95)",border:`1px solid rgba(0,210,106,0.2)`,borderRadius:20,padding:"20px",backdropFilter:"blur(20px)",boxShadow:"0 24px 64px rgba(0,0,0,0.7)"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16,paddingBottom:14,borderBottom:"1px solid #1e293b"}}>
                   <span style={{width:8,height:8,borderRadius:"50%",background:C.accent,boxShadow:`0 0 8px ${C.accent}`,display:"inline-block"}}/>
