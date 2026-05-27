@@ -2281,48 +2281,49 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
             </div>
           )}
 
-          {/* ── Bottom bar: dos filas en móvil ── */}
-          <div style={{marginTop:10}}>
-            {/* Fila 1: herramientas */}
-            <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+          {/* ── Bottom bar: 2 filas separadas ── */}
+          <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
+            {/* Fila 1: botones de herramientas */}
+            <div style={{display:"flex",gap:5,alignItems:"center"}}>
               {/* Adjuntar foto */}
               <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}}
                 onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImage(ev.target.result);r.readAsDataURL(f);e.target.value="";}}/>
               <button onClick={()=>fileRef.current?.click()} title="Subir foto"
-                style={{background:"none",border:"none",cursor:"pointer",fontSize:17,color:"var(--c-muted2)",padding:"4px",borderRadius:7,transition:"color 0.15s",lineHeight:1}}
+                style={{background:"none",border:"none",cursor:"pointer",fontSize:17,color:"var(--c-muted2)",padding:"4px 6px",borderRadius:7,transition:"color 0.15s",lineHeight:1,flexShrink:0}}
                 onMouseEnter={e=>e.currentTarget.style.color=C.accent}
                 onMouseLeave={e=>e.currentTarget.style.color="var(--c-muted2)"}>📷</button>
-              {/* Media picker button */}
+              {/* Media */}
               <button onClick={()=>setShowGif(v=>!v)} title="GIF · Emojis · Stickers"
-                style={{background:showGif?"rgba(124,58,237,0.12)":"none",border:showGif?"1px solid rgba(124,58,237,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#7C3AED":"var(--c-muted2)",padding:"4px 9px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
+                style={{background:showGif?"rgba(124,58,237,0.12)":"none",border:showGif?"1px solid rgba(124,58,237,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#7C3AED":"var(--c-muted2)",padding:"4px 9px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0}}
                 onMouseEnter={e=>{e.currentTarget.style.color="#7C3AED";}}
                 onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#7C3AED":"var(--c-muted2)";}}>
                 <span>🎭</span><span>Media</span>
               </button>
-              {/* Link button */}
+              {/* Link */}
               <button onClick={()=>setShowLink(v=>!v)} title="Agregar enlace"
-                style={{background:showLink||isValidUrl(link)?"rgba(0,168,255,0.1)":"none",border:showLink||isValidUrl(link)?"1px solid rgba(0,168,255,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showLink||isValidUrl(link)?C.accent:"var(--c-muted2)",padding:"4px 9px",borderRadius:7,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}
+                style={{background:showLink||isValidUrl(link)?"rgba(0,168,255,0.1)":"none",border:showLink||isValidUrl(link)?"1px solid rgba(0,168,255,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showLink||isValidUrl(link)?C.accent:"var(--c-muted2)",padding:"4px 9px",borderRadius:7,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0}}
                 onMouseEnter={e=>{e.currentTarget.style.color=C.accent;}}
                 onMouseLeave={e=>{e.currentTarget.style.color=showLink||isValidUrl(link)?C.accent:"var(--c-muted2)";}}>
                 <span>🔗</span><span>Link</span>
               </button>
-              {/* Ticker */}
+              {/* Ticker — input más pequeño en móvil */}
               <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
-                style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:7,color:C.accent,padding:"5px 8px",fontSize:11,outline:"none",width:72,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1}}
+                style={{background:"rgba(0,168,255,0.05)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:7,color:C.accent,padding:"5px 7px",fontSize:11,outline:"none",width:64,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1,flexShrink:0}}
                 onFocus={e=>e.target.style.borderColor="rgba(0,168,255,0.45)"}
                 onBlur={e=>e.target.style.borderColor="rgba(0,168,255,0.18)"}/>
-              {/* Sentiment — chips compactos */}
+            </div>
+            {/* Fila 2: sentimiento + publicar — siempre en su propia línea */}
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
               {[{v:"bull",label:"▲",full:"Alcista",col:"#16A34A"},{v:"bear",label:"▼",full:"Bajista",col:"#DC2626"}].map(({v,label,full,col})=>{
                 const active=sent===v;
                 return(
                   <button key={v} onClick={()=>setSent(v)} title={full}
-                    style={{background:active?`${col}12`:"transparent",border:`1.5px solid ${active?col:"var(--c-border)"}`,borderRadius:8,padding:"5px 9px",cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:3}}>
+                    style={{background:active?`${col}12`:"transparent",border:`1.5px solid ${active?col:"var(--c-border)"}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
                     <span style={{color:active?col:"var(--c-muted2)",fontWeight:active?800:600,fontSize:11}}>{label} {full}</span>
                   </button>
                 );
               })}
-              {/* Publicar — siempre visible, al final de la fila o en nueva línea */}
-              <Btn onClick={submit} style={{padding:"6px 18px",fontSize:12.5,opacity:posting?0.6:1,marginLeft:"auto"}}>
+              <Btn onClick={submit} style={{padding:"7px 20px",fontSize:13,opacity:posting?0.6:1,marginLeft:"auto",flexShrink:0}}>
                 {posting?"...":(user?t.publish:"Entrar")}
               </Btn>
             </div>
@@ -4361,7 +4362,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
           {/* VIP */}
           <div style={{background:"rgba(12,10,30,0.99)",padding:"28px 24px",position:"relative",overflow:"hidden",borderLeft:"2px solid #7C3AED"}}>
-            <div style={{position:"absolute",top:-10,right:-10,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",fontSize:9,fontWeight:800,padding:"4px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ ÚNICO PLAN</div>
+            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ ÚNICO PLAN</div>
             <div style={{position:"absolute",top:0,left:0,width:220,height:220,background:"radial-gradient(circle,rgba(124,58,237,0.1),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
               <div style={{fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:1.5,marginBottom:6}}>✦ VIP</div>
