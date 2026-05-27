@@ -1702,84 +1702,90 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{background:C.surface,borderRadius:28,width:560,maxWidth:"96vw",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.35)",border:`1px solid ${C.border}`,position:"relative"}}>
 
-        {/* ── COVER ── */}
-        <div style={{height:160,borderRadius:"28px 28px 0 0",position:"relative",overflow:"hidden",
-          background:`linear-gradient(135deg, ${accent}cc 0%, ${accent}44 40%, ${C.blueBg} 100%)`}}>
-          {/* Decorative chart lines SVG */}
-          <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",opacity:0.18}} viewBox="0 0 560 160" preserveAspectRatio="none">
-            <polyline points="0,120 60,95 120,105 180,70 240,85 300,45 360,60 420,30 480,50 560,20" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <polyline points="0,145 80,130 160,135 240,115 320,125 400,100 480,110 560,90" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="6 4"/>
+        {/* ── COVER + HEADER INTEGRADO ── */}
+        <div style={{background:`linear-gradient(135deg,${accent}dd 0%,${accent}66 50%,#0f172a 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
+          {/* Chart line SVG sutil */}
+          <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.12,pointerEvents:"none"}} height="60" viewBox="0 0 560 60" preserveAspectRatio="none">
+            <polyline points="0,50 70,35 140,42 210,18 280,28 350,8 420,15 490,5 560,2" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          {/* Level glow */}
-          <div style={{position:"absolute",top:18,left:18,background:"rgba(0,0,0,0.35)",backdropFilter:"blur(8px)",borderRadius:20,padding:"5px 14px",border:`1px solid ${accent}66`,display:"flex",alignItems:"center",gap:6}}>
-            <span style={{fontSize:14}}>{lvl.emoji}</span>
-            <span style={{color:"#fff",fontSize:12,fontWeight:800,letterSpacing:0.5}}>{lang==="en"?lvl.nameEn:lvl.name}</span>
-          </div>
-          {/* Close button */}
-          <button onClick={onClose} style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,0.35)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:10,width:34,height:34,cursor:"pointer",color:"#fff",fontSize:17,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-        </div>
+          {/* Glow orb */}
+          <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,background:`radial-gradient(circle,${accent}40,transparent 65%)`,pointerEvents:"none"}}/>
 
-        {/* ── AVATAR + HEADER ── */}
-        <div style={{padding:"0 24px 20px"}}>
-          <div style={{display:"flex",alignItems:"flex-end",gap:14,marginTop:-44,marginBottom:14,position:"relative",zIndex:2}}>
-            {/* Avatar with ring */}
+          {/* Close */}
+          <button onClick={onClose} style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,0.3)",backdropFilter:"blur(6px)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:10,width:32,height:32,cursor:"pointer",color:"#fff",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",zIndex:2}}>✕</button>
+
+          {/* ── AVATAR + NAME inline ── */}
+          <div style={{display:"flex",alignItems:"center",gap:16,position:"relative",zIndex:2,paddingBottom:18}}>
+            {/* Avatar */}
             <div style={{position:"relative",flexShrink:0}}>
-              <div style={{width:88,height:88,borderRadius:24,background:`linear-gradient(135deg,${accent},${accent}88)`,padding:3,boxShadow:`0 0 0 3px ${C.surface}, 0 0 20px ${accent}55`}}>
-                <div style={{width:"100%",height:"100%",borderRadius:21,background:C.surface,display:"flex",alignItems:"center",justifyContent:"center",fontSize:40}}>
+              <div style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 2px rgba(255,255,255,0.15),0 0 24px ${accent}55`}}>
+                <div style={{width:"100%",height:"100%",borderRadius:17,background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>
                   {user.emoji}
                 </div>
               </div>
-              <div style={{position:"absolute",bottom:-4,right:-4,width:22,height:22,borderRadius:8,background:C.bull,border:`2px solid ${C.surface}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>🟢</div>
-            </div>
-            <div style={{flex:1,paddingBottom:6}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:4}}>
-                <span style={{fontSize:22,fontWeight:900,color:C.text,letterSpacing:-0.3}}>{user.name}</span>
-                {user.badges?.includes("verified")&&<span title="Verificado" style={{fontSize:16}}>✅</span>}
-                {user.badges?.includes("vip")&&<span style={{background:`linear-gradient(90deg,#f59e0b,#d97706)`,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800,color:"#fff"}}>VIP</span>}
-              </div>
-              <div style={{display:"flex",align:"center",gap:8,flexWrap:"wrap"}}>
-                <span style={{fontSize:12,color:C.muted2}}>📅 Desde {joinYear}</span>
-                <span style={{fontSize:12,color:accent,fontWeight:700}}>{tradeStyle}</span>
+              <div style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,borderRadius:6,background:"#10B981",border:"2px solid #0f172a",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <div style={{width:6,height:6,borderRadius:"50%",background:"#fff"}}/>
               </div>
             </div>
+            {/* Name + badges */}
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",marginBottom:4}}>
+                <span style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>{user.name}</span>
+                {user.badges?.includes("verified")&&<span style={{background:"rgba(59,130,246,0.25)",border:"1px solid rgba(59,130,246,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#93c5fd"}}>✓ Verificado</span>}
+                {user.badges?.includes("vip")&&<span style={{background:"linear-gradient(90deg,rgba(245,158,11,0.35),rgba(217,119,6,0.35))",border:"1px solid rgba(245,158,11,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#fcd34d"}}>VIP ✦</span>}
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+                {/* Level badge */}
+                <span style={{background:"rgba(0,0,0,0.3)",border:`1px solid ${accent}55`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#fff",display:"flex",alignItems:"center",gap:4}}>
+                  {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
+                </span>
+                <span style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>{tradeStyle}</span>
+                <span style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>Desde {joinYear}</span>
+              </div>
+            </div>
+            {/* Follow button */}
             {currentUser&&currentUser.id!==user.id&&(
               <button onClick={()=>onFollow(user.id)}
-                style={{flexShrink:0,background:isFollowing?C.card2:accent,border:`1.5px solid ${isFollowing?C.border:accent}`,borderRadius:12,padding:"9px 20px",cursor:"pointer",color:isFollowing?C.muted:C.surface==="white"||C.surface==="#fff"?"#fff":"#fff",fontSize:13,fontWeight:800,transition:"all 0.15s"}}>
+                style={{flexShrink:0,background:isFollowing?"rgba(0,0,0,0.3)":"rgba(255,255,255,0.15)",backdropFilter:"blur(8px)",border:`1.5px solid ${isFollowing?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.35)"}`,borderRadius:10,padding:"8px 18px",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800,transition:"all 0.15s",whiteSpace:"nowrap"}}
+                onMouseEnter={e=>{ if(!isFollowing){e.currentTarget.style.background="rgba(255,255,255,0.25)";} }}
+                onMouseLeave={e=>{ if(!isFollowing){e.currentTarget.style.background="rgba(255,255,255,0.15)";} }}>
                 {isFollowing?(lang==="en"?"✓ Following":"✓ Siguiendo"):(lang==="en"?"+ Follow":"+ Seguir")}
               </button>
             )}
           </div>
 
+          {/* ── QUICK STATS BAR ── */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(0,0,0,0.2)",borderRadius:"14px 14px 0 0",overflow:"hidden",position:"relative",zIndex:2}}>
+            {[
+              {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), color:accent},
+              {label:lang==="en"?"Following":"Siguiendo",  value:fmtNum(displayStats.following),  color:"#94a3b8"},
+              {label:"Posts",                              value:fmtNum(displayStats.posts),       color:"#10B981"},
+              {label:"XP",                                 value:fmtNum(displayStats.points),      color:"#F59E0B"},
+            ].map((s,i)=>(
+              <div key={i} style={{padding:"10px 6px",textAlign:"center",background:"rgba(0,0,0,0.15)"}}>
+                <div style={{fontWeight:900,color:s.color,fontSize:16,letterSpacing:"-0.5px"}}>{s.value}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginTop:1,textTransform:"uppercase",letterSpacing:"0.08em"}}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── BODY ── */}
+        <div style={{padding:"0 24px 20px"}}>
+          <div style={{marginTop:16,marginBottom:14}}>
+
           {/* Bio */}
-          {user.bio&&<p style={{color:C.muted,fontSize:13.5,lineHeight:1.6,margin:"0 0 16px",padding:"10px 14px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>{user.bio}</p>}
+          {user.bio&&<p style={{color:C.muted,fontSize:13,lineHeight:1.6,margin:"0 0 14px",padding:"9px 13px",background:C.card2,borderRadius:10,border:`1px solid ${C.border}`}}>{user.bio}</p>}
 
           {/* Tickers favoritos */}
           {topTickers.length>0&&(
-            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
               {topTickers.map(tk=>(
                 <span key={tk} style={{background:`${accent}18`,border:`1px solid ${accent}44`,borderRadius:8,padding:"3px 10px",fontSize:12,fontWeight:700,color:accent,fontFamily:"monospace"}}>${tk}</span>
               ))}
               <span style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,padding:"3px 10px",fontSize:11,color:C.muted2}}>tickers frecuentes</span>
             </div>
           )}
-
-          {/* ── STATS ANIMADAS ── */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:20}}>
-            {[
-              {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), icon:"👥", color:accent},
-              {label:lang==="en"?"Following":"Siguiendo",  value:fmtNum(displayStats.following),  icon:"➕", color:C.purple||"#8b5cf6"},
-              {label:lang==="en"?"Posts":"Posts",          value:displayStats.posts,               icon:"✍️", color:"#f59e0b"},
-              {label:lang==="en"?"Points":"Puntos",        value:fmtNum(displayStats.points),      icon:"⭐", color:C.bull},
-            ].map(s=>(
-              <div key={s.label} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 8px",textAlign:"center",transition:"transform 0.15s",cursor:"default"}}
-                onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
-                onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                <div style={{fontSize:18,marginBottom:3}}>{s.icon}</div>
-                <div style={{fontWeight:900,color:s.color,fontSize:17,letterSpacing:-0.5}}>{s.value}</div>
-                <div style={{color:C.muted2,fontSize:10,fontWeight:600,marginTop:1}}>{s.label}</div>
-              </div>
-            ))}
-          </div>
 
           {/* ── PROGRESS BAR ── */}
           {progressToNext&&(
@@ -5815,46 +5821,46 @@ function Footer({ setPage, onAuth }){
 
   const cols = [
     {
-      title:"Plataforma",
+      title:"Platform",
       items:[
         {label:"Feed",            page:0},
-        {label:"Tops de Mercado", page:1},
-        {label:"Noticias",        page:5},
+        {label:"Market Tops",     page:1},
+        {label:"News",            page:5},
         {label:"Earnings",        page:6},
-        {label:"IA Asistente",    page:9},
-        {label:"Ideas VIP ✦",     page:21},
+        {label:"AI Assistant",    page:9},
+        {label:"VIP Ideas ✦",     page:21},
       ]
     },
     {
-      title:"Herramientas",
+      title:"Tools",
       items:[
-        {label:"Screener VIP ✦",        page:17},
-        {label:"Flujo Institucional ✦",  page:20},
-        {label:"Super Inversores ✦",     page:19},
-        {label:"Calendario Económico",   page:14},
-        {label:"IPOs 2026",              page:16},
-        {label:"Dividendos",             page:15},
+        {label:"Stock Screener ✦",      page:17},
+        {label:"Institutional Flow ✦",  page:20},
+        {label:"Top Investors ✦",       page:19},
+        {label:"Economic Calendar",     page:14},
+        {label:"IPOs 2026",             page:16},
+        {label:"Dividends",             page:15},
       ]
     },
     {
-      title:"Comunidad",
+      title:"Community",
       items:[
-        {label:"Trending",           page:7},
-        {label:"Webinars",           page:11},
-        {label:"Academia",           page:12},
-        {label:"Mensajes",           page:22},
-        {label:"VIP $9.99/mes ✦",    page:8},
-        {label:"Únete gratis →",     action:"auth"},
+        {label:"Trending",          page:7},
+        {label:"Live Webinars",     page:11},
+        {label:"Academy",           page:12},
+        {label:"Messages",          page:22},
+        {label:"VIP $9.99/mo ✦",   page:8},
+        {label:"Join free →",       action:"auth"},
       ]
     },
     {
       title:"Legal",
       items:[
-        {label:"Términos de uso",    href:"#"},
-        {label:"Privacidad",         href:"#"},
-        {label:"Aviso legal",        href:"#"},
-        {label:"No somos asesores",  href:"#"},
-        {label:"Contacto",           href:"mailto:hola@nexotradeia.com"},
+        {label:"Terms of Use",         href:"#"},
+        {label:"Privacy Policy",       href:"#"},
+        {label:"Legal Notice",         href:"#"},
+        {label:"Not Financial Advice", href:"#"},
+        {label:"Contact",              href:"mailto:hola@nexotradeia.com"},
       ]
     },
   ];
@@ -7678,27 +7684,47 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
                 </div>
 
                 {/* price + CTA */}
-                <div style={{flexShrink:0,textAlign:"center",minWidth:115}}>
-                  {isPremium ? (
-                    <>
-                      <div style={{fontSize:10,color:"#a78bfa",fontWeight:700,marginBottom:2}}>✦ PRECIO VIP</div>
-                      <div style={{fontSize:24,fontWeight:900,color:C.accent,lineHeight:1}}>${w.precioVip}</div>
-                      <div style={{fontSize:12,color:C.muted2,textDecoration:"line-through",marginBottom:10}}>${w.precio}</div>
-                    </>
-                  ):(
-                    <>
-                      <div style={{fontSize:10,color:C.muted2,fontWeight:600,marginBottom:2}}>PRECIO</div>
-                      <div style={{fontSize:24,fontWeight:900,color:C.text,lineHeight:1}}>${w.precio}</div>
-                      <div style={{fontSize:10,color:"#a78bfa",marginBottom:10}}>VIP paga ${w.precioVip}</div>
-                    </>
-                  )}
+                <div style={{flexShrink:0,textAlign:"center",minWidth:130,display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+                  {/* Price block */}
+                  <div style={{background:isPremium?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)",border:`1px solid ${isPremium?"rgba(139,92,246,0.3)":"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:"10px 16px",width:"100%",boxSizing:"border-box"}}>
+                    {isPremium ? (
+                      <>
+                        <div style={{fontSize:9,color:"#a78bfa",fontWeight:800,letterSpacing:"0.1em",marginBottom:4}}>✦ PRECIO VIP</div>
+                        <div style={{fontSize:28,fontWeight:900,color:"#A78BFA",lineHeight:1,letterSpacing:"-1px"}}>${w.precioVip}</div>
+                        <div style={{fontSize:11,color:"#475569",textDecoration:"line-through",marginTop:2}}>${w.precio} regular</div>
+                        <div style={{fontSize:10,color:"#10B981",fontWeight:700,marginTop:3}}>Ahorras ${w.precio-w.precioVip}</div>
+                      </>
+                    ):(
+                      <>
+                        <div style={{fontSize:9,color:"#64748b",fontWeight:700,letterSpacing:"0.1em",marginBottom:4}}>PRECIO</div>
+                        <div style={{fontSize:28,fontWeight:900,color:"#F1F5F9",lineHeight:1,letterSpacing:"-1px"}}>${w.precio}</div>
+                        <div style={{fontSize:10,color:"#a78bfa",fontWeight:600,marginTop:4,background:"rgba(139,92,246,0.1)",borderRadius:6,padding:"2px 6px",display:"inline-block"}}>VIP paga ${w.precioVip} ✦</div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* CTA button */}
                   <button onClick={()=>handleBuy(w)} disabled={isSoldOut}
-                    style={{background:isSoldOut?"#374151":isPremium?`linear-gradient(135deg,${C.accent},#00a87f)`:"linear-gradient(135deg,#1d4ed8,#7C3AED)",
-                      border:"none",borderRadius:10,padding:"10px 0",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",
-                      width:"100%",opacity:isSoldOut?0.5:1}}>
-                    {isSoldOut?"Agotado":"Reservar →"}
+                    style={{background:isSoldOut?"rgba(55,65,81,0.5)":isPremium?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"linear-gradient(135deg,#6366f1,#8B5CF6)",
+                      border:"none",borderRadius:10,padding:"11px 0",color:"#fff",fontSize:13,fontWeight:800,cursor:isSoldOut?"default":"pointer",
+                      width:"100%",opacity:isSoldOut?0.5:1,transition:"opacity 0.15s,transform 0.15s",
+                      boxShadow:isSoldOut?"none":"0 4px 14px rgba(139,92,246,0.35)",letterSpacing:"-0.2px"}}
+                    onMouseEnter={e=>{ if(!isSoldOut){e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 18px rgba(139,92,246,0.5)";} }}
+                    onMouseLeave={e=>{ e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=isSoldOut?"none":"0 4px 14px rgba(139,92,246,0.35)"; }}>
+                    {isSoldOut ? "Agotado" : isPremium ? "Reservar VIP ✦ →" : "Reservar plaza →"}
                   </button>
-                  <div style={{fontSize:10,color:C.muted2,marginTop:6}}>🎬 Grabación incluida</div>
+
+                  {/* Extras */}
+                  <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+                    <span style={{fontSize:10,color:"#475569",display:"flex",alignItems:"center",gap:3}}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6z" fill="#475569" stroke="none"/></svg>
+                      Grabación incluida
+                    </span>
+                    <span style={{fontSize:10,color:"#475569",display:"flex",alignItems:"center",gap:3}}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      Stripe seguro
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -9744,48 +9770,96 @@ function GurusPage({ isPremium, onNeedPremium }) {
       {/* ── INSIDERS TAB ── */}
       {tab==="insiders" && (
         <div>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-            <div style={{fontSize:12,color:C.muted}}>Compras y ventas de ejecutivos · Fuente: SEC EDGAR Form 4</div>
+          {/* subheader */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,gap:8,flexWrap:"wrap"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{display:"flex",gap:6}}>
+                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,color:"#00D26A"}}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  COMPRA
+                </span>
+                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,77,106,0.1)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,color:"#FF4D6A"}}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                  VENTA
+                </span>
+              </div>
+              <span style={{fontSize:11,color:"#334155"}}>Compras y ventas de ejecutivos · SEC EDGAR Form 4</span>
+            </div>
             <button onClick={()=>{setInsLoad(true);fetch("/api/insiders").then(r=>r.json()).then(d=>{setInsiders(d);setInsLoad(false);}).catch(()=>setInsLoad(false));}}
-              style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:C.muted,cursor:"pointer"}}>
-              ⟳ Actualizar
+              style={{display:"flex",alignItems:"center",gap:5,background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"background 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.2)"}
+              onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.1)"}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+              Actualizar
             </button>
           </div>
 
           {insLoad ? (
             <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
-              <div style={{fontSize:32,marginBottom:8}}>🕵️</div>
-              <div>Cargando datos de SEC EDGAR...</div>
+              <div style={{width:36,height:36,borderRadius:"50%",border:"3px solid rgba(99,102,241,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 12px"}}/>
+              <div style={{fontSize:13}}>Cargando datos de SEC EDGAR...</div>
+            </div>
+          ) : (insiders?.transactions||[]).length === 0 ? (
+            <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.01)",borderRadius:16,border:"1px dashed rgba(255,255,255,0.06)"}}>
+              <svg style={{opacity:0.3,marginBottom:10}} width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <div style={{fontSize:13,color:C.muted}}>No hay transacciones recientes · Haz clic en Actualizar</div>
             </div>
           ) : (
-            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            <div style={{display:"flex",flexDirection:"column",gap:5}}>
+              {/* Table header */}
+              <div style={{display:"grid",gridTemplateColumns:"44px 1fr 90px 100px 80px 70px",gap:10,padding:"7px 14px",background:"rgba(255,255,255,0.02)",borderRadius:10,border:"1px solid rgba(255,255,255,0.04)",marginBottom:4}}>
+                {["","EJECUTIVO","TICKER","MONTO","TIPO","FECHA"].map(h=>(
+                  <div key={h} style={{fontSize:10,fontWeight:700,color:"#334155",letterSpacing:"0.07em",textTransform:"uppercase"}}>{h}</div>
+                ))}
+              </div>
               {(insiders?.transactions||[]).map((t,i) => {
                 const isCompra = t.type==="COMPRA";
+                const BuyIcon = () => (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D26A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+                  </svg>
+                );
+                const SellIcon = () => (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4D6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/>
+                  </svg>
+                );
                 return (
-                  <div key={i} style={{background:"rgba(255,255,255,0.01)",border:`1px solid rgba(255,255,255,0.05)`,borderLeft:`3px solid ${isCompra?"#00D26A":"#FF4D6A"}`,borderRadius:14,padding:"14px 18px",display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
-                    <div style={{width:40,height:40,borderRadius:12,background:isCompra?"rgba(0,210,106,0.1)":"rgba(255,77,106,0.1)",border:`1px solid ${isCompra?"rgba(0,210,106,0.2)":"rgba(255,77,106,0.2)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
-                      {isCompra?"💚":"❤️"}
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"44px 1fr 90px 100px 80px 70px",gap:10,alignItems:"center",padding:"11px 14px",background:i%2===0?"rgba(255,255,255,0.015)":"transparent",borderRadius:10,border:`1px solid ${isCompra?"rgba(0,210,106,0.06)":"rgba(255,77,106,0.06)"}`,borderLeft:`3px solid ${isCompra?"rgba(0,210,106,0.5)":"rgba(255,77,106,0.5)"}`,transition:"background 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background=isCompra?"rgba(0,210,106,0.04)":"rgba(255,77,106,0.04)"}
+                    onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"rgba(255,255,255,0.015)":"transparent"}>
+                    {/* Icon */}
+                    <div style={{width:36,height:36,borderRadius:10,background:isCompra?"rgba(0,210,106,0.1)":"rgba(255,77,106,0.1)",border:`1px solid ${isCompra?"rgba(0,210,106,0.2)":"rgba(255,77,106,0.2)"}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      {isCompra ? <BuyIcon/> : <SellIcon/>}
                     </div>
-                    <div style={{flex:1,minWidth:180}}>
-                      <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{t.name}</div>
-                      <div style={{fontSize:11,color:"#475569"}}>{t.role} · {t.company}</div>
+                    {/* Nombre + rol */}
+                    <div style={{minWidth:0}}>
+                      <div style={{fontWeight:700,color:"#E2E8F0",fontSize:13,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t.name||"—"}</div>
+                      <div style={{fontSize:11,color:"#475569",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t.role||""}{t.role&&t.company?" · ":""}{t.company||""}</div>
                     </div>
-                    <div style={{textAlign:"center"}}>
-                      <div style={{fontFamily:"monospace",fontWeight:800,fontSize:14,color:t.ticker?.includes("BTC")?"#F7931A":"#A78BFA"}}>{t.ticker}</div>
-                      <span style={{background:isCompra?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:isCompra?"#00D26A":"#FF4D6A",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800}}>
-                        {isCompra?"▲ COMPRA":"▼ VENTA"}
+                    {/* Ticker */}
+                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:14,color:t.ticker?.includes("BTC")?"#F7931A":"#A78BFA"}}>{t.ticker||"—"}</div>
+                    {/* Monto */}
+                    <div>
+                      <div style={{fontWeight:700,color:"#F1F5F9",fontSize:13}}>{t.value>0?fmt$(t.value):"—"}</div>
+                      {t.shares>0&&<div style={{fontSize:10,color:"#475569"}}>{t.shares?.toLocaleString()} acc.</div>}
+                    </div>
+                    {/* Badge tipo */}
+                    <div>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:4,background:isCompra?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:isCompra?"#00D26A":"#FF4D6A",border:`1px solid ${isCompra?"rgba(0,210,106,0.3)":"rgba(255,77,106,0.3)"}`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap"}}>
+                        {isCompra
+                          ? <><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>COMPRA</>
+                          : <><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>VENTA</>
+                        }
                       </span>
                     </div>
-                    {t.value>0&&<div style={{textAlign:"right"}}>
-                      <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{fmt$(t.value)}</div>
-                      <div style={{fontSize:10,color:"#475569"}}>{t.shares?.toLocaleString()||"—"} acciones</div>
-                    </div>}
-                    <div style={{fontSize:10,color:C.muted2,textAlign:"right",minWidth:60}}>{t.filed}</div>
+                    {/* Fecha */}
+                    <div style={{fontSize:11,color:"#475569",textAlign:"right"}}>{t.filed||""}</div>
                   </div>
                 );
               })}
-              <div style={{textAlign:"center",fontSize:11,color:C.muted2,padding:"8px 0"}}>
-                Fuente: SEC EDGAR · Form 4 · {insiders?.source||""}
+              <div style={{textAlign:"center",fontSize:10,color:"#1e293b",padding:"10px 0",letterSpacing:"0.05em"}}>
+                FUENTE: SEC EDGAR · FORM 4 · {insiders?.source||"DATOS EN TIEMPO REAL"}
               </div>
             </div>
           )}
