@@ -1880,7 +1880,7 @@ const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col
 // Mini sparkline data per post
 const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
 
-function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth}){
+function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth,following=[],onFollow,onDM,onDelete}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes);
   const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch{return false;}});
   const [reposts,setReposts]=useState(post.reposts||0);
@@ -1891,6 +1891,29 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
   const [commentCount,setCommentCount]=useState(post.comments||0);
   const [loadingComments,setLoadingComments]=useState(false);
   const [postingComment,setPostingComment]=useState(false);
+  const [deleted,setDeleted]=useState(false);
+  const [delConfirm,setDelConfirm]=useState(false);
+
+  // ¿Es el autor del post?
+  const isOwner = user && (user.username===post.user || user.name===post.user || (post.user_id && user.id===post.user_id));
+  // ¿Sigue a este usuario?
+  const postUserId = post.user_id;
+  const isFollowing = postUserId && following.includes(postUserId);
+  const isOtherUser = user && !isOwner;
+
+  const handleDelete = async () => {
+    if (!isOwner) return;
+    try {
+      if (post.id && !String(post.id).startsWith("local")) {
+        await supabase.from("posts").delete().eq("id", post.id);
+      }
+      setDeleted(true);
+      if (onDelete) onDelete(post.id);
+    } catch(e) { console.error("Error al eliminar:", e); }
+    setDelConfirm(false);
+  };
+
+  if (deleted) return null;
 
   const loadComments=async()=>{
     if(loadingComments) return;
@@ -1949,6 +1972,21 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
               onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
             {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#000",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
             {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦VIP</span>}
+            {/* Botón + Seguir (solo si es otro usuario) */}
+            {isOtherUser && onFollow && (
+              <button onClick={e=>{e.stopPropagation();if(!user){onNeedAuth&&onNeedAuth();return;}onFollow(postUserId||post.user);}}
+                style={{background:isFollowing?"rgba(22,163,74,0.1)":"rgba(0,168,255,0.08)",border:`1px solid ${isFollowing?"rgba(22,163,74,0.3)":"rgba(0,168,255,0.25)"}`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:700,color:isFollowing?"#16A34A":"#00A8FF",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+                {isFollowing?"✓ Siguiendo":"+ Seguir"}
+              </button>
+            )}
+            {/* Botón DM (solo si es otro usuario y hay sesión) */}
+            {isOtherUser && onDM && user && (
+              <button onClick={e=>{e.stopPropagation();onDM({id:postUserId||post.user, username:post.user, avatar:post.avatar, avatarColor:post.avatarColor});}}
+                title="Mensaje privado"
+                style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:700,color:"#A78BFA",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+                💬 DM
+              </button>
+            )}
             <TickerBadge ticker={post.ticker} sentiment={post.sentiment}/>
             <SentPill sentiment={post.sentiment} lang={lang}/>
             <span style={{color:"var(--c-muted2)",fontSize:10.5,marginLeft:"auto",fontVariantNumeric:"tabular-nums"}}>{post.time}</span>
@@ -2032,6 +2070,22 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             <span style={{marginLeft:"auto",fontSize:10,color:"var(--c-muted2)",fontWeight:500}}>
               {`${91-((typeof post.id==="number"?post.id:1)%30)} traders`}
             </span>
+            {/* Botón Eliminar — solo dueño del post */}
+            {isOwner && !delConfirm && (
+              <button onClick={()=>setDelConfirm(true)} title="Eliminar mi post"
+                style={{background:"none",border:"none",cursor:"pointer",color:"var(--c-muted2)",fontSize:13,padding:"5px 8px",borderRadius:8,transition:"all 0.15s",display:"flex",alignItems:"center"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="rgba(239,68,68,0.08)";e.currentTarget.style.color="#EF4444";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color="var(--c-muted2)";}}>
+                🗑️
+              </button>
+            )}
+            {isOwner && delConfirm && (
+              <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:4}}>
+                <span style={{fontSize:11,color:"#EF4444",fontWeight:600}}>¿Borrar?</span>
+                <button onClick={handleDelete} style={{background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,color:"#EF4444",cursor:"pointer"}}>Sí</button>
+                <button onClick={()=>setDelConfirm(false)} style={{background:"rgba(255,255,255,0.05)",border:"1px solid var(--c-border)",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,color:"var(--c-muted)",cursor:"pointer"}}>No</button>
+              </div>
+            )}
           </div>
 
           {/* ── Panel de comentarios ── */}
@@ -9781,12 +9835,323 @@ function IdeasPage({ isPremium, onNeedPremium }) {
   );
 }
 
+// ── MENSAJES PRIVADOS PAGE ────────────────────────────────────────────────────
+function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat }) {
+  const [conversations, setConversations] = useState([]);  // {userId, username, avatar, avatarColor, lastMsg, unread, isMutual}
+  const [selConv, setSelConv]   = useState(initialChat || null); // {id, username, avatar, avatarColor}
+  const [messages, setMessages] = useState([]);
+  const [msgText, setMsgText]   = useState("");
+  const [sending, setSending]   = useState(false);
+  const [loading, setLoading]   = useState(true);
+  const [mutuals, setMutuals]   = useState([]); // IDs de seguidores mutuos
+  const [search, setSearch]     = useState("");
+  const [newDM, setNewDM]       = useState(false);
+  const [allFollowers, setAllFollowers] = useState([]);
+  const msgEndRef = useRef(null);
+
+  const FINNHUB_KEY = "d86clthr01qgiu44rtmgd86clthr01qgiu44rtn0";
+  const sb = supabaseClient || supabase;
+
+  // Cargar seguidores mutuos y conversaciones
+  useEffect(() => {
+    if (!user?.id || user.id === "local") { setLoading(false); return; }
+    const init = async () => {
+      try {
+        // Quién me sigue a mí
+        const { data: followers } = await sb.from("follows")
+          .select("follower_id").eq("following_id", user.id);
+        const followerIds = (followers||[]).map(f => f.follower_id);
+
+        // A quién sigo yo
+        const { data: iFollow } = await sb.from("follows")
+          .select("following_id").eq("follower_id", user.id);
+        const iFollowIds = (iFollow||[]).map(f => f.following_id);
+
+        // Mutuos = los que me siguen Y yo sigo
+        const mutualIds = followerIds.filter(id => iFollowIds.includes(id));
+        setMutuals(mutualIds);
+
+        // Obtener perfiles de mutuos
+        if (mutualIds.length > 0) {
+          const { data: profiles } = await sb.from("profiles")
+            .select("id,username,avatar_emoji,avatar_color")
+            .in("id", mutualIds);
+          setAllFollowers(profiles || []);
+        }
+
+        // Cargar mensajes existentes
+        const { data: msgs } = await sb.from("direct_messages")
+          .select("*")
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .order("created_at", { ascending: false })
+          .limit(100);
+
+        if (msgs && msgs.length > 0) {
+          // Agrupar por conversación
+          const convMap = {};
+          msgs.forEach(m => {
+            const otherId = m.sender_id === user.id ? m.receiver_id : m.sender_id;
+            if (!convMap[otherId]) convMap[otherId] = [];
+            convMap[otherId].push(m);
+          });
+          // Construir lista de conversaciones
+          const convList = Object.entries(convMap).map(([uid, ms]) => {
+            const last = ms[0];
+            return { userId: uid, lastMsg: last.content, lastTime: last.created_at, isMutual: mutualIds.includes(uid) };
+          });
+          setConversations(convList);
+        }
+      } catch(e) { console.error(e); }
+      setLoading(false);
+    };
+    init();
+  }, [user?.id]);
+
+  // Cargar mensajes de la conversación seleccionada
+  useEffect(() => {
+    if (!selConv || !user?.id) return;
+    const load = async () => {
+      try {
+        const { data } = await sb.from("direct_messages")
+          .select("*")
+          .or(`and(sender_id.eq.${user.id},receiver_id.eq.${selConv.id}),and(sender_id.eq.${selConv.id},receiver_id.eq.${user.id})`)
+          .order("created_at", { ascending: true })
+          .limit(100);
+        setMessages(data || []);
+        setTimeout(() => msgEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      } catch(e) {}
+    };
+    load();
+    // Poll cada 5s
+    const iv = setInterval(load, 5000);
+    return () => clearInterval(iv);
+  }, [selConv?.id, user?.id]);
+
+  useEffect(() => {
+    msgEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const isMutualWith = (uid) => mutuals.includes(uid);
+
+  const sendMessage = async () => {
+    if (!msgText.trim() || sending || !selConv || !user?.id) return;
+    if (!isMutualWith(selConv.id)) return;
+    setSending(true);
+    try {
+      const { data, error } = await sb.from("direct_messages").insert({
+        sender_id: user.id,
+        receiver_id: selConv.id,
+        content: msgText.trim(),
+      }).select().single();
+      if (!error && data) {
+        setMessages(prev => [...prev, data]);
+        setMsgText("");
+        setTimeout(() => msgEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+      }
+    } catch(e) {}
+    setSending(false);
+  };
+
+  if (!user || user.id === "local") {
+    return (
+      <div style={{maxWidth:480,margin:"80px auto",textAlign:"center",padding:"0 20px"}}>
+        <div style={{fontSize:64,marginBottom:16}}>💬</div>
+        <div style={{fontSize:22,fontWeight:900,color:C.text,marginBottom:8}}>Mensajes Privados</div>
+        <div style={{fontSize:14,color:C.muted,marginBottom:24}}>Inicia sesión para ver y enviar mensajes privados.</div>
+        <button onClick={onNeedAuth} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"12px 32px",fontSize:15,fontWeight:800,cursor:"pointer"}}>
+          Iniciar sesión
+        </button>
+      </div>
+    );
+  }
+
+  const filteredMutualsForNew = allFollowers.filter(p =>
+    !search || p.username?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div style={{maxWidth:900,margin:"0 auto",height:"calc(100vh - 140px)",display:"flex",flexDirection:"column"}}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:18,padding:"14px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:12}}>
+        <span style={{fontSize:24}}>💬</span>
+        <div>
+          <div style={{fontSize:17,fontWeight:900,color:C.text}}>Mensajes Privados</div>
+          <div style={{fontSize:11,color:C.muted}}>Solo entre usuarios que se siguen mutuamente · {mutuals.length} conexiones</div>
+        </div>
+        <button onClick={()=>{setNewDM(true);setSelConv(null);}} style={{marginLeft:"auto",background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:20,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>
+          ✏️ Nuevo mensaje
+        </button>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:10,flex:1,minHeight:0}}>
+        {/* ── LISTA DE CONVERSACIONES ── */}
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"auto",display:"flex",flexDirection:"column"}}>
+          <div style={{padding:"10px 12px",borderBottom:`1px solid ${C.border}`}}>
+            <div style={{position:"relative"}}>
+              <span style={{position:"absolute",left:8,top:"50%",transform:"translateY(-50%)",fontSize:11,color:C.muted2}}>🔍</span>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar…"
+                style={{width:"100%",background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:20,padding:"6px 8px 6px 26px",fontSize:12,color:C.text,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+          </div>
+          {loading && <div style={{padding:20,textAlign:"center",color:C.muted,fontSize:12}}>Cargando…</div>}
+          {!loading && mutuals.length === 0 && (
+            <div style={{padding:20,textAlign:"center"}}>
+              <div style={{fontSize:32,marginBottom:8}}>👥</div>
+              <div style={{fontSize:13,color:C.muted,lineHeight:1.6}}>Aún no tienes conexiones mutuas. Sigue a alguien y espera que te sigan de vuelta para poder chatear.</div>
+            </div>
+          )}
+          {/* Mutuales disponibles para chatear */}
+          {allFollowers.filter(p => !search || p.username?.toLowerCase().includes(search.toLowerCase())).map(prof => {
+            const conv = conversations.find(c => c.userId === prof.id);
+            const isSelected = selConv?.id === prof.id;
+            return (
+              <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
+                style={{display:"flex",gap:10,alignItems:"center",padding:"10px 12px",cursor:"pointer",background:isSelected?"rgba(139,92,246,0.12)":"transparent",borderLeft:`3px solid ${isSelected?"#8B5CF6":"transparent"}`,transition:"all 0.15s"}}
+                onMouseEnter={e=>{ if(!isSelected) e.currentTarget.style.background="rgba(255,255,255,0.03)"; }}
+                onMouseLeave={e=>{ if(!isSelected) e.currentTarget.style.background="transparent"; }}>
+                <div style={{width:38,height:38,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{prof.avatar_emoji||"👤"}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:700,color:C.text,fontSize:13,display:"flex",alignItems:"center",gap:4}}>
+                    {prof.username}
+                    <span style={{fontSize:9,background:"rgba(16,185,129,0.15)",color:"#10B981",borderRadius:4,padding:"1px 5px",fontWeight:700}}>MUTUO</span>
+                  </div>
+                  <div style={{fontSize:11,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{conv?.lastMsg || "Iniciar conversación"}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── PANEL DE CHAT ── */}
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          {/* ── NUEVO MENSAJE UI ── */}
+          {newDM && !selConv && (
+            <div style={{padding:24,flex:1,overflow:"auto"}}>
+              <div style={{fontWeight:800,color:C.text,fontSize:16,marginBottom:4}}>✏️ Nuevo mensaje</div>
+              <div style={{fontSize:12,color:C.muted,marginBottom:16}}>Solo puedes escribir a usuarios que también te siguen a ti.</div>
+              {filteredMutualsForNew.length === 0 && (
+                <div style={{textAlign:"center",padding:24,color:C.muted}}>
+                  <div style={{fontSize:32,marginBottom:8}}>🔒</div>
+                  <div style={{fontSize:13,lineHeight:1.7}}>No tienes seguidores mutuos aún.<br/>Sigue a alguien y espera que te sigan de vuelta.</div>
+                </div>
+              )}
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                {filteredMutualsForNew.map(prof => (
+                  <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
+                    style={{display:"flex",gap:10,alignItems:"center",padding:"10px 14px",background:"rgba(255,255,255,0.03)",border:`1px solid ${C.border}`,borderRadius:12,cursor:"pointer",transition:"all 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.08)"}
+                    onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}>
+                    <div style={{width:40,height:40,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{prof.avatar_emoji||"👤"}</div>
+                    <div>
+                      <div style={{fontWeight:700,color:C.text,fontSize:14}}>{prof.username}</div>
+                      <div style={{fontSize:11,color:"#10B981"}}>✓ Seguidor mutuo — Puedes enviarle mensajes</div>
+                    </div>
+                    <div style={{marginLeft:"auto",color:"#8B5CF6",fontSize:13,fontWeight:700}}>Chat →</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── CHAT ABIERTO ── */}
+          {selConv && (
+            <>
+              {/* Chat header */}
+              <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}>
+                <div style={{width:36,height:36,borderRadius:"50%",background:selConv.avatarColor||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{selConv.avatar||"👤"}</div>
+                <div>
+                  <div style={{fontWeight:800,color:C.text,fontSize:14}}>{selConv.username}</div>
+                  <div style={{fontSize:10,color:"#10B981"}}>✓ Seguidor mutuo · Chat privado</div>
+                </div>
+                <button onClick={()=>setSelConv(null)} style={{marginLeft:"auto",background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:18}}>✕</button>
+              </div>
+
+              {/* Check mutual */}
+              {!isMutualWith(selConv.id) && (
+                <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,padding:24}}>
+                  <div style={{fontSize:48}}>🔒</div>
+                  <div style={{fontWeight:800,color:C.text,fontSize:16,textAlign:"center"}}>Chat bloqueado</div>
+                  <div style={{fontSize:13,color:C.muted,textAlign:"center",maxWidth:320,lineHeight:1.7}}>
+                    Para chatear con <strong>{selConv.username}</strong>, ambos tienen que seguirse mutuamente. Sigue al usuario y espera que te siga de vuelta.
+                  </div>
+                </div>
+              )}
+
+              {/* Messages area */}
+              {isMutualWith(selConv.id) && (
+                <>
+                  <div style={{flex:1,overflow:"auto",padding:"16px",display:"flex",flexDirection:"column",gap:8}}>
+                    {messages.length === 0 && (
+                      <div style={{textAlign:"center",color:C.muted,padding:"40px 0",fontSize:13}}>
+                        <div style={{fontSize:36,marginBottom:8}}>👋</div>
+                        Sé el primero en escribir. Esta conversación es privada.
+                      </div>
+                    )}
+                    {messages.map((m,i) => {
+                      const isMine = m.sender_id === user.id;
+                      const time = new Date(m.created_at).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+                      return (
+                        <div key={m.id||i} style={{display:"flex",justifyContent:isMine?"flex-end":"flex-start"}}>
+                          <div style={{maxWidth:"72%",background:isMine?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"rgba(255,255,255,0.06)",borderRadius:isMine?"16px 16px 4px 16px":"16px 16px 16px 4px",padding:"8px 13px",border:isMine?"none":`1px solid ${C.border}`}}>
+                            <div style={{fontSize:13,color:isMine?"#fff":C.text,lineHeight:1.5,wordBreak:"break-word"}}>{m.content}</div>
+                            <div style={{fontSize:10,color:isMine?"rgba(255,255,255,0.5)":C.muted2,marginTop:3,textAlign:"right"}}>{time}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div ref={msgEndRef}/>
+                  </div>
+
+                  {/* Input */}
+                  <div style={{padding:"10px 14px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,alignItems:"center"}}>
+                    <input value={msgText} onChange={e=>setMsgText(e.target.value)}
+                      onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
+                      placeholder={`Mensaje para ${selConv.username}…`}
+                      maxLength={500}
+                      style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:20,padding:"9px 16px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit"}}/>
+                    <button onClick={sendMessage} disabled={!msgText.trim()||sending}
+                      style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:20,padding:"9px 18px",fontSize:13,fontWeight:700,color:"#fff",cursor:msgText.trim()&&!sending?"pointer":"not-allowed",opacity:msgText.trim()&&!sending?1:0.5,whiteSpace:"nowrap",transition:"all 0.15s"}}>
+                      {sending?"…":"Enviar ↗"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* Estado vacío */}
+          {!selConv && !newDM && (
+            <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12}}>
+              <div style={{fontSize:48}}>💬</div>
+              <div style={{fontWeight:800,color:C.text,fontSize:16}}>Tus mensajes</div>
+              <div style={{fontSize:13,color:C.muted,textAlign:"center",maxWidth:280,lineHeight:1.7}}>
+                Selecciona una conversación o empieza una nueva. Solo con seguidores mutuos.
+              </div>
+              <button onClick={()=>setNewDM(true)} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",border:"none",borderRadius:12,padding:"9px 24px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",marginTop:8}}>
+                ✏️ Nuevo mensaje
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Nota SQL para el admin */}
+      {user?.email && ["mariangat26@gmail.com","mariagalarraga2013@gmail.com"].includes(user.email) && (
+        <div style={{marginTop:8,background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:10,padding:"8px 14px",fontSize:11,color:"#F59E0B"}}>
+          ⚠️ <strong>Admin:</strong> Asegúrate de tener la tabla <code>direct_messages</code> en Supabase. SQL: <code>CREATE TABLE public.direct_messages (id BIGSERIAL PRIMARY KEY, sender_id UUID REFERENCES auth.users(id), receiver_id UUID REFERENCES auth.users(id), content TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW()); ALTER TABLE public.direct_messages ENABLE ROW LEVEL SECURITY; CREATE POLICY "own_messages" ON public.direct_messages USING (auth.uid()=sender_id OR auth.uid()=receiver_id); CREATE POLICY "insert_msg" ON public.direct_messages FOR INSERT WITH CHECK (auth.uid()=sender_id);</code>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const NAV_ITEMS = (t) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},
   {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"🎓 Webinars",idx:11},
   {label:"📚 Academia",idx:12},
+  {label:"💬 Mensajes",idx:22},
   {label:"💡 Ideas VIP",idx:21,vip:true},
   {label:"🏛️ Super Inversores",idx:19,vip:true},
   {label:"🐋 Flujo VIP",idx:20,vip:true},
@@ -10094,6 +10459,7 @@ export default function App(){
   const [auth,setAuth]         = useState(null);
   const [user,setUser]         = useState(_getSavedUser); // ← restaura al instante
   const [following,setFollow]  = useState([]);
+  const [dmTarget,setDmTarget] = useState(null); // Para abrir DM directo desde un post
   const ADMIN_EMAILS = ADMIN_EMAILS_CONST;
   const [isPremium,setIsPremium]= useState(
     _getAdminStatus() || (_getSavedUser()?.is_premium || false)
@@ -10537,6 +10903,7 @@ export default function App(){
     if(page===18) return <CommoditiesPage/>;
     if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} />;
     if(page===15) return <DividendCalendarPage/>;
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
@@ -10581,7 +10948,7 @@ export default function App(){
         )}
         {filtered2.map((p,i)=>(
           <div key={p.id}>
-            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")}/>
+            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))}/>
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
