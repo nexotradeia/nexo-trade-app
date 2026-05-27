@@ -1880,6 +1880,26 @@ const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col
 // Mini sparkline data per post
 const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
 
+function LinkPreviewCard({url}){
+  let domain="";
+  try{ domain=new URL(url).hostname.replace(/^www\./,""); }catch{}
+  if(!domain) return null;
+  return(
+    <a href={url} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
+      style={{display:"flex",alignItems:"center",gap:10,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:12,padding:"10px 14px",marginBottom:10,textDecoration:"none",transition:"all 0.15s",boxSizing:"border-box",width:"100%"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.35)";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}
+      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.background="var(--c-card2)";}}>
+      <img src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`} alt="" width={22} height={22}
+        style={{borderRadius:5,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:10,color:"var(--c-muted2)",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:2}}>{domain}</div>
+        <div style={{fontSize:12,color:"var(--c-accent)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{url}</div>
+      </div>
+      <span style={{fontSize:14,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
+    </a>
+  );
+}
+
 function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth,following=[],onFollow,onDM,onDelete}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes);
   const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch{return false;}});
@@ -2002,22 +2022,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           {/* Imagen / GIF */}
           {post.image&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
           {/* Link preview card */}
-          {post.link&&(()=>{
-            let domain="";try{domain=new URL(post.link).hostname.replace(/^www\./,"");}catch{}
-            return(
-              <a href={post.link} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
-                style={{display:"flex",alignItems:"center",gap:10,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:12,padding:"10px 14px",marginBottom:10,textDecoration:"none",transition:"all 0.15s",boxSizing:"border-box"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,168,255,0.35)";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.background="var(--c-card2)";}}>
-                <img src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`} alt="" width={22} height={22} style={{borderRadius:5,flexShrink:0}} onError={e=>{e.target.style.display="none";}}/>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:10,color:"var(--c-muted2)",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:1}}>{domain}</div>
-                  <div style={{fontSize:12,color:"var(--c-accent)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{post.link}</div>
-                </div>
-                <span style={{fontSize:14,color:"var(--c-muted2)",flexShrink:0}}>↗</span>
-              </a>
-            );
-          })()}
+          {post.link ? <LinkPreviewCard url={post.link}/> : null}
           {/* Metrics row — compacto */}
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
             <div style={{display:"flex",alignItems:"center",gap:3,background:isBull?"rgba(22,163,74,0.08)":"rgba(220,38,38,0.08)",borderRadius:8,padding:"3px 9px",border:`1px solid ${isBull?"rgba(22,163,74,0.18)":"rgba(220,38,38,0.18)"}`}}>
