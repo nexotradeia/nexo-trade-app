@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-25 14:00:00
+// NEXO TRADE — build: 2026-05-28 18:00:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -3401,7 +3401,8 @@ function TickerStrip(){
 }
 
 // ── MARKETS MINI WIDGET — tabs Mercados / Predicciones / Tendencias ───────────
-function MarketsMiniWidget(){
+function MarketsMiniWidget({ lang="es" }){
+  const isEN = lang === "en";
   const [tab, setTab] = useState("mercados");
   const [polyData] = useState([
     {q:"Fed rate cut in 2026?", p:0.55, vol:"$1.8M"},
@@ -3449,7 +3450,7 @@ function MarketsMiniWidget(){
     <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:"var(--c-shadow)"}}>
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:"1px solid var(--c-border)",padding:"0 8px"}}>
-        {[["mercados","📈 Markets"],["predicciones","🎯 Predictions"],["tendencias","🔥 Trending"]].map(([k,l])=>(
+        {[["mercados", isEN?"📈 Markets":"📈 Mercados"],["predicciones", isEN?"🎯 Predictions":"🎯 Predicciones"],["tendencias","🔥 Trending"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
             style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#00A8FF":"transparent"}`,background:"transparent",color:tab===k?"#00A8FF":"var(--c-muted)",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
             {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
@@ -6147,20 +6148,29 @@ function PredictionBanner({lang="es"}){
 }
 
 // ── VIP TOOLS PAGE ────────────────────────────────────────────────────────────
-function VipToolsPage({ isPremium, onNeedPremium, posts=[], user }){
+function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es" }){
   const [tool, setTool] = useState("riesgo");
+  const isEN = lang === "en";
 
   // ── GATE VIP ──
   if(!isPremium) return(
     <div style={{textAlign:"center",padding:"60px 20px",background:"rgba(10,16,30,0.98)",borderRadius:20,border:"1px solid rgba(245,158,11,0.2)"}}>
       <div style={{fontSize:52,marginBottom:16}}>🔒</div>
-      <h2 style={{color:"#F59E0B",fontWeight:900,marginBottom:8}}>Herramientas VIP Exclusivas</h2>
-      <p style={{color:"#94A3B8",fontSize:15,marginBottom:24,maxWidth:400,margin:"0 auto 24px"}}>Calculadora Sharpe Ratio, racha de ganancias, alertas de precio y más — solo para miembros VIP.</p>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer"}}>✦ Hazte VIP — $9.99/mes</button>
+      <h2 style={{color:"#F59E0B",fontWeight:900,marginBottom:8}}>{isEN?"Exclusive VIP Tools":"Herramientas VIP Exclusivas"}</h2>
+      <p style={{color:"#94A3B8",fontSize:15,marginBottom:24,maxWidth:400,margin:"0 auto 24px"}}>{isEN?"Sharpe Ratio calculator, win streak tracker, price alerts and more — VIP members only.":"Calculadora Sharpe Ratio, racha de ganancias, alertas de precio y más — solo para miembros VIP."}</p>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer"}}>✦ {isEN?"Go VIP — $9.99/mo":"Hazte VIP — $9.99/mes"}</button>
     </div>
   );
 
-  const TOOLS = [
+  const TOOLS = isEN ? [
+    {k:"paper",     label:"🎮 Paper Trading"},
+    {k:"riesgo",    label:"⚖️ Risk/Reward"},
+    {k:"sharpe",    label:"📐 Sharpe Ratio"},
+    {k:"racha",     label:"🔥 Win Streak & Stats"},
+    {k:"portafolio",label:"📈 Portfolio Evolution"},
+    {k:"alertas",   label:"🔔 Price Alerts"},
+    {k:"exportar",  label:"📤 Export Data"},
+  ] : [
     {k:"paper",    label:"🎮 Paper Trading"},
     {k:"riesgo",   label:"⚖️ Riesgo/Recompensa"},
     {k:"sharpe",   label:"📐 Sharpe Ratio"},
@@ -6173,8 +6183,8 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user }){
   return(
     <div>
       <div style={{marginBottom:20}}>
-        <h2 style={{color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}>🛠️ Herramientas VIP</h2>
-        <p style={{color:"#64748B",fontSize:13}}>Calculadoras y utilidades exclusivas para traders profesionales</p>
+        <h2 style={{color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}>🛠️ {isEN?"VIP Tools":"Herramientas VIP"}</h2>
+        <p style={{color:"#64748B",fontSize:13}}>{isEN?"Exclusive calculators and utilities for professional traders":"Calculadoras y utilidades exclusivas para traders profesionales"}</p>
       </div>
       {/* Tabs */}
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:24}}>
@@ -11241,9 +11251,9 @@ export default function App(){
           const mapped = data.map(p=>({
             id:         p.id,
             userId:     p.user_id,
-            user:       p.profiles?.username || p.user_name || "Anónimo",
+            user:       p.profiles?.username || p.user_name || p.username || "Trader",
             avatar:     p.profiles?.avatar_emoji || p.avatar_emoji || "🦅",
-            avatarColor:p.profiles?.avatar_color || C.accent,
+            avatarColor:p.profiles?.avatar_color || p.avatar_color || C.accent,
             time:       fmtTimeAgo(p.created_at),
             ticker:     p.ticker||"GENERAL",
             sentiment:  p.sentiment||"bull",
@@ -11280,7 +11290,7 @@ export default function App(){
         const {data:profile}=await supabase.from("profiles").select("username,avatar_emoji,avatar_color,points").eq("id",p.user_id).single();
         const newPost={
           id:p.id,userId:p.user_id,
-          user:profile?.username||"Anónimo",
+          user:profile?.username||p.user_name||"Trader",
           avatar:profile?.avatar_emoji||"🦅",
           avatarColor:profile?.avatar_color||C.accent,
           time:"ahora",ticker:p.ticker,sentiment:p.sentiment,
@@ -11356,6 +11366,7 @@ export default function App(){
           ticker:    ticker  || "GENERAL",
           sentiment: sentiment || "bull",
           tags:      [ticker || "GENERAL"],
+          user_name: user.username || user.name || user.email?.split("@")[0] || "Trader",
           likes_count:    0,
           comments_count: 0,
           reposts_count:  0,
@@ -11430,7 +11441,7 @@ export default function App(){
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage posts={posts}/>;
     if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
-    if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user}/>;
+    if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===14) return <EconCalendarPage/>;
@@ -11474,10 +11485,41 @@ export default function App(){
           <div style={{margin:"4px 0 12px",padding:"14px 16px",background:"rgba(220,38,38,0.06)",border:"1px solid rgba(220,38,38,0.2)",borderRadius:12,display:"flex",alignItems:"center",gap:12}}>
             <span style={{fontSize:22}}>⚠️</span>
             <div style={{flex:1}}>
-              <div style={{fontSize:13,fontWeight:700,color:"#DC2626"}}>Sin conexión al servidor</div>
-              <div style={{fontSize:11,color:C.muted,marginTop:2}}>No pudimos cargar los posts. Revisa tu conexión a internet.</div>
+              <div style={{fontSize:13,fontWeight:700,color:"#DC2626"}}>{lang==="en"?"Connection error":"Sin conexión al servidor"}</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:2}}>{lang==="en"?"Could not load posts. Check your internet connection.":"No pudimos cargar los posts. Revisa tu conexión a internet."}</div>
             </div>
-            <button onClick={()=>window.location.reload()} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",borderRadius:8,padding:"6px 12px",color:"#DC2626",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>🔄 Reintentar</button>
+            <button onClick={()=>window.location.reload()} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",borderRadius:8,padding:"6px 12px",color:"#DC2626",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>🔄 {lang==="en"?"Retry":"Reintentar"}</button>
+          </div>
+        )}
+        {/* Skeleton mientras carga el feed por primera vez */}
+        {!dbReady && !feedError && filtered2.length===0 && (
+          <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:8}}>
+            {[1,2,3].map(i=>(
+              <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 18px",boxShadow:C.shadow}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+                  <div style={{width:38,height:38,borderRadius:"50%",background:C.card2,animation:"nexo-pulse 1.5s infinite"}}/>
+                  <div style={{flex:1}}>
+                    <div style={{height:12,width:"35%",background:C.card2,borderRadius:6,marginBottom:6,animation:"nexo-pulse 1.5s infinite"}}/>
+                    <div style={{height:10,width:"20%",background:C.card2,borderRadius:6,animation:"nexo-pulse 1.5s infinite"}}/>
+                  </div>
+                </div>
+                <div style={{height:12,background:C.card2,borderRadius:6,marginBottom:6,animation:"nexo-pulse 1.5s infinite"}}/>
+                <div style={{height:12,width:"80%",background:C.card2,borderRadius:6,marginBottom:6,animation:"nexo-pulse 1.5s infinite"}}/>
+                <div style={{height:12,width:"60%",background:C.card2,borderRadius:6,animation:"nexo-pulse 1.5s infinite"}}/>
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Empty state cuando hay 0 posts (pero DB cargó) */}
+        {dbReady && filtered2.length===0 && !feedError && (
+          <div style={{textAlign:"center",padding:"48px 20px",background:C.card,border:`1px dashed ${C.border}`,borderRadius:16,marginTop:8}}>
+            <div style={{fontSize:40,marginBottom:12}}>📊</div>
+            <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:6}}>
+              {sent!=="all" ? (lang==="en"?"No posts with this filter yet":"Sin posts con este filtro aún") : (lang==="en"?"Be the first to post!":"¡Sé el primero en publicar!")}
+            </div>
+            <div style={{fontSize:13,color:C.muted}}>
+              {lang==="en"?"Share your market analysis and connect with traders worldwide.":"Comparte tu análisis del mercado y conecta con traders de todo el mundo."}
+            </div>
           </div>
         )}
         {filtered2.map((p,i)=>(
@@ -12259,7 +12301,7 @@ export default function App(){
       {/* MARKETS MINI WIDGET — Mercados / Predicciones / Tendencias */}
       {page===0 && !showLanding && (
         <div style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
-          <MarketsMiniWidget/>
+          <MarketsMiniWidget lang={lang}/>
         </div>
       )}
 
