@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-28 22:23:14
+// NEXO TRADE — build: 2026-05-28 22:35:06
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -632,7 +632,7 @@ function LangSelector({lang, setLang}){
       {open && (
         <div style={{position:"absolute",right:0,top:"calc(100% + 6px)",background:"#FFFFFF",border:`1px solid ${C.border}`,borderRadius:14,padding:6,zIndex:200,boxShadow:C.shadowMd,minWidth:155}}>
           {LANG_META.map(l => (
-            <button key={l.code} onClick={()=>{ setLang(l.code); setOpen(false); try{localStorage.setItem("nexo-lang",l.code);}catch{} }} style={{display:"flex",alignItems:"center",gap:10,width:"100%",textAlign:"left",border:"none",cursor:"pointer",padding:"8px 12px",borderRadius:9,fontFamily:"inherit",fontSize:13,fontWeight:lang===l.code?700:500,color:lang===l.code?C.accentText:C.text,background:lang===l.code?C.accentDim:"transparent",transition:"background 0.1s"}}>
+            <button key={l.code} onClick={()=>{ setLang(l.code); setOpen(false); try{localStorage.setItem("nexo-lang",l.code);}catch(e){} }} style={{display:"flex",alignItems:"center",gap:10,width:"100%",textAlign:"left",border:"none",cursor:"pointer",padding:"8px 12px",borderRadius:9,fontFamily:"inherit",fontSize:13,fontWeight:lang===l.code?700:500,color:lang===l.code?C.accentText:C.text,background:lang===l.code?C.accentDim:"transparent",transition:"background 0.1s"}}>
               <span style={{fontSize:18}}>{l.flag}</span>
               <span>{l.label}</span>
               {lang===l.code && <span style={{marginLeft:"auto",color:C.accent}}>â</span>}
@@ -719,7 +719,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
           <div style={{background:"#0f172a",borderRadius:14,padding:"12px 14px",border:"1px solid #334155",marginBottom:8}}>
             <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
               {LANG_META.map(l => (
-                <button key={l.code} onClick={() => { setLang(l.code); try{localStorage.setItem("nexo-lang",l.code);}catch{} }}
+                <button key={l.code} onClick={() => { setLang(l.code); try{localStorage.setItem("nexo-lang",l.code);}catch(e){} }}
                   style={{display:"flex",alignItems:"center",gap:6,border:`1px solid ${lang===l.code?"#00A8FF":"#334155"}`,
                     background:lang===l.code?"rgba(0,168,255,0.12)":"transparent",borderRadius:10,
                     padding:"7px 12px",cursor:"pointer",color:lang===l.code?"#00A8FF":"#94a3b8",fontSize:12,fontWeight:lang===l.code?800:500}}>
@@ -1375,7 +1375,7 @@ function MercadosEnVivoWidget(){
           try{
             const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${st.fhSym}&token=${FINNHUB_KEY}`);
             if(r.ok){ const d=await r.json(); if(d.c>0) newPrices[st.s]={price:d.c, change:d.dp||0}; }
-          }catch{}
+          }catch(e){}
         }));
         setPrices(newPrices);
         setLastUpdate(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
@@ -1498,7 +1498,7 @@ function AIAssistant({lang,onClose}){
       const data=await res.json();
       const reply=data.reply||respuestaLocal(userMsg);
       setMsgs(prev=>[...prev,{role:"ai",text:reply}]);
-    }catch{
+    }catch(e){
       // Si la API falla, responde con IA local inmediatamente
       setMsgs(prev=>[...prev,{role:"ai",text:respuestaLocal(userMsg)}]);
     }
@@ -1912,7 +1912,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
 function AlertsPanel({lang,onClose,onAlertChange}){
   const [alerts,setAlerts]=useState(()=>{
     try{ return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]"); }
-    catch{ return []; }
+    catch(e){ return []; }
   });
   const [newT,setNewT]=useState(""),[newV,setNewV]=useState(""),[newType,setNewType]=useState("price_above");
   const typeLabels={"price_above":"â Precio sube de","price_below":"â Precio baja de","earnings":"ð Earnings","mentions":"ð¬ Menciones pico"};
@@ -2093,7 +2093,7 @@ function LinkPreviewCard({url}){
 
 function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth,following=[],onFollow,onDM,onDelete}){
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes);
-  const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch{return false;}});
+  const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch(e){return false;}});
   const [reposts,setReposts]=useState(post.reposts||0);
   const [reposting,setReposting]=useState(false);
   const [showComments,setShowComments]=useState(false);
@@ -2258,7 +2258,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
                 const newVal = reposted ? reposts-1 : reposts+1;
                 setReposts(newVal);
                 setReposted(!reposted);
-                try{ localStorage.setItem("nx-rp-"+post.id, JSON.stringify(!reposted)); }catch{}
+                try{ localStorage.setItem("nx-rp-"+post.id, JSON.stringify(!reposted)); }catch(e){}
                 if(onRepost) await onRepost(post.id, !reposted);
                 if(!reposted) onPoints(POINT_ACTIONS.repost||2, lang==="en"?"Reposted! â":"Â¡Replicado! â");
                 setReposting(false);
@@ -2349,7 +2349,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
 
 // ââ NEW POST ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const MENTION_TICKERS_FALLBACK = ["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META","BTC","ETH","SPY","AMD","NFLX","COIN","PLTR","SMCI","ARM","JPM","V","BABA","RIVN"];
-const getMentionTickers=()=>{try{return typeof SEARCH_TICKERS!=="undefined"&&SEARCH_TICKERS.length>0?SEARCH_TICKERS:MENTION_TICKERS_FALLBACK;}catch{return MENTION_TICKERS_FALLBACK;}};
+const getMentionTickers=()=>{try{return typeof SEARCH_TICKERS!=="undefined"&&SEARCH_TICKERS.length>0?SEARCH_TICKERS:MENTION_TICKERS_FALLBACK;}catch(e){return MENTION_TICKERS_FALLBACK;}};
 
 function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   const t=LANGS[lang];
@@ -2363,8 +2363,8 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   const [mentionBox,setMentionBox]=useState({open:false,query:"",results:[],caretPos:0});
   const taRef=useRef();
 
-  const isValidUrl=url=>{try{const u=new URL(url);return u.protocol==="http:"||u.protocol==="https:";}catch{return false;}};
-  const getDomain=url=>{try{return new URL(url).hostname.replace(/^www\./,"");}catch{return url;}};
+  const isValidUrl=url=>{try{const u=new URL(url);return u.protocol==="http:"||u.protocol==="https:";}catch(e){return false;}};
+  const getDomain=url=>{try{return new URL(url).hostname.replace(/^www\./,"");}catch(e){return url;}};
 
   // Detectar @ en el textarea y mostrar autocomplete
   const handleTextChange=(e)=>{
@@ -5543,14 +5543,14 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       {/* ââ COMUNIDAD vs IA â votaciÃ³n real ââ */}
       {(()=>{
         const storageKey = "nexo-sentiment-vote";
-        const [vote, setVote] = useState(()=>{try{return localStorage.getItem(storageKey)||null;}catch{return null;}});
-        const [bullPct, setBullPct] = useState(()=>{try{return parseInt(localStorage.getItem("nexo-sent-pct")||"71");}catch{return 71;}});
+        const [vote, setVote] = useState(()=>{try{return localStorage.getItem(storageKey)||null;}catch(e){return null;}});
+        const [bullPct, setBullPct] = useState(()=>{try{return parseInt(localStorage.getItem("nexo-sent-pct")||"71");}catch(e){return 71;}});
         const castVote = (v) => {
           if(vote) return; // ya votÃ³
           const newPct = v==="bull" ? Math.min(95, bullPct+1) : Math.max(20, bullPct-1);
           setBullPct(newPct);
           setVote(v);
-          try{localStorage.setItem(storageKey,v);localStorage.setItem("nexo-sent-pct",String(newPct));}catch{}
+          try{localStorage.setItem(storageKey,v);localStorage.setItem("nexo-sent-pct",String(newPct));}catch(e){}
         };
         const bearPct = 100-bullPct;
         return(
@@ -6254,7 +6254,7 @@ function PaperTrading({ user }){
   const KEY = `nexotrade_paper_${user?.id||"guest"}`;
   const load = ()=>{
     try{ const s=localStorage.getItem(KEY); return s?JSON.parse(s):{cash:PAPER_INITIAL,positions:{},trades:[]}; }
-    catch{ return {cash:PAPER_INITIAL,positions:{},trades:[]}; }
+    catch(e){ return {cash:PAPER_INITIAL,positions:{},trades:[]}; }
   };
   const [pf, setPf] = useState(load);
   const [tab, setTab]     = useState("cartera");   // cartera | operar | historial
@@ -6268,7 +6268,7 @@ function PaperTrading({ user }){
   const [msg, setMsg] = useState(null);
 
   // Persistir
-  useEffect(()=>{ try{localStorage.setItem(KEY,JSON.stringify(pf));}catch{} },[pf]);
+  useEffect(()=>{ try{localStorage.setItem(KEY,JSON.stringify(pf));}catch(e){} },[pf]);
 
   // Refrescar precios de posiciones abiertas
   const refreshPrices = useCallback(async()=>{
@@ -6280,7 +6280,7 @@ function PaperTrading({ user }){
         const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINNHUB_KEY}`);
         const d=await r.json();
         if(d.c>0) next[tk]={price:d.c, pct:d.dp||0};
-      }catch{}
+      }catch(e){}
     }
     setPrices(next);
   },[pf.positions]);
@@ -6296,7 +6296,7 @@ function PaperTrading({ user }){
       const d=await r.json();
       if(d.c>0) setLiveQ({price:d.c, change:d.dp||0});
       else setLiveQ(null);
-    }catch{ setLiveQ(null); }
+    }catch(e){ setLiveQ(null); }
     setFetching(false);
   };
 
@@ -6945,7 +6945,7 @@ function PortfolioEvolution(){
 
 // ââ HERRAMIENTA 5: ALERTAS DE PRECIO âââââââââââââââââââââââââââââââââââââââââ
 function PriceAlerts(){
-  const [alerts,setAlerts]=useState(()=>{try{return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]");}catch{return[];}});
+  const [alerts,setAlerts]=useState(()=>{try{return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]");}catch(e){return[];}});
   const [ticker,setTicker]=useState(""); const [price,setPrice]=useState(""); const [cond,setCond]=useState("above");
   const prices=useContext(PriceCtx)||{};
 
@@ -7240,7 +7240,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${t}&token=${FINNHUB_KEY}`);
         const d=await r.json();
         if(d.c>0) return {ticker:t,price:d.c,change:d.dp||0};
-      }catch{}
+      }catch(e){}
       return null;
     })).then(results=>{
       const map={};
@@ -11735,7 +11735,7 @@ export default function App(){
       .catch(()=>{});
   },[]);
   const [alertCount,setAlertCount]   = useState(0);
-  const [triggeredIds,setTriggeredIds] = useState(()=>{try{return JSON.parse(localStorage.getItem("nexotrade-triggered")||"[]");}catch{return [];}});
+  const [triggeredIds,setTriggeredIds] = useState(()=>{try{return JSON.parse(localStorage.getItem("nexotrade-triggered")||"[]");}catch(e){return [];}});
 
   // ââ Revisar alertas de precio cada 30s âââââââââââââââââââââââââââââââââ
   useEffect(()=>{
@@ -11756,7 +11756,7 @@ export default function App(){
     const t=setInterval(checkAlerts,30000);
     return()=>clearInterval(t);
   },[]);
-  const [lang,setLang]         = useState(()=>{ try{ return localStorage.getItem("nexo-lang")||"en"; }catch{ return "en"; } });
+  const [lang,setLang]         = useState(()=>{ try{ return localStorage.getItem("nexo-lang")||"en"; }catch(e){ return "en"; } });
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
@@ -11956,7 +11956,7 @@ export default function App(){
             const local = JSON.parse(localStorage.getItem("nexo-posts-cache")||"[]");
             if(local.length>0){ setPosts(local); setDbReady(true); setFeedError(false); }
             else { setFeedError(true); }
-          }catch{ setFeedError(true); }
+          }catch(e){ setFeedError(true); }
           return;
         }
         setFeedError(false);
@@ -11986,7 +11986,7 @@ export default function App(){
             return mapped;
           });
           // Guarda en cachÃ© local para que no desaparezcan si Supabase falla
-          try{ localStorage.setItem("nexo-posts-cache", JSON.stringify(mapped.slice(0,50))); }catch{}
+          try{ localStorage.setItem("nexo-posts-cache", JSON.stringify(mapped.slice(0,50))); }catch(e){}
           setDbReady(true);
         }
       }catch(e){ console.error("Error cargando posts:", e); }
@@ -13068,8 +13068,8 @@ export default function App(){
         }}>
           <button
             onClick={async()=>{
-              try{ await supabase.auth.signOut({scope:"local"}); }catch{}
-              try{ await supabase.auth.signOut({scope:"global"}); }catch{}
+              try{ await supabase.auth.signOut({scope:"local"}); }catch(e){}
+              try{ await supabase.auth.signOut({scope:"global"}); }catch(e){}
               localStorage.clear();
               sessionStorage.clear();
               window.location.href="/";
