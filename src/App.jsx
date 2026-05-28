@@ -4878,11 +4878,13 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 // ── LEFT SIDEBAR — Perfil + Stats estilo Socimo ───────────────────────────────
-function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
+function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, onUserUpdate}){
   const t=LANGS[lang];
   const lvl = user ? getLevel(user.points) : null;
   const [activeNav, setActiveNav] = useState(0);
   const [showMore, setShowMore] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [editName, setEditName] = useState("");
 
   const isEN = lang==="en";
   const navItems = [
@@ -4912,37 +4914,97 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
       <div style={{borderRadius:18,overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.18)",border:"1px solid rgba(139,92,246,0.18)"}}>
 
         {/* ── COVER — dark premium ── */}
-        <div style={{height:88,background:"linear-gradient(135deg,#0f0c1d 0%,#1a1035 40%,#0d1528 100%)",position:"relative",overflow:"hidden"}}>
-          {/* Glow de fondo */}
-          <div style={{position:"absolute",top:-30,right:-20,width:120,height:120,borderRadius:"50%",background:"radial-gradient(circle,rgba(139,92,246,0.35),transparent 70%)",pointerEvents:"none"}}/>
-          <div style={{position:"absolute",bottom:-20,left:30,width:80,height:80,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,0.2),transparent 70%)",pointerEvents:"none"}}/>
-          {/* Línea de mercado SVG */}
-          <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.25,pointerEvents:"none"}} height="44" viewBox="0 0 220 44" preserveAspectRatio="none">
-            <polyline points="0,38 22,28 44,32 66,14 88,22 110,6 132,12 154,4 176,10 198,2 220,8" fill="none" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <polyline points="0,44 22,36 44,38 66,26 88,30 110,18 132,22 154,14 176,20 198,12 220,18" fill="none" stroke="#6366F1" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 3" opacity="0.5"/>
-          </svg>
-          {/* Avatar */}
-          <div style={{position:"absolute",bottom:-22,left:14}}>
-            {user
-              ? <div style={{width:50,height:50,borderRadius:14,background:`linear-gradient(135deg,${user.avatarColor||"#8B5CF6"},${user.avatarColor||"#6366F1"}88)`,border:"2.5px solid rgba(255,255,255,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,boxShadow:"0 4px 14px rgba(0,0,0,0.35)"}}>{user.emoji}</div>
-              : <div style={{width:50,height:50,borderRadius:14,background:"rgba(139,92,246,0.2)",border:"2px solid rgba(139,92,246,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>👤</div>
-            }
-          </div>
-          {/* Level badge top-right */}
-          {user && lvl && (
-            <div style={{position:"absolute",top:10,right:10,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(8px)",border:"1px solid rgba(139,92,246,0.4)",borderRadius:20,padding:"3px 8px",fontSize:10,fontWeight:700,color:"#A78BFA",display:"flex",alignItems:"center",gap:4}}>
-              {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
+        {(()=>{
+          const ac = user?.avatarColor || "#8B5CF6";
+          const ac2 = ac==="rgba(0,168,255,0.09)"?"#8B5CF6":ac;
+          return(
+          <div style={{height:96,background:`linear-gradient(135deg,#0a0818 0%,#100c2a 50%,#0d1528 100%)`,position:"relative",overflow:"hidden"}}>
+            {/* Animated glow orbs basados en el color del avatar */}
+            <div style={{position:"absolute",top:-28,right:-18,width:130,height:130,borderRadius:"50%",background:`radial-gradient(circle,${ac2}55,transparent 68%)`,pointerEvents:"none",animation:"nexo-pulse 3s ease-in-out infinite"}}/>
+            <div style={{position:"absolute",bottom:-24,left:20,width:90,height:90,borderRadius:"50%",background:`radial-gradient(circle,${ac2}33,transparent 68%)`,pointerEvents:"none"}}/>
+            {/* Grid de puntos decorativos */}
+            <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.12,pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
+              {[0,24,48,72,96,120,144,168,192,216,240].map(x=>
+                [0,16,32,48,64,80,96].map(y=>
+                  <circle key={`${x}-${y}`} cx={x} cy={y} r="1.2" fill={ac2}/>
+                )
+              )}
+            </svg>
+            {/* Chart SVG más pronunciado */}
+            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.35,pointerEvents:"none"}} height="48" viewBox="0 0 240 48" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="coverChartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={ac2} stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor={ac2} stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              <polygon points="0,48 0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10 240,48" fill="url(#coverChartGrad)"/>
+              <polyline points="0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10" fill="none" stroke={ac2} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {/* Avatar */}
+            <div style={{position:"absolute",bottom:-24,left:14}}>
+              {user
+                ? <div style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid rgba(255,255,255,0.18)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:`0 4px 18px ${ac2}55`}}>{user.emoji}</div>
+                : <div style={{width:52,height:52,borderRadius:15,background:"rgba(139,92,246,0.2)",border:"2px solid rgba(139,92,246,0.35)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:23}}>👤</div>
+              }
             </div>
-          )}
-        </div>
+            {/* Level badge top-right */}
+            {user && lvl && (
+              <div style={{position:"absolute",top:10,right:10,background:"rgba(0,0,0,0.55)",backdropFilter:"blur(10px)",border:`1px solid ${ac2}55`,borderRadius:20,padding:"3px 9px",fontSize:10,fontWeight:700,color:ac2,display:"flex",alignItems:"center",gap:4,boxShadow:`0 0 10px ${ac2}22`}}>
+                {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
+              </div>
+            )}
+          </div>
+          );
+        })()}
 
         {/* ── BODY ── */}
         <div style={{background:"#0f0c1d",padding:"28px 14px 14px"}}>
           {user ? <>
-            {/* Nombre + @handle */}
+            {/* Nombre + @handle — editable */}
             <div style={{marginBottom:12}}>
-              <div style={{fontWeight:800,color:"#F1F5F9",fontSize:15,letterSpacing:-0.3,lineHeight:1.2}}>{user.name}</div>
-              <div style={{fontSize:11,color:"rgba(139,92,246,0.7)",fontWeight:600,marginTop:2}}>@{(user.username||(user.name||"")).toLowerCase().replace(/[\s@]/g,"")}</div>
+              {editingName ? (
+                <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
+                  <input
+                    value={editName}
+                    onChange={e=>setEditName(e.target.value.replace(/[^a-zA-Z0-9_]/g,"").slice(0,20))}
+                    onKeyDown={async e=>{
+                      if(e.key==="Enter"){
+                        const newName = editName.trim();
+                        if(newName.length>=3){
+                          await supabase.from("profiles").update({username:newName}).eq("id",user.id);
+                          onUserUpdate&&onUserUpdate({...user,username:newName,name:newName});
+                        }
+                        setEditingName(false);
+                      }
+                      if(e.key==="Escape") setEditingName(false);
+                    }}
+                    autoFocus
+                    placeholder="nuevo_username"
+                    style={{flex:1,background:"rgba(139,92,246,0.12)",border:"1.5px solid rgba(139,92,246,0.5)",borderRadius:8,padding:"5px 9px",color:"#F1F5F9",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
+                  />
+                  <button onClick={async()=>{
+                    const newName = editName.trim();
+                    if(newName.length>=3){
+                      await supabase.from("profiles").update({username:newName}).eq("id",user.id);
+                      onUserUpdate&&onUserUpdate({...user,username:newName,name:newName});
+                    }
+                    setEditingName(false);
+                  }} style={{background:"#8B5CF6",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>✓</button>
+                </div>
+              ) : (
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <div style={{fontWeight:800,color:"#F1F5F9",fontSize:15,letterSpacing:-0.3,lineHeight:1.2,flex:1}}>
+                    {user.username || user.name || (user.email?.includes("@") ? user.email.split("@")[0] : "Trader")}
+                  </div>
+                  <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);}}
+                    title={lang==="en"?"Edit name":"Editar nombre"}
+                    style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:6,padding:"3px 6px",color:"rgba(139,92,246,0.7)",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>
+                </div>
+              )}
+              <div style={{fontSize:11,color:"rgba(139,92,246,0.7)",fontWeight:600,marginTop:2}}>
+                @{(user.username||user.name||"trader").toLowerCase().replace(/[\s@.]/g,"").slice(0,20)}
+              </div>
             </div>
 
             {/* Stats — 3 columnas dark */}
@@ -5063,9 +5125,11 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout}){
       <div style={{padding:"0 4px 4px",textAlign:"center"}}>
         <div style={{fontSize:10,color:"#CBD5E1",lineHeight:2}}>
           © 2026 NexoTrade &nbsp;·&nbsp;
-          <span style={{color:"#94A3B8",cursor:"pointer"}}>{isEN?"Terms":"Términos"}</span>
+          <span onClick={()=>onNavigate&&onNavigate(31)} style={{color:"#94A3B8",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"} onMouseLeave={e=>e.currentTarget.style.color="#94A3B8"}>{isEN?"Terms":"Términos"}</span>
           &nbsp;·&nbsp;
-          <span style={{color:"#94A3B8",cursor:"pointer"}}>{isEN?"Privacy":"Privacidad"}</span>
+          <span onClick={()=>onNavigate&&onNavigate(32)} style={{color:"#94A3B8",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"} onMouseLeave={e=>e.currentTarget.style.color="#94A3B8"}>{isEN?"Privacy":"Privacidad"}</span>
+          &nbsp;·&nbsp;
+          <span onClick={()=>onNavigate&&onNavigate(33)} style={{color:"#94A3B8",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"} onMouseLeave={e=>e.currentTarget.style.color="#94A3B8"}>{isEN?"Risk":"Riesgo"}</span>
         </div>
       </div>
 
@@ -5841,46 +5905,46 @@ function Footer({ setPage, onAuth, lang="es" }){
 
   const cols = [
     {
-      title:"Platform",
+      title: isEN?"Platform":"Plataforma",
       items:[
-        {label:"Feed",            page:0},
-        {label:"Market Tops",     page:1},
-        {label:"News",            page:5},
-        {label:"Earnings",        page:6},
-        {label:"AI Assistant",    page:9},
-        {label:"VIP Ideas ✦",     page:21},
+        {label: isEN?"Feed":"Feed",                     page:0},
+        {label: isEN?"Market Tops":"Tops de Mercado",   page:1},
+        {label: isEN?"News":"Noticias",                 page:5},
+        {label: isEN?"Earnings":"Earnings",             page:6},
+        {label: isEN?"AI Assistant":"Asistente IA",     page:9},
+        {label: isEN?"VIP Ideas ✦":"Ideas VIP ✦",      page:21},
       ]
     },
     {
-      title:"Tools",
+      title: isEN?"Tools":"Herramientas",
       items:[
-        {label:"Stock Screener ✦",      page:17},
-        {label:"Institutional Flow ✦",  page:20},
-        {label:"Top Investors ✦",       page:19},
-        {label:"Economic Calendar",     page:14},
-        {label:"IPOs 2026",             page:16},
-        {label:"Dividends",             page:15},
+        {label: isEN?"Stock Screener ✦":"Screener ✦",           page:17},
+        {label: isEN?"Institutional Flow ✦":"Flujo Inst. ✦",    page:20},
+        {label: isEN?"Top Investors ✦":"Gurús ✦",               page:19},
+        {label: isEN?"Economic Calendar":"Cal. Económico",       page:14},
+        {label: "IPOs 2026",                                     page:16},
+        {label: isEN?"Dividends":"Dividendos",                   page:15},
       ]
     },
     {
-      title:"Community",
+      title: isEN?"Community":"Comunidad",
       items:[
-        {label:"Trending",          page:7},
-        {label:"Live Webinars",     page:11},
-        {label:"Academy",           page:12},
-        {label:"Messages",          page:22},
-        {label:"VIP $9.99/mo ✦",   page:8},
-        {label:"Join free →",       action:"auth"},
+        {label: isEN?"Community Rules":"Normas",         page:34},
+        {label: isEN?"Live Webinars":"Webinars",         page:11},
+        {label: isEN?"Academy":"Academia",               page:12},
+        {label: isEN?"Messages":"Mensajes",              page:22},
+        {label: isEN?"VIP $9.99/mo ✦":"VIP $9.99/mes ✦",page:8},
+        {label: isEN?"Join free →":"Únete gratis →",     action:"auth"},
       ]
     },
     {
-      title:"Legal",
+      title: isEN?"Legal & Company":"Legal y Empresa",
       items:[
-        {label:"Terms of Use",         href:"#"},
-        {label:"Privacy Policy",       href:"#"},
-        {label:"Legal Notice",         href:"#"},
-        {label:"Not Financial Advice", href:"#"},
-        {label:"Contact",              href:"mailto:hola@nexotradeia.com"},
+        {label: isEN?"About Us":"Sobre Nosotros",        page:30},
+        {label: isEN?"Terms of Use":"Términos de Uso",   page:31},
+        {label: isEN?"Privacy Policy":"Privacidad",      page:32},
+        {label: isEN?"Risk Disclaimer":"Aviso de Riesgo",page:33},
+        {label: isEN?"Contact":"Contacto",               href:"mailto:hola@nexotradeia.com"},
       ]
     },
   ];
@@ -5962,8 +6026,11 @@ function Footer({ setPage, onAuth, lang="es" }){
           {/* Copyright */}
           <span style={{color:"#334155",fontSize:11}}>© 2026 NexoTrade · nexotradeia.com · {isEN?"All rights reserved":"Todos los derechos reservados"}</span>
 
-          {/* Disclaimer */}
-          <span style={{color:"#1e293b",fontSize:11}}>{isEN?"We are not financial advisors. Signals are educational.":"No somos asesores financieros. Las señales son educativas."}</span>
+          {/* Disclaimer — clickable */}
+          <span style={{color:"#334155",fontSize:11,cursor:"pointer",textDecoration:"underline",textDecorationColor:"rgba(255,255,255,0.1)"}}
+            onClick={()=>nav(33)}>
+            {isEN?"⚠️ Not financial advice — Educational only":"⚠️ No es consejo financiero — Solo educativo"}
+          </span>
 
           {/* Social icons */}
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -10662,6 +10729,267 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:"✦ Premium",idx:8,premium:true},
 ];
 
+// ── LEGAL PAGE WRAPPER ────────────────────────────────────────────────────────
+function LegalPage({title, children, onBack, lang}){
+  return(
+    <div style={{maxWidth:760,margin:"0 auto",padding:"0 4px 40px"}}>
+      <button onClick={onBack} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",color:C.muted,fontSize:13,cursor:"pointer",marginBottom:20,padding:"4px 0",fontFamily:"inherit"}}
+        onMouseEnter={e=>e.currentTarget.style.color=C.accent}
+        onMouseLeave={e=>e.currentTarget.style.color=C.muted}>
+        ← {lang==="en"?"Back":"Volver"}
+      </button>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:"32px 36px",boxShadow:C.shadow}}>
+        <h1 style={{fontSize:24,fontWeight:900,color:C.text,marginBottom:6,letterSpacing:"-0.5px"}}>{title}</h1>
+        <div style={{fontSize:11,color:C.muted2,marginBottom:28}}>{lang==="en"?"Last updated: May 2026":"Última actualización: Mayo 2026"} · nexotradeia.com</div>
+        <div style={{color:C.muted,fontSize:14,lineHeight:1.8}}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function LegalSection({title,children}){
+  return(
+    <div style={{marginBottom:24}}>
+      <h2 style={{fontSize:16,fontWeight:800,color:"var(--c-text)",marginBottom:10,paddingBottom:6,borderBottom:"1px solid var(--c-border)"}}>{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+// ── ABOUT US PAGE (page 30) ───────────────────────────────────────────────────
+function AboutPage({onBack, lang}){
+  const isEN = lang==="en";
+  return(
+    <LegalPage title={isEN?"About NexoTrade":"Sobre NexoTrade"} onBack={onBack} lang={lang}>
+      <LegalSection title={isEN?"Who We Are":"Quiénes Somos"}>
+        <p>{isEN
+          ?"NexoTrade is the leading investment community for Spanish-speaking traders worldwide. Our mission is to democratize access to financial markets through education, AI tools, and collaborative analysis."
+          :"NexoTrade es la comunidad de inversión líder para traders hispanohablantes en todo el mundo. Nuestra misión es democratizar el acceso a los mercados financieros a través de educación, herramientas de IA y análisis colaborativo."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Our Platform":"Nuestra Plataforma"}>
+        <p>{isEN
+          ?"We offer a social platform where investors can share analysis, discuss market movements, and access real-time data. Our AI assistant provides educational insights to help users make more informed decisions."
+          :"Ofrecemos una plataforma social donde los inversores pueden compartir análisis, discutir movimientos de mercado y acceder a datos en tiempo real. Nuestro asistente de IA proporciona información educativa para ayudar a los usuarios a tomar decisiones más informadas."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Important Disclosure":"Aviso Importante"}>
+        <p style={{background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.25)",borderRadius:10,padding:"12px 16px",color:"var(--c-text)"}}>{isEN
+          ?"⚠️ NexoTrade is an educational and social platform. We are NOT a registered investment advisor, broker-dealer, or financial institution. Nothing on this platform constitutes financial advice. Always consult a licensed financial professional before making investment decisions."
+          :"⚠️ NexoTrade es una plataforma educativa y social. NO somos un asesor de inversiones registrado, corredor-agente, ni institución financiera. Nada en esta plataforma constituye asesoramiento financiero. Siempre consulte a un profesional financiero autorizado antes de tomar decisiones de inversión."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Content Moderation":"Moderación de Contenido"}>
+        <p>{isEN
+          ?"All user-generated content is subject to our Community Guidelines. Our moderation team reviews posts to ensure compliance with our rules. Content that promotes pump-and-dump schemes, unlicensed financial advice, or illegal activities is strictly prohibited."
+          :"Todo el contenido generado por usuarios está sujeto a nuestras Normas de la Comunidad. Nuestro equipo de moderación revisa las publicaciones para garantizar el cumplimiento de nuestras reglas. Está estrictamente prohibido el contenido que promueva esquemas de manipulación de precios, asesoramiento financiero sin licencia o actividades ilegales."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Contact":"Contacto"}>
+        <p>{isEN?"For inquiries, partnerships, or support:":"Para consultas, colaboraciones o soporte:"}</p>
+        <p>📧 <a href="mailto:hola@nexotradeia.com" style={{color:C.accent}}>hola@nexotradeia.com</a></p>
+        <p>🌐 <a href="https://nexotradeia.com" style={{color:C.accent}}>nexotradeia.com</a></p>
+      </LegalSection>
+    </LegalPage>
+  );
+}
+
+// ── TERMS OF USE PAGE (page 31) ───────────────────────────────────────────────
+function TermsPage({onBack, lang}){
+  const isEN = lang==="en";
+  return(
+    <LegalPage title={isEN?"Terms of Use":"Términos de Uso"} onBack={onBack} lang={lang}>
+      <LegalSection title={isEN?"1. Acceptance":"1. Aceptación"}>
+        <p>{isEN
+          ?"By accessing or using NexoTrade, you agree to be bound by these Terms of Use. If you do not agree, please do not use our platform."
+          :"Al acceder o usar NexoTrade, aceptas quedar vinculado por estos Términos de Uso. Si no estás de acuerdo, por favor no utilices nuestra plataforma."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"2. User-Generated Content (UGC)":"2. Contenido Generado por Usuarios (UGC)"}>
+        <p>{isEN
+          ?"Users may post analysis, opinions, and market commentary. By posting, you grant NexoTrade a non-exclusive license to display your content on the platform. You retain ownership of your content."
+          :"Los usuarios pueden publicar análisis, opiniones y comentarios de mercado. Al publicar, otorgas a NexoTrade una licencia no exclusiva para mostrar tu contenido en la plataforma. Conservas la propiedad de tu contenido."
+        }</p>
+        <p>{isEN
+          ?"You are solely responsible for the content you post. Prohibited content includes: (a) financial advice presented as fact, (b) pump-and-dump schemes, (c) spam or repetitive posts, (d) harassment or hate speech, (e) illegal content."
+          :"Eres el único responsable del contenido que publicas. El contenido prohibido incluye: (a) asesoramiento financiero presentado como hecho, (b) esquemas de manipulación de precios, (c) spam o publicaciones repetitivas, (d) acoso o discurso de odio, (e) contenido ilegal."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"3. Not Financial Advice":"3. No Constituye Asesoramiento Financiero"}>
+        <p style={{background:"rgba(239,68,68,0.06)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:10,padding:"12px 16px"}}>{isEN
+          ?"⚠️ ALL content on NexoTrade is for EDUCATIONAL and INFORMATIONAL purposes ONLY. Nothing constitutes investment advice, a recommendation to buy or sell any security, or an offer to provide financial services. Past performance does not guarantee future results. Investing involves risk, including the possible loss of principal."
+          :"⚠️ TODO el contenido en NexoTrade es SOLO para fines EDUCATIVOS e INFORMATIVOS. Nada constituye asesoramiento de inversión, una recomendación de comprar o vender ningún valor, ni una oferta de servicios financieros. El rendimiento pasado no garantiza resultados futuros. Invertir implica riesgo, incluida la posible pérdida del capital."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"4. Account Responsibilities":"4. Responsabilidades de la Cuenta"}>
+        <p>{isEN
+          ?"You are responsible for maintaining the confidentiality of your account credentials. You must be at least 18 years old to use NexoTrade. One account per person is allowed."
+          :"Eres responsable de mantener la confidencialidad de las credenciales de tu cuenta. Debes tener al menos 18 años para usar NexoTrade. Se permite una cuenta por persona."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"5. VIP Membership":"5. Membresía VIP"}>
+        <p>{isEN
+          ?"VIP memberships are billed monthly at $9.99/month. You may cancel at any time. Refunds are not provided for partial billing periods. Features included in VIP may change with notice."
+          :"Las membresías VIP se facturan mensualmente a $9.99/mes. Puedes cancelar en cualquier momento. No se proporcionan reembolsos por períodos de facturación parciales. Las características incluidas en VIP pueden cambiar con aviso previo."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"6. Modifications":"6. Modificaciones"}>
+        <p>{isEN
+          ?"NexoTrade reserves the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms."
+          :"NexoTrade se reserva el derecho de modificar estos términos en cualquier momento. El uso continuado de la plataforma después de los cambios constituye la aceptación de los nuevos términos."
+        }</p>
+      </LegalSection>
+    </LegalPage>
+  );
+}
+
+// ── PRIVACY POLICY PAGE (page 32) ────────────────────────────────────────────
+function PrivacyPage({onBack, lang}){
+  const isEN = lang==="en";
+  return(
+    <LegalPage title={isEN?"Privacy Policy":"Política de Privacidad"} onBack={onBack} lang={lang}>
+      <div style={{marginBottom:16}}>
+        <a href="https://dependable-fish-gpdm3f.mystrikingly.com" target="_blank" rel="noopener noreferrer"
+          style={{display:"inline-flex",alignItems:"center",gap:6,background:C.accentDim,border:`1px solid ${C.accent}44`,borderRadius:10,padding:"8px 14px",color:C.accent,fontSize:13,fontWeight:700,textDecoration:"none"}}>
+          🔗 {isEN?"View full Privacy Policy (external)":"Ver Política de Privacidad completa (externo)"} →
+        </a>
+      </div>
+      <LegalSection title={isEN?"Data We Collect":"Datos que Recopilamos"}>
+        <p>{isEN
+          ?"We collect: (1) Account information (email, username, avatar), (2) Content you post, (3) Usage data (pages visited, features used), (4) Payment information (processed securely via Stripe — we never store card numbers)."
+          :"Recopilamos: (1) Información de cuenta (email, nombre de usuario, avatar), (2) Contenido que publicas, (3) Datos de uso (páginas visitadas, funciones usadas), (4) Información de pago (procesada de forma segura a través de Stripe — nunca almacenamos números de tarjeta)."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"How We Use Your Data":"Cómo Usamos Tus Datos"}>
+        <p>{isEN
+          ?"Your data is used to: provide and improve the platform, personalize your experience, process payments, send transactional emails (welcome, subscription confirmations), and comply with legal obligations. We do NOT sell your personal data to third parties."
+          :"Tus datos se utilizan para: proporcionar y mejorar la plataforma, personalizar tu experiencia, procesar pagos, enviar correos transaccionales (bienvenida, confirmaciones de suscripción) y cumplir con obligaciones legales. NO vendemos tus datos personales a terceros."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Third-Party Services":"Servicios de Terceros"}>
+        <p>{isEN
+          ?"We use: Supabase (database/auth), Stripe (payments), Google AdSense (advertising), Finnhub/CoinGecko (market data). Each has their own privacy policy."
+          :"Utilizamos: Supabase (base de datos/autenticación), Stripe (pagos), Google AdSense (publicidad), Finnhub/CoinGecko (datos de mercado). Cada uno tiene su propia política de privacidad."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Your Rights":"Tus Derechos"}>
+        <p>{isEN
+          ?"You have the right to: access your data, correct inaccuracies, request deletion, and export your content. Contact us at hola@nexotradeia.com to exercise these rights."
+          :"Tienes derecho a: acceder a tus datos, corregir inexactitudes, solicitar eliminación y exportar tu contenido. Contáctanos en hola@nexotradeia.com para ejercer estos derechos."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Cookies":"Cookies"}>
+        <p>{isEN
+          ?"We use essential cookies for authentication and preferences. Advertising cookies are used by Google AdSense. You can manage cookie preferences in your browser settings."
+          :"Usamos cookies esenciales para autenticación y preferencias. Las cookies publicitarias son utilizadas por Google AdSense. Puedes administrar las preferencias de cookies en la configuración de tu navegador."
+        }</p>
+      </LegalSection>
+    </LegalPage>
+  );
+}
+
+// ── RISK DISCLAIMER PAGE (page 33) ───────────────────────────────────────────
+function RiskPage({onBack, lang}){
+  const isEN = lang==="en";
+  return(
+    <LegalPage title={isEN?"Financial Risk Disclaimer":"Aviso de Riesgo Financiero"} onBack={onBack} lang={lang}>
+      <div style={{background:"rgba(239,68,68,0.08)",border:"2px solid rgba(239,68,68,0.3)",borderRadius:14,padding:"18px 22px",marginBottom:24}}>
+        <div style={{fontSize:22,marginBottom:8}}>⚠️</div>
+        <p style={{fontWeight:800,fontSize:15,color:"var(--c-text)",margin:0}}>{isEN
+          ?"IMPORTANT: Trading and investing involve substantial risk of loss."
+          :"IMPORTANTE: El trading y la inversión implican un riesgo sustancial de pérdida."
+        }</p>
+      </div>
+      <LegalSection title={isEN?"General Risk Warning":"Advertencia de Riesgo General"}>
+        <p>{isEN
+          ?"Trading stocks, cryptocurrencies, options, futures, and other financial instruments involves significant risk and is not suitable for all investors. You may lose some or all of your invested capital. Never invest money you cannot afford to lose."
+          :"El trading de acciones, criptomonedas, opciones, futuros y otros instrumentos financieros implica un riesgo significativo y no es adecuado para todos los inversores. Puedes perder parte o la totalidad de tu capital invertido. Nunca inviertas dinero que no puedes permitirte perder."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Not Financial Advice":"No Constituye Asesoramiento Financiero"}>
+        <p>{isEN
+          ?"Nothing on NexoTrade — including posts, analysis, AI responses, market data, or any other content — constitutes investment advice, a recommendation to buy or sell any security, or a solicitation of any kind. All content is strictly educational and informational."
+          :"Nada en NexoTrade — incluidas publicaciones, análisis, respuestas de IA, datos de mercado o cualquier otro contenido — constituye asesoramiento de inversión, una recomendación de comprar o vender ningún valor, ni una solicitud de ningún tipo. Todo el contenido es estrictamente educativo e informativo."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Past Performance":"Rendimiento Pasado"}>
+        <p>{isEN
+          ?"Past performance of any investment, strategy, or analysis discussed on NexoTrade is not indicative of future results. Markets can and do move in unexpected ways."
+          :"El rendimiento pasado de cualquier inversión, estrategia o análisis discutido en NexoTrade no es indicativo de resultados futuros. Los mercados pueden y de hecho se mueven de maneras inesperadas."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Crypto & High-Risk Assets":"Cripto y Activos de Alto Riesgo"}>
+        <p>{isEN
+          ?"Cryptocurrencies are particularly volatile and unregulated in many jurisdictions. Prices can change dramatically in short periods. Regulatory changes can significantly impact the value of crypto assets."
+          :"Las criptomonedas son particularmente volátiles y no están reguladas en muchas jurisdicciones. Los precios pueden cambiar drásticamente en períodos cortos. Los cambios regulatorios pueden impactar significativamente el valor de los activos cripto."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Affiliate Links":"Links de Afiliados"}>
+        <p>{isEN
+          ?"NexoTrade may earn commissions from affiliate partnerships (brokers, trading platforms). These partnerships do not influence our editorial content. We recommend you research any platform independently before opening an account."
+          :"NexoTrade puede ganar comisiones de asociaciones de afiliados (corredores, plataformas de trading). Estas asociaciones no influyen en nuestro contenido editorial. Te recomendamos que investigues cualquier plataforma de forma independiente antes de abrir una cuenta."
+        }</p>
+      </LegalSection>
+      <LegalSection title={isEN?"Seek Professional Advice":"Busca Asesoramiento Profesional"}>
+        <p>{isEN
+          ?"Before making any financial decisions, consult with a licensed financial advisor, tax professional, or legal counsel. NexoTrade is not a substitute for professional financial guidance."
+          :"Antes de tomar cualquier decisión financiera, consulta con un asesor financiero autorizado, un profesional fiscal o asesor legal. NexoTrade no es un sustituto del asesoramiento financiero profesional."
+        }</p>
+      </LegalSection>
+    </LegalPage>
+  );
+}
+
+// ── COMMUNITY GUIDELINES PAGE (page 34) ──────────────────────────────────────
+function GuidelinesPage({onBack, lang}){
+  const isEN = lang==="en";
+  const rules = isEN ? [
+    {emoji:"📊", title:"Educational Content Only", desc:"Share analysis, data, and market observations. Frame your posts as opinions, not facts. Use phrases like 'I think', 'in my analysis', or 'this is not financial advice'."},
+    {emoji:"🚫", title:"No Pump & Dump", desc:"Promoting securities to artificially inflate their price is illegal and will result in immediate account termination and reporting to authorities."},
+    {emoji:"🤝", title:"Respectful Debate", desc:"Disagree with ideas, not people. Harassment, personal attacks, and hate speech are not tolerated."},
+    {emoji:"🔍", title:"Cite Your Sources", desc:"Back up claims with data. Unverified claims or misleading information may be removed."},
+    {emoji:"🚨", title:"No Spam", desc:"No repetitive posts, unsolicited promotions, or copy-paste content. One thoughtful post beats ten low-quality ones."},
+    {emoji:"✅", title:"Verified Information", desc:"Market data, earnings figures, and company news should come from reliable sources (SEC filings, official press releases, reputable financial media)."},
+    {emoji:"🔒", title:"Privacy", desc:"Do not share personal financial information, account numbers, or private data — yours or others'."},
+    {emoji:"⚖️", title:"Legal Compliance", desc:"All content must comply with applicable securities laws. Insider trading tips, front-running, or other illegal market practices are prohibited."},
+  ] : [
+    {emoji:"📊", title:"Solo Contenido Educativo", desc:"Comparte análisis, datos y observaciones del mercado. Presenta tus publicaciones como opiniones, no como hechos. Usa frases como 'creo que', 'en mi análisis', o 'esto no es consejo financiero'."},
+    {emoji:"🚫", title:"Prohibido el Pump & Dump", desc:"Promover valores para inflar artificialmente su precio es ilegal y resultará en la terminación inmediata de la cuenta y denuncia ante las autoridades."},
+    {emoji:"🤝", title:"Debate Respetuoso", desc:"Discrepa con las ideas, no con las personas. El acoso, los ataques personales y el discurso de odio no están tolerados."},
+    {emoji:"🔍", title:"Cita Tus Fuentes", desc:"Respalda las afirmaciones con datos. Las afirmaciones no verificadas o la información engañosa pueden ser eliminadas."},
+    {emoji:"🚨", title:"Sin Spam", desc:"No hay publicaciones repetitivas, promociones no solicitadas ni contenido copy-paste. Una publicación reflexiva vale más que diez de baja calidad."},
+    {emoji:"✅", title:"Información Verificada", desc:"Los datos de mercado, cifras de ganancias y noticias de empresas deben provenir de fuentes confiables (documentos SEC, comunicados de prensa oficiales, medios financieros reputados)."},
+    {emoji:"🔒", title:"Privacidad", desc:"No compartas información financiera personal, números de cuenta ni datos privados — tuyos ni de otros."},
+    {emoji:"⚖️", title:"Cumplimiento Legal", desc:"Todo el contenido debe cumplir con las leyes de valores aplicables. Los consejos de información privilegiada, front-running u otras prácticas ilegales de mercado están prohibidas."},
+  ];
+
+  return(
+    <LegalPage title={isEN?"Community Guidelines":"Normas de la Comunidad"} onBack={onBack} lang={lang}>
+      <p style={{marginBottom:24,fontSize:15}}>{isEN
+        ?"NexoTrade is a community for serious traders and investors. These guidelines exist to maintain a high-quality, legal, and respectful environment."
+        :"NexoTrade es una comunidad para traders e inversores serios. Estas normas existen para mantener un entorno de alta calidad, legal y respetuoso."
+      }</p>
+      <div style={{display:"grid",gap:12}}>
+        {rules.map((rule,i)=>(
+          <div key={i} style={{display:"flex",gap:14,padding:"14px 16px",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:12}}>
+            <span style={{fontSize:22,flexShrink:0,marginTop:2}}>{rule.emoji}</span>
+            <div>
+              <div style={{fontWeight:800,fontSize:14,color:"var(--c-text)",marginBottom:4}}>{rule.title}</div>
+              <div style={{fontSize:13,color:"var(--c-muted)",lineHeight:1.6}}>{rule.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:24,padding:"14px 18px",background:"rgba(0,168,255,0.06)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:12}}>
+        <p style={{margin:0,fontSize:13,color:"var(--c-muted)"}}>{isEN
+          ?"Violations may result in content removal, temporary suspension, or permanent ban. For questions or to report violations: "
+          :"Las infracciones pueden resultar en eliminación de contenido, suspensión temporal o ban permanente. Para preguntas o para reportar infracciones: "
+        }<a href="mailto:hola@nexotradeia.com" style={{color:C.accent}}>hola@nexotradeia.com</a></p>
+      </div>
+    </LegalPage>
+  );
+}
+
 // ── APP ROOT ──────────────────────────────────────────────────────────────────
 // Leer sesión guardada de localStorage ANTES de renderizar (síncrono, sin flash)
 const ADMIN_EMAILS_CONST = ['mariangat26@gmail.com','mariagalarraga2013@gmail.com'];
@@ -11414,6 +11742,11 @@ export default function App(){
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
+    if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
+    if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
+    if(page===33) return <RiskPage onBack={()=>setPage(0)} lang={lang}/>;
+    if(page===34) return <GuidelinesPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
     return(
       <>
@@ -12283,6 +12616,7 @@ export default function App(){
           // 4. Forzar recarga limpia
           window.location.replace("/");
         }}
+        onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
         <div>{renderPage()}</div>
         <div className="nexo-sidebar">
