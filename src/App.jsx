@@ -10724,10 +10724,434 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
   {label:isEN?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,vip:true},
   {label:isEN?"🏛️ Top Investors":"🏛️ Super Inversores",idx:19,vip:true},
+  {label:isEN?"🏛 Congress Trades":"🏛 Trades Congreso",idx:35,vip:true},
+  {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
   {label:isEN?"🛠️ Tools":"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
+
+// ── CONGRESS TRADES PAGE ─────────────────────────────────────────────────────
+function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
+  const isEN = lang === "en";
+  const [trades, setTrades]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter]   = useState("all"); // all | buy | sell
+  const [party, setParty]     = useState("all"); // all | D | R
+  const [search, setSearch]   = useState("");
+  const [source, setSource]   = useState("");
+
+  useEffect(() => {
+    fetch("/api/congress")
+      .then(r => r.json())
+      .then(d => { setTrades(d.trades || []); setSource(d.source || ""); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (!isPremium) return (
+    <div style={{maxWidth:700,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:56,marginBottom:12}}>🏛️</div>
+      <h2 style={{color:C.text,fontWeight:800,fontSize:22,marginBottom:8}}>{isEN?"Congress Trades":"Trades del Congreso"}</h2>
+      <p style={{color:C.muted,fontSize:15,marginBottom:24,lineHeight:1.6}}>
+        {isEN
+          ? "See what US Congress members are buying and selling in real time. VIP exclusive."
+          : "Mira qué están comprando y vendiendo los congresistas de EE.UU. en tiempo real. Exclusivo VIP."}
+      </p>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#f59e0b,#ef4444)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontWeight:800,fontSize:16,cursor:"pointer",boxShadow:"0 4px 20px rgba(245,158,11,0.4)"}}>
+        ✦ {isEN?"Unlock VIP":"Desbloquear VIP"}
+      </button>
+    </div>
+  );
+
+  const partyColor = p => p === "D" ? "#3B82F6" : p === "R" ? "#EF4444" : "#94A3B8";
+  const typeColor  = t => t === "buy" ? "#10B981" : "#EF4444";
+  const typeIcon   = t => t === "buy" ? "↑" : "↓";
+
+  const filtered = trades.filter(t => {
+    if (filter !== "all" && t.type !== filter) return false;
+    if (party !== "all" && t.party !== party) return false;
+    if (search && !t.name.toLowerCase().includes(search.toLowerCase()) &&
+        !t.ticker.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  const stats = {
+    buys:  trades.filter(t=>t.type==="buy").length,
+    sells: trades.filter(t=>t.type==="sell").length,
+    dems:  [...new Set(trades.filter(t=>t.party==="D").map(t=>t.name))].length,
+    reps:  [...new Set(trades.filter(t=>t.party==="R").map(t=>t.name))].length,
+  };
+
+  return (
+    <div style={{maxWidth:900,margin:"0 auto",padding:"0 4px 60px"}}>
+      {/* Header */}
+      <div style={{marginBottom:24}}>
+        <h1 style={{color:C.text,fontWeight:900,fontSize:22,margin:"0 0 4px",display:"flex",alignItems:"center",gap:8}}>
+          🏛️ {isEN?"Congress Trades":"Trades del Congreso"}
+          <span style={{background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:12,fontWeight:800}}>VIP</span>
+        </h1>
+        <p style={{color:C.muted,fontSize:13,margin:0}}>
+          {isEN
+            ? "Real-time stock trades disclosed by U.S. Congress members under the STOCK Act."
+            : "Operaciones bursátiles divulgadas por congresistas de EE.UU. bajo el STOCK Act."}
+          {source==="curated"&&<span style={{color:"#f59e0b",marginLeft:6,fontSize:11}}>● {isEN?"Curated data":"Datos curados"}</span>}
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
+        {[
+          {l:isEN?"Total Trades":"Total Ops",v:trades.length,c:C.accent},
+          {l:isEN?"Purchases":"Compras",v:stats.buys,c:"#10B981"},
+          {l:isEN?"Sales":"Ventas",v:stats.sells,c:"#EF4444"},
+          {l:isEN?"Members":"Miembros",v:stats.dems+stats.reps,c:"#A78BFA"},
+        ].map(s=>(
+          <div key={s.l} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"14px 16px",textAlign:"center"}}>
+            <div style={{fontSize:22,fontWeight:900,color:s.c}}>{s.v}</div>
+            <div style={{fontSize:11,color:C.muted,marginTop:3}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16,alignItems:"center"}}>
+        <input
+          value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder={isEN?"Search name or ticker…":"Buscar nombre o ticker…"}
+          style={{flex:"1 1 160px",background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}
+        />
+        {/* Type filter */}
+        {["all","buy","sell"].map(v=>(
+          <button key={v} onClick={()=>setFilter(v)}
+            style={{padding:"7px 14px",borderRadius:8,border:`1px solid ${filter===v?typeColor(v===v?v:"all"):C.border}`,background:filter===v?"rgba(0,168,255,0.08)":C.card,color:filter===v?C.accent:C.muted,fontSize:12,fontWeight:filter===v?700:500,cursor:"pointer",transition:"all 0.15s"}}>
+            {v==="all"?(isEN?"All":"Todo"):v==="buy"?(isEN?"Buys ↑":"Compras ↑"):(isEN?"Sales ↓":"Ventas ↓")}
+          </button>
+        ))}
+        {/* Party filter */}
+        {["all","D","R"].map(v=>(
+          <button key={v} onClick={()=>setParty(v)}
+            style={{padding:"7px 14px",borderRadius:8,border:`1px solid ${party===v?partyColor(v):C.border}`,background:party===v?"rgba(0,168,255,0.05)":C.card,color:party===v?partyColor(v):C.muted,fontSize:12,fontWeight:party===v?700:500,cursor:"pointer",transition:"all 0.15s"}}>
+            {v==="all"?(isEN?"Both parties":"Ambos"):v==="D"?"🔵 Dem":"🔴 Rep"}
+          </button>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+        {/* Header row */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 1fr 90px 70px",gap:0,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
+          {[isEN?"Member":"Miembro","Party","Ticker",isEN?"Asset":"Activo",isEN?"Amount":"Monto",isEN?"Date":"Fecha"].map(h=>(
+            <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.5}}>{h}</div>
+          ))}
+        </div>
+
+        {loading ? (
+          <div style={{padding:"40px",textAlign:"center",color:C.muted}}>{isEN?"Loading…":"Cargando…"}</div>
+        ) : filtered.length === 0 ? (
+          <div style={{padding:"40px",textAlign:"center",color:C.muted}}>{isEN?"No results":"Sin resultados"}</div>
+        ) : filtered.map((t,i)=>(
+          <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 1fr 90px 70px",gap:0,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.1s"}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.03)"}
+            onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+            {/* Member */}
+            <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0}}>
+              <span style={{fontSize:13,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.name}</span>
+              <span style={{fontSize:11,color:C.muted}}>{t.house} · {t.state}</span>
+            </div>
+            {/* Party */}
+            <div style={{display:"flex",alignItems:"center"}}>
+              <span style={{fontSize:11,fontWeight:800,color:partyColor(t.party),background:`${partyColor(t.party)}18`,borderRadius:6,padding:"2px 7px"}}>{t.party}</span>
+            </div>
+            {/* Ticker */}
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontSize:11,fontWeight:800,background:"rgba(0,229,143,0.1)",color:"#00e58f",borderRadius:6,padding:"2px 7px",fontFamily:"monospace"}}>{t.ticker}</span>
+              <span style={{fontSize:14,fontWeight:900,color:typeColor(t.type)}}>{typeIcon(t.type)}</span>
+            </div>
+            {/* Asset name */}
+            <div style={{display:"flex",alignItems:"center"}}>
+              <span style={{fontSize:12,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.asset}</span>
+            </div>
+            {/* Amount */}
+            <div style={{display:"flex",alignItems:"center"}}>
+              <span style={{fontSize:12,color:C.text,fontWeight:600}}>{t.amount}</span>
+            </div>
+            {/* Date */}
+            <div style={{display:"flex",alignItems:"center"}}>
+              <span style={{fontSize:11,color:C.muted}}>{t.date?.slice(0,10)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p style={{color:C.muted,fontSize:11,marginTop:14,textAlign:"center"}}>
+        {isEN
+          ? "Data sourced from STOCK Act public disclosures. NexoTrade is not responsible for trade accuracy."
+          : "Datos del STOCK Act (divulgaciones públicas). NexoTrade no se responsabiliza por la exactitud de las operaciones."}
+      </p>
+    </div>
+  );
+}
+
+// ── ADVANCED VIP SCREENER ────────────────────────────────────────────────────
+const SCREENER_PRESETS = {
+  stocks: [
+    {s:"NVDA",n:"NVIDIA",p:135.4,chg:+2.1,vol:"58M",mkt:"$3.3T",sector:"Tech",pattern:"Breakout",score:94},
+    {s:"MSFT",n:"Microsoft",p:452.7,chg:+0.8,vol:"22M",mkt:"$3.4T",sector:"Tech",pattern:"Trend Up",score:88},
+    {s:"META",n:"Meta",p:618.3,chg:+1.5,vol:"18M",mkt:"$1.6T",sector:"Tech",pattern:"Momentum",score:91},
+    {s:"AAPL",n:"Apple",p:213.4,chg:-0.4,vol:"55M",mkt:"$3.2T",sector:"Tech",pattern:"Consolidation",score:72},
+    {s:"TSLA",n:"Tesla",p:352.8,chg:-1.2,vol:"92M",mkt:"$1.1T",sector:"Auto",pattern:"Volatility",score:65},
+    {s:"AMZN",n:"Amazon",p:228.5,chg:+1.1,vol:"31M",mkt:"$2.4T",sector:"Retail",pattern:"Trend Up",score:87},
+    {s:"GOOGL",n:"Alphabet",p:196.3,chg:+0.6,vol:"25M",mkt:"$2.4T",sector:"Tech",pattern:"Momentum",score:82},
+    {s:"JPM",n:"JPMorgan",p:262.1,chg:+0.3,vol:"8M",mkt:"$752B",sector:"Finance",pattern:"Base",score:75},
+    {s:"CRWD",n:"CrowdStrike",p:398.7,chg:+3.2,vol:"4.5M",mkt:"$97B",sector:"Cyber",pattern:"Breakout",score:96},
+    {s:"PLTR",n:"Palantir",p:128.3,chg:+4.1,vol:"78M",mkt:"$280B",sector:"AI",pattern:"Momentum",score:93},
+    {s:"COIN",n:"Coinbase",p:264.5,chg:+2.8,vol:"12M",mkt:"$66B",sector:"Crypto",pattern:"Breakout",score:89},
+    {s:"ARM",n:"ARM Holdings",p:163.8,chg:+1.9,vol:"6.2M",mkt:"$175B",sector:"Chips",pattern:"Trend Up",score:85},
+  ],
+  options: [
+    {s:"NVDA",n:"NVDA Calls",strike:"$140C",exp:"Jun 20",iv:"62%",vol:"28K",oi:"145K",type:"call",chg:+18.4,score:95},
+    {s:"TSLA",n:"TSLA Puts",strike:"$320P",exp:"Jun 20",iv:"78%",vol:"22K",oi:"98K",type:"put",chg:+24.1,score:88},
+    {s:"SPY",n:"SPY Calls",strike:"$570C",exp:"Jun 20",iv:"14%",vol:"185K",oi:"820K",type:"call",chg:+5.2,score:82},
+    {s:"META",n:"META Calls",strike:"$640C",exp:"Jul 18",iv:"44%",vol:"8.4K",oi:"42K",type:"call",chg:+12.8,score:91},
+    {s:"AAPL",n:"AAPL Calls",strike:"$220C",exp:"Jun 20",iv:"28%",vol:"32K",oi:"210K",type:"call",chg:+8.3,score:79},
+    {s:"QQQ",n:"QQQ Puts",strike:"$470P",exp:"Jun 20",iv:"18%",vol:"62K",oi:"340K",type:"put",chg:+6.1,score:76},
+    {s:"AMZN",n:"AMZN Calls",strike:"$235C",exp:"Jul 18",iv:"32%",vol:"11K",oi:"68K",type:"call",chg:+9.7,score:84},
+    {s:"PLTR",n:"PLTR Calls",strike:"$135C",exp:"Jun 20",iv:"88%",vol:"44K",oi:"188K",type:"call",chg:+31.2,score:97},
+  ],
+  intraday: [
+    {s:"NVDA",n:"NVIDIA",p:135.4,chg:+2.1,vol:"12.4M",atr:"4.2",rvol:"2.8x",pattern:"Gap Up + Hold",signal:"🟢 Long",score:95},
+    {s:"PLTR",n:"Palantir",p:128.3,chg:+4.1,vol:"18.2M",atr:"5.8",rvol:"3.2x",pattern:"Bull Flag",signal:"🟢 Long",score:93},
+    {s:"COIN",n:"Coinbase",p:264.5,chg:+2.8,vol:"3.4M",atr:"11.2",rvol:"2.1x",pattern:"ORB Breakout",signal:"🟢 Long",score:89},
+    {s:"TSLA",n:"Tesla",p:352.8,chg:-1.2,vol:"24.1M",atr:"14.6",rvol:"1.9x",pattern:"Rejection High",signal:"🔴 Short",score:85},
+    {s:"GME",n:"GameStop",p:28.4,chg:+8.7,vol:"42M",atr:"3.1",rvol:"8.4x",pattern:"Gamma Squeeze",signal:"⚡ Momentum",score:91},
+    {s:"MSTR",n:"MicroStrategy",p:412.6,chg:+3.9,vol:"5.8M",atr:"28.4",rvol:"2.3x",pattern:"BTC Proxy Pump",signal:"🟢 Long",score:87},
+    {s:"SOFI",n:"SoFi",p:14.8,chg:+5.2,vol:"22M",atr:"0.9",rvol:"4.1x",pattern:"News Catalyst",signal:"⚡ Momentum",score:82},
+    {s:"META",n:"Meta",p:618.3,chg:+1.5,vol:"4.2M",atr:"18.2",rvol:"1.4x",pattern:"Trend Continuation",signal:"🟢 Long",score:79},
+  ],
+  scalping: [
+    {s:"QQQ",n:"Nasdaq ETF",p:487.2,spread:"$0.01",trades:"380K",liq:"★★★★★",tf:"1min",pattern:"VWAP Touch",score:96},
+    {s:"SPY",n:"S&P 500 ETF",p:545.8,spread:"$0.01",trades:"620K",liq:"★★★★★",tf:"1min",pattern:"Level 2 Pivot",score:95},
+    {s:"NVDA",n:"NVIDIA",p:135.4,spread:"$0.02",trades:"280K",liq:"★★★★☆",tf:"2min",pattern:"T-line Bounce",score:93},
+    {s:"TSLA",n:"Tesla",p:352.8,spread:"$0.03",trades:"310K",liq:"★★★★☆",tf:"2min",pattern:"VWAP Reclaim",score:90},
+    {s:"AAPL",n:"Apple",p:213.4,spread:"$0.01",trades:"190K",liq:"★★★★★",tf:"1min",pattern:"Micro Pullback",score:88},
+    {s:"AMZN",n:"Amazon",p:228.5,spread:"$0.02",trades:"145K",liq:"★★★★☆",tf:"3min",pattern:"Bid Stack",score:85},
+    {s:"AMD",n:"AMD",p:176.2,spread:"$0.03",trades:"168K",liq:"★★★★☆",tf:"2min",pattern:"Scalp Flag",score:83},
+    {s:"IWM",n:"Russell 2000 ETF",p:218.4,spread:"$0.02",trades:"98K",liq:"★★★★☆",tf:"1min",pattern:"Range Break",score:80},
+  ],
+};
+
+function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
+  const isEN = lang === "en";
+  const [tab, setTab]       = useState("stocks");
+  const [sortCol, setSortCol] = useState("score");
+  const [sortDir, setSortDir] = useState(-1);
+  const [search, setSearch] = useState("");
+  const [minScore, setMinScore] = useState(0);
+  const livePx = useContext(PriceCtx);
+
+  if (!isPremium) return (
+    <div style={{maxWidth:700,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:56,marginBottom:12}}>🔬</div>
+      <h2 style={{color:C.text,fontWeight:800,fontSize:22,marginBottom:8}}>{isEN?"Advanced Screener":"Screener Avanzado"}</h2>
+      <p style={{color:C.muted,fontSize:15,marginBottom:24,lineHeight:1.6}}>
+        {isEN
+          ? "Scan stocks, options, intraday setups and scalping opportunities with AI-powered signals. VIP exclusive."
+          : "Escanea acciones, opciones, setups intraday y scalping con señales potenciadas por IA. Exclusivo VIP."}
+      </p>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6366F1)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontWeight:800,fontSize:16,cursor:"pointer",boxShadow:"0 4px 20px rgba(139,92,246,0.4)"}}>
+        ✦ {isEN?"Unlock VIP":"Desbloquear VIP"}
+      </button>
+    </div>
+  );
+
+  const tabs = [
+    {id:"stocks",  l:isEN?"📊 Stocks":"📊 Acciones"},
+    {id:"options", l:isEN?"⚡ Options":"⚡ Opciones"},
+    {id:"intraday",l:isEN?"🕐 Intraday":"🕐 Intraday"},
+    {id:"scalping",l:isEN?"⚡ Scalping":"⚡ Scalping"},
+  ];
+
+  const data = (SCREENER_PRESETS[tab]||[]).map(r => {
+    const live = livePx[r.s];
+    return { ...r, p: live?.price ?? r.p, chg: live?.change ?? r.chg };
+  }).filter(r => {
+    if (search && !r.s.toLowerCase().includes(search.toLowerCase()) && !r.n.toLowerCase().includes(search.toLowerCase())) return false;
+    if (r.score < minScore) return false;
+    return true;
+  }).sort((a,b) => {
+    const av = a[sortCol] ?? 0, bv = b[sortCol] ?? 0;
+    return (av > bv ? 1 : av < bv ? -1 : 0) * sortDir;
+  });
+
+  const scoreColor = s => s >= 90 ? "#10B981" : s >= 75 ? "#F59E0B" : "#94A3B8";
+  const chgColor   = c => c >= 0 ? "#10B981" : "#EF4444";
+
+  const sortToggle = col => {
+    if (sortCol === col) setSortDir(d => -d);
+    else { setSortCol(col); setSortDir(-1); }
+  };
+  const SortBtn = ({col,label}) => (
+    <button onClick={()=>sortToggle(col)} style={{background:"none",border:"none",color:sortCol===col?C.accent:C.muted,cursor:"pointer",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:0.5,padding:0,fontFamily:"inherit",display:"flex",alignItems:"center",gap:2}}>
+      {label}{sortCol===col?(sortDir===-1?"▼":"▲"):""}
+    </button>
+  );
+
+  return (
+    <div style={{maxWidth:1000,margin:"0 auto",padding:"0 4px 60px"}}>
+      {/* Header */}
+      <div style={{marginBottom:20}}>
+        <h1 style={{color:C.text,fontWeight:900,fontSize:22,margin:"0 0 4px",display:"flex",alignItems:"center",gap:8}}>
+          🔬 {isEN?"Advanced Screener":"Screener Avanzado"}
+          <span style={{background:"linear-gradient(135deg,#8B5CF6,#6366F1)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:12,fontWeight:800}}>VIP</span>
+        </h1>
+        <p style={{color:C.muted,fontSize:13,margin:0}}>
+          {isEN
+            ? "AI-powered scanner across stocks, options, intraday & scalping setups."
+            : "Scanner con IA para acciones, opciones, setups intraday y scalping."}
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:0,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:4,marginBottom:16,width:"fit-content"}}>
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)}
+            style={{padding:"8px 18px",borderRadius:9,border:"none",background:tab===t.id?"linear-gradient(135deg,#8B5CF6,#6366F1)":"transparent",color:tab===t.id?"#fff":C.muted,fontSize:13,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.2s"}}>
+            {t.l}
+          </button>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder={isEN?"Search ticker…":"Buscar ticker…"}
+          style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"7px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit",width:160}}/>
+        <div style={{display:"flex",alignItems:"center",gap:6,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"5px 12px"}}>
+          <span style={{fontSize:11,color:C.muted}}>Score ≥</span>
+          <input type="range" min="0" max="95" step="5" value={minScore} onChange={e=>setMinScore(Number(e.target.value))}
+            style={{width:80,accentColor:"#8B5CF6"}}/>
+          <span style={{fontSize:12,fontWeight:700,color:"#8B5CF6",minWidth:24}}>{minScore}</span>
+        </div>
+        <div style={{marginLeft:"auto",color:C.muted,fontSize:12}}>{data.length} {isEN?"results":"resultados"}</div>
+      </div>
+
+      {/* Table — Stocks tab */}
+      {tab === "stocks" && (
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+          <div style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 70px 80px 90px 120px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p",isEN?"Price":"Precio"],["chg",isEN?"Chg%":"Var%"],["vol","Vol"],["mkt","Mkt Cap"],["pattern",isEN?"Pattern":"Patrón"],["score","Score"]].map(([col,lbl])=>(
+              <SortBtn key={col} col={col} label={lbl}/>
+            ))}
+          </div>
+          {data.map((r,i)=>(
+            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 70px 80px 90px 120px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s",cursor:"default"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13}}>{r.s}</span>
+              <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+              <span style={{fontSize:13,fontWeight:700,color:C.text}}>${r.p?.toFixed(2)}</span>
+              <span style={{fontSize:12,fontWeight:700,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(1)}%</span>
+              <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
+              <span style={{fontSize:11,color:C.muted}}>{r.mkt}</span>
+              <span style={{fontSize:11,background:"rgba(139,92,246,0.1)",color:"#A78BFA",borderRadius:6,padding:"2px 7px"}}>{r.pattern}</span>
+              <div style={{display:"flex",alignItems:"center",gap:4}}>
+                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Table — Options tab */}
+      {tab === "options" && (
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+          <div style={{display:"grid",gridTemplateColumns:"70px 120px 80px 70px 60px 70px 70px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Contract":"Contrato"],["strike","Strike"],["exp",isEN?"Exp":"Vto"],["iv","IV"],["vol","Vol"],["chg",isEN?"Chg%":"Var%"],["score","Score"]].map(([col,lbl])=>(
+              <SortBtn key={col} col={col} label={lbl}/>
+            ))}
+          </div>
+          {data.map((r,i)=>(
+            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 120px 80px 70px 60px 70px 70px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <span style={{fontFamily:"monospace",fontWeight:800,color:r.type==="call"?"#10B981":"#EF4444",fontSize:13}}>{r.s}</span>
+              <span style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+              <span style={{fontSize:12,fontWeight:700,color:C.text}}>{r.strike}</span>
+              <span style={{fontSize:11,color:C.muted}}>{r.exp}</span>
+              <span style={{fontSize:12,color:"#F59E0B",fontWeight:700}}>{r.iv}</span>
+              <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
+              <span style={{fontSize:12,fontWeight:700,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(1)}%</span>
+              <div style={{display:"flex",alignItems:"center"}}>
+                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Table — Intraday tab */}
+      {tab === "intraday" && (
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+          <div style={{display:"grid",gridTemplateColumns:"70px 1fr 80px 70px 55px 60px 110px 90px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p",isEN?"Price":"Precio"],["chg","Chg%"],["atr","ATR"],["rvol","RVol"],["pattern",isEN?"Pattern":"Patrón"],["signal","Signal"],["score","Score"]].map(([col,lbl])=>(
+              <SortBtn key={col} col={col} label={lbl}/>
+            ))}
+          </div>
+          {data.map((r,i)=>(
+            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 1fr 80px 70px 55px 60px 110px 90px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13}}>{r.s}</span>
+              <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+              <span style={{fontSize:13,fontWeight:700,color:C.text}}>${r.p?.toFixed(2)}</span>
+              <span style={{fontSize:12,fontWeight:700,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(1)}%</span>
+              <span style={{fontSize:11,color:C.muted}}>{r.atr}</span>
+              <span style={{fontSize:12,fontWeight:700,color:"#F59E0B"}}>{r.rvol}</span>
+              <span style={{fontSize:11,background:"rgba(139,92,246,0.1)",color:"#A78BFA",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{r.pattern}</span>
+              <span style={{fontSize:11,fontWeight:700}}>{r.signal}</span>
+              <div style={{display:"flex",alignItems:"center"}}>
+                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Table — Scalping tab */}
+      {tab === "scalping" && (
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+          <div style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 80px 80px 60px 130px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p",isEN?"Price":"Precio"],["spread","Spread"],["trades",isEN?"Trades/hr":"Ops/hr"],["tf","TF"],["pattern",isEN?"Setup":"Setup"],["score","Score"]].map(([col,lbl])=>(
+              <SortBtn key={col} col={col} label={lbl}/>
+            ))}
+          </div>
+          {data.map((r,i)=>(
+            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 80px 80px 60px 130px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13}}>{r.s}</span>
+              <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+              <span style={{fontSize:13,fontWeight:700,color:C.text}}>${r.p?.toFixed(2)}</span>
+              <span style={{fontSize:12,color:C.text}}>{r.spread}</span>
+              <span style={{fontSize:11,color:C.muted}}>{r.trades}</span>
+              <span style={{fontSize:12,fontWeight:700,color:C.accent}}>{r.tf}</span>
+              <span style={{fontSize:11,background:"rgba(139,92,246,0.1)",color:"#A78BFA",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{r.pattern}</span>
+              <div style={{display:"flex",alignItems:"center"}}>
+                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p style={{color:C.muted,fontSize:11,marginTop:14,textAlign:"center"}}>
+        {isEN
+          ? "Signals are educational, not financial advice. NexoTrade is not a licensed financial advisor."
+          : "Las señales son educativas, no son consejos financieros. NexoTrade no es un asesor financiero registrado."}
+      </p>
+    </div>
+  );
+}
 
 // ── LEGAL PAGE WRAPPER ────────────────────────────────────────────────────────
 function LegalPage({title, children, onBack, lang}){
@@ -11742,6 +12166,8 @@ export default function App(){
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===35) return <CongressTradesPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
