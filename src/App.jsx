@@ -3297,16 +3297,16 @@ function NoticiasPage({lang}){
 // CoinGecko IDs para los 4 crypto principales (API gratis, sin key)
 const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
 const TICKER_DATA_INIT = [
-  {s:"BTC",  n:"Bitcoin",    p:95000,  c:+1.80,  col:"#f7931a", cg:"bitcoin"},
-  {s:"ETH",  n:"Ethereum",   p:2100,   c:+0.90,  col:"#627eea", cg:"ethereum"},
-  {s:"SOL",  n:"Solana",     p:148,    c:+2.10,  col:"#9945ff", cg:"solana"},
-  {s:"BNB",  n:"BNB",        p:620,    c:+0.55,  col:"#f3ba2f", cg:"binancecoin"},
-  {s:"NVDA", n:"NVIDIA",     p:131.5,  c:+1.20,  col:"#76b900", cg:null, fh:"NVDA"},
-  {s:"AAPL", n:"Apple",      p:207.2,  c:-0.30,  col:"#94a3b8", cg:null, fh:"AAPL"},
-  {s:"TSLA", n:"Tesla",      p:338.5,  c:-1.10,  col:"#e31937", cg:null, fh:"TSLA"},
-  {s:"SPY",  n:"S&P 500",    p:582.4,  c:-0.25,  col:"#00A8FF", cg:null, fh:"SPY"},
-  {s:"MSFT", n:"Microsoft",  p:448.2,  c:+0.90,  col:"#00b4d8", cg:null, fh:"MSFT"},
-  {s:"GOLD", n:"Gold",       p:3320,   c:+0.40,  col:"#fbbf24", cg:null},
+  {s:"BTC",  n:"Bitcoin",    p:108500, c:+0.80,  col:"#f7931a", cg:"bitcoin"},
+  {s:"ETH",  n:"Ethereum",   p:2550,   c:+0.50,  col:"#627eea", cg:"ethereum"},
+  {s:"SOL",  n:"Solana",     p:172,    c:+1.20,  col:"#9945ff", cg:"solana"},
+  {s:"BNB",  n:"BNB",        p:648,    c:+0.30,  col:"#f3ba2f", cg:"binancecoin"},
+  {s:"NVDA", n:"NVIDIA",     p:135.4,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
+  {s:"AAPL", n:"Apple",      p:213.5,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
+  {s:"TSLA", n:"Tesla",      p:352.8,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
+  {s:"SPY",  n:"S&P 500",    p:591.2,  c:+0.15,  col:"#00A8FF", cg:null, fh:"SPY"},
+  {s:"MSFT", n:"Microsoft",  p:453.6,  c:+0.60,  col:"#00b4d8", cg:null, fh:"MSFT"},
+  {s:"GOLD", n:"Gold",       p:3315,   c:+0.25,  col:"#fbbf24", cg:null},
 ];
 
 // Hook compartido para precios reales de CoinGecko
@@ -3340,31 +3340,16 @@ function useCryptoPrices(){
 }
 
 function TickerStrip(){
-  const {cryptoPrices, lastUpdate} = useCryptoPrices();
-  // Acciones simuladas con pequeño movimiento (no hay API gratis para acciones real-time)
-  const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
-  useEffect(()=>{
-    const iv = setInterval(()=>{
-      setStocks(prev=>prev.map(t=>({
-        ...t,
-        p:+(t.p*(1+(Math.random()-0.49)*0.0015)).toFixed(t.p>100?1:2),
-        c:+(t.c+(Math.random()-0.5)*0.06).toFixed(2),
-      })));
-    }, 8000);
-    return ()=>clearInterval(iv);
-  },[]);
+  const lp = useContext(PriceCtx);
+  const isLive = Object.keys(lp).length > 0;
 
-  // Mezclar crypto real + acciones simuladas
+  // Construir tickers con precio real del PriceCtx
   const tickers = TICKER_DATA_INIT.map(t=>{
-    if(t.cg && cryptoPrices[t.s]?.p){
-      return {...t, p:cryptoPrices[t.s].p, c:cryptoPrices[t.s].c};
-    }
-    const stock = stocks.find(s=>s.s===t.s);
-    return stock || t;
+    const live = lp[t.s];
+    return { ...t, p: live?.price ?? t.p, c: live?.change ?? t.c };
   });
 
   const items = [...tickers, ...tickers];
-  const isLive = Object.keys(cryptoPrices).length > 0;
 
   return(
     <div style={{background:"#060e1c",borderBottom:"1px solid rgba(255,255,255,0.07)",overflow:"hidden",height:34,position:"relative",zIndex:99}}>
@@ -3410,39 +3395,14 @@ function MarketsMiniWidget({ lang="es" }){
     {q:"Bitcoin hits $120K before year end?", p:0.48, vol:"$5.2M"},
     {q:"US inflation stays below 3% all 2026?", p:0.61, vol:"$940K"},
   ]);
-  const {cryptoPrices} = useCryptoPrices();
-  const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
-
-  // Fetch real stock prices from Finnhub
-  useEffect(()=>{
-    const fetchStocks = async () => {
-      const stockItems = TICKER_DATA_INIT.filter(t=>t.fh);
-      const updates = await Promise.all(stockItems.map(async t=>{
-        try{
-          const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${t.fh}&token=${FINNHUB_KEY}`);
-          const d = await r.json();
-          if(d.c>0) return {s:t.s, p:d.c, c:d.dp||0};
-        }catch{}
-        return null;
-      }));
-      const valid = updates.filter(Boolean);
-      if(valid.length>0){
-        setStocks(prev=>prev.map(t=>{
-          const live=valid.find(v=>v.s===t.s);
-          return live?{...t,p:live.p,c:live.c}:t;
-        }));
-      }
-    };
-    fetchStocks();
-    const iv=setInterval(fetchStocks,60000);
-    return()=>clearInterval(iv);
-  },[]);
+  // Usar el PriceCtx centralizado — mismo WebSocket que el resto del app
+  const lp = useContext(PriceCtx);
+  const isLive = Object.keys(lp).length > 0;
 
   const prices = TICKER_DATA_INIT.slice(0,8).map(t=>{
-    if(t.cg && cryptoPrices[t.s]?.p) return {...t, p:cryptoPrices[t.s].p, c:cryptoPrices[t.s].c};
-    return stocks.find(s=>s.s===t.s)||t;
+    const live = lp[t.s];
+    return { ...t, p: live?.price ?? t.p, c: live?.change ?? t.c };
   });
-  const isLive = Object.keys(cryptoPrices).length>0;
 
   const barCol = p => p>=0.6?"#10b981":p>=0.4?"#f59e0b":"#ef4444";
 
@@ -3625,25 +3585,26 @@ function MediaNetBannerSidebar(){
 }
 // ── FIN MEDIA.NET ─────────────────────────────────────────────────────────────
 
-// ── SIDEBAR TICKER WIDGET — precios reales CoinGecko + acciones simuladas ─────
+// ── SIDEBAR TICKER WIDGET — precios reales via PriceCtx (WebSocket Finnhub) ───
 function SidebarTickerWidget(){
-  const {cryptoPrices, lastUpdate} = useCryptoPrices();
-  const [stocks, setStocks] = useState(TICKER_DATA_INIT.filter(t=>!t.cg));
-  useEffect(()=>{
-    const iv = setInterval(()=>{
-      setStocks(prev=>prev.map(t=>({...t,
-        p:+(t.p*(1+(Math.random()-0.49)*0.0015)).toFixed(t.p>100?1:2),
-        c:+(t.c+(Math.random()-0.5)*0.05).toFixed(2),
-      })));
-    }, 9000);
-    return ()=>clearInterval(iv);
-  },[]);
+  const lp = useContext(PriceCtx);
+  const isLive = Object.keys(lp).length > 0;
+  const [lastUpdate, setLastUpdate] = useState(null);
 
+  // Actualizar timestamp cada vez que llegan precios
+  useEffect(()=>{
+    if(isLive) setLastUpdate(new Date());
+  },[lp]);
+
+  // Construir items con precio real del contexto
   const items = TICKER_DATA_INIT.slice(0,6).map(t=>{
-    if(t.cg && cryptoPrices[t.s]?.p) return {...t, p:cryptoPrices[t.s].p, c:cryptoPrices[t.s].c};
-    return stocks.find(s=>s.s===t.s)||t;
+    const live = lp[t.s];
+    return {
+      ...t,
+      p: live?.price  ?? t.p,
+      c: live?.change ?? t.c,
+    };
   });
-  const isLive = Object.keys(cryptoPrices).length>0;
 
   return(
     <div style={{background:"rgba(6,14,28,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,marginBottom:14,overflow:"hidden"}}>
