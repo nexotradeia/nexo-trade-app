@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 19:11:39
+// NEXO TRADE — build: 2026-05-29 19:21:34
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11440,7 +11440,7 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
 }
 
 // ── WATCHLIST PAGE ────────────────────────────────────────────────────────────
-function WatchlistPage({ user, lang="es", onNeedAuth, posts=[] }) {
+function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false }) {
   const isEN = lang==="en";
   const LS_KEY = `nexo_watchlist_${user?.id||"guest"}`;
 
@@ -11529,93 +11529,100 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[] }) {
 
   // Mock extended data per ticker
   const MOCK = {
-    AAPL:{ytd:15.2,w52h:-0.9,w1:1.0,beta:1.28,vol:24.1,pe:31.2,pb:9.4,roe:17.3,roa:22.1,margin:26.4,target:225,rating:"Buy",upside:8.2,de:1.8,cr:1.07,qr:0.98},
-    NVDA:{ytd:18.4,w52h:-8.2,w1:2.1,beta:2.15,vol:48.3,pe:42.8,pb:28.4,roe:52.1,roa:28.4,margin:55.8,target:165,rating:"Strong Buy",upside:24.4,de:0.4,cr:4.2,qr:3.8},
-    TSLA:{ytd:-12.4,w52h:-35.2,w1:-1.5,beta:2.8,vol:62.4,pe:95.4,pb:14.2,roe:12.8,roa:8.4,margin:17.9,target:280,rating:"Hold",upside:12.1,de:0.08,cr:2.0,qr:1.5},
-    MSFT:{ytd:12.1,w52h:-3.2,w1:0.8,beta:0.92,vol:22.8,pe:38.4,pb:13.8,roe:38.1,roa:18.4,margin:41.2,target:480,rating:"Buy",upside:10.4,de:0.7,cr:1.8,qr:1.7},
-    BTC: {ytd:42.8,w52h:-15.6,w1:3.2,beta:1.85,vol:68.2,pe:null,pb:null,roe:null,roa:null,margin:null,target:120000,rating:"—",upside:18.4,de:null,cr:null,qr:null},
-    ETH: {ytd:22.4,w52h:-28.4,w1:4.8,beta:1.95,vol:72.4,pe:null,pb:null,roe:null,roa:null,margin:null,target:4800,rating:"—",upside:24.8,de:null,cr:null,qr:null},
-    SPY: {ytd:8.4,w52h:-1.8,w1:1.1,beta:1.0,vol:16.4,pe:22.4,pb:4.8,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,de:null,cr:null,qr:null},
-    AMZN:{ytd:16.8,w52h:-2.9,w1:1.2,beta:1.42,vol:28.4,pe:44.2,pb:9.2,roe:22.4,roa:8.8,margin:28.4,target:245,rating:"Strong Buy",upside:15.2,de:0.6,cr:1.1,qr:0.8},
-    CRWD:{ytd:55.9,w52h:-0.1,w1:10.2,beta:1.82,vol:45.2,pe:null,pb:18.4,roe:null,roa:null,margin:22.4,target:420,rating:"Buy",upside:22.4,de:0.2,cr:1.8,qr:1.6},
-    TSM: {ytd:38.0,w52h:-2.8,w1:3.4,beta:1.24,vol:32.4,pe:24.8,pb:6.4,roe:28.4,roa:16.2,margin:38.2,target:210,rating:"Buy",upside:18.8,de:0.3,cr:2.8,qr:2.4},
-    AVGO:{ytd:29.4,w52h:-0.5,w1:7.9,beta:1.38,vol:28.8,pe:36.4,pb:12.8,roe:48.2,roa:12.4,margin:44.2,target:240,rating:"Buy",upside:12.4,de:1.2,cr:1.4,qr:1.2},
-    GOOG:{ytd:20.0,w52h:-6.9,w1:-0.8,beta:1.04,vol:26.4,pe:25.4,pb:6.8,roe:32.4,roa:18.8,margin:32.4,target:210,rating:"Buy",upside:14.2,de:0.1,cr:2.4,qr:2.2},
-    PLTR:{ytd:124.8,w52h:-4.2,w1:9.2,beta:2.42,vol:58.4,pe:null,pb:24.4,roe:null,roa:null,margin:28.4,target:42,rating:"Hold",upside:8.4,de:0.0,cr:5.8,qr:5.4},
-    GS:  {ytd:28.4,w52h:-3.1,w1:2.8,beta:1.48,vol:24.8,pe:14.8,pb:1.8,roe:12.4,roa:1.4,margin:28.8,target:620,rating:"Buy",upside:12.8,de:4.2,cr:null,qr:null},
-    AMD: {ytd:8.2,w52h:-22.4,w1:3.8,beta:1.88,vol:44.8,pe:null,pb:4.8,roe:null,roa:null,margin:18.4,target:145,rating:"Buy",upside:18.4,de:0.1,cr:2.8,qr:2.2},
-    ARM: {ytd:42.4,w52h:-8.4,w1:4.2,beta:2.12,vol:52.4,pe:148.4,pb:18.4,roe:12.4,roa:8.8,margin:38.4,target:165,rating:"Hold",upside:14.8,de:0.2,cr:3.2,qr:2.8},
-    JPM: {ytd:22.8,w52h:-1.2,w1:2.2,beta:1.18,vol:18.4,pe:14.4,pb:2.2,roe:18.4,roa:1.8,margin:32.4,target:280,rating:"Buy",upside:10.4,de:2.8,cr:null,qr:null},
+    AAPL:{ytd:15.2,w52h:-0.9,w1:1.0,w2:1.8,w3:2.6,w4:3.4,m3:8.4,m6:12.8,beta:1.28,vol:24.1,pe:31.2,pb:9.4,roe:17.3,roa:22.1,margin:26.4,target:225,rating:"Buy",upside:8.2,analysts:42,eps:7.28,de:1.8,cr:1.07,qr:0.98,icov:28.4,fcf:6.82,div:0.52},
+    NVDA:{ytd:18.4,w52h:-8.2,w1:2.1,w2:4.8,w3:7.2,w4:10.4,m3:24.8,m6:38.4,beta:2.15,vol:48.3,pe:42.8,pb:28.4,roe:52.1,roa:28.4,margin:55.8,target:165,rating:"Strong Buy",upside:24.4,analysts:56,eps:2.88,de:0.4,cr:4.2,qr:3.8,icov:82.4,fcf:2.14,div:0.04},
+    TSLA:{ytd:-12.4,w52h:-35.2,w1:-1.5,w2:-2.8,w3:-4.2,w4:-6.8,m3:-18.4,m6:-28.4,beta:2.8,vol:62.4,pe:95.4,pb:14.2,roe:12.8,roa:8.4,margin:17.9,target:280,rating:"Hold",upside:12.1,analysts:38,eps:1.84,de:0.08,cr:2.0,qr:1.5,icov:18.4,fcf:1.24,div:0.0},
+    MSFT:{ytd:12.1,w52h:-3.2,w1:0.8,w2:1.6,w3:2.4,w4:3.8,m3:9.4,m6:14.8,beta:0.92,vol:22.8,pe:38.4,pb:13.8,roe:38.1,roa:18.4,margin:41.2,target:480,rating:"Buy",upside:10.4,analysts:48,eps:12.42,de:0.7,cr:1.8,qr:1.7,icov:44.8,fcf:11.24,div:0.84},
+    BTC: {ytd:42.8,w52h:-15.6,w1:3.2,w2:6.8,w3:9.4,w4:14.2,m3:28.4,m6:48.8,beta:1.85,vol:68.2,pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:18.4,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:null},
+    ETH: {ytd:22.4,w52h:-28.4,w1:4.8,w2:8.4,w3:12.4,w4:16.8,m3:24.8,m6:38.4,beta:1.95,vol:72.4,pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:24.8,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:null},
+    SPY: {ytd:8.4,w52h:-1.8,w1:1.1,w2:2.2,w3:3.2,w4:4.4,m3:6.8,m6:10.4,beta:1.0,vol:16.4,pe:22.4,pb:4.8,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:1.42},
+    AMZN:{ytd:16.8,w52h:-2.9,w1:1.2,w2:2.4,w3:4.2,w4:6.8,m3:14.4,m6:22.8,beta:1.42,vol:28.4,pe:44.2,pb:9.2,roe:22.4,roa:8.8,margin:28.4,target:245,rating:"Strong Buy",upside:15.2,analysts:52,eps:6.28,de:0.6,cr:1.1,qr:0.8,icov:22.4,fcf:4.82,div:0.0},
+    CRWD:{ytd:55.9,w52h:-0.1,w1:10.2,w2:14.8,w3:18.4,w4:22.8,m3:38.4,m6:52.4,beta:1.82,vol:45.2,pe:null,pb:18.4,roe:null,roa:null,margin:22.4,target:420,rating:"Buy",upside:22.4,analysts:44,eps:1.84,de:0.2,cr:1.8,qr:1.6,icov:null,fcf:1.42,div:0.0},
+    TSM: {ytd:38.0,w52h:-2.8,w1:3.4,w2:5.8,w3:8.4,w4:12.4,m3:22.4,m6:34.8,beta:1.24,vol:32.4,pe:24.8,pb:6.4,roe:28.4,roa:16.2,margin:38.2,target:210,rating:"Buy",upside:18.8,analysts:38,eps:8.42,de:0.3,cr:2.8,qr:2.4,icov:38.4,fcf:6.28,div:1.84},
+    AVGO:{ytd:29.4,w52h:-0.5,w1:7.9,w2:12.4,w3:16.8,w4:22.4,m3:32.4,m6:44.8,beta:1.38,vol:28.8,pe:36.4,pb:12.8,roe:48.2,roa:12.4,margin:44.2,target:240,rating:"Buy",upside:12.4,analysts:34,eps:5.84,de:1.2,cr:1.4,qr:1.2,icov:12.4,fcf:4.28,div:2.14},
+    GOOG:{ytd:20.0,w52h:-6.9,w1:-0.8,w2:-1.4,w3:0.8,w4:2.4,m3:12.4,m6:18.8,beta:1.04,vol:26.4,pe:25.4,pb:6.8,roe:32.4,roa:18.8,margin:32.4,target:210,rating:"Buy",upside:14.2,analysts:48,eps:8.42,de:0.1,cr:2.4,qr:2.2,icov:null,fcf:7.82,div:0.0},
+    PLTR:{ytd:124.8,w52h:-4.2,w1:9.2,w2:18.4,w3:28.4,w4:38.8,m3:62.4,m6:92.4,beta:2.42,vol:58.4,pe:null,pb:24.4,roe:null,roa:null,margin:28.4,target:42,rating:"Hold",upside:8.4,analysts:28,eps:0.14,de:0.0,cr:5.8,qr:5.4,icov:null,fcf:0.42,div:0.0},
+    GS:  {ytd:28.4,w52h:-3.1,w1:2.8,w2:4.8,w3:7.2,w4:10.4,m3:18.4,m6:26.8,beta:1.48,vol:24.8,pe:14.8,pb:1.8,roe:12.4,roa:1.4,margin:28.8,target:620,rating:"Buy",upside:12.8,analysts:28,eps:38.42,de:4.2,cr:null,qr:null,icov:null,fcf:null,div:3.0},
+    AMD: {ytd:8.2,w52h:-22.4,w1:3.8,w2:6.4,w3:8.8,w4:12.4,m3:14.8,m6:8.4,beta:1.88,vol:44.8,pe:null,pb:4.8,roe:null,roa:null,margin:18.4,target:145,rating:"Buy",upside:18.4,analysts:42,eps:3.28,de:0.1,cr:2.8,qr:2.2,icov:null,fcf:2.14,div:0.0},
+    ARM: {ytd:42.4,w52h:-8.4,w1:4.2,w2:8.4,w3:12.8,w4:18.4,m3:28.8,m6:38.4,beta:2.12,vol:52.4,pe:148.4,pb:18.4,roe:12.4,roa:8.8,margin:38.4,target:165,rating:"Hold",upside:14.8,analysts:24,eps:0.84,de:0.2,cr:3.2,qr:2.8,icov:22.4,fcf:0.68,div:0.0},
+    JPM: {ytd:22.8,w52h:-1.2,w1:2.2,w2:3.8,w3:5.4,w4:7.8,m3:14.4,m6:20.8,beta:1.18,vol:18.4,pe:14.4,pb:2.2,roe:18.4,roa:1.8,margin:32.4,target:280,rating:"Buy",upside:10.4,analysts:32,eps:18.42,de:2.8,cr:null,qr:null,icov:null,fcf:null,div:4.2},
   };
-  const getMock = (tk) => MOCK[tk] || {ytd:(Math.random()*40-10).toFixed(1),w52h:(Math.random()*-30).toFixed(1),w1:(Math.random()*8-2).toFixed(1),beta:(Math.random()*2+0.5).toFixed(2),vol:(Math.random()*40+15).toFixed(1),pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,de:null,cr:null,qr:null};
+  const getMock = (tk) => MOCK[tk] || {ytd:parseFloat((Math.random()*40-10).toFixed(1)),w52h:parseFloat((Math.random()*-30).toFixed(1)),w1:parseFloat((Math.random()*8-2).toFixed(1)),w2:parseFloat((Math.random()*10-2).toFixed(1)),w3:parseFloat((Math.random()*14-3).toFixed(1)),w4:parseFloat((Math.random()*18-4).toFixed(1)),m3:parseFloat((Math.random()*30-5).toFixed(1)),m6:parseFloat((Math.random()*50-8).toFixed(1)),beta:parseFloat((Math.random()*2+0.5).toFixed(2)),vol:parseFloat((Math.random()*40+15).toFixed(1)),pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:null};
 
   const pctColor = v => v==null?"#64748B":v>=0?"#10B981":"#EF4444";
   const pctFmt  = v => v==null?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
   const numFmt  = v => v==null?"—":Number(v).toFixed(1);
-  const VIP = <span style={{color:"#3B82F6",fontWeight:600,fontSize:11,cursor:"pointer"}}>Upgrade to <strong>Pro</strong></span>;
+  const upgBtn  = <span style={{color:"#3B82F6",fontWeight:600,fontSize:11,cursor:"pointer"}}>Upgrade to <strong>Pro</strong></span>;
+  // vip(value, suffix) → muestra dato si es premium, si no botón
+  const vip = (val, suffix="", color=null) => isPremium
+    ? <span style={{fontFamily:"monospace",color:color||(val!=null&&typeof val==="number"&&suffix==="%"?pctColor(val):"#1E293B")}}>{val!=null?Number(val).toFixed(1)+suffix:"—"}</span>
+    : upgBtn;
 
+  const nm = (tk,d,m) => <><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:"#1E293B"}}>{tk}</div><div style={{fontSize:10,color:"#94A3B8"}}>{tk}</div></>;
+  const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:700,color:"#1E293B"}}>{fmtPrice(d?.price??null,tk)}</span>;
   const COLS = {
     market:[
-      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
-      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
+      {h:"Name",           w:150, render:nm},
+      {h:"Price",          w:110, render:pr},
       {h:"Change %",       w:90,  render:(tk,d,m)=><span style={{color:pctColor(d?.change??null),fontWeight:700,fontFamily:"monospace"}}>{d?.change!=null?(d.change>=0?"+":"")+d.change.toFixed(2)+"%":"—"}</span>},
-      {h:"Day High",       w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#10B981"}}>{fmtPrice(d?.high??null,tk)}</span>},
-      {h:"Day Low",        w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#EF4444"}}>{fmtPrice(d?.low??null,tk)}</span>},
-      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace"}}>{numFmt(m.beta)}</span>},
-      {h:"Volatility",     w:100, render:(tk,d,m)=>VIP},
-      {h:"Volume",         w:100, render:(tk,d,m)=>VIP},
+      {h:"Day High",       w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#10B981"}}>{fmtPrice(d?.high??null,tk)}</span>},
+      {h:"Day Low",        w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#EF4444"}}>{fmtPrice(d?.low??null,tk)}</span>},
+      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#1E293B"}}>{numFmt(m.beta)}</span>},
+      {h:"Volatility %",   w:110, render:(tk,d,m)=>vip(m.vol,"%")},
+      {h:"Open",           w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#64748B"}}>{fmtPrice(d?.open??null,tk)}</span>},
+      {h:"Prev Close",     w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#64748B"}}>{fmtPrice(d?.prev??null,tk)}</span>},
     ],
     risk:[
-      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
-      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
-      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:m.beta>1.5?"#F59E0B":m.beta>2?"#EF4444":"#F1F5F9"}}>{numFmt(m.beta)}</span>},
+      {h:"Name",           w:150, render:nm},
+      {h:"Price",          w:110, render:pr},
+      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700,color:m.beta>2?"#EF4444":m.beta>1.5?"#F59E0B":"#10B981"}}>{numFmt(m.beta)}</span>},
       {h:"Volatility %",   w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:m.vol>50?"#EF4444":m.vol>30?"#F59E0B":"#10B981"}}>{numFmt(m.vol)}%</span>},
-      {h:"VaR (95%)",      w:100, render:(tk,d,m)=>VIP},
-      {h:"Sharpe Ratio",   w:110, render:(tk,d,m)=>VIP},
-      {h:"Max Drawdown",   w:120, render:(tk,d,m)=>VIP},
-      {h:"Correlation",    w:110, render:(tk,d,m)=>VIP},
+      {h:"VaR (95%)",      w:100, render:(tk,d,m)=>vip(parseFloat((m.vol*0.082).toFixed(2)),"%")},
+      {h:"Sharpe Ratio",   w:110, render:(tk,d,m)=>vip(parseFloat((2.4-m.beta*0.6).toFixed(2)),"")},
+      {h:"Max Drawdown",   w:120, render:(tk,d,m)=>vip(parseFloat((-m.vol*0.58).toFixed(1)),"%")},
+      {h:"Correlation SPY",w:130, render:(tk,d,m)=>vip(parseFloat((1.1-m.beta*0.08).toFixed(2)),"")},
     ],
     returns:[
-      {h:"Name",                          w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
-      {h:"Price, Current",               w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
-      {h:"% from 52W High",              w:140, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:pctColor(m.w52h)}}>{pctFmt(m.w52h)}</span>},
-      {h:"YTD Price Total Return",       w:160, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:pctColor(m.ytd)}}>{pctFmt(m.ytd)}</span>},
-      {h:"1 Week Total Return",          w:150, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:pctColor(m.w1)}}>{pctFmt(m.w1)}</span>},
-      {h:"2 Week Total Return",          w:150, render:(tk,d,m)=>VIP},
-      {h:"3 Week Total Return",          w:150, render:(tk,d,m)=>VIP},
-      {h:"4 Week Total Return",          w:150, render:(tk,d,m)=>VIP},
-      {h:"3 Month Total Return",         w:160, render:(tk,d,m)=>VIP},
-      {h:"6 Month Total Return",         w:160, render:(tk,d,m)=>VIP},
+      {h:"Name",                    w:150, render:nm},
+      {h:"Price",                   w:110, render:pr},
+      {h:"% from 52W High",         w:140, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:600,color:pctColor(m.w52h)}}>{pctFmt(m.w52h)}</span>},
+      {h:"YTD Return",              w:120, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:600,color:pctColor(m.ytd)}}>{pctFmt(m.ytd)}</span>},
+      {h:"1 Week Return",           w:130, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:600,color:pctColor(m.w1)}}>{pctFmt(m.w1)}</span>},
+      {h:"2 Week Return",           w:130, render:(tk,d,m)=>vip(m.w2,"%")},
+      {h:"3 Week Return",           w:130, render:(tk,d,m)=>vip(m.w3,"%")},
+      {h:"4 Week Return",           w:130, render:(tk,d,m)=>vip(m.w4,"%")},
+      {h:"3 Month Return",          w:140, render:(tk,d,m)=>vip(m.m3,"%")},
+      {h:"6 Month Return",          w:140, render:(tk,d,m)=>vip(m.m6,"%")},
     ],
     efficiency:[
-      {h:"Name",       w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
-      {h:"Price",      w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
-      {h:"P/E Ratio",  w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace"}}>{m.pe!=null?numFmt(m.pe):"—"}</span>},
-      {h:"P/B Ratio",  w:100, render:(tk,d,m)=>VIP},
-      {h:"ROE %",      w:90,  render:(tk,d,m)=>VIP},
-      {h:"ROA %",      w:90,  render:(tk,d,m)=>VIP},
-      {h:"Net Margin", w:110, render:(tk,d,m)=>VIP},
-      {h:"Rev Growth", w:110, render:(tk,d,m)=>VIP},
+      {h:"Name",       w:150, render:nm},
+      {h:"Price",      w:110, render:pr},
+      {h:"P/E Ratio",  w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#1E293B"}}>{m.pe!=null?numFmt(m.pe):"—"}</span>},
+      {h:"P/B Ratio",  w:100, render:(tk,d,m)=>vip(m.pb,"")},
+      {h:"ROE %",      w:90,  render:(tk,d,m)=>vip(m.roe,"%")},
+      {h:"ROA %",      w:90,  render:(tk,d,m)=>vip(m.roa,"%")},
+      {h:"Net Margin", w:110, render:(tk,d,m)=>vip(m.margin,"%")},
+      {h:"FCF/Share",  w:110, render:(tk,d,m)=>vip(m.fcf,"")},
     ],
     projections:[
-      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
-      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
-      {h:"Price Target",   w:110, render:(tk,d,m)=>VIP},
-      {h:"Analyst Rating", w:130, render:(tk,d,m)=>VIP},
-      {h:"Upside %",       w:100, render:(tk,d,m)=>VIP},
-      {h:"# Analysts",     w:100, render:(tk,d,m)=>VIP},
-      {h:"EPS Estimate",   w:120, render:(tk,d,m)=>VIP},
-      {h:"Rev Estimate",   w:120, render:(tk,d,m)=>VIP},
+      {h:"Name",           w:150, render:nm},
+      {h:"Price",          w:110, render:pr},
+      {h:"Price Target",   w:120, render:(tk,d,m)=>vip(m.target,"","#6366F1")},
+      {h:"Analyst Rating", w:140, render:(tk,d,m)=>isPremium?<span style={{fontWeight:700,fontSize:11,color:m.rating==="Strong Buy"?"#10B981":m.rating==="Buy"?"#3B82F6":m.rating==="Hold"?"#F59E0B":"#94A3B8"}}>{m.rating||"—"}</span>:upgBtn},
+      {h:"Upside %",       w:110, render:(tk,d,m)=>vip(m.upside,"%")},
+      {h:"# Analysts",     w:110, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#1E293B"}}>{m.analysts!=null?m.analysts:"—"}</span>:upgBtn},
+      {h:"EPS Estimate",   w:120, render:(tk,d,m)=>vip(m.eps,"")},
+      {h:"Dividend %",     w:120, render:(tk,d,m)=>vip(m.div,"%")},
     ],
     health:[
-      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
-      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
-      {h:"Debt / Equity",  w:120, render:(tk,d,m)=>VIP},
-      {h:"Current Ratio",  w:120, render:(tk,d,m)=>VIP},
-      {h:"Quick Ratio",    w:110, render:(tk,d,m)=>VIP},
-      {h:"Interest Cov.",  w:120, render:(tk,d,m)=>VIP},
-      {h:"FCF / Share",    w:110, render:(tk,d,m)=>VIP},
-      {h:"Dividend Yield", w:120, render:(tk,d,m)=>VIP},
+      {h:"Name",           w:150, render:nm},
+      {h:"Price",          w:110, render:pr},
+      {h:"Debt / Equity",  w:120, render:(tk,d,m)=>vip(m.de,"")},
+      {h:"Current Ratio",  w:120, render:(tk,d,m)=>vip(m.cr,"")},
+      {h:"Quick Ratio",    w:110, render:(tk,d,m)=>vip(m.qr,"")},
+      {h:"Interest Cov.",  w:120, render:(tk,d,m)=>vip(m.icov,"")},
+      {h:"FCF / Share",    w:110, render:(tk,d,m)=>vip(m.fcf,"")},
+      {h:"Dividend Yield", w:120, render:(tk,d,m)=>vip(m.div,"%")},
     ],
   };
 
@@ -12550,7 +12557,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
 
         {/* Stocks header */}
         {tab==="stocks" && (
-          <div style={{display:"grid",gridTemplateColumns:"68px 1fr 88px 72px 80px 90px 120px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+          <div style={{display:"grid",gridTemplateColumns:"80px 180px 100px 80px 90px 100px 1fr 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
             {[["s","Ticker"],["n",isEN?"Company":"Empresa"],["p",isEN?"Price":"Precio"],["chg",isEN?"Chg%":"Var%"],["vol","Volume"],["mkt","Mkt Cap"],["pattern",isEN?"Pattern":"Patrón"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
           </div>
         )}
@@ -12575,12 +12582,12 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           const flash = flashRows[r.s];
           const rowBg = flash==="up" ? "rgba(16,185,129,0.15)" : flash==="down" ? "rgba(239,68,68,0.15)" : chgBg(r.chg);
           const cols = tab==="stocks"
-            ? "68px 1fr 88px 72px 80px 90px 120px 68px"
+            ? "80px 180px 100px 80px 90px 100px 1fr 68px"
             : tab==="options"
-            ? "68px 120px 80px 70px 60px 70px 70px 68px"
+            ? "80px 160px 100px 80px 70px 80px 80px 68px"
             : tab==="intraday"
-            ? "68px 1fr 80px 68px 50px 58px 110px 88px 68px"
-            : "68px 1fr 88px 80px 78px 58px 130px 68px";
+            ? "80px 180px 100px 80px 60px 70px 1fr 110px 68px"
+            : "80px 180px 100px 90px 80px 70px 1fr 68px";
           return(
             <div key={i} style={{display:"grid",gridTemplateColumns:cols,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.3s",background:rowBg,cursor:"default",alignItems:"center"}}
               onMouseEnter={e=>{if(!flash)e.currentTarget.style.background="rgba(139,92,246,0.05)";}}
@@ -13670,7 +13677,7 @@ export default function App(){
     if(page===35) return <CongressTradesPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
-    if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts}/>;
+    if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium}/>;
     if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
