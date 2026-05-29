@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-28 20:30:00
+// NEXO TRADE — build: 2026-05-29 14:28:24
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1905,6 +1905,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
         </div>
       </div>
     </div>
+  </div>
   );
 }
 
@@ -11735,7 +11736,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
 }
 
 // ── ADVANCED VIP SCREENER ────────────────────────────────────────────────────
-const SCREENER_PRESETS = {
+const SCREENER_DATA = {
   stocks: [
     {s:"NVDA",n:"NVIDIA",p:135.4,chg:+2.1,vol:"58M",mkt:"$3.3T",sector:"Tech",pattern:"Breakout",score:94},
     {s:"MSFT",n:"Microsoft",p:452.7,chg:+0.8,vol:"22M",mkt:"$3.4T",sector:"Tech",pattern:"Trend Up",score:88},
@@ -11813,7 +11814,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     {id:"scalping",l:isEN?"⚡ Scalping":"⚡ Scalping"},
   ];
 
-  const data = (SCREENER_PRESETS[tab]||[]).map(r => {
+  const data = (SCREENER_DATA[tab]||[]).map(r => {
     const live = livePx[r.s];
     return { ...r, p: live?.price ?? r.p, chg: live?.change ?? r.chg };
   }).filter(r => {
