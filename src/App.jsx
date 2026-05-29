@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 17:43:02
+// NEXO TRADE — build: 2026-05-29 17:52:39
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -3816,7 +3816,7 @@ function EarningsPage({lang}){
   const sel=selected?earnings.find(e=>e.ticker===selected):null;
 
   return(
-    <div style={{display:"grid",gridTemplateColumns:sel?"1fr 340px":"1fr",gap:18,transition:"all 0.2s"}}>
+    <div style={{display:"grid",gridTemplateColumns:sel&&window.innerWidth>=640?"1fr 340px":"1fr",gap:18,transition:"all 0.2s"}}>
 
       {/* LEFT — Stock list */}
       <div>
@@ -10173,6 +10173,8 @@ function GurusPage({ isPremium, onNeedPremium }) {
             </div>
           ) : (
             <>
+              <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+              <div style={{minWidth:480}}>
               <div style={{display:"grid",gridTemplateColumns:"50px 1fr 80px 80px 80px",gap:8,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
                 {["#","EMPRESA","PESO","PRECIO","HOY"].map(h=>(
                   <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
@@ -10192,17 +10194,19 @@ function GurusPage({ isPremium, onNeedPremium }) {
                       </div>
                     </div>
                     <div>
-                      <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{h.weight?.toFixed(1)||"—"}%</div>
+                      <div style={{fontSize:12,fontWeight:700,color:C.text}}>{h.weight?.toFixed(1)||"—"}%</div>
                       <div style={{width:"100%",height:3,background:"rgba(255,255,255,0.05)",borderRadius:2,marginTop:3}}>
                         <div style={{width:`${Math.min((h.weight||0)*5,100)}%`,height:"100%",background:"linear-gradient(90deg,#8B5CF6,#6D28D9)",borderRadius:2}}/>
                       </div>
                     </div>
-                    <div style={{fontSize:13,fontWeight:700,color:"#F1F5F9"}}>{h.price?`$${h.price.toFixed(2)}`:"—"}</div>
+                    <div style={{fontSize:13,fontWeight:700,color:C.text}}>{h.price?`$${h.price.toFixed(2)}`:"—"}</div>
                     <div style={{fontSize:12,fontWeight:700,color:pos?"#00D26A":"#FF4D6A"}}>{h.change!=null?`${pos?"+":""}${h.change.toFixed(2)}%`:"—"}</div>
                   </div>
                 );
               })}
               {arkData?.fallback && <div style={{textAlign:"center",fontSize:11,color:C.muted2,padding:"8px 0"}}>* Datos del último reporte disponible</div>}
+              </div>
+              </div>
             </>
           )}
         </div>
@@ -10246,11 +10250,12 @@ function GurusPage({ isPremium, onNeedPremium }) {
               <div style={{fontSize:13,color:C.muted}}>No hay transacciones recientes · Haz clic en Actualizar</div>
             </div>
           ) : (
-            <div style={{display:"flex",flexDirection:"column",gap:5}}>
+            <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+            <div style={{display:"flex",flexDirection:"column",gap:5,minWidth:520}}>
               {/* Table header */}
-              <div style={{display:"grid",gridTemplateColumns:"44px 1fr 90px 100px 80px 70px",gap:10,padding:"7px 14px",background:"rgba(255,255,255,0.02)",borderRadius:10,border:"1px solid rgba(255,255,255,0.04)",marginBottom:4}}>
+              <div style={{display:"grid",gridTemplateColumns:"44px minmax(140px,1fr) 70px 100px 90px 70px",gap:10,padding:"7px 14px",background:C.card2,borderRadius:10,border:`1px solid ${C.border}`,marginBottom:4}}>
                 {["","EJECUTIVO","TICKER","MONTO","TIPO","FECHA"].map(h=>(
-                  <div key={h} style={{fontSize:10,fontWeight:700,color:"#334155",letterSpacing:"0.07em",textTransform:"uppercase"}}>{h}</div>
+                  <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted,letterSpacing:"0.07em",textTransform:"uppercase"}}>{h}</div>
                 ))}
               </div>
               {(insiders?.transactions||[]).map((t,i) => {
@@ -10266,24 +10271,24 @@ function GurusPage({ isPremium, onNeedPremium }) {
                   </svg>
                 );
                 return (
-                  <div key={i} style={{display:"grid",gridTemplateColumns:"44px 1fr 90px 100px 80px 70px",gap:10,alignItems:"center",padding:"11px 14px",background:i%2===0?"rgba(255,255,255,0.015)":"transparent",borderRadius:10,border:`1px solid ${isCompra?"rgba(0,210,106,0.06)":"rgba(255,77,106,0.06)"}`,borderLeft:`3px solid ${isCompra?"rgba(0,210,106,0.5)":"rgba(255,77,106,0.5)"}`,transition:"background 0.15s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background=isCompra?"rgba(0,210,106,0.04)":"rgba(255,77,106,0.04)"}
-                    onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"rgba(255,255,255,0.015)":"transparent"}>
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"44px minmax(140px,1fr) 70px 100px 90px 70px",gap:10,alignItems:"center",padding:"11px 14px",background:i%2===0?C.card2:"transparent",borderRadius:10,border:`1px solid ${isCompra?"rgba(0,210,106,0.1)":"rgba(255,77,106,0.1)"}`,borderLeft:`3px solid ${isCompra?"rgba(0,210,106,0.5)":"rgba(255,77,106,0.5)"}`,transition:"background 0.15s",minWidth:500}}
+                    onMouseEnter={e=>e.currentTarget.style.background=isCompra?"rgba(0,210,106,0.06)":"rgba(255,77,106,0.06)"}
+                    onMouseLeave={e=>e.currentTarget.style.background=i%2===0?C.card2:"transparent"}>
                     {/* Icon */}
                     <div style={{width:36,height:36,borderRadius:10,background:isCompra?"rgba(0,210,106,0.1)":"rgba(255,77,106,0.1)",border:`1px solid ${isCompra?"rgba(0,210,106,0.2)":"rgba(255,77,106,0.2)"}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
                       {isCompra ? <BuyIcon/> : <SellIcon/>}
                     </div>
                     {/* Nombre + rol */}
                     <div style={{minWidth:0}}>
-                      <div style={{fontWeight:700,color:"#E2E8F0",fontSize:13,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t.name||"—"}</div>
-                      <div style={{fontSize:11,color:"#475569",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t.role||""}{t.role&&t.company?" · ":""}{t.company||""}</div>
+                      <div style={{fontWeight:700,color:C.text,fontSize:13,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t.name||"—"}</div>
+                      <div style={{fontSize:11,color:C.muted,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t.role||""}{t.role&&t.company?" · ":""}{t.company||""}</div>
                     </div>
                     {/* Ticker */}
-                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:14,color:t.ticker?.includes("BTC")?"#F7931A":"#A78BFA"}}>{t.ticker||"—"}</div>
+                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:t.ticker?.includes("BTC")?"#F7931A":C.accent}}>{t.ticker||"—"}</div>
                     {/* Monto */}
                     <div>
-                      <div style={{fontWeight:700,color:"#F1F5F9",fontSize:13}}>{t.value>0?fmt$(t.value):"—"}</div>
-                      {t.shares>0&&<div style={{fontSize:10,color:"#475569"}}>{t.shares?.toLocaleString()} acc.</div>}
+                      <div style={{fontWeight:700,color:C.text,fontSize:13}}>{t.value>0?fmt$(t.value):"—"}</div>
+                      {t.shares>0&&<div style={{fontSize:10,color:C.muted}}>{t.shares?.toLocaleString()} acc.</div>}
                     </div>
                     {/* Badge tipo */}
                     <div>
@@ -10295,13 +10300,14 @@ function GurusPage({ isPremium, onNeedPremium }) {
                       </span>
                     </div>
                     {/* Fecha */}
-                    <div style={{fontSize:11,color:"#475569",textAlign:"right"}}>{t.filed||""}</div>
+                    <div style={{fontSize:11,color:C.muted,textAlign:"right"}}>{t.filed||""}</div>
                   </div>
                 );
               })}
-              <div style={{textAlign:"center",fontSize:10,color:"#1e293b",padding:"10px 0",letterSpacing:"0.05em"}}>
+              <div style={{textAlign:"center",fontSize:10,color:C.muted,padding:"10px 0",letterSpacing:"0.05em"}}>
                 FUENTE: SEC EDGAR · FORM 4 · {insiders?.source||"DATOS EN TIEMPO REAL"}
               </div>
+            </div>
             </div>
           )}
         </div>
@@ -12043,8 +12049,9 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
 
       {/* Table */}
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+        <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         {/* Header row */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 1fr 90px 70px",gap:0,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
+        <div style={{display:"grid",gridTemplateColumns:"minmax(130px,1fr) 55px 80px minmax(120px,1fr) 90px 80px",gap:0,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,minWidth:560}}>
           {[isEN?"Member":"Miembro","Party","Ticker",isEN?"Asset":"Activo",isEN?"Amount":"Monto",isEN?"Date":"Fecha"].map(h=>(
             <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.5}}>{h}</div>
           ))}
@@ -12055,7 +12062,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
         ) : filtered.length === 0 ? (
           <div style={{padding:"40px",textAlign:"center",color:C.muted}}>{isEN?"No results":"Sin resultados"}</div>
         ) : filtered.map((t,i)=>(
-          <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 1fr 90px 70px",gap:0,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.1s"}}
+          <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(130px,1fr) 55px 80px minmax(120px,1fr) 90px 80px",gap:0,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.1s",minWidth:560}}
             onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.05)"}
             onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
             {/* Member */}
@@ -12086,6 +12093,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
             </div>
           </div>
         ))}
+        </div>{/* /overflowX scroll */}
       </div>
 
       <p style={{color:C.muted,fontSize:11,marginTop:14,textAlign:"center"}}>
@@ -12424,7 +12432,8 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       </div>
 
       {/* ── TABLE ─────────────────────────────────── */}
-      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+        <div style={{minWidth:680}}>
 
         {/* Stocks header */}
         {tab==="stocks" && (
@@ -12504,6 +12513,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             </div>
           );
         })}
+        </div>{/* /minWidth:680 */}
       </div>
 
       {/* ── NOTIFICATION HINT ─────────────────────── */}
