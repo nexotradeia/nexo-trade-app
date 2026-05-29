@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 17:30:32
+// NEXO TRADE — build: 2026-05-29 17:42:04
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -12056,12 +12056,12 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
           <div style={{padding:"40px",textAlign:"center",color:C.muted}}>{isEN?"No results":"Sin resultados"}</div>
         ) : filtered.map((t,i)=>(
           <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 1fr 90px 70px",gap:0,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.1s"}}
-            onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.03)"}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.05)"}
             onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
             {/* Member */}
             <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0}}>
-              <span style={{fontSize:13,fontWeight:700,color:"#F1F5F9",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.name}</span>
-              <span style={{fontSize:11,color:"#94A3B8",fontWeight:500}}>{t.house} · {t.state}</span>
+              <span style={{fontSize:13,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.name}</span>
+              <span style={{fontSize:11,color:C.muted,fontWeight:500}}>{t.house} · {t.state}</span>
             </div>
             {/* Party */}
             <div style={{display:"flex",alignItems:"center"}}>
@@ -12069,20 +12069,20 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
             </div>
             {/* Ticker */}
             <div style={{display:"flex",alignItems:"center",gap:6}}>
-              <span style={{fontSize:11,fontWeight:800,background:"rgba(0,229,143,0.1)",color:"#00e58f",borderRadius:6,padding:"2px 7px",fontFamily:"monospace"}}>{t.ticker}</span>
+              <span style={{fontSize:11,fontWeight:800,background:"rgba(0,168,255,0.1)",color:C.accent,borderRadius:6,padding:"2px 7px",fontFamily:"monospace"}}>{t.ticker}</span>
               <span style={{fontSize:14,fontWeight:900,color:typeColor(t.type)}}>{typeIcon(t.type)}</span>
             </div>
             {/* Asset name */}
             <div style={{display:"flex",alignItems:"center"}}>
-              <span style={{fontSize:12,color:"#CBD5E1",fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.asset}</span>
+              <span style={{fontSize:12,color:C.muted,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.asset}</span>
             </div>
             {/* Amount */}
             <div style={{display:"flex",alignItems:"center"}}>
-              <span style={{fontSize:12,color:"#E2E8F0",fontWeight:700}}>{t.amount}</span>
+              <span style={{fontSize:12,color:C.text,fontWeight:700}}>{t.amount}</span>
             </div>
             {/* Date */}
             <div style={{display:"flex",alignItems:"center"}}>
-              <span style={{fontSize:11,color:"#94A3B8",fontWeight:500}}>{t.date?.slice(0,10)}</span>
+              <span style={{fontSize:11,color:C.muted,fontWeight:500}}>{t.date?.slice(0,10)}</span>
             </div>
           </div>
         ))}
