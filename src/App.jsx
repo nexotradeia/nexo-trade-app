@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 17:52:39
+// NEXO TRADE — build: 2026-05-29 18:04:38
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9213,6 +9213,7 @@ function FlowPage({isPremium,onNeedPremium}){
   const [paused,setPaused]=useState(false);
   const [highlight,setHighlight]=useState(null);
   const [minPrem,setMinPrem]=useState(0);
+  const [fullscreen,setFullscreen]=useState(false);
 
   useEffect(()=>{
     if(paused||!isPremium) return;
@@ -9271,7 +9272,7 @@ function FlowPage({isPremium,onNeedPremium}){
   });
 
   return(
-    <div style={{maxWidth:980,margin:"0 auto"}}>
+    <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:980,margin:"0 auto"}}>
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)"}}/>
@@ -9298,6 +9299,13 @@ function FlowPage({isPremium,onNeedPremium}){
             <button onClick={()=>setPaused(v=>!v)}
               style={{background:paused?"rgba(245,158,11,0.15)":"rgba(0,210,106,0.1)",border:`1px solid ${paused?"rgba(245,158,11,0.3)":"rgba(0,210,106,0.2)"}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700,color:paused?"#F59E0B":"#00D26A",cursor:"pointer"}}>
               {paused?"▶ Reanudar":"⏸ Pausar"}
+            </button>
+            {/* Full-screen toggle */}
+            <button onClick={()=>setFullscreen(v=>!v)} title={fullscreen?"Salir de pantalla completa":"Pantalla completa"}
+              style={{background:fullscreen?"rgba(139,92,246,0.25)":"rgba(255,255,255,0.06)",border:`1px solid ${fullscreen?"rgba(139,92,246,0.5)":"rgba(255,255,255,0.12)"}`,borderRadius:10,padding:"7px 10px",fontSize:16,cursor:"pointer",lineHeight:1,color:fullscreen?"#A78BFA":"#94A3B8",transition:"all 0.2s"}}
+              onMouseEnter={e=>e.currentTarget.style.background=fullscreen?"rgba(139,92,246,0.35)":"rgba(255,255,255,0.1)"}
+              onMouseLeave={e=>e.currentTarget.style.background=fullscreen?"rgba(139,92,246,0.25)":"rgba(255,255,255,0.06)"}>
+              {fullscreen?"⊠":"⛶"}
             </button>
           </div>
         </div>
@@ -9328,7 +9336,7 @@ function FlowPage({isPremium,onNeedPremium}){
       </div>
 
       {/* Feed */}
-      <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:600,overflowY:"auto"}}>
+      <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:fullscreen?"calc(100vh - 280px)":600,overflowY:"auto"}}>
         {visible.map(item=>{
           const isNew=item.id===highlight;
           const bull=item.isCall;
