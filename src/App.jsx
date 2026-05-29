@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 18:57:25
+// NEXO TRADE — build: 2026-05-29 19:01:37
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9355,7 +9355,7 @@ function FlowPage({isPremium,onNeedPremium}){
       <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
       <div style={{minWidth:680}}>
       {/* Table header */}
-      <div style={{display:"grid",gridTemplateColumns:"70px 60px 80px 90px 80px 70px 80px 80px 1fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
         {["HORA","TICKER","TIPO","PREMIUM","TAMAÑO","STRIKE","EXPIRY","OTM","SENTIMIENTO"].map(h=>(
           <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
         ))}
@@ -9373,7 +9373,7 @@ function FlowPage({isPremium,onNeedPremium}){
           const bigPrem=item.premium>=1e6;
           return(
             <div key={item.id} style={{
-              display:"grid",gridTemplateColumns:"70px 60px 80px 90px 80px 70px 80px 80px 1fr",
+              display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",
               gap:6,padding:"10px 16px",
               background:isNew?`${accentC}12`:gold?"rgba(245,158,11,0.04)":dark?"rgba(139,92,246,0.03)":"rgba(255,255,255,0.01)",
               border:`1px solid ${isNew?accentC+"50":gold?"rgba(245,158,11,0.15)":dark?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)"}`,
@@ -12369,7 +12369,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   );
 
   return (
-    <div style={{maxWidth:1100,margin:"0 auto",padding:"0 4px 60px"}}>
+    <div style={{maxWidth:1380,margin:"0 auto",padding:"0 4px 60px"}}>
 
       {/* ── ALERT TOASTS ─────────────────────────── */}
       {alerts.length>0 && (
@@ -14467,8 +14467,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:page===20?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:page===20?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===20||page===36)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===20||page===36)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -14485,8 +14485,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:page===20?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:page===20?"none":undefined}}>
+        <div style={{gridColumn:(page===20||page===36)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===20||page===36)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
