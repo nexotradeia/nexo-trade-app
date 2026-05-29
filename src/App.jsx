@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 19:03:26
+// NEXO TRADE — build: 2026-05-29 19:04:04
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -13128,7 +13128,7 @@ function WelcomeModal({name, onClose, onGoVip}){
 export default function App(){
   const [posts,setPosts]       = useState([]);
   const [newPostId,setNewPostId]= useState(null);
-  const [page,setPage]         = useState(0);
+  const [page,setPage]         = useState(()=>{ try{ const p=parseInt(localStorage.getItem("nexo_page")||"0"); return isNaN(p)?0:p; }catch{return 0;} });
   const [sent,setSent]         = useState("all");
   const [auth,setAuth]         = useState(null);
   const [user,setUser]         = useState(_getSavedUser); // ← restaura al instante
@@ -13146,6 +13146,9 @@ export default function App(){
   const [showAlerts,setAlerts] = useState(false);
   const [communityCount, setCommunityCount] = useState(3200);
   const animatedCount = useCountUp(communityCount, 2500);
+
+  // ── Guardar página actual en localStorage (restaura al refrescar) ────────
+  useEffect(()=>{ try{ localStorage.setItem("nexo_page", String(page)); }catch{} },[page]);
 
   // ── Fetch contador real de comunidad desde Supabase ─────────────────────
   useEffect(()=>{
