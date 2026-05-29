@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 15:11:12
+// NEXO TRADE — build: 2026-05-29 17:23:02
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1506,7 +1506,7 @@ function AIAssistant({lang,onClose}){
   };
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(3px)"}}
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9995,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(3px)"}}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{background:C.surface,borderRadius:22,width:480,maxWidth:"94vw",height:560,display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",border:`1px solid ${C.border}`,position:"relative",zIndex:2001}}>
         {/* Header */}
@@ -1966,7 +1966,7 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
   };
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#00000077",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+    <div style={{position:"fixed",inset:0,background:"#00000077",zIndex:9990,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{background:C.surface,borderRadius:22,width:500,maxWidth:"96vw",maxHeight:"90vh",overflowY:"auto",boxShadow:C.shadowMd,border:`1px solid ${C.border}`}}>
 
         {/* Header */}
