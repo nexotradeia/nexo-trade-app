@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 18:04:38
+// NEXO TRADE — build: 2026-05-29 18:09:55
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5306,9 +5306,6 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
           <span style={{fontSize:13}}>←</span> {isEN?"Sign out":"Cerrar sesión"}
         </button>
       )}
-
-      {/* ── BANNER AFILIADOS (sidebar izquierdo) ── */}
-      <AffiliateBanner/>
 
       <div style={{padding:"0 4px 4px",textAlign:"center"}}>
         <div style={{fontSize:10,color:"#CBD5E1",lineHeight:2}}>
