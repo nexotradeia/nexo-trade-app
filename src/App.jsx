@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 14:50:19
+// NEXO TRADE — build: 2026-05-29 14:53:44
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5016,6 +5016,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
   const [showMore, setShowMore] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [editName, setEditName] = useState("");
+  const [nameStatus, setNameStatus] = useState(null); // null | "checking" | "available" | "taken" | "saved"
 
   const isEN = lang==="en";
   const navItems = [
@@ -5099,41 +5100,58 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
             {/* Nombre + @handle — editable */}
             <div style={{marginBottom:12}}>
               {editingName ? (
-                <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
-                  <input
-                    value={editName}
-                    onChange={e=>setEditName(e.target.value.replace(/[^a-zA-Z0-9_]/g,"").slice(0,20))}
-                    onKeyDown={async e=>{
-                      if(e.key==="Enter"){
-                        const newName = editName.trim();
-                        if(newName.length>=3){
-                          await supabase.from("profiles").update({username:newName}).eq("id",user.id);
-                          onUserUpdate&&onUserUpdate({...user,username:newName,name:newName});
-                        }
-                        setEditingName(false);
+                <div style={{marginBottom:4}}>
+                  <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                    <input
+                      value={editName}
+                      onChange={async e=>{
+                        const v=e.target.value.replace(/[^a-zA-Z0-9_]/g,"").slice(0,20);
+                        setEditName(v);
+                        if(v.length<3){setNameStatus(null);return;}
+                        setNameStatus("checking");
+                        const {data}=await supabase.from("profiles").select("id").eq("username",v).neq("id",user.id).limit(1);
+                        setNameStatus(data&&data.length>0?"taken":"available");
+                      }}
+                      autoFocus
+                      placeholder="nuevo_username"
+                      style={{flex:1,background:"rgba(139,92,246,0.12)",border:`1.5px solid ${nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#00e58f":"rgba(139,92,246,0.5)"}`,borderRadius:8,padding:"5px 9px",color:"#F1F5F9",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
+                    />
+                    <button onClick={async()=>{
+                      const newName=editName.trim();
+                      if(newName.length<3||nameStatus==="taken")return;
+                      setNameStatus("checking");
+                      // Doble verificación
+                      const{data:chk}=await supabase.from("profiles").select("id").eq("username",newName).neq("id",user.id).limit(1);
+                      if(chk&&chk.length>0){setNameStatus("taken");return;}
+                      await supabase.from("profiles").update({username:newName,user_name:newName}).eq("id",user.id);
+                      onUserUpdate&&onUserUpdate({...user,username:newName,name:newName,user_name:newName});
+                      // Email confirmación
+                      if(user.email){
+                        fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:user.email,subject:"Tu username en NexoTrade fue actualizado",message:`Tu nuevo username es @${newName}. Si no hiciste este cambio, contáctanos en hola@nexotradeia.com`})}).catch(()=>{});
                       }
-                      if(e.key==="Escape") setEditingName(false);
-                    }}
-                    autoFocus
-                    placeholder="nuevo_username"
-                    style={{flex:1,background:"rgba(139,92,246,0.12)",border:"1.5px solid rgba(139,92,246,0.5)",borderRadius:8,padding:"5px 9px",color:"#F1F5F9",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
-                  />
-                  <button onClick={async()=>{
-                    const newName = editName.trim();
-                    if(newName.length>=3){
-                      await supabase.from("profiles").update({username:newName}).eq("id",user.id);
-                      onUserUpdate&&onUserUpdate({...user,username:newName,name:newName});
-                    }
-                    setEditingName(false);
-                  }} style={{background:"#8B5CF6",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>✓</button>
+                      setNameStatus("saved");
+                      setTimeout(()=>{setEditingName(false);setNameStatus(null);},1500);
+                    }} disabled={nameStatus==="taken"||nameStatus==="checking"||editName.length<3}
+                      style={{background:nameStatus==="taken"||editName.length<3?"#334155":"#8B5CF6",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",opacity:nameStatus==="taken"||editName.length<3?0.5:1}}>✓</button>
+                    <button onClick={()=>{setEditingName(false);setNameStatus(null);}}
+                      style={{background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:11,cursor:"pointer"}}>✕</button>
+                  </div>
+                  {/* Status indicator */}
+                  {nameStatus&&<div style={{fontSize:11,marginTop:4,fontWeight:600,color:nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#00e58f":nameStatus==="saved"?"#00e58f":"#94a3b8"}}>
+                    {nameStatus==="checking"?"🔍 Verificando..."
+                    :nameStatus==="taken"?"✗ Username ya en uso"
+                    :nameStatus==="available"?"✓ Disponible"
+                    :nameStatus==="saved"?"✅ ¡Guardado! Revisá tu email":""}
+                  </div>}
+                  <div style={{fontSize:10,color:"rgba(148,163,184,0.5)",marginTop:3}}>Solo letras, números y _ · Mín. 3 caracteres</div>
                 </div>
               ) : (
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   <div style={{fontWeight:800,color:"#F1F5F9",fontSize:15,letterSpacing:-0.3,lineHeight:1.2,flex:1}}>
                     {user.username || user.name || (user.email?.includes("@") ? user.email.split("@")[0] : "Trader")}
                   </div>
-                  <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);}}
-                    title={lang==="en"?"Edit name":"Editar nombre"}
+                  <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);setNameStatus(null);}}
+                    title={lang==="en"?"Edit username":"Editar username"}
                     style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:6,padding:"3px 6px",color:"rgba(139,92,246,0.7)",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>
                 </div>
               )}
@@ -13714,7 +13732,7 @@ export default function App(){
         <div style={{display:"flex",alignItems:"center",gap:8,height:58,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Logo — integrado al navbar */}
-          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(!user);}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
             <img src="/logo_nexo.png" alt="NEXO TRADE" className="nexo-logo-img"
               style={{height:54,width:"auto",objectFit:"contain",borderRadius:8,display:"block"}}
               onError={e=>{e.target.style.display="none";}}/>
