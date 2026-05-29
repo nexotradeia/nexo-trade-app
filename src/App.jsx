@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 19:24:32
+// NEXO TRADE — build: 2026-05-29 19:24:57
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11440,7 +11440,7 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
 }
 
 // ── WATCHLIST PAGE ────────────────────────────────────────────────────────────
-function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false }) {
+function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false, onNeedPremium }) {
   const isEN = lang==="en";
   const LS_KEY = `nexo_watchlist_${user?.id||"guest"}`;
 
@@ -11552,7 +11552,20 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false 
   const pctColor = v => v==null?"#64748B":v>=0?"#10B981":"#EF4444";
   const pctFmt  = v => v==null?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
   const numFmt  = v => v==null?"—":Number(v).toFixed(1);
-  const upgBtn  = <span style={{color:"#3B82F6",fontWeight:600,fontSize:11,cursor:"pointer"}}>Upgrade to <strong>Pro</strong></span>;
+  const upgBtn = (
+    <button onClick={onNeedPremium} style={{
+      background:"linear-gradient(135deg,#7C3AED,#A855F7)",
+      border:"none",borderRadius:20,padding:"3px 10px",
+      color:"#fff",fontSize:10,fontWeight:800,cursor:"pointer",
+      letterSpacing:0.4,whiteSpace:"nowrap",
+      boxShadow:"0 2px 8px rgba(124,58,237,0.35)",
+      transition:"all 0.15s",display:"inline-flex",alignItems:"center",gap:4
+    }}
+    onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,#6D28D9,#9333EA)";e.currentTarget.style.transform="scale(1.05)";}}
+    onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,#7C3AED,#A855F7)";e.currentTarget.style.transform="scale(1)";}}>
+      ✦ VIP
+    </button>
+  );
   // vip(value, suffix) → muestra dato si es premium, si no botón
   const vip = (val, suffix="", color=null) => isPremium
     ? <span style={{fontFamily:"monospace",color:color||(val!=null&&typeof val==="number"&&suffix==="%"?pctColor(val):"#1E293B")}}>{val!=null?Number(val).toFixed(1)+suffix:"—"}</span>
