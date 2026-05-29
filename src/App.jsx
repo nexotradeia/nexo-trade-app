@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 04:06:40
+// NEXO TRADE — build: 2026-05-28 20:30:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4901,6 +4901,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"⛏️", label:isEN?"Commodities":"Commodities",              idx:18},
     {icon:"🔍", label:isEN?"Screener":"Screener",                    idx:17, vip:true},
     {icon:"💼", label:isEN?"My Portfolio":"Mi Portfolio",            idx:37, vip:true},
+    {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
+    {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
     {icon:"⚡", label:"Trending",                                    idx:7},
@@ -10728,10 +10730,350 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"🏛 Congress Trades":"🏛 Trades Congreso",idx:35,vip:true},
   {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
   {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
+  {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
   {label:isEN?"🛠️ Tools":"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
+
+// ── NOTIFICATIONS PAGE ────────────────────────────────────────────────────────
+function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile, onNeedAuth }) {
+  const isEN = lang==="en";
+  const [tab, setTab] = useState("all"); // all | social | mentions | system
+  const [read, setRead] = useState(()=>{ try{return new Set(JSON.parse(localStorage.getItem("nexo_notif_read")||"[]"));}catch{return new Set();}});
+
+  if(!user) return(
+    <div style={{textAlign:"center",padding:"60px 20px",maxWidth:400,margin:"0 auto"}}>
+      <div style={{fontSize:56,marginBottom:16}}>🔔</div>
+      <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,marginBottom:8}}>{isEN?"Notifications":"Notificaciones"}</h2>
+      <p style={{color:"#64748B",fontSize:14,marginBottom:24}}>{isEN?"Log in to see your notifications.":"Inicia sesión para ver tus notificaciones."}</p>
+      <button onClick={onNeedAuth} style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
+        {isEN?"Sign In":"Entrar"}
+      </button>
+    </div>
+  );
+
+  // Build notifications from existing data
+  const myPosts = posts.filter(p=>p.user_id===user.id||p.authorId===user.id);
+
+  // Likes on my posts
+  const likeNotifs = myPosts.flatMap(p=> {
+    const likes = p.likes||0;
+    if(likes===0) return [];
+    return [{
+      id:`like_${p.id}`, type:"like", icon:"❤️",
+      text: isEN ? `Your post about <strong>${p.ticker||"markets"}</strong> got ${likes} like${likes>1?"s":""}` : `Tu post sobre <strong>${p.ticker||"mercados"}</strong> recibió ${likes} like${likes>1?"s":""}`,
+      time: p.created_at, post: p,
+    }];
+  });
+
+  // Reposts
+  const repostNotifs = myPosts.flatMap(p=>{
+    const reps = p.reposts_count||p.reposts||0;
+    if(reps===0) return [];
+    return [{
+      id:`rep_${p.id}`, type:"repost", icon:"🔁",
+      text: isEN ? `Your post was reposted ${reps} time${reps>1?"s":""}` : `Tu post fue reposteado ${reps} vez${reps>1?"ces":""}`,
+      time: p.created_at, post: p,
+    }];
+  });
+
+  // Mentions of @username in any post
+  const myName = (user.username||user.name||"").toLowerCase();
+  const mentionNotifs = myName ? posts.filter(p=>(p.user_id!==user.id&&p.authorId!==user.id)&&(p.text||"").toLowerCase().includes("@"+myName)).map(p=>({
+    id:`mention_${p.id}`, type:"mention", icon:"💬",
+    text: isEN ? `<strong>@${p.author||p.authorName||"Someone"}</strong> mentioned you in a post` : `<strong>@${p.author||p.authorName||"Alguien"}</strong> te mencionó en un post`,
+    time: p.created_at, post: p,
+  })) : [];
+
+  // Followers count notification
+  const followNotifs = following.length>0 ? [{
+    id:"follow_count", type:"follow", icon:"👥",
+    text: isEN ? `You're following <strong>${following.length}</strong> trader${following.length>1?"s":""}` : `Sigues a <strong>${following.length}</strong> trader${following.length>1?"s":""}`,
+    time: new Date().toISOString(),
+  }] : [];
+
+  // System notifications
+  const systemNotifs = [
+    {id:"sys_welcome", type:"system", icon:"🎉",
+     text: isEN ? "Welcome to NexoTrade! Complete your profile to get <strong>+50 points</strong>" : "¡Bienvenido a NexoTrade! Completa tu perfil para ganar <strong>+50 puntos</strong>",
+     time: user.created_at||new Date().toISOString()},
+    {id:"sys_vip", type:"system", icon:"✦",
+     text: isEN ? "Upgrade to <strong>VIP</strong> and access Picks, Portfolio Tracker, and more for $9.99/mo" : "Actualiza a <strong>VIP</strong> y accede a Picks, Portfolio Tracker y más por $9.99/mes",
+     time: new Date(Date.now()-86400000).toISOString()},
+  ];
+
+  const all = [...mentionNotifs, ...likeNotifs, ...repostNotifs, ...followNotifs, ...systemNotifs]
+    .sort((a,b)=>new Date(b.time)-new Date(a.time));
+
+  const filtered = tab==="all" ? all
+    : tab==="social" ? all.filter(n=>["like","repost","follow"].includes(n.type))
+    : tab==="mentions" ? all.filter(n=>n.type==="mention")
+    : all.filter(n=>n.type==="system");
+
+  const unread = all.filter(n=>!read.has(n.id)).length;
+
+  const markAllRead = () => {
+    const newRead = new Set([...read, ...all.map(n=>n.id)]);
+    setRead(newRead);
+    try { localStorage.setItem("nexo_notif_read", JSON.stringify([...newRead])); } catch{}
+  };
+
+  const timeAgo = (t) => {
+    const s = Math.floor((Date.now()-new Date(t))/1000);
+    if(s<60) return isEN?`${s}s ago`:`hace ${s}s`;
+    if(s<3600) return isEN?`${Math.floor(s/60)}m ago`:`hace ${Math.floor(s/60)}m`;
+    if(s<86400) return isEN?`${Math.floor(s/3600)}h ago`:`hace ${Math.floor(s/3600)}h`;
+    return isEN?`${Math.floor(s/86400)}d ago`:`hace ${Math.floor(s/86400)}d`;
+  };
+
+  const TYPE_COLOR = {like:"#FF4D6A",repost:"#00D26A",mention:"#00A8FF",follow:"#8B5CF6",system:"#F59E0B"};
+
+  return(
+    <div style={{maxWidth:640,margin:"0 auto",padding:"0 4px"}}>
+      {/* Header */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+        <div>
+          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:0,letterSpacing:-0.5}}>
+            🔔 {isEN?"Notifications":"Notificaciones"}
+            {unread>0&&<span style={{marginLeft:8,background:"#FF4D6A",color:"#fff",borderRadius:20,padding:"2px 8px",fontSize:11,fontWeight:800,verticalAlign:"middle"}}>{unread}</span>}
+          </h2>
+          <div style={{fontSize:11,color:"#475569",marginTop:2}}>{all.length} {isEN?"total notifications":"notificaciones en total"}</div>
+        </div>
+        {unread>0&&(
+          <button onClick={markAllRead} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"8px 14px",color:"#64748B",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+            {isEN?"Mark all read":"Marcar todo leído"}
+          </button>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:6,marginBottom:14,background:"rgba(255,255,255,0.03)",borderRadius:12,padding:4}}>
+        {[["all",isEN?"All":"Todos"],["social","Social"],["mentions",isEN?"Mentions":"Menciones"],["system",isEN?"System":"Sistema"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setTab(k)} style={{flex:1,background:tab===k?"rgba(255,255,255,0.08)":"transparent",border:"none",borderRadius:9,padding:"8px 0",color:tab===k?"#F1F5F9":"#64748B",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+            {l}
+            {k==="all"&&unread>0&&<span style={{marginLeft:4,background:"#FF4D6A",color:"#fff",borderRadius:10,padding:"1px 5px",fontSize:9,fontWeight:800}}>{unread}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* List */}
+      {filtered.length===0 ? (
+        <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.01)",border:"1px dashed rgba(255,255,255,0.08)",borderRadius:18}}>
+          <div style={{fontSize:40,marginBottom:12}}>🔕</div>
+          <div style={{color:"#64748B",fontSize:14}}>{isEN?"No notifications in this category":"No hay notificaciones en esta categoría"}</div>
+        </div>
+      ) : filtered.map(n=>{
+        const isUnread = !read.has(n.id);
+        const col = TYPE_COLOR[n.type]||"#475569";
+        return(
+          <div key={n.id} onClick={()=>{const nr=new Set([...read,n.id]);setRead(nr);try{localStorage.setItem("nexo_notif_read",JSON.stringify([...nr]));}catch{}}}
+            style={{display:"flex",gap:12,padding:"14px 16px",marginBottom:8,background:isUnread?"rgba(255,255,255,0.04)":"rgba(255,255,255,0.01)",border:`1px solid ${isUnread?col+"22":"rgba(255,255,255,0.05)"}`,borderRadius:14,cursor:"pointer",transition:"background 0.15s",position:"relative"}}>
+            {isUnread&&<div style={{position:"absolute",top:16,right:16,width:7,height:7,borderRadius:"50%",background:col,boxShadow:`0 0 8px ${col}`}}/>}
+            <div style={{width:40,height:40,borderRadius:12,background:`${col}18`,border:`1px solid ${col}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
+              {n.icon}
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:13,color:"#CBD5E1",lineHeight:1.5}} dangerouslySetInnerHTML={{__html:n.text}}/>
+              {n.post && (
+                <div style={{fontSize:11,color:"#475569",marginTop:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%"}}>
+                  {(n.post.text||"").slice(0,80)}{(n.post.text||"").length>80?"…":""}
+                </div>
+              )}
+              <div style={{fontSize:10,color:"#334155",marginTop:4,fontWeight:600}}>{timeAgo(n.time)}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── WATCHLIST PAGE ────────────────────────────────────────────────────────────
+function WatchlistPage({ user, lang="es", onNeedAuth, posts=[] }) {
+  const isEN = lang==="en";
+  const LS_KEY = `nexo_watchlist_${user?.id||"guest"}`;
+
+  const DEFAULT_TICKERS = ["AAPL","NVDA","TSLA","MSFT","BTC","ETH","SPY","AMZN"];
+
+  const [tickers, setTickers] = useState(()=>{
+    try { const s=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return s||DEFAULT_TICKERS; } catch { return DEFAULT_TICKERS; }
+  });
+  const [prices, setPrices] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [input, setInput] = useState("");
+  const [removing, setRemoving] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  useEffect(()=>{
+    try { localStorage.setItem(LS_KEY, JSON.stringify(tickers)); } catch{}
+  },[tickers, LS_KEY]);
+
+  const fetchPrices = async () => {
+    if(!tickers.length){ setLoading(false); return; }
+    setLoading(true);
+    const cryptoMap={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT"};
+    const results = await Promise.all(tickers.map(async tk=>{
+      const sym = cryptoMap[tk]||tk;
+      try {
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
+        const d = await r.json();
+        if(d.c>0) return {ticker:tk, price:d.c, change:d.dp||0, high:d.h||0, low:d.l||0, open:d.o||0, prev:d.pc||0};
+      } catch{}
+      return {ticker:tk, price:null, change:null};
+    }));
+    const map={};
+    results.forEach(r=>{ map[r.ticker]=r; });
+    setPrices(map);
+    setLastUpdated(new Date());
+    setLoading(false);
+  };
+
+  useEffect(()=>{ fetchPrices(); },[tickers]);
+
+  const addTicker = () => {
+    const tk = input.trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
+    if(!tk||tickers.includes(tk)||tickers.length>=30) return;
+    setTickers(prev=>[...prev, tk]);
+    setInput("");
+  };
+
+  const removeTicker = (tk) => {
+    setTickers(prev=>prev.filter(t=>t!==tk));
+    setRemoving(null);
+  };
+
+  // get top posts for ticker
+  const topPost = (tk) => posts.filter(p=>p.ticker===tk).sort((a,b)=>b.likes-a.likes)[0]||null;
+
+  const fmtPrice = (p, tk) => {
+    if(p==null) return "—";
+    const isCrypto = ["BTC","ETH","SOL","BNB","XRP","ADA","DOGE","AVAX"].includes(tk);
+    if(isCrypto && p>1000) return "$"+p.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
+    if(p>=100) return "$"+p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+    return "$"+p.toFixed(4).replace(/\.?0+$/,"");
+  };
+
+  return(
+    <div style={{maxWidth:720,margin:"0 auto",padding:"0 4px"}}>
+
+      {/* Header */}
+      <div style={{position:"relative",borderRadius:22,padding:"20px 24px 18px",marginBottom:14,background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(15,22,40,0.95))",border:"1px solid rgba(0,168,255,0.18)",boxShadow:"0 8px 32px rgba(0,0,0,0.3)",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-40,right:-30,width:200,height:200,background:"radial-gradient(circle,rgba(0,168,255,0.1),transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",marginBottom:14}}>
+          <div>
+            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:21,margin:"0 0 3px",letterSpacing:-0.5}}>
+              👁 {isEN?"My Watchlist":"Mi Watchlist"}
+            </h2>
+            <div style={{fontSize:11,color:"#475569"}}>
+              {lastUpdated ? (isEN?"Updated ":"Actualizado ")+lastUpdated.toLocaleTimeString(lang==="es"?"es":"en",{hour:"2-digit",minute:"2-digit"}) : (isEN?"Loading prices…":"Cargando precios…")}
+              {" · "}{tickers.length}/30 tickers
+            </div>
+          </div>
+          <button onClick={fetchPrices} style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:10,padding:"8px 14px",color:"#00A8FF",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+            ↻ {isEN?"Refresh":"Actualizar"}
+          </button>
+        </div>
+        {/* Add ticker input */}
+        <div style={{display:"flex",gap:8}}>
+          <input value={input} onChange={e=>setInput(e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,10))}
+            onKeyDown={e=>e.key==="Enter"&&addTicker()}
+            placeholder={isEN?"Add ticker: AAPL, BTC, NVDA…":"Agregar ticker: AAPL, BTC, NVDA…"}
+            style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 14px",color:"#F1F5F9",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
+          <button onClick={addTicker} style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"10px 20px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",flexShrink:0}}>
+            + {isEN?"Add":"Agregar"}
+          </button>
+        </div>
+      </div>
+
+      {/* Empty */}
+      {tickers.length===0 && (
+        <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.01)",border:"1px dashed rgba(255,255,255,0.08)",borderRadius:18}}>
+          <div style={{fontSize:48,marginBottom:12}}>👁</div>
+          <div style={{color:"#F1F5F9",fontWeight:800,fontSize:17,marginBottom:8}}>{isEN?"Your watchlist is empty":"Tu watchlist está vacía"}</div>
+          <div style={{color:"#64748B",fontSize:13}}>{isEN?"Type a ticker above and press Enter":"Escribe un ticker arriba y presiona Enter"}</div>
+        </div>
+      )}
+
+      {/* Grid of cards */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:10}}>
+        {tickers.map(tk=>{
+          const d = prices[tk];
+          const chg = d?.change??null;
+          const isPos = chg===null ? null : chg>=0;
+          const ACCENT = isPos===null?"#475569":isPos?"#00D26A":"#FF4D6A";
+          const post = topPost(tk);
+          return(
+            <div key={tk} style={{position:"relative",background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${ACCENT}22`,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 16px rgba(0,0,0,0.25)"}}>
+              <div style={{height:2,background:`linear-gradient(90deg,${ACCENT},transparent)`}}/>
+              <div style={{padding:"14px 14px 12px"}}>
+                {/* Remove button */}
+                <button onClick={()=>setRemoving(removing===tk?null:tk)}
+                  style={{position:"absolute",top:10,right:10,background:"transparent",border:"none",color:"#334155",fontSize:14,cursor:"pointer",lineHeight:1,padding:2,zIndex:2}}>×</button>
+                {removing===tk && (
+                  <div style={{position:"absolute",top:28,right:10,background:"#1e293b",border:"1px solid rgba(255,77,106,0.3)",borderRadius:8,padding:"6px 10px",zIndex:10,whiteSpace:"nowrap"}}>
+                    <button onClick={()=>removeTicker(tk)} style={{background:"rgba(255,77,106,0.15)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:6,padding:"4px 10px",color:"#FF4D6A",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                      {isEN?"Remove":"Eliminar"}
+                    </button>
+                  </div>
+                )}
+                {/* Ticker */}
+                <div style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#F1F5F9",letterSpacing:-0.5,marginBottom:2}}>{tk}</div>
+                {/* Price */}
+                {loading && !d ? (
+                  <div style={{height:28,background:"rgba(255,255,255,0.05)",borderRadius:6,marginBottom:6,animation:"shimmer 1.5s infinite"}}/>
+                ):(
+                  <div style={{fontFamily:"monospace",fontWeight:800,fontSize:22,color:"#F1F5F9",marginBottom:4,lineHeight:1}}>
+                    {fmtPrice(d?.price??null, tk)}
+                  </div>
+                )}
+                {/* Change */}
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  {chg!==null && (
+                    <span style={{fontSize:13,fontWeight:800,color:ACCENT,fontFamily:"monospace"}}>
+                      {isPos?"+":""}{chg.toFixed(2)}%
+                    </span>
+                  )}
+                  {chg!==null && (
+                    <span style={{fontSize:10,color:"#334155",fontWeight:600}}>{isEN?"today":"hoy"}</span>
+                  )}
+                  {chg===null && !loading && (
+                    <span style={{fontSize:11,color:"#334155"}}>{isEN?"No data":"Sin datos"}</span>
+                  )}
+                </div>
+                {/* High/Low mini */}
+                {d?.high>0 && (
+                  <div style={{display:"flex",gap:10,marginTop:8,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.04)"}}>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:8,color:"#334155",fontWeight:700,letterSpacing:0.5}}>HIGH</div>
+                      <div style={{fontSize:11,color:"#00D26A",fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d.high,tk)}</div>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:8,color:"#334155",fontWeight:700,letterSpacing:0.5}}>LOW</div>
+                      <div style={{fontSize:11,color:"#FF4D6A",fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d.low,tk)}</div>
+                    </div>
+                  </div>
+                )}
+                {/* Top community post */}
+                {post && (
+                  <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.04)",fontSize:11,color:"#475569",lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
+                    💬 {post.text}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {tickers.length>0 && (
+        <div style={{fontSize:11,color:"#334155",textAlign:"center",padding:"14px 0",marginTop:4}}>
+          {isEN?"Prices from Finnhub · Delayed ~15s · Not financial advice":"Precios de Finnhub · Delay ~15s · No es consejo financiero"}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── PORTFOLIO TRACKER PAGE ───────────────────────────────────────────────────
 function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPost, onNeedAuth }) {
@@ -12500,6 +12842,8 @@ export default function App(){
     if(page===35) return <CongressTradesPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
+    if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts}/>;
+    if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -12989,7 +13333,7 @@ export default function App(){
   sessionStorage.clear();
   try{ await supabase.auth.signOut(); }catch(e){}
   window.location.replace("/");
-}} onProfile={setProfUser} onAlerts={()=>setAlerts(true)} onAdmin={()=>setPage(99)} lang={lang}/>
+}} onProfile={setProfUser} onAlerts={()=>{setPage(39);setShowLanding(false);}} onAdmin={()=>setPage(99)} lang={lang}/>
               : <div className="nexo-auth-btns"><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></div>
             }
           </div>
