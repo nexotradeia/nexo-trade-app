@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 18:26:16
+// NEXO TRADE — build: 2026-05-29 18:37:39
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6203,11 +6203,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             {/* Logo */}
-            <NexoLogoIcon size={34}/>
-            <div>
-              <span style={{fontSize:16,fontWeight:900,color:"#f1f5f9",letterSpacing:"-0.5px"}}>NexoTrade</span>
-              <span style={{fontSize:10,color:"rgba(139,92,246,0.8)",marginLeft:8,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>IA · Trading</span>
-            </div>
+            <img src="/logo_nexo.png" alt="NexoTrade" style={{height:38,width:"auto",objectFit:"contain"}}/>
           </div>
           {/* Tagline */}
           <p style={{color:"#475569",fontSize:12,margin:0,lineHeight:1.6,maxWidth:420,textAlign:"center"}}>
@@ -9302,7 +9298,7 @@ function FlowPage({isPremium,onNeedPremium}){
   });
 
   return(
-    <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:980,margin:"0 auto"}}>
+    <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto"}}>
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)"}}/>
@@ -14008,11 +14004,7 @@ export default function App(){
 
           {/* Logo — integrado al navbar */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
-            <NexoLogoIcon size={40}/>
-            <div className="nexo-logo-text" style={{display:"flex",flexDirection:"column",lineHeight:1.15}}>
-              <span style={{fontWeight:900,fontSize:20,color:"var(--c-text)",letterSpacing:-0.5}}>Nexo<span style={{background:"linear-gradient(90deg,#6366F1,#00A8FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>Trade</span></span>
-              <span style={{fontSize:9,fontWeight:700,color:"var(--c-muted2)",letterSpacing:2,textTransform:"uppercase"}}>AI Community</span>
-            </div>
+            <img src="/logo_nexo.png" alt="NexoTrade" className="nexo-logo-img" style={{height:44,width:"auto",objectFit:"contain"}}/>
           </div>
 
           {/* Search — centrado */}
@@ -14475,8 +14467,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar"><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:page===20?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:page===20?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -14493,8 +14485,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div>{renderPage()}</div>
-        <div className="nexo-sidebar">
+        <div style={{gridColumn:page===20?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:page===20?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
