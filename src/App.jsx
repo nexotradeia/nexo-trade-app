@@ -4903,6 +4903,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"💼", label:isEN?"My Portfolio":"Mi Portfolio",            idx:37, vip:true},
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
     {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
+    {icon:"🏆", label:isEN?"Leaderboard":"Ranking",                  idx:40},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
     {icon:"⚡", label:"Trending",                                    idx:7},
@@ -10736,6 +10737,174 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:"✦ Premium",idx:8,premium:true},
 ];
 
+// ── LEADERBOARD PAGE ──────────────────────────────────────────────────────────
+function LeaderboardPage({ posts=[], user, lang="es" }) {
+  const isEN = lang==="en";
+  const [tab, setTab] = useState("traders"); // traders | posts | rising
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(()=>{
+    supabase.from("profiles").select("id,username,emoji,avatar_color,points,created_at")
+      .order("points",{ascending:false}).limit(50)
+      .then(({data})=>{ if(data) setProfiles(data); setLoading(false); })
+      .catch(()=>setLoading(false));
+  },[]);
+
+  // Top posts by likes
+  const topPosts = [...posts].sort((a,b)=>(b.likes||0)-(a.likes||0)).slice(0,15);
+
+  // Rising: most posts in last 7 days
+  const week = Date.now()-7*86400000;
+  const recentPosts = posts.filter(p=>new Date(p.created_at||0)>week);
+  const risingMap = {};
+  recentPosts.forEach(p=>{ const k=p.user_id||p.authorId; if(k) risingMap[k]=(risingMap[k]||0)+1; });
+  const rising = Object.entries(risingMap).sort((a,b)=>b[1]-a[1]).slice(0,10)
+    .map(([id,count])=>({id, count, profile:profiles.find(pr=>pr.id===id)||null}));
+
+  const getLevel = (pts=0) => {
+    if(pts>=5000) return {emoji:"💎",name:"Élite",color:"#06B6D4"};
+    if(pts>=2000) return {emoji:"🏆",name:"Pro",color:"#F59E0B"};
+    if(pts>=500)  return {emoji:"⭐",name:"Experto",color:"#8B5CF6"};
+    if(pts>=100)  return {emoji:"📈",name:"Trader",color:"#00A8FF"};
+    return {emoji:"🌱",name:"Nuevo",color:"#64748B"};
+  };
+
+  const MEDALS = ["🥇","🥈","🥉"];
+
+  return(
+    <div style={{maxWidth:640,margin:"0 auto",padding:"0 4px"}}>
+      {/* Header */}
+      <div style={{position:"relative",borderRadius:22,padding:"20px 24px 18px",marginBottom:14,background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(18,12,40,0.95))",border:"1px solid rgba(245,158,11,0.2)",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-40,right:-30,width:200,height:200,background:"radial-gradient(circle,rgba(245,158,11,0.1),transparent 70%)",pointerEvents:"none"}}/>
+        <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5,position:"relative"}}>
+          🏆 {isEN?"Leaderboard":"Ranking de Traders"}
+        </h2>
+        <div style={{fontSize:11,color:"#475569",position:"relative"}}>{isEN?"Top traders by reputation, posts and activity":"Top traders por reputación, posts y actividad"}</div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:6,marginBottom:14,background:"rgba(255,255,255,0.03)",borderRadius:12,padding:4}}>
+        {[["traders",isEN?"🏆 Top Traders":"🏆 Top Traders"],["posts",isEN?"🔥 Top Posts":"🔥 Top Posts"],["rising",isEN?"📈 Rising":"📈 En Alza"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setTab(k)}
+            style={{flex:1,background:tab===k?"rgba(245,158,11,0.15)":"transparent",border:`1px solid ${tab===k?"rgba(245,158,11,0.3)":"transparent"}`,borderRadius:9,padding:"9px 0",color:tab===k?"#F59E0B":"#64748B",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {/* TOP TRADERS */}
+      {tab==="traders" && (
+        loading ? (
+          <div style={{textAlign:"center",padding:"40px",color:"#475569"}}>{isEN?"Loading traders…":"Cargando traders…"}</div>
+        ) : profiles.length===0 ? (
+          <div style={{textAlign:"center",padding:"48px 20px",color:"#475569"}}>
+            <div style={{fontSize:40,marginBottom:12}}>🌱</div>
+            <div>{isEN?"No traders yet — be the first!":"¡Sé el primero en aparecer aquí!"}</div>
+          </div>
+        ) : profiles.map((p,i)=>{
+          const lvl=getLevel(p.points||0);
+          const postCount=posts.filter(x=>(x.user_id||x.authorId)===p.id).length;
+          const totalLikes=posts.filter(x=>(x.user_id||x.authorId)===p.id).reduce((s,x)=>s+(x.likes||0),0);
+          const isMe = user?.id===p.id;
+          return(
+            <div key={p.id} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",marginBottom:8,background:isMe?"rgba(245,158,11,0.06)":"rgba(255,255,255,0.02)",border:`1px solid ${isMe?"rgba(245,158,11,0.25)":"rgba(255,255,255,0.06)"}`,borderRadius:14}}>
+              {/* Rank */}
+              <div style={{width:28,textAlign:"center",flexShrink:0}}>
+                {i<3 ? <span style={{fontSize:20}}>{MEDALS[i]}</span>
+                : <span style={{fontWeight:900,color:"#475569",fontSize:14}}>#{i+1}</span>}
+              </div>
+              {/* Avatar */}
+              <div style={{width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${p.avatar_color||"#8B5CF6"},${p.avatar_color||"#8B5CF6"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,boxShadow:`0 2px 12px ${p.avatar_color||"#8B5CF6"}44`}}>
+                {p.emoji||"👤"}
+              </div>
+              {/* Info */}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+                  <span style={{fontWeight:800,color:"#F1F5F9",fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                    {p.username||"Trader"}
+                  </span>
+                  {isMe&&<span style={{fontSize:9,background:"rgba(245,158,11,0.15)",color:"#F59E0B",border:"1px solid rgba(245,158,11,0.3)",borderRadius:6,padding:"1px 6px",fontWeight:700}}>{isEN?"YOU":"TÚ"}</span>}
+                  <span style={{fontSize:10,color:lvl.color,fontWeight:700}}>{lvl.emoji} {lvl.name}</span>
+                </div>
+                <div style={{display:"flex",gap:12,fontSize:11,color:"#475569"}}>
+                  <span>📝 {postCount} {isEN?"posts":"posts"}</span>
+                  <span>❤️ {totalLikes} {isEN?"likes":"likes"}</span>
+                </div>
+              </div>
+              {/* Points */}
+              <div style={{textAlign:"right",flexShrink:0}}>
+                <div style={{fontWeight:900,color:"#F59E0B",fontSize:18,fontFamily:"monospace"}}>
+                  {(p.points||0).toLocaleString()}
+                </div>
+                <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.5}}>{isEN?"POINTS":"PUNTOS"}</div>
+              </div>
+            </div>
+          );
+        })
+      )}
+
+      {/* TOP POSTS */}
+      {tab==="posts" && (
+        topPosts.length===0 ? (
+          <div style={{textAlign:"center",padding:"48px 20px",color:"#475569"}}>
+            <div style={{fontSize:40,marginBottom:12}}>📭</div>
+            <div>{isEN?"No posts yet":"Aún no hay posts"}</div>
+          </div>
+        ) : topPosts.map((p,i)=>(
+          <div key={p.id} style={{display:"flex",gap:12,padding:"14px 16px",marginBottom:8,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,alignItems:"flex-start"}}>
+            <div style={{width:28,textAlign:"center",flexShrink:0,paddingTop:2}}>
+              {i<3?<span style={{fontSize:18}}>{MEDALS[i]}</span>:<span style={{fontWeight:900,color:"#475569",fontSize:13}}>#{i+1}</span>}
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,flexWrap:"wrap"}}>
+                <span style={{fontWeight:700,color:"#A78BFA",fontSize:12}}>@{p.author||p.authorName||"Trader"}</span>
+                {p.ticker&&<span style={{background:"rgba(0,168,255,0.1)",color:"#00A8FF",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800,fontFamily:"monospace"}}>{p.ticker}</span>}
+                {p.sentiment&&<span style={{fontSize:11,color:p.sentiment==="bullish"?"#00D26A":"#FF4D6A"}}>{p.sentiment==="bullish"?"▲ ALCISTA":"▼ BAJISTA"}</span>}
+              </div>
+              <div style={{fontSize:13,color:"#CBD5E1",lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>
+                {p.text}
+              </div>
+              <div style={{display:"flex",gap:14,marginTop:8,fontSize:12,color:"#475569"}}>
+                <span>❤️ <strong style={{color:"#F1F5F9"}}>{p.likes||0}</strong></span>
+                <span>🔁 <strong style={{color:"#F1F5F9"}}>{p.reposts_count||p.reposts||0}</strong></span>
+                <span>💬 <strong style={{color:"#F1F5F9"}}>{p.comments?.length||0}</strong></span>
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+
+      {/* RISING */}
+      {tab==="rising" && (
+        rising.length===0 ? (
+          <div style={{textAlign:"center",padding:"48px 20px",color:"#475569"}}>
+            <div style={{fontSize:40,marginBottom:12}}>📈</div>
+            <div>{isEN?"No recent activity":"Sin actividad reciente"}</div>
+          </div>
+        ) : rising.map(({id,count,profile},i)=>(
+          <div key={id} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",marginBottom:8,background:"rgba(0,210,106,0.03)",border:"1px solid rgba(0,210,106,0.1)",borderRadius:14}}>
+            <div style={{width:28,textAlign:"center",flexShrink:0}}>
+              {i<3?<span style={{fontSize:18}}>{MEDALS[i]}</span>:<span style={{fontWeight:900,color:"#475569",fontSize:13}}>#{i+1}</span>}
+            </div>
+            <div style={{width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${profile?.avatar_color||"#00D26A"},${profile?.avatar_color||"#00D26A"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>
+              {profile?.emoji||"🌱"}
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14,marginBottom:2}}>{profile?.username||"Trader"}</div>
+              <div style={{fontSize:11,color:"#475569"}}>{isEN?`${count} posts this week`:  `${count} posts esta semana`}</div>
+            </div>
+            <div style={{background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:10,padding:"6px 12px",textAlign:"center"}}>
+              <div style={{fontWeight:900,color:"#00D26A",fontSize:16}}>+{count}</div>
+              <div style={{fontSize:8,color:"#475569",fontWeight:700}}>{isEN?"POSTS":"POSTS"}</div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
 // ── NOTIFICATIONS PAGE ────────────────────────────────────────────────────────
 function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile, onNeedAuth }) {
   const isEN = lang==="en";
@@ -12844,6 +13013,7 @@ export default function App(){
     if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
     if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts}/>;
     if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
+    if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
