@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-28 20:30:00
+// NEXO TRADE — build: 2026-05-29 04:06:40
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4900,6 +4900,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🚀", label:"IPOs 2026",                                   idx:16},
     {icon:"⛏️", label:isEN?"Commodities":"Commodities",              idx:18},
     {icon:"🔍", label:isEN?"Screener":"Screener",                    idx:17, vip:true},
+    {icon:"💼", label:isEN?"My Portfolio":"Mi Portfolio",            idx:37, vip:true},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
     {icon:"⚡", label:"Trending",                                    idx:7},
@@ -10726,10 +10727,340 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"🏛️ Top Investors":"🏛️ Super Inversores",idx:19,vip:true},
   {label:isEN?"🏛 Congress Trades":"🏛 Trades Congreso",idx:35,vip:true},
   {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
+  {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
   {label:isEN?"🛠️ Tools":"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
+
+// ── PORTFOLIO TRACKER PAGE ───────────────────────────────────────────────────
+function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPost, onNeedAuth }) {
+  const isEN = lang==="en";
+  const LS_KEY = `nexo_portfolio_${user?.id||"guest"}`;
+
+  const [positions, setPositions] = useState(()=>{
+    try { return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); } catch{ return []; }
+  });
+  const [livePrices, setLivePrices] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ticker:"",shares:"",entryPrice:"",note:""});
+  const [shareMsg, setShareMsg] = useState(null);
+  const [sortBy, setSortBy] = useState("pnl"); // pnl | ticker | value
+
+  // Persist to localStorage
+  useEffect(()=>{
+    try { localStorage.setItem(LS_KEY, JSON.stringify(positions)); } catch{}
+  },[positions, LS_KEY]);
+
+  // Fetch live prices for all tickers
+  useEffect(()=>{
+    if(!positions.length) return;
+    const cryptoMap={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT"};
+    const tickers=[...new Set(positions.map(p=>p.ticker.toUpperCase()))];
+    setLoading(true);
+    Promise.all(tickers.map(async tk=>{
+      const sym=cryptoMap[tk]||tk;
+      try{
+        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
+        const d=await r.json();
+        if(d.c>0) return {ticker:tk,price:d.c,change:d.dp||0,prevClose:d.pc||0};
+      }catch{}
+      return null;
+    })).then(res=>{
+      const map={};
+      res.filter(Boolean).forEach(r=>{map[r.ticker]={price:r.price,change:r.change};});
+      setLivePrices(map);
+      setLoading(false);
+    });
+  },[positions]);
+
+  const totalCost   = positions.reduce((s,p)=>(s + (parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0)),0);
+  const totalValue  = positions.reduce((s,p)=>{
+    const lp = livePrices[p.ticker.toUpperCase()];
+    return s + (lp ? (parseFloat(p.shares)||0)*lp.price : (parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0));
+  },0);
+  const totalPnl    = totalValue - totalCost;
+  const totalPnlPct = totalCost>0 ? (totalPnl/totalCost*100) : 0;
+
+  const addOrEdit = () => {
+    const tk = form.ticker.trim().toUpperCase();
+    const sh = parseFloat(form.shares);
+    const ep = parseFloat(form.entryPrice);
+    if(!tk||!sh||!ep||sh<=0||ep<=0) return;
+    if(editId) {
+      setPositions(prev=>prev.map(p=>p.id===editId?{...p,ticker:tk,shares:sh,entryPrice:ep,note:form.note.trim()}:p));
+      setEditId(null);
+    } else {
+      setPositions(prev=>[...prev,{id:Date.now()+"",ticker:tk,shares:sh,entryPrice:ep,note:form.note.trim(),addedAt:new Date().toISOString()}]);
+    }
+    setForm({ticker:"",shares:"",entryPrice:"",note:""});
+    setShowAdd(false);
+  };
+
+  const removePosition = (id) => {
+    if(window.confirm(isEN?"Delete this position?":"¿Eliminar esta posición?"))
+      setPositions(prev=>prev.filter(p=>p.id!==id));
+  };
+
+  const startEdit = (p) => {
+    setEditId(p.id); setForm({ticker:p.ticker,shares:String(p.shares),entryPrice:String(p.entryPrice),note:p.note||""});
+    setShowAdd(true);
+  };
+
+  const shareToFeed = (p) => {
+    if(!user){onNeedAuth&&onNeedAuth();return;}
+    const lp=livePrices[p.ticker.toUpperCase()];
+    const curr=lp?lp.price:parseFloat(p.entryPrice);
+    const pnl=((curr-parseFloat(p.entryPrice))/parseFloat(p.entryPrice)*100).toFixed(2);
+    const bull=parseFloat(pnl)>=0;
+    const txt=`${bull?"📈":"📉"} Mi posición en $${p.ticker}: entrada $${parseFloat(p.entryPrice).toLocaleString("en-US",{minimumFractionDigits:2})}, precio actual $${curr.toLocaleString("en-US",{minimumFractionDigits:2})} (${bull?"+":""}${pnl}%)\n\n${p.note||""}\n\n#${p.ticker} #Trading #NexoTrade`;
+    setShareMsg(txt);
+  };
+
+  const sorted = [...positions].sort((a,b)=>{
+    if(sortBy==="ticker") return a.ticker.localeCompare(b.ticker);
+    if(sortBy==="value"){
+      const va=(livePrices[a.ticker.toUpperCase()]?.price||parseFloat(a.entryPrice))*parseFloat(a.shares);
+      const vb=(livePrices[b.ticker.toUpperCase()]?.price||parseFloat(b.entryPrice))*parseFloat(b.shares);
+      return vb-va;
+    }
+    // sort by pnl%
+    const pa=(livePrices[a.ticker.toUpperCase()]?.price||parseFloat(a.entryPrice));
+    const pb=(livePrices[b.ticker.toUpperCase()]?.price||parseFloat(b.entryPrice));
+    const pnlA=(pa-parseFloat(a.entryPrice))/parseFloat(a.entryPrice);
+    const pnlB=(pb-parseFloat(b.entryPrice))/parseFloat(b.entryPrice);
+    return pnlB-pnlA;
+  });
+
+  if(!isPremium) return(
+    <div style={{maxWidth:520,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
+      <div style={{fontSize:60,marginBottom:16}}>📊</div>
+      <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:24,marginBottom:8}}>{isEN?"Portfolio Tracker":"Mi Portfolio"}</h2>
+      <p style={{color:"#64748B",fontSize:15,lineHeight:1.7,marginBottom:28}}>
+        {isEN?"Track your positions, monitor P&L in real time and share your best trades with the community.":"Registra tus posiciones, monitorea tu P&L en tiempo real y comparte tus mejores trades con la comunidad."}
+      </p>
+      <div style={{background:"rgba(124,58,237,0.08)",border:"1px solid rgba(124,58,237,0.2)",borderRadius:16,padding:"20px",marginBottom:28,textAlign:"left"}}>
+        {[isEN?"📈 Track stocks, ETFs and crypto":"📈 Acciones, ETFs y crypto",
+          isEN?"💰 Real-time P&L with live prices":"💰 P&L en tiempo real con precios live",
+          isEN?"📤 Share your positions to the feed":"📤 Comparte tus posiciones al feed",
+          isEN?"🔔 Set alerts on your positions":"🔔 Alertas en tus posiciones"].map(f=>(
+          <div key={f} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+            <span style={{fontSize:14}}>{f.split(" ")[0]}</span>
+            <span style={{fontSize:13,color:"#CBD5E1"}}>{f.slice(f.indexOf(" ")+1)}</span>
+          </div>
+        ))}
+      </div>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:12,padding:"14px 36px",color:"#fff",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(124,58,237,0.4)"}}>
+        ✦ {isEN?"Go VIP — $9.99/mo":"Hazte VIP — $9.99/mes"}
+      </button>
+    </div>
+  );
+
+  return(
+    <div style={{maxWidth:720,margin:"0 auto",padding:"0 4px"}}>
+
+      {/* Share modal */}
+      {shareMsg && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShareMsg(null)}>
+          <div style={{background:"#0f1729",border:"1px solid rgba(139,92,246,0.3)",borderRadius:20,padding:24,maxWidth:480,width:"100%"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontWeight:800,color:"#F1F5F9",fontSize:16,marginBottom:12}}>📤 {isEN?"Share to feed":"Compartir al feed"}</div>
+            <textarea value={shareMsg} onChange={e=>setShareMsg(e.target.value)} rows={6}
+              style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:12,padding:12,color:"#F1F5F9",fontSize:13,resize:"vertical",fontFamily:"inherit",outline:"none",boxSizing:"border-box"}}/>
+            <div style={{display:"flex",gap:10,marginTop:12}}>
+              <button onClick={()=>setShareMsg(null)} style={{flex:1,background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px",color:"#64748B",fontWeight:700,cursor:"pointer"}}>
+                {isEN?"Cancel":"Cancelar"}
+              </button>
+              <button onClick={()=>{onPost&&onPost({text:shareMsg,ticker:null,sentiment:"bullish"});setShareMsg(null);}}
+                style={{flex:2,background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:10,padding:"10px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
+                📤 {isEN?"Publish":"Publicar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{position:"relative",borderRadius:22,padding:"22px 24px",marginBottom:16,overflow:"hidden",background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(15,20,40,0.95))",border:"1px solid rgba(139,92,246,0.2)",boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
+        <div style={{position:"absolute",top:-40,right:-30,width:200,height:200,background:"radial-gradient(circle,rgba(139,92,246,0.15),transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"relative"}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span style={{background:"rgba(139,92,246,0.2)",color:"#A78BFA",border:"1px solid rgba(139,92,246,0.35)",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:1}}>✦ VIP</span>
+              {loading && <span style={{fontSize:10,color:"#475569",fontWeight:600}}>{isEN?"Updating prices…":"Actualizando precios…"}</span>}
+            </div>
+            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5}}>📊 {isEN?"My Portfolio":"Mi Portfolio"}</h2>
+            <div style={{fontSize:11,color:"#475569"}}>{isEN?"Track your positions with real-time P&L":"Sigue tus posiciones con P&L en tiempo real"}</div>
+          </div>
+          <button onClick={()=>{setShowAdd(true);setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""}); }}
+            style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:12,padding:"10px 20px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+            + {isEN?"Add Position":"Agregar"}
+          </button>
+        </div>
+
+        {/* Summary strip */}
+        {positions.length>0 && (
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginTop:18}}>
+            {[
+              {label:isEN?"Total Value":"Valor Total",val:"$"+totalValue.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}),color:"#F1F5F9"},
+              {label:"P&L Total",val:(totalPnl>=0?"+":"")+"$"+Math.abs(totalPnl).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}),color:totalPnl>=0?"#00D26A":"#FF4D6A"},
+              {label:isEN?"Return":"Retorno",val:(totalPnlPct>=0?"+":"")+totalPnlPct.toFixed(2)+"%",color:totalPnlPct>=0?"#00D26A":"#FF4D6A"},
+            ].map(s=>(
+              <div key={s.label} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"12px 14px",textAlign:"center"}}>
+                <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.8,marginBottom:4,textTransform:"uppercase"}}>{s.label}</div>
+                <div style={{fontWeight:900,color:s.color,fontSize:16,fontFamily:"monospace"}}>{s.val}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add / Edit form */}
+      {showAdd && (
+        <div style={{background:"rgba(139,92,246,0.06)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:18,padding:"20px",marginBottom:16}}>
+          <div style={{fontWeight:800,color:"#F1F5F9",fontSize:15,marginBottom:14}}>
+            {editId?(isEN?"Edit Position":"Editar Posición"):(isEN?"New Position":"Nueva Posición")}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10}}>
+            {[
+              {key:"ticker",placeholder:"AAPL, BTC…",label:"Ticker"},
+              {key:"shares",placeholder:isEN?"Shares / Units":"Acciones / Unidades",label:isEN?"Qty":"Cantidad",type:"number"},
+              {key:"entryPrice",placeholder:isEN?"Entry price $":"Precio entrada $",label:isEN?"Entry $":"Entrada $",type:"number"},
+            ].map(f=>(
+              <div key={f.key}>
+                <div style={{fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:0.5}}>{f.label.toUpperCase()}</div>
+                <input value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:f.key==="ticker"?e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,""):e.target.value}))}
+                  type={f.type||"text"} placeholder={f.placeholder}
+                  style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:14,outline:"none",fontFamily:"monospace",boxSizing:"border-box"}}/>
+              </div>
+            ))}
+          </div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:0.5}}>{isEN?"NOTE (OPTIONAL)":"NOTA (OPCIONAL)"}</div>
+            <input value={form.note} onChange={e=>setForm(p=>({...p,note:e.target.value}))}
+              placeholder={isEN?"Your thesis, why you bought…":"Tu tesis, por qué compraste…"}
+              style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:13,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
+          </div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"11px",color:"#64748B",fontWeight:700,cursor:"pointer"}}>
+              {isEN?"Cancel":"Cancelar"}
+            </button>
+            <button onClick={addOrEdit} style={{flex:2,background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
+              {editId?(isEN?"Save Changes":"Guardar"):(isEN?"Add to Portfolio":"Agregar al Portfolio")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Sort bar */}
+      {positions.length>1 && (
+        <div style={{display:"flex",gap:8,marginBottom:12,alignItems:"center"}}>
+          <span style={{fontSize:11,color:"#475569",fontWeight:600}}>{isEN?"Sort:":"Ordenar:"}</span>
+          {[["pnl",isEN?"Best P&L":"Mejor P&L"],["value",isEN?"Value":"Valor"],["ticker","Ticker"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setSortBy(k)}
+              style={{background:sortBy===k?"rgba(139,92,246,0.2)":"transparent",border:`1px solid ${sortBy===k?"rgba(139,92,246,0.4)":"rgba(255,255,255,0.08)"}`,borderRadius:8,padding:"5px 12px",color:sortBy===k?"#A78BFA":"#64748B",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              {l}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {positions.length===0 && !showAdd && (
+        <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.01)",border:"1px dashed rgba(255,255,255,0.08)",borderRadius:18,marginBottom:16}}>
+          <div style={{fontSize:48,marginBottom:12}}>📂</div>
+          <div style={{fontWeight:800,color:"#F1F5F9",fontSize:17,marginBottom:8}}>{isEN?"No positions yet":"No tienes posiciones aún"}</div>
+          <div style={{color:"#64748B",fontSize:13,marginBottom:20}}>{isEN?"Add your first position to start tracking your portfolio.":"Agrega tu primera posición para empezar a seguir tu portfolio."}</div>
+          <button onClick={()=>setShowAdd(true)} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
+            + {isEN?"Add First Position":"Agregar Primera Posición"}
+          </button>
+        </div>
+      )}
+
+      {/* Positions list */}
+      {sorted.map((pos,i)=>{
+        const tk=pos.ticker.toUpperCase();
+        const lp=livePrices[tk];
+        const entry=parseFloat(pos.entryPrice)||0;
+        const shares=parseFloat(pos.shares)||0;
+        const curr=lp?lp.price:entry;
+        const pnlAmt=(curr-entry)*shares;
+        const pnlPct=entry>0?((curr-entry)/entry*100):0;
+        const isPos=pnlPct>=0;
+        const marketVal=curr*shares;
+        const COLORS=["#8B5CF6","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#3B82F6","#14B8A6"];
+        const col=COLORS[i%COLORS.length];
+        return(
+          <div key={pos.id} style={{position:"relative",background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,marginBottom:10,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
+            <div style={{height:2,background:`linear-gradient(90deg,${col},transparent)`}}/>
+            <div style={{padding:"16px 18px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+                {/* Left: ticker info */}
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <div style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${col}30,${col}10)`,border:`1px solid ${col}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:col,fontFamily:"monospace"}}>
+                    {tk.slice(0,4)}
+                  </div>
+                  <div>
+                    <div style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#F1F5F9",letterSpacing:-0.5}}>{tk}</div>
+                    <div style={{fontSize:11,color:"#475569",marginTop:1}}>{shares.toLocaleString("en-US",{maximumFractionDigits:6})} {isEN?"units":"unidades"} · {isEN?"Entry":"Entrada"} ${entry.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+                  </div>
+                </div>
+                {/* Right: P&L */}
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontWeight:900,fontSize:18,color:isPos?"#00D26A":"#FF4D6A",fontFamily:"monospace"}}>
+                    {isPos?"+":""}{pnlPct.toFixed(2)}%
+                  </div>
+                  <div style={{fontSize:12,color:isPos?"rgba(0,210,106,0.7)":"rgba(255,77,106,0.7)",fontFamily:"monospace"}}>
+                    {isPos?"+":"-"}${Math.abs(pnlAmt).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
+                  </div>
+                </div>
+              </div>
+
+              {/* Price row */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:pos.note?10:12}}>
+                {[
+                  [isEN?"Current":"Actual", lp?"$"+curr.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4}):"—", lp?(isPos?"#00D26A":"#FF4D6A"):"#475569"],
+                  [isEN?"Market Value":"Valor Mercado","$"+marketVal.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}),"#F1F5F9"],
+                  [isEN?"Today":"Hoy", lp?(lp.change>=0?"+":"")+lp.change.toFixed(2)+"%":"—", lp?(lp.change>=0?"#00D26A":"#FF4D6A"):"#475569"],
+                ].map(([lbl,val,c])=>(
+                  <div key={lbl} style={{background:"rgba(255,255,255,0.025)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
+                    <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,marginBottom:3,textTransform:"uppercase"}}>{lbl}</div>
+                    <div style={{fontFamily:"monospace",fontWeight:800,color:c,fontSize:13}}>{val}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Note */}
+              {pos.note && (
+                <div style={{fontSize:12,color:"#64748B",fontStyle:"italic",background:"rgba(255,255,255,0.02)",borderRadius:8,padding:"6px 10px",marginBottom:10,lineHeight:1.5}}>
+                  💬 {pos.note}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>shareToFeed(pos)} style={{flex:1,background:"rgba(139,92,246,0.1)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:9,padding:"7px 10px",color:"#A78BFA",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  📤 {isEN?"Share":"Compartir"}
+                </button>
+                <button onClick={()=>startEdit(pos)} style={{flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:9,padding:"7px 10px",color:"#64748B",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  ✏️ {isEN?"Edit":"Editar"}
+                </button>
+                <button onClick={()=>removePosition(pos.id)} style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:9,padding:"7px 12px",color:"#FF4D6A",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  🗑
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <div style={{fontSize:11,color:"#334155",textAlign:"center",padding:"12px 0",marginTop:4,lineHeight:1.6}}>
+        ⚠️ {isEN?"Prices from Finnhub. For educational use only. Not financial advice.":"Precios de Finnhub. Solo uso educativo. No es consejo financiero."}
+      </div>
+    </div>
+  );
+}
 
 // ── CONGRESS TRADES PAGE ─────────────────────────────────────────────────────
 function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
@@ -12168,6 +12499,7 @@ export default function App(){
     if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===35) return <CongressTradesPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
