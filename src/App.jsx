@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 15:03:26
+// NEXO TRADE — build: 2026-05-29 15:11:12
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1506,9 +1506,9 @@ function AIAssistant({lang,onClose}){
   };
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#00000066",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center"}}
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(3px)"}}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{background:C.surface,borderRadius:22,width:480,maxWidth:"94vw",height:560,display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.15)",border:`1px solid ${C.border}`}}>
+      <div style={{background:C.surface,borderRadius:22,width:480,maxWidth:"94vw",height:560,display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",border:`1px solid ${C.border}`,position:"relative",zIndex:2001}}>
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:12,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,borderRadius:"22px 22px 0 0"}}>
           <div style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.accent},#0099ff)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>🤖</div>
@@ -1743,9 +1743,9 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
   ];
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}}
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.72)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{background:C.surface,borderRadius:28,width:560,maxWidth:"96vw",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.35)",border:`1px solid ${C.border}`,position:"relative"}}>
+      <div style={{background:C.surface,borderRadius:28,width:560,maxWidth:"96vw",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.5)",border:`1px solid ${C.border}`,position:"relative",willChange:"transform"}}>
 
         {/* ── COVER + HEADER INTEGRADO ── */}
         <div style={{background:`linear-gradient(135deg,${accent}dd 0%,${accent}66 50%,#0f172a 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
@@ -3842,14 +3842,14 @@ function EarningsPage({lang}){
                 <div style={{color:"#64748b",fontSize:12}}>{next.live_speaker} · {next.fecha} · {next.hora}</div>
               </div>
               <div style={{display:"flex",gap:8,flexShrink:0}}>
-                <a href={next.ir_url} target="_blank" rel="noopener noreferrer"
-                  style={{background:"rgba(245,158,11,0.15)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 14px",color:"#f59e0b",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>
+                <button onClick={e=>{e.stopPropagation();window.open(next.ir_url,"_blank","noopener,noreferrer");}}
+                  style={{background:"rgba(245,158,11,0.15)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 14px",color:"#f59e0b",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap",cursor:"pointer",fontFamily:"inherit"}}>
                   🏢 IR Page →
-                </a>
-                <a href={next.yt_url} target="_blank" rel="noopener noreferrer"
-                  style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"7px 14px",color:"#ef4444",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>
+                </button>
+                <button onClick={e=>{e.stopPropagation();window.open(next.yt_url,"_blank","noopener,noreferrer");}}
+                  style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"7px 14px",color:"#ef4444",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap",cursor:"pointer",fontFamily:"inherit"}}>
                   ▶ YouTube →
-                </a>
+                </button>
               </div>
             </div>
           );
@@ -11414,6 +11414,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[] }) {
   const [input, setInput] = useState("");
   const [removing, setRemoving] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [addFeedback, setAddFeedback] = useState(null); // null | "added" | "exists" | "full"
 
   useEffect(()=>{
     try { localStorage.setItem(LS_KEY, JSON.stringify(tickers)); } catch{}
@@ -11443,9 +11444,21 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[] }) {
 
   const addTicker = () => {
     const tk = input.trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
-    if(!tk||tickers.includes(tk)||tickers.length>=30) return;
+    if(!tk){ return; }
+    if(tickers.includes(tk)){
+      setAddFeedback("exists");
+      setTimeout(()=>setAddFeedback(null),2500);
+      return;
+    }
+    if(tickers.length>=30){
+      setAddFeedback("full");
+      setTimeout(()=>setAddFeedback(null),2500);
+      return;
+    }
     setTickers(prev=>[...prev, tk]);
     setInput("");
+    setAddFeedback("added");
+    setTimeout(()=>setAddFeedback(null),2000);
   };
 
   const removeTicker = (tk) => {
@@ -11494,6 +11507,15 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[] }) {
             + {isEN?"Add":"Agregar"}
           </button>
         </div>
+        {addFeedback && (
+          <div style={{marginTop:8,fontSize:12,fontWeight:600,
+            color: addFeedback==="added"?"#10B981": addFeedback==="exists"?"#F59E0B":"#EF4444",
+            display:"flex",alignItems:"center",gap:5}}>
+            {addFeedback==="added" && <span>✅ {isEN?"Ticker added!":"¡Ticker agregado!"}</span>}
+            {addFeedback==="exists" && <span>⚠️ {isEN?"Already in your watchlist":"Ya está en tu watchlist"}</span>}
+            {addFeedback==="full"   && <span>🚫 {isEN?"Watchlist full (30 max)":"Watchlist llena (máx 30)"}</span>}
+          </div>
+        )}
       </div>
 
       {/* Empty */}
@@ -12038,8 +12060,8 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
             onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
             {/* Member */}
             <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0}}>
-              <span style={{fontSize:13,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.name}</span>
-              <span style={{fontSize:11,color:C.muted}}>{t.house} · {t.state}</span>
+              <span style={{fontSize:13,fontWeight:700,color:"#F1F5F9",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.name}</span>
+              <span style={{fontSize:11,color:"#94A3B8",fontWeight:500}}>{t.house} · {t.state}</span>
             </div>
             {/* Party */}
             <div style={{display:"flex",alignItems:"center"}}>
@@ -12052,15 +12074,15 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
             </div>
             {/* Asset name */}
             <div style={{display:"flex",alignItems:"center"}}>
-              <span style={{fontSize:12,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.asset}</span>
+              <span style={{fontSize:12,color:"#CBD5E1",fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.asset}</span>
             </div>
             {/* Amount */}
             <div style={{display:"flex",alignItems:"center"}}>
-              <span style={{fontSize:12,color:C.text,fontWeight:600}}>{t.amount}</span>
+              <span style={{fontSize:12,color:"#E2E8F0",fontWeight:700}}>{t.amount}</span>
             </div>
             {/* Date */}
             <div style={{display:"flex",alignItems:"center"}}>
-              <span style={{fontSize:11,color:C.muted}}>{t.date?.slice(0,10)}</span>
+              <span style={{fontSize:11,color:"#94A3B8",fontWeight:500}}>{t.date?.slice(0,10)}</span>
             </div>
           </div>
         ))}
