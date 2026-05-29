@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 18:09:55
+// NEXO TRADE — build: 2026-05-29 18:25:40
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -46,6 +46,39 @@ const STRIPE_LINKS = {
 // Alias cortos (compatibilidad con código existente)
 const STRIPE_PRO_LINK = STRIPE_LINKS.pro;
 
+
+// ── NEXO LOGO SVG COMPONENT ──────────────────────────────────────────────────
+function NexoLogoIcon({size=40}){
+  return(
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display:"block",flexShrink:0}}>
+      <defs>
+        <linearGradient id="nlGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#6366F1"/>
+          <stop offset="60%" stopColor="#00A8FF"/>
+          <stop offset="100%" stopColor="#00C8A0"/>
+        </linearGradient>
+        <linearGradient id="nlGlow" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#818CF8" stopOpacity="0.3"/>
+          <stop offset="100%" stopColor="#00A8FF" stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      {/* Background */}
+      <rect width="40" height="40" rx="11" fill="url(#nlGrad)"/>
+      {/* Glow overlay */}
+      <rect width="40" height="40" rx="11" fill="url(#nlGlow)"/>
+      {/* Grid lines — faint */}
+      <path d="M8 30 L32 30" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+      <path d="M8 22 L32 22" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8"/>
+      {/* Chart line */}
+      <path d="M8 28 L14 20 L20 24 L28 11" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Area fill under chart */}
+      <path d="M8 28 L14 20 L20 24 L28 11 L28 30 L8 30 Z" fill="rgba(255,255,255,0.07)"/>
+      {/* Peak dot */}
+      <circle cx="28" cy="11" r="3" fill="#00E58F"/>
+      <circle cx="28" cy="11" r="1.4" fill="white"/>
+    </svg>
+  );
+}
 
 // ── CASHTAG + @MENTION RENDERER ───────────────────────────────────────────────
 function renderWithCashtags(text, onTickerClick, onMentionClick){
@@ -6170,7 +6203,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             {/* Logo */}
-            <div style={{width:34,height:34,borderRadius:9,background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#fff",fontSize:16,letterSpacing:-1,flexShrink:0}}>N</div>
+            <NexoLogoIcon size={34}/>
             <div>
               <span style={{fontSize:16,fontWeight:900,color:"#f1f5f9",letterSpacing:"-0.5px"}}>NexoTrade</span>
               <span style={{fontSize:10,color:"rgba(139,92,246,0.8)",marginLeft:8,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>IA · Trading</span>
@@ -13974,13 +14007,11 @@ export default function App(){
         <div style={{display:"flex",alignItems:"center",gap:8,height:58,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Logo — integrado al navbar */}
-          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
-            <img src="/logo_nexo.png" alt="NEXO TRADE" className="nexo-logo-img"
-              style={{height:54,width:"auto",objectFit:"contain",borderRadius:8,display:"block"}}
-              onError={e=>{e.target.style.display="none";}}/>
+          <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
+            <NexoLogoIcon size={40}/>
             <div className="nexo-logo-text" style={{display:"flex",flexDirection:"column",lineHeight:1.15}}>
-              <span style={{fontWeight:900,fontSize:22,color:"var(--c-text)",letterSpacing:-0.5}}>NEXO<span style={{color:"#00A8FF"}}>TRADE</span></span>
-              <span style={{fontSize:10,fontWeight:600,color:"var(--c-muted2)",letterSpacing:1.5,textTransform:"uppercase"}}>AI Trading Community</span>
+              <span style={{fontWeight:900,fontSize:20,color:"var(--c-text)",letterSpacing:-0.5}}>Nexo<span style={{background:"linear-gradient(90deg,#6366F1,#00A8FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>Trade</span></span>
+              <span style={{fontSize:9,fontWeight:700,color:"var(--c-muted2)",letterSpacing:2,textTransform:"uppercase"}}>AI Community</span>
             </div>
           </div>
 
@@ -14192,6 +14223,27 @@ export default function App(){
           </div>
         </div>
 
+        {/* ── STATS TRUST BAR ── */}
+        <div style={{background:"#060c18",borderBottom:"1px solid rgba(0,168,255,0.1)",padding:"20px 20px"}}>
+          <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-around",flexWrap:"wrap",gap:"12px 0"}}>
+            {[
+              {val:lang==="en"?"8,400+":"8,400+", label:lang==="en"?"active traders":"traders activos", icon:"👥", c:"#00D26A"},
+              {val:"40K+", label:lang==="en"?"ideas shared":"ideas compartidas", icon:"📊", c:"#3B8EFA"},
+              {val:"4.9★", label:lang==="en"?"average rating":"calificación promedio", icon:"⭐", c:"#F59E0B"},
+              {val:"92%", label:lang==="en"?"pick accuracy":"precisión en picks", icon:"🎯", c:"#a78bfa"},
+              {val:"#1", label:lang==="en"?"Spanish trading community":"comunidad trading hispana", icon:"🏆", c:"#00A8FF"},
+            ].map((s,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 20px",borderRight:i<4?"1px solid rgba(255,255,255,0.06)":"none"}}>
+                <span style={{fontSize:22}}>{s.icon}</span>
+                <div>
+                  <div style={{fontSize:20,fontWeight:900,color:s.c,lineHeight:1}}>{s.val}</div>
+                  <div style={{fontSize:11,color:"#475569",fontWeight:500,marginTop:2}}>{s.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ── FEATURES ── */}
         <div style={{background:"#080e1a",padding:"56px 20px",borderBottom:"1px solid #0f172a"}}>
           <div style={{maxWidth:1100,margin:"0 auto"}}>
@@ -14213,9 +14265,10 @@ export default function App(){
                 {icon:"🎮",t:"Paper Trading",d:"Practica con $100,000 virtuales. Compite en el leaderboard y demuestra tu estrategia antes de arriesgar.",c:"#f59e0b"},
                 {icon:"🎓",t:"Academia & Webinars",d:"Cursos grabados ($39-$99) y webinars en vivo ($29-$79). Aprende análisis técnico, crypto, opciones y más.",c:"#ef4444"},
               ]).map((f,i)=>(
-                <div key={i} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,padding:"24px 20px",transition:"border-color 0.2s"}}
-                  onMouseEnter={e=>e.currentTarget.style.borderColor=f.c+"66"}
-                  onMouseLeave={e=>e.currentTarget.style.borderColor="#1e293b"}>
+                <div key={i} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,padding:"24px 20px",transition:"border-color 0.2s, box-shadow 0.2s",position:"relative",overflow:"hidden"}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor=f.c+"66";e.currentTarget.style.boxShadow=`0 0 32px ${f.c}12`;}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="#1e293b";e.currentTarget.style.boxShadow="none";}}>
+                  <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${f.c},transparent)`,opacity:0.6}}/>
                   <div style={{width:44,height:44,borderRadius:12,background:f.c+"18",border:`1px solid ${f.c}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:14}}>{f.icon}</div>
                   <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:15,fontWeight:800}}>{f.t}</h3>
                   <p style={{margin:0,color:"#64748b",fontSize:13,lineHeight:1.6}}>{f.d}</p>
@@ -14393,12 +14446,14 @@ export default function App(){
         <div style={{background:`linear-gradient(135deg,#0B1A2E,#0D2244)`,padding:"64px 20px",borderTop:"1px solid rgba(0,168,255,0.15)",textAlign:"center"}}>
           <div style={{maxWidth:600,margin:"0 auto"}}>
             <div style={{fontSize:48,marginBottom:16}}>🚀</div>
-            <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4vw,40px)",fontWeight:900}}>¿Listo para invertir mejor?</h2>
-            <p style={{margin:"0 0 32px",color:"#64748b",fontSize:16,lineHeight:1.7}}>Únete a más de 2,847 traders hispanos que ya están usando NexoTrade para tomar mejores decisiones de inversión.</p>
-            <button onClick={()=>setAuth("register")} style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:14,padding:"18px 52px",fontSize:17,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 40px ${C.accent}55`,display:"inline-block"}}>
-              Crear cuenta gratis — 0 riesgo →
+            <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4vw,40px)",fontWeight:900}}>{lang==="en"?"Ready to invest smarter?":"¿Listo para invertir mejor?"}</h2>
+            <p style={{margin:"0 0 32px",color:"#64748b",fontSize:16,lineHeight:1.7}}>{lang==="en"?"Join over 8,400 Hispanic traders already using NexoTrade to make better investment decisions.":"Únete a más de 8,400 traders hispanos que ya están usando NexoTrade para tomar mejores decisiones de inversión."}</p>
+            <button onClick={()=>setAuth("register")} style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:14,padding:"18px 52px",fontSize:17,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 40px ${C.accent}55`,display:"inline-block",transition:"transform 0.15s, box-shadow 0.2s"}}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 48px ${C.accent}70`;}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=`0 0 40px ${C.accent}55`;}}>
+              {lang==="en"?"Create free account — zero risk →":"Crear cuenta gratis — 0 riesgo →"}
             </button>
-            <div style={{marginTop:20,color:"#334155",fontSize:13}}>Sin tarjeta de crédito · Cancela cuando quieras · En español</div>
+            <div style={{marginTop:20,color:"#334155",fontSize:13}}>{lang==="en"?"No credit card · Cancel anytime · Support in Spanish":"Sin tarjeta de crédito · Cancela cuando quieras · En español"}</div>
           </div>
         </div>
 
