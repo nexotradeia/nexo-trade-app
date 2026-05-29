@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 19:04:04
+// NEXO TRADE — build: 2026-05-29 19:11:39
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11517,132 +11517,211 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[] }) {
     return "$"+p.toFixed(4).replace(/\.?0+$/,"");
   };
 
+  const [activeView, setActiveView] = useState("returns");
+  const VIEWS = [
+    {id:"market",  l:"Market View"},
+    {id:"risk",    l:"Risk"},
+    {id:"returns", l:"Returns"},
+    {id:"efficiency", l:"Efficiency"},
+    {id:"projections",l:"Projections"},
+    {id:"health",  l:"Health"},
+  ];
+
+  // Mock extended data per ticker
+  const MOCK = {
+    AAPL:{ytd:15.2,w52h:-0.9,w1:1.0,beta:1.28,vol:24.1,pe:31.2,pb:9.4,roe:17.3,roa:22.1,margin:26.4,target:225,rating:"Buy",upside:8.2,de:1.8,cr:1.07,qr:0.98},
+    NVDA:{ytd:18.4,w52h:-8.2,w1:2.1,beta:2.15,vol:48.3,pe:42.8,pb:28.4,roe:52.1,roa:28.4,margin:55.8,target:165,rating:"Strong Buy",upside:24.4,de:0.4,cr:4.2,qr:3.8},
+    TSLA:{ytd:-12.4,w52h:-35.2,w1:-1.5,beta:2.8,vol:62.4,pe:95.4,pb:14.2,roe:12.8,roa:8.4,margin:17.9,target:280,rating:"Hold",upside:12.1,de:0.08,cr:2.0,qr:1.5},
+    MSFT:{ytd:12.1,w52h:-3.2,w1:0.8,beta:0.92,vol:22.8,pe:38.4,pb:13.8,roe:38.1,roa:18.4,margin:41.2,target:480,rating:"Buy",upside:10.4,de:0.7,cr:1.8,qr:1.7},
+    BTC: {ytd:42.8,w52h:-15.6,w1:3.2,beta:1.85,vol:68.2,pe:null,pb:null,roe:null,roa:null,margin:null,target:120000,rating:"—",upside:18.4,de:null,cr:null,qr:null},
+    ETH: {ytd:22.4,w52h:-28.4,w1:4.8,beta:1.95,vol:72.4,pe:null,pb:null,roe:null,roa:null,margin:null,target:4800,rating:"—",upside:24.8,de:null,cr:null,qr:null},
+    SPY: {ytd:8.4,w52h:-1.8,w1:1.1,beta:1.0,vol:16.4,pe:22.4,pb:4.8,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,de:null,cr:null,qr:null},
+    AMZN:{ytd:16.8,w52h:-2.9,w1:1.2,beta:1.42,vol:28.4,pe:44.2,pb:9.2,roe:22.4,roa:8.8,margin:28.4,target:245,rating:"Strong Buy",upside:15.2,de:0.6,cr:1.1,qr:0.8},
+    CRWD:{ytd:55.9,w52h:-0.1,w1:10.2,beta:1.82,vol:45.2,pe:null,pb:18.4,roe:null,roa:null,margin:22.4,target:420,rating:"Buy",upside:22.4,de:0.2,cr:1.8,qr:1.6},
+    TSM: {ytd:38.0,w52h:-2.8,w1:3.4,beta:1.24,vol:32.4,pe:24.8,pb:6.4,roe:28.4,roa:16.2,margin:38.2,target:210,rating:"Buy",upside:18.8,de:0.3,cr:2.8,qr:2.4},
+    AVGO:{ytd:29.4,w52h:-0.5,w1:7.9,beta:1.38,vol:28.8,pe:36.4,pb:12.8,roe:48.2,roa:12.4,margin:44.2,target:240,rating:"Buy",upside:12.4,de:1.2,cr:1.4,qr:1.2},
+    GOOG:{ytd:20.0,w52h:-6.9,w1:-0.8,beta:1.04,vol:26.4,pe:25.4,pb:6.8,roe:32.4,roa:18.8,margin:32.4,target:210,rating:"Buy",upside:14.2,de:0.1,cr:2.4,qr:2.2},
+    PLTR:{ytd:124.8,w52h:-4.2,w1:9.2,beta:2.42,vol:58.4,pe:null,pb:24.4,roe:null,roa:null,margin:28.4,target:42,rating:"Hold",upside:8.4,de:0.0,cr:5.8,qr:5.4},
+    GS:  {ytd:28.4,w52h:-3.1,w1:2.8,beta:1.48,vol:24.8,pe:14.8,pb:1.8,roe:12.4,roa:1.4,margin:28.8,target:620,rating:"Buy",upside:12.8,de:4.2,cr:null,qr:null},
+    AMD: {ytd:8.2,w52h:-22.4,w1:3.8,beta:1.88,vol:44.8,pe:null,pb:4.8,roe:null,roa:null,margin:18.4,target:145,rating:"Buy",upside:18.4,de:0.1,cr:2.8,qr:2.2},
+    ARM: {ytd:42.4,w52h:-8.4,w1:4.2,beta:2.12,vol:52.4,pe:148.4,pb:18.4,roe:12.4,roa:8.8,margin:38.4,target:165,rating:"Hold",upside:14.8,de:0.2,cr:3.2,qr:2.8},
+    JPM: {ytd:22.8,w52h:-1.2,w1:2.2,beta:1.18,vol:18.4,pe:14.4,pb:2.2,roe:18.4,roa:1.8,margin:32.4,target:280,rating:"Buy",upside:10.4,de:2.8,cr:null,qr:null},
+  };
+  const getMock = (tk) => MOCK[tk] || {ytd:(Math.random()*40-10).toFixed(1),w52h:(Math.random()*-30).toFixed(1),w1:(Math.random()*8-2).toFixed(1),beta:(Math.random()*2+0.5).toFixed(2),vol:(Math.random()*40+15).toFixed(1),pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,de:null,cr:null,qr:null};
+
+  const pctColor = v => v==null?"#64748B":v>=0?"#10B981":"#EF4444";
+  const pctFmt  = v => v==null?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
+  const numFmt  = v => v==null?"—":Number(v).toFixed(1);
+  const VIP = <span style={{color:"#3B82F6",fontWeight:600,fontSize:11,cursor:"pointer"}}>Upgrade to <strong>Pro</strong></span>;
+
+  const COLS = {
+    market:[
+      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
+      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
+      {h:"Change %",       w:90,  render:(tk,d,m)=><span style={{color:pctColor(d?.change??null),fontWeight:700,fontFamily:"monospace"}}>{d?.change!=null?(d.change>=0?"+":"")+d.change.toFixed(2)+"%":"—"}</span>},
+      {h:"Day High",       w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#10B981"}}>{fmtPrice(d?.high??null,tk)}</span>},
+      {h:"Day Low",        w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#EF4444"}}>{fmtPrice(d?.low??null,tk)}</span>},
+      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace"}}>{numFmt(m.beta)}</span>},
+      {h:"Volatility",     w:100, render:(tk,d,m)=>VIP},
+      {h:"Volume",         w:100, render:(tk,d,m)=>VIP},
+    ],
+    risk:[
+      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
+      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
+      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:m.beta>1.5?"#F59E0B":m.beta>2?"#EF4444":"#F1F5F9"}}>{numFmt(m.beta)}</span>},
+      {h:"Volatility %",   w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:m.vol>50?"#EF4444":m.vol>30?"#F59E0B":"#10B981"}}>{numFmt(m.vol)}%</span>},
+      {h:"VaR (95%)",      w:100, render:(tk,d,m)=>VIP},
+      {h:"Sharpe Ratio",   w:110, render:(tk,d,m)=>VIP},
+      {h:"Max Drawdown",   w:120, render:(tk,d,m)=>VIP},
+      {h:"Correlation",    w:110, render:(tk,d,m)=>VIP},
+    ],
+    returns:[
+      {h:"Name",                          w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
+      {h:"Price, Current",               w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
+      {h:"% from 52W High",              w:140, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:pctColor(m.w52h)}}>{pctFmt(m.w52h)}</span>},
+      {h:"YTD Price Total Return",       w:160, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:pctColor(m.ytd)}}>{pctFmt(m.ytd)}</span>},
+      {h:"1 Week Total Return",          w:150, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:pctColor(m.w1)}}>{pctFmt(m.w1)}</span>},
+      {h:"2 Week Total Return",          w:150, render:(tk,d,m)=>VIP},
+      {h:"3 Week Total Return",          w:150, render:(tk,d,m)=>VIP},
+      {h:"4 Week Total Return",          w:150, render:(tk,d,m)=>VIP},
+      {h:"3 Month Total Return",         w:160, render:(tk,d,m)=>VIP},
+      {h:"6 Month Total Return",         w:160, render:(tk,d,m)=>VIP},
+    ],
+    efficiency:[
+      {h:"Name",       w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
+      {h:"Price",      w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
+      {h:"P/E Ratio",  w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace"}}>{m.pe!=null?numFmt(m.pe):"—"}</span>},
+      {h:"P/B Ratio",  w:100, render:(tk,d,m)=>VIP},
+      {h:"ROE %",      w:90,  render:(tk,d,m)=>VIP},
+      {h:"ROA %",      w:90,  render:(tk,d,m)=>VIP},
+      {h:"Net Margin", w:110, render:(tk,d,m)=>VIP},
+      {h:"Rev Growth", w:110, render:(tk,d,m)=>VIP},
+    ],
+    projections:[
+      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
+      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
+      {h:"Price Target",   w:110, render:(tk,d,m)=>VIP},
+      {h:"Analyst Rating", w:130, render:(tk,d,m)=>VIP},
+      {h:"Upside %",       w:100, render:(tk,d,m)=>VIP},
+      {h:"# Analysts",     w:100, render:(tk,d,m)=>VIP},
+      {h:"EPS Estimate",   w:120, render:(tk,d,m)=>VIP},
+      {h:"Rev Estimate",   w:120, render:(tk,d,m)=>VIP},
+    ],
+    health:[
+      {h:"Name",           w:160, render:(tk,d,m)=><><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace"}}>{tk}</div><div style={{fontSize:10,color:"#64748B"}}>{tk}</div></>},
+      {h:"Price, Current", w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d?.price??null,tk)}</span>},
+      {h:"Debt / Equity",  w:120, render:(tk,d,m)=>VIP},
+      {h:"Current Ratio",  w:120, render:(tk,d,m)=>VIP},
+      {h:"Quick Ratio",    w:110, render:(tk,d,m)=>VIP},
+      {h:"Interest Cov.",  w:120, render:(tk,d,m)=>VIP},
+      {h:"FCF / Share",    w:110, render:(tk,d,m)=>VIP},
+      {h:"Dividend Yield", w:120, render:(tk,d,m)=>VIP},
+    ],
+  };
+
+  const cols = COLS[activeView]||COLS.returns;
+  const totalW = cols.reduce((s,c)=>s+c.w, 0);
+
+  const thStyle = {fontSize:10,fontWeight:700,color:"#64748B",padding:"10px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid #E2E8F0",background:"#F8FAFC",userSelect:"none"};
+  const tdStyle = {padding:"11px 12px",borderBottom:"1px solid #F1F5F9",verticalAlign:"middle",whiteSpace:"nowrap"};
+
   return(
-    <div style={{maxWidth:720,margin:"0 auto",padding:"0 4px"}}>
+    <div style={{maxWidth:1380,margin:"0 auto",padding:"0 0 60px",fontFamily:"Inter,sans-serif"}}>
 
-      {/* Header */}
-      <div style={{position:"relative",borderRadius:22,padding:"20px 24px 18px",marginBottom:14,background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(15,22,40,0.95))",border:"1px solid rgba(0,168,255,0.18)",boxShadow:"0 8px 32px rgba(0,0,0,0.3)",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-40,right:-30,width:200,height:200,background:"radial-gradient(circle,rgba(0,168,255,0.1),transparent 70%)",pointerEvents:"none"}}/>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",marginBottom:14}}>
-          <div>
-            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:21,margin:"0 0 3px",letterSpacing:-0.5}}>
-              👁 {isEN?"My Watchlist":"Mi Watchlist"}
-            </h2>
-            <div style={{fontSize:11,color:"#475569"}}>
-              {lastUpdated ? (isEN?"Updated ":"Actualizado ")+lastUpdated.toLocaleTimeString(lang==="es"?"es":"en",{hour:"2-digit",minute:"2-digit"}) : (isEN?"Loading prices…":"Cargando precios…")}
-              {" · "}{tickers.length}/30 tickers
-            </div>
-          </div>
-          <button onClick={fetchPrices} style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.25)",borderRadius:10,padding:"8px 14px",color:"#00A8FF",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>
-            ↻ {isEN?"Refresh":"Actualizar"}
-          </button>
+      {/* ── TOP BAR ── */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 4px",gap:12,flexWrap:"wrap"}}>
+        <div style={{display:"flex",gap:6}}>
+          {/* Tab bar */}
+          {VIEWS.map(v=>(
+            <button key={v.id} onClick={()=>setActiveView(v.id)}
+              style={{background:"none",border:"none",borderBottom:`2.5px solid ${activeView===v.id?"#1E40AF":"transparent"}`,padding:"6px 14px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#1E40AF":"#64748B",cursor:"pointer",whiteSpace:"nowrap"}}>
+              {v.l}
+            </button>
+          ))}
         </div>
-        {/* Add ticker input */}
-        <div style={{display:"flex",gap:8}}>
-          <input value={input} onChange={e=>setInput(e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,10))}
-            onKeyDown={e=>e.key==="Enter"&&addTicker()}
-            placeholder={isEN?"Add ticker: AAPL, BTC, NVDA…":"Agregar ticker: AAPL, BTC, NVDA…"}
-            style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 14px",color:"#F1F5F9",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
-          <button onClick={addTicker} style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"10px 20px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",flexShrink:0}}>
-            + {isEN?"Add":"Agregar"}
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button onClick={fetchPrices} style={{background:"none",border:"1px solid #E2E8F0",borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,color:"#475569",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+            ↻ Refresh
           </button>
+          <button style={{background:"none",border:"1px solid #E2E8F0",borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,color:"#475569",cursor:"pointer"}}>+ Add View</button>
+          <button style={{background:"linear-gradient(135deg,#1E40AF,#2563EB)",border:"none",borderRadius:8,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>Export as… ▾</button>
         </div>
+      </div>
+
+      {/* ── ADD TICKER ── */}
+      <div style={{display:"flex",gap:8,padding:"0 4px 12px"}}>
+        <input value={input} onChange={e=>setInput(e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,10))}
+          onKeyDown={e=>e.key==="Enter"&&addTicker()}
+          placeholder="+ Add ticker: AAPL, BTC, NVDA…"
+          style={{width:260,background:"#F8FAFC",border:"1px solid #E2E8F0",borderRadius:8,padding:"8px 14px",color:"#1E293B",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
+        <button onClick={addTicker} style={{background:"#1E40AF",border:"none",borderRadius:8,padding:"8px 18px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+          + {isEN?"Add":"Agregar"}
+        </button>
         {addFeedback && (
-          <div style={{marginTop:8,fontSize:12,fontWeight:600,
-            color: addFeedback==="added"?"#10B981": addFeedback==="exists"?"#F59E0B":"#EF4444",
-            display:"flex",alignItems:"center",gap:5}}>
-            {addFeedback==="added" && <span>✅ {isEN?"Ticker added!":"¡Ticker agregado!"}</span>}
-            {addFeedback==="exists" && <span>⚠️ {isEN?"Already in your watchlist":"Ya está en tu watchlist"}</span>}
-            {addFeedback==="full"   && <span>🚫 {isEN?"Watchlist full (30 max)":"Watchlist llena (máx 30)"}</span>}
-          </div>
+          <span style={{fontSize:12,fontWeight:600,alignSelf:"center",color:addFeedback==="added"?"#10B981":addFeedback==="exists"?"#F59E0B":"#EF4444"}}>
+            {addFeedback==="added"?"✅ Agregado":addFeedback==="exists"?"⚠️ Ya existe":"🚫 Lista llena"}
+          </span>
         )}
+        <span style={{fontSize:11,color:"#94A3B8",alignSelf:"center",marginLeft:"auto"}}>
+          {lastUpdated?"Updated "+lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"Loading…"} · {tickers.length}/30 tickers
+        </span>
       </div>
 
-      {/* Empty */}
-      {tickers.length===0 && (
-        <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.01)",border:"1px dashed rgba(255,255,255,0.08)",borderRadius:18}}>
-          <div style={{fontSize:48,marginBottom:12}}>👁</div>
-          <div style={{color:"#F1F5F9",fontWeight:800,fontSize:17,marginBottom:8}}>{isEN?"Your watchlist is empty":"Tu watchlist está vacía"}</div>
-          <div style={{color:"#64748B",fontSize:13}}>{isEN?"Type a ticker above and press Enter":"Escribe un ticker arriba y presiona Enter"}</div>
+      {/* ── TABLE ── */}
+      {tickers.length===0?(
+        <div style={{textAlign:"center",padding:"60px 20px",border:"2px dashed #E2E8F0",borderRadius:16}}>
+          <div style={{fontSize:40,marginBottom:12}}>👁</div>
+          <div style={{fontWeight:700,fontSize:16,color:"#1E293B",marginBottom:6}}>{isEN?"Watchlist vacía":"Your watchlist is empty"}</div>
+          <div style={{color:"#64748B",fontSize:13}}>Agrega tickers arriba para comenzar</div>
+        </div>
+      ):(
+        <div style={{overflowX:"auto",border:"1px solid #E2E8F0",borderRadius:12,boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+          <table style={{borderCollapse:"collapse",width:"100%",minWidth:totalW}}>
+            <thead>
+              <tr>
+                {cols.map((c,i)=>(
+                  <th key={i} style={{...thStyle,minWidth:c.w}}>{c.h}</th>
+                ))}
+                <th style={{...thStyle,width:60}}>×</th>
+              </tr>
+              {/* Filter row */}
+              <tr style={{background:"#F8FAFC"}}>
+                {cols.map((c,i)=>(
+                  <td key={i} style={{padding:"4px 12px",borderBottom:"1px solid #E2E8F0"}}>
+                    <span style={{fontSize:10,color:"#94A3B8",fontFamily:"monospace"}}>&gt; #</span>
+                  </td>
+                ))}
+                <td style={{padding:"4px 12px",borderBottom:"1px solid #E2E8F0"}}/>
+              </tr>
+            </thead>
+            <tbody>
+              {tickers.map((tk,rowIdx)=>{
+                const d = prices[tk];
+                const m = getMock(tk);
+                return(
+                  <tr key={tk} style={{background:rowIdx%2===0?"#fff":"#FAFAFA",transition:"background 0.1s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="#EFF6FF"}
+                    onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#fff":"#FAFAFA"}>
+                    {cols.map((c,i)=>(
+                      <td key={i} style={tdStyle}>{c.render(tk,d,m)}</td>
+                    ))}
+                    <td style={tdStyle}>
+                      <button onClick={()=>removeTicker(tk)}
+                        style={{background:"none",border:"none",color:"#CBD5E1",fontSize:16,cursor:"pointer",padding:"2px 6px",borderRadius:4}}
+                        onMouseEnter={e=>e.currentTarget.style.color="#EF4444"}
+                        onMouseLeave={e=>e.currentTarget.style.color="#CBD5E1"}>×</button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Grid of cards */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:10}}>
-        {tickers.map(tk=>{
-          const d = prices[tk];
-          const chg = d?.change??null;
-          const isPos = chg===null ? null : chg>=0;
-          const ACCENT = isPos===null?"#475569":isPos?"#00D26A":"#FF4D6A";
-          const post = topPost(tk);
-          return(
-            <div key={tk} style={{position:"relative",background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${ACCENT}22`,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 16px rgba(0,0,0,0.25)"}}>
-              <div style={{height:2,background:`linear-gradient(90deg,${ACCENT},transparent)`}}/>
-              <div style={{padding:"14px 14px 12px"}}>
-                {/* Remove button */}
-                <button onClick={()=>setRemoving(removing===tk?null:tk)}
-                  style={{position:"absolute",top:10,right:10,background:"transparent",border:"none",color:"#334155",fontSize:14,cursor:"pointer",lineHeight:1,padding:2,zIndex:2}}>×</button>
-                {removing===tk && (
-                  <div style={{position:"absolute",top:28,right:10,background:"#1e293b",border:"1px solid rgba(255,77,106,0.3)",borderRadius:8,padding:"6px 10px",zIndex:10,whiteSpace:"nowrap"}}>
-                    <button onClick={()=>removeTicker(tk)} style={{background:"rgba(255,77,106,0.15)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:6,padding:"4px 10px",color:"#FF4D6A",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-                      {isEN?"Remove":"Eliminar"}
-                    </button>
-                  </div>
-                )}
-                {/* Ticker */}
-                <div style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#F1F5F9",letterSpacing:-0.5,marginBottom:2}}>{tk}</div>
-                {/* Price */}
-                {loading && !d ? (
-                  <div style={{height:28,background:"rgba(255,255,255,0.05)",borderRadius:6,marginBottom:6,animation:"shimmer 1.5s infinite"}}/>
-                ):(
-                  <div style={{fontFamily:"monospace",fontWeight:800,fontSize:22,color:"#F1F5F9",marginBottom:4,lineHeight:1}}>
-                    {fmtPrice(d?.price??null, tk)}
-                  </div>
-                )}
-                {/* Change */}
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  {chg!==null && (
-                    <span style={{fontSize:13,fontWeight:800,color:ACCENT,fontFamily:"monospace"}}>
-                      {isPos?"+":""}{chg.toFixed(2)}%
-                    </span>
-                  )}
-                  {chg!==null && (
-                    <span style={{fontSize:10,color:"#334155",fontWeight:600}}>{isEN?"today":"hoy"}</span>
-                  )}
-                  {chg===null && !loading && (
-                    <span style={{fontSize:11,color:"#334155"}}>{isEN?"No data":"Sin datos"}</span>
-                  )}
-                </div>
-                {/* High/Low mini */}
-                {d?.high>0 && (
-                  <div style={{display:"flex",gap:10,marginTop:8,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.04)"}}>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:8,color:"#334155",fontWeight:700,letterSpacing:0.5}}>HIGH</div>
-                      <div style={{fontSize:11,color:"#00D26A",fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d.high,tk)}</div>
-                    </div>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:8,color:"#334155",fontWeight:700,letterSpacing:0.5}}>LOW</div>
-                      <div style={{fontSize:11,color:"#FF4D6A",fontFamily:"monospace",fontWeight:700}}>{fmtPrice(d.low,tk)}</div>
-                    </div>
-                  </div>
-                )}
-                {/* Top community post */}
-                {post && (
-                  <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.04)",fontSize:11,color:"#475569",lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
-                    💬 {post.text}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+      <div style={{fontSize:11,color:"#94A3B8",textAlign:"center",padding:"12px 0"}}>
+        Precios: Finnhub · Delay ~15s · No es consejo financiero
       </div>
-
-      {tickers.length>0 && (
-        <div style={{fontSize:11,color:"#334155",textAlign:"center",padding:"14px 0",marginTop:4}}>
-          {isEN?"Prices from Finnhub · Delayed ~15s · Not financial advice":"Precios de Finnhub · Delay ~15s · No es consejo financiero"}
-        </div>
-      )}
     </div>
   );
 }
@@ -14470,8 +14549,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===20||page===36)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===20||page===36)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===20||page===36||page===38)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===20||page===36||page===38)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -14488,8 +14567,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===20||page===36)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===20||page===36)?"none":undefined}}>
+        <div style={{gridColumn:(page===20||page===36||page===38)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===20||page===36||page===38)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
