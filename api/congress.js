@@ -121,6 +121,9 @@ export default async function handler(req, res) {
     { name:"Nancy Pelosi",           party:"D", state:"CA", ticker:"MSFT", type:"buy",  amount:"$500K–$1M",   date:"2025-02-14", asset:"Microsoft Corp",                 house:"House"  },
     { name:"David Rouzer",           party:"R", state:"NC", ticker:"LOW",  type:"buy",  amount:"$15K–$50K",   date:"2025-02-03", asset:"Lowe's Companies",               house:"House"  },
     { name:"Josh Gottheimer",        party:"D", state:"NJ", ticker:"AMZN", type:"buy",  amount:"$15K–$50K",   date:"2025-01-20", asset:"Amazon.com Inc",                 house:"House"  },
+    { name:"Marjorie Taylor Greene", party:"R", state:"GA", ticker:"NVDA", type:"buy",  amount:"$15K–$50K",   date:"2025-01-15", asset:"NVIDIA Corp",                    house:"House"  },
+    { name:"Tommy Tuberville",       party:"R", state:"AL", ticker:"GLD",  type:"buy",  amount:"$50K–$100K",  date:"2025-01-10", asset:"SPDR Gold Shares ETF",           house:"Senate" },
+    { name:"Rick Scott",             party:"R", state:"FL", ticker:"TSLA", type:"buy",  amount:"$100K–$250K", date:"2025-01-06", asset:"Tesla Inc",                      house:"Senate" },
   ];
 
   // Sort by date descending
