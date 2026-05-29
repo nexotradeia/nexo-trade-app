@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 19:21:34
+// NEXO TRADE — build: 2026-05-29 19:24:32
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -13677,7 +13677,7 @@ export default function App(){
     if(page===35) return <CongressTradesPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
-    if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium}/>;
+    if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
