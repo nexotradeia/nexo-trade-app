@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 14:53:44
+// NEXO TRADE — build: 2026-05-29 15:03:26
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5017,6 +5017,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
   const [editingName, setEditingName] = useState(false);
   const [editName, setEditName] = useState("");
   const [nameStatus, setNameStatus] = useState(null); // null | "checking" | "available" | "taken" | "saved"
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [savingAvatar, setSavingAvatar] = useState(false);
 
   const isEN = lang==="en";
   const navItems = [
@@ -5077,10 +5079,14 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
               <polygon points="0,48 0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10 240,48" fill="url(#coverChartGrad)"/>
               <polyline points="0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10" fill="none" stroke={ac2} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {/* Avatar */}
+            {/* Avatar — clickable to change */}
             <div style={{position:"absolute",bottom:-24,left:14}}>
               {user
-                ? <div style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid rgba(255,255,255,0.18)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:`0 4px 18px ${ac2}55`}}>{user.emoji}</div>
+                ? <div onClick={()=>setShowAvatarPicker(v=>!v)} title={lang==="en"?"Change avatar":"Cambiar avatar"}
+                    style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid rgba(255,255,255,0.18)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:`0 4px 18px ${ac2}55`,cursor:"pointer",position:"relative"}}>
+                    {user.emoji}
+                    <span style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,background:"#8B5CF6",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #0f0c1d"}}>✎</span>
+                  </div>
                 : <div style={{width:52,height:52,borderRadius:15,background:"rgba(139,92,246,0.2)",border:"2px solid rgba(139,92,246,0.35)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:23}}>👤</div>
               }
             </div>
@@ -5197,6 +5203,35 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
           </>}
         </div>
       </div>
+
+      {/* ── AVATAR PICKER MODAL ── */}
+      {showAvatarPicker && user && (
+        <div style={{background:"#0f0c1d",border:"1px solid rgba(139,92,246,0.3)",borderRadius:16,padding:"14px",boxShadow:"0 8px 32px rgba(0,0,0,0.5)",position:"relative",zIndex:10}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <span style={{fontSize:12,fontWeight:700,color:"#A78BFA"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
+            <button onClick={()=>setShowAvatarPicker(false)} style={{background:"none",border:"none",color:"#64748b",fontSize:14,cursor:"pointer"}}>✕</button>
+          </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,maxHeight:140,overflowY:"auto"}}>
+            {AVATAR_OPTIONS.map(av=>(
+              <button key={av.emoji} onClick={async()=>{
+                if(savingAvatar) return;
+                setSavingAvatar(true);
+                try{
+                  await supabase.from("profiles").update({avatar_emoji:av.emoji,avatar_color:av.color}).eq("id",user.id);
+                  onUserUpdate&&onUserUpdate({...user,emoji:av.emoji,avatarColor:av.color});
+                }catch(e){}
+                setSavingAvatar(false);
+                setShowAvatarPicker(false);
+              }}
+              title={av.emoji}
+              style={{width:38,height:38,borderRadius:10,background:user.emoji===av.emoji?`${av.color}33`:"rgba(255,255,255,0.04)",border:`2px solid ${user.emoji===av.emoji?av.color:"rgba(255,255,255,0.08)"}`,cursor:"pointer",fontSize:20,transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {av.emoji}
+              </button>
+            ))}
+          </div>
+          {savingAvatar && <div style={{textAlign:"center",fontSize:11,color:"#A78BFA",marginTop:8}}>Guardando...</div>}
+        </div>
+      )}
 
       {/* ── NAVEGACIÓN ── */}
       <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(15,23,42,0.08)",border:"1px solid rgba(15,23,42,0.07)"}}>
@@ -12090,12 +12125,126 @@ const SCREENER_DATA = {
 
 function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const isEN = lang === "en";
-  const [tab, setTab]       = useState("stocks");
-  const [sortCol, setSortCol] = useState("score");
-  const [sortDir, setSortDir] = useState(-1);
-  const [search, setSearch] = useState("");
-  const [minScore, setMinScore] = useState(0);
-  const livePx = useContext(PriceCtx);
+  const [tab, setTab]         = useState("stocks");
+  const [sortCol, setSortCol]  = useState("score");
+  const [sortDir, setSortDir]  = useState(-1);
+  const [search, setSearch]    = useState("");
+  const [minScore, setMinScore]= useState(0);
+  const [livePrices, setLivePrices] = useState({});
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [wsStatus, setWsStatus]     = useState("connecting"); // connecting|live|polling
+  const [alerts, setAlerts2]         = useState([]); // [{id,ticker,msg,chg,ts}]
+  const [flashRows, setFlashRows]    = useState({}); // {ticker: "up"|"down"}
+  const prevPrices = useRef({});
+  const alertedTickers = useRef({});
+  const wsRef = useRef(null);
+  const FKEY = "d86clthr01qgiu44rtmgd86clthr01qgiu44rtn0";
+
+  // All tickers across all tabs
+  const ALL_TICKERS = useMemo(()=>{
+    const s = new Set();
+    Object.values(SCREENER_DATA).forEach(arr=>arr.forEach(r=>s.add(r.s)));
+    return [...s];
+  },[]);
+
+  // Fetch prices via REST as fallback/initial
+  const fetchPricesREST = useCallback(async()=>{
+    const tickers = ALL_TICKERS.slice(0,20); // Finnhub free tier limit
+    const results = {};
+    await Promise.allSettled(tickers.map(async t=>{
+      try{
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${t}&token=${FKEY}`);
+        const d = await r.json();
+        if(d.c && d.c > 0){
+          results[t] = { price: d.c, change: d.dp ?? 0, open: d.o, high: d.h, low: d.l, prev: d.pc };
+        }
+      }catch(e){}
+    }));
+    setLivePrices(prev=>{
+      const merged = {...prev};
+      Object.entries(results).forEach(([t,v])=>{
+        const prev2 = prevPrices.current[t]?.price;
+        if(prev2 && v.price !== prev2){
+          setFlashRows(f=>({...f,[t]: v.price>prev2?"up":"down"}));
+          setTimeout(()=>setFlashRows(f=>{const n={...f};delete n[t];return n;}),700);
+          // Alert if >2% move from open
+          const absChg = Math.abs(v.change);
+          if(absChg >= 2 && (!alertedTickers.current[t] || Date.now()-alertedTickers.current[t]>300000)){
+            alertedTickers.current[t] = Date.now();
+            const msg = `${t} ${v.change>=0?"+":""}${v.change?.toFixed(2)}% (${isEN?"big move detected":"movimiento detectado"})`;
+            setAlerts2(a=>[{id:Date.now(),ticker:t,msg,chg:v.change,ts:new Date().toLocaleTimeString()},...a].slice(0,5));
+            try{playAlertSound("price");}catch(e){}
+          }
+        }
+        prevPrices.current[t] = v;
+        merged[t] = v;
+      });
+      return merged;
+    });
+    setLastUpdate(new Date());
+  },[ALL_TICKERS, isEN]);
+
+  // WebSocket connection
+  useEffect(()=>{
+    if(!isPremium) return;
+    let ws, retryTimer;
+    const connect = ()=>{
+      try{
+        ws = new WebSocket(`wss://ws.finnhub.io?token=${FKEY}`);
+        wsRef.current = ws;
+        ws.onopen = ()=>{
+          setWsStatus("live");
+          ALL_TICKERS.slice(0,15).forEach(t=>{
+            ws.send(JSON.stringify({type:"subscribe",symbol:t}));
+          });
+        };
+        ws.onmessage = e=>{
+          try{
+            const d = JSON.parse(e.data);
+            if(d.type==="trade" && d.data){
+              d.data.forEach(trade=>{
+                const t = trade.s;
+                const price = trade.p;
+                if(!t||!price) return;
+                setLivePrices(prev=>{
+                  const prevP = prev[t]?.price;
+                  const open = prev[t]?.open ?? price;
+                  const chgPct = open>0 ? ((price-open)/open)*100 : 0;
+                  const newEntry = {price, change: chgPct, open, high:Math.max(prev[t]?.high??0,price), low:Math.min(prev[t]?.low??9999,price)};
+                  if(prevP && price!==prevP){
+                    setFlashRows(f=>({...f,[t]:price>prevP?"up":"down"}));
+                    setTimeout(()=>setFlashRows(f=>{const n={...f};delete n[t];return n;}),600);
+                    if(Math.abs(chgPct)>=2 && (!alertedTickers.current[t]||Date.now()-alertedTickers.current[t]>300000)){
+                      alertedTickers.current[t]=Date.now();
+                      const msg=`${t} ${chgPct>=0?"+":""}${chgPct.toFixed(2)}%`;
+                      setAlerts2(a=>[{id:Date.now(),ticker:t,msg,chg:chgPct,ts:new Date().toLocaleTimeString()},...a].slice(0,5));
+                      try{playAlertSound("price");}catch(e2){}
+                    }
+                  }
+                  prevPrices.current[t] = newEntry;
+                  return {...prev,[t]:newEntry};
+                });
+                setLastUpdate(new Date());
+              });
+            }
+          }catch(e){}
+        };
+        ws.onerror = ()=>{ setWsStatus("polling"); };
+        ws.onclose = ()=>{
+          setWsStatus("polling");
+          retryTimer = setTimeout(connect, 10000);
+        };
+      }catch(e){ setWsStatus("polling"); }
+    };
+    fetchPricesREST(); // initial load
+    connect();
+    const pollTimer = setInterval(fetchPricesREST, 30000); // 30s fallback
+    return ()=>{
+      clearInterval(pollTimer);
+      clearTimeout(retryTimer);
+      try{ if(ws) ws.close(); }catch(e){}
+    };
+  },[isPremium]);
 
   if (!isPremium) return (
     <div style={{maxWidth:700,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
@@ -12113,16 +12262,18 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   );
 
   const tabs = [
-    {id:"stocks",  l:isEN?"📊 Stocks":"📊 Acciones"},
-    {id:"options", l:isEN?"⚡ Options":"⚡ Opciones"},
-    {id:"intraday",l:isEN?"🕐 Intraday":"🕐 Intraday"},
-    {id:"scalping",l:isEN?"⚡ Scalping":"⚡ Scalping"},
+    {id:"stocks",  l:"📊 "+( isEN?"Stocks":"Acciones")},
+    {id:"options", l:"⚡ "+(isEN?"Options":"Opciones")},
+    {id:"intraday",l:"🕐 Intraday"},
+    {id:"scalping",l:"⚡ Scalping"},
   ];
 
-  const data = (SCREENER_DATA[tab]||[]).map(r => {
-    const live = livePx[r.s];
-    return { ...r, p: live?.price ?? r.p, chg: live?.change ?? r.chg };
-  }).filter(r => {
+  const mergedData = (SCREENER_DATA[tab]||[]).map(r => {
+    const live = livePrices[r.s];
+    return { ...r, p: live?.price ?? r.p, chg: live?.change ?? r.chg, liveHigh: live?.high, liveLow: live?.low };
+  });
+
+  const data = mergedData.filter(r => {
     if (search && !r.s.toLowerCase().includes(search.toLowerCase()) && !r.n.toLowerCase().includes(search.toLowerCase())) return false;
     if (r.score < minScore) return false;
     return true;
@@ -12131,36 +12282,102 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     return (av > bv ? 1 : av < bv ? -1 : 0) * sortDir;
   });
 
+  // Top movers from all tabs
+  const allRows = Object.values(SCREENER_DATA).flat().map(r=>{
+    const live = livePrices[r.s];
+    return {...r, chg: live?.change ?? r.chg};
+  });
+  const topGainers = [...allRows].sort((a,b)=>b.chg-a.chg).slice(0,3);
+  const topLosers  = [...allRows].sort((a,b)=>a.chg-b.chg).slice(0,3);
+
   const scoreColor = s => s >= 90 ? "#10B981" : s >= 75 ? "#F59E0B" : "#94A3B8";
   const chgColor   = c => c >= 0 ? "#10B981" : "#EF4444";
+  const chgBg      = c => c >= 2 ? "rgba(16,185,129,0.12)" : c <= -2 ? "rgba(239,68,68,0.12)" : "transparent";
 
   const sortToggle = col => {
     if (sortCol === col) setSortDir(d => -d);
     else { setSortCol(col); setSortDir(-1); }
   };
   const SortBtn = ({col,label}) => (
-    <button onClick={()=>sortToggle(col)} style={{background:"none",border:"none",color:sortCol===col?C.accent:C.muted,cursor:"pointer",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:0.5,padding:0,fontFamily:"inherit",display:"flex",alignItems:"center",gap:2}}>
-      {label}{sortCol===col?(sortDir===-1?"▼":"▲"):""}
+    <button onClick={()=>sortToggle(col)} style={{background:"none",border:"none",color:sortCol===col?"#A78BFA":C.muted,cursor:"pointer",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8,padding:0,fontFamily:"inherit",display:"flex",alignItems:"center",gap:2,whiteSpace:"nowrap"}}>
+      {label}{sortCol===col?(sortDir===-1?" ▼":" ▲"):""}
     </button>
   );
 
   return (
-    <div style={{maxWidth:1000,margin:"0 auto",padding:"0 4px 60px"}}>
-      {/* Header */}
-      <div style={{marginBottom:20}}>
-        <h1 style={{color:C.text,fontWeight:900,fontSize:22,margin:"0 0 4px",display:"flex",alignItems:"center",gap:8}}>
-          🔬 {isEN?"Advanced Screener":"Screener Avanzado"}
-          <span style={{background:"linear-gradient(135deg,#8B5CF6,#6366F1)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:12,fontWeight:800}}>VIP</span>
-        </h1>
-        <p style={{color:C.muted,fontSize:13,margin:0}}>
-          {isEN
-            ? "AI-powered scanner across stocks, options, intraday & scalping setups."
-            : "Scanner con IA para acciones, opciones, setups intraday y scalping."}
-        </p>
+    <div style={{maxWidth:1100,margin:"0 auto",padding:"0 4px 60px"}}>
+
+      {/* ── ALERT TOASTS ─────────────────────────── */}
+      {alerts.length>0 && (
+        <div style={{position:"fixed",top:72,right:16,zIndex:9999,display:"flex",flexDirection:"column",gap:8,maxWidth:320}}>
+          {alerts.map(a=>(
+            <div key={a.id} style={{background: a.chg>=0?"rgba(16,185,129,0.95)":"rgba(239,68,68,0.95)",color:"#fff",borderRadius:12,padding:"10px 14px",fontSize:13,fontWeight:700,boxShadow:"0 4px 20px rgba(0,0,0,0.4)",display:"flex",alignItems:"center",gap:8,cursor:"pointer",backdropFilter:"blur(8px)"}}
+              onClick={()=>setAlerts2(x=>x.filter(i=>i.id!==a.id))}>
+              <span style={{fontSize:18}}>{a.chg>=0?"🚀":"⚠️"}</span>
+              <div>
+                <div>{a.msg}</div>
+                <div style={{fontSize:10,opacity:0.8,fontWeight:400}}>{a.ts} · {isEN?"click to dismiss":"clic para cerrar"}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── HEADER ────────────────────────────────── */}
+      <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.08),rgba(99,102,241,0.04))",border:`1px solid rgba(139,92,246,0.2)`,borderRadius:20,padding:"20px 24px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#8B5CF6,#6366F1,#00e58f)"}}/>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+              <span style={{fontSize:22,fontWeight:900,color:C.text,letterSpacing:"-0.5px"}}>🔬 {isEN?"Advanced Screener":"Screener Avanzado"}</span>
+              <span style={{background:"linear-gradient(135deg,#8B5CF6,#6366F1)",color:"#fff",fontSize:10,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>VIP</span>
+              {/* Live indicator */}
+              <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:20,padding:"3px 10px"}}>
+                <div style={{width:7,height:7,borderRadius:"50%",background:wsStatus==="live"?"#10B981":"#F59E0B",boxShadow:wsStatus==="live"?"0 0 6px #10B981":"0 0 6px #F59E0B",animation:"pulse 1.5s infinite"}}/>
+                <span style={{fontSize:10,fontWeight:800,color:wsStatus==="live"?"#10B981":"#F59E0B",letterSpacing:0.5}}>
+                  {wsStatus==="live"?"LIVE":"AUTO"}
+                </span>
+              </div>
+            </div>
+            <p style={{color:C.muted,fontSize:12,margin:0}}>
+              {isEN?"Real-time scanner · Institutional-grade signals · AI-powered":"Scanner en tiempo real · Señales institucionales · Potenciado por IA"}
+              {lastUpdate && <span style={{color:C.muted2,marginLeft:8}}>· {isEN?"Updated":"Actualizado"} {lastUpdate.toLocaleTimeString()}</span>}
+            </p>
+          </div>
+          <button onClick={fetchPricesREST} style={{background:"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",color:"#A78BFA",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+            ↻ {isEN?"Refresh":"Actualizar"}
+          </button>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{display:"flex",gap:0,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:4,marginBottom:16,width:"fit-content"}}>
+      {/* ── TOP MOVERS BAR ────────────────────────── */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+        <div style={{background:C.card,border:"1px solid rgba(16,185,129,0.2)",borderRadius:14,padding:"12px 16px"}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#10B981",letterSpacing:0.5,marginBottom:8}}>🚀 TOP GAINERS</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {topGainers.map(r=>(
+              <div key={r.s} style={{background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:8,padding:"4px 10px",fontSize:12}}>
+                <span style={{fontWeight:800,color:"#10B981",fontFamily:"monospace"}}>{r.s}</span>
+                <span style={{color:"#10B981",marginLeft:4,fontWeight:700}}>+{r.chg?.toFixed(2)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{background:C.card,border:"1px solid rgba(239,68,68,0.2)",borderRadius:14,padding:"12px 16px"}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#EF4444",letterSpacing:0.5,marginBottom:8}}>📉 TOP LOSERS</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {topLosers.map(r=>(
+              <div key={r.s} style={{background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:8,padding:"4px 10px",fontSize:12}}>
+                <span style={{fontWeight:800,color:"#EF4444",fontFamily:"monospace"}}>{r.s}</span>
+                <span style={{color:"#EF4444",marginLeft:4,fontWeight:700}}>{r.chg?.toFixed(2)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── TABS ──────────────────────────────────── */}
+      <div style={{display:"flex",gap:0,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:4,marginBottom:14,width:"fit-content"}}>
         {tabs.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)}
             style={{padding:"8px 18px",borderRadius:9,border:"none",background:tab===t.id?"linear-gradient(135deg,#8B5CF6,#6366F1)":"transparent",color:tab===t.id?"#fff":C.muted,fontSize:13,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.2s"}}>
@@ -12169,130 +12386,118 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
         ))}
       </div>
 
-      {/* Filters */}
-      <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+      {/* ── FILTERS ───────────────────────────────── */}
+      <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
         <input value={search} onChange={e=>setSearch(e.target.value)}
           placeholder={isEN?"Search ticker…":"Buscar ticker…"}
           style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"7px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit",width:160}}/>
         <div style={{display:"flex",alignItems:"center",gap:6,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"5px 12px"}}>
           <span style={{fontSize:11,color:C.muted}}>Score ≥</span>
-          <input type="range" min="0" max="95" step="5" value={minScore} onChange={e=>setMinScore(Number(e.target.value))}
-            style={{width:80,accentColor:"#8B5CF6"}}/>
+          <input type="range" min="0" max="95" step="5" value={minScore} onChange={e=>setMinScore(Number(e.target.value))} style={{width:80,accentColor:"#8B5CF6"}}/>
           <span style={{fontSize:12,fontWeight:700,color:"#8B5CF6",minWidth:24}}>{minScore}</span>
         </div>
-        <div style={{marginLeft:"auto",color:C.muted,fontSize:12}}>{data.length} {isEN?"results":"resultados"}</div>
+        <div style={{marginLeft:"auto",color:C.muted,fontSize:12}}>
+          <span style={{fontWeight:700,color:C.text}}>{data.length}</span> {isEN?"results":"resultados"}
+        </div>
       </div>
 
-      {/* Table — Stocks tab */}
-      {tab === "stocks" && (
-        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
-          <div style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 70px 80px 90px 120px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
-            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p",isEN?"Price":"Precio"],["chg",isEN?"Chg%":"Var%"],["vol","Vol"],["mkt","Mkt Cap"],["pattern",isEN?"Pattern":"Patrón"],["score","Score"]].map(([col,lbl])=>(
-              <SortBtn key={col} col={col} label={lbl}/>
-            ))}
-          </div>
-          {data.map((r,i)=>(
-            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 70px 80px 90px 120px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s",cursor:"default"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13}}>{r.s}</span>
-              <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
-              <span style={{fontSize:13,fontWeight:700,color:C.text}}>${r.p?.toFixed(2)}</span>
-              <span style={{fontSize:12,fontWeight:700,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(1)}%</span>
-              <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
-              <span style={{fontSize:11,color:C.muted}}>{r.mkt}</span>
-              <span style={{fontSize:11,background:"rgba(139,92,246,0.1)",color:"#A78BFA",borderRadius:6,padding:"2px 7px"}}>{r.pattern}</span>
-              <div style={{display:"flex",alignItems:"center",gap:4}}>
-                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ── TABLE ─────────────────────────────────── */}
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
 
-      {/* Table — Options tab */}
-      {tab === "options" && (
-        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
-          <div style={{display:"grid",gridTemplateColumns:"70px 120px 80px 70px 60px 70px 70px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
-            {[["s","Ticker"],["n",isEN?"Contract":"Contrato"],["strike","Strike"],["exp",isEN?"Exp":"Vto"],["iv","IV"],["vol","Vol"],["chg",isEN?"Chg%":"Var%"],["score","Score"]].map(([col,lbl])=>(
-              <SortBtn key={col} col={col} label={lbl}/>
-            ))}
+        {/* Stocks header */}
+        {tab==="stocks" && (
+          <div style={{display:"grid",gridTemplateColumns:"68px 1fr 88px 72px 80px 90px 120px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Company":"Empresa"],["p",isEN?"Price":"Precio"],["chg",isEN?"Chg%":"Var%"],["vol","Volume"],["mkt","Mkt Cap"],["pattern",isEN?"Pattern":"Patrón"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
           </div>
-          {data.map((r,i)=>(
-            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 120px 80px 70px 60px 70px 70px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <span style={{fontFamily:"monospace",fontWeight:800,color:r.type==="call"?"#10B981":"#EF4444",fontSize:13}}>{r.s}</span>
-              <span style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
-              <span style={{fontSize:12,fontWeight:700,color:C.text}}>{r.strike}</span>
-              <span style={{fontSize:11,color:C.muted}}>{r.exp}</span>
-              <span style={{fontSize:12,color:"#F59E0B",fontWeight:700}}>{r.iv}</span>
-              <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
-              <span style={{fontSize:12,fontWeight:700,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(1)}%</span>
+        )}
+        {tab==="options" && (
+          <div style={{display:"grid",gridTemplateColumns:"68px 120px 80px 70px 60px 70px 70px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Contract":"Contrato"],["strike","Strike"],["exp",isEN?"Exp":"Vto"],["iv","IV"],["vol","Vol"],["chg","Chg%"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
+          </div>
+        )}
+        {tab==="intraday" && (
+          <div style={{display:"grid",gridTemplateColumns:"68px 1fr 80px 68px 50px 58px 110px 88px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p","Price"],["chg","Chg%"],["atr","ATR"],["rvol","RVol"],["pattern","Pattern"],["signal","Signal"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
+          </div>
+        )}
+        {tab==="scalping" && (
+          <div style={{display:"grid",gridTemplateColumns:"68px 1fr 88px 80px 78px 58px 130px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p","Price"],["spread","Spread"],["trades","Ops/hr"],["tf","TF"],["pattern","Setup"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
+          </div>
+        )}
+
+        {/* Rows */}
+        {data.map((r,i)=>{
+          const flash = flashRows[r.s];
+          const rowBg = flash==="up" ? "rgba(16,185,129,0.15)" : flash==="down" ? "rgba(239,68,68,0.15)" : chgBg(r.chg);
+          const cols = tab==="stocks"
+            ? "68px 1fr 88px 72px 80px 90px 120px 68px"
+            : tab==="options"
+            ? "68px 120px 80px 70px 60px 70px 70px 68px"
+            : tab==="intraday"
+            ? "68px 1fr 80px 68px 50px 58px 110px 88px 68px"
+            : "68px 1fr 88px 80px 78px 58px 130px 68px";
+          return(
+            <div key={i} style={{display:"grid",gridTemplateColumns:cols,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.3s",background:rowBg,cursor:"default",alignItems:"center"}}
+              onMouseEnter={e=>{if(!flash)e.currentTarget.style.background="rgba(139,92,246,0.05)";}}
+              onMouseLeave={e=>{if(!flash)e.currentTarget.style.background=rowBg;}}>
+              <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13,letterSpacing:0.3}}>{r.s}</span>
+              {tab==="stocks" && <>
+                <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+                <span style={{fontSize:13,fontWeight:800,color:C.text,fontFamily:"monospace"}}>${r.p?.toFixed(2)}</span>
+                <span style={{fontSize:12,fontWeight:800,color:chgColor(r.chg),background:chgBg(r.chg),borderRadius:5,padding:"1px 4px"}}>{r.chg>=0?"+":""}{r.chg?.toFixed(2)}%</span>
+                <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
+                <span style={{fontSize:11,color:C.muted}}>{r.mkt}</span>
+                <span style={{fontSize:11,background:"rgba(139,92,246,0.12)",color:"#A78BFA",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{r.pattern}</span>
+              </>}
+              {tab==="options" && <>
+                <span style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+                <span style={{fontSize:12,fontWeight:700,color:C.text,fontFamily:"monospace"}}>{r.strike}</span>
+                <span style={{fontSize:11,color:C.muted}}>{r.exp}</span>
+                <span style={{fontSize:12,color:"#F59E0B",fontWeight:800}}>{r.iv}</span>
+                <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
+                <span style={{fontSize:12,fontWeight:800,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(2)}%</span>
+              </>}
+              {tab==="intraday" && <>
+                <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+                <span style={{fontSize:13,fontWeight:800,color:C.text,fontFamily:"monospace"}}>${r.p?.toFixed(2)}</span>
+                <span style={{fontSize:12,fontWeight:800,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(2)}%</span>
+                <span style={{fontSize:11,color:C.muted}}>{r.atr}</span>
+                <span style={{fontSize:12,fontWeight:700,color:"#F59E0B"}}>{r.rvol}</span>
+                <span style={{fontSize:11,background:"rgba(139,92,246,0.12)",color:"#A78BFA",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{r.pattern}</span>
+                <span style={{fontSize:11,fontWeight:700,color:r.signal?.includes("BUY")||r.signal?.includes("LONG")?"#10B981":"#EF4444"}}>{r.signal}</span>
+              </>}
+              {tab==="scalping" && <>
+                <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+                <span style={{fontSize:13,fontWeight:800,color:C.text,fontFamily:"monospace"}}>${r.p?.toFixed(2)}</span>
+                <span style={{fontSize:12,color:C.text}}>{r.spread}</span>
+                <span style={{fontSize:11,color:C.muted}}>{r.trades}</span>
+                <span style={{fontSize:12,fontWeight:700,color:C.accent}}>{r.tf}</span>
+                <span style={{fontSize:11,background:"rgba(139,92,246,0.12)",color:"#A78BFA",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{r.pattern}</span>
+              </>}
+              {/* Score ring */}
               <div style={{display:"flex",alignItems:"center"}}>
-                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
+                <div style={{width:30,height:30,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,background:`${scoreColor(r.score)}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
-      {/* Table — Intraday tab */}
-      {tab === "intraday" && (
-        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
-          <div style={{display:"grid",gridTemplateColumns:"70px 1fr 80px 70px 55px 60px 110px 90px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
-            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p",isEN?"Price":"Precio"],["chg","Chg%"],["atr","ATR"],["rvol","RVol"],["pattern",isEN?"Pattern":"Patrón"],["signal","Signal"],["score","Score"]].map(([col,lbl])=>(
-              <SortBtn key={col} col={col} label={lbl}/>
-            ))}
-          </div>
-          {data.map((r,i)=>(
-            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 1fr 80px 70px 55px 60px 110px 90px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13}}>{r.s}</span>
-              <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
-              <span style={{fontSize:13,fontWeight:700,color:C.text}}>${r.p?.toFixed(2)}</span>
-              <span style={{fontSize:12,fontWeight:700,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(1)}%</span>
-              <span style={{fontSize:11,color:C.muted}}>{r.atr}</span>
-              <span style={{fontSize:12,fontWeight:700,color:"#F59E0B"}}>{r.rvol}</span>
-              <span style={{fontSize:11,background:"rgba(139,92,246,0.1)",color:"#A78BFA",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{r.pattern}</span>
-              <span style={{fontSize:11,fontWeight:700}}>{r.signal}</span>
-              <div style={{display:"flex",alignItems:"center"}}>
-                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ── NOTIFICATION HINT ─────────────────────── */}
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 16px",marginTop:12,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+        <span style={{fontSize:16}}>🔔</span>
+        <span style={{fontSize:12,color:C.muted,flex:1}}>
+          {isEN
+            ? "Automatic alert when any stock moves ≥2% · Toasts + sound · Updates every 30s"
+            : "Alerta automática cuando alguna acción mueve ≥2% · Toast + sonido · Se actualiza cada 30s"}
+        </span>
+        <span style={{fontSize:11,fontWeight:700,color:wsStatus==="live"?"#10B981":"#F59E0B"}}>
+          {wsStatus==="live"?"● WebSocket LIVE":"● REST 30s"}
+        </span>
+      </div>
 
-      {/* Table — Scalping tab */}
-      {tab === "scalping" && (
-        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
-          <div style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 80px 80px 60px 130px 70px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
-            {[["s","Ticker"],["n",isEN?"Name":"Nombre"],["p",isEN?"Price":"Precio"],["spread","Spread"],["trades",isEN?"Trades/hr":"Ops/hr"],["tf","TF"],["pattern",isEN?"Setup":"Setup"],["score","Score"]].map(([col,lbl])=>(
-              <SortBtn key={col} col={col} label={lbl}/>
-            ))}
-          </div>
-          {data.map((r,i)=>(
-            <div key={i} style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 80px 80px 60px 130px 70px",padding:"11px 16px",borderBottom:`1px solid ${C.border}`,gap:8,transition:"background 0.1s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.04)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-              <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13}}>{r.s}</span>
-              <span style={{fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
-              <span style={{fontSize:13,fontWeight:700,color:C.text}}>${r.p?.toFixed(2)}</span>
-              <span style={{fontSize:12,color:C.text}}>{r.spread}</span>
-              <span style={{fontSize:11,color:C.muted}}>{r.trades}</span>
-              <span style={{fontSize:12,fontWeight:700,color:C.accent}}>{r.tf}</span>
-              <span style={{fontSize:11,background:"rgba(139,92,246,0.1)",color:"#A78BFA",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{r.pattern}</span>
-              <div style={{display:"flex",alignItems:"center"}}>
-                <div style={{width:28,height:28,borderRadius:"50%",border:`2.5px solid ${scoreColor(r.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:scoreColor(r.score)}}>{r.score}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <p style={{color:C.muted,fontSize:11,marginTop:14,textAlign:"center"}}>
+      <p style={{color:C.muted,fontSize:11,marginTop:10,textAlign:"center"}}>
         {isEN
           ? "Signals are educational, not financial advice. NexoTrade is not a licensed financial advisor."
           : "Las señales son educativas, no son consejos financieros. NexoTrade no es un asesor financiero registrado."}
