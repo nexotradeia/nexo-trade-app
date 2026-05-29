@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 14:28:24
+// NEXO TRADE — build: 2026-05-29 14:50:19
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1910,42 +1910,172 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
 }
 
 // ── ALERTS PANEL ──────────────────────────────────────────────────────────────
-function AlertsPanel({lang,onClose,onAlertChange}){
+// ── ALERT SOUND ──────────────────────────────────────────────────────────────
+function playAlertSound(type="price"){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const freqs=type==="price"?[880,1100,880]:type==="earnings"?[440,550,660]:[660,880,1100];
+    freqs.forEach((f,i)=>{
+      const o=ctx.createOscillator();const g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=f;o.type="sine";
+      g.gain.setValueAtTime(0.3,ctx.currentTime+i*0.12);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.12+0.25);
+      o.start(ctx.currentTime+i*0.12);o.stop(ctx.currentTime+i*0.12+0.25);
+    });
+  }catch(e){}
+}
+
+function AlertsPanel({lang,onClose,onAlertChange,user}){
   const [alerts,setAlerts]=useState(()=>{
     try{ return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]"); }
     catch(e){ return []; }
   });
   const [newT,setNewT]=useState(""),[newV,setNewV]=useState(""),[newType,setNewType]=useState("price_above");
-  const typeLabels={"price_above":"↑ Precio sube de","price_below":"↓ Precio baja de","earnings":"📅 Earnings","mentions":"💬 Menciones pico"};
+  const [notifEmail,setNotifEmail]=useState(()=>localStorage.getItem("nexo-alert-email")||user?.email||"");
+  const [soundOn,setSoundOn]=useState(()=>localStorage.getItem("nexo-alert-sound")!=="0");
+  const [pushOn,setPushOn]=useState(()=>localStorage.getItem("nexo-alert-push")==="1");
+  const [emailOn,setEmailOn]=useState(()=>localStorage.getItem("nexo-alert-email-on")==="1");
+  const [triggered,setTriggered]=useState(null); // mensaje de alerta activada
+  const typeLabels={"price_above":"📈 Precio sube de","price_below":"📉 Precio baja de","earnings":"📅 Earnings","mentions":"💬 Menciones pico"};
+
+  const saveAlerts=(upd)=>{
+    setAlerts(upd);
+    localStorage.setItem("nexotrade-alerts",JSON.stringify(upd));
+    if(onAlertChange)onAlertChange(upd);
+  };
+
+  const testAlert=()=>{
+    if(soundOn) playAlertSound("price");
+    setTriggered("✅ Alerta de prueba activada — sonido y notificación OK");
+    if(pushOn && "Notification" in window && Notification.permission==="granted"){
+      new Notification("🔔 NexoTrade Alerta",{body:"$AAPL superó $200 — alerta de prueba",icon:"/favicon.svg"});
+    }
+    setTimeout(()=>setTriggered(null),3000);
+  };
+
+  const requestPush=async()=>{
+    if(!("Notification" in window)){alert("Tu navegador no soporta notificaciones push");return;}
+    const perm=await Notification.requestPermission();
+    if(perm==="granted"){
+      setPushOn(true);localStorage.setItem("nexo-alert-push","1");
+      new Notification("🔔 NexoTrade",{body:"Notificaciones push activadas. Te avisaremos cuando se dispare una alerta.",icon:"/favicon.svg"});
+    }else{
+      alert("Necesitas permitir notificaciones en tu navegador para activar esta función.");
+    }
+  };
+
   return(
-    <div style={{position:"fixed",inset:0,background:"#00000066",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{background:C.surface,borderRadius:22,width:460,maxWidth:"94vw",boxShadow:C.shadowMd,border:`1px solid ${C.border}`}}>
-        <div style={{padding:"18px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.card2,borderRadius:"22px 22px 0 0"}}>
-          <h3 style={{margin:0,color:C.text,fontSize:16,fontWeight:800}}>🔔 Mis Alertas</h3>
+    <div style={{position:"fixed",inset:0,background:"#00000077",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{background:C.surface,borderRadius:22,width:500,maxWidth:"96vw",maxHeight:"90vh",overflowY:"auto",boxShadow:C.shadowMd,border:`1px solid ${C.border}`}}>
+
+        {/* Header */}
+        <div style={{padding:"18px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.card2,borderRadius:"22px 22px 0 0",position:"sticky",top:0,zIndex:1}}>
+          <h3 style={{margin:0,color:C.text,fontSize:16,fontWeight:800}}>🔔 Mis Alertas de Precio</h3>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:20}}>×</button>
         </div>
-        <div style={{padding:20,maxHeight:400,overflowY:"auto"}}>
-          {alerts.map(a=>(
-            <div key={a.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:a.active?C.card2:"#f8fafc",border:`1px solid ${a.active?C.border:"#e2e8f0"}`,borderRadius:12,marginBottom:10,opacity:a.active?1:0.6}}>
-              <span style={{fontSize:20}}>{a.type==="earnings"?"📅":a.type==="price_above"?"📈":"📉"}</span>
+
+        {/* Triggered banner */}
+        {triggered && <div style={{background:"#00e58f22",border:"1px solid #00e58f44",borderRadius:10,margin:"12px 20px 0",padding:"10px 14px",fontSize:13,color:"#00e58f",fontWeight:700}}>{triggered}</div>}
+
+        {/* Canales de notificación */}
+        <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.border}`}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.muted,marginBottom:12,letterSpacing:0.5}}>CANALES DE NOTIFICACIÓN</div>
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+
+            {/* Sonido */}
+            <div style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>
+              <span style={{fontSize:22}}>🔊</span>
               <div style={{flex:1}}>
-                <span style={{background:C.accentDim,color:C.accentText,borderRadius:6,padding:"2px 7px",fontSize:11,fontWeight:800,fontFamily:"monospace",marginRight:8}}>${a.ticker}</span>
-                <span style={{color:C.muted,fontSize:12}}>{typeLabels[a.type]} <strong style={{color:C.text}}>{a.value}</strong></span>
+                <div style={{fontWeight:700,color:C.text,fontSize:13}}>Sonido en pantalla</div>
+                <div style={{color:C.muted2,fontSize:11}}>Alerta sonora cuando se dispare el precio</div>
               </div>
-              <button onClick={()=>{const upd=alerts.map(x=>x.id===a.id?{...x,active:!x.active}:x);setAlerts(upd);localStorage.setItem("nexotrade-alerts",JSON.stringify(upd));if(onAlertChange)onAlertChange(upd);}} style={{background:a.active?C.bull+"22":C.card2,border:`1px solid ${a.active?C.bull+"44":C.border}`,borderRadius:20,padding:"3px 10px",cursor:"pointer",color:a.active?C.bull:C.muted2,fontSize:11,fontWeight:700}}>{a.active?"ON":"OFF"}</button>
-              <button onClick={()=>{const upd=alerts.filter(x=>x.id!==a.id);setAlerts(upd);localStorage.setItem("nexotrade-alerts",JSON.stringify(upd));if(onAlertChange)onAlertChange(upd);}} style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:16}}>×</button>
+              <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                <button onClick={testAlert} style={{background:C.accent+"22",border:`1px solid ${C.accent}44`,borderRadius:8,padding:"4px 10px",fontSize:11,color:C.accent,cursor:"pointer",fontWeight:600}}>Probar</button>
+                <button onClick={()=>{const v=!soundOn;setSoundOn(v);localStorage.setItem("nexo-alert-sound",v?"1":"0");}} style={{background:soundOn?C.bull+"22":"transparent",border:`1px solid ${soundOn?C.bull+"44":C.border}`,borderRadius:20,padding:"4px 14px",cursor:"pointer",color:soundOn?C.bull:C.muted2,fontSize:12,fontWeight:700}}>{soundOn?"ON":"OFF"}</button>
+              </div>
+            </div>
+
+            {/* Push */}
+            <div style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>
+              <span style={{fontSize:22}}>📲</span>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,color:C.text,fontSize:13}}>Notificación en pantalla (push)</div>
+                <div style={{color:C.muted2,fontSize:11}}>Aparece aunque tengas otra pestaña abierta</div>
+              </div>
+              <button onClick={pushOn?()=>{setPushOn(false);localStorage.setItem("nexo-alert-push","0");}:requestPush}
+                style={{background:pushOn?C.bull+"22":"transparent",border:`1px solid ${pushOn?C.bull+"44":C.border}`,borderRadius:20,padding:"4px 14px",cursor:"pointer",color:pushOn?C.bull:C.muted2,fontSize:12,fontWeight:700}}>{pushOn?"ON":"Activar"}</button>
+            </div>
+
+            {/* Email */}
+            <div style={{padding:"10px 14px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <span style={{fontSize:22}}>📧</span>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,color:C.text,fontSize:13}}>Alerta por correo</div>
+                  <div style={{color:C.muted2,fontSize:11}}>Te enviamos un email cuando se active la alerta</div>
+                </div>
+                <button onClick={()=>{const v=!emailOn;setEmailOn(v);localStorage.setItem("nexo-alert-email-on",v?"1":"0");}}
+                  style={{background:emailOn?C.bull+"22":"transparent",border:`1px solid ${emailOn?C.bull+"44":C.border}`,borderRadius:20,padding:"4px 14px",cursor:"pointer",color:emailOn?C.bull:C.muted2,fontSize:12,fontWeight:700,flexShrink:0}}>{emailOn?"ON":"OFF"}</button>
+              </div>
+              {emailOn && <div style={{marginTop:10,display:"flex",gap:8}}>
+                <input value={notifEmail} onChange={e=>setNotifEmail(e.target.value)} placeholder="tu@email.com" type="email"
+                  style={{flex:1,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"7px 10px",fontSize:12,color:C.text,outline:"none"}}/>
+                <button onClick={()=>{localStorage.setItem("nexo-alert-email",notifEmail);setTriggered("✅ Email guardado: "+notifEmail);setTimeout(()=>setTriggered(null),2500);}}
+                  style={{background:C.accent,border:"none",borderRadius:8,padding:"7px 14px",color:"#000",fontSize:12,fontWeight:700,cursor:"pointer"}}>Guardar</button>
+              </div>}
+            </div>
+          </div>
+        </div>
+
+        {/* Lista de alertas */}
+        <div style={{padding:"16px 20px"}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.muted,marginBottom:12,letterSpacing:0.5}}>MIS ALERTAS ({alerts.length})</div>
+          {alerts.length===0 && <div style={{textAlign:"center",color:C.muted2,fontSize:13,padding:"20px 0"}}>No tienes alertas configuradas aún.<br/>Agrega una abajo 👇</div>}
+          {alerts.map(a=>(
+            <div key={a.id} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 13px",background:a.active?C.card2:"transparent",border:`1px solid ${a.active?C.border:"#e2e8f010"}`,borderRadius:12,marginBottom:8,opacity:a.active?1:0.55}}>
+              <span style={{fontSize:18}}>{a.type==="earnings"?"📅":a.type==="price_above"?"📈":"📉"}</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                  <span style={{background:C.accentDim,color:C.accentText,borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:800,fontFamily:"monospace"}}>${a.ticker}</span>
+                  <span style={{color:C.muted,fontSize:12}}>{typeLabels[a.type]?.replace(/📈 |📉 |📅 |💬 /,"")}</span>
+                  {a.value&&a.value!=="—"&&<strong style={{color:C.text,fontSize:12}}>{a.value}</strong>}
+                </div>
+                <div style={{display:"flex",gap:8,marginTop:4}}>
+                  {a.channels?.sound!==false&&<span style={{fontSize:10,color:C.muted2}}>🔊</span>}
+                  {a.channels?.push&&<span style={{fontSize:10,color:C.muted2}}>📲</span>}
+                  {a.channels?.email&&<span style={{fontSize:10,color:C.muted2}}>📧</span>}
+                </div>
+              </div>
+              <button onClick={()=>saveAlerts(alerts.map(x=>x.id===a.id?{...x,active:!x.active}:x))}
+                style={{background:a.active?C.bull+"22":"transparent",border:`1px solid ${a.active?C.bull+"44":C.border}`,borderRadius:20,padding:"3px 10px",cursor:"pointer",color:a.active?C.bull:C.muted2,fontSize:11,fontWeight:700}}>{a.active?"ON":"OFF"}</button>
+              <button onClick={()=>saveAlerts(alerts.filter(x=>x.id!==a.id))}
+                style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:16,padding:0}}>×</button>
             </div>
           ))}
         </div>
-        <div style={{padding:"16px 20px",borderTop:`1px solid ${C.border}`,background:C.card2,borderRadius:"0 0 22px 22px"}}>
-          <h4 style={{margin:"0 0 12px",color:C.muted,fontSize:12,fontWeight:700}}>NUEVA ALERTA</h4>
+
+        {/* Nueva alerta */}
+        <div style={{padding:"14px 20px",borderTop:`1px solid ${C.border}`,background:C.card2,borderRadius:"0 0 22px 22px"}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.muted,marginBottom:10,letterSpacing:0.5}}>+ NUEVA ALERTA</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            <input value={newT} onChange={e=>setNewT(e.target.value.toUpperCase())} placeholder="TICKER" style={{width:80,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",fontFamily:"monospace"}}/>
-            <select value={newType} onChange={e=>setNewType(e.target.value)} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px",fontSize:12,color:C.text,outline:"none"}}>
+            <input value={newT} onChange={e=>setNewT(e.target.value.toUpperCase())} placeholder="TICKER"
+              style={{width:78,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px 10px",fontSize:12,color:C.text,outline:"none",fontFamily:"monospace"}}/>
+            <select value={newType} onChange={e=>setNewType(e.target.value)}
+              style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px",fontSize:12,color:C.text,outline:"none",flex:1}}>
               {Object.entries(typeLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}
             </select>
-            <input value={newV} onChange={e=>setNewV(e.target.value)} placeholder="Valor..." style={{flex:1,minWidth:80,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none"}}/>
-            <Btn small onClick={()=>{if(!newT)return;const upd=[...alerts,{id:Date.now(),ticker:newT,type:newType,value:newV||"—",active:true}];setAlerts(upd);localStorage.setItem("nexotrade-alerts",JSON.stringify(upd));if(onAlertChange)onAlertChange(upd);setNewT("");setNewV("");}}>+ Añadir</Btn>
+            <input value={newV} onChange={e=>setNewV(e.target.value)} placeholder="Precio ($200)..."
+              style={{width:110,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"8px 10px",fontSize:12,color:C.text,outline:"none"}}/>
+            <button onClick={()=>{
+              if(!newT)return;
+              const newAlert={id:Date.now(),ticker:newT,type:newType,value:newV||"—",active:true,channels:{sound:soundOn,push:pushOn,email:emailOn}};
+              saveAlerts([...alerts,newAlert]);
+              if(soundOn) playAlertSound("price");
+              setTriggered(`✅ Alerta creada: $${newT} ${newV}`);
+              setTimeout(()=>setTriggered(null),2500);
+              setNewT("");setNewV("");
+            }} style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:8,padding:"8px 16px",color:"#000",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Añadir</button>
           </div>
         </div>
       </div>
@@ -5253,18 +5383,46 @@ const AFFILIATES = [
     tickers:["SPY","QQQ","NVDA","AAPL","MSFT","TSLA","AMD","AMZN","META"],
   },
   {
-    id:"moomoo",
-    logo:"🐄",
-    name:"moomoo",
-    color:"#FF6B35",
-    bg:"linear-gradient(135deg,#1A0A00,#2D1400)",
-    tagline:"15 acciones gratis al abrir cuenta",
-    sub:"Análisis de nivel profesional · Gratis · Sin comisiones",
-    cta:"Reclamar acciones gratis →",
-    badge:"15 ACCIONES GRATIS",
-    badgeColor:"#FF6B35",
-    url:"https://j.moomoo.com/00yjN2",
-    tickers:["AAPL","TSLA","NVDA","AMD","META","AMZN","GOOGL","MSFT"],
+    id:"ftmo",
+    logo:"🏆",
+    name:"FTMO",
+    color:"#00C896",
+    bg:"linear-gradient(135deg,#001A12,#002B1E)",
+    tagline:"Hasta 20% comisión por cada trader referido",
+    sub:"Funded accounts hasta $200k · Pago semanal · Programa gratuito",
+    cta:"Unirse al programa FTMO →",
+    badge:"HASTA 20% CPA",
+    badgeColor:"#00C896",
+    url:"https://ftmo.com/en/affiliate-programme/",
+    tickers:["EURUSD","GBPUSD","XAUUSD","SPY","NAS100"],
+  },
+  {
+    id:"topstep",
+    logo:"🎯",
+    name:"Topstep",
+    color:"#3B82F6",
+    bg:"linear-gradient(135deg,#00091A,#001530)",
+    tagline:"$50–$150 por cada trader que financies",
+    sub:"Funded accounts · Futuros · Forex · Se paga vía PayPal",
+    cta:"Referir traders a Topstep →",
+    badge:"$150 POR REFERIDO",
+    badgeColor:"#3B82F6",
+    url:"https://www.topstep.com/affiliates/",
+    tickers:["ES","NQ","GC","CL","YM"],
+  },
+  {
+    id:"apex",
+    logo:"⚡",
+    name:"Apex Trader Funding",
+    color:"#FF6B00",
+    bg:"linear-gradient(135deg,#1A0800,#2D1200)",
+    tagline:"10% comisión por cada challenge vendido",
+    sub:"Hasta $300k funded · Retiro cada 7 días · Sin drawdown mensual",
+    cta:"Referir a Apex →",
+    badge:"10% POR VENTA",
+    badgeColor:"#FF6B00",
+    url:"https://apextraderfunding.com/member/aff/go/nexotrade",
+    tickers:["MES","MNQ","MGC","MCL"],
   },
 ];
 
@@ -7661,6 +7819,92 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
         })}
       </div>
 
+      {/* ── ACADEMIAS RECOMENDADAS ── */}
+      <div style={{marginTop:32}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+          <span style={{fontSize:22}}>🌍</span>
+          <div>
+            <div style={{fontSize:16,fontWeight:800,color:C.text}}>Academias y Prop Firms Recomendadas</div>
+            <div style={{fontSize:12,color:C.muted}}>Socios de confianza — NexoTrade recibe comisión si te unes</div>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
+          {[
+            {
+              name:"FTMO",emoji:"🏆",color:"#00C896",
+              tagline:"Consigue una cuenta fondeada hasta $200k",
+              comision:"Comisión: hasta 20% por referido",
+              desc:"El programa de prop trading más reconocido del mundo. Supera el challenge y opera con su dinero.",
+              cta:"Ver programa →",
+              url:"https://ftmo.com/en/affiliate-programme/",
+              badge:"PROP TRADING",
+            },
+            {
+              name:"Topstep",emoji:"🎯",color:"#3B82F6",
+              tagline:"Cuenta fondeada en futuros desde $50/mes",
+              comision:"Comisión: $50–$150 por referido",
+              desc:"La plataforma de prop trading #1 para futuros en EE.UU. Ideal para traders de ES, NQ, GC.",
+              cta:"Empezar con Topstep →",
+              url:"https://www.topstep.com/affiliates/",
+              badge:"FUTUROS",
+            },
+            {
+              name:"Apex Trader Funding",emoji:"⚡",color:"#FF6B00",
+              tagline:"La prop firm de mayor crecimiento en 2026",
+              comision:"Comisión: 10% por cada challenge",
+              desc:"Sin drawdown mensual, retiro cada 7 días. Uno de los mejores para traders agresivos.",
+              cta:"Ver Apex →",
+              url:"https://apextraderfunding.com/member/aff/go/nexotrade",
+              badge:"CHALLENGE",
+            },
+            {
+              name:"Tradeando Academy",emoji:"📖",color:"#A78BFA",
+              tagline:"La academia de trading en español más completa",
+              comision:"Cursos desde $47 · Afiliados activos",
+              desc:"Cursos 100% en español de análisis técnico, price action, cripto y opciones. Miles de alumnos.",
+              cta:"Ver cursos →",
+              url:"https://tradeando.net/curso/tradeando-academy/",
+              badge:"EN ESPAÑOL",
+            },
+            {
+              name:"Masters Traders Academy",emoji:"🎓",color:"#F59E0B",
+              tagline:"Trading institucional e interbancario",
+              comision:"Programas avanzados · Afiliados disponibles",
+              desc:"Formación en trading institucional. Aprende cómo opera realmente el mercado interbancario.",
+              cta:"Ver academia →",
+              url:"https://masterstraders.academy/",
+              badge:"INSTITUCIONAL",
+            },
+            {
+              name:"Investopedia Academy",emoji:"📚",color:"#00A8FF",
+              tagline:"La mayor enciclopedia financiera del mundo",
+              comision:"Cursos certificados · Programa de afiliados",
+              desc:"Cursos certificados de finanzas personales, análisis técnico, opciones y más. En inglés.",
+              cta:"Ver cursos →",
+              url:"https://www.investopedia.com/investopedia-academy-4588395",
+              badge:"CERTIFICADO",
+            },
+          ].map((a,i)=>(
+            <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"18px 20px",display:"flex",flexDirection:"column",gap:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <div style={{width:44,height:44,borderRadius:12,background:a.color+"22",border:`1px solid ${a.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{a.emoji}</div>
+                <div>
+                  <div style={{fontWeight:800,color:C.text,fontSize:14}}>{a.name}</div>
+                  <div style={{background:a.color+"22",color:a.color,borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700,display:"inline-block"}}>{a.badge}</div>
+                </div>
+              </div>
+              <div style={{fontSize:13,fontWeight:700,color:C.text}}>{a.tagline}</div>
+              <div style={{fontSize:12,color:C.muted2,lineHeight:1.5}}>{a.desc}</div>
+              <div style={{fontSize:11,color:a.color,fontWeight:600,background:a.color+"11",borderRadius:8,padding:"4px 10px"}}>{a.comision}</div>
+              <a href={a.url} target="_blank" rel="noopener noreferrer"
+                style={{display:"block",background:`linear-gradient(135deg,${a.color},${a.color}cc)`,border:"none",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",textAlign:"center",textDecoration:"none",marginTop:"auto"}}>
+                {a.cta}
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Bottom CTA */}
       <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
         <div style={{fontSize:36,marginBottom:10}}>🎓</div>
@@ -8207,21 +8451,62 @@ function EconCalendarPage() {
 
 // ── DIVIDEND CALENDAR PAGE (page 15) ─────────────────────────────────────────
 const DIV_FALLBACK = [
-  {ticker:"AAPL",  name:"Apple Inc",          price:248.2, divRate:1.00, yield:0.40, quarterly:"0.25",exDate:"2026-05-09",payDate:"2026-05-15",sector:"Tecnología"},
-  {ticker:"MSFT",  name:"Microsoft Corp",     price:440.5, divRate:3.32, yield:0.75, quarterly:"0.83",exDate:"2026-05-15",payDate:"2026-06-12",sector:"Tecnología"},
-  {ticker:"JNJ",   name:"Johnson & Johnson",  price:160.3, divRate:4.96, yield:3.10, quarterly:"1.24",exDate:"2026-05-27",payDate:"2026-06-10",sector:"Salud"},
-  {ticker:"KO",    name:"Coca-Cola Co",       price:67.8,  divRate:1.94, yield:2.86, quarterly:"0.485",exDate:"2026-06-13",payDate:"2026-07-01",sector:"Consumo"},
-  {ticker:"MCD",   name:"McDonald's Corp",    price:307.4, divRate:7.08, yield:2.30, quarterly:"1.77",exDate:"2026-06-04",payDate:"2026-06-16",sector:"Consumo"},
-  {ticker:"PG",    name:"Procter & Gamble",   price:167.9, divRate:4.02, yield:2.40, quarterly:"1.006",exDate:"2026-07-18",payDate:"2026-08-15",sector:"Consumo"},
-  {ticker:"T",     name:"AT&T Inc",           price:23.1,  divRate:1.11, yield:4.81, quarterly:"0.2775",exDate:"2026-07-10",payDate:"2026-08-01",sector:"Telecomunicaciones"},
-  {ticker:"VZ",    name:"Verizon Comm",       price:45.0,  divRate:2.66, yield:5.91, quarterly:"0.665",exDate:"2026-07-08",payDate:"2026-08-02",sector:"Telecomunicaciones"},
-  {ticker:"XOM",   name:"ExxonMobil Corp",    price:117.5, divRate:3.96, yield:3.37, quarterly:"0.99",exDate:"2026-05-13",payDate:"2026-06-10",sector:"Energía"},
-  {ticker:"CVX",   name:"Chevron Corp",       price:145.8, divRate:6.84, yield:4.69, quarterly:"1.71",exDate:"2026-05-19",payDate:"2026-06-10",sector:"Energía"},
-  {ticker:"ABBV",  name:"AbbVie Inc",         price:188.2, divRate:6.40, yield:3.40, quarterly:"1.60",exDate:"2026-07-14",payDate:"2026-08-15",sector:"Salud"},
-  {ticker:"PFE",   name:"Pfizer Inc",         price:27.4,  divRate:1.68, yield:6.13, quarterly:"0.42",exDate:"2026-07-30",payDate:"2026-09-03",sector:"Salud"},
-  {ticker:"IBM",   name:"IBM Corp",           price:214.9, divRate:6.68, yield:3.11, quarterly:"1.67",exDate:"2026-08-07",payDate:"2026-09-10",sector:"Tecnología"},
-  {ticker:"WMT",   name:"Walmart Inc",        price:98.3,  divRate:0.88, yield:0.90, quarterly:"0.22",exDate:"2026-08-06",payDate:"2026-09-03",sector:"Consumo"},
-  {ticker:"HD",    name:"Home Depot Inc",     price:388.1, divRate:9.00, yield:2.32, quarterly:"2.25",exDate:"2026-09-03",payDate:"2026-09-18",sector:"Consumo"},
+  // ── Tecnología ──────────────────────────────────────────────────────────────
+  {ticker:"AAPL",  name:"Apple Inc",              price:248.2,  divRate:1.00,  yield:0.40,  quarterly:"0.25",   exDate:"2026-05-09",payDate:"2026-05-15",sector:"Tecnología"},
+  {ticker:"MSFT",  name:"Microsoft Corp",         price:440.5,  divRate:3.32,  yield:0.75,  quarterly:"0.83",   exDate:"2026-05-15",payDate:"2026-06-12",sector:"Tecnología"},
+  {ticker:"IBM",   name:"IBM Corp",               price:214.9,  divRate:6.68,  yield:3.11,  quarterly:"1.67",   exDate:"2026-08-07",payDate:"2026-09-10",sector:"Tecnología"},
+  {ticker:"CSCO",  name:"Cisco Systems",          price:56.4,   divRate:1.60,  yield:2.84,  quarterly:"0.40",   exDate:"2026-07-03",payDate:"2026-07-24",sector:"Tecnología"},
+  {ticker:"TXN",   name:"Texas Instruments",      price:178.3,  divRate:5.20,  yield:2.92,  quarterly:"1.30",   exDate:"2026-07-31",payDate:"2026-08-19",sector:"Tecnología"},
+  {ticker:"INTC",  name:"Intel Corp",             price:22.8,   divRate:0.50,  yield:2.19,  quarterly:"0.125",  exDate:"2026-08-06",payDate:"2026-09-01",sector:"Tecnología"},
+  // ── Salud ────────────────────────────────────────────────────────────────────
+  {ticker:"JNJ",   name:"Johnson & Johnson",      price:160.3,  divRate:4.96,  yield:3.10,  quarterly:"1.24",   exDate:"2026-05-27",payDate:"2026-06-10",sector:"Salud"},
+  {ticker:"ABBV",  name:"AbbVie Inc",             price:188.2,  divRate:6.40,  yield:3.40,  quarterly:"1.60",   exDate:"2026-07-14",payDate:"2026-08-15",sector:"Salud"},
+  {ticker:"PFE",   name:"Pfizer Inc",             price:27.4,   divRate:1.68,  yield:6.13,  quarterly:"0.42",   exDate:"2026-07-30",payDate:"2026-09-03",sector:"Salud"},
+  {ticker:"MRK",   name:"Merck & Co",             price:98.7,   divRate:3.12,  yield:3.16,  quarterly:"0.77",   exDate:"2026-07-15",payDate:"2026-08-07",sector:"Salud"},
+  {ticker:"BMY",   name:"Bristol-Myers Squibb",   price:52.1,   divRate:2.48,  yield:4.76,  quarterly:"0.62",   exDate:"2026-08-07",payDate:"2026-08-28",sector:"Salud"},
+  {ticker:"MDT",   name:"Medtronic",              price:88.6,   divRate:2.80,  yield:3.16,  quarterly:"0.70",   exDate:"2026-06-27",payDate:"2026-07-18",sector:"Salud"},
+  // ── Consumo ──────────────────────────────────────────────────────────────────
+  {ticker:"KO",    name:"Coca-Cola Co",           price:67.8,   divRate:1.94,  yield:2.86,  quarterly:"0.485",  exDate:"2026-06-13",payDate:"2026-07-01",sector:"Consumo"},
+  {ticker:"PEP",   name:"PepsiCo Inc",            price:158.4,  divRate:5.44,  yield:3.43,  quarterly:"1.36",   exDate:"2026-06-05",payDate:"2026-06-30",sector:"Consumo"},
+  {ticker:"MCD",   name:"McDonald's Corp",        price:307.4,  divRate:7.08,  yield:2.30,  quarterly:"1.77",   exDate:"2026-06-04",payDate:"2026-06-16",sector:"Consumo"},
+  {ticker:"PG",    name:"Procter & Gamble",       price:167.9,  divRate:4.02,  yield:2.40,  quarterly:"1.006",  exDate:"2026-07-18",payDate:"2026-08-15",sector:"Consumo"},
+  {ticker:"WMT",   name:"Walmart Inc",            price:98.3,   divRate:0.88,  yield:0.90,  quarterly:"0.22",   exDate:"2026-08-06",payDate:"2026-09-03",sector:"Consumo"},
+  {ticker:"HD",    name:"Home Depot Inc",         price:388.1,  divRate:9.00,  yield:2.32,  quarterly:"2.25",   exDate:"2026-09-03",payDate:"2026-09-18",sector:"Consumo"},
+  {ticker:"CL",    name:"Colgate-Palmolive",      price:91.2,   divRate:1.96,  yield:2.15,  quarterly:"0.49",   exDate:"2026-07-17",payDate:"2026-08-15",sector:"Consumo"},
+  {ticker:"GIS",   name:"General Mills",          price:56.8,   divRate:2.48,  yield:4.37,  quarterly:"0.62",   exDate:"2026-07-10",payDate:"2026-08-01",sector:"Consumo"},
+  {ticker:"KMB",   name:"Kimberly-Clark",         price:137.6,  divRate:5.04,  yield:3.66,  quarterly:"1.26",   exDate:"2026-06-06",payDate:"2026-07-04",sector:"Consumo"},
+  // ── Energía ──────────────────────────────────────────────────────────────────
+  {ticker:"XOM",   name:"ExxonMobil Corp",        price:117.5,  divRate:3.96,  yield:3.37,  quarterly:"0.99",   exDate:"2026-05-13",payDate:"2026-06-10",sector:"Energía"},
+  {ticker:"CVX",   name:"Chevron Corp",           price:145.8,  divRate:6.84,  yield:4.69,  quarterly:"1.71",   exDate:"2026-05-19",payDate:"2026-06-10",sector:"Energía"},
+  {ticker:"COP",   name:"ConocoPhillips",         price:108.4,  divRate:2.32,  yield:2.14,  quarterly:"0.58",   exDate:"2026-07-15",payDate:"2026-09-01",sector:"Energía"},
+  {ticker:"OXY",   name:"Occidental Petroleum",  price:49.7,   divRate:0.88,  yield:1.77,  quarterly:"0.22",   exDate:"2026-09-10",payDate:"2026-10-15",sector:"Energía"},
+  {ticker:"ET",    name:"Energy Transfer LP",     price:19.8,   divRate:1.28,  yield:6.46,  quarterly:"0.32",   exDate:"2026-07-30",payDate:"2026-08-19",sector:"Energía"},
+  {ticker:"MMP",   name:"Magellan Midstream",     price:67.4,   divRate:4.13,  yield:6.13,  quarterly:"1.0475", exDate:"2026-07-16",payDate:"2026-08-15",sector:"Energía"},
+  // ── Telecomunicaciones ───────────────────────────────────────────────────────
+  {ticker:"T",     name:"AT&T Inc",               price:23.1,   divRate:1.11,  yield:4.81,  quarterly:"0.2775", exDate:"2026-07-10",payDate:"2026-08-01",sector:"Telecomunicaciones"},
+  {ticker:"VZ",    name:"Verizon Comm",           price:45.0,   divRate:2.66,  yield:5.91,  quarterly:"0.665",  exDate:"2026-07-08",payDate:"2026-08-02",sector:"Telecomunicaciones"},
+  // ── Finanzas ─────────────────────────────────────────────────────────────────
+  {ticker:"JPM",   name:"JPMorgan Chase",         price:262.1,  divRate:5.00,  yield:1.91,  quarterly:"1.25",   exDate:"2026-07-03",payDate:"2026-07-31",sector:"Finanzas"},
+  {ticker:"BAC",   name:"Bank of America",        price:44.8,   divRate:1.04,  yield:2.32,  quarterly:"0.26",   exDate:"2026-06-06",payDate:"2026-06-27",sector:"Finanzas"},
+  {ticker:"WFC",   name:"Wells Fargo",            price:72.3,   divRate:1.40,  yield:1.94,  quarterly:"0.35",   exDate:"2026-08-08",payDate:"2026-09-01",sector:"Finanzas"},
+  {ticker:"GS",    name:"Goldman Sachs",          price:598.4,  divRate:12.00, yield:2.00,  quarterly:"3.00",   exDate:"2026-08-29",payDate:"2026-09-26",sector:"Finanzas"},
+  {ticker:"BLK",   name:"BlackRock Inc",          price:1014.3, divRate:21.12, yield:2.08,  quarterly:"5.28",   exDate:"2026-06-06",payDate:"2026-06-23",sector:"Finanzas"},
+  // ── REITs (alto dividendo) ───────────────────────────────────────────────────
+  {ticker:"O",     name:"Realty Income Corp",     price:55.8,   divRate:3.16,  yield:5.66,  quarterly:"0.264",  exDate:"2026-06-30",payDate:"2026-07-15",sector:"REITs"},
+  {ticker:"AMT",   name:"American Tower",         price:198.7,  divRate:6.84,  yield:3.44,  quarterly:"1.71",   exDate:"2026-06-25",payDate:"2026-07-11",sector:"REITs"},
+  {ticker:"SPG",   name:"Simon Property Group",   price:175.4,  divRate:8.40,  yield:4.79,  quarterly:"2.10",   exDate:"2026-08-07",payDate:"2026-08-28",sector:"REITs"},
+  {ticker:"PLD",   name:"Prologis Inc",           price:112.3,  divRate:4.06,  yield:3.61,  quarterly:"1.015",  exDate:"2026-06-19",payDate:"2026-06-30",sector:"REITs"},
+  {ticker:"VICI",  name:"VICI Properties",        price:32.7,   divRate:1.73,  yield:5.30,  quarterly:"0.4325", exDate:"2026-06-19",payDate:"2026-07-03",sector:"REITs"},
+  {ticker:"MPW",   name:"Medical Properties Trust",price:4.2,   divRate:0.60,  yield:14.28, quarterly:"0.15",   exDate:"2026-09-18",payDate:"2026-10-10",sector:"REITs"},
+  // ── Utilities ────────────────────────────────────────────────────────────────
+  {ticker:"NEE",   name:"NextEra Energy",         price:72.4,   divRate:2.23,  yield:3.08,  quarterly:"0.5425", exDate:"2026-08-28",payDate:"2026-09-15",sector:"Utilities"},
+  {ticker:"DUK",   name:"Duke Energy",            price:112.8,  divRate:4.20,  yield:3.72,  quarterly:"1.045",  exDate:"2026-08-14",payDate:"2026-09-16",sector:"Utilities"},
+  {ticker:"SO",    name:"Southern Company",       price:88.5,   divRate:2.88,  yield:3.25,  quarterly:"0.72",   exDate:"2026-08-06",payDate:"2026-09-06",sector:"Utilities"},
+  {ticker:"D",     name:"Dominion Energy",        price:54.1,   divRate:2.67,  yield:4.93,  quarterly:"0.6675", exDate:"2026-09-04",payDate:"2026-09-20",sector:"Utilities"},
+  // ── BDCs y alto rendimiento ─────────────────────────────────────────────────
+  {ticker:"MAIN",  name:"Main Street Capital",    price:58.9,   divRate:3.00,  yield:5.09,  quarterly:"0.75",   exDate:"2026-09-19",payDate:"2026-09-26",sector:"BDC/Yield"},
+  {ticker:"ARCC",  name:"Ares Capital Corp",      price:22.1,   divRate:1.92,  yield:8.69,  quarterly:"0.48",   exDate:"2026-09-16",payDate:"2026-09-30",sector:"BDC/Yield"},
+  {ticker:"FSK",   name:"FS KKR Capital",         price:18.8,   divRate:2.72,  yield:14.47, quarterly:"0.68",   exDate:"2026-09-12",payDate:"2026-09-30",sector:"BDC/Yield"},
 ];
 
 function DividendCalendarPage() {
@@ -8229,7 +8514,7 @@ function DividendCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [sector,  setSector]  = useState("todos");
   const today = new Date().toISOString().split("T")[0];
-  const sectors = ["todos","Tecnología","Salud","Consumo","Energía","Telecomunicaciones"];
+  const sectors = ["todos","Tecnología","Salud","Consumo","Energía","Telecomunicaciones","Finanzas","REITs","Utilities","BDC/Yield"];
 
   useEffect(()=>{
     fetch("/api/dividends")
@@ -10399,6 +10684,8 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
   // Cargar seguidores mutuos y conversaciones
   useEffect(() => {
     if (!user?.id || user.id === "local") { setLoading(false); return; }
+    // Fallback: always stop loading after 4s max
+    const timeout = setTimeout(() => setLoading(false), 4000);
     const init = async () => {
       try {
         // Quién me sigue a mí
@@ -10423,32 +10710,32 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
           setAllFollowers(profiles || []);
         }
 
-        // Cargar mensajes existentes
-        const { data: msgs } = await sb.from("direct_messages")
-          .select("*")
-          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-          .order("created_at", { ascending: false })
-          .limit(100);
-
-        if (msgs && msgs.length > 0) {
-          // Agrupar por conversación
-          const convMap = {};
-          msgs.forEach(m => {
-            const otherId = m.sender_id === user.id ? m.receiver_id : m.sender_id;
-            if (!convMap[otherId]) convMap[otherId] = [];
-            convMap[otherId].push(m);
-          });
-          // Construir lista de conversaciones
-          const convList = Object.entries(convMap).map(([uid, ms]) => {
-            const last = ms[0];
-            return { userId: uid, lastMsg: last.content, lastTime: last.created_at, isMutual: mutualIds.includes(uid) };
-          });
-          setConversations(convList);
-        }
+        // Cargar mensajes existentes (tabla puede no existir aún)
+        try {
+          const { data: msgs } = await sb.from("direct_messages")
+            .select("*")
+            .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+            .order("created_at", { ascending: false })
+            .limit(100);
+          if (msgs && msgs.length > 0) {
+            const convMap = {};
+            msgs.forEach(m => {
+              const otherId = m.sender_id === user.id ? m.receiver_id : m.sender_id;
+              if (!convMap[otherId]) convMap[otherId] = [];
+              convMap[otherId].push(m);
+            });
+            const convList = Object.entries(convMap).map(([uid, ms]) => {
+              const last = ms[0];
+              return { userId: uid, lastMsg: last.content, lastTime: last.created_at, isMutual: mutualIds.includes(uid) };
+            });
+            setConversations(convList);
+          }
+        } catch(e2) { /* tabla direct_messages no existe aún */ }
       } catch(e) { console.error(e); }
-      setLoading(false);
+      finally { clearTimeout(timeout); setLoading(false); }
     };
     init();
+    return () => clearTimeout(timeout);
   }, [user?.id]);
 
   // Cargar mensajes de la conversación seleccionada
@@ -14044,7 +14331,7 @@ export default function App(){
           }}>🤖</button>
         </div>
       )}
-      {showAlerts&&<AlertsPanel lang={lang} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
+      {showAlerts&&<AlertsPanel lang={lang} user={user} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase}/>}
       <PointToast show={toast.show} points={toast.points} reason={toast.reason}/>
     </div>
