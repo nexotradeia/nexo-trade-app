@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 20:29:36
+// NEXO TRADE — build: 2026-05-29 20:34:33
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -25,7 +25,7 @@ const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
 const STRIPE_LINKS = {
   // ── Suscripciones ──────────────────────────────────────────────
   vip:      "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $9.99/mes
-  vipAnual: "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ⚠️ REEMPLAZAR con link $79/año de Stripe
+  vipAnual: "https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e", // ✅ activo $79/año
   pro:      "https://buy.stripe.com/8x23co0vE2Hvgd29cpaR203", // ✅ activo $24.99/mes
 
   // ── Webinars (sesión única) ────────────────────────────────────
