@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 17:45:33
+// NEXO TRADE — build: 2026-05-30 17:47:54
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6373,20 +6373,15 @@ function ReferralSection({ user }) {
 
       {/* Compartir */}
       <div style={{display:"flex",gap:6}}>
-        <a href={`https://wa.me/?text=📈 Te invito a NexoTrade, la comunidad de traders en español. Señales VIP, IA de trading y más. Únete gratis: ${refLink}`}
-          target="_blank" rel="noopener noreferrer"
-          style={{flex:1,background:"#25D366",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
-          📱 WhatsApp
-        </a>
         <a href={`https://twitter.com/intent/tweet?text=📈 Acabo de unirme a NexoTrade, la red social de traders en español. Picks VIP, IA y más. Únete aquí: ${refLink}`}
           target="_blank" rel="noopener noreferrer"
           style={{flex:1,background:"#0F172A",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
           𝕏 Twitter/X
         </a>
-        <a href={`https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=📈 Únete a NexoTrade - comunidad de traders en español`}
+        <a href={`https://www.instagram.com/?url=${encodeURIComponent(refLink)}`}
           target="_blank" rel="noopener noreferrer"
-          style={{flex:1,background:"#2AABEE",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
-          ✈️ Telegram
+          style={{flex:1,background:"linear-gradient(135deg,#833AB4,#FD1D1D,#F77737)",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
+          📸 Instagram
         </a>
       </div>
     </div>
