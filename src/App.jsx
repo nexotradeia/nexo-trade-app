@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 18:59:13
+// NEXO TRADE — build: 2026-05-30 19:23:44
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4789,34 +4789,106 @@ function SponsoredPostCard({sp}){
   if(dismissed) return null;
   return(
     <div style={{
-      background:"#FFFFFF",
-      border:`1.5px solid rgba(0,168,255,0.18)`,
+      background:C.card,
+      border:`1.5px solid ${C.border}`,
       borderRadius:18,
       padding:"16px 18px",
       margin:"8px 0",
       position:"relative",
-      boxShadow:"0 2px 12px rgba(0,168,255,0.07)",
+      boxShadow:C.shadow,
     }}>
-      {/* Badge patrocinado */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:20}}>{sp.logo}</span>
-          <span style={{fontWeight:800,fontSize:13,color:"#0F172A"}}>{sp.brand}</span>
+      {/* Header: logo-avatar + brand + badge */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+        <div style={{width:42,height:42,borderRadius:12,background:sp.brandColor+"20",border:`1.5px solid ${sp.brandColor}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>
+          {sp.logo}
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:20,padding:"2px 9px",fontSize:9,color:"#64748B",fontWeight:700,letterSpacing:0.5}}>Patrocinado</span>
-          <button onClick={()=>setDismissed(true)} style={{background:"none",border:"none",color:"#94A3B8",fontSize:16,cursor:"pointer",lineHeight:1,padding:"2px 4px"}}>×</button>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+            <span style={{fontWeight:800,fontSize:13.5,color:C.text}}>{sp.brand}</span>
+            <span style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:20,padding:"1px 8px",fontSize:9,color:C.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase"}}>Patrocinado</span>
+          </div>
+          <div style={{fontSize:11,color:C.muted,marginTop:1}}>NexoTrade Partner</div>
         </div>
+        <button onClick={()=>setDismissed(true)} style={{background:"none",border:"none",color:C.muted,fontSize:20,cursor:"pointer",lineHeight:1,padding:"2px 6px",borderRadius:8,opacity:0.6}}>×</button>
       </div>
       {/* Texto */}
-      <p style={{margin:"0 0 14px",color:"#475569",fontSize:13.5,lineHeight:1.6}}>{sp.text}</p>
+      <p style={{margin:"0 0 14px",color:C.text,fontSize:13.5,lineHeight:1.65}}>{sp.text}</p>
       {/* CTA */}
       <a href={sp.url} target="_blank" rel="noopener noreferrer"
-        style={{display:"inline-block",background:"#00A8FF",color:"#fff",borderRadius:10,padding:"9px 20px",fontSize:13,fontWeight:700,textDecoration:"none",transition:"opacity 0.15s"}}
+        style={{display:"inline-flex",alignItems:"center",gap:6,background:sp.brandColor,color:"#fff",borderRadius:11,padding:"9px 22px",fontSize:13,fontWeight:700,textDecoration:"none",transition:"opacity 0.15s",boxShadow:`0 4px 14px ${sp.brandColor}33`}}
         onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
         onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
         {sp.cta}
       </a>
+    </div>
+  );
+}
+
+// ── BOT POSTS de NexoTrade Research ──────────────────────────────────────────
+const BOT_POSTS = IDEAS_DATA.slice(0,10).map(idea=>({
+  id:`bot-${idea.id}`,
+  user:"NexoTrade Research",
+  avatar:"🤖",
+  avatarColor:"#00A8FF",
+  ticker:idea.ticker,
+  sentiment:idea.signal==="COMPRA"?"bull":idea.signal==="VENTA"?"bear":"neutral",
+  text:`${idea.icon} $${idea.ticker} — ${idea.signal}: ${idea.thesis.slice(0,200)}... Entrada: $${idea.entry} · Target: $${idea.target} · Stop: $${idea.stop}`,
+  likes:80+(idea.id*17)%120,
+  comments:12+(idea.id*5)%30,
+  reposts:8+(idea.id*3)%25,
+  time:idea.published,
+  tags:idea.tags,
+}));
+
+function BotPostCard({post,onTickerClick,lang}){
+  const isEN = lang==="en";
+  const isBull = post.sentiment==="bull";
+  const isBear = post.sentiment==="bear";
+  const sentColor = isBull?C.bull:isBear?C.bear:C.muted;
+  const sentBg    = isBull?C.bullBg:isBear?C.bearBg:C.accentDim;
+  const sentLabel = isBull?(isEN?"BUY":"COMPRA"):isBear?(isEN?"SELL":"VENTA"):(isEN?"HOLD":"NEUTRO");
+  return(
+    <div style={{background:C.card,border:`1.5px solid ${isBull?"rgba(22,163,74,0.22)":isBear?"rgba(220,38,38,0.22)":C.border}`,borderRadius:16,padding:"14px 16px",marginBottom:6,boxShadow:C.shadow,transition:"transform 0.18s"}}
+      onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+      onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+      <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
+        {/* Bot avatar */}
+        <div style={{width:40,height:40,borderRadius:12,background:"rgba(0,168,255,0.12)",border:"1.5px solid rgba(0,168,255,0.28)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+          🤖
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          {/* Header row */}
+          <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,flexWrap:"wrap"}}>
+            <span style={{fontWeight:800,color:C.text,fontSize:14}}>NexoTrade Research</span>
+            <span style={{background:"rgba(0,168,255,0.1)",color:"#00A8FF",borderRadius:20,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ AI</span>
+            <span style={{background:sentBg,color:sentColor,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>{sentLabel}</span>
+            <span onClick={()=>onTickerClick&&onTickerClick(post.ticker)}
+              style={{background:C.accentDim,color:C.accent,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+              ${post.ticker}
+            </span>
+            <span style={{marginLeft:"auto",fontSize:11,color:C.muted}}>{post.time}</span>
+          </div>
+          {/* Text */}
+          <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.6}}>{post.text}</p>
+          {/* Tags */}
+          {post.tags?.length>0&&(
+            <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>
+              {post.tags.slice(0,3).map(t=>(
+                <span key={t} style={{background:C.accentDim,color:C.muted,borderRadius:20,padding:"2px 8px",fontSize:10}}>#{t}</span>
+              ))}
+            </div>
+          )}
+          {/* Footer */}
+          <div style={{display:"flex",gap:18,alignItems:"center"}}>
+            <span style={{fontSize:12,color:C.muted}}>❤️ {post.likes}</span>
+            <span style={{fontSize:12,color:C.muted}}>💬 {post.comments}</span>
+            <span style={{fontSize:12,color:C.muted}}>🔁 {post.reposts}</span>
+            <span style={{marginLeft:"auto",fontSize:10,color:C.accent,background:C.accentDim,borderRadius:20,padding:"2px 9px",fontWeight:600}}>
+              {isEN?"AI Research Pick":"Pick IA"}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -5533,6 +5605,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"💼", label:isEN?"My Portfolio":"Mi Portfolio",            idx:37, vip:true},
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
     {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
+    {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
     {icon:"🏆", label:isEN?"Leaderboard":"Ranking",                  idx:40},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
@@ -12851,6 +12924,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
   {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
+  {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
   {label:isEN?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
@@ -14628,6 +14702,321 @@ function LegalSection({title,children}){
   );
 }
 
+// ── ALERT CENTER PAGE (page 42) ───────────────────────────────────────────────
+const FINNHUB_KEY_ALERT = "d86clthr01qgiu44rtmgd86clthr01qgiu44rtn0";
+const ALERT_STORAGE_KEY = "nx-price-alerts-v2";
+
+function AlertCenterPage({ lang="es", user, onNeedAuth }) {
+  const isEN = lang === "en";
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  const [alerts, setAlerts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(ALERT_STORAGE_KEY) || "[]"); } catch { return []; }
+  });
+  const [ticker,    setTicker]    = useState("");
+  const [price,     setPrice]     = useState("");
+  const [direction, setDirection] = useState("above"); // "above" | "below"
+  const [checking,  setChecking]  = useState(false);
+  const [lastCheck, setLastCheck] = useState(null);
+  const [notifPerm, setNotifPerm] = useState(() => {
+    if(typeof Notification !== "undefined") return Notification.permission;
+    return "default";
+  });
+  const [fired, setFired] = useState({}); // {alertId: true} transient in-session
+
+  // ── Persist ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    localStorage.setItem(ALERT_STORAGE_KEY, JSON.stringify(alerts));
+  }, [alerts]);
+
+  // ── Request notification permission ───────────────────────────────────────
+  const requestPermission = async () => {
+    if (typeof Notification === "undefined") return;
+    const perm = await Notification.requestPermission();
+    setNotifPerm(perm);
+    if (perm === "granted") {
+      new Notification("🔔 NexoTrade Alertas", {
+        body: isEN ? "You will receive price alerts here." : "Recibirás alertas de precio aquí.",
+        icon: "/logo_nexo.png",
+      });
+    }
+  };
+
+  // ── Add alert ─────────────────────────────────────────────────────────────
+  const addAlert = () => {
+    const sym = ticker.trim().toUpperCase();
+    const tgt = parseFloat(price);
+    if (!sym || isNaN(tgt) || tgt <= 0) return;
+    const newAlert = {
+      id: Date.now(),
+      ticker: sym,
+      targetPrice: tgt,
+      direction,
+      createdAt: new Date().toISOString().slice(0, 10),
+      triggered: false,
+    };
+    setAlerts(prev => [newAlert, ...prev]);
+    setTicker(""); setPrice("");
+  };
+
+  // ── Delete alert ──────────────────────────────────────────────────────────
+  const deleteAlert = (id) => setAlerts(prev => prev.filter(a => a.id !== id));
+
+  // ── Check prices every 30s ────────────────────────────────────────────────
+  useEffect(() => {
+    const activeAlerts = alerts.filter(a => !a.triggered);
+    if (activeAlerts.length === 0) return;
+
+    const checkNow = async () => {
+      setChecking(true);
+      const tickers = [...new Set(activeAlerts.map(a => a.ticker))];
+      const prices = {};
+      await Promise.allSettled(
+        tickers.map(sym =>
+          fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY_ALERT}`)
+            .then(r => r.json())
+            .then(d => { if (d.c) prices[sym] = d.c; })
+            .catch(() => {})
+        )
+      );
+      setLastCheck(new Date().toLocaleTimeString());
+
+      setAlerts(prev => prev.map(a => {
+        if (a.triggered) return a;
+        const cur = prices[a.ticker];
+        if (!cur) return a;
+        const hit = (a.direction === "above" && cur >= a.targetPrice) ||
+                    (a.direction === "below" && cur <= a.targetPrice);
+        if (hit) {
+          // Fire browser notification
+          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+            new Notification(`🔔 $${a.ticker} ${a.direction === "above" ? (isEN?"above":"superó") : (isEN?"below":"bajó de")} $${a.targetPrice}`, {
+              body: `${isEN?"Current price":"Precio actual"}: $${cur.toFixed(2)}`,
+              icon: "/logo_nexo.png",
+              badge: "/favicon.svg",
+              tag: `alert-${a.id}`,
+            });
+          }
+          setFired(prev => ({ ...prev, [a.id]: cur }));
+          return { ...a, triggered: true, triggeredAt: new Date().toLocaleTimeString(), triggeredPrice: cur };
+        }
+        return a;
+      }));
+      setChecking(false);
+    };
+
+    checkNow();
+    const interval = setInterval(checkNow, 30000);
+    return () => clearInterval(interval);
+  }, [alerts.length, isEN]);
+
+  // ── Colors & styles ───────────────────────────────────────────────────────
+  const permColor = notifPerm === "granted" ? C.bull : notifPerm === "denied" ? C.bear : C.gold;
+  const permLabel = notifPerm === "granted"
+    ? (isEN ? "✓ Notifications active" : "✓ Notificaciones activas")
+    : notifPerm === "denied"
+    ? (isEN ? "✗ Blocked — enable in browser settings" : "✗ Bloqueado — activa en ajustes del navegador")
+    : (isEN ? "Enable notifications" : "Activar notificaciones");
+
+  const activeCount  = alerts.filter(a => !a.triggered).length;
+  const firedCount   = alerts.filter(a => a.triggered).length;
+
+  return (
+    <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 16px", fontFamily: "system-ui,-apple-system,sans-serif" }}>
+
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(0,168,255,0.12)", border: "1.5px solid rgba(0,168,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔔</div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 22, color: C.text, letterSpacing: -0.5 }}>
+              {isEN ? "Alert Center" : "Centro de Alertas"}
+            </div>
+            <div style={{ fontSize: 13, color: C.muted }}>
+              {isEN ? "Get notified when prices hit your targets" : "Recibe alertas cuando los precios lleguen a tus objetivos"}
+            </div>
+          </div>
+        </div>
+
+        {/* Stats row */}
+        <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+          {[
+            { label: isEN ? "Active" : "Activas", value: activeCount, color: C.accent },
+            { label: isEN ? "Triggered" : "Disparadas", value: firedCount, color: C.bull },
+            { label: isEN ? "Total" : "Total", value: alerts.length, color: C.muted },
+          ].map(s => (
+            <div key={s.label} style={{ flex: 1, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 14px", textAlign: "center" }}>
+              <div style={{ fontWeight: 900, fontSize: 20, color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Notification permission banner */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: "14px 16px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+        <span style={{ fontSize: 22 }}>🔕</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 2 }}>
+            {isEN ? "Browser Notifications" : "Notificaciones del navegador"}
+          </div>
+          <div style={{ fontSize: 12, color: permColor, fontWeight: 600 }}>{permLabel}</div>
+        </div>
+        {notifPerm !== "granted" && notifPerm !== "denied" && (
+          <button onClick={requestPermission}
+            style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 10, padding: "8px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+            {isEN ? "Enable" : "Activar"}
+          </button>
+        )}
+      </div>
+
+      {/* Add alert form */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: "18px 18px 20px", marginBottom: 20 }}>
+        <div style={{ fontWeight: 800, fontSize: 15, color: C.text, marginBottom: 14 }}>
+          {isEN ? "➕ New Price Alert" : "➕ Nueva Alerta de Precio"}
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
+          {/* Ticker */}
+          <div style={{ flex: "1 1 90px", minWidth: 80 }}>
+            <div style={{ fontSize: 11, color: C.muted, fontWeight: 600, marginBottom: 4 }}>Ticker</div>
+            <input
+              value={ticker}
+              onChange={e => setTicker(e.target.value.toUpperCase())}
+              onKeyDown={e => e.key === "Enter" && addAlert()}
+              placeholder="AAPL"
+              maxLength={8}
+              style={{ width: "100%", background: "var(--c-bg)", border: `1px solid ${C.border}`, borderRadius: 10, padding: "9px 12px", fontSize: 13, fontWeight: 700, color: C.text, outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+          {/* Direction */}
+          <div style={{ flex: "1 1 110px", minWidth: 100 }}>
+            <div style={{ fontSize: 11, color: C.muted, fontWeight: 600, marginBottom: 4 }}>
+              {isEN ? "When price is" : "Cuando precio"}
+            </div>
+            <select value={direction} onChange={e => setDirection(e.target.value)}
+              style={{ width: "100%", background: "var(--c-bg)", border: `1px solid ${C.border}`, borderRadius: 10, padding: "9px 12px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box", cursor: "pointer" }}>
+              <option value="above">{isEN ? "≥ Above" : "≥ Sobre"}</option>
+              <option value="below">{isEN ? "≤ Below" : "≤ Bajo"}</option>
+            </select>
+          </div>
+          {/* Price */}
+          <div style={{ flex: "1 1 90px", minWidth: 80 }}>
+            <div style={{ fontSize: 11, color: C.muted, fontWeight: 600, marginBottom: 4 }}>
+              {isEN ? "Target $" : "Precio $"}
+            </div>
+            <input
+              value={price}
+              onChange={e => setPrice(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && addAlert()}
+              placeholder="150.00"
+              type="number"
+              min="0"
+              style={{ width: "100%", background: "var(--c-bg)", border: `1px solid ${C.border}`, borderRadius: 10, padding: "9px 12px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+          {/* Add button */}
+          <button onClick={addAlert}
+            style={{ flex: "0 0 auto", background: C.accent, color: "#fff", border: "none", borderRadius: 10, padding: "10px 22px", fontSize: 13, fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap", alignSelf: "flex-end" }}>
+            {isEN ? "Add Alert" : "Agregar"}
+          </button>
+        </div>
+
+        {/* Check status */}
+        <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: checking ? C.gold : activeCount > 0 ? C.bull : C.muted, animation: checking ? "pulse 1s infinite" : "none" }}/>
+          <span style={{ fontSize: 11, color: C.muted }}>
+            {checking
+              ? (isEN ? "Checking prices..." : "Verificando precios...")
+              : lastCheck
+              ? (isEN ? `Last check: ${lastCheck}` : `Última verificación: ${lastCheck}`)
+              : (isEN ? "Checks every 30 seconds" : "Verifica cada 30 segundos")}
+          </span>
+        </div>
+      </div>
+
+      {/* Alerts list */}
+      {alerts.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px 20px", background: C.card, border: `1px dashed ${C.border}`, borderRadius: 16 }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>🔔</div>
+          <div style={{ fontWeight: 700, color: C.text, marginBottom: 4 }}>
+            {isEN ? "No alerts yet" : "Sin alertas aún"}
+          </div>
+          <div style={{ fontSize: 13, color: C.muted }}>
+            {isEN ? "Add a price alert above to get started." : "Agrega una alerta de precio arriba para empezar."}
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* Active alerts first */}
+          {alerts.filter(a => !a.triggered).length > 0 && (
+            <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 4 }}>
+              {isEN ? "Active Alerts" : "Alertas Activas"}
+            </div>
+          )}
+          {alerts.filter(a => !a.triggered).map(a => (
+            <div key={a.id} style={{ background: C.card, border: `1.5px solid ${a.direction==="above"?"rgba(22,163,74,0.25)":"rgba(220,38,38,0.25)"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: a.direction==="above"?C.bullBg:C.bearBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
+                {a.direction === "above" ? "📈" : "📉"}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontWeight: 800, fontSize: 14, color: C.text }}>${a.ticker}</span>
+                  <span style={{ background: a.direction==="above"?C.bullBg:C.bearBg, color: a.direction==="above"?C.bull:C.bear, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>
+                    {a.direction === "above" ? "≥" : "≤"} ${a.targetPrice}
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
+                  {isEN ? "Added" : "Creada"} {a.createdAt}
+                </div>
+              </div>
+              <button onClick={() => deleteAlert(a.id)}
+                style={{ background: "none", border: "none", color: C.muted, fontSize: 18, cursor: "pointer", padding: "4px 6px", borderRadius: 8, opacity: 0.6 }}>×</button>
+            </div>
+          ))}
+
+          {/* Triggered alerts */}
+          {alerts.filter(a => a.triggered).length > 0 && (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", margin: "10px 0 4px" }}>
+                {isEN ? "Triggered" : "Disparadas"}
+              </div>
+              {alerts.filter(a => a.triggered).map(a => (
+                <div key={a.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, opacity: 0.7 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: C.bullBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>✅</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontWeight: 800, fontSize: 13, color: C.text }}>${a.ticker}</span>
+                      <span style={{ background: C.bullBg, color: C.bull, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>
+                        {isEN ? "Triggered" : "Disparada"} {a.triggeredAt || ""}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 11, color: C.muted }}>
+                      {a.direction === "above" ? "≥" : "≤"} ${a.targetPrice}
+                      {a.triggeredPrice ? ` → $${Number(a.triggeredPrice).toFixed(2)}` : ""}
+                    </div>
+                  </div>
+                  <button onClick={() => deleteAlert(a.id)}
+                    style={{ background: "none", border: "none", color: C.muted, fontSize: 18, cursor: "pointer", padding: "4px 6px", borderRadius: 8, opacity: 0.6 }}>×</button>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Info footer */}
+      <div style={{ marginTop: 20, padding: "14px 16px", background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <span style={{ fontSize: 18 }}>ℹ️</span>
+        <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>
+          {isEN
+            ? "Prices are checked every 30 seconds via Finnhub. Keep this page open to receive real-time alerts. Browser notifications require permission."
+            : "Los precios se verifican cada 30 segundos via Finnhub. Mantén esta página abierta para recibir alertas en tiempo real. Las notificaciones del navegador requieren permiso."}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── ABOUT US PAGE (page 30) ───────────────────────────────────────────────────
 function AboutPage({onBack, lang}){
   const isEN = lang==="en";
@@ -15683,6 +16072,7 @@ export default function App(){
     if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
     if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
+    if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -15782,9 +16172,13 @@ export default function App(){
                 </a>
               );
             })()}
-            {/* Post patrocinado completo cada 8 posts */}
-            {(i+1)%8===0 && SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length] && (
-              <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/8))%SPONSORED_POSTS.length]}/>
+            {/* Post patrocinado completo cada 5 posts */}
+            {(i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
+              <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
+            )}
+            {/* Bot Research post cada 7 posts */}
+            {(i+1)%7===0 && BOT_POSTS[(Math.floor(i/7))%BOT_POSTS.length] && (
+              <BotPostCard post={BOT_POSTS[(Math.floor(i/7))%BOT_POSTS.length]} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
             )}
             {/* AdSense banner cada 6 posts */}
             {(i+1)%6===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
@@ -16562,8 +16956,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -16580,8 +16974,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}>
+        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
