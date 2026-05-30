@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 19:32:51
+// NEXO TRADE — build: 2026-05-30 19:40:03
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -7914,16 +7914,20 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 
   useEffect(()=>{
     const loadPicks=async()=>{
-      // Buscar los picks más recientes por semana (sin filtrar por activo para evitar errores de columna)
-      const {data,error}=await supabase.from("weekly_picks").select("*").order("semana",{ascending:false}).order("id").limit(40);
-      if(!error && data && data.length>0){
-        const grouped={corto:[],largo:[],dividendos:[],crypto:[]};
-        data.forEach(p=>{ if(grouped[p.categoria]) grouped[p.categoria].push(p); });
-        // Solo usar si hay al menos algún pick en alguna categoría
-        if(Object.values(grouped).some(arr=>arr.length>0)){
-          setPicks(grouped);
-          return;
+      try{
+        // Buscar los picks más recientes por semana
+        const {data,error}=await supabase.from("weekly_picks").select("*").order("semana",{ascending:false}).order("id").limit(40);
+        if(!error && data && data.length>0){
+          const grouped={corto:[],largo:[],dividendos:[],crypto:[]};
+          data.forEach(p=>{ if(grouped[p.categoria]) grouped[p.categoria].push(p); });
+          // Solo usar si hay al menos algún pick en alguna categoría
+          if(Object.values(grouped).some(arr=>arr.length>0)){
+            setPicks(grouped);
+            return;
+          }
         }
+      }catch(e){
+        // Supabase error — usar FALLBACK
       }
       // Si Supabase falla o está vacío → usar FALLBACK
       setPicks(FALLBACK);
