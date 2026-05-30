@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 17:58:24
+// NEXO TRADE — build: 2026-05-30 18:02:21
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11795,6 +11795,328 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
 }
 
 
+// ── CRYPTO PERFORMANCE PAGE (page 2) — Heatmap estilo Finviz ──────────────────
+function CryptoPerformancePage({ lang="es" }) {
+  const isEN = lang==="en";
+  const [coins, setCoins]         = useState([]);
+  const [global, setGlobal]       = useState(null);
+  const [fearGreed, setFearGreed] = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [err, setErr]             = useState(null);
+  const [period, setPeriod]       = useState("24h");
+  const [view, setView]           = useState("heatmap");
+  const [search, setSearch]       = useState("");
+  const [countdown, setCountdown] = useState(60);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [sortCol, setSortCol]     = useState("market_cap");
+  const [sortAsc, setSortAsc]     = useState(false);
+
+  const PERIODS = [
+    { id:"1h",  label:"1H",  key:"price_change_percentage_1h_in_currency"  },
+    { id:"24h", label:"24H", key:"price_change_percentage_24h_in_currency" },
+    { id:"7d",  label:"7D",  key:"price_change_percentage_7d_in_currency"  },
+    { id:"30d", label:"30D", key:"price_change_percentage_30d_in_currency" },
+  ];
+
+  const fetchAll = useCallback(async () => {
+    setErr(null);
+    try {
+      const [coinsRes, globalRes, fgRes] = await Promise.all([
+        fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h,24h,7d,30d")
+          .then(r => r.json()),
+        fetch("https://api.coingecko.com/api/v3/global").then(r => r.json()),
+        fetch("https://api.alternative.me/fng/?limit=1").then(r => r.json()).catch(()=>null),
+      ]);
+      if (Array.isArray(coinsRes)) { setCoins(coinsRes); setLoading(false); }
+      if (globalRes?.data) setGlobal(globalRes.data);
+      if (fgRes?.data?.[0]) setFearGreed(fgRes.data[0]);
+      setLastUpdate(new Date());
+      setCountdown(60);
+    } catch(e) {
+      setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando...");
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    const iv = setInterval(() => setCountdown(c => { if(c <= 1){ fetchAll(); return 60; } return c - 1; }), 1000);
+    return () => clearInterval(iv);
+  }, [fetchAll]);
+
+  const periodKey = PERIODS.find(p => p.id === period)?.key || "price_change_percentage_24h_in_currency";
+
+  function getPct(coin) {
+    return coin[periodKey] ?? coin.price_change_percentage_24h ?? 0;
+  }
+
+  function getHeatColor(pct) {
+    if (pct >= 10)  return { bg:"#065f46", text:"#6ee7b7" };
+    if (pct >= 5)   return { bg:"#047857", text:"#a7f3d0" };
+    if (pct >= 2)   return { bg:"#059669", text:"#d1fae5" };
+    if (pct >= 0.5) return { bg:"#10b981", text:"#fff" };
+    if (pct >= 0)   return { bg:"#34d399", text:"#064e3b" };
+    if (pct >= -0.5)return { bg:"#f87171", text:"#fff" };
+    if (pct >= -2)  return { bg:"#ef4444", text:"#fff" };
+    if (pct >= -5)  return { bg:"#dc2626", text:"#fecaca" };
+    if (pct >= -10) return { bg:"#b91c1c", text:"#fee2e2" };
+    return                 { bg:"#7f1d1d", text:"#fca5a5" };
+  }
+
+  function fmt$(n) {
+    if (!n && n !== 0) return "—";
+    if (n >= 1e12) return `$${(n/1e12).toFixed(2)}T`;
+    if (n >= 1e9)  return `$${(n/1e9).toFixed(2)}B`;
+    if (n >= 1e6)  return `$${(n/1e6).toFixed(2)}M`;
+    return `$${n.toLocaleString("en-US", {minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  }
+  function fmtPrice(n) {
+    if (!n && n !== 0) return "—";
+    if (n >= 1000) return `$${n.toLocaleString("en-US",{maximumFractionDigits:0})}`;
+    if (n >= 1)    return `$${n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4})}`;
+    return `$${n.toFixed(6)}`;
+  }
+  function fmtPct(n) { return n == null ? "—" : `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`; }
+
+  const filtered = coins
+    .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.symbol.toLowerCase().includes(search.toLowerCase()))
+    .sort((a,b) => {
+      let va = a[sortCol], vb = b[sortCol];
+      if (sortCol === "pct") { va = getPct(a); vb = getPct(b); }
+      if (va == null) va = 0; if (vb == null) vb = 0;
+      return sortAsc ? va - vb : vb - va;
+    });
+
+  const fgVal = fearGreed ? parseInt(fearGreed.value) : null;
+  const fgColor = fgVal>75?"#22c55e":fgVal>55?"#a3e635":fgVal>45?"#fbbf24":fgVal>25?"#f97316":"#ef4444";
+
+  // ── RENDER ──────────────────────────────────────────────────────────────────
+  return (
+    <div style={{background:"#090e1a",minHeight:"100vh",padding:"0 0 40px",fontFamily:"system-ui,-apple-system,sans-serif"}}>
+
+      {/* ── HEADER ── */}
+      <div style={{background:"linear-gradient(180deg,#0d1627,#090e1a)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"14px 20px"}}>
+        <div style={{maxWidth:1600,margin:"0 auto",display:"flex",alignItems:"center",flexWrap:"wrap",gap:12}}>
+          <div>
+            <div style={{fontSize:18,fontWeight:900,color:"#f1f5f9",letterSpacing:-0.5}}>₿ {isEN?"Crypto Performance":"Performance Crypto"}</div>
+            <div style={{fontSize:10,color:"#475569",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase",marginTop:1}}>{isEN?"Real-time · Top 100 by market cap · CoinGecko":"Tiempo real · Top 100 por market cap · CoinGecko"}</div>
+          </div>
+
+          {/* Period tabs */}
+          <div style={{display:"flex",gap:2,background:"rgba(255,255,255,0.05)",borderRadius:9,padding:3}}>
+            {PERIODS.map(p => (
+              <button key={p.id} onClick={()=>setPeriod(p.id)}
+                style={{background:period===p.id?"#00A8FF":"transparent",color:period===p.id?"#fff":"#64748b",border:"none",borderRadius:6,padding:"5px 14px",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* View toggle */}
+          <div style={{display:"flex",gap:2,background:"rgba(255,255,255,0.05)",borderRadius:9,padding:3}}>
+            {[["heatmap","🔥 Heatmap"],["table","📋 "+ (isEN?"Table":"Tabla")]].map(([id,lbl])=>(
+              <button key={id} onClick={()=>setView(id)}
+                style={{background:view===id?"rgba(255,255,255,0.12)":"transparent",color:view===id?"#f1f5f9":"#64748b",border:"none",borderRadius:6,padding:"5px 12px",fontWeight:700,fontSize:11,cursor:"pointer"}}>
+                {lbl}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <input value={search} onChange={e=>setSearch(e.target.value)}
+            placeholder={isEN?"Search BTC, ETH...":"Buscar BTC, ETH..."}
+            style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#f1f5f9",padding:"6px 12px",fontSize:12,outline:"none",width:160}}/>
+
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
+            {lastUpdate && <div style={{fontSize:10,color:"#475569",textAlign:"right"}}>
+              <div style={{color:"#22c55e",fontWeight:700,fontSize:11}}>● LIVE</div>
+              <div>{isEN?"Refreshes in":"Actualiza en"} {countdown}s</div>
+            </div>}
+            <button onClick={fetchAll} disabled={loading}
+              style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,color:"#00A8FF",padding:"6px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              {loading?"⏳":"🔄"} {isEN?"Refresh":"Actualizar"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── MARKET STATS BAR ── */}
+      {global && (
+        <div style={{background:"#0d1627",borderBottom:"1px solid rgba(255,255,255,0.05)",padding:"8px 20px",overflowX:"auto"}}>
+          <div style={{maxWidth:1600,margin:"0 auto",display:"flex",gap:0,minWidth:600}}>
+            {[
+              {label:isEN?"Market Cap":"Cap. Total", val:fmt$(global.total_market_cap?.usd), sub:`${global.market_cap_change_percentage_24h_usd?.toFixed(2)}% 24h`, color:global.market_cap_change_percentage_24h_usd>=0?"#22c55e":"#f87171"},
+              {label:isEN?"24h Volume":"Vol. 24h",   val:fmt$(global.total_volume?.usd), sub:`${global.active_cryptocurrencies?.toLocaleString()} activas`, color:"#f1f5f9"},
+              {label:"BTC Dom.",                     val:`${global.market_cap_percentage?.btc?.toFixed(1)}%`, sub:`ETH ${global.market_cap_percentage?.eth?.toFixed(1)}%`, color:"#F7931A"},
+              {label:isEN?"Cryptos":"Criptos",       val:global.active_cryptocurrencies?.toLocaleString(), sub:isEN?"active markets":"mercados activos", color:"#f1f5f9"},
+              {label:"Fear & Greed",                 val:fearGreed?.value||"—", sub:fearGreed?.value_classification||"—", color:fgColor},
+            ].map((m,i) => (
+              <div key={i} style={{flex:"1 1 100px",padding:"6px 16px",borderRight:i<4?"1px solid rgba(255,255,255,0.05)":"none"}}>
+                <div style={{fontSize:9,color:"#64748b",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:2}}>{m.label}</div>
+                <div style={{fontSize:14,fontWeight:800,color:m.color,letterSpacing:-0.3}}>{m.val}</div>
+                <div style={{fontSize:10,color:"#475569"}}>{m.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── CONTENT ── */}
+      <div style={{maxWidth:1600,margin:"0 auto",padding:"16px 20px"}}>
+
+        {err && <div style={{background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"10px 16px",color:"#f87171",fontSize:13,marginBottom:12}}>⚠️ {err}</div>}
+
+        {/* ── HEATMAP VIEW ── */}
+        {view === "heatmap" && (
+          <div>
+            {/* Legend */}
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+              <span style={{fontSize:10,color:"#475569",fontWeight:700,textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Performance":"Rendimiento"} {PERIODS.find(p=>p.id===period)?.label}:</span>
+              {[["#7f1d1d","<-10%"],["#b91c1c","-10% / -5%"],["#dc2626","-5% / -2%"],["#ef4444","-2% / 0%"],["#34d399","0% / +2%"],["#10b981","+2% / +5%"],["#047857","+5% / +10%"],["#065f46",">+10%"]].map(([bg,lbl])=>(
+                <div key={lbl} style={{display:"flex",alignItems:"center",gap:4}}>
+                  <div style={{width:12,height:12,borderRadius:3,background:bg}}/>
+                  <span style={{fontSize:9,color:"#64748b"}}>{lbl}</span>
+                </div>
+              ))}
+            </div>
+            {loading ? (
+              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                {Array(50).fill(0).map((_,i)=>(
+                  <div key={i} style={{height:80,width:`${60+Math.random()*60}px`,background:"rgba(255,255,255,0.05)",borderRadius:8,animation:"pulse 1.4s infinite",flex:`0 0 ${60+i%4*20}px`}}/>
+                ))}
+              </div>
+            ) : (
+              <div style={{display:"flex",flexWrap:"wrap",gap:3,alignItems:"flex-start",alignContent:"flex-start"}}>
+                {filtered.map(coin => {
+                  const pct  = getPct(coin);
+                  const {bg, text} = getHeatColor(pct);
+                  // Size by market cap rank (rank 1 = biggest)
+                  const rankFactor = Math.max(0.3, 1 - (coin.market_cap_rank - 1) / 100);
+                  const w = Math.round(60 + rankFactor * 100);
+                  const h = Math.round(55 + rankFactor * 55);
+                  return (
+                    <div key={coin.id}
+                      style={{width:w,height:h,background:bg,borderRadius:8,padding:"6px 7px",cursor:"pointer",display:"flex",flexDirection:"column",justifyContent:"space-between",transition:"transform 0.12s,filter 0.12s",userSelect:"none",flexShrink:0,overflow:"hidden"}}
+                      title={`${coin.name} · ${fmtPrice(coin.current_price)} · ${fmtPct(pct)}`}
+                      onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.04)";e.currentTarget.style.filter="brightness(1.15)";e.currentTarget.style.zIndex="5";e.currentTarget.style.position="relative";}}
+                      onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.filter="";e.currentTarget.style.zIndex="";e.currentTarget.style.position="";}}>
+                      <div>
+                        <div style={{fontWeight:800,fontSize:Math.max(9,Math.min(14,w/7)),color:text,lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{coin.symbol.toUpperCase()}</div>
+                        {w > 75 && <div style={{fontSize:9,color:`${text}bb`,marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{coin.name}</div>}
+                      </div>
+                      <div>
+                        {h > 75 && <div style={{fontSize:Math.max(8,Math.min(12,w/9)),color:`${text}cc`,marginBottom:1}}>{fmtPrice(coin.current_price)}</div>}
+                        <div style={{fontWeight:800,fontSize:Math.max(9,Math.min(14,w/7)),color:text}}>{fmtPct(pct)}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TABLE VIEW ── */}
+        {view === "table" && (
+          <div style={{overflowX:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"collapse",minWidth:700}}>
+              <thead>
+                <tr style={{borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
+                  {[
+                    {label:"#", col:"market_cap_rank", w:40},
+                    {label:isEN?"Name":"Nombre", col:"name", w:180},
+                    {label:isEN?"Price":"Precio", col:"current_price", w:110},
+                    {label:"1H %", col:"price_change_percentage_1h_in_currency", w:80},
+                    {label:"24H %", col:"pct", w:80},
+                    {label:"7D %", col:"price_change_percentage_7d_in_currency", w:80},
+                    {label:isEN?"Market Cap":"Cap. Mercado", col:"market_cap", w:130},
+                    {label:isEN?"Volume 24H":"Vol. 24H", col:"total_volume", w:120},
+                  ].map(h=>(
+                    <th key={h.col} onClick={()=>{ if(sortCol===h.col) setSortAsc(!sortAsc); else{setSortCol(h.col);setSortAsc(false);} }}
+                      style={{textAlign:"left",padding:"8px 10px",fontSize:10,fontWeight:700,color:sortCol===h.col?"#00A8FF":"#64748b",letterSpacing:0.5,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap",width:h.w}}>
+                      {h.label}{sortCol===h.col?(sortAsc?" ↑":" ↓"):""}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading && Array(15).fill(0).map((_,i)=>(
+                  <tr key={i}><td colSpan={8} style={{padding:"10px"}}>
+                    <div style={{height:14,background:"rgba(255,255,255,0.05)",borderRadius:4,animation:"pulse 1.4s infinite"}}/>
+                  </td></tr>
+                ))}
+                {!loading && filtered.map((coin,i)=>{
+                  const pct24  = coin.price_change_percentage_24h_in_currency ?? coin.price_change_percentage_24h ?? 0;
+                  const pct1h  = coin.price_change_percentage_1h_in_currency ?? 0;
+                  const pct7d  = coin.price_change_percentage_7d_in_currency ?? 0;
+                  const rowBg  = i%2===0?"rgba(255,255,255,0.02)":"transparent";
+                  return (
+                    <tr key={coin.id} style={{background:rowBg,transition:"background 0.1s"}}
+                      onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.05)"}
+                      onMouseLeave={e=>e.currentTarget.style.background=rowBg}>
+                      <td style={{padding:"9px 10px",color:"#475569",fontSize:11,fontFamily:"monospace"}}>{coin.market_cap_rank}</td>
+                      <td style={{padding:"9px 10px"}}>
+                        <div style={{display:"flex",alignItems:"center",gap:8}}>
+                          <img src={coin.image} alt={coin.symbol} width={22} height={22} style={{borderRadius:"50%",flexShrink:0}} onError={e=>e.target.style.display="none"}/>
+                          <div>
+                            <div style={{fontWeight:700,color:"#f1f5f9",fontSize:13}}>{coin.symbol.toUpperCase()}</div>
+                            <div style={{fontSize:10,color:"#475569"}}>{coin.name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{padding:"9px 10px",fontWeight:700,color:"#f1f5f9",fontSize:13,fontFamily:"monospace"}}>{fmtPrice(coin.current_price)}</td>
+                      <td style={{padding:"9px 10px",fontWeight:700,fontSize:12,color:pct1h>=0?"#22c55e":"#f87171",fontFamily:"monospace"}}>{fmtPct(pct1h)}</td>
+                      <td style={{padding:"9px 10px",fontWeight:700,fontSize:12,color:pct24>=0?"#22c55e":"#f87171",fontFamily:"monospace"}}>{fmtPct(pct24)}</td>
+                      <td style={{padding:"9px 10px",fontWeight:700,fontSize:12,color:pct7d>=0?"#22c55e":"#f87171",fontFamily:"monospace"}}>{fmtPct(pct7d)}</td>
+                      <td style={{padding:"9px 10px",color:"#94a3b8",fontSize:12,fontFamily:"monospace"}}>{fmt$(coin.market_cap)}</td>
+                      <td style={{padding:"9px 10px",color:"#94a3b8",fontSize:12,fontFamily:"monospace"}}>{fmt$(coin.total_volume)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Top Gainers / Losers */}
+        {!loading && view === "heatmap" && (
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:20}}>
+            {[
+              {title:isEN?"🚀 Top Gainers":"🚀 Mayores Subidas",dir:1},
+              {title:isEN?"💀 Top Losers":"💀 Mayores Caídas",dir:-1},
+            ].map(({title,dir})=>{
+              const list = [...coins].sort((a,b)=>dir*(getPct(b)-getPct(a))).slice(0,5);
+              return (
+                <div key={dir} style={{background:"#0d1627",border:"1px solid rgba(255,255,255,0.06)",borderRadius:12,padding:"14px 16px"}}>
+                  <div style={{fontWeight:800,fontSize:13,color:"#f1f5f9",marginBottom:10}}>{title} ({PERIODS.find(p=>p.id===period)?.label})</div>
+                  {list.map(c=>{
+                    const pct=getPct(c);
+                    const {bg,text}=getHeatColor(pct);
+                    return (
+                      <div key={c.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,padding:"6px 8px",borderRadius:8,background:"rgba(255,255,255,0.03)"}}>
+                        <img src={c.image} alt={c.symbol} width={24} height={24} style={{borderRadius:"50%"}} onError={e=>e.target.style.display="none"}/>
+                        <div style={{flex:1}}>
+                          <div style={{fontWeight:700,color:"#f1f5f9",fontSize:12}}>{c.symbol.toUpperCase()} <span style={{color:"#475569",fontWeight:400,fontSize:10}}>{c.name}</span></div>
+                          <div style={{color:"#64748b",fontSize:11,fontFamily:"monospace"}}>{fmtPrice(c.current_price)}</div>
+                        </div>
+                        <div style={{background:bg,color:text,borderRadius:6,padding:"3px 9px",fontWeight:800,fontSize:12,fontFamily:"monospace"}}>{fmtPct(pct)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{marginTop:14,fontSize:10,color:"#334155",textAlign:"center"}}>
+          📡 {isEN?"Data: CoinGecko API · Updates every 60s · Not financial advice":"Datos: CoinGecko API · Actualiza cada 60s · No es consejo financiero"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── CRYPTO OPTIONS PAGE (page 41) ─────────────────────────────────────────────
 function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
   const isEN = lang==="en";
@@ -15225,10 +15547,11 @@ export default function App(){
   const renderPage = () => {
     if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} onRepost={handleRepost}/>;
     if(page===1) return <TopsPage posts={posts}/>;
-    if(page===2||page===4) return(
+    if(page===2) return <CryptoPerformancePage lang={lang}/>;
+    if(page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
         <div style={{fontSize:48,marginBottom:16}}>🚧</div>
-        <h2 style={{color:C.text,fontWeight:800,marginBottom:8}}>{page===2?"Crypto":"Macro"}</h2>
+        <h2 style={{color:C.text,fontWeight:800,marginBottom:8}}>Macro</h2>
         <p style={{color:C.muted,fontSize:15}}>Esta sección estará disponible muy pronto.<br/>Mientras tanto, explora el feed principal.</p>
         <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>← Volver al Feed</button>
       </div>
@@ -16136,8 +16459,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===19||page===20||page===35||page===36||page===38||page===41)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -16154,8 +16477,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===19||page===20||page===35||page===36||page===38||page===41)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}>
+        <div style={{gridColumn:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
