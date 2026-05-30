@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 16:51:39
+// NEXO TRADE — build: 2026-05-30 17:03:06
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -7717,26 +7717,27 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
   const [livePrices,setLivePrices]=useState({});
   const semana = new Date().toLocaleDateString("es",{day:"numeric",month:"long",year:"numeric"});
 
-  // Picks semana 26 mayo 2026 — fuente: Wall Street analysts (TipRanks, CNBC, Motley Fool)
+  // Picks semana 1–5 junio 2026 — fuente: Wall Street analysts (TipRanks, CNBC, Motley Fool, Barclays)
   const FALLBACK = {
     corto:[
-      {ticker:"NVDA", nombre:"NVIDIA",        tipo:"COMPRA", entrada:"$131", target:"$165", stop_loss:"$118", confianza:92, razon:"Reportó $81.6B ingresos (+85% YoY) + buyback $80B. Analistas target $295–$303. Momentum IA imparable."},
-      {ticker:"MU",   nombre:"Micron Tech",   tipo:"COMPRA", entrada:"$118", target:"$145", stop_loss:"$108", confianza:87, razon:"Q1 FY2026 superior a expectativas. Memoria HBM para IA en máxima demanda. Strong Buy consensus."},
-      {ticker:"CRWD", nombre:"CrowdStrike",   tipo:"COMPRA", entrada:"$412", target:"$470", stop_loss:"$385", confianza:84, razon:"+$5B ARR, margen bruto 80%. Mercado de ciberseguridad crece a $325B hacia 2030."},
+      {ticker:"NVDA", nombre:"NVIDIA",        tipo:"COMPRA", entrada:"$131", target:"$152", stop_loss:"$122", confianza:93, razon:"Semana de datos de empleo — NVDA lidera momentum IA. Soporte fuerte en $125, catalizador: actualizaciones Blackwell. Analistas Barclays/Wedbush reiteran Buy."},
+      {ticker:"SPY",  nombre:"S&P 500 ETF",   tipo:"COMPRA", entrada:"$592", target:"$610", stop_loss:"$581", confianza:85, razon:"ETF del S&P 500 en zona de ruptura. Semana de NFP — volatilidad aprovechable. Ideal para day trading de apertura y cierre de mercado."},
+      {ticker:"TSLA", nombre:"Tesla",         tipo:"COMPRA", entrada:"$348", target:"$385", stop_loss:"$325", confianza:82, razon:"Elon Musk menos distraído por DOGE, foco en Tesla. Modelo nueva plataforma barata en producción. Rebote técnico desde soporte clave."},
+      {ticker:"PLTR", nombre:"Palantir",      tipo:"COMPRA", entrada:"$122", target:"$140", stop_loss:"$112", confianza:88, razon:"Contratos gobierno USA aceleran (+127% YoY en US Commercial). AIP Platform dominando enterprise AI. Wedbush target $140."},
     ],
     largo:[
-      {ticker:"MSFT", nombre:"Microsoft",     tipo:"COMPRA", entrada:"$448", target:"$650", stop_loss:"$415", confianza:89, razon:"Morgan Stanley reiteró Buy, target $650. Copilot AI integrado en toda la suite. Azure creciendo doble dígito."},
-      {ticker:"AMZN", nombre:"Amazon",        tipo:"COMPRA", entrada:"$226", target:"$280", stop_loss:"$205", confianza:86, razon:"RBC Capital: mejor visibilidad en ROI de IA. AWS + publicidad digital acelerando. Posición dominante."},
-      {ticker:"ISRG", nombre:"Intuitive Surgical", tipo:"COMPRA", entrada:"$572", target:"$680", stop_loss:"$530", confianza:83, razon:"Ingresos Q1 2026 +23% YoY. 80% market share global en robótica quirúrgica. Moat insuperable."},
-      {ticker:"AVAV", nombre:"AeroVironment", tipo:"COMPRA", entrada:"$248", target:"$310", stop_loss:"$225", confianza:80, razon:"Drones militares táticos con demanda disparada. Gasto global en defensa al alza. Backlog robusto."},
+      {ticker:"AMD",  nombre:"AMD",           tipo:"COMPRA", entrada:"$172", target:"$210", stop_loss:"$155", confianza:86, razon:"MI300X GPU ganando terreno vs NVIDIA en data centers. Ryzen AI para laptops se acelera. BofA y Needham reiteran Buy con target $200+."},
+      {ticker:"META", nombre:"Meta Platforms", tipo:"COMPRA", entrada:"$618", target:"$710", stop_loss:"$575", confianza:89, razon:"IA generativa en Reels y anuncios disparó RPM. Llama 4 mejor modelo open-source. Margen operativo récord 42%. Target consenso $700+."},
+      {ticker:"AMZN", nombre:"Amazon",        tipo:"COMPRA", entrada:"$226", target:"$275", stop_loss:"$205", confianza:87, razon:"AWS creciendo 20%+ YoY, acelerando. Publicidad digital superando expectativas. RBC Capital y JPMorgan reiteran Overweight."},
+      {ticker:"GLD",  nombre:"SPDR Gold ETF", tipo:"COMPRA", entrada:"$315", target:"$338", stop_loss:"$302", confianza:80, razon:"Oro en zona de acumulación institucional. Incertidumbre macro + dólar presionado. Hedge ideal ante volatilidad de NFP el viernes."},
     ],
     dividendos:[
-      {ticker:"SM",  nombre:"SM Energy",  yield_div:"2.8%", entrada:"$28",  sector:"Energía",  rating:"★★★★☆"},
-      {ticker:"MBLY",nombre:"Mobileye",   yield_div:"—",    entrada:"$14",  sector:"Auto/Tech", rating:"★★★★★"},
+      {ticker:"GLD",  nombre:"SPDR Gold ETF", yield_div:"—",    entrada:"$315", sector:"Cobertura/Oro", rating:"★★★★★"},
+      {ticker:"AMZN", nombre:"Amazon",        yield_div:"—",    entrada:"$226", sector:"Tech/Cloud",    rating:"★★★★★"},
     ],
     crypto:[
-      {ticker:"BTC", nombre:"Bitcoin",  tipo:"COMPRA", entrada:"$95,000", target:"$120,000", stop_loss:"$86,000", confianza:78, razon:"Flujos ETF institucionales positivos. 48% de probabilidad de tocar $120K según Polymarket. Soporte fuerte."},
-      {ticker:"ETH", nombre:"Ethereum", tipo:"COMPRA", entrada:"$2,100",  target:"$2,800",   stop_loss:"$1,850",  confianza:72, razon:"Ratio ETH/BTC en mínimos históricos. Upgrade de staking activo. Accumulation zone técnica clara."},
+      {ticker:"COIN", nombre:"Coinbase",  tipo:"COMPRA", entrada:"$258", target:"$310", stop_loss:"$232", confianza:84, razon:"Volumen crypto en alza, ingresos de Coinbase correlacionados directamente. ETF de Bitcoin atrayendo nuevos usuarios. Posición estratégica única en cripto regulado USA."},
+      {ticker:"MSTR", nombre:"MicroStrategy", tipo:"COMPRA", entrada:"$398", target:"$470", stop_loss:"$362", confianza:81, razon:"Proxy de Bitcoin más puro del mercado. Acumulación activa: 568,840 BTC. Si BTC rompe $110K, MSTR supera $500. Alta beta para traders agresivos."},
     ],
   };
 
