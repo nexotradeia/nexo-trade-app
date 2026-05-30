@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 17:47:54
+// NEXO TRADE — build: 2026-05-30 17:52:04
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1862,8 +1862,9 @@ function AuthModal({mode,onClose,onAuth,lang}){
 }
 
 // ── PROFILE PAGE ──────────────────────────────────────────────────────────────
-function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
+function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate,lang}){
   const t=LANGS[lang];
+  const isOwn = currentUser?.id === user?.id;
   const userPosts=MOCK_POSTS.filter(p=>p.user===user.name);
   const lvl=getLevel(user.points);
   const userBadges=BADGES.filter(b=>user.badges?.includes(b.id));
@@ -1873,6 +1874,18 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
   const [activeTab,setActiveTab]=useState("posts");
   const [counted,setCounted]=useState(false);
   const [displayStats,setDisplayStats]=useState({followers:0,following:0,posts:0,points:0});
+  // ── Edit states ──
+  const [showAvatarEdit,setShowAvatarEdit] = useState(false);
+  const [savingAvatar,setSavingAvatar]     = useState(false);
+  const [editingNick,setEditingNick]       = useState(false);
+  const [newNick,setNewNick]               = useState("");
+  const [nickStatus,setNickStatus]         = useState(null); // null|checking|available|taken|saved|cooldown
+  const COOLDOWN_KEY = `nexo_nick_changed_${user?.id}`;
+  function getCooldownDaysLeft(){
+    try{ const ts=localStorage.getItem(COOLDOWN_KEY); if(!ts) return 0;
+      const days=15-Math.floor((Date.now()-parseInt(ts))/86400000);
+      return Math.max(0,days); }catch{ return 0; }
+  }
 
   // Animate counters on open
   useEffect(()=>{
@@ -1917,6 +1930,15 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{background:C.surface,borderRadius:28,width:560,maxWidth:"96vw",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.5)",border:`1px solid ${C.border}`,position:"relative",willChange:"transform"}}>
 
+        {/* ── X CLOSE — fuera del overflow:hidden para que siempre funcione ── */}
+        <button onClick={onClose}
+          style={{position:"sticky",top:12,float:"right",marginRight:12,marginTop:12,zIndex:999,
+            background:"rgba(15,23,42,0.85)",backdropFilter:"blur(8px)",
+            border:"1px solid rgba(255,255,255,0.18)",borderRadius:10,
+            width:34,height:34,cursor:"pointer",color:"#fff",fontSize:16,
+            display:"flex",alignItems:"center",justifyContent:"center",
+            boxShadow:"0 2px 12px rgba(0,0,0,0.5)",flexShrink:0}}>✕</button>
+
         {/* ── COVER + HEADER INTEGRADO ── */}
         <div style={{background:`linear-gradient(135deg,${accent}dd 0%,${accent}66 50%,#0f172a 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
           {/* Performance chart — deterministic from user points */}
@@ -1953,31 +1975,103 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,lang}){
           {/* Glow orb */}
           <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,background:`radial-gradient(circle,${accent}40,transparent 65%)`,pointerEvents:"none"}}/>
 
-          {/* Close */}
-          <button onClick={onClose} style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,0.3)",backdropFilter:"blur(6px)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:10,width:32,height:32,cursor:"pointer",color:"#fff",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",zIndex:2}}>✕</button>
+          {/* Close button moved outside overflow:hidden — see above */}
 
           {/* ── AVATAR + NAME inline ── */}
           <div style={{display:"flex",alignItems:"center",gap:16,position:"relative",zIndex:2,paddingBottom:18}}>
-            {/* Avatar */}
+            {/* Avatar — clickable to edit if own profile */}
             <div style={{position:"relative",flexShrink:0}}>
-              <div style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 2px rgba(255,255,255,0.15),0 0 24px ${accent}55`}}>
+              <div onClick={isOwn?()=>setShowAvatarEdit(v=>!v):undefined}
+                style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 2px rgba(255,255,255,0.15),0 0 24px ${accent}55`,cursor:isOwn?"pointer":"default",position:"relative"}}>
                 <div style={{width:"100%",height:"100%",borderRadius:17,background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>
                   {user.emoji}
                 </div>
+                {isOwn && <div style={{position:"absolute",bottom:-2,right:-2,width:20,height:20,borderRadius:6,background:"#8B5CF6",border:"2px solid #0f172a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff"}}>✎</div>}
               </div>
-              <div style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,borderRadius:6,background:"#10B981",border:"2px solid #0f172a",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {!isOwn && <div style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,borderRadius:6,background:"#10B981",border:"2px solid #0f172a",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <div style={{width:6,height:6,borderRadius:"50%",background:"#fff"}}/>
-              </div>
+              </div>}
+              {/* Avatar picker dropdown */}
+              {showAvatarEdit && isOwn && (
+                <div style={{position:"absolute",top:80,left:0,zIndex:50,background:"#1e293b",border:"1px solid rgba(139,92,246,0.4)",borderRadius:14,padding:12,boxShadow:"0 12px 40px rgba(0,0,0,0.7)",width:220}} onClick={e=>e.stopPropagation()}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                    <span style={{fontSize:11,fontWeight:700,color:"#A78BFA"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
+                    <button onClick={()=>setShowAvatarEdit(false)} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:14}}>✕</button>
+                  </div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:5,maxHeight:150,overflowY:"auto"}}>
+                    {AVATAR_OPTIONS.map(av=>(
+                      <button key={av.emoji} onClick={async()=>{
+                        if(savingAvatar) return;
+                        setSavingAvatar(true);
+                        try{ await supabase.from("profiles").update({avatar_emoji:av.emoji,avatar_color:av.color}).eq("id",user.id);
+                          onUserUpdate&&onUserUpdate({...user,emoji:av.emoji,avatarColor:av.color}); }catch(e){}
+                        setSavingAvatar(false); setShowAvatarEdit(false);
+                      }} style={{width:36,height:36,borderRadius:9,background:user.emoji===av.emoji?`${av.color}44`:"rgba(255,255,255,0.05)",border:`2px solid ${user.emoji===av.emoji?av.color:"rgba(255,255,255,0.08)"}`,cursor:"pointer",fontSize:19,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        {av.emoji}
+                      </button>
+                    ))}
+                  </div>
+                  {savingAvatar && <div style={{textAlign:"center",fontSize:11,color:"#A78BFA",marginTop:6}}>Guardando...</div>}
+                </div>
+              )}
             </div>
-            {/* Name + badges */}
+
+            {/* Name + badges + nickname edit */}
             <div style={{flex:1,minWidth:0}}>
               <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",marginBottom:4}}>
-                <span style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>{user.name}</span>
+                {editingNick && isOwn ? (
+                  <div style={{width:"100%"}} onClick={e=>e.stopPropagation()}>
+                    <div style={{display:"flex",gap:5,alignItems:"center",marginBottom:3}}>
+                      <input value={newNick} autoFocus
+                        onChange={async e=>{
+                          const v=e.target.value.replace(/[^a-zA-Z0-9_]/g,"").slice(0,20);
+                          setNewNick(v);
+                          if(v.length<3){setNickStatus(null);return;}
+                          setNickStatus("checking");
+                          const{data}=await supabase.from("profiles").select("id").eq("username",v).neq("id",user.id).limit(1);
+                          setNickStatus(data?.length>0?"taken":"available");
+                        }}
+                        placeholder="nuevo_username"
+                        style={{flex:1,background:"rgba(255,255,255,0.1)",border:`1.5px solid ${nickStatus==="taken"?"#ef4444":nickStatus==="available"?"#22c55e":"rgba(255,255,255,0.2)"}`,borderRadius:8,padding:"5px 10px",color:"#fff",fontSize:14,fontWeight:700,outline:"none",fontFamily:"inherit"}}/>
+                      <button onClick={async()=>{
+                        const n=newNick.trim();
+                        if(n.length<3||nickStatus==="taken") return;
+                        const dLeft=getCooldownDaysLeft();
+                        if(dLeft>0){setNickStatus("cooldown");return;}
+                        setNickStatus("checking");
+                        const{data:chk}=await supabase.from("profiles").select("id").eq("username",n).neq("id",user.id).limit(1);
+                        if(chk?.length>0){setNickStatus("taken");return;}
+                        await supabase.from("profiles").update({username:n,user_name:n}).eq("id",user.id);
+                        try{localStorage.setItem(COOLDOWN_KEY,String(Date.now()));}catch{}
+                        onUserUpdate&&onUserUpdate({...user,username:n,name:n,user_name:n});
+                        setNickStatus("saved");
+                        setTimeout(()=>{setEditingNick(false);setNickStatus(null);},1500);
+                      }} disabled={nickStatus==="taken"||nickStatus==="checking"||newNick.length<3}
+                        style={{background:nickStatus==="taken"||newNick.length<3?"#334155":"#22c55e",border:"none",borderRadius:7,padding:"5px 11px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>✓</button>
+                      <button onClick={()=>{setEditingNick(false);setNickStatus(null);}}
+                        style={{background:"none",border:"1px solid rgba(255,255,255,0.15)",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:12,cursor:"pointer"}}>✕</button>
+                    </div>
+                    <div style={{fontSize:10,fontWeight:600,color:nickStatus==="taken"?"#ef4444":nickStatus==="available"?"#22c55e":nickStatus==="saved"?"#22c55e":nickStatus==="cooldown"?"#f59e0b":"#64748b"}}>
+                      {nickStatus==="checking"?"🔍 Verificando..."
+                      :nickStatus==="taken"?"✗ Ya en uso — elige otro"
+                      :nickStatus==="available"?"✓ Disponible"
+                      :nickStatus==="saved"?"✅ ¡Guardado!"
+                      :nickStatus==="cooldown"?`⏳ Puedes cambiarlo en ${getCooldownDaysLeft()} días`
+                      :"Solo letras, números y _ · Mín. 3 · Cada 15 días"}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>{user.name}</span>
+                    {isOwn && <button onClick={e=>{e.stopPropagation();const dL=getCooldownDaysLeft();setNewNick(user.username||user.name||"");setNickStatus(dL>0?"cooldown":null);setEditingNick(true);}}
+                      title={lang==="en"?"Edit username":"Editar nickname"}
+                      style={{background:"rgba(255,255,255,0.12)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:6,padding:"3px 7px",color:"rgba(255,255,255,0.7)",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>}
+                  </div>
+                )}
                 {user.badges?.includes("verified")&&<span style={{background:"rgba(59,130,246,0.25)",border:"1px solid rgba(59,130,246,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#93c5fd"}}>✓ Verificado</span>}
                 {user.badges?.includes("vip")&&<span style={{background:"linear-gradient(90deg,rgba(245,158,11,0.35),rgba(217,119,6,0.35))",border:"1px solid rgba(245,158,11,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#fcd34d"}}>VIP ✦</span>}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-                {/* Level badge */}
                 <span style={{background:"rgba(0,0,0,0.3)",border:`1px solid ${accent}55`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#fff",display:"flex",alignItems:"center",gap:4}}>
                   {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
                 </span>
@@ -16133,7 +16227,7 @@ export default function App(){
           </div>
         </div>
       )}
-      {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} lang={lang}/>}
+      {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} onUserUpdate={(updated)=>saveUser(updated)} lang={lang}/>}
       {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
 
       {/* ── SOCIAL PROOF TOAST (esquina inferior izquierda) ── */}
