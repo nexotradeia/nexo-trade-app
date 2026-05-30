@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 21:29:58
+// NEXO TRADE — build: 2026-05-30 04:07:18
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1539,43 +1539,179 @@ function AIAssistant({lang,onClose}){
     setLoading(false);
   };
 
+  const isStartScreen = msgs.length===1 && msgs[0].role==="ai";
+  const CATEGORIES = [
+    {icon:"📈",label:lang==="en"?"Stock Picks":"Mejores acciones"},
+    {icon:"🌊",label:lang==="en"?"Market Trends":"Tendencias"},
+    {icon:"💰",label:lang==="en"?"Earnings":"Resultados"},
+    {icon:"🔬",label:lang==="en"?"Tech Insights":"Análisis Técnico"},
+    {icon:"🐋",label:lang==="en"?"Institutional":"Institucionales"},
+    {icon:"₿",label:lang==="en"?"Crypto":"Cripto"},
+  ];
+
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9995,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(3px)"}}
-      onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{background:C.surface,borderRadius:22,width:480,maxWidth:"94vw",height:560,display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",border:`1px solid ${C.border}`,position:"relative",zIndex:2001}}>
-        {/* Header */}
-        <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:12,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,borderRadius:"22px 22px 0 0"}}>
-          <div style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.accent},#0099ff)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>🤖</div>
+    <div style={{position:"fixed",inset:0,background:"#060B1A",zIndex:9995,display:"flex",flexDirection:"column"}}>
+      <style>{`
+        @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        .nexo-ai-msg{animation:fadeInUp 0.25s ease-out}
+        .nexo-ai-cat:hover{background:rgba(99,102,241,0.18)!important;border-color:rgba(99,102,241,0.4)!important;color:#A5B4FC!important;transform:translateY(-2px)}
+        .nexo-ai-send:hover{opacity:0.85}
+        .nexo-ai-hist:hover{background:rgba(255,255,255,0.06)!important}
+      `}</style>
+
+      {/* ── TOP NAV ── */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.07)",background:"rgba(6,11,26,0.95)",backdropFilter:"blur(12px)",flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#6366F1,#00A8FF)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🤖</div>
           <div>
-            <div style={{fontWeight:800,color:C.text,fontSize:15}}>NexoTrade AI</div>
-            <div style={{fontSize:11,color:C.bull,display:"flex",alignItems:"center",gap:4}}><span style={{width:6,height:6,borderRadius:"50%",background:C.bull,display:"inline-block"}}/>Online</div>
+            <div style={{fontWeight:900,color:"#F1F5F9",fontSize:16,letterSpacing:-0.3}}>NexoTrade <span style={{background:"linear-gradient(135deg,#6366F1,#00A8FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>AI</span></div>
+            <div style={{fontSize:10,color:"#10B981",display:"flex",alignItems:"center",gap:4}}>
+              <span style={{width:5,height:5,borderRadius:"50%",background:"#10B981",display:"inline-block",animation:"pulse 2s infinite"}}/>
+              {lang==="en"?"Online · Powered by NexoTrade":"Online · Inteligencia NexoTrade"}
+            </div>
           </div>
-          <button onClick={onClose} style={{marginLeft:"auto",background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:20}}>×</button>
         </div>
-        {/* Messages */}
-        <div style={{flex:1,overflowY:"auto",padding:"16px 20px",display:"flex",flexDirection:"column",gap:12}}>
-          {msgs.map((m,i)=>(
-            <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
-              <div style={{maxWidth:"80%",background:m.role==="user"?`linear-gradient(135deg,${C.accent},#00a87f)`:C.card2,color:m.role==="user"?"#fff":C.text,borderRadius:m.role==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px",padding:"10px 14px",fontSize:13,lineHeight:1.6,border:m.role==="ai"?`1px solid ${C.border}`:"none"}}>
-                {m.text}
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <button onClick={()=>setMsgs([{role:"ai",text:t.aiHello}])}
+            style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 14px",fontSize:12,color:"#94A3B8",cursor:"pointer",fontWeight:600}}>
+            + {lang==="en"?"New Chat":"Nueva Consulta"}
+          </button>
+          <button onClick={onClose}
+            style={{width:34,height:34,borderRadius:8,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",color:"#94A3B8",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>
+            ×
+          </button>
+        </div>
+      </div>
+
+      {/* ── BODY ── */}
+      <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+
+        {/* Sidebar history */}
+        <div style={{width:220,flexShrink:0,borderRight:"1px solid rgba(255,255,255,0.06)",padding:"16px 10px",overflowY:"auto",display:"flex",flexDirection:"column",gap:4}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#334155",letterSpacing:1,textTransform:"uppercase",marginBottom:8,paddingLeft:6}}>Recientes</div>
+          {[
+            lang==="en"?"Best dividend stocks":"Las mejores acciones de dividendo",
+            lang==="en"?"NVDA technical analysis":"Análisis técnico de NVDA",
+            lang==="en"?"S&P 500 forecast":"Perspectiva del S&P 500",
+            lang==="en"?"How to start investing":"Cómo empezar a invertir",
+            lang==="en"?"Bitcoin bull case":"Bull case del Bitcoin",
+          ].map((h,i)=>(
+            <button key={i} onClick={()=>send(h)} className="nexo-ai-hist"
+              style={{background:"transparent",border:"none",borderRadius:8,padding:"8px 10px",textAlign:"left",fontSize:12,color:"#64748B",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"block",width:"100%"}}>
+              💬 {h}
+            </button>
+          ))}
+          <div style={{marginTop:"auto",paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+            <div style={{fontSize:10,color:"#1E293B",lineHeight:1.5,padding:"0 4px"}}>
+              ⚠️ {lang==="en"?"Not financial advice":"No es consejo financiero"}
+            </div>
+          </div>
+        </div>
+
+        {/* Main chat area */}
+        <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+
+          {/* START SCREEN — shown when no messages yet */}
+          {isStartScreen ? (
+            <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 20px",gap:32,overflowY:"auto"}}>
+              {/* Banner top */}
+              <div style={{background:"linear-gradient(135deg,rgba(99,102,241,0.12),rgba(0,168,255,0.08))",border:"1px solid rgba(99,102,241,0.2)",borderRadius:12,padding:"8px 18px",fontSize:12,fontWeight:600,color:"#818CF8"}}>
+                🧠 {lang==="en"?"AI analyzed 15K+ companies · Powered by NexoTrade Intelligence":"IA analizó 15K+ empresas · NexoTrade Intelligence"}
+              </div>
+              {/* Title */}
+              <div style={{textAlign:"center"}}>
+                <div style={{fontSize:38,fontWeight:900,color:"#F1F5F9",letterSpacing:-1,lineHeight:1.1,marginBottom:10}}>
+                  {lang==="en"?"Doing investment":"¿Analizando el"}<br/>
+                  <span style={{background:"linear-gradient(135deg,#6366F1,#00A8FF,#10B981)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+                    {lang==="en"?"research?":"mercado?"}
+                  </span>
+                </div>
+                <div style={{fontSize:14,color:"#475569",maxWidth:400,lineHeight:1.6}}>
+                  {lang==="en"
+                    ?"Your personal market analyst powered by real-time, verified data."
+                    :"Tu analista personal de mercados con datos en tiempo real."}
+                </div>
+              </div>
+              {/* Search bar */}
+              <div style={{width:"100%",maxWidth:680,position:"relative"}}>
+                <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send(input)}
+                  placeholder={lang==="en"?"Ask NexoAI anything about markets…":"Pregunta sobre acciones, cripto, opciones…"}
+                  style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"2px solid rgba(99,102,241,0.35)",borderRadius:16,padding:"18px 60px 18px 22px",fontSize:15,color:"#F1F5F9",outline:"none",fontFamily:"inherit",boxSizing:"border-box",boxShadow:"0 0 0 0 rgba(99,102,241,0)",transition:"border-color 0.2s, box-shadow 0.2s"}}
+                  onFocus={e=>{e.target.style.borderColor="rgba(99,102,241,0.7)";e.target.style.boxShadow="0 0 0 4px rgba(99,102,241,0.1)";}}
+                  onBlur={e=>{e.target.style.borderColor="rgba(99,102,241,0.35)";e.target.style.boxShadow="none";}}/>
+                <button onClick={()=>send(input)} className="nexo-ai-send"
+                  style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,#6366F1,#4F46E5)",border:"none",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"opacity 0.15s"}}>
+                  ➤
+                </button>
+              </div>
+              {/* Categories */}
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center",maxWidth:680}}>
+                {CATEGORIES.map(cat=>(
+                  <button key={cat.label} onClick={()=>send(cat.label)} className="nexo-ai-cat"
+                    style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:24,padding:"8px 18px",fontSize:13,color:"#94A3B8",cursor:"pointer",display:"flex",alignItems:"center",gap:7,fontWeight:600,transition:"all 0.18s"}}>
+                    {cat.icon} {cat.label}
+                  </button>
+                ))}
               </div>
             </div>
-          ))}
-          {loading&&<div style={{display:"flex",gap:4,padding:"10px 14px",background:C.card2,borderRadius:16,width:"fit-content",border:`1px solid ${C.border}`}}>
-            <style>{`@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}`}</style>
-            {[0,0.16,0.32].map((d,i)=><span key={i} style={{width:7,height:7,borderRadius:"50%",background:C.accent,display:"inline-block",animation:`bounce 1.4s ease-in-out ${d}s infinite`}}/>)}
-          </div>}
-          <div ref={endRef}/>
-        </div>
-        {/* Quick questions */}
-        <div style={{padding:"8px 16px",display:"flex",gap:6,flexWrap:"wrap",borderTop:`1px solid ${C.border}`}}>
-          {t.aiQuick.map(q=><button key={q} onClick={()=>send(q)} style={{background:C.accentDim,border:`1px solid ${C.accent}44`,borderRadius:20,padding:"4px 10px",fontSize:11,color:C.accentText,fontWeight:600,cursor:"pointer"}}>{q}</button>)}
-        </div>
-        {/* Input */}
-        <div style={{padding:"12px 16px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8}}>
-          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send(input)} placeholder={t.askAI}
-            style={{flex:1,background:C.card2,border:`1.5px solid ${C.border}`,borderRadius:10,padding:"9px 14px",fontSize:13,outline:"none",color:C.text,fontFamily:"inherit"}}/>
-          <Btn onClick={()=>send(input)} style={{padding:"9px 16px"}}>→</Btn>
+          ) : (
+            /* CHAT VIEW */
+            <div style={{flex:1,overflowY:"auto",padding:"24px 40px",display:"flex",flexDirection:"column",gap:16,maxWidth:780,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
+              {msgs.map((m,i)=>(
+                <div key={i} className="nexo-ai-msg" style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10,alignItems:"flex-start"}}>
+                  {m.role==="ai"&&(
+                    <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#6366F1,#00A8FF)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0,marginTop:2}}>🤖</div>
+                  )}
+                  <div style={{maxWidth:"78%",background:m.role==="user"?"linear-gradient(135deg,#6366F1,#4F46E5)":"rgba(255,255,255,0.05)",color:"#F1F5F9",borderRadius:m.role==="user"?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"12px 16px",fontSize:14,lineHeight:1.65,border:m.role==="ai"?"1px solid rgba(255,255,255,0.08)":"none",boxShadow:m.role==="user"?"0 4px 16px rgba(99,102,241,0.25)":"none"}}>
+                    {m.text}
+                  </div>
+                  {m.role==="user"&&(
+                    <div style={{width:32,height:32,borderRadius:9,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0,marginTop:2}}>👤</div>
+                  )}
+                </div>
+              ))}
+              {loading&&(
+                <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+                  <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#6366F1,#00A8FF)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>🤖</div>
+                  <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"18px 18px 18px 4px",padding:"14px 18px",display:"flex",gap:5,alignItems:"center"}}>
+                    {[0,0.18,0.36].map((d,i)=><span key={i} style={{width:8,height:8,borderRadius:"50%",background:"#6366F1",display:"inline-block",animation:`bounce 1.4s ease-in-out ${d}s infinite`}}/>)}
+                  </div>
+                </div>
+              )}
+              <div ref={endRef}/>
+            </div>
+          )}
+
+          {/* ── BOTTOM INPUT ── (always visible when in chat view) */}
+          {!isStartScreen && (
+            <div style={{padding:"16px 40px 20px",borderTop:"1px solid rgba(255,255,255,0.07)",background:"rgba(6,11,26,0.9)",flexShrink:0}}>
+              {/* Quick topics */}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
+                {t.aiQuick.map(q=>(
+                  <button key={q} onClick={()=>send(q)}
+                    style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:16,padding:"4px 12px",fontSize:11,color:"#818CF8",fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.2)"}
+                    onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.1)"}>
+                    {q}
+                  </button>
+                ))}
+              </div>
+              <div style={{position:"relative",maxWidth:780,margin:"0 auto"}}>
+                <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send(input)}
+                  placeholder={lang==="en"?"Ask a follow-up…":"Continúa la consulta…"}
+                  style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1.5px solid rgba(99,102,241,0.3)",borderRadius:13,padding:"13px 56px 13px 18px",fontSize:14,color:"#F1F5F9",outline:"none",fontFamily:"inherit",boxSizing:"border-box",transition:"border-color 0.2s"}}
+                  onFocus={e=>e.target.style.borderColor="rgba(99,102,241,0.6)"}
+                  onBlur={e=>e.target.style.borderColor="rgba(99,102,241,0.3)"}/>
+                <button onClick={()=>send(input)}
+                  style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",width:36,height:36,borderRadius:9,background:"linear-gradient(135deg,#6366F1,#4F46E5)",border:"none",color:"#fff",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"opacity 0.15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
+                  onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+                  ➤
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -5321,7 +5457,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                       onUserUpdate&&onUserUpdate({...user,username:newName,name:newName,user_name:newName});
                       // Email confirmación
                       if(user.email){
-                        fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:user.email,subject:"Tu username en NexoTrade fue actualizado",message:`Tu nuevo username es @${newName}. Si no hiciste este cambio, contáctanos en hola@nexotradeia.com`})}).catch(()=>{});
+                        fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:user.email,subject:"Tu username en NexoTrade fue actualizado",message:`Tu nuevo username es @${newName}. Si no hiciste este cambio, contáctanos en mgtproia@gmail.com`})}).catch(()=>{});
                       }
                       setNameStatus("saved");
                       setTimeout(()=>{setEditingName(false);setNameStatus(null);},1500);
@@ -6345,7 +6481,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"Terms of Use":"Términos de Uso",   page:31},
         {label: isEN?"Privacy Policy":"Privacidad",      page:32},
         {label: isEN?"Risk Disclaimer":"Aviso de Riesgo",page:33},
-        {label: isEN?"Contact":"Contacto",               href:"mailto:hola@nexotradeia.com"},
+        {label: isEN?"Contact":"Contacto",               href:"mailto:mgtproia@gmail.com"},
       ]
     },
   ];
@@ -8144,7 +8280,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
         <div style={{fontSize:36,marginBottom:10}}>🎓</div>
         <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Quieres enseñar en NexoTrade?</h3>
         <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Si eres trader con experiencia, escríbenos. Tú enseñas, nosotros ponemos la plataforma y los alumnos.</p>
-        <a href="mailto:hola@nexotradeia.com?subject=Quiero ser instructor en NexoTrade" style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#00a87f)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>Ser instructor →</a>
+        <a href="mailto:mgtproia@gmail.com?subject=Quiero ser instructor en NexoTrade" style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#00a87f)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>Ser instructor →</a>
       </div>
     </div>
   );
@@ -8317,9 +8453,9 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
       <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
         <div style={{fontSize:36,marginBottom:10}}>📬</div>
         <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Tienes preguntas sobre algún webinar?</h3>
-        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Escríbenos a <a href="mailto:hola@nexotradeia.com" style={{color:C.accent}}>hola@nexotradeia.com</a> y te respondemos en menos de 24h.</p>
+        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Escríbenos a <a href="mailto:mgtproia@gmail.com" style={{color:C.accent}}>mgtproia@gmail.com</a> y te respondemos en menos de 24h.</p>
         <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-          <button onClick={()=>window.open("mailto:hola@nexotradeia.com","_blank")} style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Contactar →</button>
+          <button onClick={()=>window.open("mailto:mgtproia@gmail.com","_blank")} style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Contactar →</button>
           {!isPremium && <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>✦ Ser VIP y ahorrar 50%</button>}
         </div>
       </div>
@@ -10059,13 +10195,18 @@ const GURUS_13F = [
     ]},
 ];
 
-function GurusPage({ isPremium, onNeedPremium }) {
-  const [tab, setTab]           = useState("gurus");
+function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
+  const isEN = lang === "en";
+  const [tab, setTab]           = useState(initialTab||"gurus");
   const [arkFund, setArkFund]   = useState("ARKK");
   const [arkData, setArkData]   = useState(null);
   const [arkLoad, setArkLoad]   = useState(false);
   const [insiders, setInsiders] = useState(null);
   const [insLoad, setInsLoad]   = useState(false);
+  const [congress, setCongress] = useState([]);
+  const [congLoad, setCongLoad] = useState(false);
+  const [congFilter, setCongFilter] = useState("all");
+  const [congParty, setCongParty]   = useState("all");
   const [livePx, setLivePx]     = useState({});
   const [selGuru, setSelGuru]   = useState(null);
   const [detailTab, setDetailTab] = useState("holdings");
@@ -10115,10 +10256,26 @@ function GurusPage({ isPremium, onNeedPremium }) {
       .catch(() => setInsLoad(false));
   }, [tab]);
 
+  // Fetch congress trades
+  useEffect(() => {
+    if (tab !== "congress") return;
+    if (congress.length > 0) return; // already loaded
+    setCongLoad(true);
+    fetch("/api/congress")
+      .then(r => r.json())
+      .then(d => { setCongress(d.trades || []); setCongLoad(false); })
+      .catch(() => setCongLoad(false));
+  }, [tab]);
+
   // Free users ven 5 gurús, el resto con blur
 
   const fmt$ = v => v >= 1e9 ? `$${(v/1e9).toFixed(1)}B` : v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v/1e3).toFixed(0)}K` : `$${v}`;
-  const TABS = [{k:"gurus",l:"🏛️ Gurús"},{k:"ark",l:"🚀 ARK Daily"},{k:"insiders",l:"🕵️ Insiders SEC"}];
+  const TABS = [
+    {k:"gurus",    l:"🏛️ Gurús"},
+    {k:"ark",      l:"🚀 ARK Daily"},
+    {k:"insiders", l:"🕵️ Insiders SEC"},
+    {k:"congress", l:"🏛️ Congresistas", vip:true},
+  ];
   const ARK_FUNDS = ["ARKK","ARKQ","ARKW","ARKG","ARKF"];
 
   return (
@@ -10129,8 +10286,8 @@ function GurusPage({ isPremium, onNeedPremium }) {
         <div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
           <span style={{fontSize:32}}>👁️</span>
           <div>
-            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Inversores Influyentes</div>
-            <div style={{fontSize:12,color:"#475569"}}>Gurús · ARK en tiempo real · Insiders corporativos SEC</div>
+            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Inversores &amp; Congresistas</div>
+            <div style={{fontSize:12,color:"#475569"}}>Gurús · ARK en tiempo real · Insiders SEC · Trades del Congreso</div>
           </div>
           <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
             {pxUpdated && <span style={{fontSize:10,color:"#334155"}}>Act. {pxUpdated}</span>}
@@ -10152,9 +10309,10 @@ function GurusPage({ isPremium, onNeedPremium }) {
       {/* Tabs */}
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
         {TABS.map(t => (
-          <button key={t.k} onClick={()=>setTab(t.k)}
-            style={{background:tab===t.k?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${tab===t.k?"transparent":C.border}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(124,58,237,0.3)":"none"}}>
+          <button key={t.k} onClick={()=>{ if(t.vip&&!isPremium){onNeedPremium();return;} setTab(t.k); }}
+            style={{background:tab===t.k?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${tab===t.k?"transparent":C.border}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(124,58,237,0.3)":"none",display:"flex",alignItems:"center",gap:6}}>
             {t.l}
+            {t.vip&&<span style={{fontSize:9,fontWeight:800,background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:0.5}}>VIP</span>}
           </button>
         ))}
         {/* Search bar */}
@@ -10497,6 +10655,150 @@ function GurusPage({ isPremium, onNeedPremium }) {
                 FUENTE: SEC EDGAR · FORM 4 · {insiders?.source||"DATOS EN TIEMPO REAL"}
               </div>
             </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CONGRESISTAS TAB ── */}
+      {tab==="congress" && (
+        <div>
+          {/* Subheader */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,gap:8,flexWrap:"wrap"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:12,color:C.muted}}>Operaciones bursátiles bajo el STOCK Act · Datos públicos</span>
+              <a href="https://www.capitoltrades.com/trades" target="_blank" rel="noopener noreferrer"
+                style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(0,168,255,0.07)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:6,padding:"2px 8px",textDecoration:"none"}}>
+                📡 Capitol Trades ↗
+              </a>
+            </div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+              {["all","buy","sell"].map(v=>(
+                <button key={v} onClick={()=>setCongFilter(v)}
+                  style={{padding:"5px 12px",borderRadius:8,border:`1px solid ${congFilter===v?"#10B981":C.border}`,background:congFilter===v?"rgba(16,185,129,0.1)":C.card,color:congFilter===v?"#10B981":C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  {v==="all"?"Todo":v==="buy"?"🟢 Compras":"🔴 Ventas"}
+                </button>
+              ))}
+              {["all","D","R"].map(v=>(
+                <button key={v} onClick={()=>setCongParty(v)}
+                  style={{padding:"5px 12px",borderRadius:8,border:`1px solid ${congParty===v?(v==="D"?"#3B82F6":"#EF4444"):C.border}`,background:congParty===v?"rgba(0,168,255,0.07)":C.card,color:congParty===v?(v==="D"?"#3B82F6":"#EF4444"):C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  {v==="all"?"Ambos":v==="D"?"🔵 Dem":"🔴 Rep"}
+                </button>
+              ))}
+              <button onClick={()=>{setCongLoad(true);fetch("/api/congress").then(r=>r.json()).then(d=>{setCongress(d.trades||[]);setCongLoad(false);}).catch(()=>setCongLoad(false));}}
+                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer"}}>
+                🔄 Actualizar
+              </button>
+            </div>
+          </div>
+
+          {/* Stats row */}
+          {congress.length>0 && (
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
+              {[
+                {l:"Total Trades",v:congress.length,c:C.accent},
+                {l:"Compras",v:congress.filter(t=>t.type==="buy").length,c:"#10B981"},
+                {l:"Ventas",v:congress.filter(t=>t.type==="sell").length,c:"#EF4444"},
+                {l:"Miembros",v:[...new Set(congress.map(t=>t.name))].length,c:"#A78BFA"},
+              ].map(s=>(
+                <div key={s.l} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px",textAlign:"center"}}>
+                  <div style={{fontSize:20,fontWeight:900,color:s.c}}>{s.v}</div>
+                  <div style={{fontSize:10,color:C.muted,marginTop:2}}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Pelosi Tracker + Most Active */}
+          {congress.length>0 && (()=>{
+            const pelosiTrades = congress.filter(t=>t.name.includes("Pelosi"));
+            const topBuyers = Object.entries(
+              congress.filter(t=>t.type==="buy").reduce((acc,t)=>{acc[t.name]=(acc[t.name]||0)+1;return acc;},{})
+            ).sort((a,b)=>b[1]-a[1]).slice(0,3);
+            return(
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+                <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.08),rgba(0,168,255,0.05))",border:"1px solid rgba(124,58,237,0.2)",borderRadius:12,padding:"12px 14px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+                    <span style={{fontSize:18}}>👑</span>
+                    <span style={{fontWeight:800,fontSize:13,color:C.text}}>Pelosi Tracker</span>
+                    <span style={{fontSize:10,color:"#A78BFA",background:"rgba(124,58,237,0.1)",borderRadius:6,padding:"1px 6px",marginLeft:"auto"}}>{pelosiTrades.length} trades</span>
+                  </div>
+                  {pelosiTrades.slice(0,2).map((t,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5,padding:"5px 8px",background:"rgba(255,255,255,0.03)",borderRadius:7}}>
+                      <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:C.accent,minWidth:36}}>{t.ticker}</span>
+                      <span style={{fontSize:10,fontWeight:700,color:t.type==="buy"?"#10B981":"#EF4444",background:t.type==="buy"?"rgba(16,185,129,0.1)":"rgba(239,68,68,0.1)",borderRadius:4,padding:"1px 5px"}}>{t.type==="buy"?"↑ BUY":"↓ SELL"}</span>
+                      <span style={{fontSize:10,color:C.muted,marginLeft:"auto"}}>{t.date?.slice(0,10)}</span>
+                    </div>
+                  ))}
+                  {pelosiTrades.length===0&&<div style={{fontSize:12,color:C.muted}}>Sin trades recientes</div>}
+                </div>
+                <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(0,168,255,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:"12px 14px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+                    <span style={{fontSize:16}}>🔥</span>
+                    <span style={{fontWeight:800,fontSize:13,color:C.text}}>Más Activos</span>
+                  </div>
+                  {topBuyers.map(([name,count],i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                      <span style={{fontSize:11,color:["#F59E0B","#94A3B8","#B45309"][i],fontWeight:700}}>{["🥇","🥈","🥉"][i]}</span>
+                      <span style={{fontSize:12,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name.split(" ").slice(0,2).join(" ")}</span>
+                      <span style={{fontSize:11,color:"#10B981",fontWeight:700}}>{count} compras</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Table */}
+          {congLoad ? (
+            <div style={{textAlign:"center",padding:"50px",color:C.muted}}>
+              <div style={{width:32,height:32,borderRadius:"50%",border:"3px solid rgba(99,102,241,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 10px"}}/>
+              <div style={{fontSize:13}}>Cargando datos del Congreso...</div>
+            </div>
+          ) : congress.length===0 ? (
+            <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(255,255,255,0.01)",borderRadius:16,border:"1px dashed rgba(255,255,255,0.06)"}}>
+              <div style={{fontSize:13,color:C.muted}}>No hay datos · Haz clic en Actualizar</div>
+            </div>
+          ) : (
+            <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+              {/* Header */}
+              <div style={{display:"grid",gridTemplateColumns:"minmax(140px,1fr) 55px 80px minmax(120px,1fr) 90px 80px",gap:0,padding:"8px 14px",background:C.card2,borderRadius:"10px 10px 0 0",border:`1px solid ${C.border}`,minWidth:540}}>
+                {["Miembro","Party","Ticker","Activo","Monto","Fecha"].map(h=>(
+                  <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.5}}>{h}</div>
+                ))}
+              </div>
+              {congress
+                .filter(t=>congFilter==="all"||t.type===congFilter)
+                .filter(t=>congParty==="all"||t.party===congParty)
+                .map((t,i)=>(
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(140px,1fr) 55px 80px minmax(120px,1fr) 90px 80px",gap:0,padding:"10px 14px",borderBottom:`1px solid ${C.border}`,background:i%2===0?C.card2:"transparent",transition:"background 0.1s",minWidth:540}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.05)"}
+                    onMouseLeave={e=>e.currentTarget.style.background=i%2===0?C.card2:"transparent"}>
+                    <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0}}>
+                      <span style={{fontSize:12,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.name}</span>
+                      <span style={{fontSize:10,color:C.muted}}>{t.house}{t.state?` · ${t.state}`:""}</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center"}}>
+                      <span style={{fontSize:11,fontWeight:800,color:t.party==="D"?"#3B82F6":t.party==="R"?"#EF4444":"#94A3B8",background:t.party==="D"?"rgba(59,130,246,0.15)":t.party==="R"?"rgba(239,68,68,0.15)":"rgba(148,163,184,0.1)",borderRadius:5,padding:"2px 6px"}}>{t.party||"?"}</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:5}}>
+                      <span style={{fontSize:11,fontWeight:800,background:"rgba(0,168,255,0.1)",color:C.accent,borderRadius:5,padding:"2px 6px",fontFamily:"monospace"}}>{t.ticker}</span>
+                      <span style={{fontSize:13,fontWeight:900,color:t.type==="buy"?"#10B981":"#EF4444"}}>{t.type==="buy"?"↑":"↓"}</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center"}}>
+                      <span style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.asset}</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center"}}>
+                      <span style={{fontSize:11,color:C.text,fontWeight:700}}>{t.amount}</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center"}}>
+                      <span style={{fontSize:10,color:C.muted}}>{t.date?.slice(0,10)}</span>
+                    </div>
+                  </div>
+                ))}
+              <div style={{padding:"8px 14px",textAlign:"center",fontSize:10,color:C.muted,background:C.card2,borderRadius:"0 0 10px 10px",border:`1px solid ${C.border}`,borderTop:"none"}}>
+                Fuente: STOCK Act (divulgaciones públicas) · NexoTrade no se responsabiliza por la exactitud de las operaciones
+              </div>
             </div>
           )}
         </div>
@@ -11610,6 +11912,30 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [removing, setRemoving] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [addFeedback, setAddFeedback] = useState(null); // null | "added" | "exists" | "full"
+  const [marketStatus, setMarketStatus] = useState({status:"loading",label:"…",color:"#94A3B8"});
+  const [exportOpen, setExportOpen] = useState(false);
+  const [addViewOpen, setAddViewOpen] = useState(false);
+
+  // Market status: compute NYSE open/closed/pre-market in real time
+  const computeMarketStatus = () => {
+    const now = new Date();
+    const etStr = now.toLocaleString("en-US",{timeZone:"America/New_York"});
+    const et = new Date(etStr);
+    const day = et.getDay(); // 0=Sun,6=Sat
+    const h = et.getHours(), m = et.getMinutes();
+    const mins = h*60+m;
+    if(day===0||day===6) return {status:"closed",label:isEN?"Market Closed":"Mercado Cerrado",sub:"Abre el lunes",color:"#EF4444",dot:"#EF4444"};
+    if(mins>=570&&mins<960) return {status:"open",label:isEN?"Market Open":"Mercado Abierto",sub:`NYSE · Cierra ${isEN?"4:00 PM ET":"4:00 PM ET"}`,color:"#10B981",dot:"#10B981"};
+    if(mins>=240&&mins<570) return {status:"pre",label:isEN?"Pre-Market":"Pre-Mercado",sub:`Abre 9:30 AM ET`,color:"#F59E0B",dot:"#F59E0B"};
+    if(mins>=960&&mins<1200) return {status:"after",label:isEN?"After-Hours":"After-Hours",sub:`Cierra 8:00 PM ET`,color:"#F59E0B",dot:"#F59E0B"};
+    return {status:"closed",label:isEN?"Market Closed":"Mercado Cerrado",sub:`Abre 9:30 AM ET`,color:"#EF4444",dot:"#EF4444"};
+  };
+
+  useEffect(()=>{
+    setMarketStatus(computeMarketStatus());
+    const interval = setInterval(()=>setMarketStatus(computeMarketStatus()),30000);
+    return ()=>clearInterval(interval);
+  },[lang]);
 
   useEffect(()=>{
     try { localStorage.setItem(LS_KEY, JSON.stringify(tickers)); } catch{}
@@ -11800,26 +12126,146 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const thStyle = {fontSize:10,fontWeight:700,color:"#64748B",padding:"10px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid #E2E8F0",background:"#F8FAFC",userSelect:"none"};
   const tdStyle = {padding:"11px 12px",borderBottom:"1px solid #F1F5F9",verticalAlign:"middle",whiteSpace:"nowrap"};
 
+  // Export watchlist as CSV
+  const exportCSV = () => {
+    const rows = [["Ticker","Price","Change%","Day High","Day Low","Open","Prev Close"]];
+    tickers.forEach(tk=>{
+      const d=prices[tk]||{};
+      rows.push([tk,d.price||"",d.change||"",d.high||"",d.low||"",d.open||"",d.prev||""]);
+    });
+    const csv = rows.map(r=>r.join(",")).join("\n");
+    const blob = new Blob([csv],{type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download="nexotrade_watchlist.csv"; a.click();
+    URL.revokeObjectURL(url);
+    setExportOpen(false);
+  };
+
   return(
     <div style={{maxWidth:1380,margin:"0 auto",padding:"0 0 60px",fontFamily:"Inter,sans-serif"}}>
 
-      {/* ── TOP BAR ── */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 4px",gap:12,flexWrap:"wrap"}}>
-        <div style={{display:"flex",gap:6}}>
-          {/* Tab bar */}
+      {/* ── HERO HEADER ── */}
+      <div style={{
+        background:"linear-gradient(135deg,#0F1A3C 0%,#1A1040 40%,#0D2137 100%)",
+        borderRadius:20,
+        padding:"22px 28px 18px",
+        marginBottom:16,
+        position:"relative",
+        overflow:"hidden",
+        boxShadow:"0 8px 32px rgba(0,0,0,0.3)",
+      }}>
+        {/* Decorative circles */}
+        <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,0.18) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{position:"absolute",bottom:-30,left:120,width:140,height:140,borderRadius:"50%",background:"radial-gradient(circle,rgba(0,168,255,0.12) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{position:"absolute",top:10,left:"40%",width:80,height:80,borderRadius:"50%",background:"radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
+
+        <div style={{position:"relative",display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:14}}>
+          {/* Left: Title + subtitle */}
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+              <span style={{fontSize:28}}>📊</span>
+              <div>
+                <div style={{fontSize:22,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5,lineHeight:1}}>
+                  {isEN?"Portfolio Tracker":"Portfolio Tracker"}
+                </div>
+                <div style={{fontSize:12,color:"rgba(148,163,184,0.8)",marginTop:2}}>
+                  {isEN?"Real-time prices · 24h · Finnhub":"Precios en tiempo real · 24h · Finnhub"}
+                </div>
+              </div>
+            </div>
+            {/* Stats pills */}
+            <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+              <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.07)",borderRadius:20,padding:"4px 12px",border:"1px solid rgba(255,255,255,0.1)"}}>
+                <span style={{fontSize:11,color:"#94A3B8"}}>{tickers.length} tickers</span>
+              </div>
+              {lastUpdated&&(
+                <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.07)",borderRadius:20,padding:"4px 12px",border:"1px solid rgba(255,255,255,0.1)"}}>
+                  <span style={{width:6,height:6,borderRadius:"50%",background:"#10B981",display:"inline-block",animation:"pulse 2s infinite"}}/>
+                  <span style={{fontSize:11,color:"#94A3B8"}}>Act. {lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Market status + buttons */}
+          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:10}}>
+            {/* Market Status Badge */}
+            <div style={{
+              display:"flex",alignItems:"center",gap:8,
+              background:`${marketStatus.color}18`,
+              border:`1.5px solid ${marketStatus.color}40`,
+              borderRadius:12,padding:"8px 16px",
+              minWidth:180,
+            }}>
+              <span style={{width:8,height:8,borderRadius:"50%",background:marketStatus.dot,display:"inline-block",boxShadow:`0 0 8px ${marketStatus.dot}`,animation:marketStatus.status==="open"?"pulse 2s infinite":"none",flexShrink:0}}/>
+              <div>
+                <div style={{fontSize:13,fontWeight:800,color:marketStatus.color,lineHeight:1}}>{marketStatus.label}</div>
+                <div style={{fontSize:10,color:"rgba(148,163,184,0.7)",marginTop:1}}>{marketStatus.sub}</div>
+              </div>
+            </div>
+            {/* Action buttons */}
+            <div style={{display:"flex",gap:7,alignItems:"center"}}>
+              <button onClick={fetchPrices} disabled={loading}
+                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(99,102,241,0.15)",border:"1px solid rgba(99,102,241,0.35)",borderRadius:9,padding:"7px 14px",fontSize:12,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"all 0.15s"}}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.28)"}
+                onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.15)"}>
+                <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none",fontSize:13}}>↻</span>
+                Refresh
+              </button>
+              <div style={{position:"relative"}}>
+                <button onClick={()=>setAddViewOpen(p=>!p)}
+                  style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:9,padding:"7px 14px",fontSize:12,fontWeight:700,color:"#CBD5E1",cursor:"pointer",transition:"all 0.15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.12)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.07)"}>
+                  + {isEN?"Add View":"Vista"}
+                </button>
+                {addViewOpen&&(
+                  <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1E293B",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"6px",zIndex:100,minWidth:160,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
+                    {VIEWS.map(v=>(
+                      <button key={v.id} onClick={()=>{setActiveView(v.id);setAddViewOpen(false);}}
+                        style={{display:"block",width:"100%",textAlign:"left",background:activeView===v.id?"rgba(99,102,241,0.15)":"transparent",border:"none",borderRadius:7,padding:"8px 12px",fontSize:12,color:activeView===v.id?"#818CF8":"#94A3B8",cursor:"pointer",fontWeight:activeView===v.id?700:500}}>
+                        {v.l}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div style={{position:"relative"}}>
+                <button onClick={()=>setExportOpen(p=>!p)}
+                  style={{background:"linear-gradient(135deg,#1E40AF,#2563EB)",border:"none",borderRadius:9,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:5,boxShadow:"0 2px 12px rgba(37,99,235,0.35)"}}
+                  onMouseEnter={e=>e.currentTarget.style.opacity="0.9"}
+                  onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+                  Export as… ▾
+                </button>
+                {exportOpen&&(
+                  <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1E293B",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"6px",zIndex:100,minWidth:150,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
+                    <button onClick={exportCSV}
+                      style={{display:"block",width:"100%",textAlign:"left",background:"transparent",border:"none",borderRadius:7,padding:"8px 12px",fontSize:12,color:"#94A3B8",cursor:"pointer"}}
+                      onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.07)"}
+                      onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                      📄 Export CSV
+                    </button>
+                    <button onClick={()=>{window.print();setExportOpen(false);}}
+                      style={{display:"block",width:"100%",textAlign:"left",background:"transparent",border:"none",borderRadius:7,padding:"8px 12px",fontSize:12,color:"#94A3B8",cursor:"pointer"}}
+                      onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.07)"}
+                      onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                      🖨️ Print / PDF
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── VIEW TABS (inside header) ── */}
+        <div style={{display:"flex",gap:2,marginTop:16,borderTop:"1px solid rgba(255,255,255,0.07)",paddingTop:14,flexWrap:"wrap"}}>
           {VIEWS.map(v=>(
             <button key={v.id} onClick={()=>setActiveView(v.id)}
-              style={{background:"none",border:"none",borderBottom:`2.5px solid ${activeView===v.id?"#1E40AF":"transparent"}`,padding:"6px 14px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#1E40AF":"#64748B",cursor:"pointer",whiteSpace:"nowrap"}}>
+              style={{background:activeView===v.id?"rgba(99,102,241,0.2)":"transparent",border:"none",borderRadius:8,padding:"6px 16px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#818CF8":"#64748B",cursor:"pointer",whiteSpace:"nowrap",borderBottom:activeView===v.id?"2px solid #818CF8":"2px solid transparent",transition:"all 0.15s"}}>
               {v.l}
             </button>
           ))}
-        </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <button onClick={fetchPrices} style={{background:"none",border:"1px solid #E2E8F0",borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,color:"#475569",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
-            ↻ Refresh
-          </button>
-          <button style={{background:"none",border:"1px solid #E2E8F0",borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,color:"#475569",cursor:"pointer"}}>+ Add View</button>
-          <button style={{background:"linear-gradient(135deg,#1E40AF,#2563EB)",border:"none",borderRadius:8,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>Export as… ▾</button>
         </div>
       </div>
 
@@ -12932,7 +13378,7 @@ function AboutPage({onBack, lang}){
       </LegalSection>
       <LegalSection title={isEN?"Contact":"Contacto"}>
         <p>{isEN?"For inquiries, partnerships, or support:":"Para consultas, colaboraciones o soporte:"}</p>
-        <p>📧 <a href="mailto:hola@nexotradeia.com" style={{color:C.accent}}>hola@nexotradeia.com</a></p>
+        <p>📧 <a href="mailto:mgtproia@gmail.com" style={{color:C.accent}}>mgtproia@gmail.com</a></p>
         <p>🌐 <a href="https://nexotradeia.com" style={{color:C.accent}}>nexotradeia.com</a></p>
       </LegalSection>
     </LegalPage>
@@ -13019,8 +13465,8 @@ function PrivacyPage({onBack, lang}){
       </LegalSection>
       <LegalSection title={isEN?"Your Rights":"Tus Derechos"}>
         <p>{isEN
-          ?"You have the right to: access your data, correct inaccuracies, request deletion, and export your content. Contact us at hola@nexotradeia.com to exercise these rights."
-          :"Tienes derecho a: acceder a tus datos, corregir inexactitudes, solicitar eliminación y exportar tu contenido. Contáctanos en hola@nexotradeia.com para ejercer estos derechos."
+          ?"You have the right to: access your data, correct inaccuracies, request deletion, and export your content. Contact us at mgtproia@gmail.com to exercise these rights."
+          :"Tienes derecho a: acceder a tus datos, corregir inexactitudes, solicitar eliminación y exportar tu contenido. Contáctanos en mgtproia@gmail.com para ejercer estos derechos."
         }</p>
       </LegalSection>
       <LegalSection title={isEN?"Cookies":"Cookies"}>
@@ -13129,7 +13575,7 @@ function GuidelinesPage({onBack, lang}){
         <p style={{margin:0,fontSize:13,color:"var(--c-muted)"}}>{isEN
           ?"Violations may result in content removal, temporary suspension, or permanent ban. For questions or to report violations: "
           :"Las infracciones pueden resultar en eliminación de contenido, suspensión temporal o ban permanente. Para preguntas o para reportar infracciones: "
-        }<a href="mailto:hola@nexotradeia.com" style={{color:C.accent}}>hola@nexotradeia.com</a></p>
+        }<a href="mailto:mgtproia@gmail.com" style={{color:C.accent}}>mgtproia@gmail.com</a></p>
       </div>
     </LegalPage>
   );
@@ -13944,8 +14390,8 @@ export default function App(){
     if(page===15) return <DividendCalendarPage/>;
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
-    if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
-    if(page===35) return <CongressTradesPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===35) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} initialTab="congress"/>;
     if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
     if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
