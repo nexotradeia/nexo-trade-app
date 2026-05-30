@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 17:38:51
+// NEXO TRADE — build: 2026-05-30 17:45:33
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4742,35 +4742,40 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   const savingsPct = Math.round((1 - priceAnual / (price * 12)) * 100);
 
   const FREE_FEATURES = [
-    "Foro social — publicar, comentar y repostear",
-    "Mensajes privados (mutuo seguimiento)",
-    "Noticias del mercado en tiempo real",
-    "Calendario de earnings",
-    "Trending — acciones más mencionadas",
-    "Leaderboard público de traders",
-    "Paper trading con $100k virtual",
-    "3 lecciones gratuitas de Academia",
-    "Watchlist básica (hasta 5 acciones)",
-    "Sistema de puntos y badges",
+    "🔥 Foro social — publicar, comentar y repostear",
+    "💬 Mensajes privados entre traders",
+    "📰 Noticias del mercado en tiempo real",
+    "📅 Calendario de earnings (fechas de resultados)",
+    "📈 Trending — acciones y cryptos más mencionadas",
+    "🏆 Leaderboard público de traders",
+    "🎮 Paper Trading con $100k virtual",
+    "🔔 Notificaciones de actividad social",
+    "📚 3 lecciones gratuitas de Academia",
+    "👁 Watchlist básica (hasta 5 activos)",
+    "⭐ Sistema de puntos, niveles y badges",
+    "🤖 Asistente IA — 5 preguntas diarias",
   ];
 
   const VIP_FEATURES = [
-    "✓ Todo lo del plan Free incluido",
-    "📊 10 Picks semanales exclusivos con análisis",
-    "💡 30+ Ideas de inversión con tesis completa",
-    "🏛️ 52 portafolios Gurús 13F actualizados (Buffett, Ackman...)",
+    "✓ Todo lo del plan Free, sin límites",
+    "🧠 Stock Pick IA — 10 picks semanales con análisis completo",
+    "💡 30+ Ideas de inversión con tesis, entrada, target y stop",
+    "🏛️ 52 portafolios Gurús 13F actualizados (Buffett, Ackman, Druckenmiller...)",
+    "🏛️ Congress Trades — operaciones de congresistas en tiempo real",
     "🐋 Flujo institucional — dark pool y sweeps en tiempo real",
-    "🛠️ Stock Screener avanzado con 20+ filtros",
+    "📊 Opciones Crypto — cadena completa BTC/ETH/SOL 24h",
+    "🔬 Advanced Screener — 20+ filtros técnicos y fundamentales",
+    "💼 Portfolio Tracker — seguimiento de inversiones con P&L",
+    "👁 Watchlist Bloomberg-style — 6 tabs con datos en tiempo real",
     "📅 Calendario de dividendos en tiempo real",
     "📅 Calendario de IPOs próximas",
     "📅 Calendario económico macro en tiempo real",
     "🏦 ARK Invest — holdings diarios actualizados",
     "🔍 Insiders SEC — Form 4 en tiempo real",
     "🤖 Asistente IA de trading ilimitado",
-    "🔔 Alertas de precio por email personalizadas",
-    "🎓 Academia completa — todos los cursos",
-    "🎓 Webinars con 50% de descuento exclusivo",
-    "✦ Badge VIP dorado en tu perfil",
+    "🔔 Alertas de precio personalizadas por email",
+    "🎓 Academia completa — todos los cursos y webinars VIP",
+    "✦ Badge VIP dorado + acceso anticipado a nuevas funciones",
   ];
 
   const SIGNALS = [
@@ -14707,8 +14712,11 @@ export default function App(){
     _getAdminStatus() || (_getSavedUser()?.is_pro || false)
   );
   const [profUser,setProfUser] = useState(null);
-  const [showAI,setShowAI]     = useState(false);
-  const [showAlerts,setAlerts] = useState(false);
+  const [showAI,setShowAI]           = useState(false);
+  const [aiHidden,setAiHidden]       = useState(false);
+  const [aiSide,setAiSide]           = useState("right");
+  const [aiBubbleOff,setAiBubbleOff] = useState(false);
+  const [showAlerts,setAlerts]       = useState(false);
   const [communityCount, setCommunityCount] = useState(3200);
   const animatedCount = useCountUp(communityCount, 2500);
 
@@ -16184,31 +16192,89 @@ export default function App(){
       )}
 
       {/* ── CHATBOT FLOTANTE IA ── */}
-      {!showAI && (
-        <div style={{position:"fixed",bottom:24,right:24,zIndex:8900,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,pointerEvents:"none"}}>
-          <div style={{
-            background:"linear-gradient(135deg,#0B1A2E,#0D2244)",
-            border:"1px solid rgba(0,168,255,0.5)",
-            borderRadius:14,padding:"10px 14px",
-            color:"#fff",fontSize:12,fontWeight:600,
-            boxShadow:"0 4px 24px rgba(0,168,255,0.25)",
-            whiteSpace:"nowrap",backdropFilter:"blur(12px)",
-            pointerEvents:"auto",cursor:"pointer",
-            animation:"nexo-float 3s ease-in-out infinite",
-          }} onClick={()=>setShowAI(true)}>
-            ¿Tienes dudas sobre el mercado? <span style={{color:"#00A8FF"}}>Pregúntame →</span>
+      {!showAI && !aiHidden && (
+        <div style={{
+          position:"fixed", bottom:24, [aiSide]:24,
+          zIndex:8900, display:"flex",
+          flexDirection: aiSide==="right" ? "column" : "column",
+          alignItems: aiSide==="right" ? "flex-end" : "flex-start",
+          gap:8, pointerEvents:"none",
+        }}>
+          {/* Bubble tooltip */}
+          {!aiBubbleOff && (
+            <div style={{
+              background:"linear-gradient(135deg,#0B1A2E,#0D2244)",
+              border:"1px solid rgba(0,168,255,0.5)",
+              borderRadius:14, padding:"9px 12px 9px 14px",
+              color:"#fff", fontSize:12, fontWeight:600,
+              boxShadow:"0 4px 24px rgba(0,168,255,0.25)",
+              whiteSpace:"nowrap", backdropFilter:"blur(12px)",
+              pointerEvents:"auto", cursor:"pointer",
+              animation:"nexo-float 3s ease-in-out infinite",
+              display:"flex", alignItems:"center", gap:10,
+            }}>
+              <span onClick={()=>setShowAI(true)}>
+                ¿Tienes dudas sobre el mercado? <span style={{color:"#00A8FF"}}>Pregúntame →</span>
+              </span>
+              <button onClick={e=>{e.stopPropagation();setAiBubbleOff(true);}}
+                style={{background:"rgba(255,255,255,0.1)",border:"none",borderRadius:"50%",
+                  width:20,height:20,color:"#94a3b8",cursor:"pointer",fontSize:13,
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  lineHeight:1,padding:0,flexShrink:0}}>
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* Botón principal + controles */}
+          <div style={{display:"flex",alignItems:"center",gap:6,pointerEvents:"auto",
+            flexDirection: aiSide==="right" ? "row" : "row-reverse"}}>
+
+            {/* Toggle posición ↔ */}
+            <button onClick={()=>setAiSide(s=>s==="right"?"left":"right")}
+              title={aiSide==="right"?"Mover a la izquierda":"Mover a la derecha"}
+              style={{width:28,height:28,borderRadius:"50%",background:"rgba(15,23,42,0.9)",
+                border:"1px solid rgba(255,255,255,0.15)",color:"#64748b",cursor:"pointer",
+                fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",
+                boxShadow:"0 2px 8px rgba(0,0,0,0.4)"}}>
+              {aiSide==="right"?"←":"→"}
+            </button>
+
+            {/* Botón IA principal */}
+            <button onClick={()=>setShowAI(true)} style={{
+              width:58, height:58, borderRadius:"50%",
+              background:"linear-gradient(135deg,#00A8FF,#0066CC)",
+              border:"3px solid rgba(0,168,255,0.4)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:26, cursor:"pointer",
+              boxShadow:"0 4px 24px rgba(0,168,255,0.5)",
+              animation:"nexo-pulse 2s infinite",
+            }}>🤖</button>
+
+            {/* X para ocultar */}
+            <button onClick={()=>{setAiHidden(true);setAiBubbleOff(false);}}
+              title="Ocultar"
+              style={{width:28,height:28,borderRadius:"50%",background:"rgba(15,23,42,0.9)",
+                border:"1px solid rgba(255,255,255,0.15)",color:"#64748b",cursor:"pointer",
+                fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",
+                boxShadow:"0 2px 8px rgba(0,0,0,0.4)"}}>
+              ×
+            </button>
+
           </div>
-          <button onClick={()=>setShowAI(true)} style={{
-            width:58,height:58,borderRadius:"50%",
-            background:"linear-gradient(135deg,#00A8FF,#0066CC)",
-            border:"3px solid rgba(0,168,255,0.4)",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            fontSize:26,cursor:"pointer",
-            boxShadow:"0 4px 24px rgba(0,168,255,0.5), 0 0 0 0 rgba(0,168,255,0.4)",
-            animation:"nexo-pulse 2s infinite",
-            pointerEvents:"auto",
-          }}>🤖</button>
         </div>
+      )}
+
+      {/* Chip para restaurar cuando está oculto */}
+      {!showAI && aiHidden && (
+        <button onClick={()=>setAiHidden(false)}
+          style={{position:"fixed",bottom:16,right:16,zIndex:8900,
+            background:"rgba(15,23,42,0.95)",border:"1px solid rgba(0,168,255,0.35)",
+            borderRadius:20,padding:"6px 14px",color:"#00A8FF",cursor:"pointer",
+            fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:6,
+            boxShadow:"0 4px 16px rgba(0,0,0,0.4)"}}>
+          🤖 IA
+        </button>
       )}
       {showAlerts&&<AlertsPanel lang={lang} user={user} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase}/>}
