@@ -1,7 +1,5 @@
 // api/webhook.js — NEXO TRADE Stripe Webhook Handler
-import crypto from 'node:crypto';
-
-export const config = { api: { bodyParser: false } };
+import crypto from 'crypto';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
