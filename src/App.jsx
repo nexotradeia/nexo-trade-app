@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 21:11:18
+// NEXO TRADE — build: 2026-05-29 21:16:49
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -495,7 +495,7 @@ const generateAvatarSVG = (id, emoji, color, style, size=80) => {
     signal:   `<circle cx="40" cy="40" r="38" fill="#0f172a" stroke="${c}" stroke-width="2"/><path d="M20,40 Q30,25 40,40 Q50,55 60,40" fill="none" stroke="${c}" stroke-width="2.5"/><text x="40" y="68" text-anchor="middle" font-size="16">${emoji}</text>`,
     bull:     `<defs><linearGradient id="bg${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${c}44"/><stop offset="100%" stop-color="${c}11"/></linearGradient></defs><circle cx="40" cy="40" r="38" fill="url(#bg${id})" stroke="${c}" stroke-width="2.5"/><text x="40" y="52" text-anchor="middle" font-size="28">${emoji}</text>`,
     fast:     `<defs><linearGradient id="bg${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="${c}11"/><stop offset="100%" stop-color="${c}44"/></linearGradient></defs><polygon points="40,4 76,40 40,76 4,40" fill="url(#bg${id})" stroke="${c}" stroke-width="2"/><text x="40" y="52" text-anchor="middle" font-size="26">${emoji}</text>`,
-    sharp:    `<polygon points="40,4 76,22 76,58 40,76 4,58 4,22" fill="${c}22" stroke="${c}" stroke-width="2.5"/><text x="40" y="52" text-anchor="middle" font-size="26">${emoji}</text>`,
+    edgy:     `<polygon points="40,4 76,22 76,58 40,76 4,58 4,22" fill="${c}22" stroke="${c}" stroke-width="2.5"/><text x="40" y="52" text-anchor="middle" font-size="26">${emoji}</text>`,
     hot:      `<circle cx="40" cy="40" r="38" fill="#1c0a0a" stroke="${c}" stroke-width="2.5"/><circle cx="40" cy="40" r="28" fill="${c}22"/><text x="40" y="52" text-anchor="middle" font-size="28">${emoji}</text>`,
     profit:   `<rect x="4" y="4" width="72" height="72" rx="16" fill="${c}15" stroke="${c}" stroke-width="2"/><polyline points="15,55 30,35 45,45 60,20" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/><text x="40" y="72" text-anchor="middle" font-size="12">${emoji}</text>`,
     bold:     `<polygon points="40,4 76,22 76,58 40,76 4,58 4,22" fill="#1a0a2e" stroke="${c}" stroke-width="2"/><circle cx="40" cy="40" r="20" fill="${c}33" stroke="${c}" stroke-width="1.5"/><text x="40" y="52" text-anchor="middle" font-size="22">${emoji}</text>`,
