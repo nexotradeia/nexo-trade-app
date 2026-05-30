@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 19:23:44
+// NEXO TRADE — build: 2026-05-30 19:32:51
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4820,75 +4820,6 @@ function SponsoredPostCard({sp}){
         onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
         {sp.cta}
       </a>
-    </div>
-  );
-}
-
-// ── BOT POSTS de NexoTrade Research ──────────────────────────────────────────
-const BOT_POSTS = IDEAS_DATA.slice(0,10).map(idea=>({
-  id:`bot-${idea.id}`,
-  user:"NexoTrade Research",
-  avatar:"🤖",
-  avatarColor:"#00A8FF",
-  ticker:idea.ticker,
-  sentiment:idea.signal==="COMPRA"?"bull":idea.signal==="VENTA"?"bear":"neutral",
-  text:`${idea.icon} $${idea.ticker} — ${idea.signal}: ${idea.thesis.slice(0,200)}... Entrada: $${idea.entry} · Target: $${idea.target} · Stop: $${idea.stop}`,
-  likes:80+(idea.id*17)%120,
-  comments:12+(idea.id*5)%30,
-  reposts:8+(idea.id*3)%25,
-  time:idea.published,
-  tags:idea.tags,
-}));
-
-function BotPostCard({post,onTickerClick,lang}){
-  const isEN = lang==="en";
-  const isBull = post.sentiment==="bull";
-  const isBear = post.sentiment==="bear";
-  const sentColor = isBull?C.bull:isBear?C.bear:C.muted;
-  const sentBg    = isBull?C.bullBg:isBear?C.bearBg:C.accentDim;
-  const sentLabel = isBull?(isEN?"BUY":"COMPRA"):isBear?(isEN?"SELL":"VENTA"):(isEN?"HOLD":"NEUTRO");
-  return(
-    <div style={{background:C.card,border:`1.5px solid ${isBull?"rgba(22,163,74,0.22)":isBear?"rgba(220,38,38,0.22)":C.border}`,borderRadius:16,padding:"14px 16px",marginBottom:6,boxShadow:C.shadow,transition:"transform 0.18s"}}
-      onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
-      onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-      <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
-        {/* Bot avatar */}
-        <div style={{width:40,height:40,borderRadius:12,background:"rgba(0,168,255,0.12)",border:"1.5px solid rgba(0,168,255,0.28)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
-          🤖
-        </div>
-        <div style={{flex:1,minWidth:0}}>
-          {/* Header row */}
-          <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,flexWrap:"wrap"}}>
-            <span style={{fontWeight:800,color:C.text,fontSize:14}}>NexoTrade Research</span>
-            <span style={{background:"rgba(0,168,255,0.1)",color:"#00A8FF",borderRadius:20,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ AI</span>
-            <span style={{background:sentBg,color:sentColor,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>{sentLabel}</span>
-            <span onClick={()=>onTickerClick&&onTickerClick(post.ticker)}
-              style={{background:C.accentDim,color:C.accent,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-              ${post.ticker}
-            </span>
-            <span style={{marginLeft:"auto",fontSize:11,color:C.muted}}>{post.time}</span>
-          </div>
-          {/* Text */}
-          <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.6}}>{post.text}</p>
-          {/* Tags */}
-          {post.tags?.length>0&&(
-            <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>
-              {post.tags.slice(0,3).map(t=>(
-                <span key={t} style={{background:C.accentDim,color:C.muted,borderRadius:20,padding:"2px 8px",fontSize:10}}>#{t}</span>
-              ))}
-            </div>
-          )}
-          {/* Footer */}
-          <div style={{display:"flex",gap:18,alignItems:"center"}}>
-            <span style={{fontSize:12,color:C.muted}}>❤️ {post.likes}</span>
-            <span style={{fontSize:12,color:C.muted}}>💬 {post.comments}</span>
-            <span style={{fontSize:12,color:C.muted}}>🔁 {post.reposts}</span>
-            <span style={{marginLeft:"auto",fontSize:10,color:C.accent,background:C.accentDim,borderRadius:20,padding:"2px 9px",fontWeight:600}}>
-              {isEN?"AI Research Pick":"Pick IA"}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
@@ -11226,6 +11157,70 @@ const IDEAS_DATA = [
   {id:29,ticker:"GOOGL",name:"Alphabet Inc",icon:"🔍",sector:"Tecnología",signal:"COMPRA",entry:175,target:225,stop:152,horizon:"6-12 meses",risk:"Bajo",riskN:1,tags:["IA","Search","Cloud","YouTube"],thesis:"Alphabet es la compañía de IA más infravalorada del mercado. Google Search integra Gemini y mantiene 91% de market share. GCP crece 35%+ con AI workloads. YouTube supera $40B en ingresos publicitarios. Waymo lidera robotaxis. A 22x earnings con crecimiento de 15%+ es una ganga vs peers. Programa de recompra agresivo.",published:"2026-05-19",analyst:"NexoTrade Research"},
   {id:30,ticker:"LLY",name:"Eli Lilly & Co",icon:"💉",sector:"Farmacéutico",signal:"COMPRA",entry:780,target:1050,stop:680,horizon:"12+ meses",risk:"Bajo",riskN:1,tags:["GLP-1","Obesidad","Diabetes"],thesis:"Eli Lilly tiene el pipeline farmacéutico más valioso del mundo en GLP-1 (Ozempic/Mounjaro). El mercado global de obesidad es >$100B anual y apenas comienza a desarrollarse. Tirzepatide es superior a semaglutida en estudios clínicos. La demanda supera su capacidad de manufactura — un problema de lujo. Orforglipron oral puede ser el game-changer de 2027.",published:"2026-05-18",analyst:"NexoTrade Research"},
 ];
+
+// ── BOT POSTS de NexoTrade Research (después de IDEAS_DATA para poder usarla) ─
+const BOT_POSTS = IDEAS_DATA.slice(0,10).map(idea=>({
+  id:`bot-${idea.id}`,
+  user:"NexoTrade Research",
+  avatar:"🤖",
+  avatarColor:"#00A8FF",
+  ticker:idea.ticker,
+  sentiment:idea.signal==="COMPRA"?"bull":idea.signal==="VENTA"?"bear":"neutral",
+  text:`${idea.icon} $${idea.ticker} — ${idea.signal}: ${idea.thesis.slice(0,200)}... Entrada: $${idea.entry} · Target: $${idea.target} · Stop: $${idea.stop}`,
+  likes:80+(idea.id*17)%120,
+  comments:12+(idea.id*5)%30,
+  reposts:8+(idea.id*3)%25,
+  time:idea.published,
+  tags:idea.tags,
+}));
+
+function BotPostCard({post,onTickerClick,lang}){
+  const isEN = lang==="en";
+  const isBull = post.sentiment==="bull";
+  const isBear = post.sentiment==="bear";
+  const sentColor = isBull?C.bull:isBear?C.bear:C.muted;
+  const sentBg    = isBull?C.bullBg:isBear?C.bearBg:C.accentDim;
+  const sentLabel = isBull?(isEN?"BUY":"COMPRA"):isBear?(isEN?"SELL":"VENTA"):(isEN?"HOLD":"NEUTRO");
+  return(
+    <div style={{background:C.card,border:`1.5px solid ${isBull?"rgba(22,163,74,0.22)":isBear?"rgba(220,38,38,0.22)":C.border}`,borderRadius:16,padding:"14px 16px",marginBottom:6,boxShadow:C.shadow,transition:"transform 0.18s"}}
+      onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+      onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+      <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
+        <div style={{width:40,height:40,borderRadius:12,background:"rgba(0,168,255,0.12)",border:"1.5px solid rgba(0,168,255,0.28)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+          🤖
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,flexWrap:"wrap"}}>
+            <span style={{fontWeight:800,color:C.text,fontSize:14}}>NexoTrade Research</span>
+            <span style={{background:"rgba(0,168,255,0.1)",color:"#00A8FF",borderRadius:20,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ AI</span>
+            <span style={{background:sentBg,color:sentColor,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>{sentLabel}</span>
+            <span onClick={()=>onTickerClick&&onTickerClick(post.ticker)}
+              style={{background:C.accentDim,color:C.accent,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+              ${post.ticker}
+            </span>
+            <span style={{marginLeft:"auto",fontSize:11,color:C.muted}}>{post.time}</span>
+          </div>
+          <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.6}}>{post.text}</p>
+          {post.tags?.length>0&&(
+            <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>
+              {post.tags.slice(0,3).map(t=>(
+                <span key={t} style={{background:C.accentDim,color:C.muted,borderRadius:20,padding:"2px 8px",fontSize:10}}>#{t}</span>
+              ))}
+            </div>
+          )}
+          <div style={{display:"flex",gap:18,alignItems:"center"}}>
+            <span style={{fontSize:12,color:C.muted}}>❤️ {post.likes}</span>
+            <span style={{fontSize:12,color:C.muted}}>💬 {post.comments}</span>
+            <span style={{fontSize:12,color:C.muted}}>🔁 {post.reposts}</span>
+            <span style={{marginLeft:"auto",fontSize:10,color:C.accent,background:C.accentDim,borderRadius:20,padding:"2px 9px",fontWeight:600}}>
+              {isEN?"AI Research Pick":"Pick IA"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function IdeasPage({ isPremium, onNeedPremium }) {
   const [filter, setFilter]     = useState("todos");
