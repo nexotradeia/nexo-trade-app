@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 17:27:23
+// NEXO TRADE — build: 2026-05-30 17:33:27
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11704,13 +11704,24 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
 // ── CRYPTO OPTIONS PAGE (page 41) ─────────────────────────────────────────────
 function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
   const isEN = lang==="en";
-  const ASSETS = [
-    {sym:"BTC", idx:"btc_usd", color:"#F7931A", emoji:"₿"},
-    {sym:"ETH", idx:"eth_usd", color:"#627EEA", emoji:"Ξ"},
-    {sym:"SOL", idx:"sol_usd", color:"#9945FF", emoji:"◎"},
-  ];
   const MONTHS = {JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+  const COLOR_MAP = {
+    BTC:{color:"#F7931A",emoji:"₿"}, ETH:{color:"#627EEA",emoji:"Ξ"},
+    SOL:{color:"#9945FF",emoji:"◎"}, MATIC:{color:"#8247E5",emoji:"⬡"},
+    XRP:{color:"#00AAE4",emoji:"✕"}, LINK:{color:"#2A5ADA",emoji:"⬡"},
+    DOGE:{color:"#C3A634",emoji:"Ð"}, ADA:{color:"#0033AD",emoji:"₳"},
+    AVAX:{color:"#E84142",emoji:"▲"}, DOT:{color:"#E6007A",emoji:"●"},
+    BNB:{color:"#F3BA2F",emoji:"◈"}, ATOM:{color:"#6F4E37",emoji:"⚛"},
+    NEAR:{color:"#00C08B",emoji:"Ⓝ"}, UNI:{color:"#FF007A",emoji:"🦄"},
+    LTC:{color:"#BFBBBB",emoji:"Ł"}, BCH:{color:"#8DC351",emoji:"₿"},
+  };
+  const DEFAULT_ASSETS = [
+    {sym:"BTC",idx:"btc_usd",color:"#F7931A",emoji:"₿"},
+    {sym:"ETH",idx:"eth_usd",color:"#627EEA",emoji:"Ξ"},
+    {sym:"SOL",idx:"sol_usd",color:"#9945FF",emoji:"◎"},
+  ];
 
+  const [assets, setAssets]             = useState(DEFAULT_ASSETS);
   const [assetIdx, setAssetIdx]         = useState(0);
   const [expiries, setExpiries]         = useState([]);
   const [selExpiry, setSelExpiry]       = useState(null);
@@ -11730,7 +11741,25 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
   const [filterATM, setFilterATM]       = useState(true);
   const [sortCol, setSortCol]           = useState("oi");
 
-  const asset = ASSETS[assetIdx];
+  const asset = assets[assetIdx] || assets[0];
+
+  // Cargar monedas disponibles dinámicamente desde Deribit
+  useEffect(()=>{
+    fetch("https://www.deribit.com/api/v2/public/get_currencies")
+      .then(r=>r.json())
+      .then(data=>{
+        const STABLE = ["USDC","USDT","EURR","STETH","CBETH"];
+        const list = (data.result||[])
+          .filter(c=>!STABLE.includes(c.currency))
+          .map(c=>({
+            sym:c.currency,
+            idx:`${c.currency.toLowerCase()}_usd`,
+            ...(COLOR_MAP[c.currency]||{color:"#64748b",emoji:"●"}),
+          }));
+        if(list.length>0) setAssets(list);
+      })
+      .catch(()=>{}); // mantiene defaults si falla
+  },[]);
 
   function parseExpiry(str) {
     try {
@@ -11894,11 +11923,14 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
             </div>
           </div>
 
-          {/* Asset tabs */}
-          <div style={{display:"flex",gap:4,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:3}}>
-            {ASSETS.map((a,i)=>(
+          {/* Asset tabs — scrollable, dinámico */}
+          <div style={{display:"flex",gap:3,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:3,overflowX:"auto",maxWidth:"100%",flexShrink:1,scrollbarWidth:"none"}}>
+            {assets.map((a,i)=>(
               <button key={a.sym} onClick={()=>{setAssetIdx(i);setSelExpiry(null);}}
-                style={{background:assetIdx===i?a.color:"transparent",color:assetIdx===i?"#000":a.color,border:"none",borderRadius:7,padding:"6px 14px",fontWeight:800,fontSize:13,cursor:"pointer",transition:"all 0.15s"}}>
+                style={{background:assetIdx===i?a.color:"transparent",color:assetIdx===i?"#000":a.color,
+                  border:assetIdx===i?"none":`1px solid ${a.color}33`,
+                  borderRadius:7,padding:"5px 11px",fontWeight:800,fontSize:12,cursor:"pointer",
+                  transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0}}>
                 {a.emoji} {a.sym}
               </button>
             ))}
