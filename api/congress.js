@@ -1,7 +1,8 @@
 // NEXO TRADE — api/congress.js
 // Proxy de trades de congresistas de EE.UU.
-// Fuente primaria: Quiver Quantitative (si existe API key)
-// Fallback: datos curados 2025-2026
+// Fuente 1: Quiver Quantitative (si existe API key)
+// Fuente 2: Capitol Trades scraping (datos STOCK Act, dominio público)
+// Fuente 3: datos curados 2025-2026
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -9,7 +10,7 @@ export default async function handler(req, res) {
 
   const QUIVER_KEY = process.env.QUIVER_API_KEY;
 
-  // ── Intentar Quiver Quantitative si hay API key ──────────────────
+  // ── 1. Quiver Quantitative ────────────────────────────────────────
   if (QUIVER_KEY) {
     try {
       const r = await fetch(
@@ -18,9 +19,8 @@ export default async function handler(req, res) {
       );
       if (r.ok) {
         const data = await r.json();
-        // Normalizar formato Quiver → nuestro formato
         const trades = (Array.isArray(data) ? data : data.data || [])
-          .slice(0, 100)
+          .slice(0, 150)
           .map((t) => ({
             name:   t.Representative || t.Name || "Unknown",
             party:  t.Party || "?",
@@ -35,11 +35,103 @@ export default async function handler(req, res) {
         return res.status(200).json({ source: "quiver", trades });
       }
     } catch (e) {
-      // fall through to curated data
+      // fall through
     }
   }
 
-  // ── Datos curados 2024-2026 (STOCK Act disclosures) ──────────────
+  // ── 2. Capitol Trades scraping (STOCK Act public disclosures) ─────
+  try {
+    const headers = {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+    };
+
+    const r = await fetch("https://www.capitoltrades.com/trades?pageSize=100", { headers });
+    if (r.ok) {
+      const html = await r.text();
+
+      // ── Try Next.js __NEXT_DATA__ embedded JSON ──────────────────
+      const ndMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+      if (ndMatch) {
+        try {
+          const nd = JSON.parse(ndMatch[1]);
+          // Capitol Trades Next.js data structure
+          const raw =
+            nd?.props?.pageProps?.trades ||
+            nd?.props?.pageProps?.data ||
+            nd?.props?.pageProps?.initialTrades ||
+            [];
+          if (Array.isArray(raw) && raw.length > 0) {
+            const trades = raw.slice(0, 150).map(t => mapCapitolTrade(t));
+            return res.status(200).json({ source: "capitoltrades", trades });
+          }
+        } catch (_) {}
+      }
+
+      // ── Try inline JSON chunks (common in Next.js 13+) ───────────
+      const selfDataMatch = html.match(/self\.__next_f\.push\(\[1,"([^"]+)"\]\)/g);
+      if (selfDataMatch) {
+        // Next.js 13+ app-router streaming format — skip for now, use regex parse
+      }
+
+      // ── Regex HTML table parser ───────────────────────────────────
+      // Capitol Trades renders <tr> rows with <td> cells
+      const rowRx = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+      const cellRx = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+      const tagRx = /<[^>]+>/g;
+      const clean = s => s.replace(tagRx, "").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim();
+
+      const rows = [];
+      let rowM;
+      while ((rowM = rowRx.exec(html)) !== null) {
+        const cells = [];
+        let cellM;
+        const cellSrc = rowM[1];
+        cellRx.lastIndex = 0;
+        while ((cellM = cellRx.exec(cellSrc)) !== null) {
+          cells.push(clean(cellM[1]));
+        }
+        if (cells.length >= 5) rows.push(cells);
+      }
+
+      // Expect columns: [politician, party?, ticker, published, traded, filed, type, size]
+      // Filter rows that look like trade data (have a buy/sell type)
+      const typeWords = /\b(buy|sell|purchase|sale|exchange)\b/i;
+      const tradeRows = rows.filter(r => r.some(c => typeWords.test(c)));
+
+      if (tradeRows.length > 0) {
+        const trades = tradeRows.slice(0, 150).map(cells => {
+          // Try to detect column positions heuristically
+          const typeCell = cells.find(c => typeWords.test(c)) || "";
+          const type = /sale|sell/i.test(typeCell) ? "sell" : "buy";
+          const dateCell = cells.find(c => /\d{4}/.test(c) && /jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i.test(c)) || "";
+          const amountCell = cells.find(c => /\$|K–|\d+K/.test(c)) || "";
+          const tickerCell = cells.find(c => /^[A-Z]{1,5}$/.test(c.trim())) || cells.find(c => /:US/.test(c))?.replace(/:US.*/,"").trim() || "";
+          const nameCell = cells[0] || "";
+          return {
+            name: nameCell.length < 50 ? nameCell : "",
+            party: cells.find(c => c === "D" || c === "R") || "",
+            state: "",
+            ticker: tickerCell.replace(/:US.*/,"").trim().toUpperCase(),
+            type,
+            amount: amountCell || "",
+            date: dateCell,
+            asset: "",
+            house: "House",
+          };
+        }).filter(t => t.ticker && t.date);
+
+        if (trades.length > 0) {
+          return res.status(200).json({ source: "capitoltrades", trades });
+        }
+      }
+    }
+  } catch (e) {
+    // fall through to curated
+  }
+
+  // ── 3. Datos curados 2024-2026 (STOCK Act disclosures) ───────────
   const CURATED = [
     // ── Mayo 2026 ────────────────────────────────────────────────
     { name:"Nancy Pelosi",           party:"D", state:"CA", ticker:"NVDA", type:"buy",  amount:"$500K–$1M",   date:"2026-05-20", asset:"NVIDIA Corp",                   house:"House"  },
@@ -47,6 +139,9 @@ export default async function handler(req, res) {
     { name:"Michael McCaul",         party:"R", state:"TX", ticker:"LMT",  type:"buy",  amount:"$100K–$250K", date:"2026-05-16", asset:"Lockheed Martin",                house:"House"  },
     { name:"Ro Khanna",              party:"D", state:"CA", ticker:"TSLA", type:"buy",  amount:"$15K–$50K",   date:"2026-05-14", asset:"Tesla Inc",                      house:"House"  },
     { name:"Tommy Tuberville",       party:"R", state:"AL", ticker:"XOM",  type:"sell", amount:"$50K–$100K",  date:"2026-05-12", asset:"Exxon Mobil",                    house:"Senate" },
+    { name:"Jake Auchincloss",       party:"D", state:"MA", ticker:"STT",  type:"sell", amount:"$15K–$50K",   date:"2026-05-18", asset:"State Street Corporation",       house:"House"  },
+    { name:"Tim Moore",              party:"R", state:"NC", ticker:"SPY",  type:"buy",  amount:"$50K–$100K",  date:"2026-05-18", asset:"S&P 500 ETF",                    house:"House"  },
+    { name:"Buddy Carter",           party:"R", state:"GA", ticker:"NVDA", type:"buy",  amount:"$1M–$5M",     date:"2026-05-07", asset:"NVIDIA Corp",                    house:"House"  },
     { name:"Marjorie Taylor Greene", party:"R", state:"GA", ticker:"AMZN", type:"buy",  amount:"$15K–$50K",   date:"2026-05-10", asset:"Amazon.com Inc",                 house:"House"  },
     { name:"Rick Scott",             party:"R", state:"FL", ticker:"CRWD", type:"buy",  amount:"$100K–$250K", date:"2026-05-08", asset:"CrowdStrike Holdings",           house:"Senate" },
     { name:"Dan Crenshaw",           party:"R", state:"TX", ticker:"RTX",  type:"buy",  amount:"$50K–$100K",  date:"2026-05-06", asset:"Raytheon Technologies",          house:"House"  },
@@ -77,6 +172,7 @@ export default async function handler(req, res) {
     // ── Febrero 2026 ─────────────────────────────────────────────
     { name:"Nancy Pelosi",           party:"D", state:"CA", ticker:"TSLA", type:"buy",  amount:"$1M–$5M",     date:"2026-02-28", asset:"Tesla Inc",                      house:"House"  },
     { name:"Michael McCaul",         party:"R", state:"TX", ticker:"NVDA", type:"buy",  amount:"$250K–$500K", date:"2026-02-25", asset:"NVIDIA Corp",                    house:"House"  },
+    { name:"Jake Auchincloss",       party:"D", state:"MA", ticker:"STT",  type:"sell", amount:"$15K–$50K",   date:"2026-02-17", asset:"State Street Corporation",       house:"House"  },
     { name:"Ro Khanna",              party:"D", state:"CA", ticker:"MSFT", type:"buy",  amount:"$15K–$50K",   date:"2026-02-20", asset:"Microsoft Corp",                 house:"House"  },
     { name:"John Rutherford",        party:"R", state:"FL", ticker:"JPM",  type:"buy",  amount:"$50K–$100K",  date:"2026-02-18", asset:"JPMorgan Chase",                 house:"House"  },
     { name:"Pat Fallon",             party:"R", state:"TX", ticker:"GD",   type:"buy",  amount:"$15K–$50K",   date:"2026-02-15", asset:"General Dynamics",               house:"House"  },
@@ -126,8 +222,24 @@ export default async function handler(req, res) {
     { name:"Rick Scott",             party:"R", state:"FL", ticker:"TSLA", type:"buy",  amount:"$100K–$250K", date:"2025-01-06", asset:"Tesla Inc",                      house:"Senate" },
   ];
 
-  // Sort by date descending
-  CURATED.sort((a,b) => new Date(b.date) - new Date(a.date));
-
+  CURATED.sort((a, b) => new Date(b.date) - new Date(a.date));
   res.status(200).json({ source: "curated", trades: CURATED });
+}
+
+// ── Helper: map Capitol Trades JSON format → our format ──────────────
+function mapCapitolTrade(t) {
+  const politician = t.politician || t.member || {};
+  const asset = t.asset || t.issuer || {};
+  const txType = (t.type || t.transactionType || t.transaction || "").toLowerCase();
+  return {
+    name:   politician.name || politician.firstName + " " + politician.lastName || t.name || "Unknown",
+    party:  (politician.party || t.party || "").slice(0, 1).toUpperCase(),
+    state:  politician.state || t.state || "",
+    ticker: asset.ticker || asset.symbol || t.ticker || "",
+    type:   txType.includes("sale") || txType.includes("sell") ? "sell" : "buy",
+    amount: t.range || t.amount || t.size || "$1K–$15K",
+    date:   t.filedDate || t.transactionDate || t.date || "",
+    asset:  asset.name || asset.description || t.assetName || "",
+    house:  politician.chamber || politician.house || t.chamber || "House",
+  };
 }
