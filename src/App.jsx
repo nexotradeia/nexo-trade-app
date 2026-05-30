@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 19:49:13
+// NEXO TRADE — build: 2026-05-30 19:54:12
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11166,21 +11166,68 @@ const IDEAS_DATA = [
   {id:30,ticker:"LLY",name:"Eli Lilly & Co",icon:"💉",sector:"Farmacéutico",signal:"COMPRA",entry:780,target:1050,stop:680,horizon:"12+ meses",risk:"Bajo",riskN:1,tags:["GLP-1","Obesidad","Diabetes"],thesis:"Eli Lilly tiene el pipeline farmacéutico más valioso del mundo en GLP-1 (Ozempic/Mounjaro). El mercado global de obesidad es >$100B anual y apenas comienza a desarrollarse. Tirzepatide es superior a semaglutida en estudios clínicos. La demanda supera su capacidad de manufactura — un problema de lujo. Orforglipron oral puede ser el game-changer de 2027.",published:"2026-05-18",analyst:"NexoTrade Research"},
 ];
 
+// ── BOT PERSONAS — traders ficticios que postean análisis ────────────────────
+const BOT_PERSONAS = [
+  {user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#7C3AED", badge:"Pro Trader",    style:"técnico"},
+  {user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analista",      style:"fundamental"},
+  {user:"AlexTradingMX",    avatar:"⚡",  avatarColor:"#F59E0B", badge:"Day Trader",    style:"momentum"},
+  {user:"LucasMercados",    avatar:"🦁",  avatarColor:"#16A34A", badge:"Macro",         style:"macro"},
+  {user:"ValentinaFinance", avatar:"💎",  avatarColor:"#06B6D4", badge:"Value Investor",style:"value"},
+  {user:"MarcoBTC",         avatar:"₿",  avatarColor:"#F7931A", badge:"Crypto Trader", style:"cripto"},
+  {user:"AndresTradePro",   avatar:"🎯",  avatarColor:"#EF4444", badge:"Opciones",      style:"opciones"},
+  {user:"IsabelAnalysis",   avatar:"📊",  avatarColor:"#8B5CF6", badge:"Quant",         style:"quant"},
+  {user:"RicardoInvest",    avatar:"🏆",  avatarColor:"#D97706", badge:"Swing Trader",  style:"swing"},
+  {user:"NataliaTrader",    avatar:"🌟",  avatarColor:"#10B981", badge:"Growth",        style:"growth"},
+];
+
+// Textos más naturales por estilo de trading
+const BOT_TEXT_TEMPLATES = {
+  técnico:     (idea) => `📈 Vengo siguiendo $${idea.ticker} desde $${idea.entry} y el setup está perfecto. ${idea.thesis.slice(0,150)}... Mi target: $${idea.target} con stop en $${idea.stop} 🎯`,
+  fundamental: (idea) => `Análisis fundamental de $${idea.ticker}: ${idea.thesis.slice(0,160)}... Precio de entrada justo: $${idea.entry}, objetivo conservador $${idea.target}.`,
+  momentum:    (idea) => `🚀 $${idea.ticker} con momentum brutal! ${idea.thesis.slice(0,140)}... Entro en $${idea.entry}, ride hasta $${idea.target}. Stop duro: $${idea.stop}`,
+  macro:       (idea) => `Macro view sobre $${idea.ticker}: ${idea.thesis.slice(0,155)}... Horizonte ${idea.horizon}. Entrada: $${idea.entry} → Target: $${idea.target}`,
+  value:       (idea) => `$${idea.ticker} cotiza con descuento. ${idea.thesis.slice(0,155)}... A $${idea.entry} es una ganga. Target a 12 meses: $${idea.target} 💎`,
+  cripto:      (idea) => `${idea.icon} $${idea.ticker} — señal ${idea.signal}. ${idea.thesis.slice(0,150)}... DCA desde $${idea.entry}, target $${idea.target}. DYOR 🔥`,
+  opciones:    (idea) => `Posición en $${idea.ticker}: ${idea.thesis.slice(0,150)}... Entry $${idea.entry}, gestión de riesgo en $${idea.stop}. R/R favorable 📐`,
+  quant:       (idea) => `Modelo quant señala $${idea.ticker} (${idea.signal}). ${idea.thesis.slice(0,145)}... Backtest: entrada $${idea.entry} → $${idea.target}. Confianza 87%.`,
+  swing:       (idea) => `Swing setup en $${idea.ticker} 📊 ${idea.thesis.slice(0,150)}... Espero 2-6 semanas. Compra: $${idea.entry} | TP: $${idea.target} | SL: $${idea.stop}`,
+  growth:      (idea) => `Long $${idea.ticker} por ${idea.horizon}. ${idea.thesis.slice(0,155)}... Acumulando desde $${idea.entry}, hold hasta $${idea.target}. Alta convicción 🌟`,
+};
+
+// ── POSTS CASUALES de traders ficticios (reacciones de mercado) ──────────────
+const CASUAL_BOT_POSTS = [
+  {id:"c1", user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#7C3AED", badge:"Pro Trader",    ticker:"BTC",  sentiment:"bull", text:"$BTC rompiendo resistencia clave 💥 Quién más está en el trade? Yo con posición desde $95k, esto va pa $120k 📈", likes:143, comments:31, reposts:22, time:"hace 2h", tags:["BTC","Crypto"]},
+  {id:"c2", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analista",      ticker:"NVDA", sentiment:"bull", text:"$NVDA acaba de confirmar soporte en $128. Setup de libro de texto. Los que entraron ayer ya están up +4% 🙌 Next stop $145", likes:98,  comments:19, reposts:14, time:"hace 4h", tags:["NVDA","IA"]},
+  {id:"c3", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"ETH",  sentiment:"bull", text:"$ETH rompió $2,800 con volumen 🔥 La narrativa de ETF de ETH está volviendo. Acumulando en cada pullback. Target corto: $3,200 🎯", likes:211, comments:44, reposts:38, time:"hace 1h", tags:["ETH","Crypto","ETF"]},
+  {id:"c4", user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"SPY",  sentiment:"bull", text:"$SPY cerrando cerca de máximos históricos. El mercado ignora todos los ruidos macro. Bulls in control 🐂 No peleen contra la tendencia.", likes:77,  comments:12, reposts:9,  time:"hace 6h", tags:["SPY","Mercado"]},
+  {id:"c5", user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"TSLA", sentiment:"bear",  text:"$TSLA bajando a pesar del rebote del mercado. Divergencia bajista. Cuidado con las longs acá, el setup no convence 📉 Prefiero esperar confirmación.", likes:54,  comments:23, reposts:7,  time:"hace 3h", tags:["TSLA","Análisis"]},
+  {id:"c6", user:"AndresTradePro",   avatar:"🎯",   avatarColor:"#EF4444", badge:"Opciones",      ticker:"META", sentiment:"bull", text:"Compré calls de $META para junio. La compañía está imprimiendo dinero con IA en los anuncios. Si $600 aguanta, este trade va a dar 3x 🚀", likes:167, comments:35, reposts:28, time:"hace 5h", tags:["META","Opciones"]},
+  {id:"c7", user:"ValentinaFinance", avatar:"💎",   avatarColor:"#06B6D4", badge:"Value Investor", ticker:"AMZN", sentiment:"bull", text:"$AMZN sigue siendo mi top pick de largo plazo. AWS + publicidad + IA = máquina de generar cash. A estos precios es oportunidad clara 💎", likes:89,  comments:17, reposts:11, time:"hace 8h", tags:["AMZN","Cloud"]},
+  {id:"c8", user:"IsabelAnalysis",   avatar:"📊",   avatarColor:"#8B5CF6", badge:"Quant",         ticker:"PLTR", sentiment:"bull", text:"Modelo cuantitativo señala $PLTR con probabilidad 88% de upside en 30 días. Contratos gobierno USA aceleran. Alguien más tiene posición? 📊", likes:134, comments:28, reposts:19, time:"hace 2h", tags:["PLTR","Gobierno"]},
+  {id:"c9", user:"RicardoInvest",    avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"SOL",  sentiment:"bull", text:"$SOL completó corrección hasta soporte. Zona de compra perfecta entre $155-$160. Objetivo del swing: $195 en 3-4 semanas ⚡ Risk reward de 4:1", likes:201, comments:42, reposts:31, time:"hace 1h", tags:["SOL","Crypto"]},
+  {id:"c10",user:"NataliaTrader",    avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"COIN", sentiment:"bull", text:"$COIN es el mejor proxy del bull market crypto que existe. Cada vez que BTC sube, COIN sube el doble. Y estamos apenas empezando 🌟 All in.", likes:118, comments:24, reposts:16, time:"hace 7h", tags:["COIN","Crypto"]},
+];
+
 // ── BOT POSTS de NexoTrade Research (después de IDEAS_DATA para poder usarla) ─
-const BOT_POSTS = IDEAS_DATA.slice(0,10).map(idea=>({
-  id:`bot-${idea.id}`,
-  user:"NexoTrade Research",
-  avatar:"🤖",
-  avatarColor:"#00A8FF",
-  ticker:idea.ticker,
-  sentiment:idea.signal==="COMPRA"?"bull":idea.signal==="VENTA"?"bear":"neutral",
-  text:`${idea.icon} $${idea.ticker} — ${idea.signal}: ${idea.thesis.slice(0,200)}... Entrada: $${idea.entry} · Target: $${idea.target} · Stop: $${idea.stop}`,
-  likes:80+(idea.id*17)%120,
-  comments:12+(idea.id*5)%30,
-  reposts:8+(idea.id*3)%25,
-  time:idea.published,
-  tags:idea.tags,
-}));
+const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
+  const persona = BOT_PERSONAS[i % BOT_PERSONAS.length];
+  const textFn  = BOT_TEXT_TEMPLATES[persona.style];
+  return {
+    id:`bot-${idea.id}`,
+    user: persona.user,
+    avatar: persona.avatar,
+    avatarColor: persona.avatarColor,
+    badge: persona.badge,
+    ticker: idea.ticker,
+    sentiment: idea.signal==="COMPRA"?"bull":idea.signal==="VENTA"?"bear":"neutral",
+    text: textFn(idea),
+    likes:  60 + (idea.id*19) % 140,
+    comments: 8 + (idea.id*7) % 35,
+    reposts:  4 + (idea.id*3) % 22,
+    time: idea.published,
+    tags: idea.tags,
+  };
+});
 
 function BotPostCard({post,onTickerClick,lang}){
   const isEN = lang==="en";
@@ -11194,13 +11241,14 @@ function BotPostCard({post,onTickerClick,lang}){
       onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
       onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
-        <div style={{width:40,height:40,borderRadius:12,background:"rgba(0,168,255,0.12)",border:"1.5px solid rgba(0,168,255,0.28)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
-          🤖
+        {/* Avatar del persona */}
+        <div style={{width:40,height:40,borderRadius:12,background:`${post.avatarColor}18`,border:`1.5px solid ${post.avatarColor}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+          {post.avatar}
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,flexWrap:"wrap"}}>
-            <span style={{fontWeight:800,color:C.text,fontSize:14}}>NexoTrade Research</span>
-            <span style={{background:"rgba(0,168,255,0.1)",color:"#00A8FF",borderRadius:20,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ AI</span>
+            <span style={{fontWeight:800,color:C.text,fontSize:14}}>@{post.user}</span>
+            {post.badge&&<span style={{background:`${post.avatarColor}15`,color:post.avatarColor,borderRadius:20,padding:"1px 7px",fontSize:10,fontWeight:700}}>{post.badge}</span>}
             <span style={{background:sentBg,color:sentColor,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>{sentLabel}</span>
             <span onClick={()=>onTickerClick&&onTickerClick(post.ticker)}
               style={{background:C.accentDim,color:C.accent,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
@@ -11220,9 +11268,6 @@ function BotPostCard({post,onTickerClick,lang}){
             <span style={{fontSize:12,color:C.muted}}>❤️ {post.likes}</span>
             <span style={{fontSize:12,color:C.muted}}>💬 {post.comments}</span>
             <span style={{fontSize:12,color:C.muted}}>🔁 {post.reposts}</span>
-            <span style={{marginLeft:"auto",fontSize:10,color:C.accent,background:C.accentDim,borderRadius:20,padding:"2px 9px",fontWeight:600}}>
-              {isEN?"AI Research Pick":"Pick IA"}
-            </span>
           </div>
         </div>
       </div>
@@ -16184,9 +16229,13 @@ export default function App(){
             {(i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
             )}
-            {/* Bot Research post cada 7 posts */}
+            {/* Bot post de análisis cada 7 posts */}
             {(i+1)%7===0 && BOT_POSTS[(Math.floor(i/7))%BOT_POSTS.length] && (
               <BotPostCard post={BOT_POSTS[(Math.floor(i/7))%BOT_POSTS.length]} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
+            )}
+            {/* Post casual de trader cada 11 posts */}
+            {(i+1)%11===0 && CASUAL_BOT_POSTS[(Math.floor(i/11))%CASUAL_BOT_POSTS.length] && (
+              <BotPostCard post={CASUAL_BOT_POSTS[(Math.floor(i/11))%CASUAL_BOT_POSTS.length]} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
             )}
             {/* AdSense banner cada 6 posts */}
             {(i+1)%6===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
