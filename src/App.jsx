@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 19:40:03
+// NEXO TRADE — build: 2026-05-30 19:42:47
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -15770,20 +15770,25 @@ export default function App(){
   }, []);
 
   // ── SUPABASE: Auth listener & session restore ──────────────────────────────
-  const buildUserFromProfile = (supabaseUser, profile) => ({
-    id: supabaseUser.id,
-    email: supabaseUser.email || "",
-    name: profile?.username || supabaseUser.email?.split("@")[0] || "Usuario",
-    emoji: profile?.avatar_emoji || "🦅",
-    avatarColor: profile?.avatar_color || C.accent,
-    followers: profile?.followers_count || 0,
-    following: profile?.following_count || 0,
-    posts: profile?.posts_count || 0,
-    points: profile?.points || 100,
-    badges: profile?.badges || ["early"],
-    bio: profile?.bio || "",
-    is_premium: profile?.is_premium || false,
-  });
+  const buildUserFromProfile = (supabaseUser, profile) => {
+    const uname = profile?.username || supabaseUser.user_metadata?.username || supabaseUser.email?.split("@")[0] || "Trader";
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || "",
+      name: uname,
+      username: uname,           // ← siempre presente para evitar caída al email
+      user_name: uname,
+      emoji: profile?.avatar_emoji || supabaseUser.user_metadata?.avatar_emoji || "🦅",
+      avatarColor: profile?.avatar_color || supabaseUser.user_metadata?.avatar_color || C.accent,
+      followers: profile?.followers_count || 0,
+      following: profile?.following_count || 0,
+      posts: profile?.posts_count || 0,
+      points: profile?.points || 100,
+      badges: profile?.badges || ["early"],
+      bio: profile?.bio || "",
+      is_premium: profile?.is_premium || false,
+    };
+  };
 
   useEffect(()=>{
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event, session)=>{
