@@ -4,21 +4,55 @@
 // Fuente 2: Capitol Trades scraping (datos STOCK Act, dominio público)
 // Fuente 3: datos curados 2025-2026
 
+// ── Helper: parse concatenated names like "David TaylorRepublicanHouseOH"
+function parseRawName(raw) {
+  // Pattern: Name + Party (Republican|Democrat|Independent) + Chamber (House|Senate) + State (2 letters)
+  const rx = /(Republican|Democrat|Democratic|Independent)(House|Senate)([A-Z]{2})$/;
+  const m = raw.match(rx);
+  if (m) {
+    const name = raw.slice(0, raw.length - m[0].length).trim();
+    const party = m[1].startsWith("R") ? "R" : m[1] === "Independent" ? "I" : "D";
+    return { name, party, house: m[2], state: m[3] };
+  }
+  // Fallback: try splitting on Jr/Sr suffixes or just return raw
+  return { name: raw, party: "", house: "House", state: "" };
+}
+
 // ── Helper: map Capitol Trades JSON format → our format ──────────────
 function mapCapitolTrade(t) {
   const politician = t.politician || t.member || {};
   const asset = t.asset || t.issuer || {};
   const txType = (t.type || t.transactionType || t.transaction || "").toLowerCase();
+
+  // Get raw name and try to parse if concatenated
+  let rawName = politician.name || (politician.firstName ? politician.firstName + " " + politician.lastName : null) || t.name || "Unknown";
+  let parsedParty = (politician.party || t.party || "").slice(0, 1).toUpperCase();
+  let parsedHouse = politician.chamber || politician.house || t.chamber || "House";
+  let parsedState = politician.state || t.state || "";
+
+  // If name looks concatenated (has Republican/Democrat/House/Senate appended), parse it
+  if (/Republican|Democrat|Independent/.test(rawName) && !parsedParty && !parsedState) {
+    const parsed = parseRawName(rawName);
+    rawName = parsed.name;
+    if (!parsedParty) parsedParty = parsed.party;
+    if (!parsedHouse || parsedHouse === "House") parsedHouse = parsed.house;
+    if (!parsedState) parsedState = parsed.state;
+  } else if (/Republican|Democrat|Independent/.test(rawName)) {
+    // Even if we have other fields, fix the name
+    const parsed = parseRawName(rawName);
+    rawName = parsed.name || rawName;
+  }
+
   return {
-    name:   politician.name || (politician.firstName ? politician.firstName + " " + politician.lastName : null) || t.name || "Unknown",
-    party:  (politician.party || t.party || "").slice(0, 1).toUpperCase(),
-    state:  politician.state || t.state || "",
+    name:   rawName,
+    party:  parsedParty,
+    state:  parsedState,
     ticker: asset.ticker || asset.symbol || t.ticker || "",
     type:   txType.includes("sale") || txType.includes("sell") ? "sell" : "buy",
     amount: t.range || t.amount || t.size || "$1K–$15K",
     date:   t.filedDate || t.transactionDate || t.date || "",
     asset:  asset.name || asset.description || t.assetName || "",
-    house:  politician.chamber || politician.house || t.chamber || "House",
+    house:  parsedHouse,
   };
 }
 
