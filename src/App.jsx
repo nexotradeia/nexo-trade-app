@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 18:18:24
+// NEXO TRADE — build: 2026-05-30 18:28:38
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -12734,7 +12734,38 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
   );
 }
 
-
+// ── CRYPTO HUB PAGE (page 2) — Performance + Opciones unificadas ──────────────
+function CryptoHubPage({ isPremium, onNeedPremium, lang="es", defaultSection="performance" }) {
+  const isEN = lang==="en";
+  const [section, setSection] = useState(defaultSection);
+  return (
+    <div style={{background:"#090e1a",minHeight:"100vh",fontFamily:"system-ui,-apple-system,sans-serif"}}>
+      {/* ── TOP SECTION SWITCHER ── */}
+      <div style={{background:"#0a0f1e",borderBottom:"2px solid rgba(0,168,255,0.18)",padding:"0 24px",display:"flex",gap:0}}>
+        {[
+          {id:"performance", label:"₿ " + (isEN?"Crypto Performance":"Performance Crypto"), icon:"📊"},
+          {id:"options",     label:"📈 " + (isEN?"Crypto Options":"Opciones Crypto"),        icon:"⚙️"},
+        ].map(s=>(
+          <button key={s.id} onClick={()=>setSection(s.id)}
+            style={{background:"none",border:"none",
+              borderBottom:`3px solid ${section===s.id?"#00A8FF":"transparent"}`,
+              color:section===s.id?"#00A8FF":"#64748b",
+              padding:"14px 28px",fontSize:14,fontWeight:section===s.id?800:500,
+              cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",letterSpacing:0.2}}>
+            {s.label}
+          </button>
+        ))}
+        <div style={{marginLeft:"auto",display:"flex",alignItems:"center",padding:"0 4px"}}>
+          <span style={{fontSize:10,color:"#334155",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase"}}>
+            {isEN?"Data: CoinGecko · Deribit · alternative.me":"Datos: CoinGecko · Deribit · alternative.me"}
+          </span>
+        </div>
+      </div>
+      {section==="performance" && <CryptoPerformancePage lang={lang}/>}
+      {section==="options"     && <CryptoOptionsPage isPremium={isPremium} onNeedPremium={onNeedPremium} lang={lang}/>}
+    </div>
+  );
+}
 
 const NAV_ITEMS = (t, isEN=false) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},{label:t.crypto,idx:2},
@@ -12749,7 +12780,6 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
-  {label:isEN?"📊 Crypto Options":"📊 Opciones Crypto",idx:41,vip:true},
   {label:isEN?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
@@ -15548,7 +15578,7 @@ export default function App(){
   const renderPage = () => {
     if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} onRepost={handleRepost}/>;
     if(page===1) return <TopsPage posts={posts}/>;
-    if(page===2) return <CryptoPerformancePage lang={lang}/>;
+    if(page===2) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="performance"/>;
     if(page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
         <div style={{fontSize:48,marginBottom:16}}>🚧</div>
@@ -15580,7 +15610,7 @@ export default function App(){
     if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
-    if(page===41) return <CryptoOptionsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
