@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 20:59:09
+// NEXO TRADE — build: 2026-05-29 21:07:43
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -1475,7 +1475,7 @@ function MercadosEnVivoWidget(){
           );
         })}
         <div style={{marginTop:12,padding:"8px",background:"rgba(0,168,255,0.05)",borderRadius:8,textAlign:"center"}}>
-          <a href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer"
+          <a href="https://www.tradingview.com/pricing/?aff_id=167149&aff_sub=nexotrade&source=nexotrade" target="_blank" rel="noopener noreferrer"
             style={{color:"#00A8FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>
             📊 Full charts on TradingView →
           </a>
@@ -3859,7 +3859,7 @@ function SidebarTickerWidget(){
         </a>
       ))}
       <div style={{padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <a href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer"
+        <a href="https://www.tradingview.com/pricing/?aff_id=167149&aff_sub=nexotrade&source=nexotrade" target="_blank" rel="noopener noreferrer"
           style={{color:"#00A8FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>Ver gráficos →</a>
         {lastUpdate&&<span style={{color:"#334155",fontSize:9}}>
           {lastUpdate.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})}
