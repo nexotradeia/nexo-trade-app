@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 18:02:21
+// NEXO TRADE — build: 2026-05-30 18:18:24
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5447,6 +5447,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
   const navItems = [
     {icon:"🔥", label:"Feed",                                        idx:0},
     {icon:"📊", label:isEN?"Top Traders":"Tops Traders",             idx:1},
+    {icon:"₿",  label:isEN?"₿ Crypto":"₿ Cripto",                   idx:2},
     {icon:"📈", label:isEN?"Markets":"Mercados",                     idx:3},
     {icon:"🎮", label:isEN?"Paper Trading":"Paper Trading",             idx:9, vip:true, ai:true},
     {icon:"✦",  label:isEN?"VIP Premium":"Premium VIP",              idx:8, premium:true},
@@ -12736,7 +12737,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
 
 
 const NAV_ITEMS = (t, isEN=false) => [
-  {label:t.feed,idx:0},{label:t.tops,idx:1},
+  {label:t.feed,idx:0},{label:t.tops,idx:1},{label:t.crypto,idx:2},
   {label:t.acciones,idx:3},
   {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
   {label:"🎓 Webinars",idx:11},
