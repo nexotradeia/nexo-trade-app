@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 18:28:38
+// NEXO TRADE — build: 2026-05-30 18:33:52
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -138,7 +138,7 @@ const LANG_META = [
 const LANGS = {
   es: {
     feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
-    macro:"🌍 Macro", noticias:"📰 Noticias", earnings:"📅 Earnings", trending:"🔥 Trending",
+    macro:"🌍 Macro", noticias:"📰 Noticias", earnings:"📅 Earnings", trending:"🚀 Movers 24H",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrarse →",
     publish:"Publicar →", bullish:"▲ ALCISTA", bearish:"▼ BAJISTA",
     followers:"Seguidores", following:"Siguiendo", points:"Puntos", posts:"Posts",
@@ -162,7 +162,7 @@ const LANGS = {
   },
   en: {
     feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
-    macro:"🌍 Macro", noticias:"📰 News", earnings:"📅 Earnings", trending:"🔥 Trending",
+    macro:"🌍 Macro", noticias:"📰 News", earnings:"📅 Earnings", trending:"🚀 Movers 24H",
     search:"Search ticker... AAPL, BTC, NVDA", login:"Sign in", register:"Sign up →",
     publish:"Post →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
     followers:"Followers", following:"Following", points:"Points", posts:"Posts",
@@ -5464,7 +5464,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🏆", label:isEN?"Leaderboard":"Ranking",                  idx:40},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
-    {icon:"⚡", label:"Trending",                                    idx:7},
+    {icon:"🚀", label:"Movers 24H",                                  idx:7},
     {icon:"🎓", label:"Webinars",                                    idx:11},
     {icon:"📚", label:isEN?"Academy":"Academia",                     idx:12},
   ];
@@ -16490,8 +16490,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -16508,8 +16508,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===2||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}>
+        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
