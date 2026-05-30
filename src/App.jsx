@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 18:33:52
+// NEXO TRADE — build: 2026-05-30 18:59:13
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4100,40 +4100,70 @@ function SidebarTickerWidget(){
 }
 
 function EarningsPage({lang}){
-  const [liveEvent,   setLiveEvent]  = useState(null);
-  const [selected,    setSelected]   = useState(null);   // ticker seleccionado para el panel detalle
-  const [voted,       setVoted]      = useState({});
-  const [votes,       setVotes]      = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker, e.bull_pct])));
-  const [earnings,    setEarnings]   = useState(MOCK_EARNINGS);
-  const [loadingEar,  setLoadingEar] = useState(true);
+  const isEN = lang==="en";
+  const [liveEvent,    setLiveEvent]    = useState(null);
+  const [selected,     setSelected]     = useState(null);
+  const [voted,        setVoted]        = useState({});
+  const [votes,        setVotes]        = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker,e.bull_pct])));
+  const [earnings,     setEarnings]     = useState(MOCK_EARNINGS);
+  const [loadingEar,   setLoadingEar]   = useState(true);
+  const [viewMode,     setViewMode]     = useState("month"); // "week" | "month"
+  const [companyNames, setCompanyNames] = useState({});
+  const [search,       setSearch]       = useState("");
+  const [refreshKey,   setRefreshKey]   = useState(0);
 
   useEffect(()=>{
-    const today=new Date();
-    const from=today.toISOString().slice(0,10);
-    const to=new Date(today.getTime()+14*24*60*60*1000).toISOString().slice(0,10);
+    setLoadingEar(true);
+    const today  = new Date();
+    const from   = today.toISOString().slice(0,10);
+    const days   = viewMode==="month" ? 31 : 14;
+    const to     = new Date(today.getTime()+days*24*60*60*1000).toISOString().slice(0,10);
+    const todayStr = from;
+
     fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_KEY}`)
       .then(r=>r.json())
-      .then(data=>{
-        if(!data?.earningsCalendar?.length){setLoadingEar(false);return;}
-        const todayOnly=new Date().toISOString().slice(0,10);
-        const interesting=data.earningsCalendar.filter(e=>(e.epsEstimate!=null||e.revenueEstimate!=null)&&e.date>=todayOnly).slice(0,10).map(e=>{
-          const mock=MOCK_EARNINGS.find(m=>m.ticker===e.symbol)||{};
-          const dateObj=new Date(e.date+"T12:00:00");
-          const todayStr=new Date().toISOString().slice(0,10);
-          const isToday=e.date===todayStr;
-          const dayLabel=isToday?"Hoy":dateObj.toLocaleDateString(lang==="en"?"en-US":"es-ES",{weekday:"short",day:"numeric",month:"short"});
-          const hora=e.hour==="bmo"?(lang==="en"?"Before open":"Antes apertura"):(lang==="en"?"After close":"Tras cierre");
-          const revEst=e.revenueEstimate?(e.revenueEstimate>=1e9?`$${(e.revenueEstimate/1e9).toFixed(1)}B`:`$${(e.revenueEstimate/1e6).toFixed(0)}M`):mock.rev_est||"—";
-          const epsEst=e.epsEstimate!=null?`$${e.epsEstimate.toFixed(2)}`:mock.eps_est||"—";
-          return{ticker:e.symbol,nombre:mock.nombre||e.symbol,fecha:isToday?"Hoy":dayLabel,fechaEn:isToday?"Today":dayLabel,hora,eps_est:epsEst,rev_est:revEst,
-            sorpresa:e.epsActual!=null&&e.epsEstimate!=null?(e.epsActual>=e.epsEstimate?`+${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`:`${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`):mock.sorpresa||null,
-            bull_pct:mock.bull_pct||50,community_votes:mock.community_votes||0,live:mock.live||false,live_viewers:mock.live_viewers||0,live_title:mock.live_title||"Earnings Call",live_speaker:mock.live_speaker||""};
-        });
-        if(interesting.length>0){setEarnings(interesting);setVotes(Object.fromEntries(interesting.map(e=>[e.ticker,e.bull_pct])));}
+      .then(async data=>{
+        if(!data?.earningsCalendar?.length){ setLoadingEar(false); return; }
+        const all = data.earningsCalendar
+          .filter(e=>e.date>=todayStr)
+          .map(e=>{
+            const mock=MOCK_EARNINGS.find(m=>m.ticker===e.symbol)||{};
+            const dateObj=new Date(e.date+"T12:00:00");
+            const isToday=e.date===todayStr;
+            const dayLabel=isToday?(isEN?"Today":"Hoy"):dateObj.toLocaleDateString(isEN?"en-US":"es-ES",{weekday:"short",day:"numeric",month:"short"});
+            const hora=e.hour==="bmo"?(isEN?"Before open":"Antes apertura"):(isEN?"After close":"Tras cierre");
+            const revEst=e.revenueEstimate?(e.revenueEstimate>=1e9?`$${(e.revenueEstimate/1e9).toFixed(1)}B`:`$${(e.revenueEstimate/1e6).toFixed(0)}M`):mock.rev_est||"—";
+            const epsEst=e.epsEstimate!=null?`$${e.epsEstimate.toFixed(2)}`:mock.eps_est||"—";
+            return{
+              ticker:e.symbol, nombre:mock.nombre||e.symbol,
+              fecha:dayLabel, fechaEn:dayLabel, rawDate:e.date,
+              hora, eps_est:epsEst, rev_est:revEst,
+              sorpresa:e.epsActual!=null&&e.epsEstimate!=null?(e.epsActual>=e.epsEstimate?`+${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`:`${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`):mock.sorpresa||null,
+              bull_pct:mock.bull_pct||50, community_votes:mock.community_votes||0,
+              live:mock.live||false, live_viewers:mock.live_viewers||0,
+              live_title:mock.live_title||"Earnings Call", live_speaker:mock.live_speaker||"",
+              ir_url:mock.ir_url||null, yt_url:mock.yt_url||null, yt_embed:mock.yt_embed||null,
+              emoji:mock.emoji||"📊", sector:mock.sector||"",
+            };
+          });
+        if(all.length>0){
+          setEarnings(all);
+          setVotes(Object.fromEntries(all.map(e=>[e.ticker,e.bull_pct])));
+          // ── Fetch real company names for unknown tickers ──
+          const unknown=[...new Set(all.filter(e=>!MOCK_EARNINGS.find(m=>m.ticker===e.ticker)).map(e=>e.ticker))].slice(0,30);
+          if(unknown.length>0){
+            const results=await Promise.allSettled(
+              unknown.map(sym=>fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FINNHUB_KEY}`)
+                .then(r=>r.json()).then(d=>({sym,name:d.name||sym})).catch(()=>({sym,name:sym})))
+            );
+            const nm={};
+            results.forEach(r=>{if(r.status==="fulfilled"&&r.value.name!==r.value.sym)nm[r.value.sym]=r.value.name;});
+            setCompanyNames(nm);
+          }
+        }
       })
-      .catch(()=>{})
-      .finally(()=>setLoadingEar(false));
-  },[lang]);
+      .catch(()=>{}).finally(()=>setLoadingEar(false));
+  },[lang,viewMode,refreshKey]);
 
   const vote=(ticker,dir)=>{
     if(voted[ticker])return;
@@ -4141,193 +4171,235 @@ function EarningsPage({lang}){
     setVotes(v=>({...v,[ticker]:dir==="bull"?Math.min(99,v[ticker]+1):Math.max(1,v[ticker]-1)}));
   };
 
-  // Group by date
-  const dates=[...new Set(earnings.map(e=>lang==="en"?e.fechaEn:e.fecha))];
-  const sel=selected?earnings.find(e=>e.ticker===selected):null;
+  const allEarnings = earnings.map(e=>({...e,nombre:companyNames[e.ticker]||e.nombre}));
+  const filtered    = search
+    ? allEarnings.filter(e=>e.ticker.toLowerCase().includes(search.toLowerCase())||e.nombre.toLowerCase().includes(search.toLowerCase()))
+    : allEarnings;
+  const byDate      = filtered.reduce((acc,e)=>{(acc[e.rawDate]=acc[e.rawDate]||[]).push(e);return acc;},{});
+  const sortedDates = Object.keys(byDate).sort();
+  const sel         = selected ? allEarnings.find(e=>e.ticker===selected) : null;
 
   return(
-    <div style={{display:"grid",gridTemplateColumns:sel&&window.innerWidth>=640?"1fr 340px":"1fr",gap:18,transition:"all 0.2s"}}>
+    <div style={{background:"#090e1a",minHeight:"100vh",fontFamily:"system-ui,-apple-system,sans-serif"}}>
 
-      {/* LEFT — Stock list */}
-      <div>
-        {/* Header */}
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-          <h2 style={{margin:0,color:"#F1F5F9",fontSize:17,fontWeight:800,letterSpacing:-0.3}}>📅 Earnings Calendar</h2>
-          <span style={{background:"rgba(245,158,11,0.12)",color:C.gold,border:"1px solid rgba(245,158,11,0.2)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:700}}>ESTA SEMANA</span>
-          {loadingEar
-            ?<span style={{marginLeft:"auto",color:"#334155",fontSize:11,display:"flex",alignItems:"center",gap:5}}>⏳ Cargando...</span>
-            :<span style={{marginLeft:"auto",color:C.bull,fontSize:11,fontWeight:700}}>🟢 En vivo</span>}
+      {/* ── HEADER ── */}
+      <div style={{background:"linear-gradient(180deg,#0d1627,#090e1a)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"14px 24px"}}>
+        <div style={{maxWidth:1600,margin:"0 auto",display:"flex",alignItems:"center",flexWrap:"wrap",gap:12}}>
+          <div>
+            <div style={{fontSize:18,fontWeight:900,color:"#f1f5f9",letterSpacing:-0.5}}>📅 Earnings Calendar</div>
+            <div style={{fontSize:10,color:"#475569",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase",marginTop:1}}>
+              {isEN?"Real-time · Powered by Finnhub":"Tiempo real · Powered by Finnhub"}
+            </div>
+          </div>
+
+          {/* Week / Month toggle */}
+          <div style={{display:"flex",gap:2,background:"rgba(255,255,255,0.05)",borderRadius:9,padding:3}}>
+            {[["week",isEN?"2 Weeks":"2 Semanas"],["month",isEN?"Full Month":"Mes Completo"]].map(([id,lbl])=>(
+              <button key={id} onClick={()=>setViewMode(id)}
+                style={{background:viewMode===id?"#00A8FF":"transparent",color:viewMode===id?"#fff":"#64748b",border:"none",borderRadius:6,padding:"5px 14px",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
+                {lbl}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <input value={search} onChange={e=>setSearch(e.target.value)}
+            placeholder={isEN?"Search AAPL, Tesla...":"Buscar AAPL, Tesla..."}
+            style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#f1f5f9",padding:"6px 12px",fontSize:12,outline:"none",width:200}}/>
+
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
+            {loadingEar
+              ?<span style={{color:"#475569",fontSize:11}}>⏳ {isEN?"Loading...":"Cargando..."}</span>
+              :<span style={{color:"#22c55e",fontSize:11,fontWeight:700}}>🟢 {isEN?"Live":"En vivo"} · {filtered.length} {isEN?"companies":"empresas"}</span>}
+            <button onClick={()=>setRefreshKey(k=>k+1)} disabled={loadingEar}
+              style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,color:"#00A8FF",padding:"6px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              {loadingEar?"⏳":"🔄"} {isEN?"Refresh":"Actualizar"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── BODY ── */}
+      <div style={{maxWidth:1600,margin:"0 auto",padding:"16px 24px",display:"grid",gridTemplateColumns:sel&&window.innerWidth>=768?"1fr 360px":"1fr",gap:20,alignItems:"start"}}>
+
+        {/* LEFT — list */}
+        <div>
+          {/* Next call banner */}
+          {(()=>{
+            const next=allEarnings.find(e=>!e.live);
+            if(!next) return null;
+            return(
+              <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03))",border:"1px solid rgba(245,158,11,0.2)",borderRadius:12,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+                <div style={{fontSize:28}}>{next.emoji||"📅"}</div>
+                <div style={{flex:1}}>
+                  <div style={{color:"#f59e0b",fontSize:11,fontWeight:700,letterSpacing:1,marginBottom:2}}>{isEN?"NEXT EARNINGS CALL":"PRÓXIMA EARNINGS CALL"}</div>
+                  <div style={{color:"#e2e8f0",fontWeight:800,fontSize:14}}>{next.ticker} — {next.nombre}</div>
+                  <div style={{color:"#64748b",fontSize:12}}>{next.live_speaker} · {next.fecha} · {next.hora}</div>
+                </div>
+                <div style={{display:"flex",gap:8,flexShrink:0}}>
+                  {next.ir_url&&<button onClick={e=>{e.stopPropagation();window.open(next.ir_url,"_blank","noopener,noreferrer");}}
+                    style={{background:"rgba(245,158,11,0.15)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 14px",color:"#f59e0b",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+                    🏢 IR Page →
+                  </button>}
+                  {next.yt_url&&<button onClick={e=>{e.stopPropagation();window.open(next.yt_url,"_blank","noopener,noreferrer");}}
+                    style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"7px 14px",color:"#ef4444",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+                    ▶ YouTube →
+                  </button>}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Date groups */}
+          {sortedDates.map(rawDate=>{
+            const group=byDate[rawDate];
+            const dateLabel=group[0]?.fecha||rawDate;
+            return(
+              <div key={rawDate} style={{marginBottom:16}}>
+                <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:8,paddingLeft:2,textTransform:"uppercase",display:"flex",alignItems:"center",gap:8}}>
+                  {dateLabel}
+                  <span style={{fontSize:10,color:"#334155",fontWeight:500,textTransform:"none",letterSpacing:0}}>
+                    — {group.length} {isEN?"companies":"empresas"}
+                  </span>
+                </div>
+                {group.map(e=>{
+                  const bull=votes[e.ticker]??50;
+                  const isToday=e.rawDate===new Date().toISOString().slice(0,10);
+                  const isSel=selected===e.ticker;
+                  return(
+                    <div key={e.ticker}
+                      onClick={()=>setSelected(isSel?null:e.ticker)}
+                      style={{
+                        display:"flex",alignItems:"center",gap:10,
+                        background:isSel?"rgba(0,229,143,0.06)":isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)",
+                        border:`1px solid ${isSel?"rgba(0,229,143,0.25)":isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)"}`,
+                        borderRadius:11,padding:"10px 14px",marginBottom:5,cursor:"pointer",transition:"all 0.15s",
+                        boxShadow:isSel?"0 0 20px rgba(0,229,143,0.1)":"none"
+                      }}
+                      onMouseEnter={e2=>{if(!isSel){e2.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e2.currentTarget.style.background="rgba(14,22,40,0.9)";}}}
+                      onMouseLeave={e2=>{if(!isSel){e2.currentTarget.style.borderColor=isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)";e2.currentTarget.style.background=isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)";}}}
+                    >
+                      <span style={{fontSize:18,flexShrink:0}}>{e.emoji||"📊"}</span>
+                      <span style={{fontFamily:"monospace",fontSize:13,fontWeight:800,color:isToday?C.gold:C.accent,minWidth:52,letterSpacing:0.5}}>{e.ticker}</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:13,fontWeight:600,color:"#CBD5E1",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
+                        {e.sector&&<div style={{fontSize:10,color:"#475569"}}>{e.sector}</div>}
+                      </div>
+                      <span style={{fontSize:11,color:"#475569",whiteSpace:"nowrap",flexShrink:0}}>{e.hora}</span>
+                      {e.eps_est!=="—"&&<div style={{fontSize:10,color:"#00A8FF",background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap",flexShrink:0,fontFamily:"monospace"}}>EPS {e.eps_est}</div>}
+                      {e.rev_est!=="—"&&<div style={{fontSize:10,color:"#94a3b8",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap",flexShrink:0,fontFamily:"monospace"}}>{e.rev_est}</div>}
+                      {e.ir_url&&<a href={e.ir_url} target="_blank" rel="noopener noreferrer"
+                        onClick={ev=>ev.stopPropagation()}
+                        style={{background:"rgba(255,255,255,0.04)",border:"1px solid #1e293b",borderRadius:7,padding:"3px 8px",fontSize:10,fontWeight:600,color:"#64748b",textDecoration:"none",whiteSpace:"nowrap",flexShrink:0}}>
+                        🏢 IR
+                      </a>}
+                      {e.live&&<span onClick={ev=>{ev.stopPropagation();setLiveEvent(e);}} style={{background:"#ef4444",borderRadius:12,padding:"3px 10px",fontSize:10,fontWeight:800,color:"#fff",whiteSpace:"nowrap",cursor:"pointer",boxShadow:"0 0 10px rgba(239,68,68,0.5)"}}>🔴 EN VIVO</span>}
+                      <div style={{display:"flex",gap:0,background:"rgba(255,255,255,0.04)",borderRadius:8,overflow:"hidden",border:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
+                        <span style={{fontSize:10,fontWeight:800,color:C.bull,padding:"3px 7px",background:"rgba(0,229,143,0.08)"}}>{bull}%</span>
+                        <span style={{fontSize:10,fontWeight:800,color:C.bear,padding:"3px 7px",background:"rgba(255,77,106,0.08)"}}>{100-bull}%</span>
+                      </div>
+                      <span style={{color:"#334155",fontSize:14,transition:"transform 0.2s",transform:isSel?"rotate(90deg)":"none",flexShrink:0}}>›</span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+
+          {!loadingEar&&sortedDates.length===0&&(
+            <div style={{textAlign:"center",padding:"60px 20px",color:"#475569",fontSize:14}}>
+              {search?`${isEN?"No results for":"Sin resultados para"} "${search}"`:(isEN?"No earnings found for this period":"Sin earnings para este período")}
+            </div>
+          )}
+
+          {loadingEar&&(
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {Array(12).fill(0).map((_,i)=>(
+                <div key={i} style={{height:48,background:"rgba(255,255,255,0.04)",borderRadius:11,animation:"pulse 1.4s infinite"}}/>
+              ))}
+            </div>
+          )}
+
+          <div style={{marginTop:16,fontSize:10,color:"#334155",textAlign:"center"}}>
+            📡 {isEN?"Data: Finnhub API · Real-time earnings calendar · Not financial advice":"Datos: Finnhub API · Calendario de earnings en tiempo real · No es consejo financiero"}
+          </div>
         </div>
 
-        {/* ── PRÓXIMA CALL COUNTDOWN ── */}
-        {(()=>{
-          const next = earnings.find(e=>!e.live);
-          if(!next) return null;
+        {/* RIGHT — Detail panel */}
+        {sel&&(()=>{
+          const bull=votes[sel.ticker]??50;
+          const bear=100-bull;
+          const myVote=voted[sel.ticker];
+          const isToday=sel.rawDate===new Date().toISOString().slice(0,10);
           return(
-            <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03))",border:"1px solid rgba(245,158,11,0.2)",borderRadius:12,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
-              <div style={{fontSize:28}}>{next.emoji||"📅"}</div>
-              <div style={{flex:1}}>
-                <div style={{color:"#f59e0b",fontSize:11,fontWeight:700,letterSpacing:1,marginBottom:2}}>PRÓXIMA EARNINGS CALL</div>
-                <div style={{color:"#e2e8f0",fontWeight:800,fontSize:14}}>{next.ticker} — {next.nombre}</div>
-                <div style={{color:"#64748b",fontSize:12}}>{next.live_speaker} · {next.fecha} · {next.hora}</div>
-              </div>
-              <div style={{display:"flex",gap:8,flexShrink:0}}>
-                <button onClick={e=>{e.stopPropagation();window.open(next.ir_url,"_blank","noopener,noreferrer");}}
-                  style={{background:"rgba(245,158,11,0.15)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 14px",color:"#f59e0b",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap",cursor:"pointer",fontFamily:"inherit"}}>
-                  🏢 IR Page →
-                </button>
-                <button onClick={e=>{e.stopPropagation();window.open(next.yt_url,"_blank","noopener,noreferrer");}}
-                  style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"7px 14px",color:"#ef4444",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap",cursor:"pointer",fontFamily:"inherit"}}>
-                  ▶ YouTube →
-                </button>
+            <div style={{position:"sticky",top:88}}>
+              <div style={{background:"rgba(14,22,40,0.97)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:16,padding:"20px",backdropFilter:"blur(20px)",boxShadow:"0 20px 60px rgba(0,0,0,0.7)"}}>
+                <button onClick={()=>setSelected(null)} style={{float:"right",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,width:28,height:28,color:"#94a3b8",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>✕</button>
+                <div style={{marginBottom:16,paddingRight:36}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                    <span style={{fontFamily:"monospace",fontSize:22,fontWeight:900,color:isToday?C.gold:C.accent}}>${sel.ticker}</span>
+                    {isToday&&<span style={{background:"rgba(245,158,11,0.15)",color:C.gold,border:"1px solid rgba(245,158,11,0.3)",borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>🔥 HOY</span>}
+                  </div>
+                  <div style={{fontSize:14,color:"#94A3B8",fontWeight:600}}>{sel.nombre}</div>
+                  <div style={{fontSize:12,color:"#475569",marginTop:2}}>{sel.fecha} · {sel.hora}</div>
+                </div>
+
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
+                  {[["EPS Est.",sel.eps_est,C.accent],["Rev. Est.",sel.rev_est,C.blue],
+                    ...(sel.sorpresa?[["Sorpresa",sel.sorpresa,sel.sorpresa?.startsWith("+")?C.bull:C.bear]]:[])]
+                    .map(([label,val,col])=>(
+                    <div key={label} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:9,padding:"10px 12px"}}>
+                      <div style={{fontSize:10,color:"#475569",fontWeight:600,marginBottom:4,letterSpacing:0.3}}>{label}</div>
+                      <div style={{fontFamily:"monospace",fontSize:16,fontWeight:800,color:col}}>{val}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{marginBottom:16}}>
+                  <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8,textTransform:"uppercase"}}>{isEN?"Community Sentiment":"Sentimiento de la Comunidad"}</div>
+                  <div style={{textAlign:"center",marginBottom:8}}>
+                    <svg viewBox="0 0 120 65" style={{width:"100%",maxWidth:160,margin:"0 auto",display:"block"}}>
+                      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" strokeLinecap="round"/>
+                      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#gaugeGrad2)" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${bull*1.57} 157`}/>
+                      <defs>
+                        <linearGradient id="gaugeGrad2" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#ef4444"/>
+                          <stop offset="50%" stopColor="#F59E0B"/>
+                          <stop offset="100%" stopColor="#00E58F"/>
+                        </linearGradient>
+                      </defs>
+                      <text x="60" y="52" textAnchor="middle" fontSize="18" fontWeight="900" fill="#F1F5F9">{bull}%</text>
+                    </svg>
+                    <div style={{fontSize:12,color:"#64748B",marginTop:-4}}>
+                      <span style={{color:C.bull,fontWeight:700}}>👍 Bullish</span> / <span style={{color:C.bear,fontWeight:700}}>{bear}% Bearish 👎</span>
+                    </div>
+                    <div style={{fontSize:11,color:"#334155",marginTop:4}}>💬 {(sel.community_votes||0).toLocaleString()} {isEN?"votes":"votos"}</div>
+                  </div>
+                  <div style={{height:6,background:"rgba(255,255,255,0.05)",borderRadius:6,overflow:"hidden",display:"flex",marginBottom:12}}>
+                    <div style={{width:`${bull}%`,background:`linear-gradient(90deg,${C.bull},#00c4d4)`,transition:"width 0.5s"}}/>
+                    <div style={{flex:1,background:`linear-gradient(90deg,rgba(255,100,100,0.5),${C.bear})`}}/>
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button onClick={()=>vote(sel.ticker,"bull")} disabled={!!myVote}
+                      style={{flex:1,background:myVote==="bull"?"rgba(0,229,143,0.15)":"transparent",border:`1.5px solid ${myVote==="bull"?C.bull:"rgba(0,229,143,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bull"?C.bull:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
+                      {myVote==="bull"?"✓ Alcista":"▲ Soy Alcista"}
+                    </button>
+                    <button onClick={()=>vote(sel.ticker,"bear")} disabled={!!myVote}
+                      style={{flex:1,background:myVote==="bear"?"rgba(255,77,106,0.15)":"transparent",border:`1.5px solid ${myVote==="bear"?C.bear:"rgba(255,77,106,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bear"?C.bear:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
+                      {myVote==="bear"?"✓ Bajista":"▼ Soy Bajista"}
+                    </button>
+                  </div>
+                </div>
+
+                {sel.live&&<button onClick={()=>setLiveEvent(sel)} style={{width:"100%",background:"#ef4444",border:"none",borderRadius:9,padding:"10px",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 0 20px rgba(239,68,68,0.4)"}}>
+                  <span style={{width:8,height:8,borderRadius:"50%",background:"#fff",display:"inline-block"}}/>
+                  {sel.live_title} — EN VIVO
+                </button>}
               </div>
             </div>
           );
         })()}
-
-        {/* By-date groups */}
-        {dates.map(fecha=>{
-          const group=earnings.filter(e=>(lang==="en"?e.fechaEn:e.fecha)===fecha);
-          return(
-            <div key={fecha} style={{marginBottom:16}}>
-              {/* Date label */}
-              <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:8,paddingLeft:2,textTransform:"uppercase"}}>{fecha}</div>
-              {/* Stock rows */}
-              {group.map(e=>{
-                const bull=votes[e.ticker];
-                const isToday=e.fecha==="Hoy"||e.fechaEn==="Today";
-                const isSel=selected===e.ticker;
-                return(
-                  <div key={e.ticker}
-                    onClick={()=>setSelected(isSel?null:e.ticker)}
-                    style={{
-                      display:"flex",alignItems:"center",gap:10,
-                      background:isSel?"rgba(0,229,143,0.06)":isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)",
-                      border:`1px solid ${isSel?"rgba(0,229,143,0.25)":isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)"}`,
-                      borderRadius:11,padding:"11px 14px",marginBottom:6,cursor:"pointer",transition:"all 0.15s",
-                      boxShadow:isSel?"0 0 20px rgba(0,229,143,0.1)":"none"
-                    }}
-                    onMouseEnter={e2=>{if(!isSel){e2.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e2.currentTarget.style.background="rgba(14,22,40,0.9)";}}}
-                    onMouseLeave={e2=>{if(!isSel){e2.currentTarget.style.borderColor=isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)";e2.currentTarget.style.background=isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)";}}}
-                  >
-                    {/* Emoji + Ticker */}
-                    <span style={{fontSize:18,flexShrink:0}}>{e.emoji||"📊"}</span>
-                    <span style={{fontFamily:"monospace",fontSize:13,fontWeight:800,color:isToday?C.gold:C.accent,minWidth:46,letterSpacing:0.5}}>{e.ticker}</span>
-                    {/* Company + sector */}
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:600,color:"#CBD5E1",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
-                      {e.sector&&<div style={{fontSize:10,color:"#475569"}}>{e.sector}</div>}
-                    </div>
-                    {/* Time */}
-                    <span style={{fontSize:11,color:"#475569",whiteSpace:"nowrap"}}>{e.hora}</span>
-                    {/* IR link */}
-                    {e.ir_url&&<a href={e.ir_url} target="_blank" rel="noopener noreferrer"
-                      onClick={ev=>ev.stopPropagation()}
-                      style={{background:"rgba(255,255,255,0.04)",border:"1px solid #1e293b",borderRadius:7,padding:"3px 8px",fontSize:10,fontWeight:600,color:"#64748b",textDecoration:"none",whiteSpace:"nowrap",flexShrink:0}}>
-                      🏢 IR
-                    </a>}
-                    {/* Live badge */}
-                    {e.live&&<span onClick={ev=>{ev.stopPropagation();setLiveEvent(e);}} style={{background:"#ef4444",borderRadius:12,padding:"3px 10px",fontSize:10,fontWeight:800,color:"#fff",whiteSpace:"nowrap",cursor:"pointer",animation:"nexo-pulse 2s infinite",boxShadow:"0 0 10px rgba(239,68,68,0.5)"}}>🔴 EN VIVO</span>}
-                    {/* Bull % pill */}
-                    <div style={{display:"flex",gap:0,background:"rgba(255,255,255,0.04)",borderRadius:8,overflow:"hidden",border:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-                      <span style={{fontSize:10,fontWeight:800,color:C.bull,padding:"3px 7px",background:"rgba(0,229,143,0.08)"}}>{bull}%</span>
-                      <span style={{fontSize:10,fontWeight:800,color:C.bear,padding:"3px 7px",background:"rgba(255,77,106,0.08)"}}>{100-bull}%</span>
-                    </div>
-                    {/* Chevron */}
-                    <span style={{color:"#334155",fontSize:14,transition:"transform 0.2s",transform:isSel?"rotate(90deg)":"none"}}>›</span>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
       </div>
-
-      {/* RIGHT — Detail panel (appears on click) */}
-      {sel&&(()=>{
-        const bull=votes[sel.ticker];
-        const bear=100-bull;
-        const myVote=voted[sel.ticker];
-        const isToday=sel.fecha==="Hoy"||sel.fechaEn==="Today";
-        return(
-          <div style={{position:"sticky",top:88}}>
-            <div style={{background:"rgba(14,22,40,0.95)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,padding:"20px",backdropFilter:"blur(20px)",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
-              {/* Close */}
-              <button onClick={()=>setSelected(null)} style={{float:"right",background:"none",border:"none",color:"#475569",fontSize:18,cursor:"pointer",lineHeight:1}}>×</button>
-              {/* Ticker & name */}
-              <div style={{marginBottom:16}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                  <span style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:isToday?C.gold:C.accent}}>${sel.ticker}</span>
-                  {isToday&&<span style={{background:"rgba(245,158,11,0.15)",color:C.gold,border:"1px solid rgba(245,158,11,0.3)",borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>🔥 HOY</span>}
-                </div>
-                <div style={{fontSize:14,color:"#94A3B8",fontWeight:600}}>{sel.nombre}</div>
-                <div style={{fontSize:12,color:"#475569",marginTop:2}}>{lang==="en"?sel.fechaEn:sel.fecha} · {sel.hora}</div>
-              </div>
-
-              {/* EPS + Rev + Sorpresa */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-                {[["EPS Est.",sel.eps_est,C.accent],["Rev. Est.",sel.rev_est,C.blue],
-                  ...(sel.sorpresa?[["Sorpresa",sel.sorpresa,C.bull]]:[])]
-                  .map(([label,val,col])=>(
-                  <div key={label} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:9,padding:"10px 12px"}}>
-                    <div style={{fontSize:10,color:"#475569",fontWeight:600,marginBottom:4,letterSpacing:0.3}}>{label}</div>
-                    <div style={{fontFamily:"monospace",fontSize:16,fontWeight:800,color:col}}>{val}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Community sentiment — gauge style */}
-              <div style={{marginBottom:16}}>
-                <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8,textTransform:"uppercase"}}>Sentimiento de la Comunidad</div>
-                {/* Semicircle gauge */}
-                <div style={{textAlign:"center",position:"relative",marginBottom:8}}>
-                  <svg viewBox="0 0 120 65" style={{width:"100%",maxWidth:160,margin:"0 auto",display:"block"}}>
-                    {/* Background arc */}
-                    <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" strokeLinecap="round"/>
-                    {/* Bull arc */}
-                    <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#gaugeGrad)" strokeWidth="10" strokeLinecap="round"
-                      strokeDasharray={`${bull*1.57} 157`}/>
-                    <defs>
-                      <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#ef4444"/>
-                        <stop offset="50%" stopColor="#F59E0B"/>
-                        <stop offset="100%" stopColor="#00E58F"/>
-                      </linearGradient>
-                    </defs>
-                    <text x="60" y="52" textAnchor="middle" fontSize="18" fontWeight="900" fill="#F1F5F9">{bull}%</text>
-                  </svg>
-                  <div style={{fontSize:12,color:"#64748B",marginTop:-4}}>
-                    <span style={{color:C.bull,fontWeight:700}}>👍 Bullish</span> / <span style={{color:C.bear,fontWeight:700}}>{bear}% Bearish 👎</span>
-                  </div>
-                  <div style={{fontSize:11,color:"#334155",marginTop:4}}>💬 {sel.community_votes.toLocaleString()} votos</div>
-                </div>
-                {/* Bar */}
-                <div style={{height:6,background:"rgba(255,255,255,0.05)",borderRadius:6,overflow:"hidden",display:"flex",marginBottom:12}}>
-                  <div style={{width:`${bull}%`,background:`linear-gradient(90deg,${C.bull},#00c4d4)`,transition:"width 0.5s"}}/>
-                  <div style={{flex:1,background:`linear-gradient(90deg,rgba(255,100,100,0.5),${C.bear})`}}/>
-                </div>
-                {/* Vote buttons */}
-                <div style={{display:"flex",gap:8}}>
-                  <button onClick={()=>vote(sel.ticker,"bull")} disabled={!!myVote}
-                    style={{flex:1,background:myVote==="bull"?"rgba(0,229,143,0.15)":"transparent",border:`1.5px solid ${myVote==="bull"?C.bull:"rgba(0,229,143,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bull"?C.bull:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s",boxShadow:myVote==="bull"?"0 0 16px rgba(0,229,143,0.2)":"none"}}>
-                    {myVote==="bull"?"✓ Alcista":"▲ Soy Alcista"}
-                  </button>
-                  <button onClick={()=>vote(sel.ticker,"bear")} disabled={!!myVote}
-                    style={{flex:1,background:myVote==="bear"?"rgba(255,77,106,0.15)":"transparent",border:`1.5px solid ${myVote==="bear"?C.bear:"rgba(255,77,106,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bear"?C.bear:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s",boxShadow:myVote==="bear"?"0 0 16px rgba(255,77,106,0.2)":"none"}}>
-                    {myVote==="bear"?"✓ Bajista":"▼ Soy Bajista"}
-                  </button>
-                </div>
-              </div>
-
-              {/* Live button if applicable */}
-              {sel.live&&<button onClick={()=>setLiveEvent(sel)} style={{width:"100%",background:"#ef4444",border:"none",borderRadius:9,padding:"10px",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 0 20px rgba(239,68,68,0.4)"}}>
-                <span style={{width:8,height:8,borderRadius:"50%",background:"#fff",display:"inline-block"}}/>
-                {sel.live_title} — EN VIVO
-              </button>}
-            </div>
-          </div>
-        );
-      })()}
 
       {liveEvent&&<LiveConferenceModal event={liveEvent} lang={lang} onClose={()=>setLiveEvent(null)}/>}
     </div>
