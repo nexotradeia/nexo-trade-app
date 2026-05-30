@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 15:03:38
+// NEXO TRADE — build: 2026-05-30 15:23:35
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -8199,77 +8199,33 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
-          {[
-            {
-              name:"FTMO",emoji:"🏆",color:"#00C896",
-              tagline:"Consigue una cuenta fondeada hasta $200k",
-              comision:"Comisión: hasta 20% por referido",
-              desc:"El programa de prop trading más reconocido del mundo. Supera el challenge y opera con su dinero.",
-              cta:"Ver programa →",
-              url:"https://ftmo.com/en/affiliate-programme/",
-              badge:"PROP TRADING",
-            },
-            {
-              name:"Topstep",emoji:"🎯",color:"#3B82F6",
-              tagline:"Cuenta fondeada en futuros desde $50/mes",
-              comision:"Comisión: $50–$150 por referido",
-              desc:"La plataforma de prop trading #1 para futuros en EE.UU. Ideal para traders de ES, NQ, GC.",
-              cta:"Empezar con Topstep →",
-              url:"https://www.topstep.com/affiliates/",
-              badge:"FUTUROS",
-            },
-            {
-              name:"Apex Trader Funding",emoji:"⚡",color:"#FF6B00",
-              tagline:"La prop firm de mayor crecimiento en 2026",
-              comision:"Comisión: 10% por cada challenge",
-              desc:"Sin drawdown mensual, retiro cada 7 días. Uno de los mejores para traders agresivos.",
-              cta:"Ver Apex →",
-              url:"https://apextraderfunding.com/member/aff/go/nexotrade",
-              badge:"CHALLENGE",
-            },
-            {
-              name:"Tradeando Academy",emoji:"📖",color:"#A78BFA",
-              tagline:"La academia de trading en español más completa",
-              comision:"Cursos desde $47 · Afiliados activos",
-              desc:"Cursos 100% en español de análisis técnico, price action, cripto y opciones. Miles de alumnos.",
-              cta:"Ver cursos →",
-              url:"https://tradeando.net/curso/tradeando-academy/",
-              badge:"EN ESPAÑOL",
-            },
-            {
-              name:"Masters Traders Academy",emoji:"🎓",color:"#F59E0B",
-              tagline:"Trading institucional e interbancario",
-              comision:"Programas avanzados · Afiliados disponibles",
-              desc:"Formación en trading institucional. Aprende cómo opera realmente el mercado interbancario.",
-              cta:"Ver academia →",
-              url:"https://masterstraders.academy/",
-              badge:"INSTITUCIONAL",
-            },
-            {
-              name:"Investopedia Academy",emoji:"📚",color:"#00A8FF",
-              tagline:"La mayor enciclopedia financiera del mundo",
-              comision:"Cursos certificados · Programa de afiliados",
-              desc:"Cursos certificados de finanzas personales, análisis técnico, opciones y más. En inglés.",
-              cta:"Ver cursos →",
-              url:"https://www.investopedia.com/investopedia-academy-4588395",
-              badge:"CERTIFICADO",
-            },
-          ].map((a,i)=>(
-            <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"18px 20px",display:"flex",flexDirection:"column",gap:10}}>
-              <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:44,height:44,borderRadius:12,background:a.color+"22",border:`1px solid ${a.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{a.emoji}</div>
-                <div>
-                  <div style={{fontWeight:800,color:C.text,fontSize:14}}>{a.name}</div>
-                  <div style={{background:a.color+"22",color:a.color,borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700,display:"inline-block"}}>{a.badge}</div>
-                </div>
+
+          {/* ── TradingView — afiliado activo ── */}
+          <div style={{background:"linear-gradient(135deg,rgba(20,30,60,0.95),rgba(15,23,42,0.95))",border:"1px solid #2962FF55",borderRadius:16,padding:"18px 20px",display:"flex",flexDirection:"column",gap:10,boxShadow:"0 0 20px #2962FF15",position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#2962FF,#2962FFcc)",color:"#fff",fontSize:9,fontWeight:800,padding:"4px 10px",borderRadius:"0 16px 0 10px",letterSpacing:0.5}}>COMISIÓN ACTIVA</div>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:44,height:44,borderRadius:12,background:"#2962FF22",border:"1px solid #2962FF44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>📊</div>
+              <div>
+                <div style={{fontWeight:800,color:C.text,fontSize:14}}>TradingView</div>
+                <div style={{background:"#2962FF22",color:"#2962FF",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700,display:"inline-block"}}>AFILIADO ACTIVO</div>
               </div>
-              <div style={{fontSize:13,fontWeight:700,color:C.text}}>{a.tagline}</div>
-              <div style={{fontSize:12,color:C.muted2,lineHeight:1.5}}>{a.desc}</div>
-              <div style={{fontSize:11,color:a.color,fontWeight:600,background:a.color+"11",borderRadius:8,padding:"4px 10px"}}>{a.comision}</div>
-              <a href={a.url} target="_blank" rel="noopener noreferrer"
-                style={{display:"block",background:`linear-gradient(135deg,${a.color},${a.color}cc)`,border:"none",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",textAlign:"center",textDecoration:"none",marginTop:"auto"}}>
-                {a.cta}
-              </a>
+            </div>
+            <div style={{fontSize:13,fontWeight:700,color:C.text}}>La plataforma de gráficas #1 del mundo</div>
+            <div style={{fontSize:12,color:C.muted2,lineHeight:1.5}}>Gráficas profesionales, screeners, alertas y señales. Más de 50 millones de traders lo usan. Tú ganas por cada usuario que se suscribe a premium.</div>
+            <div style={{fontSize:11,color:"#00D26A",fontWeight:600,background:"rgba(0,210,106,0.08)",borderRadius:8,padding:"6px 10px",border:"1px solid rgba(0,210,106,0.2)"}}>✅ Comisión activa: hasta $90 por suscripción referida</div>
+            <a href="https://www.tradingview.com/?aff_id=167149" target="_blank" rel="noopener noreferrer"
+              style={{display:"block",background:"linear-gradient(135deg,#2962FF,#2962FFcc)",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,textAlign:"center",textDecoration:"none",marginTop:"auto"}}>
+              Abrir TradingView →
+            </a>
+          </div>
+
+          {/* ── Próximamente x3 ── */}
+          {["🎓 Academia en español","💼 Prop Firm","📈 Plataforma de inversión"].map((label,i)=>(
+            <div key={i} style={{background:C.surface,border:`1px dashed ${C.border}`,borderRadius:16,padding:"18px 20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,minHeight:220,textAlign:"center",opacity:0.7}}>
+              <div style={{fontSize:36}}>🔜</div>
+              <div style={{fontSize:13,fontWeight:800,color:C.muted}}>{label}</div>
+              <div style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:20,padding:"5px 16px",fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:0.5}}>PRÓXIMAMENTE</div>
+              <div style={{fontSize:11,color:C.muted2}}>Socio en proceso de negociación</div>
             </div>
           ))}
         </div>
