@@ -4,6 +4,24 @@
 // Fuente 2: Capitol Trades scraping (datos STOCK Act, dominio público)
 // Fuente 3: datos curados 2025-2026
 
+// ── Helper: map Capitol Trades JSON format → our format ──────────────
+function mapCapitolTrade(t) {
+  const politician = t.politician || t.member || {};
+  const asset = t.asset || t.issuer || {};
+  const txType = (t.type || t.transactionType || t.transaction || "").toLowerCase();
+  return {
+    name:   politician.name || (politician.firstName ? politician.firstName + " " + politician.lastName : null) || t.name || "Unknown",
+    party:  (politician.party || t.party || "").slice(0, 1).toUpperCase(),
+    state:  politician.state || t.state || "",
+    ticker: asset.ticker || asset.symbol || t.ticker || "",
+    type:   txType.includes("sale") || txType.includes("sell") ? "sell" : "buy",
+    amount: t.range || t.amount || t.size || "$1K–$15K",
+    date:   t.filedDate || t.transactionDate || t.date || "",
+    asset:  asset.name || asset.description || t.assetName || "",
+    house:  politician.chamber || politician.house || t.chamber || "House",
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=7200");
@@ -226,20 +244,3 @@ export default async function handler(req, res) {
   res.status(200).json({ source: "curated", trades: CURATED });
 }
 
-// ── Helper: map Capitol Trades JSON format → our format ──────────────
-function mapCapitolTrade(t) {
-  const politician = t.politician || t.member || {};
-  const asset = t.asset || t.issuer || {};
-  const txType = (t.type || t.transactionType || t.transaction || "").toLowerCase();
-  return {
-    name:   politician.name || politician.firstName + " " + politician.lastName || t.name || "Unknown",
-    party:  (politician.party || t.party || "").slice(0, 1).toUpperCase(),
-    state:  politician.state || t.state || "",
-    ticker: asset.ticker || asset.symbol || t.ticker || "",
-    type:   txType.includes("sale") || txType.includes("sell") ? "sell" : "buy",
-    amount: t.range || t.amount || t.size || "$1K–$15K",
-    date:   t.filedDate || t.transactionDate || t.date || "",
-    asset:  asset.name || asset.description || t.assetName || "",
-    house:  politician.chamber || politician.house || t.chamber || "House",
-  };
-}
