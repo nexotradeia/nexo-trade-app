@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 17:04:19
+// NEXO TRADE — build: 2026-05-30 17:27:23
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -137,7 +137,7 @@ const LANG_META = [
 
 const LANGS = {
   es: {
-    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Acciones",
+    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
     macro:"🌍 Macro", noticias:"📰 Noticias", earnings:"📅 Earnings", trending:"🔥 Trending",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrarse →",
     publish:"Publicar →", bullish:"▲ ALCISTA", bearish:"▼ BAJISTA",
@@ -161,7 +161,7 @@ const LANGS = {
     aiErr:"Lo siento, no pude conectarme. Inténtalo de nuevo.",
   },
   en: {
-    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stocks",
+    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
     macro:"🌍 Macro", noticias:"📰 News", earnings:"📅 Earnings", trending:"🔥 Trending",
     search:"Search ticker... AAPL, BTC, NVDA", login:"Sign in", register:"Sign up →",
     publish:"Post →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
@@ -7789,7 +7789,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
   if(!isPremium) return(
     <div style={{textAlign:"center",padding:"60px 20px",maxWidth:480,margin:"0 auto"}}>
       <div style={{fontSize:56,marginBottom:16}}>🔒</div>
-      <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:24,marginBottom:8}}>Acciones VIP Semanales</h2>
+      <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:24,marginBottom:8}}>📈 Stock Pick IA</h2>
       <p style={{color:"#64748B",fontSize:15,lineHeight:1.7,marginBottom:28}}>
         Cada semana nuestro equipo selecciona <strong style={{color:"#F1F5F9"}}>10 acciones</strong> con mayor potencial — corto plazo, largo plazo, dividendos y crypto.
       </p>
@@ -7949,7 +7949,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>EN VIVO
               </span>
             </div>
-            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5}}>🧠 Picks IA · Semana {new Date().toLocaleDateString("es",{day:"numeric",month:"short"})}</h2>
+            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5}}>🧠 Stock Pick IA · Semana {new Date().toLocaleDateString("es",{day:"numeric",month:"short"})}</h2>
             <div style={{fontSize:11,color:"#475569"}}>Selección algorítmica + análisis fundamental · Wall Street consensus</div>
           </div>
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
@@ -11700,6 +11700,593 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
   );
 }
 
+
+// ── CRYPTO OPTIONS PAGE (page 41) ─────────────────────────────────────────────
+function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
+  const isEN = lang==="en";
+  const ASSETS = [
+    {sym:"BTC", idx:"btc_usd", color:"#F7931A", emoji:"₿"},
+    {sym:"ETH", idx:"eth_usd", color:"#627EEA", emoji:"Ξ"},
+    {sym:"SOL", idx:"sol_usd", color:"#9945FF", emoji:"◎"},
+  ];
+  const MONTHS = {JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+
+  const [assetIdx, setAssetIdx]         = useState(0);
+  const [expiries, setExpiries]         = useState([]);
+  const [selExpiry, setSelExpiry]       = useState(null);
+  const [allOpts, setAllOpts]           = useState([]);
+  const [spot, setSpot]                 = useState(null);
+  const [loading, setLoading]           = useState(true);
+  const [err, setErr]                   = useState(null);
+  const [lastUpdate, setLastUpdate]     = useState(null);
+  const [countdown, setCountdown]       = useState(30);
+  const [tab, setTab]                   = useState("chain");
+  const [fearGreed, setFearGreed]       = useState(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertPrice, setAlertPrice]     = useState("");
+  const [alertDir, setAlertDir]         = useState("above");
+  const [myAlerts, setMyAlerts]         = useState([]);
+  const [firedAlerts, setFiredAlerts]   = useState([]);
+  const [filterATM, setFilterATM]       = useState(true);
+  const [sortCol, setSortCol]           = useState("oi");
+
+  const asset = ASSETS[assetIdx];
+
+  function parseExpiry(str) {
+    try {
+      const day=parseInt(str.slice(0,2)),mon=MONTHS[str.slice(2,5)],yr=2000+parseInt(str.slice(5));
+      return new Date(yr,mon,day);
+    } catch { return new Date(); }
+  }
+  function daysToExpiry(str) {
+    return Math.max(0,Math.ceil((parseExpiry(str)-new Date())/86400000));
+  }
+  function fmtExp(str) {
+    const d=parseExpiry(str);
+    return d.toLocaleDateString(isEN?"en-US":"es-ES",{day:"numeric",month:"short",year:"2-digit"});
+  }
+
+  const fetchData = useCallback(async () => {
+    setLoading(true); setErr(null);
+    try {
+      const base="https://www.deribit.com/api/v2/public";
+      const [sRes,oRes] = await Promise.all([
+        fetch(`${base}/get_index_price?index_name=${asset.idx}`).then(r=>r.json()),
+        fetch(`${base}/get_book_summary_by_currency?currency=${asset.sym}&kind=option`).then(r=>r.json()),
+      ]);
+      const sp = sRes.result?.index_price || 0;
+      setSpot(sp);
+      const opts = (oRes.result||[]).map(o=>{
+        const p=o.instrument_name.split("-");
+        return {
+          name:o.instrument_name, strike:parseFloat(p[2]), type:p[3], expiry:p[1],
+          markUSD:(o.mark_price||0)*sp, bidUSD:(o.bid_price||0)*sp, askUSD:(o.ask_price||0)*sp,
+          oi:o.open_interest||0, vol24h:o.volume||0, iv:Math.round(o.mark_iv||0),
+          delta:o.greeks?.delta||0, gamma:o.greeks?.gamma||0,
+          vega:o.greeks?.vega||0, theta:o.greeks?.theta||0,
+        };
+      });
+      setAllOpts(opts);
+      const exps=[...new Set(opts.map(o=>o.expiry))].sort((a,b)=>parseExpiry(a)-parseExpiry(b));
+      setExpiries(exps);
+      setSelExpiry(prev => (prev && exps.includes(prev)) ? prev : (exps[0]||null));
+      setLastUpdate(new Date()); setCountdown(30);
+    } catch(e) { setErr(isEN?"Connection error with Deribit. Retrying...":"Error al conectar con Deribit. Reintentando..."); }
+    finally { setLoading(false); }
+  }, [asset.sym, asset.idx]);
+
+  useEffect(()=>{ fetchData(); },[fetchData]);
+  useEffect(()=>{
+    const iv=setInterval(()=>setCountdown(c=>{ if(c<=1){fetchData();return 30;} return c-1; }),1000);
+    return ()=>clearInterval(iv);
+  },[fetchData]);
+  useEffect(()=>{
+    fetch("https://api.alternative.me/fng/?limit=1").then(r=>r.json()).then(d=>setFearGreed(d.data?.[0])).catch(()=>{});
+  },[]);
+  useEffect(()=>{
+    if(!spot||!myAlerts.length) return;
+    const fired=myAlerts.filter(a=>(a.dir==="above"&&spot>=a.price)||(a.dir==="below"&&spot<=a.price));
+    if(fired.length){ setFiredAlerts(f=>[...f,...fired.map(a=>({...a,firedAt:spot}))]);
+      setMyAlerts(p=>p.filter(a=>!fired.includes(a))); }
+  },[spot,myAlerts]);
+
+  const expiryOpts = allOpts.filter(o=>o.expiry===selExpiry);
+  const strikes    = [...new Set(expiryOpts.map(o=>o.strike))].sort((a,b)=>a-b);
+  const visStrikes = filterATM && spot
+    ? strikes.filter(s=>Math.abs(s-spot)/spot<0.30)
+    : strikes;
+
+  const callOI    = expiryOpts.filter(o=>o.type==="C").reduce((s,o)=>s+o.oi,0);
+  const putOI     = expiryOpts.filter(o=>o.type==="P").reduce((s,o)=>s+o.oi,0);
+  const totalOI   = callOI+putOI;
+  const pcRatio   = callOI>0?(putOI/callOI).toFixed(2):"—";
+  const vol24h    = expiryOpts.reduce((s,o)=>s+o.vol24h,0);
+  const allCallOI = allOpts.filter(o=>o.type==="C").reduce((s,o)=>s+o.oi,0);
+  const allPutOI  = allOpts.filter(o=>o.type==="P").reduce((s,o)=>s+o.oi,0);
+
+  const maxPain = useMemo(()=>{
+    if(!spot||!strikes.length) return null;
+    let best=Infinity,mp=null;
+    for(const ts of strikes){
+      let pain=0;
+      for(const s of strikes){
+        const c=expiryOpts.find(o=>o.strike===s&&o.type==="C");
+        const p=expiryOpts.find(o=>o.strike===s&&o.type==="P");
+        if(c&&ts>s) pain+=(ts-s)*c.oi;
+        if(p&&ts<s) pain+=(s-ts)*p.oi;
+      }
+      if(pain<best){best=pain;mp=ts;}
+    }
+    return mp;
+  },[strikes,expiryOpts,spot]);
+
+  const fgVal   = fearGreed ? parseInt(fearGreed.value) : null;
+  const fgColor = fgVal>75?"#22c55e":fgVal>55?"#a3e635":fgVal>45?"#fbbf24":fgVal>25?"#f97316":"#ef4444";
+  const fgLabel = fearGreed?.value_classification || "—";
+
+  const fmtP = n => !n?"—":`$${n.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0})}`;
+  const fmtN = n => !n?"—":`${n.toFixed(2)}`;
+  const fmtOI= n => n>=1000?`${(n/1000).toFixed(1)}K`:`${n}`;
+  const fmtVol= n => n>=1e6?`${(n/1e6).toFixed(2)}M`:n>=1000?`${(n/1000).toFixed(1)}K`:`${n.toFixed(0)}`;
+
+  const thSt={fontSize:10,fontWeight:700,color:"rgba(148,163,184,0.8)",letterSpacing:"0.08em",textTransform:"uppercase",padding:"7px 6px",textAlign:"right",borderBottom:"1px solid rgba(255,255,255,0.07)",whiteSpace:"nowrap"};
+  const tdSt={fontSize:11,padding:"5px 6px",textAlign:"right",borderBottom:"1px solid rgba(255,255,255,0.04)",fontVariantNumeric:"tabular-nums",fontFamily:"'SF Mono',monospace,system-ui"};
+
+  // ── RENDER ──────────────────────────────────────────────────────────────────
+  return (
+    <div style={{background:"#090e1a",minHeight:"100vh",padding:"0 0 40px",fontFamily:"system-ui,-apple-system,sans-serif"}}>
+
+      {/* ─ FIRED ALERTS ─ */}
+      {firedAlerts.map((a,i)=>(
+        <div key={i} onClick={()=>setFiredAlerts(f=>f.filter((_,j)=>j!==i))}
+          style={{position:"fixed",top:16+i*68,right:20,zIndex:9999,background:"linear-gradient(135deg,#1e293b,#0f172a)",border:"1px solid #f59e0b",borderRadius:12,padding:"12px 18px",cursor:"pointer",boxShadow:"0 8px 32px rgba(0,0,0,0.6)",minWidth:220}}>
+          <div style={{color:"#f59e0b",fontWeight:800,fontSize:13}}>🔔 {isEN?"Alert triggered!":"¡Alerta activada!"}</div>
+          <div style={{color:"#94a3b8",fontSize:11,marginTop:3}}>{asset.sym} {a.dir==="above"?(isEN?"went above":"superó"):(isEN?"fell below":"cayó bajo")} {fmtP(a.price)} → {fmtP(a.firedAt)}</div>
+        </div>
+      ))}
+
+      {/* ─ ALERT MODAL ─ */}
+      {showAlertModal && (
+        <div style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setShowAlertModal(false)}>
+          <div style={{background:"#0f172a",border:"1px solid rgba(0,168,255,0.3)",borderRadius:18,padding:28,width:320,boxShadow:"0 24px 64px rgba(0,0,0,0.8)"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontWeight:800,fontSize:16,color:"#f1f5f9",marginBottom:18}}>🔔 {isEN?"Set Price Alert":"Crear Alerta de Precio"}</div>
+            <div style={{fontSize:12,color:"#94a3b8",marginBottom:6}}>{isEN?"Asset":"Activo"}: <span style={{color:asset.color,fontWeight:700}}>{asset.emoji} {asset.sym}</span> · {isEN?"Current":"Actual"}: <span style={{color:"#00A8FF",fontWeight:700}}>{fmtP(spot)}</span></div>
+            <select value={alertDir} onChange={e=>setAlertDir(e.target.value)}
+              style={{width:"100%",background:"#1e293b",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#f1f5f9",padding:"9px 12px",fontSize:13,marginBottom:10,outline:"none"}}>
+              <option value="above">{isEN?"Price goes ABOVE":"Precio sube SOBRE"}</option>
+              <option value="below">{isEN?"Price falls BELOW":"Precio cae BAJO"}</option>
+            </select>
+            <input type="number" value={alertPrice} onChange={e=>setAlertPrice(e.target.value)}
+              placeholder={`${isEN?"Strike price e.g.":"Precio ej."} ${spot?Math.round(spot/1000)*1000:100000}`}
+              style={{width:"100%",boxSizing:"border-box",background:"#1e293b",border:"1px solid rgba(255,255,255,0.15)",borderRadius:8,color:"#f1f5f9",padding:"9px 12px",fontSize:14,marginBottom:14,outline:"none"}}/>
+            {myAlerts.length>0 && (
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:11,color:"#64748b",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Active alerts":"Alertas activas"}</div>
+                {myAlerts.map((a,i)=>(
+                  <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"#1e293b",borderRadius:7,padding:"6px 10px",marginBottom:4}}>
+                    <span style={{fontSize:11,color:"#94a3b8"}}>{a.dir==="above"?"▲":"▼"} {fmtP(a.price)}</span>
+                    <button onClick={()=>setMyAlerts(p=>p.filter((_,j)=>j!==i))} style={{background:"none",border:"none",color:"#ef4444",cursor:"pointer",fontSize:14,lineHeight:1}}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={()=>{
+              if(!alertPrice) return;
+              setMyAlerts(p=>[...p,{dir:alertDir,price:parseFloat(alertPrice),asset:asset.sym}]);
+              setAlertPrice(""); setShowAlertModal(false);
+            }} style={{width:"100%",background:"linear-gradient(135deg,#00A8FF,#0070aa)",border:"none",borderRadius:10,color:"#fff",padding:"11px",fontWeight:700,fontSize:14,cursor:"pointer"}}>
+              {isEN?"Set Alert":"Crear Alerta"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─ HEADER ─ */}
+      <div style={{background:"linear-gradient(180deg,#0d1627 0%,#090e1a 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"14px 24px"}}>
+        <div style={{maxWidth:1600,margin:"0 auto",display:"flex",alignItems:"center",flexWrap:"wrap",gap:12}}>
+          {/* Title */}
+          <div style={{marginRight:8}}>
+            <div style={{fontSize:18,fontWeight:900,color:"#f1f5f9",letterSpacing:-0.5,lineHeight:1}}>
+              📊 {isEN?"Crypto Options":"Opciones Crypto"}
+            </div>
+            <div style={{fontSize:10,color:"#64748b",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase",marginTop:2}}>
+              {isEN?"Real-time · 24h · Powered by Deribit":"Tiempo real · 24h · Powered by Deribit"}
+            </div>
+          </div>
+
+          {/* Asset tabs */}
+          <div style={{display:"flex",gap:4,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:3}}>
+            {ASSETS.map((a,i)=>(
+              <button key={a.sym} onClick={()=>{setAssetIdx(i);setSelExpiry(null);}}
+                style={{background:assetIdx===i?a.color:"transparent",color:assetIdx===i?"#000":a.color,border:"none",borderRadius:7,padding:"6px 14px",fontWeight:800,fontSize:13,cursor:"pointer",transition:"all 0.15s"}}>
+                {a.emoji} {a.sym}
+              </button>
+            ))}
+          </div>
+
+          {/* Expiry selector */}
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:11,color:"#64748b",fontWeight:700,textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Expiry":"Vence"}</span>
+            <select value={selExpiry||""} onChange={e=>setSelExpiry(e.target.value)}
+              style={{background:"#1e293b",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#f1f5f9",padding:"6px 10px",fontSize:12,fontWeight:700,cursor:"pointer",outline:"none"}}>
+              {expiries.map(e=>(
+                <option key={e} value={e}>{fmtExp(e)} ({daysToExpiry(e)}d)</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
+            {/* Last update */}
+            {lastUpdate && (
+              <div style={{fontSize:10,color:"#475569",textAlign:"right"}}>
+                <div style={{color:"#22c55e",fontWeight:700,fontSize:11}}>● LIVE</div>
+                <div>{isEN?"Next update in":"Actualiza en"} {countdown}s</div>
+              </div>
+            )}
+            {/* Refresh */}
+            <button onClick={fetchData} disabled={loading}
+              style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:9,color:"#00A8FF",padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+              {loading?"⏳":"🔄"} {isEN?"Refresh":"Actualizar"}
+            </button>
+            {/* Alert */}
+            <button onClick={()=>setShowAlertModal(true)}
+              style={{background:myAlerts.length?"rgba(245,158,11,0.15)":"rgba(255,255,255,0.05)",border:`1px solid ${myAlerts.length?"#f59e0b":"rgba(255,255,255,0.1)"}`,borderRadius:9,color:myAlerts.length?"#f59e0b":"#64748b",padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+              🔔 {isEN?"Alerts":"Alertas"}{myAlerts.length?` (${myAlerts.length})`:""}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─ METRICS STRIP ─ */}
+      <div style={{background:"#0d1627",borderBottom:"1px solid rgba(255,255,255,0.05)",padding:"10px 24px"}}>
+        <div style={{maxWidth:1600,margin:"0 auto",display:"flex",gap:0,flexWrap:"wrap"}}>
+          {[
+            {label:asset.sym, val:fmtP(spot), sub:loading?"…":"SPOT", color:asset.color, bold:true},
+            {label:isEN?"Total OI":"OI Total", val:fmtOI(allCallOI+allPutOI), sub:`${asset.sym} (${isEN?"all expiries":"todos los venc."})`, color:"#f1f5f9"},
+            {label:"Put/Call", val:callOI>0?(allPutOI/allCallOI).toFixed(2):"—", sub:parseFloat(callOI>0?(allPutOI/allCallOI).toFixed(2):0)<0.7?isEN?"🟢 Bullish":"🟢 Alcista":parseFloat(callOI>0?(allPutOI/allCallOI).toFixed(2):0)>1.2?isEN?"🔴 Bearish":"🔴 Bajista":isEN?"🟡 Neutral":"🟡 Neutral", color:parseFloat(callOI>0?(allPutOI/allCallOI).toFixed(2):0)<0.7?"#22c55e":parseFloat(callOI>0?(allPutOI/allCallOI).toFixed(2):0)>1.2?"#f87171":"#fbbf24"},
+            {label:"Max Pain", val:maxPain?fmtP(maxPain):"—", sub:maxPain&&spot?`${((maxPain-spot)/spot*100).toFixed(1)}% vs spot`:"", color:"#a78bfa"},
+            {label:isEN?"24h Volume":"Vol. 24h", val:fmtOI(vol24h), sub:`${asset.sym} ${isEN?"selected expiry":"venc. sel."}`, color:"#f1f5f9"},
+            {label:"Fear & Greed", val:fearGreed?fearGreed.value:"—", sub:fgLabel.length>18?fgLabel.slice(0,18)+"…":fgLabel, color:fgColor},
+          ].map((m,i)=>(
+            <div key={i} style={{flex:"1 1 120px",padding:"8px 16px",borderRight:i<5?"1px solid rgba(255,255,255,0.06)":"none"}}>
+              <div style={{fontSize:9,color:"#64748b",fontWeight:700,letterSpacing:0.6,textTransform:"uppercase",marginBottom:3}}>{m.label}</div>
+              <div style={{fontSize:m.bold?20:16,fontWeight:800,color:m.color,letterSpacing:-0.5,lineHeight:1.1}}>{m.val}</div>
+              <div style={{fontSize:10,color:"#475569",marginTop:2}}>{m.sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ─ OI BAR (calls vs puts visual) ─ */}
+      <div style={{background:"#0d1627",borderBottom:"1px solid rgba(255,255,255,0.05)",padding:"8px 24px"}}>
+        <div style={{maxWidth:1600,margin:"0 auto",display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:10,color:"#22c55e",fontWeight:700,whiteSpace:"nowrap"}}>CALLS {fmtOI(allCallOI)}</span>
+          <div style={{flex:1,height:6,background:"rgba(255,255,255,0.05)",borderRadius:10,overflow:"hidden",display:"flex"}}>
+            <div style={{width:`${allCallOI/(allCallOI+allPutOI)*100}%`,background:"linear-gradient(90deg,#22c55e,#16a34a)",borderRadius:"10px 0 0 10px",transition:"width 0.6s"}}/>
+            <div style={{flex:1,background:"linear-gradient(90deg,#dc2626,#f87171)",borderRadius:"0 10px 10px 0"}}/>
+          </div>
+          <span style={{fontSize:10,color:"#f87171",fontWeight:700,whiteSpace:"nowrap"}}>PUTS {fmtOI(allPutOI)}</span>
+        </div>
+      </div>
+
+      {/* ─ TABS ─ */}
+      <div style={{background:"#0d1627",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"0 24px"}}>
+        <div style={{maxWidth:1600,margin:"0 auto",display:"flex",gap:0}}>
+          {[
+            {id:"chain",  label:isEN?"📊 Options Chain":"📊 Cadena"},
+            {id:"oi",     label:isEN?"📈 Open Interest":"📈 Open Interest"},
+            {id:"maxpain",label:"🎯 Max Pain"},
+            {id:"expiries",label:isEN?"📅 Expirations":"📅 Vencimientos"},
+          ].map(t=>(
+            <button key={t.id} onClick={()=>setTab(t.id)}
+              style={{background:"none",border:"none",borderBottom:`2px solid ${tab===t.id?"#00A8FF":"transparent"}`,color:tab===t.id?"#00A8FF":"#64748b",padding:"12px 18px",fontSize:12,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+              {t.label}
+            </button>
+          ))}
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,padding:"8px 0"}}>
+            <label style={{fontSize:11,color:"#64748b",fontWeight:600,display:"flex",alignItems:"center",gap:6,cursor:"pointer"}}>
+              <input type="checkbox" checked={filterATM} onChange={e=>setFilterATM(e.target.checked)}
+                style={{accentColor:"#00A8FF"}}/>
+              {isEN?"ATM ±30%":"ATM ±30%"}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* ─ CONTENT ─ */}
+      <div style={{maxWidth:1600,margin:"0 auto",padding:"16px 24px"}}>
+
+        {err && (
+          <div style={{background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"12px 16px",color:"#f87171",fontSize:13,marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
+            ⚠️ {err}
+            <button onClick={fetchData} style={{marginLeft:"auto",background:"none",border:"1px solid #f87171",borderRadius:7,color:"#f87171",padding:"4px 10px",cursor:"pointer",fontSize:11}}>
+              {isEN?"Retry":"Reintentar"}
+            </button>
+          </div>
+        )}
+
+        {/* ── OPTIONS CHAIN TAB ── */}
+        {tab==="chain" && (
+          <div>
+            {/* Column headers legend */}
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+              <div style={{fontSize:11,fontWeight:700,color:"#22c55e",letterSpacing:1,textTransform:"uppercase"}}>◀ CALLS</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#f87171",letterSpacing:1,textTransform:"uppercase"}}>PUTS ▶</div>
+            </div>
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed"}}>
+                <colgroup>
+                  <col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/>
+                  <col style={{width:"10%"}}/>
+                  <col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/>
+                </colgroup>
+                <thead>
+                  <tr style={{background:"rgba(34,197,94,0.05)"}}>
+                    <th style={{...thSt,color:"#22c55e"}}>Delta</th>
+                    <th style={{...thSt,color:"#22c55e"}}>OI</th>
+                    <th style={{...thSt,color:"#22c55e"}}>Vol</th>
+                    <th style={{...thSt,color:"#22c55e"}}>IV%</th>
+                    <th style={{...thSt,color:"#22c55e"}}>Bid</th>
+                    <th style={{...thSt,color:"#22c55e"}}>Ask</th>
+                    <th style={{...thSt,textAlign:"center",color:"#94a3b8",background:"rgba(148,163,184,0.06)"}}>STRIKE</th>
+                    <th style={{...thSt,color:"#f87171"}}>Bid</th>
+                    <th style={{...thSt,color:"#f87171"}}>Ask</th>
+                    <th style={{...thSt,color:"#f87171"}}>IV%</th>
+                    <th style={{...thSt,color:"#f87171"}}>Vol</th>
+                    <th style={{...thSt,color:"#f87171"}}>OI</th>
+                    <th style={{...thSt,color:"#f87171"}}>Delta</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading && [1,2,3,4,5,6,7,8].map(i=>(
+                    <tr key={i}>
+                      {Array(13).fill(0).map((_,j)=>(
+                        <td key={j} style={tdSt}>
+                          <div style={{height:10,background:"rgba(255,255,255,0.06)",borderRadius:4,width:j===6?"60%":"80%",margin:"0 auto",animation:"pulse 1.4s infinite"}}/>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  {!loading && visStrikes.map(strike=>{
+                    const call=expiryOpts.find(o=>o.strike===strike&&o.type==="C");
+                    const put =expiryOpts.find(o=>o.strike===strike&&o.type==="P");
+                    const isATM=spot&&Math.abs(strike-spot)/spot<0.01;
+                    const isITMCall=spot&&strike<spot;
+                    const isITMPut =spot&&strike>spot;
+                    const rowBg=isATM?"rgba(0,168,255,0.12)":isITMCall?"rgba(34,197,94,0.04)":isITMPut?"rgba(248,113,113,0.04)":"transparent";
+                    return (
+                      <tr key={strike} style={{background:rowBg,transition:"background 0.15s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background=isATM?"rgba(0,168,255,0.18)":"rgba(255,255,255,0.04)"}
+                        onMouseLeave={e=>e.currentTarget.style.background=rowBg}>
+                        <td style={{...tdSt,color:"#22c55e"}}>{call?fmtN(call.delta):"—"}</td>
+                        <td style={{...tdSt,color:"#22c55e"}}>{call?fmtOI(call.oi):"—"}</td>
+                        <td style={{...tdSt,color:"#22c55e"}}>{call?fmtVol(call.vol24h):"—"}</td>
+                        <td style={{...tdSt,color:"#22c55e"}}>{call?`${call.iv}%`:"—"}</td>
+                        <td style={{...tdSt,color:"rgba(34,197,94,0.7)"}}>{call&&call.bidUSD>0?`$${call.bidUSD.toFixed(0)}`:"—"}</td>
+                        <td style={{...tdSt,color:"rgba(34,197,94,0.9)"}}>{call&&call.askUSD>0?`$${call.askUSD.toFixed(0)}`:"—"}</td>
+                        <td style={{...tdSt,textAlign:"center",fontWeight:isATM?800:600,fontSize:isATM?13:11,
+                          color:isATM?"#00A8FF":isITMCall?"rgba(34,197,94,0.9)":isITMPut?"rgba(248,113,113,0.9)":"#94a3b8",
+                          background:"rgba(148,163,184,0.04)",borderLeft:"1px solid rgba(255,255,255,0.06)",borderRight:"1px solid rgba(255,255,255,0.06)"}}>
+                          {isATM && <span style={{display:"block",fontSize:8,color:"#00A8FF",letterSpacing:0.5,marginBottom:1}}>◆ ATM</span>}
+                          {maxPain===strike && <span style={{display:"block",fontSize:8,color:"#a78bfa",letterSpacing:0.5,marginBottom:1}}>★ MAX PAIN</span>}
+                          {fmtP(strike)}
+                        </td>
+                        <td style={{...tdSt,color:"rgba(248,113,113,0.9)"}}>{put&&put.bidUSD>0?`$${put.bidUSD.toFixed(0)}`:"—"}</td>
+                        <td style={{...tdSt,color:"rgba(248,113,113,0.9)"}}>{put&&put.askUSD>0?`$${put.askUSD.toFixed(0)}`:"—"}</td>
+                        <td style={{...tdSt,color:"#f87171"}}>{put?`${put.iv}%`:"—"}</td>
+                        <td style={{...tdSt,color:"#f87171"}}>{put?fmtVol(put.vol24h):"—"}</td>
+                        <td style={{...tdSt,color:"#f87171"}}>{put?fmtOI(put.oi):"—"}</td>
+                        <td style={{...tdSt,color:"#f87171"}}>{put?fmtN(put.delta):"—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {!loading && visStrikes.length===0 && (
+              <div style={{textAlign:"center",padding:"40px",color:"#475569",fontSize:14}}>
+                {isEN?"No data for this expiry":"Sin datos para este vencimiento"}
+              </div>
+            )}
+            {/* Greeks legend */}
+            <div style={{marginTop:14,display:"flex",flexWrap:"wrap",gap:16,padding:"10px 0",borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+              {[["OI","Open Interest — contratos abiertos"],["IV%","Volatilidad implícita"],["Delta","Sensibilidad al precio del spot"],["Bid/Ask","Precio de compra / venta"]].map(([k,v])=>(
+                <span key={k} style={{fontSize:10,color:"#475569"}}><span style={{color:"#64748b",fontWeight:700}}>{k}</span>: {v}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── OPEN INTEREST TAB ── */}
+        {tab==="oi" && (
+          <div>
+            <div style={{marginBottom:16,display:"flex",alignItems:"center",gap:20}}>
+              <div style={{fontSize:13,color:"#94a3b8"}}>{isEN?"Open Interest by strike price for expiry":"Open Interest por strike — vencimiento"} <span style={{color:"#00A8FF",fontWeight:700}}>{selExpiry?fmtExp(selExpiry):""}</span></div>
+              <div style={{display:"flex",gap:16,marginLeft:"auto"}}>
+                <span style={{fontSize:11,fontWeight:700,color:"#22c55e"}}>■ Calls {fmtOI(callOI)} {asset.sym}</span>
+                <span style={{fontSize:11,fontWeight:700,color:"#f87171"}}>■ Puts {fmtOI(putOI)} {asset.sym}</span>
+              </div>
+            </div>
+            {loading ? <div style={{color:"#475569",textAlign:"center",padding:40}}>⏳ {isEN?"Loading...":"Cargando..."}</div> : (
+              <div style={{overflowX:"auto"}}>
+                {visStrikes.map(strike=>{
+                  const call=expiryOpts.find(o=>o.strike===strike&&o.type==="C");
+                  const put =expiryOpts.find(o=>o.strike===strike&&o.type==="P");
+                  const cOI=call?.oi||0, pOI=put?.oi||0;
+                  const maxOI=Math.max(...visStrikes.map(s=>{
+                    const c=expiryOpts.find(o=>o.strike===s&&o.type==="C");
+                    const p=expiryOpts.find(o=>o.strike===s&&o.type==="P");
+                    return Math.max(c?.oi||0,p?.oi||0);
+                  }),1);
+                  const isATM=spot&&Math.abs(strike-spot)/spot<0.01;
+                  const isMP=maxPain===strike;
+                  return (
+                    <div key={strike} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}>
+                      <div style={{width:90,textAlign:"right",fontSize:11,fontWeight:isATM?800:isMP?700:500,
+                        color:isATM?"#00A8FF":isMP?"#a78bfa":"#94a3b8",flexShrink:0}}>
+                        {isATM?"◆ ":isMP?"★ ":""}{fmtP(strike)}
+                      </div>
+                      {/* Calls bar (right) */}
+                      <div style={{flex:1,display:"flex",justifyContent:"flex-end"}}>
+                        <div style={{height:18,width:`${cOI/maxOI*100}%`,background:"linear-gradient(270deg,#22c55e,#15803d)",borderRadius:"3px 0 0 3px",minWidth:cOI>0?2:0,transition:"width 0.4s"}}/>
+                      </div>
+                      <div style={{width:1,background:"rgba(255,255,255,0.15)",height:18,flexShrink:0}}/>
+                      {/* Puts bar (right) */}
+                      <div style={{flex:1}}>
+                        <div style={{height:18,width:`${pOI/maxOI*100}%`,background:"linear-gradient(90deg,#dc2626,#f87171)",borderRadius:"0 3px 3px 0",minWidth:pOI>0?2:0,transition:"width 0.4s"}}/>
+                      </div>
+                      <div style={{width:80,fontSize:10,color:"#f87171",textAlign:"right",flexShrink:0}}>{fmtOI(pOI)}</div>
+                      <div style={{width:80,fontSize:10,color:"#22c55e",textAlign:"left",flexShrink:0}}>{fmtOI(cOI)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── MAX PAIN TAB ── */}
+        {tab==="maxpain" && (
+          <div>
+            <div style={{marginBottom:20}}>
+              <h3 style={{color:"#f1f5f9",fontWeight:800,fontSize:16,margin:"0 0 6px"}}>🎯 Max Pain — {selExpiry?fmtExp(selExpiry):""} ({selExpiry?daysToExpiry(selExpiry):0}d)</h3>
+              <p style={{color:"#64748b",fontSize:13,margin:0,lineHeight:1.6}}>
+                {isEN
+                  ?"Max Pain is the price at which option buyers lose the most money at expiry. Market makers have an incentive to keep the price near this level."
+                  :"Max Pain es el precio donde los compradores de opciones pierden más dinero al vencimiento. Los market makers tienen incentivo para mantener el precio cerca de este nivel."}
+              </p>
+            </div>
+            {maxPain && spot && (
+              <div style={{display:"flex",gap:16,marginBottom:24,flexWrap:"wrap"}}>
+                {[
+                  {label:"Max Pain Strike",val:fmtP(maxPain),color:"#a78bfa"},
+                  {label:isEN?"Current Spot":"Spot Actual",val:fmtP(spot),color:asset.color},
+                  {label:isEN?"Difference":"Diferencia",val:`${((maxPain-spot)/spot*100).toFixed(2)}%`,color:maxPain>spot?"#22c55e":"#f87171"},
+                  {label:"DTE",val:`${daysToExpiry(selExpiry||"")} días`,color:"#f1f5f9"},
+                ].map((m,i)=>(
+                  <div key={i} style={{background:"#0d1627",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"14px 20px",flex:"1 1 120px"}}>
+                    <div style={{fontSize:10,color:"#64748b",fontWeight:700,textTransform:"uppercase",letterSpacing:0.5,marginBottom:6}}>{m.label}</div>
+                    <div style={{fontSize:20,fontWeight:800,color:m.color}}>{m.val}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {loading ? <div style={{color:"#475569",textAlign:"center",padding:40}}>⏳</div> : (
+              <div style={{overflowX:"auto"}}>
+                {visStrikes.map(strike=>{
+                  // Calculate pain at this strike
+                  let pain=0;
+                  for(const s of strikes){
+                    const c=expiryOpts.find(o=>o.strike===s&&o.type==="C");
+                    const p=expiryOpts.find(o=>o.strike===s&&o.type==="P");
+                    if(c&&strike>s) pain+=(strike-s)*c.oi;
+                    if(p&&strike<s) pain+=(s-strike)*p.oi;
+                  }
+                  const maxPainVal=visStrikes.reduce((mx,ts)=>{
+                    let p2=0;
+                    for(const s of strikes){
+                      const c=expiryOpts.find(o=>o.strike===s&&o.type==="C");
+                      const pp=expiryOpts.find(o=>o.strike===s&&o.type==="P");
+                      if(c&&ts>s) p2+=(ts-s)*c.oi;
+                      if(pp&&ts<s) p2+=(s-ts)*pp.oi;
+                    }
+                    return Math.max(mx,p2);
+                  },1);
+                  const isMP=maxPain===strike;
+                  const isATM=spot&&Math.abs(strike-spot)/spot<0.01;
+                  return (
+                    <div key={strike} style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,padding:"3px 0"}}>
+                      <div style={{width:100,textAlign:"right",fontSize:11,fontWeight:isMP?800:isATM?700:400,
+                        color:isMP?"#a78bfa":isATM?"#00A8FF":"#64748b",flexShrink:0}}>
+                        {isMP?"★ ":isATM?"◆ ":""}{fmtP(strike)}
+                      </div>
+                      <div style={{flex:1,height:16,background:"rgba(255,255,255,0.04)",borderRadius:4,overflow:"hidden"}}>
+                        <div style={{height:"100%",width:`${pain/maxPainVal*100}%`,
+                          background:isMP?"linear-gradient(90deg,#7c3aed,#a78bfa)":isATM?"linear-gradient(90deg,#0070aa,#00A8FF)":"linear-gradient(90deg,#334155,#475569)",
+                          borderRadius:4,transition:"width 0.4s"}}/>
+                      </div>
+                      <div style={{width:80,fontSize:10,color:isMP?"#a78bfa":"#475569",textAlign:"right",flexShrink:0,fontFamily:"monospace"}}>
+                        {(pain/1e6).toFixed(1)}M
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <div style={{marginTop:16,padding:"12px 16px",background:"rgba(167,139,250,0.07)",border:"1px solid rgba(167,139,250,0.2)",borderRadius:10,fontSize:12,color:"#94a3b8",lineHeight:1.6}}>
+              💡 <strong style={{color:"#a78bfa"}}>{isEN?"Trading tip":"Consejo"}: </strong>
+              {isEN
+                ?"If spot is below max pain, expect upward pressure. If above, expect downward pressure as expiry approaches."
+                :"Si el spot está por debajo del max pain, espera presión alcista. Si está por encima, presión bajista conforme se acerca el vencimiento."}
+            </div>
+          </div>
+        )}
+
+        {/* ── EXPIRATIONS TAB ── */}
+        {tab==="expiries" && (
+          <div>
+            <div style={{marginBottom:16,fontSize:13,color:"#64748b"}}>{isEN?"Open interest and volume distribution across all expiration dates":"Distribución de open interest y volumen en todas las fechas de vencimiento"}</div>
+            {loading ? <div style={{color:"#475569",textAlign:"center",padding:40}}>⏳</div> : (
+              <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <thead>
+                  <tr>
+                    {[isEN?"Expiry":"Vencimiento","DTE",isEN?"Call OI":"OI Calls",isEN?"Put OI":"OI Puts",isEN?"Total OI":"OI Total","P/C",isEN?"24h Vol":"Vol 24h",isEN?"Bias":"Sesgo"].map(h=>(
+                      <th key={h} style={thSt}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {expiries.map(exp=>{
+                    const eo=allOpts.filter(o=>o.expiry===exp);
+                    const cOI=eo.filter(o=>o.type==="C").reduce((s,o)=>s+o.oi,0);
+                    const pOI=eo.filter(o=>o.type==="P").reduce((s,o)=>s+o.oi,0);
+                    const tot=cOI+pOI;
+                    const pc=cOI>0?(pOI/cOI).toFixed(2):"—";
+                    const vol=eo.reduce((s,o)=>s+o.vol24h,0);
+                    const dte=daysToExpiry(exp);
+                    const bias=parseFloat(pc)<0.7?"🟢 Bull":parseFloat(pc)>1.2?"🔴 Bear":"🟡 Neutral";
+                    const isSel=exp===selExpiry;
+                    return (
+                      <tr key={exp} onClick={()=>{setSelExpiry(exp);setTab("chain");}}
+                        style={{cursor:"pointer",background:isSel?"rgba(0,168,255,0.08)":"transparent",transition:"background 0.1s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background=isSel?"rgba(0,168,255,0.12)":"rgba(255,255,255,0.03)"}
+                        onMouseLeave={e=>e.currentTarget.style.background=isSel?"rgba(0,168,255,0.08)":"transparent"}>
+                        <td style={{...tdSt,textAlign:"left",fontWeight:isSel?700:400,color:isSel?"#00A8FF":"#f1f5f9"}}>{fmtExp(exp)}{isSel?" ◆":""}</td>
+                        <td style={{...tdSt,color:dte<=7?"#f59e0b":dte<=30?"#94a3b8":"#64748b"}}>{dte}d</td>
+                        <td style={{...tdSt,color:"#22c55e"}}>{fmtOI(cOI)}</td>
+                        <td style={{...tdSt,color:"#f87171"}}>{fmtOI(pOI)}</td>
+                        <td style={{...tdSt,fontWeight:600,color:"#f1f5f9"}}>{fmtOI(tot)}</td>
+                        <td style={{...tdSt,color:parseFloat(pc)<0.7?"#22c55e":parseFloat(pc)>1.2?"#f87171":"#fbbf24"}}>{pc}</td>
+                        <td style={{...tdSt,color:"#94a3b8"}}>{fmtVol(vol)}</td>
+                        <td style={{...tdSt}}>{bias}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+            <div style={{marginTop:12,fontSize:11,color:"#475569"}}>
+              💡 {isEN?"Click any row to view its options chain":"Haz clic en cualquier fila para ver su cadena de opciones"}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* ─ FOOTER ─ */}
+      <div style={{maxWidth:1600,margin:"0 auto",padding:"0 24px"}}>
+        <div style={{borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:14,display:"flex",flexWrap:"wrap",gap:12,alignItems:"center"}}>
+          <span style={{fontSize:10,color:"#334155"}}>📡 {isEN?"Data":"Datos"}: Deribit Public API · {isEN?"Fear & Greed":"Miedo y Codicia"}: alternative.me</span>
+          <span style={{fontSize:10,color:"#334155",marginLeft:"auto"}}>⚠️ {isEN?"For informational purposes only. Not financial advice.":"Solo informativo. No es consejo financiero."}</span>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+
+
 const NAV_ITEMS = (t, isEN=false) => [
   {label:t.feed,idx:0},{label:t.tops,idx:1},
   {label:t.acciones,idx:3},
@@ -11713,6 +12300,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
+  {label:isEN?"📊 Crypto Options":"📊 Opciones Crypto",idx:41,vip:true},
   {label:isEN?"🛠️ Tools":"🛠️ Herramientas",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
@@ -14539,6 +15127,7 @@ export default function App(){
     if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
+    if(page===41) return <CryptoOptionsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -15418,8 +16007,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===19||page===20||page===35||page===36||page===38)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===19||page===20||page===35||page===36||page===38)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===19||page===20||page===35||page===36||page===38||page===41)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -15436,8 +16025,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===19||page===20||page===35||page===36||page===38)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===19||page===20||page===35||page===36||page===38)?"none":undefined}}>
+        <div style={{gridColumn:(page===19||page===20||page===35||page===36||page===38||page===41)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===19||page===20||page===35||page===36||page===38||page===41)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
