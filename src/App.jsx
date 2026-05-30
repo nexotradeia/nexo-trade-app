@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 21:07:43
+// NEXO TRADE — build: 2026-05-29 21:09:21
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6471,7 +6471,7 @@ function useCountdown(targetDateStr){
 function WebinarCountdown({fecha}){
   // Convierte "Lun 2 Jun" → fecha real 2025
   const monthMap={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11,
-    Ene:0,Feb:1,Mar:2,Abr:3,May:4,Jun:5,Jul:6,Ago:7,Sep:8,Oct:9,Nov:10,Dic:11};
+    Ene:0,Abr:3,Ago:7,Dic:11};
   const parts = fecha.replace(/^[A-Za-záéíóú]+ /,"").split(" ");
   const day=parseInt(parts[0]);
   const mon=monthMap[parts[1]]??5;
