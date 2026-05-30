@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-29 20:22:12
+// NEXO TRADE — build: 2026-05-29 20:28:01
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -24,8 +24,9 @@ const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
 // ══════════════════════════════════════════════════════════════════
 const STRIPE_LINKS = {
   // ── Suscripciones ──────────────────────────────────────────────
-  vip:   "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $9.99/mes
-  pro:   "https://buy.stripe.com/8x23co0vE2Hvgd29cpaR203",  // ✅ activo $24.99/mes
+  vip:      "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $9.99/mes
+  vipAnual: "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ⚠️ REEMPLAZAR con link $79/año de Stripe
+  pro:      "https://buy.stripe.com/8x23co0vE2Hvgd29cpaR203", // ✅ activo $24.99/mes
 
   // ── Webinars (sesión única) ────────────────────────────────────
   // Crear en: dashboard.stripe.com → Payment Links → + Create Link
@@ -4597,8 +4598,12 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   const [email, setEmail] = useState(user?.email||"");
   const [successMsg, setSuccessMsg] = useState("");
   const [activeTab, setActiveTab] = useState("planes");
+  const [billing, setBilling] = useState("annual"); // "monthly" | "annual"
 
   const price = 9.99;
+  const priceAnual = 79;
+  const savingsAnual = Math.round((price * 12 - priceAnual));
+  const savingsPct = Math.round((1 - priceAnual / (price * 12)) * 100);
 
   const FREE_FEATURES = [
     "Foro social — publicar, comentar y repostear",
@@ -4657,13 +4662,11 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     {icon:"📰", titulo:"Noticia urgente",   desc:"Breaking news de tus tickers favoritos al instante"},
   ];
 
-  const handleSubscribe = () => {
+  const handleSubscribe = (forceBilling) => {
     if(!user){ onNeedAuth(); return; }
-    // Abrir Stripe Checkout — pago real con 7 días gratis
-    // Pasamos el email del usuario para pre-rellenar el formulario de Stripe
-    const stripeUrl = STRIPE_PAYMENT_LINK
-      ? STRIPE_PAYMENT_LINK + (user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : "")
-      : "https://dashboard.stripe.com"; // fallback si no se configuró el link
+    const plan = forceBilling || billing;
+    const baseLink = plan === "annual" ? STRIPE_LINKS.vipAnual : STRIPE_LINKS.vip;
+    const stripeUrl = baseLink + (user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : "");
     window.open(stripeUrl, "_blank");
   };
 
@@ -4699,13 +4702,42 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 </div>
                 <h1 style={{margin:"0 0 10px",color:"#fff",fontSize:"clamp(22px,4vw,30px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Take your trading to the next level":"Lleva tu trading al siguiente nivel"}</h1>
                 <p style={{margin:"0 auto 20px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, unlimited AI, email alerts and exclusive education.":"Señales en tiempo real, IA sin límites, alertas por email y formación exclusiva."}</p>
+                {/* Toggle mensual / anual */}
+                <div style={{display:"inline-flex",background:"rgba(0,0,0,0.3)",borderRadius:14,padding:4,gap:4,marginBottom:16,border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <button onClick={()=>setBilling("monthly")}
+                    style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:700,transition:"all 0.2s",
+                      background: billing==="monthly" ? "rgba(99,102,241,0.35)" : "transparent",
+                      color: billing==="monthly" ? "#fff" : "#64748B"}}>
+                    {lang==="en"?"Monthly":"Mensual"} <span style={{opacity:0.7}}>$9.99</span>
+                  </button>
+                  <button onClick={()=>setBilling("annual")}
+                    style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:800,transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,
+                      background: billing==="annual" ? "linear-gradient(135deg,#7C3AED,#6366F1)" : "transparent",
+                      color: billing==="annual" ? "#fff" : "#64748B",
+                      boxShadow: billing==="annual" ? "0 2px 12px rgba(124,58,237,0.4)" : "none"}}>
+                    {lang==="en"?"Annual":"Anual"} <span style={{opacity:0.9}}>$79</span>
+                    <span style={{background:"#10B981",color:"#fff",fontSize:9,fontWeight:900,padding:"1px 6px",borderRadius:6}}>
+                      -{savingsPct}%
+                    </span>
+                  </button>
+                </div>
+
                 {/* CTA prominente en el hero */}
-                <button onClick={handleSubscribe}
-                  style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:14,padding:"16px 36px",fontSize:16,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 32px rgba(124,58,237,0.6)",marginBottom:12,display:"inline-flex",alignItems:"center",gap:8,transition:"transform 0.15s"}}
-                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
-                  onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                  {lang==="en"?"✦ Start free 7 days — $9.99/mo after":"✦ Empieza gratis 7 días — $9.99/mes después"}
-                </button>
+                <div style={{marginBottom:12}}>
+                  <button onClick={()=>handleSubscribe()}
+                    style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:14,padding:"16px 36px",fontSize:16,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 32px rgba(124,58,237,0.6)",display:"inline-flex",alignItems:"center",gap:8,transition:"transform 0.15s, box-shadow 0.15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 40px rgba(124,58,237,0.75)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 32px rgba(124,58,237,0.6)";}}>
+                    {billing==="annual"
+                      ? (lang==="en" ? `✦ Get VIP Annual — $79/year` : `✦ Obtener VIP Anual — $79/año`)
+                      : (lang==="en" ? `✦ Start free 7 days — $9.99/mo` : `✦ Empieza gratis 7 días — $9.99/mes`)
+                    }
+                  </button>
+                </div>
+                {billing==="annual"
+                  ? <div style={{fontSize:12,color:"#10B981",marginBottom:8,fontWeight:700}}>🎉 {lang==="en"?`You save $${savingsAnual}/year vs monthly`:`Ahorras $${savingsAnual} al año vs mensual`}</div>
+                  : null
+                }
                 <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"No card required · Cancel anytime · 840+ active VIP traders":"Sin tarjeta requerida · Cancela cuando quieras · 840+ traders VIP activos"}</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {(lang==="en"
@@ -4755,36 +4787,93 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
           {/* VIP */}
           <div style={{background:"rgba(12,10,30,0.99)",padding:"28px 24px",position:"relative",overflow:"hidden",borderLeft:"2px solid #7C3AED"}}>
-            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ ÚNICO PLAN</div>
+            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ MÁS POPULAR</div>
             <div style={{position:"absolute",top:0,left:0,width:220,height:220,background:"radial-gradient(circle,rgba(124,58,237,0.1),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:1.5,marginBottom:6}}>✦ VIP</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${price.toFixed(2)}</span>
-                <span style={{fontSize:13,color:"#64748B"}}>/mes</span>
+              <div style={{fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:1.5,marginBottom:10}}>✦ VIP</div>
+
+              {/* Toggle mensual / anual inline */}
+              <div style={{display:"flex",background:"rgba(0,0,0,0.3)",borderRadius:10,padding:3,gap:2,marginBottom:14,border:"1px solid rgba(255,255,255,0.07)"}}>
+                <button onClick={()=>setBilling("monthly")}
+                  style={{flex:1,padding:"6px 0",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,transition:"all 0.2s",
+                    background:billing==="monthly"?"rgba(99,102,241,0.3)":"transparent",
+                    color:billing==="monthly"?"#fff":"#475569"}}>
+                  Mensual
+                </button>
+                <button onClick={()=>setBilling("annual")}
+                  style={{flex:1,padding:"6px 0",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:800,transition:"all 0.2s",position:"relative",
+                    background:billing==="annual"?"linear-gradient(135deg,#7C3AED,#6366F1)":"transparent",
+                    color:billing==="annual"?"#fff":"#475569",
+                    boxShadow:billing==="annual"?"0 2px 10px rgba(124,58,237,0.35)":"none"}}>
+                  Anual
+                  {billing!=="annual"&&<span style={{position:"absolute",top:-7,right:2,background:"#10B981",color:"#fff",fontSize:8,fontWeight:900,padding:"1px 4px",borderRadius:4}}>-{savingsPct}%</span>}
+                </button>
               </div>
-              <div style={{fontSize:12,color:"#475569",marginBottom:20}}>Cancela cuando quieras · Sin permanencia</div>
+
+              {/* Precio dinámico */}
+              {billing==="annual" ? (
+                <div style={{marginBottom:4}}>
+                  <div style={{display:"flex",alignItems:"baseline",gap:4}}>
+                    <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${priceAnual}</span>
+                    <span style={{fontSize:13,color:"#64748B"}}>/año</span>
+                    <span style={{fontSize:12,color:"#10B981",fontWeight:700,marginLeft:4}}>({lang==="en"?`$${(priceAnual/12).toFixed(2)}/mo`:`$${(priceAnual/12).toFixed(2)}/mes`})</span>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                    <span style={{fontSize:12,color:"#475569",textDecoration:"line-through"}}>${(price*12).toFixed(0)}/año</span>
+                    <span style={{background:"rgba(16,185,129,0.15)",color:"#10B981",border:"1px solid rgba(16,185,129,0.3)",borderRadius:6,fontSize:11,fontWeight:800,padding:"1px 7px"}}>🎉 Ahorras ${savingsAnual}</span>
+                  </div>
+                </div>
+              ) : (
+                <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+                  <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${price.toFixed(2)}</span>
+                  <span style={{fontSize:13,color:"#64748B"}}>/mes</span>
+                </div>
+              )}
+              <div style={{fontSize:12,color:"#475569",marginBottom:16}}>
+                {billing==="annual" ? "Pago único anual · Sin renovación sorpresa" : "Cancela cuando quieras · Sin permanencia"}
+              </div>
+
               {VIP_FEATURES.map((f,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"7px 0",borderBottom:i<VIP_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
                   <span style={{fontSize:11,color:"#A78BFA",flexShrink:0,marginTop:2}}>★</span>
                   <span style={{fontSize:12,color:"#CBD5E1",lineHeight:1.4}}>{f}</span>
                 </div>
               ))}
+
               <div style={{marginTop:24}}>
                 {isPremium
-                  ?<div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>✅ Plan activo — ¡Gracias por ser VIP!</div>
-                  :<>
-                    {/* Trial badge */}
-                    <div style={{background:"rgba(0,200,100,0.1)",border:"1px solid rgba(0,200,100,0.25)",borderRadius:10,padding:"8px 12px",marginBottom:10,textAlign:"center"}}>
-                      <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>🎁 7 días GRATIS · Luego solo $9.99/mes</span>
-                    </div>
-                    <button onClick={handleSubscribe}
-                      style={{width:"100%",background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(124,58,237,0.55)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
-                      onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 36px rgba(124,58,237,0.7)";}}
-                      onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 28px rgba(124,58,237,0.55)";}}>
-                      ✦ Comenzar prueba gratis →
-                    </button>
-                    <div style={{textAlign:"center",fontSize:11,color:"#475569"}}>Sin tarjeta · Cancela cuando quieras · Acceso inmediato</div>
+                  ? <div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>✅ Plan activo — ¡Gracias por ser VIP!</div>
+                  : <>
+                    {billing==="annual" ? (
+                      <>
+                        <button onClick={()=>handleSubscribe("annual")}
+                          style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 24px rgba(16,185,129,0.45)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
+                          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,0.6)";}}
+                          onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 24px rgba(16,185,129,0.45)";}}>
+                          🎉 Obtener VIP Anual — $79/año →
+                        </button>
+                        <div style={{textAlign:"center",fontSize:11,color:"#10B981",fontWeight:700,marginBottom:4}}>Ahorras ${savingsAnual} vs mensual · Acceso inmediato</div>
+                        <div style={{textAlign:"center",fontSize:10,color:"#334155",cursor:"pointer",textDecoration:"underline"}} onClick={()=>setBilling("monthly")}>
+                          O continúa mensual por $9.99/mes →
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{background:"rgba(0,200,100,0.1)",border:"1px solid rgba(0,200,100,0.25)",borderRadius:10,padding:"8px 12px",marginBottom:10,textAlign:"center"}}>
+                          <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>🎁 7 días GRATIS · Luego solo $9.99/mes</span>
+                        </div>
+                        <button onClick={()=>handleSubscribe("monthly")}
+                          style={{width:"100%",background:"linear-gradient(135deg,#7C3AED,#6366F1)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(124,58,237,0.55)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
+                          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 36px rgba(124,58,237,0.7)";}}
+                          onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 28px rgba(124,58,237,0.55)";}}>
+                          ✦ Comenzar prueba gratis →
+                        </button>
+                        <div style={{textAlign:"center",fontSize:11,color:"#475569",marginBottom:4}}>Sin tarjeta · Cancela cuando quieras · Acceso inmediato</div>
+                        <div style={{textAlign:"center",fontSize:10,color:"#10B981",fontWeight:700,cursor:"pointer"}} onClick={()=>setBilling("annual")}>
+                          💡 O ahorra ${savingsAnual} con el plan anual →
+                        </div>
+                      </>
+                    )}
                   </>
                 }
               </div>
