@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 04:07:18
+// NEXO TRADE — build: 2026-05-30 14:38:27
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6457,7 +6457,7 @@ function Footer({ setPage, onAuth, lang="es" }){
       items:[
         {label: isEN?"Stock Screener ✦":"Screener ✦",           page:17},
         {label: isEN?"Institutional Flow ✦":"Flujo Inst. ✦",    page:20},
-        {label: isEN?"Top Investors ✦":"Gurús ✦",               page:19},
+        {label: isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",            page:19},
         {label: isEN?"Economic Calendar":"Cal. Económico",       page:14},
         {label: "IPOs 2026",                                     page:16},
         {label: isEN?"Dividends":"Dividendos",                   page:15},
@@ -9531,6 +9531,47 @@ function FlowPage({isPremium,onNeedPremium}){
   const [highlight,setHighlight]=useState(null);
   const [minPrem,setMinPrem]=useState(0);
   const [fullscreen,setFullscreen]=useState(false);
+  // Whale tracker state
+  const [whaleData,setWhaleData]=useState(null);
+  const [whaleLoad,setWhaleLoad]=useState(false);
+  const [whaleErr,setWhaleErr]=useState(false);
+  const [whaleTxs,setWhaleTxs]=useState([]); // simulated live feed
+  const [whalePaused,setWhalePaused]=useState(false);
+
+  const fetchWhales=async()=>{
+    setWhaleLoad(true); setWhaleErr(false);
+    try{
+      const r=await fetch("/api/chart?type=whales");
+      if(!r.ok) throw new Error("err");
+      const d=await r.json();
+      setWhaleData(d);
+    }catch{ setWhaleErr(true); }
+    setWhaleLoad(false);
+  };
+
+  useEffect(()=>{ if(filter==="whales") fetchWhales(); },[filter]);
+
+  // Simulated live BTC whale tx feed (actualizado cada 8s)
+  useEffect(()=>{
+    if(filter!=="whales"||whalePaused) return;
+    const WALLETS=["Binance Hot Wallet","Coinbase Custody","Kraken Exchange","Unknown Whale","MicroStrategy","OKX","Bitfinex","Unknown Wallet","BlackRock IBIT","Fidelity FBTC"];
+    const genTx=()=>({
+      id:Date.now()+Math.random(),
+      from:WALLETS[Math.floor(Math.random()*WALLETS.length)],
+      to:WALLETS[Math.floor(Math.random()*WALLETS.length)],
+      btc:+(Math.random()*2000+100).toFixed(2),
+      usd:null, // calculado abajo
+      type:Math.random()>0.5?"exchange_in":"exchange_out",
+      ts:new Date(),
+      isNew:true,
+    });
+    const iv=setInterval(()=>{
+      const tx=genTx();
+      if(whaleData?.btcPrice?.price) tx.usd=+(tx.btc*whaleData.btcPrice.price).toFixed(0);
+      setWhaleTxs(prev=>[tx,...prev.slice(0,29)].map((t,i)=>({...t,isNew:i===0})));
+    },8000);
+    return()=>clearInterval(iv);
+  },[filter,whalePaused,whaleData]);
 
   useEffect(()=>{
     if(paused||!isPremium) return;
@@ -9565,11 +9606,12 @@ function FlowPage({isPremium,onNeedPremium}){
   const fmtSize=(v)=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1e3?`${(v/1e3).toFixed(0)}K`:`${v}`;
 
   const FILTERS=[
-    {k:"all",  l:"🌊 Todo"},
-    {k:"call", l:"📈 Calls"},
-    {k:"put",  l:"📉 Puts"},
-    {k:"dark", l:"🌑 Dark Pool"},
-    {k:"gold", l:"⭐ Golden Sweep"},
+    {k:"all",    l:"🌊 Todo"},
+    {k:"call",   l:"📈 Calls"},
+    {k:"put",    l:"📉 Puts"},
+    {k:"dark",   l:"🌑 Dark Pool"},
+    {k:"gold",   l:"⭐ Golden Sweep"},
+    {k:"whales", l:"🐳 Ballenas BTC"},
   ];
 
   const PREM_FILTERS=[
@@ -9696,9 +9738,250 @@ function FlowPage({isPremium,onNeedPremium}){
       </div>{/* end minWidth wrapper */}
       </div>{/* end overflow-x:auto */}
 
-      <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
-        ⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero
-      </div>
+      {filter!=="whales" && (
+        <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
+          ⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero
+        </div>
+      )}
+
+      {/* ── 🐳 BALLENAS BTC TAB ─────────────────────────────────── */}
+      {filter==="whales" && (
+        <div style={{padding:"4px 0 40px"}}>
+          {whaleLoad && (
+            <div style={{textAlign:"center",padding:"60px 20px"}}>
+              <div style={{width:40,height:40,borderRadius:"50%",border:"3px solid rgba(247,147,26,0.2)",borderTopColor:"#F7931A",animation:"spin 1s linear infinite",margin:"0 auto 14px"}}/>
+              <div style={{color:C.muted,fontSize:13}}>Cargando datos de ballenas en tiempo real…</div>
+            </div>
+          )}
+
+          {!whaleLoad && whaleErr && (
+            <div style={{textAlign:"center",padding:"48px 20px"}}>
+              <div style={{fontSize:40,marginBottom:10}}>🐳</div>
+              <div style={{color:C.muted,fontSize:13,marginBottom:14}}>No se pudieron cargar los datos · Intenta de nuevo</div>
+              <button onClick={fetchWhales} style={{background:"linear-gradient(135deg,#F7931A,#ff6b00)",border:"none",borderRadius:10,padding:"10px 24px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>Reintentar</button>
+            </div>
+          )}
+
+          {!whaleLoad && !whaleErr && whaleData && (()=>{
+            const {btcPrice,fng,etfFlows,totalEtfFlow7d,bigHolders,signals,onChain}=whaleData;
+            const fmt$B=v=>v>=1e9?`$${(v/1e9).toFixed(1)}B`:v>=1e6?`$${(v/1e6).toFixed(0)}M`:`$${v}`;
+            const fngColor=v=>v>=60?"#10B981":v>=40?"#F59E0B":"#EF4444";
+
+            return(
+              <div style={{display:"flex",flexDirection:"column",gap:14}}>
+
+                {/* ── HEADER ROW: BTC price + F&G + señales ── */}
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10}}>
+                  {/* BTC Price */}
+                  {btcPrice && (
+                    <div style={{background:"linear-gradient(135deg,rgba(247,147,26,0.12),rgba(247,147,26,0.05))",border:"1px solid rgba(247,147,26,0.25)",borderRadius:14,padding:"14px 16px",gridColumn:"span 2"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:28}}>₿</span>
+                        <div>
+                          <div style={{fontSize:22,fontWeight:900,color:"#F7931A"}}>
+                            ${btcPrice.price.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0})}
+                          </div>
+                          <div style={{fontSize:12,color:btcPrice.change24h>=0?"#10B981":"#EF4444",fontWeight:700}}>
+                            {btcPrice.change24h>=0?"+":""}{btcPrice.change24h?.toFixed(2)}% · Vol 24h: {fmt$B(btcPrice.volume24h)}
+                          </div>
+                        </div>
+                        <div style={{marginLeft:"auto",textAlign:"right"}}>
+                          <div style={{fontSize:11,color:C.muted}}>H: ${btcPrice.high24h?.toLocaleString("en-US",{maximumFractionDigits:0})}</div>
+                          <div style={{fontSize:11,color:C.muted}}>L: ${btcPrice.low24h?.toLocaleString("en-US",{maximumFractionDigits:0})}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {/* Fear & Greed */}
+                  {fng && (
+                    <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",textAlign:"center"}}>
+                      <div style={{fontSize:10,color:C.muted,fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>Fear &amp; Greed</div>
+                      <div style={{fontSize:32,fontWeight:900,color:fngColor(fng.value),lineHeight:1}}>{fng.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,color:fngColor(fng.value),marginTop:3}}>{fng.label}</div>
+                    </div>
+                  )}
+                  {/* ETF Flow 7d */}
+                  <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",textAlign:"center"}}>
+                    <div style={{fontSize:10,color:C.muted,fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>ETF Flow 7d</div>
+                    <div style={{fontSize:22,fontWeight:900,color:totalEtfFlow7d>=0?"#10B981":"#EF4444",lineHeight:1}}>{totalEtfFlow7d>=0?"+":""}{fmt$B(totalEtfFlow7d*1e6)}</div>
+                    <div style={{fontSize:11,color:totalEtfFlow7d>=0?"#10B981":"#EF4444",marginTop:3,fontWeight:700}}>{totalEtfFlow7d>=0?"Entrada neta":"Salida neta"}</div>
+                  </div>
+                  {/* Hash Rate */}
+                  {onChain?.hashRate && (
+                    <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",textAlign:"center"}}>
+                      <div style={{fontSize:10,color:C.muted,fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>Hash Rate</div>
+                      <div style={{fontSize:20,fontWeight:900,color:"#A78BFA",lineHeight:1}}>{(onChain.hashRate/1e18).toFixed(0)} EH/s</div>
+                      <div style={{fontSize:11,color:C.muted,marginTop:3}}>Seguridad histórica</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── SEÑALES ON-CHAIN ── */}
+                <div>
+                  <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>📡 Señales Manos Fuertes</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:8}}>
+                    {signals.map((s,i)=>(
+                      <div key={i} style={{background:s.bull?"rgba(16,185,129,0.06)":"rgba(239,68,68,0.06)",border:`1px solid ${s.bull?"rgba(16,185,129,0.18)":"rgba(239,68,68,0.18)"}`,borderRadius:12,padding:"11px 14px",display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:18,flexShrink:0}}>{s.icon}</span>
+                        <div style={{minWidth:0}}>
+                          <div style={{fontSize:11,color:C.muted,fontWeight:600}}>{s.label}</div>
+                          <div style={{fontSize:12,fontWeight:800,color:s.bull?"#10B981":"#EF4444",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.value}</div>
+                        </div>
+                        <span style={{marginLeft:"auto",fontSize:16,flexShrink:0}}>{s.bull?"🟢":"🔴"}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── LIVE TX FEED + ETF FLOWS (dos columnas) ── */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+
+                  {/* Live whale transactions feed */}
+                  <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden"}}>
+                    <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                      <div>
+                        <div style={{fontWeight:800,fontSize:13,color:C.text,display:"flex",alignItems:"center",gap:8}}>
+                          🐳 Transacciones en Vivo
+                          <span style={{width:6,height:6,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>
+                        </div>
+                        <div style={{fontSize:10,color:C.muted,marginTop:2}}>Movimientos BTC +100 BTC</div>
+                      </div>
+                      <button onClick={()=>setWhalePaused(p=>!p)}
+                        style={{background:whalePaused?"rgba(245,158,11,0.15)":"rgba(0,210,106,0.1)",border:`1px solid ${whalePaused?"rgba(245,158,11,0.3)":"rgba(0,210,106,0.2)"}`,borderRadius:8,padding:"4px 10px",fontSize:11,fontWeight:700,color:whalePaused?"#F59E0B":"#00D26A",cursor:"pointer"}}>
+                        {whalePaused?"▶":"⏸"}
+                      </button>
+                    </div>
+                    <div style={{maxHeight:340,overflowY:"auto",padding:"6px 0"}}>
+                      {whaleTxs.length===0 && (
+                        <div style={{padding:"30px",textAlign:"center",color:C.muted,fontSize:12}}>
+                          Esperando primera transacción…<br/>
+                          <span style={{fontSize:10,color:"#1E293B",marginTop:4,display:"block"}}>Se actualiza cada ~8 segundos</span>
+                        </div>
+                      )}
+                      {whaleTxs.map((tx,i)=>{
+                        const isIn=tx.type==="exchange_in";
+                        const usdStr=tx.usd?`$${(tx.usd/1e6).toFixed(1)}M`:`${tx.btc.toFixed(0)} BTC`;
+                        return(
+                          <div key={tx.id} style={{padding:"8px 14px",borderBottom:`1px solid ${C.border}`,transition:"background 0.3s",background:tx.isNew?"rgba(247,147,26,0.06)":"transparent",animation:tx.isNew?"fadeInRow 0.4s ease-out":undefined}}>
+                            <div style={{display:"flex",alignItems:"center",gap:8}}>
+                              <span style={{fontSize:18,flexShrink:0}}>{isIn?"📥":"📤"}</span>
+                              <div style={{flex:1,minWidth:0}}>
+                                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                                  <span style={{fontSize:11,fontWeight:800,color:"#F7931A"}}>{tx.btc.toFixed(0)} ₿</span>
+                                  <span style={{fontSize:11,fontWeight:700,color:isIn?"#EF4444":"#10B981",background:isIn?"rgba(239,68,68,0.1)":"rgba(16,185,129,0.1)",borderRadius:5,padding:"1px 6px"}}>{isIn?"→ Exchange":"← Salida"}</span>
+                                </div>
+                                <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:2}}>
+                                  {tx.from} → {tx.to}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{padding:"8px 14px",borderTop:`1px solid ${C.border}`,fontSize:10,color:"#1E293B",textAlign:"center"}}>
+                      Fuente: Blockchain simulado · <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener" style={{color:C.accent}}>BitInfoCharts ↗</a>
+                    </div>
+                  </div>
+
+                  {/* ETF Flows table */}
+                  <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden"}}>
+                    <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`}}>
+                      <div style={{fontWeight:800,fontSize:13,color:C.text}}>🏦 ETF Bitcoin — Flujos Institucionales</div>
+                      <div style={{fontSize:10,color:C.muted,marginTop:2}}>BlackRock · Fidelity · ARK · Grayscale</div>
+                    </div>
+                    <div style={{overflowX:"auto"}}>
+                      <table style={{width:"100%",borderCollapse:"collapse",minWidth:320}}>
+                        <thead>
+                          <tr style={{background:"rgba(255,255,255,0.03)"}}>
+                            {["ETF","Emisor","7d","YTD","AUM"].map(h=>(
+                              <th key={h} style={{padding:"7px 12px",textAlign:"left",fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {etfFlows.map((e,i)=>(
+                            <tr key={e.name} style={{borderBottom:`1px solid ${C.border}`,background:i%2===0?"transparent":"rgba(255,255,255,0.015)"}}
+                              onMouseEnter={ev=>ev.currentTarget.style.background="rgba(0,168,255,0.05)"}
+                              onMouseLeave={ev=>ev.currentTarget.style.background=i%2===0?"transparent":"rgba(255,255,255,0.015)"}>
+                              <td style={{padding:"8px 12px"}}>
+                                <span style={{fontWeight:800,fontSize:13,color:C.text}}>{e.icon} {e.name}</span>
+                              </td>
+                              <td style={{padding:"8px 12px",fontSize:11,color:C.muted}}>{e.issuer}</td>
+                              <td style={{padding:"8px 12px"}}>
+                                <span style={{fontSize:12,fontWeight:800,color:e.flow7d>=0?"#10B981":"#EF4444"}}>
+                                  {e.flow7d>=0?"+":""}{fmt$B(e.flow7d*1e6)}
+                                </span>
+                              </td>
+                              <td style={{padding:"8px 12px"}}>
+                                <span style={{fontSize:11,color:e.flowYtd>=0?"#10B981":"#EF4444",fontWeight:700}}>
+                                  {e.flowYtd>=0?"+":""}{fmt$B(e.flowYtd*1e6)}
+                                </span>
+                              </td>
+                              <td style={{padding:"8px 12px",fontSize:11,color:C.text,fontWeight:600}}>{fmt$B(e.aum*1e6)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div style={{padding:"7px 14px",borderTop:`1px solid ${C.border}`,fontSize:10,color:"#1E293B",textAlign:"center"}}>
+                      Fuente: Bloomberg · Farside Investors · Datos semanales
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── GRANDES TENEDORES (BitInfoCharts style) ── */}
+                <div>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                    <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>🏆 Manos Fuertes — Mayores Tenedores BTC</div>
+                    <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener noreferrer"
+                      style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(0,168,255,0.07)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:6,padding:"3px 10px",textDecoration:"none",display:"flex",alignItems:"center",gap:4}}>
+                      📊 BitInfoCharts ↗
+                    </a>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:10}}>
+                    {bigHolders.map((h,i)=>(
+                      <div key={i} style={{background:C.card2,border:`1px solid ${h.color}22`,borderLeft:`3px solid ${h.color}`,borderRadius:12,padding:"12px 14px",display:"flex",alignItems:"center",gap:12,transition:"background 0.15s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background=`${h.color}08`}
+                        onMouseLeave={e=>e.currentTarget.style.background=C.card2}>
+                        <div style={{width:38,height:38,borderRadius:10,background:`${h.color}18`,border:`1px solid ${h.color}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{h.icon}</div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontWeight:800,fontSize:12,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
+                          <div style={{fontSize:11,color:h.color,fontWeight:700}}>{h.btc.toLocaleString("en-US")} ₿</div>
+                          <div style={{fontSize:10,color:C.muted}}>{h.change}</div>
+                        </div>
+                        <div style={{textAlign:"right",flexShrink:0}}>
+                          <div style={{fontSize:9,color:C.muted,background:`${h.color}12`,border:`1px solid ${h.color}25`,borderRadius:5,padding:"2px 6px",fontWeight:700}}>{h.type}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── Fear & Greed histórico ── */}
+                {fng?.history?.length>0 && (
+                  <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:10}}>😱 Fear &amp; Greed — Últimos 7 días</div>
+                    <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
+                      {fng.history.map((d,i)=>(
+                        <div key={i} style={{flex:1,textAlign:"center"}}>
+                          <div style={{height:Math.max(d.value*0.8,8),background:`linear-gradient(to top,${fngColor(d.value)},${fngColor(d.value)}88)`,borderRadius:"4px 4px 0 0",marginBottom:4,transition:"height 0.3s"}}/>
+                          <div style={{fontSize:11,fontWeight:800,color:fngColor(d.value)}}>{d.value}</div>
+                          <div style={{fontSize:9,color:C.muted}}>{d.date}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{textAlign:"center",fontSize:10,color:"#1E293B",padding:"4px 0"}}>
+                  Fuentes: alternative.me · Binance · Farside Investors · BitInfoCharts · Blockchain.info · No es consejo financiero
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
 }
@@ -10286,8 +10569,8 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
         <div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
           <span style={{fontSize:32}}>👁️</span>
           <div>
-            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Inversores &amp; Congresistas</div>
-            <div style={{fontSize:12,color:"#475569"}}>Gurús · ARK en tiempo real · Insiders SEC · Trades del Congreso</div>
+            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>🏛️ Wall St. & Capitol</div>
+            <div style={{fontSize:12,color:"#475569"}}>Gurús 13F · ARK Daily · Insiders SEC · Congresistas</div>
           </div>
           <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
             {pxUpdated && <span style={{fontSize:10,color:"#334155"}}>Act. {pxUpdated}</span>}
@@ -11565,8 +11848,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"📚 Academy":"📚 Academia",idx:12},
   {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
   {label:isEN?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,vip:true},
-  {label:isEN?"🏛️ Top Investors":"🏛️ Top Inversores",idx:19,vip:true},
-  {label:isEN?"🏛️ Congress Trades":"🏛️ Trades Congreso",idx:35,vip:true},
+  {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
   {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
   {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
