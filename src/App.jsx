@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 14:44:32
+// NEXO TRADE — build: 2026-05-30 15:03:38
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9622,6 +9622,7 @@ function FlowPage({isPremium,onNeedPremium}){
   ];
 
   const visible=feed.filter(f=>{
+    if(filter==="whales") return false; // whale tab has its own section
     if(f.premium<minPrem) return false;
     if(filter==="call") return f.isCall&&!f.isDark;
     if(filter==="put")  return !f.isCall&&!f.isDark;
@@ -9684,8 +9685,8 @@ function FlowPage({isPremium,onNeedPremium}){
         </div>
       </div>
 
-      {/* Table — scrollable on mobile */}
-      <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+      {/* Table — scrollable on mobile — hidden when whale tab is active */}
+      {filter!=="whales" && <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
       <div style={{minWidth:680}}>
       {/* Table header */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
@@ -9736,7 +9737,7 @@ function FlowPage({isPremium,onNeedPremium}){
         })}
       </div>
       </div>{/* end minWidth wrapper */}
-      </div>{/* end overflow-x:auto */}
+      </div>}{/* end overflow-x:auto — conditional on filter!=="whales" */}
 
       {filter!=="whales" && (
         <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
@@ -10484,6 +10485,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
   const [arkFund, setArkFund]   = useState("ARKK");
   const [arkData, setArkData]   = useState(null);
   const [arkLoad, setArkLoad]   = useState(false);
+  const [arkErr,  setArkErr]    = useState(false);
   const [insiders, setInsiders] = useState(null);
   const [insLoad, setInsLoad]   = useState(false);
   const [congress, setCongress] = useState([]);
@@ -10523,10 +10525,15 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
   useEffect(() => {
     if (tab !== "ark") return;
     setArkLoad(true);
+    setArkErr(false);
     fetch(`/api/ark?fund=${arkFund}`)
       .then(r => r.json())
-      .then(d => { setArkData(d); setArkLoad(false); })
-      .catch(() => setArkLoad(false));
+      .then(d => {
+        if (d && (d.holdings?.length > 0)) { setArkData(d); setArkErr(false); }
+        else setArkErr(true);
+        setArkLoad(false);
+      })
+      .catch(() => { setArkErr(true); setArkLoad(false); });
   }, [tab, arkFund]);
 
   // Fetch insiders
@@ -10793,25 +10800,38 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 {f}
               </button>
             ))}
-            <span style={{marginLeft:"auto",fontSize:11,color:C.muted2}}>🚀 Cathie Wood · Actualizado: {arkData?.date||"hoy"}</span>
+            <button onClick={()=>{ setArkData(null); setArkLoad(true); setArkErr(false); fetch(`/api/ark?fund=${arkFund}`).then(r=>r.json()).then(d=>{if(d?.holdings?.length>0){setArkData(d);}else setArkErr(true);setArkLoad(false);}).catch(()=>{setArkErr(true);setArkLoad(false);}); }}
+              style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4,background:"rgba(99,102,241,0.1)",border:`1px solid rgba(99,102,241,0.25)`,borderRadius:16,padding:"4px 12px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer"}}>
+              🔄 Refresh
+            </button>
+            <span style={{fontSize:11,color:C.muted2}}>🚀 Cathie Wood · {arkData?.date||"Actualizado diariamente"}</span>
           </div>
 
           {arkLoad ? (
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {[1,2,3,4,5,6,7,8,9,10].map(i=>(
+                <div key={i} style={{display:"grid",gridTemplateColumns:"50px 1fr 80px 80px 80px",gap:8,padding:"14px 16px",background:"rgba(255,255,255,0.02)",borderRadius:12,border:`1px solid ${C.border}`,animation:"pulse 1.5s ease-in-out infinite"}}>
+                  {[1,2,3,4,5].map(j=><div key={j} style={{height:14,background:"rgba(255,255,255,0.06)",borderRadius:6}}/>)}
+                </div>
+              ))}
+            </div>
+          ) : arkErr ? (
             <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
-              <div style={{fontSize:32,marginBottom:8}}>🚀</div>
-              <div>Cargando holdings de ARK...</div>
+              <div style={{fontSize:40,marginBottom:12}}>⚠️</div>
+              <div style={{fontSize:14,color:"#FF4D6A",marginBottom:8}}>No se pudo cargar datos de ARK</div>
+              <div style={{fontSize:12,color:C.muted2}}>Intenta hacer Refresh o revisa más tarde</div>
             </div>
           ) : (
             <>
               <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
               <div style={{minWidth:480}}>
               <div style={{display:"grid",gridTemplateColumns:"50px 1fr 80px 80px 80px",gap:8,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
-                {["#","EMPRESA","PESO","PRECIO","HOY"].map(h=>(
+                {["#","EMPRESA","PESO %","PRECIO","HOY"].map(h=>(
                   <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
                 ))}
               </div>
               {(arkData?.holdings||[]).map((h,i) => {
-                const pos = h.change >= 0;
+                const pos = (h.change||0) >= 0;
                 return (
                   <div key={h.ticker} style={{display:"grid",gridTemplateColumns:"50px 1fr 80px 80px 80px",gap:8,padding:"12px 16px",background:"rgba(255,255,255,0.01)",border:"1px solid rgba(255,255,255,0.04)",borderRadius:12,marginBottom:5,transition:"background 0.15s"}}
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(139,92,246,0.05)"}
@@ -10834,7 +10854,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                   </div>
                 );
               })}
-              {arkData?.fallback && <div style={{textAlign:"center",fontSize:11,color:C.muted2,padding:"8px 0"}}>* Datos del último reporte disponible</div>}
+              {arkData?.fallback && <div style={{textAlign:"center",fontSize:11,color:"#F59E0B",padding:"8px 0",background:"rgba(245,158,11,0.05)",borderRadius:8,border:"1px solid rgba(245,158,11,0.15)"}}>📋 Datos de referencia — ARK CSV no disponible en este momento</div>}
               </div>
               </div>
             </>
