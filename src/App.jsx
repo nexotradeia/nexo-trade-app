@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 15:39:13
+// NEXO TRADE — build: 2026-05-30 16:34:02
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -8131,158 +8131,156 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
    WEBINARS PAGE — página pública de webinars con compra Stripe
 ═══════════════════════════════════════════════════════════════ */
 const WEBINARS_LIST = [
-  {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar1, nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
-  {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar2, nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
-  {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar3, nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
-  {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:STRIPE_LINKS.webinar4, nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
-  {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar5, nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
-  {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:STRIPE_LINKS.webinar6, nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
+  {
+    titulo:"Análisis Técnico con TradingView",
+    fuente:"TradingView Education",
+    emoji:"📊", nivel:"Principiante", duracion:"60 min", gratis:true,
+    badge:"GRATIS",
+    desc:"Serie oficial de TradingView: aprende a usar gráficas, indicadores, alertas y Pine Script desde cero. Acceso inmediato.",
+    url:"https://www.tradingview.com/education/?aff_id=167149",
+    afiliado:true,
+    tags:["Gráficas","Indicadores","Alertas"],
+  },
+  {
+    titulo:"Introducción a Futuros y Opciones",
+    fuente:"CME Group Education",
+    emoji:"🏛️", nivel:"Principiante", duracion:"45 min", gratis:true,
+    badge:"GRATIS",
+    desc:"CME Group — el mayor mercado de futuros del mundo — ofrece webinars gratuitos sobre futuros, opciones y gestión de riesgo.",
+    url:"https://www.cmegroup.com/education/webinars.html",
+    afiliado:false,
+    tags:["Futuros","Opciones","Riesgo"],
+  },
+  {
+    titulo:"Estrategias de Inversión para Principiantes",
+    fuente:"Charles Schwab",
+    emoji:"🏦", nivel:"Principiante", duracion:"90 min", gratis:true,
+    badge:"GRATIS",
+    desc:"Schwab ofrece webinars semanales gratuitos sobre acciones, ETFs, opciones y planificación financiera. Sin cuenta requerida.",
+    url:"https://www.schwab.com/learn/online-courses",
+    afiliado:false,
+    tags:["ETFs","Acciones","Portafolio"],
+  },
+  {
+    titulo:"Análisis de Mercados con TradingView Pro",
+    fuente:"TradingView Webinars",
+    emoji:"📈", nivel:"Intermedio", duracion:"60 min", gratis:true,
+    badge:"GRATIS",
+    desc:"Webinars en vivo con traders expertos analizando mercados en tiempo real. Disponibles para todos los usuarios de TradingView.",
+    url:"https://www.tradingview.com/webinars/?aff_id=167149",
+    afiliado:true,
+    tags:["Análisis","En Vivo","Mercados"],
+  },
+  {
+    titulo:"Trading de Opciones: Nivel Intermedio",
+    fuente:"CME Group Education",
+    emoji:"🛡️", nivel:"Intermedio", duracion:"60 min", gratis:true,
+    badge:"GRATIS",
+    desc:"Webinar de CME sobre estrategias con opciones: calls cubiertos, puts protectoras y spreads. Material descargable incluido.",
+    url:"https://www.cmegroup.com/education/webinars.html",
+    afiliado:false,
+    tags:["Opciones","Spreads","Hedging"],
+  },
+  {
+    titulo:"Cripto y Bitcoin: Análisis On-Chain",
+    fuente:"TradingView Crypto",
+    emoji:"₿", nivel:"Intermedio", duracion:"75 min", gratis:true,
+    badge:"GRATIS",
+    desc:"Aprende a leer métricas on-chain de Bitcoin y Ethereum usando las herramientas de TradingView: MVRV, NVT, dominancia y más.",
+    url:"https://www.tradingview.com/education/bitcoin/?aff_id=167149",
+    afiliado:true,
+    tags:["Bitcoin","On-Chain","Crypto"],
+  },
 ];
 
 function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
   const [filtroNivel, setFiltroNivel] = useState("todos");
-
-  const niveles = ["todos","Principiante","Intermedio","Avanzado"];
+  const niveles = ["todos","Principiante","Intermedio"];
   const filtered = filtroNivel==="todos" ? WEBINARS_LIST : WEBINARS_LIST.filter(w=>w.nivel===filtroNivel);
-
-  const handleBuy = (w) => {
-    if(!user){ onNeedAuth(); return; }
-    const base = isPremium ? w.stripeLink : w.stripeLink;
-    window.open(base + (user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""), "_blank");
-  };
 
   return(
     <div style={{maxWidth:860,margin:"0 auto",padding:"0 4px"}}>
+
       {/* Hero */}
       <div style={{background:"linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%)",borderRadius:20,padding:"36px 28px",marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,background:`radial-gradient(circle at 30% 50%,#10b98115,transparent 60%),radial-gradient(circle at 70% 50%,#7C3AED15,transparent 60%)`,pointerEvents:"none"}}/>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 30% 50%,#10b98115,transparent 60%),radial-gradient(circle at 70% 50%,#2962FF15,transparent 60%)",pointerEvents:"none"}}/>
         <div style={{position:"relative"}}>
           <div style={{fontSize:44,marginBottom:10}}>🎓</div>
-          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>Webinars de Trading en Vivo</h1>
-          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:500,marginLeft:"auto",marginRight:"auto"}}>Aprende de traders reales. Sesiones en vivo + grabación incluida. Plazas limitadas.</p>
+          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>Webinars & Educación Gratuita</h1>
+          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:500,marginLeft:"auto",marginRight:"auto"}}>Recursos educativos reales de las instituciones financieras más importantes del mundo. 100% gratuitos.</p>
           <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
-            <div style={{background:"#ffffff10",borderRadius:12,padding:"10px 20px",border:"1px solid #ffffff15"}}>
-              <div style={{color:"#fff",fontWeight:800,fontSize:18}}>{WEBINARS_LIST.length}</div>
-              <div style={{color:"#64748b",fontSize:11}}>Webinars este mes</div>
-            </div>
-            <div style={{background:"#ffffff10",borderRadius:12,padding:"10px 20px",border:"1px solid #ffffff15"}}>
-              <div style={{color:"#10b981",fontWeight:800,fontSize:18}}>$29–$79</div>
-              <div style={{color:"#64748b",fontSize:11}}>Precio por sesión</div>
-            </div>
-            <div style={{background:"#7C3AED22",borderRadius:12,padding:"10px 20px",border:"1px solid #7C3AED44"}}>
-              <div style={{color:"#a78bfa",fontWeight:800,fontSize:18}}>50% off</div>
-              <div style={{color:"#64748b",fontSize:11}}>Descuento VIP</div>
-            </div>
+            {[
+              {v:`${WEBINARS_LIST.length} recursos`,l:"Disponibles"},
+              {v:"100% Gratis",l:"Sin costo"},
+              {v:"Instituciones reales",l:"CME · Schwab · TradingView"},
+            ].map((s,i)=>(
+              <div key={i} style={{background:"#ffffff10",borderRadius:12,padding:"10px 20px",border:"1px solid #ffffff15"}}>
+                <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{s.v}</div>
+                <div style={{color:"#64748b",fontSize:11}}>{s.l}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* VIP banner if not premium */}
-      {!isPremium && (
-        <div style={{background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #7C3AED44",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
-          <span style={{fontSize:24}}>✦</span>
-          <div style={{flex:1,fontSize:13,color:"#a78bfa"}}><strong>Hazte VIP ($9.99/mes)</strong> y obtén 50% de descuento en todos los webinars automáticamente.</div>
-          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver VIP →</button>
+      {/* TradingView afiliado banner */}
+      <div style={{background:"linear-gradient(135deg,rgba(41,98,255,0.12),rgba(41,98,255,0.05))",border:"1px solid rgba(41,98,255,0.3)",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
+        <span style={{fontSize:24}}>📊</span>
+        <div style={{flex:1,fontSize:13,color:"#93c5fd"}}>
+          <strong>¿Quieres gráficas profesionales?</strong> — Abre TradingView gratis y accede a todos sus webinars, indicadores y alertas en tiempo real.
         </div>
-      )}
+        <a href="https://www.tradingview.com/?aff_id=167149" target="_blank" rel="noopener noreferrer"
+          style={{background:"linear-gradient(135deg,#2962FF,#1d4ed8)",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",textDecoration:"none",whiteSpace:"nowrap"}}>
+          Abrir TradingView →
+        </a>
+      </div>
 
       {/* Filtros */}
       <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
         {niveles.map(n=>(
           <button key={n} onClick={()=>setFiltroNivel(n)}
             style={{padding:"6px 16px",borderRadius:20,border:"1px solid",fontSize:12,fontWeight:600,cursor:"pointer",
-              borderColor: filtroNivel===n ? C.accent : C.border,
-              background: filtroNivel===n ? C.accent+"22" : "transparent",
-              color: filtroNivel===n ? C.accent : C.muted}}>
-            {n==="todos" ? "🎯 Todos" : n==="Principiante" ? "🟢 "+n : n==="Intermedio" ? "🟡 "+n : "🔴 "+n}
+              borderColor:filtroNivel===n?C.accent:C.border,
+              background:filtroNivel===n?C.accent+"22":"transparent",
+              color:filtroNivel===n?C.accent:C.muted}}>
+            {n==="todos"?"🎯 Todos":n==="Principiante"?"🟢 "+n:"🟡 "+n}
           </button>
         ))}
       </div>
 
       {/* Webinar cards */}
-      <div style={{display:"flex",flexDirection:"column",gap:16}}>
+      <div style={{display:"flex",flexDirection:"column",gap:14}}>
         {filtered.map((w,i)=>{
-          const isUrgent  = w.spotsLeft<=10;
-          const isSoldOut = w.spotsLeft===0;
-          const pct = Math.round((w.spotsLeft/w.spots)*100);
-          const nivelColor = w.nivel==="Avanzado"?"#ef4444":w.nivel==="Intermedio"?"#f59e0b":"#10b981";
+          const nivelColor = w.nivel==="Intermedio"?"#f59e0b":"#10b981";
           return(
-            <div key={i} style={{background:C.surface,border:`1px solid ${isUrgent&&!isSoldOut?"#ef444444":C.border}`,borderRadius:18,overflow:"hidden",boxShadow:C.shadow}}>
-              {isUrgent&&!isSoldOut&&<div style={{height:3,background:"linear-gradient(90deg,#ef4444,#f59e0b)"}}/>}
-              <div style={{padding:"20px 22px",display:"flex",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
+            <div key={i} style={{background:C.surface,border:`1px solid ${w.afiliado?"rgba(41,98,255,0.25)":C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,position:"relative"}}>
+              {w.afiliado && <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#2962FF,#1d4ed8)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 10px",borderRadius:"0 16px 0 8px",letterSpacing:0.5}}>AFILIADO ACTIVO</div>}
+              <div style={{padding:"18px 20px",display:"flex",gap:14,alignItems:"flex-start",flexWrap:"wrap"}}>
                 {/* icon */}
-                <div style={{width:56,height:56,borderRadius:14,background:`linear-gradient(135deg,${C.accentDim},${C.blueBg})`,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,flexShrink:0}}>{w.emoji}</div>
+                <div style={{width:52,height:52,borderRadius:14,background:w.afiliado?"rgba(41,98,255,0.15)":C.accentDim,border:`1px solid ${w.afiliado?"rgba(41,98,255,0.3)":C.accent+"33"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>{w.emoji}</div>
 
                 {/* body */}
                 <div style={{flex:1,minWidth:180}}>
-                  <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
-                    <h3 style={{margin:0,color:C.text,fontSize:15,fontWeight:800}}>{w.titulo}</h3>
-                    <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:11,fontWeight:700}}>{w.nivel}</span>
+                  <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:5}}>
+                    <h3 style={{margin:0,color:C.text,fontSize:14,fontWeight:800}}>{w.titulo}</h3>
+                    <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700}}>{w.nivel}</span>
+                    <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700}}>✅ GRATIS</span>
                   </div>
-                  <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:6}}>
-                    <span style={{color:C.muted,fontSize:12}}>📅 {w.fecha}</span>
-                    <span style={{color:C.muted,fontSize:12}}>🕐 {w.hora}</span>
-                    <span style={{color:C.muted,fontSize:12}}>👤 @{w.instructor}</span>
-                    <span style={{color:C.muted,fontSize:12}}>⏱ {w.duracion}</span>
-                  </div>
-                  <div style={{marginBottom:8}}><WebinarCountdown fecha={w.fecha}/></div>
+                  <div style={{fontSize:11,color:C.muted,fontWeight:600,marginBottom:6}}>🏛️ {w.fuente} · ⏱ {w.duracion}</div>
                   <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.6}}>{w.desc}</p>
-                  {/* spots */}
-                  <div>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                      <span style={{fontSize:11,color:isUrgent?"#ef4444":C.muted,fontWeight:isUrgent?700:400}}>
-                        {isSoldOut?"❌ Agotado":isUrgent?`🔥 ¡Solo ${w.spotsLeft} plazas!`:`👥 ${w.spotsLeft}/${w.spots} plazas`}
-                      </span>
-                      <span style={{fontSize:11,color:C.muted2}}>{pct}% disp.</span>
-                    </div>
-                    <div style={{background:C.border,borderRadius:20,height:5,overflow:"hidden"}}>
-                      <div style={{height:"100%",borderRadius:20,width:`${pct}%`,background:isUrgent?"linear-gradient(90deg,#ef4444,#f59e0b)":`linear-gradient(90deg,${C.accent},#00e5b0)`}}/>
-                    </div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    {w.tags.map(t=><span key={t} style={{background:C.border,color:C.muted2,borderRadius:6,padding:"2px 8px",fontSize:11}}>{t}</span>)}
                   </div>
                 </div>
 
-                {/* price + CTA */}
-                <div style={{flexShrink:0,textAlign:"center",minWidth:130,display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
-                  {/* Price block */}
-                  <div style={{background:isPremium?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)",border:`1px solid ${isPremium?"rgba(139,92,246,0.3)":"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:"10px 16px",width:"100%",boxSizing:"border-box"}}>
-                    {isPremium ? (
-                      <>
-                        <div style={{fontSize:9,color:"#a78bfa",fontWeight:800,letterSpacing:"0.1em",marginBottom:4}}>✦ PRECIO VIP</div>
-                        <div style={{fontSize:28,fontWeight:900,color:"#A78BFA",lineHeight:1,letterSpacing:"-1px"}}>${w.precioVip}</div>
-                        <div style={{fontSize:11,color:"#475569",textDecoration:"line-through",marginTop:2}}>${w.precio} regular</div>
-                        <div style={{fontSize:10,color:"#10B981",fontWeight:700,marginTop:3}}>Ahorras ${w.precio-w.precioVip}</div>
-                      </>
-                    ):(
-                      <>
-                        <div style={{fontSize:9,color:"#64748b",fontWeight:700,letterSpacing:"0.1em",marginBottom:4}}>PRECIO</div>
-                        <div style={{fontSize:28,fontWeight:900,color:"#F1F5F9",lineHeight:1,letterSpacing:"-1px"}}>${w.precio}</div>
-                        <div style={{fontSize:10,color:"#a78bfa",fontWeight:600,marginTop:4,background:"rgba(139,92,246,0.1)",borderRadius:6,padding:"2px 6px",display:"inline-block"}}>VIP paga ${w.precioVip} ✦</div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* CTA button */}
-                  <button onClick={()=>handleBuy(w)} disabled={isSoldOut}
-                    style={{background:isSoldOut?"rgba(55,65,81,0.5)":isPremium?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"linear-gradient(135deg,#6366f1,#8B5CF6)",
-                      border:"none",borderRadius:10,padding:"11px 0",color:"#fff",fontSize:13,fontWeight:800,cursor:isSoldOut?"default":"pointer",
-                      width:"100%",opacity:isSoldOut?0.5:1,transition:"opacity 0.15s,transform 0.15s",
-                      boxShadow:isSoldOut?"none":"0 4px 14px rgba(139,92,246,0.35)",letterSpacing:"-0.2px"}}
-                    onMouseEnter={e=>{ if(!isSoldOut){e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 18px rgba(139,92,246,0.5)";} }}
-                    onMouseLeave={e=>{ e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=isSoldOut?"none":"0 4px 14px rgba(139,92,246,0.35)"; }}>
-                    {isSoldOut ? "Agotado" : isPremium ? "Reservar VIP ✦ →" : "Reservar plaza →"}
-                  </button>
-
-                  {/* Extras */}
-                  <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
-                    <span style={{fontSize:10,color:"#475569",display:"flex",alignItems:"center",gap:3}}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6z" fill="#475569" stroke="none"/></svg>
-                      Grabación incluida
-                    </span>
-                    <span style={{fontSize:10,color:"#475569",display:"flex",alignItems:"center",gap:3}}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                      Stripe seguro
-                    </span>
-                  </div>
+                {/* CTA */}
+                <div style={{flexShrink:0,display:"flex",flexDirection:"column",gap:8,alignItems:"center",minWidth:130}}>
+                  <div style={{fontSize:22,fontWeight:900,color:"#00D26A"}}>GRATIS</div>
+                  <a href={w.url} target="_blank" rel="noopener noreferrer"
+                    style={{display:"block",background:w.afiliado?"linear-gradient(135deg,#2962FF,#1d4ed8)":"linear-gradient(135deg,#10b981,#059669)",border:"none",borderRadius:10,padding:"10px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"center",textDecoration:"none",width:"100%",boxSizing:"border-box"}}>
+                    Ver webinar →
+                  </a>
+                  <div style={{fontSize:10,color:C.muted2,textAlign:"center"}}>🌐 Acceso inmediato</div>
                 </div>
               </div>
             </div>
@@ -8293,12 +8291,12 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
       {/* Bottom CTA */}
       <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
         <div style={{fontSize:36,marginBottom:10}}>📬</div>
-        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Tienes preguntas sobre algún webinar?</h3>
-        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Escríbenos a <a href="mailto:mgtproia@gmail.com" style={{color:C.accent}}>mgtproia@gmail.com</a> y te respondemos en menos de 24h.</p>
-        <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-          <button onClick={()=>window.open("mailto:mgtproia@gmail.com","_blank")} style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Contactar →</button>
-          {!isPremium && <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>✦ Ser VIP y ahorrar 50%</button>}
-        </div>
+        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Quieres webinars propios de NexoTrade?</h3>
+        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Estamos organizando sesiones en vivo con traders reales. Déjanos tu correo para ser el primero en enterarte.</p>
+        <a href="mailto:mgtproia@gmail.com?subject=Quiero saber de los webinars de NexoTrade"
+          style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#00a87f)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>
+          📬 Notifícame →
+        </a>
       </div>
     </div>
   );
