@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 19:42:47
+// NEXO TRADE — build: 2026-05-30 19:46:51
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -2041,7 +2041,9 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                         setNickStatus("checking");
                         const{data:chk}=await supabase.from("profiles").select("id").eq("username",n).neq("id",user.id).limit(1);
                         if(chk?.length>0){setNickStatus("taken");return;}
-                        await supabase.from("profiles").update({username:n,user_name:n}).eq("id",user.id);
+                        const{error:upErr2}=await supabase.from("profiles").update({username:n}).eq("id",user.id);
+                        if(upErr2){setNickStatus("taken");return;}
+                        await supabase.auth.updateUser({data:{username:n}}).catch(()=>{});
                         try{localStorage.setItem(COOLDOWN_KEY,String(Date.now()));}catch{}
                         onUserUpdate&&onUserUpdate({...user,username:n,name:n,user_name:n});
                         setNickStatus("saved");
@@ -5629,12 +5631,13 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                       // Doble verificación
                       const{data:chk}=await supabase.from("profiles").select("id").eq("username",newName).neq("id",user.id).limit(1);
                       if(chk&&chk.length>0){setNameStatus("taken");return;}
-                      await supabase.from("profiles").update({username:newName,user_name:newName}).eq("id",user.id);
-                      onUserUpdate&&onUserUpdate({...user,username:newName,name:newName,user_name:newName});
-                      // Email confirmación
-                      if(user.email){
-                        fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:user.email,subject:"Tu username en NexoTrade fue actualizado",message:`Tu nuevo username es @${newName}. Si no hiciste este cambio, contáctanos en mgtproia@gmail.com`})}).catch(()=>{});
-                      }
+                      // Solo actualizar username (columna garantizada en profiles)
+                      const{error:upErr}=await supabase.from("profiles").update({username:newName}).eq("id",user.id);
+                      if(upErr){setNameStatus("error");return;}
+                      // También actualizar user_metadata de Supabase auth para máxima persistencia
+                      await supabase.auth.updateUser({data:{username:newName}}).catch(()=>{});
+                      const updated={...user,username:newName,name:newName,user_name:newName};
+                      onUserUpdate&&onUserUpdate(updated);
                       setNameStatus("saved");
                       setTimeout(()=>{setEditingName(false);setNameStatus(null);},1500);
                     }} disabled={nameStatus==="taken"||nameStatus==="checking"||editName.length<3}
@@ -5643,11 +5646,12 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                       style={{background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:11,cursor:"pointer"}}>✕</button>
                   </div>
                   {/* Status indicator */}
-                  {nameStatus&&<div style={{fontSize:11,marginTop:4,fontWeight:600,color:nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#00e58f":nameStatus==="saved"?"#00e58f":"#94a3b8"}}>
+                  {nameStatus&&<div style={{fontSize:11,marginTop:4,fontWeight:600,color:nameStatus==="taken"||nameStatus==="error"?"#ef4444":nameStatus==="available"?"#00e58f":nameStatus==="saved"?"#00e58f":"#94a3b8"}}>
                     {nameStatus==="checking"?"🔍 Verificando..."
                     :nameStatus==="taken"?"✗ Username ya en uso"
+                    :nameStatus==="error"?"✗ Error al guardar — intenta de nuevo"
                     :nameStatus==="available"?"✓ Disponible"
-                    :nameStatus==="saved"?"✅ ¡Guardado! Revisá tu email":""}
+                    :nameStatus==="saved"?"✅ ¡Guardado!":""}
                   </div>}
                   <div style={{fontSize:10,color:"rgba(148,163,184,0.5)",marginTop:3}}>Solo letras, números y _ · Mín. 3 caracteres</div>
                 </div>
