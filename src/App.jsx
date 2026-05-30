@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 17:33:27
+// NEXO TRADE — build: 2026-05-30 17:38:51
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5349,7 +5349,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🔥", label:"Feed",                                        idx:0},
     {icon:"📊", label:isEN?"Top Traders":"Tops Traders",             idx:1},
     {icon:"📈", label:isEN?"Markets":"Mercados",                     idx:3},
-    {icon:"🤖", label:isEN?"AI Tools":"Herramientas IA",             idx:9, vip:true, ai:true},
+    {icon:"🎮", label:isEN?"Paper Trading":"Paper Trading",             idx:9, vip:true, ai:true},
     {icon:"✦",  label:isEN?"VIP Premium":"Premium VIP",              idx:8, premium:true},
   ];
   const navMore = [
@@ -6453,7 +6453,7 @@ function Footer({ setPage, onAuth, lang="es" }){
       ]
     },
     {
-      title: isEN?"Tools":"Herramientas",
+      title: isEN?"Paper Trading":"Paper Trading",
       items:[
         {label: isEN?"Stock Screener ✦":"Screener ✦",           page:17},
         {label: isEN?"Institutional Flow ✦":"Flujo Inst. ✦",    page:20},
@@ -12333,7 +12333,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
   {label:isEN?"📊 Crypto Options":"📊 Opciones Crypto",idx:41,vip:true},
-  {label:isEN?"🛠️ Tools":"🛠️ Herramientas",idx:9,vip:true},
+  {label:isEN?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
 
