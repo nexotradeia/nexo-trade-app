@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 20:04:55
+// NEXO TRADE — build: 2026-05-30 20:08:01
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -3057,7 +3057,10 @@ function GifPicker({onSelect,onClose,onText}){
   const tabs = [{k:"gif",l:"GIF 🎞️"},{k:"emoji",l:"Emojis 😎"},{k:"reaction",l:"Frases ⚡"},{k:"sticker",l:"Stickers 🎨"}];
 
   return(
-    <div style={{position:"fixed",bottom:0,left:0,right:0,maxWidth:680,margin:"0 auto",background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:"16px 16px 0 0",boxShadow:"0 -8px 40px rgba(0,0,0,0.18)",zIndex:9999,overflow:"hidden"}}>
+    <>
+    {/* Backdrop para cerrar al tocar fuera */}
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:9998}}/>
+    <div style={{position:"fixed",bottom:0,left:0,right:0,maxWidth:720,margin:"0 auto",background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:"18px 18px 0 0",boxShadow:"0 -12px 48px rgba(0,0,0,0.28)",zIndex:9999,overflow:"hidden"}}>
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.card2||"#f8fafc"}}>
         {tabs.map(t=>(
@@ -3086,7 +3089,7 @@ function GifPicker({onSelect,onClose,onText}){
             );})}
           </div>
           {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ Buscando GIFs...</div>:(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:200,overflowY:"auto"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:260,overflowY:"auto"}}>
               {gifs.map(g=>(
                 <div key={g.id} style={{borderRadius:7,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:"#f1f5f9"}}
                   onClick={()=>onSelect(g.full||g.preview)}>
@@ -3099,6 +3102,7 @@ function GifPicker({onSelect,onClose,onText}){
         </>}
 
         {/* ── EMOJI TAB ── */}
+
         {tab==="emoji"&&<>
           <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Toca un emoji para añadirlo a tu post:</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(8,1fr)",gap:4,maxHeight:240,overflowY:"auto"}}>
@@ -3143,6 +3147,7 @@ function GifPicker({onSelect,onClose,onText}){
         </>}
       </div>
     </div>
+    </>
   );
 }
 
