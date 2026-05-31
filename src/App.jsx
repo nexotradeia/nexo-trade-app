@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 20:08:01
+// NEXO TRADE — build: 2026-05-30 20:09:58
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11261,20 +11261,55 @@ const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
   };
 });
 
+// Nombres de empresa para los tickers más comunes
+const TICKER_NAMES={
+  NVDA:"NVIDIA",AAPL:"Apple",TSLA:"Tesla",MSFT:"Microsoft",META:"Meta",
+  AMZN:"Amazon",GOOGL:"Alphabet",PLTR:"Palantir",AMD:"AMD",SPY:"S&P 500 ETF",
+  SMCI:"Super Micro",COIN:"Coinbase",QQQ:"Nasdaq ETF",MSFT:"Microsoft",
+  BTC:"Bitcoin",ETH:"Ethereum",SOL:"Solana",BNB:"Binance Coin",
+  XRP:"Ripple",ADA:"Cardano",DOGE:"Dogecoin",AVAX:"Avalanche",
+  JPM:"JPMorgan",BAC:"Bank of America",GS:"Goldman Sachs",
+  NFLX:"Netflix",DIS:"Disney",UBER:"Uber",LYFT:"Lyft",
+  SHOP:"Shopify",SQ:"Block (Square)",PYPL:"PayPal",V:"Visa",MA:"Mastercard",
+};
+
+// Renderiza texto con $TICKER clicables y nombre de empresa
+function renderBotText(text, onTickerClick){
+  const parts = text.split(/(\$[A-Z]{1,5})/g);
+  return parts.map((part,i)=>{
+    const match = part.match(/^\$([A-Z]{1,5})$/);
+    if(match){
+      const tk = match[1];
+      const name = TICKER_NAMES[tk];
+      return(
+        <span key={i} onClick={()=>onTickerClick&&onTickerClick(tk)}
+          title={name?`Ver ${name} en NexoTrade`:`Ver $${tk} en NexoTrade`}
+          style={{color:C.accent,fontWeight:800,cursor:"pointer",borderBottom:`1.5px solid ${C.accent}`,paddingBottom:1,transition:"opacity 0.15s",display:"inline-flex",alignItems:"center",gap:2}}
+          onMouseEnter={e=>e.currentTarget.style.opacity="0.75"}
+          onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+          {part}{name&&<span style={{fontSize:"0.75em",fontWeight:600,color:C.muted,borderBottom:"none"}}> ({name})</span>}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function BotPostCard({post,onTickerClick,lang}){
   const isEN = lang==="en";
   const isBull = post.sentiment==="bull";
   const isBear = post.sentiment==="bear";
   const sentColor = isBull?C.bull:isBear?C.bear:C.muted;
   const sentBg    = isBull?C.bullBg:isBear?C.bearBg:C.accentDim;
-  const sentLabel = isBull?(isEN?"BUY":"COMPRA"):isBear?(isEN?"SELL":"VENTA"):(isEN?"HOLD":"NEUTRO");
+  const sentLabel = isBull?(isEN?"▲ COMPRA":"▲ COMPRA"):isBear?(isEN?"▼ VENTA":"▼ VENTA"):(isEN?"◆ HOLD":"◆ HOLD");
+  const mainName  = TICKER_NAMES[post.ticker];
   return(
     <div style={{background:C.card,border:`1.5px solid ${isBull?"rgba(22,163,74,0.22)":isBear?"rgba(220,38,38,0.22)":C.border}`,borderRadius:16,padding:"14px 16px",marginBottom:6,boxShadow:C.shadow,transition:"transform 0.18s"}}
       onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
       onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
-        {/* Avatar del persona */}
-        <div style={{width:40,height:40,borderRadius:12,background:`${post.avatarColor}18`,border:`1.5px solid ${post.avatarColor}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+        {/* Avatar */}
+        <div style={{width:40,height:40,borderRadius:12,background:`${post.avatarColor}18`,border:`1.5px solid ${post.avatarColor}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,cursor:"default"}}>
           {post.avatar}
         </div>
         <div style={{flex:1,minWidth:0}}>
@@ -11282,24 +11317,35 @@ function BotPostCard({post,onTickerClick,lang}){
             <span style={{fontWeight:800,color:C.text,fontSize:14}}>@{post.user}</span>
             {post.badge&&<span style={{background:`${post.avatarColor}15`,color:post.avatarColor,borderRadius:20,padding:"1px 7px",fontSize:10,fontWeight:700}}>{post.badge}</span>}
             <span style={{background:sentBg,color:sentColor,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>{sentLabel}</span>
+            {/* Ticker clicable con nombre de empresa */}
             <span onClick={()=>onTickerClick&&onTickerClick(post.ticker)}
-              style={{background:C.accentDim,color:C.accent,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-              ${post.ticker}
+              style={{background:C.accentDim,color:C.accent,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:700,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4}}
+              title={mainName?`Ver ${mainName} en NexoTrade`:undefined}>
+              <span style={{fontFamily:"monospace"}}>${post.ticker}</span>
+              {mainName&&<span style={{color:C.muted,fontWeight:500,fontSize:10}}>{mainName}</span>}
             </span>
             <span style={{marginLeft:"auto",fontSize:11,color:C.muted}}>{post.time}</span>
           </div>
-          <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.6}}>{post.text}</p>
+          {/* Texto con $TICKERS clicables */}
+          <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.65}}>
+            {renderBotText(post.text, onTickerClick)}
+          </p>
           {post.tags?.length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>
-              {post.tags.slice(0,3).map(t=>(
+              {post.tags.slice(0,4).map(t=>(
                 <span key={t} style={{background:C.accentDim,color:C.muted,borderRadius:20,padding:"2px 8px",fontSize:10}}>#{t}</span>
               ))}
             </div>
           )}
-          <div style={{display:"flex",gap:18,alignItems:"center"}}>
+          {/* Botón "Ver análisis completo" */}
+          <div style={{display:"flex",gap:12,alignItems:"center",marginTop:4}}>
             <span style={{fontSize:12,color:C.muted}}>❤️ {post.likes}</span>
             <span style={{fontSize:12,color:C.muted}}>💬 {post.comments}</span>
             <span style={{fontSize:12,color:C.muted}}>🔁 {post.reposts}</span>
+            <button onClick={()=>onTickerClick&&onTickerClick(post.ticker)}
+              style={{marginLeft:"auto",background:`${C.accent}12`,border:`1px solid ${C.accent}30`,borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,color:C.accent,cursor:"pointer"}}>
+              {isEN?"View $"+post.ticker+" →":"Ver $"+post.ticker+(mainName?" ("+mainName+")":"")+" →"}
+            </button>
           </div>
         </div>
       </div>
