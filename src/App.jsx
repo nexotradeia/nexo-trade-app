@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 13:28:12
+// NEXO TRADE — build: 2026-05-31 13:31:41
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5070,7 +5070,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     "🐋 Flujo institucional — dark pool y sweeps en tiempo real",
     "📊 Opciones Crypto — cadena completa BTC/ETH/SOL 24h",
     "🔬 Advanced Screener — 20+ filtros técnicos y fundamentales",
-    "💼 Portfolio Tracker — seguimiento de inversiones con P&L",
+    "💼 Portfolio Tracker — seguimiento de inversiones con P&L en tiempo real",
+    "🔮 Oracle IA — Predictor estadístico de escenarios alcistas / bajistas para tu portfolio",
+    "🌍 Radar Global — Mapa del Dinero Global 3D con flujos de capital en vivo",
+    "🎮 Terminal de Trading full-screen — simulador con crypto, acciones y opciones",
     "👁 Watchlist Bloomberg-style — 6 tabs con datos en tiempo real",
     "📅 Calendario de dividendos en tiempo real",
     "📅 Calendario de IPOs próximas",
@@ -5135,7 +5138,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>¡Eres miembro Premium!</h1>
                 <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>Tienes acceso completo a todas las funciones exclusivas.</p>
                 <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-                  {["💡 Ideas VIP","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🤖 IA Ilimitada","🔍 Insiders SEC"].map(b=>(
+                  {["💡 Ideas VIP","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","🔍 Insiders SEC"].map(b=>(
                     <span key={b} style={{background:C.bull+"22",color:C.bull,border:`1px solid ${C.bull}44`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700}}>{b}</span>
                   ))}
                 </div>
@@ -5187,8 +5190,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"No card required · Cancel anytime · 840+ active VIP traders":"Sin tarjeta requerida · Cancela cuando quieras · 840+ traders VIP activos"}</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {(lang==="en"
-                    ?["💡 VIP Ideas","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","🤖 Unlimited AI","📅 Calendars"]
-                    :["💡 Ideas VIP","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🤖 IA Ilimitada","📅 Calendarios"]
+                    ?["💡 VIP Ideas","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
+                    :["💡 Ideas VIP","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","📅 Calendarios"]
                   ).map(b=>(
                     <span key={b} style={{background:"#ffffff15",border:"1px solid #ffffff22",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
                   ))}
