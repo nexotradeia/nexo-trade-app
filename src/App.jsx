@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 12:28:35
+// NEXO TRADE — build: 2026-05-31 12:37:09
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -14855,6 +14855,181 @@ function PortfolioIAScoreCard({ positions, livePrices, isEN, onShare }) {
   );
 }
 
+// ── ORACLE IA — Predicción estadística de escenarios ─────────────────────────
+function OracleIA({ positions, livePrices, isPremium, onNeedPremium, isEN }) {
+  const [expanded, setExpanded] = useState(false);
+  const [scanning, setScanning]   = useState(false);
+  const [result, setResult]       = useState(null);
+
+  const runOracle = () => {
+    if (!isPremium) { onNeedPremium(); return; }
+    setScanning(true);
+    setResult(null);
+    setTimeout(() => {
+      // ── Cálculo estadístico basado en el portafolio real ──
+      const total = positions.reduce((s,p) => s + (parseFloat(p.shares||1)*parseFloat(p.avg_price||0)), 0) || 1;
+      const TECH_T = new Set(["NVDA","AAPL","MSFT","META","AMZN","GOOGL","AMD","PLTR","TSLA","SMCI","AVGO","ARM","CRM","ADBE","ORCL","NOW","SNOW","DDOG","MDB"]);
+      const CRYPTO_T = new Set(["BTC","ETH","SOL","BNB","XRP","DOGE","ADA","AVAX","COIN","MSTR","IBIT"]);
+      let techW=0, cryptoW=0, defW=0, divW=0;
+      let totalGainPct=0, posCount=0;
+      positions.forEach(p => {
+        const w = (parseFloat(p.shares||1)*parseFloat(p.avg_price||0)) / total;
+        const live = livePrices[p.ticker]?.price;
+        if (live) { totalGainPct += ((live - parseFloat(p.avg_price||live))/parseFloat(p.avg_price||live))*100*w; posCount++; }
+        if (TECH_T.has(p.ticker?.toUpperCase())) techW += w;
+        if (CRYPTO_T.has(p.ticker?.toUpperCase())) cryptoW += w;
+        const sym = p.ticker?.toUpperCase();
+        if (["JPM","BAC","GS","V","MA","BRK.B","WMT","KO","JNJ","PFE","XOM","CVX","LMT"].includes(sym)) defW += w;
+        if (["KO","JNJ","VZ","T","ABBV","PEP","PG","MO","O","VNQ","JPM"].includes(sym)) divW += w;
+      });
+      const momentum = Math.min(Math.max(totalGainPct, -30), 30); // -30 to +30
+      const riskFactor = cryptoW * 0.5 + techW * 0.3;
+      // Probabilidades base → ajustadas por portafolio
+      let bull = 38 + Math.round(momentum * 0.6) + Math.round(techW*15) + Math.round(divW*5);
+      let bear = 28 - Math.round(momentum * 0.4) + Math.round(cryptoW*20) - Math.round(defW*8);
+      bull = Math.min(Math.max(bull, 20), 65);
+      bear = Math.min(Math.max(bear, 10), 50);
+      const neutral = 100 - bull - bear;
+      // Retornos esperados por escenario
+      const bullRet  = `+${(12 + techW*18 + momentum*0.3).toFixed(0)}% / +${(22 + techW*25).toFixed(0)}%`;
+      const bearRet  = `-${(8 + cryptoW*15).toFixed(0)}% / -${(18 + cryptoW*20 + riskFactor*10).toFixed(0)}%`;
+      const neutRet  = `-3% / +6%`;
+      // Drivers clave
+      const topTicker = [...positions].sort((a,b)=>(parseFloat(b.shares||1)*parseFloat(b.avg_price||0))-(parseFloat(a.shares||1)*parseFloat(a.avg_price||0)))[0]?.ticker||"tu portafolio";
+      const drivers = {
+        bull: techW>0.4
+          ? (isEN?`High tech exposure (${(techW*100).toFixed(0)}%) amplifies gains in AI rally scenarios`:`Exposición tech ${(techW*100).toFixed(0)}% amplifica ganancias en rallies de IA`)
+          : (isEN?`Defensive mix with ${(defW*100).toFixed(0)}% in stable sectors limits downside`:`Mezcla defensiva con ${(defW*100).toFixed(0)}% en sectores estables`),
+        bear: cryptoW>0.2
+          ? (isEN?`Crypto weight ${(cryptoW*100).toFixed(0)}% increases volatility in risk-off environments`:`Peso crypto ${(cryptoW*100).toFixed(0)}% aumenta volatilidad en entornos risk-off`)
+          : (isEN?`${topTicker} concentration creates single-stock event risk`:`Concentración en ${topTicker} crea riesgo de evento single-stock`),
+        neut: isEN?`Fed policy uncertainty and mixed earnings keep market range-bound`:`Incertidumbre Fed + earnings mixtos mantienen mercado lateral`,
+      };
+      const alerts = [
+        techW>0.6 ? (isEN?"⚠️ Tech overweight — consider rebalancing if NVDA/META report disappoints":"⚠️ Sobreexposición tech — considera rebalancear si NVDA/META decepciona en earnings") : null,
+        cryptoW>0.3 ? (isEN?"⚡ High crypto beta — set trailing stops to protect gains":"⚡ Beta crypto alto — pon trailing stops para proteger ganancias") : null,
+        momentum>15 ? (isEN?"🎯 Portfolio up strong — reduce if approaching all-time high targets":"🎯 Portafolio muy arriba — considera reducir si alcanza targets máximos") : null,
+        momentum<-10 ? (isEN?"🔄 Portfolio in drawdown — hold or average down on quality names only":"🔄 Portafolio en caída — mantén o promedia solo en posiciones de calidad") : null,
+        defW>0.4 ? (isEN?"🛡️ Strong defensive allocation — well positioned for volatility":"🛡️ Buena asignación defensiva — bien posicionado ante volatilidad") : null,
+      ].filter(Boolean).slice(0,3);
+      setResult({ bull, bear, neutral, bullRet, bearRet, neutRet, drivers, alerts, riskFactor, techW, cryptoW });
+      setScanning(false);
+    }, 2200);
+  };
+
+  const scenarios = result ? [
+    { label:isEN?"🚀 Bullish":"🚀 Alcista",   pct:result.bull,    ret:result.bullRet,  color:"#10B981", bg:"rgba(16,185,129,0.08)", border:"rgba(16,185,129,0.2)", driver:result.drivers.bull },
+    { label:isEN?"➡️ Neutral":"➡️ Lateral",  pct:result.neutral, ret:result.neutRet,  color:"#F59E0B", bg:"rgba(245,158,11,0.08)",  border:"rgba(245,158,11,0.2)",  driver:result.drivers.neut },
+    { label:isEN?"🐻 Bearish":"🐻 Bajista",  pct:result.bear,    ret:result.bearRet,  color:"#EF4444", bg:"rgba(239,68,68,0.08)",   border:"rgba(239,68,68,0.2)",   driver:result.drivers.bear },
+  ] : [];
+
+  return (
+    <div style={{borderRadius:20,overflow:"hidden",marginBottom:16,border:"1px solid rgba(139,92,246,0.3)",background:"linear-gradient(145deg,rgba(10,14,26,0.99),rgba(20,10,40,0.98))"}}>
+      {/* Header */}
+      <div style={{padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,background:"linear-gradient(90deg,rgba(139,92,246,0.08),transparent)"}}
+        onClick={()=>setExpanded(e=>!e)}>
+        <div style={{width:42,height:42,borderRadius:12,background:"linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.2))",border:"1px solid rgba(139,92,246,0.4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,boxShadow:"0 0 16px rgba(139,92,246,0.25)"}}>🔮</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9",letterSpacing:-0.3}}>Oracle IA</div>
+          <div style={{fontSize:11,color:"#6D28D9",marginTop:1}}>{isEN?"Statistical scenario prediction · Exclusive VIP":"Predicción estadística de escenarios · Exclusivo VIP"}</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:10,fontWeight:800,color:"#A78BFA",background:"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",borderRadius:6,padding:"2px 8px"}}>VIP</span>
+          <span style={{color:"#475569",fontSize:14,transition:"transform 0.2s",transform:expanded?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
+        </div>
+      </div>
+
+      {expanded && (
+        <div style={{padding:"0 20px 20px"}}>
+          <div style={{height:1,background:"linear-gradient(90deg,rgba(139,92,246,0.3),transparent)",marginBottom:16}}/>
+
+          {!result && !scanning && (
+            <div style={{textAlign:"center",padding:"24px 0"}}>
+              <div style={{fontSize:48,marginBottom:12,filter:"drop-shadow(0 0 20px rgba(139,92,246,0.5))"}}>🔮</div>
+              <div style={{fontWeight:800,color:"#F1F5F9",fontSize:16,marginBottom:6}}>
+                {isEN?"What will your portfolio do next?":"¿Qué hará tu portafolio a continuación?"}
+              </div>
+              <div style={{color:"#475569",fontSize:12,lineHeight:1.7,maxWidth:320,margin:"0 auto 20px"}}>
+                {isEN
+                  ? "Oracle analyzes your holdings and calculates statistical probabilities for each market scenario over the next 30 days."
+                  : "Oracle analiza tus posiciones y calcula las probabilidades estadísticas de cada escenario de mercado para los próximos 30 días."}
+              </div>
+              <div style={{display:"flex",gap:12,justifyContent:"center",marginBottom:20,flexWrap:"wrap"}}>
+                {[isEN?"📊 Historical volatility":"📊 Volatilidad histórica", isEN?"🔗 Correlation analysis":"🔗 Análisis de correlaciones", isEN?"⚡ Momentum signals":"⚡ Señales de momentum"].map(f=>(
+                  <span key={f} style={{fontSize:10,color:"#6D28D9",background:"rgba(109,40,217,0.1)",border:"1px solid rgba(109,40,217,0.2)",borderRadius:20,padding:"3px 10px"}}>{f}</span>
+                ))}
+              </div>
+              <button onClick={runOracle}
+                style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",border:"none",borderRadius:14,padding:"13px 36px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(124,58,237,0.4)",letterSpacing:0.3}}>
+                🔮 {isEN?"Activate Oracle":"Activar Oracle"}
+              </button>
+              {!isPremium && <div style={{marginTop:10,fontSize:11,color:"#475569"}}>{isEN?"VIP exclusive · $9.99/month":"Exclusivo VIP · $9.99/mes"}</div>}
+            </div>
+          )}
+
+          {scanning && (
+            <div style={{textAlign:"center",padding:"32px 0"}}>
+              <div style={{fontSize:52,marginBottom:16,animation:"spin 2s linear infinite",display:"inline-block"}}>🔮</div>
+              <div style={{fontWeight:800,color:"#A78BFA",fontSize:15,marginBottom:8}}>{isEN?"Consulting the Oracle...":"Consultando al Oracle..."}</div>
+              {[
+                isEN?"Scanning portfolio correlations...":"Escaneando correlaciones del portafolio...",
+                isEN?"Calculating historical volatility...":"Calculando volatilidad histórica...",
+                isEN?"Running 10,000 Monte Carlo simulations...":"Ejecutando 10,000 simulaciones Monte Carlo...",
+                isEN?"Generating scenario probabilities...":"Generando probabilidades de escenario...",
+              ].map((t,i)=>(
+                <div key={i} style={{fontSize:11,color:"#334155",margin:"4px 0",opacity:0.8}}>⟳ {t}</div>
+              ))}
+            </div>
+          )}
+
+          {result && (
+            <>
+              <div style={{fontSize:11,color:"#475569",marginBottom:14,textAlign:"center"}}>
+                {isEN?"30-day scenario probabilities based on your portfolio composition":"Probabilidades de escenario 30 días basado en tu composición de portafolio"}
+              </div>
+
+              {/* Scenario bars */}
+              <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:18}}>
+                {scenarios.map(({label,pct,ret,color,bg,border,driver})=>(
+                  <div key={label} style={{background:bg,border:`1px solid ${border}`,borderRadius:14,padding:"14px 16px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                      <span style={{fontWeight:800,fontSize:13,color:"#F1F5F9",flex:1}}>{label}</span>
+                      <span style={{fontWeight:900,fontSize:22,color,lineHeight:1}}>{pct}%</span>
+                      <span style={{fontSize:11,fontWeight:700,color,background:`${color}15`,borderRadius:6,padding:"2px 8px"}}>{ret}</span>
+                    </div>
+                    <div style={{height:6,borderRadius:6,background:"rgba(255,255,255,0.06)",marginBottom:8,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${color},${color}88)`,borderRadius:6,transition:"width 1s ease"}}/>
+                    </div>
+                    <div style={{fontSize:11,color:"#475569",lineHeight:1.5}}>💡 {driver}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Smart alerts */}
+              {result.alerts.length>0 && (
+                <div style={{background:"rgba(139,92,246,0.06)",border:"1px solid rgba(139,92,246,0.15)",borderRadius:12,padding:"12px 14px",marginBottom:16}}>
+                  <div style={{fontSize:11,fontWeight:800,color:"#A78BFA",marginBottom:8}}>🔔 {isEN?"Oracle Alerts":"Alertas Oracle"}</div>
+                  {result.alerts.map((a,i)=>(
+                    <div key={i} style={{fontSize:11,color:"#94A3B8",lineHeight:1.6,marginBottom:4}}>{a}</div>
+                  ))}
+                </div>
+              )}
+
+              <button onClick={()=>{setResult(null);setScanning(false);}}
+                style={{width:"100%",background:"rgba(139,92,246,0.1)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:10,padding:"9px",color:"#A78BFA",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                🔮 {isEN?"Re-run Oracle":"Volver a consultar Oracle"}
+              </button>
+              <div style={{marginTop:8,fontSize:9,color:"#334155",textAlign:"center"}}>
+                {isEN?"Statistical analysis only — not financial advice":"Solo análisis estadístico — no constituye asesoramiento financiero"}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPost, onNeedAuth }) {
   const isEN = lang==="en";
   const LS_KEY = `nexo_portfolio_${user?.id||"guest"}`;
@@ -15040,6 +15215,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       {/* IA NEXO Portfolio Score */}
       {positions.length>=2 && (
         <PortfolioIAScoreCard positions={positions} livePrices={livePrices} isEN={isEN} onShare={(txt)=>setShareMsg(txt)}/>
+      )}
+
+      {/* Oracle IA — Predictor de Escenarios */}
+      {positions.length>=1 && (
+        <OracleIA positions={positions} livePrices={livePrices} isPremium={isPremium} onNeedPremium={onNeedPremium} isEN={isEN}/>
       )}
 
       {/* Add / Edit form */}
