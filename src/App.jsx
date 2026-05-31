@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 10:51:37
+// NEXO TRADE — build: 2026-05-31 10:56:07
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -12671,18 +12671,18 @@ function CryptoPerformancePage({ lang="es" }) {
     try {
       const [coinsRes, globalRes, fgRes] = await Promise.all([
         fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h,24h,7d,30d")
-          .then(r => r.json()),
-        fetch("https://api.coingecko.com/api/v3/global").then(r => r.json()),
+          .then(r => r.json()).catch(()=>null),
+        fetch("https://api.coingecko.com/api/v3/global").then(r => r.json()).catch(()=>null),
         fetch("https://api.alternative.me/fng/?limit=1").then(r => r.json()).catch(()=>null),
       ]);
-      if (Array.isArray(coinsRes)) { setCoins(coinsRes); setLoading(false); }
+      if (Array.isArray(coinsRes)) { setCoins(coinsRes); setErr(null); setLoading(false); }
+      else { setLoading(prev => { if(prev) setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando..."); return false; }); }
       if (globalRes?.data) setGlobal(globalRes.data);
       if (fgRes?.data?.[0]) setFearGreed(fgRes.data[0]);
       setLastUpdate(new Date());
       setCountdown(60);
     } catch(e) {
-      setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando...");
-      setLoading(false);
+      setLoading(prev => { if(prev) setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando..."); return false; });
     }
   }, []);
 
