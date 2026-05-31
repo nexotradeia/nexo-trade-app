@@ -1,6 +1,7 @@
-// NEXO TRADE — build: 2026-05-31 14:27:40
+// NEXO TRADE — build: 2026-05-31 14:52:42
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import * as THREE from 'three';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
 const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
@@ -15024,14 +15025,91 @@ function RadarGlobalPage({lang="es"}){
     return()=>{clearInterval(iv);clearInterval(ivTime);};
   },[]);
 
-  // Canvas 2D globe
+  // Three.js globe (npm)
   useEffect(()=>{
+    if(!cvsRef.current||!wrapRef.current)return;
+    const W=wrapRef.current.clientWidth||700, H=480;
+    // helpers
+    function l2v(lat,lon,r=5){const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));}
+    function glowTex(r,g,b,sz=128){const c=document.createElement('canvas');c.width=c.height=sz;const ctx=c.getContext('2d');const grd=ctx.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz/2);grd.addColorStop(0,`rgba(${r},${g},${b},1)`);grd.addColorStop(.4,`rgba(${r},${g},${b},.4)`);grd.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=grd;ctx.fillRect(0,0,sz,sz);return new THREE.CanvasTexture(c);}
+    function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+    // Renderer
+    const renderer=new THREE.WebGLRenderer({canvas:cvsRef.current,antialias:true,alpha:true});
+    renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    // Scene & Camera
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(45,W/H,0.1,100);
+    camera.position.set(0,0,13.5);
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff,.3));
+    const dL=new THREE.DirectionalLight(0x88aaff,.8);dL.position.set(5,3,5);scene.add(dL);
+    const pL=new THREE.PointLight(0x4466ff,.5,30);pL.position.set(-8,4,6);scene.add(pL);
+    // Globe
+    const G=new THREE.Group();G.rotation.x=0.22;scene.add(G);
+    const globeMat=new THREE.MeshPhongMaterial({color:0x0a1628,transparent:true,opacity:.97,shininess:60,specular:0x1144aa});
+    G.add(new THREE.Mesh(new THREE.SphereGeometry(5,64,64),globeMat));
+    try{new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/textures/land_ocean_ice_cloud_2048.jpg',t=>{globeMat.map=t;globeMat.color.set(0xffffff);globeMat.needsUpdate=true;});}catch{}
+    G.add(new THREE.Mesh(new THREE.SphereGeometry(5.25,64,64),new THREE.MeshPhongMaterial({color:0x1a5fff,transparent:true,opacity:.08,side:THREE.BackSide})));
+    // Grid
+    const gm=new THREE.LineBasicMaterial({color:0x1a3060,transparent:true,opacity:.18});
+    for(let lat=-75;lat<=75;lat+=15){const pts=[];for(let lon=0;lon<=360;lon+=4)pts.push(l2v(lat,lon,5.02));G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));}
+    for(let lon=0;lon<360;lon+=15){const pts=[];for(let lat=-90;lat<=90;lat+=4)pts.push(l2v(lat,lon,5.02));G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));}
+    // Country glows
+    const CLRS=[[0,26,102],[0,85,204],[0,153,238],[0,221,170],[255,255,204]];
+    const glowSps=[];
+    function renderGlows(vMap){
+      glowSps.forEach(s=>G.remove(s));glowSps.length=0;
+      const mx=Math.max(...Object.values(vMap),1);
+      Object.entries(RADAR_CD).forEach(([c,cd])=>{
+        const v=vMap[c]||0;if(!v)return;
+        const norm=Math.min(v/mx,1),ci=Math.min(Math.floor(norm*4),4);
+        const [r,g,b]=CLRS[ci];
+        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(r,g,b),transparent:true,opacity:.35+norm*.5,blending:THREE.AdditiveBlending,depthWrite:false}));
+        sp.position.copy(l2v(cd.lat,cd.lon,5.03));const s=cd.r*.38+.4;sp.scale.set(s,s,1);
+        G.add(sp);glowSps.push(sp);
+      });
+    }
+    renderGlows(RADAR_FALLBACK);
+    // Market dots + hit spheres
+    const mktHits=[];
+    RADAR_MKTS.forEach(m=>{
+      const [r,g,b]=hex2rgb(m.col),open=isOpenR(m)||forceOpenR(m);
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(r,g,b),transparent:true,opacity:open?.9:.55,blending:THREE.AdditiveBlending,depthWrite:false}));
+      sp.position.copy(l2v(m.lat,m.lon,5.05));const s=m.sz*(open?1.3:.8);sp.scale.set(s,s,1);G.add(sp);
+      const hit=new THREE.Mesh(new THREE.SphereGeometry(.32,8,8),new THREE.MeshBasicMaterial({visible:false}));
+      hit.position.copy(l2v(m.lat,m.lon,5.05));hit.userData={...m};G.add(hit);mktHits.push(hit);
+    });
+    // Arcs
+    const byId=Object.fromEntries(RADAR_MKTS.map(m=>[m.id,m]));
+    const am=new THREE.LineBasicMaterial({color:0x4488ff,transparent:true,opacity:.18,blending:THREE.AdditiveBlending});
+    RADAR_ARCS.forEach(([aid,bid])=>{
+      const a=byId[aid],b=byId[bid];if(!a||!b)return;
+      const vA=l2v(a.lat,a.lon,5.08),vB=l2v(b.lat,b.lon,5.08);
+      const mid=new THREE.Vector3().addVectors(vA,vB).multiplyScalar(.5).normalize().multiplyScalar(5.08+vA.distanceTo(vB)*.4);
+      G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(new THREE.QuadraticBezierCurve3(vA,mid,vB).getPoints(48)),am));
+    });
+    // Click / drag
+    const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
     const cvs=cvsRef.current;
-    if(!cvs)return;
-    const W=wrapRef.current?.clientWidth||700, H=480;
-    cvs.width=W; cvs.height=H;
-    const cx=W/2, cy=H/2, R=Math.min(W,H)*0.4;
-    const MKT_RGB={nyse:[34,197,94],lse:[56,189,248],tse:[251,146,60],sse:[248,113,113],xetra:[250,204,21],hkex:[249,115,22],b3:[74,222,128],asx:[163,230,53],sgx:[52,211,153],tsx:[251,113,133],bse:[251,191,36],krx:[129,140,248],bmv:[45,212,191],dfm:[232,121,249],jse:[212,165,122],tadawul:[103,232,249]};
+    function onClick(e){const rect=cvs.getBoundingClientRect();mouse.x=((e.clientX-rect.left)/rect.width)*2-1;mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;ray.setFromCamera(mouse,camera);const h=ray.intersectObjects(mktHits);if(h.length)setSelMkt(s=>s?.id===h[0].object.userData.id?null:h[0].object.userData);}
+    let drag=false,lx=0;
+    const onMD=(e)=>{drag=true;lx=e.clientX;cvs.style.cursor='grabbing';};
+    const onMM=(e)=>{if(!drag)return;T.current.rot+=(e.clientX-lx)*.005;lx=e.clientX;};
+    const onMU=()=>{drag=false;cvs.style.cursor='grab';};
+    cvs.style.cursor='grab';
+    cvs.addEventListener('click',onClick);cvs.addEventListener('mousedown',onMD);
+    window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);
+    // Animate
+    let afId;
+    function animate(){afId=requestAnimationFrame(animate);if(!T.current.isPausedR)T.current.rot+=.002;G.rotation.y=T.current.rot;renderer.render(scene,camera);}
+    animate();
+    T.current.renderCountryGlows=renderGlows;
+    // Live data
+    const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),6000);
+    fetch('https://api.coingecko.com/api/v3/exchanges?per_page=250',{signal:ctrl.signal})
+      .then(r=>r.json()).then(data=>{const vm={};data.forEach(ex=>{if(ex.country)vm[ex.country]=(vm[ex.country]||0)+(ex.trade_volume_24h_btc||0);});T.current.volMap=vm;renderGlows(vm);setDataSrc(isEN?'Live data: CoinGecko':'Datos en vivo: CoinGecko');})
+      .catch(()=>setDataSrc(isEN?'Source: estimated data':'Fuente: datos estimados'));
+    const MKT_RGB={nyse:[34,197,94]};// placeholder to satisfy linter
     function proj(lat,lon){
       const phi=(90-lat)*Math.PI/180, theta=lon*Math.PI/180+T.current.rot;
       const x=R*Math.sin(phi)*Math.cos(theta), y=-R*Math.cos(phi), z=R*Math.sin(phi)*Math.sin(theta);
@@ -15149,6 +15227,7 @@ function RadarGlobalPage({lang="es"}){
       cvs.removeEventListener('mousedown',onMD);
       window.removeEventListener('mousemove',onMM);
       window.removeEventListener('mouseup',onMU);
+      renderer.dispose();
     };
   },[]);
 
@@ -15159,7 +15238,7 @@ function RadarGlobalPage({lang="es"}){
     T.current.isPausedR=next;
   };
   // refresh
-  const doRefresh=()=>{T.current.volMap=RADAR_FALLBACK;};
+  const doRefresh=()=>{if(T.current.renderCountryGlows)T.current.renderCountryGlows(RADAR_FALLBACK);};
 
   const topByTraders=Object.entries(RADAR_TD).sort((a,b)=>b[1].total-a[1].total).slice(0,18);
 
