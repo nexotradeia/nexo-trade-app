@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 11:16:29
+// NEXO TRADE — build: 2026-05-31 11:18:01
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11629,6 +11629,107 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               ))}
             </div>
           )}
+
+          {/* ── TRUMP TRADES + TRUMP MEDIA ── */}
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>🇺🇸 Donald Trump · Trades Recientes (2026)</div>
+            <div style={{background:"linear-gradient(135deg,rgba(10,16,30,0.98),rgba(30,20,20,0.97))",border:"1px solid rgba(220,38,38,0.25)",borderRadius:16,padding:"16px 18px",marginBottom:10,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
+              {/* Header */}
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+                <div style={{width:52,height:52,borderRadius:"50%",background:"linear-gradient(135deg,#DC2626,#991B1B)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0,border:"2px solid rgba(220,38,38,0.4)"}}>🦅</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9"}}>Donald J. Trump</div>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3,flexWrap:"wrap"}}>
+                    <span style={{fontSize:10,fontWeight:800,color:"#EF4444",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:5,padding:"1px 7px"}}>🔴 REP</span>
+                    <span style={{fontSize:10,color:"#475569"}}>Presidente de EE.UU. · 47th</span>
+                    <a href="https://www.quiverquant.com/Donald-Trump-Stock-Trades/" target="_blank" rel="noopener noreferrer"
+                      style={{fontSize:9,fontWeight:700,color:"#38BDF8",background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:5,padding:"1px 6px",textDecoration:"none",marginLeft:"auto"}}>Ver en QuiverQuant ↗</a>
+                  </div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontWeight:900,fontSize:14,color:"#F59E0B"}}>100+ trades</div>
+                  <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.5}}>MAY 2026</div>
+                </div>
+              </div>
+              {/* Top purchases (all $1M–$5M) */}
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#10B981",letterSpacing:0.8,marginBottom:7}}>💰 COMPRAS DESTACADAS · $1M–$5M c/u · Archivadas May 13, 2026</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                  {[
+                    {t:"NVDA",n:"NVIDIA",r:"+2.69%",pos:true},{t:"ORCL",n:"Oracle",r:"+33.18%",pos:true},
+                    {t:"AVGO",n:"Broadcom",r:"+21.93%",pos:true},{t:"DELL",n:"Dell Tech",r:"+224.73%",pos:true},
+                    {t:"AMZN",n:"Amazon",r:"+14.99%",pos:true},{t:"AAPL",n:"Apple",r:"+7.67%",pos:true},
+                    {t:"NOW",n:"ServiceNow",r:"+7.50%",pos:true},{t:"MSFT",n:"Microsoft",r:"+1.08%",pos:true},
+                    {t:"TXN",n:"Texas Instr.",r:"+52.85%",pos:true},{t:"ADBE",n:"Adobe",r:"-11.36%",pos:false},
+                    {t:"WDAY",n:"Workday",r:"-13.89%",pos:false},{t:"BA",n:"Boeing",r:"-14.01%",pos:false},
+                    {t:"JBL",n:"Jabil",r:"+31.50%",pos:true},{t:"AXON",n:"Axon Enterp.",r:"-8.91%",pos:false},
+                    {t:"COST",n:"Costco",r:"-10.83%",pos:false},{t:"PG",n:"P&G",r:"-8.75%",pos:false},
+                  ].map(({t,n,r,pos})=>(
+                    <div key={t+r} style={{background:"rgba(220,38,38,0.07)",border:"1px solid rgba(220,38,38,0.18)",borderRadius:7,padding:"4px 9px"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5}}>
+                        <span style={{fontFamily:"monospace",fontWeight:800,fontSize:11,color:"#F87171"}}>{t}</span>
+                        <span style={{fontSize:10,fontWeight:700,color:pos?"#10B981":"#EF4444"}}>{r}</span>
+                      </div>
+                      <div style={{fontSize:9,color:"#475569",marginTop:1}}>{n}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* ETFs */}
+              <div>
+                <div style={{fontSize:10,fontWeight:700,color:"#A78BFA",letterSpacing:0.8,marginBottom:6}}>📊 ETFs COMPRADOS</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                  {["Vanguard S&P 500","iShares Russell 1000","SPDR S&P 500","iShares Gold Trust","Vanguard FTSE Europe","S&P 500 Equal Weight","iShares GSCI Commodity","iShares Intl Treasury"].map(n=>(
+                    <span key={n} style={{background:"rgba(139,92,246,0.07)",border:"1px solid rgba(139,92,246,0.15)",borderRadius:6,padding:"3px 8px",fontSize:9,color:"#94A3B8"}}>{n}</span>
+                  ))}
+                </div>
+              </div>
+              <div style={{marginTop:10,fontSize:9,color:"#334155",textAlign:"right"}}>Fuente: OGE Financial Disclosure · Vía QuiverQuantitative · Todos los trades son compras</div>
+            </div>
+
+            {/* ── TRUMP MEDIA (DJT) ── */}
+            <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,textTransform:"uppercase",marginBottom:8,marginTop:4}}>📺 Trump Media & Technology Group</div>
+            <div style={{background:"linear-gradient(135deg,rgba(10,16,30,0.98),rgba(15,10,30,0.97))",border:"1px solid rgba(245,158,11,0.3)",borderRadius:16,padding:"16px 18px",boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+                <div style={{width:52,height:52,borderRadius:12,background:"linear-gradient(135deg,#1e3a5f,#0f1f40)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,border:"2px solid rgba(245,158,11,0.3)"}}>🗽</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9"}}>Trump Media & Technology</div>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3,flexWrap:"wrap"}}>
+                    <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:"#F59E0B",background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.25)",borderRadius:5,padding:"1px 8px"}}>$DJT</span>
+                    <span style={{fontSize:10,color:"#475569"}}>NASDAQ · Media & Tech</span>
+                    <a href="https://finance.yahoo.com/quote/DJT" target="_blank" rel="noopener noreferrer"
+                      style={{fontSize:9,fontWeight:700,color:"#38BDF8",background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:5,padding:"1px 6px",textDecoration:"none",marginLeft:"auto"}}>Yahoo Finance ↗</a>
+                  </div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:12}}>
+                {[
+                  {l:"Ticker",v:"DJT",c:"#F59E0B"},{l:"Exchange",v:"NASDAQ",c:"#38BDF8"},
+                  {l:"Propietario",v:"~57% Trump",c:"#F1F5F9"},{l:"Plataforma",v:"Truth Social",c:"#A78BFA"},
+                ].map(({l,v,c})=>(
+                  <div key={l} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8,padding:"8px 10px"}}>
+                    <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:2}}>{l}</div>
+                    <div style={{fontWeight:800,fontSize:13,color:c}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.15)",borderRadius:10,padding:"10px 12px",marginBottom:10}}>
+                <div style={{fontSize:11,color:"#94A3B8",lineHeight:1.7}}>
+                  Trump Media & Technology Group Corp. es la empresa propietaria de <strong style={{color:"#F59E0B"}}>Truth Social</strong>, la red social creada por Donald Trump. Cotiza en NASDAQ bajo el ticker <strong style={{color:"#F59E0B"}}>DJT</strong>. Trump posee aproximadamente el <strong style={{color:"#F1F5F9"}}>57% de las acciones</strong>, lo que lo convierte en el mayor accionista individual. La acción es altamente volátil y sensible a noticias políticas.
+                </div>
+              </div>
+              <div style={{display:"flex",gap:8}}>
+                <a href="https://finance.yahoo.com/quote/DJT" target="_blank" rel="noopener noreferrer"
+                  style={{flex:1,textAlign:"center",background:"linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.08))",border:"1px solid rgba(245,158,11,0.3)",borderRadius:10,padding:"9px",fontSize:12,fontWeight:700,color:"#F59E0B",textDecoration:"none",display:"block"}}>
+                  📈 Ver $DJT en tiempo real
+                </a>
+                <a href="https://www.quiverquant.com/Donald-Trump-Stock-Trades/" target="_blank" rel="noopener noreferrer"
+                  style={{flex:1,textAlign:"center",background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:10,padding:"9px",fontSize:12,fontWeight:700,color:"#38BDF8",textDecoration:"none",display:"block"}}>
+                  🏛️ Todos sus trades
+                </a>
+              </div>
+            </div>
+          </div>
 
           {/* ── MARKWAYNE MULLIN PORTFOLIO ── */}
           <div style={{marginBottom:16}}>
