@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 10:29:52
+// NEXO TRADE — build: 2026-05-31 10:48:03
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4669,57 +4669,51 @@ function NexoTermometro() {
   };
 
   return(
-    <div style={{background:"linear-gradient(145deg,rgba(10,14,26,0.98),rgba(15,20,40,0.95))",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,padding:"20px 22px",marginBottom:20,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:`radial-gradient(circle,${color}12,transparent 70%)`,pointerEvents:"none"}}/>
+    <div style={{background:"linear-gradient(145deg,rgba(15,23,42,0.92),rgba(20,30,55,0.88))",border:"1px solid rgba(255,255,255,0.1)",borderRadius:18,padding:"14px 18px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:-30,right:-30,width:150,height:150,background:`radial-gradient(circle,${color}15,transparent 70%)`,pointerEvents:"none"}}/>
       {/* Title */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,position:"relative"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,position:"relative"}}>
         <div>
-          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:15}}>🌡️ Termómetro NexoTrade</div>
-          <div style={{fontSize:11,color:"#475569",marginTop:2}}>Índice Miedo/Codicia del mercado en español</div>
+          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:14}}>🌡️ Termómetro NexoTrade</div>
+          <div style={{fontSize:10,color:"#64748B",marginTop:1}}>Índice Miedo/Codicia del mercado en español</div>
         </div>
-        <div style={{textAlign:"right"}}>
-          {updated&&<div style={{fontSize:10,color:"#334155",fontWeight:600}}>🕐 {updated}</div>}
-          <button onClick={fetchAll} style={{background:"transparent",border:`1px solid rgba(255,255,255,0.08)`,borderRadius:8,padding:"4px 10px",color:"#475569",fontSize:11,fontWeight:600,cursor:"pointer",marginTop:4}}>🔄 Actualizar</button>
+        <div style={{textAlign:"right",display:"flex",alignItems:"center",gap:8}}>
+          {updated&&<div style={{fontSize:10,color:"#64748B",fontWeight:600}}>🕐 {updated}</div>}
+          <button onClick={fetchAll} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:7,padding:"3px 9px",color:"#94A3B8",fontSize:10,fontWeight:600,cursor:"pointer"}}>🔄</button>
         </div>
       </div>
       {/* Main gauge */}
-      <div style={{textAlign:"center",marginBottom:16}}>
+      <div style={{textAlign:"center",marginBottom:10}}>
         {loading
-          ?<div style={{height:130,display:"flex",alignItems:"center",justifyContent:"center",color:"#334155",fontSize:12}}>⏳ Calculando índice...</div>
+          ?<div style={{height:90,display:"flex",alignItems:"center",justifyContent:"center",color:"#475569",fontSize:11}}>⏳ Calculando índice...</div>
           :<>
-            <svg viewBox="0 0 220 115" width="220" height="115" style={{margin:"0 auto",display:"block"}}>
-              {/* Background arc */}
-              <path d={arc(R,0,100)} stroke="rgba(255,255,255,0.05)" strokeWidth="14" fill="none" strokeLinecap="round"/>
-              {/* Colored zones */}
+            <svg viewBox="0 0 220 115" width="180" height="92" style={{margin:"0 auto",display:"block"}}>
+              <path d={arc(R,0,100)} stroke="rgba(255,255,255,0.06)" strokeWidth="14" fill="none" strokeLinecap="round"/>
               {ZONES.map(([s,e,cl])=>(
-                <path key={s} d={arc(R,s,e)} stroke={cl} strokeWidth="14" fill="none" strokeLinecap="round" opacity="0.75"/>
+                <path key={s} d={arc(R,s,e)} stroke={cl} strokeWidth="14" fill="none" strokeLinecap="round" opacity="0.8"/>
               ))}
-              {/* Active value highlight */}
-              <path d={arc(R,0,combined)} stroke={color} strokeWidth="6" fill="none" strokeLinecap="round" style={{filter:`drop-shadow(0 0 6px ${color}80)`}}/>
-              {/* Needle */}
+              <path d={arc(R,0,combined)} stroke={color} strokeWidth="5" fill="none" strokeLinecap="round" style={{filter:`drop-shadow(0 0 5px ${color}80)`}}/>
               <line x1={CX} y1={CY} x2={needleX(combined).toFixed(1)} y2={needleY(combined).toFixed(1)} stroke="white" strokeWidth="2.5" strokeLinecap="round" style={{filter:"drop-shadow(0 0 4px rgba(255,255,255,0.8))"}}/>
-              <circle cx={CX} cy={CY} r="5" fill="white" style={{filter:"drop-shadow(0 0 4px rgba(255,255,255,0.6))"}}/>
+              <circle cx={CX} cy={CY} r="5" fill="white"/>
               <circle cx={CX} cy={CY} r="2.5" fill="#0F172A"/>
-              {/* Value */}
-              <text x={CX} y={CY-14} textAnchor="middle" fill="#F1F5F9" fontSize="30" fontWeight="900" fontFamily="monospace">{combined}</text>
-              {/* Zone labels */}
+              <text x={CX} y={CY-12} textAnchor="middle" fill="#F1F5F9" fontSize="30" fontWeight="900" fontFamily="monospace">{combined}</text>
               <text x="18" y="108" textAnchor="middle" fill="#EF4444" fontSize="7.5" fontWeight="700">PÁNICO</text>
               <text x="202" y="108" textAnchor="middle" fill="#22C55E" fontSize="7.5" fontWeight="700">CODICIA</text>
             </svg>
-            <div style={{marginTop:-4}}>
-              <span style={{fontSize:22}}>{emoji}</span>
-              <span style={{fontSize:18,fontWeight:900,color:color,fontFamily:"monospace",marginLeft:8}}>{label}</span>
+            <div style={{marginTop:-2}}>
+              <span style={{fontSize:16}}>{emoji}</span>
+              <span style={{fontSize:15,fontWeight:900,color:color,fontFamily:"monospace",marginLeft:6}}>{label}</span>
             </div>
           </>
         }
       </div>
       {/* Mini gauges */}
-      {!loading&&<div style={{display:"flex",gap:10}}>
+      {!loading&&<div style={{display:"flex",gap:8}}>
         <MiniGauge val={cryptoFG} label="Crypto" icon="₿"/>
         <MiniGauge val={stockFG}  label="Acciones (S&P)" icon="📈"/>
       </div>}
-      <div style={{textAlign:"center",fontSize:10,color:"#1E293B",marginTop:12,fontWeight:600}}>
-        Crypto: Alternative.me Fear & Greed Index · Acciones: SPY+QQQ Finnhub · Actualización horaria
+      <div style={{textAlign:"center",fontSize:9,color:"#475569",marginTop:8,fontWeight:600}}>
+        Crypto: Alternative.me Fear & Greed · Acciones: SPY+QQQ Finnhub · Actualización horaria
       </div>
     </div>
   );
@@ -8493,27 +8487,30 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
   const [livePrices,setLivePrices]=useState({});
   const semana = new Date().toLocaleDateString("es",{day:"numeric",month:"long",year:"numeric"});
 
-  // Picks semana 1–5 junio 2026 — fuente: Wall Street analysts (TipRanks, CNBC, Motley Fool, Barclays)
+  // Picks semana 2–6 junio 2026 — fuente: Barclays, Wedbush, JPMorgan, BofA, Goldman Sachs, TipRanks
   const FALLBACK = {
     corto:[
-      {ticker:"NVDA", nombre:"NVIDIA",        tipo:"COMPRA", entrada:"$131", target:"$152", stop_loss:"$122", confianza:93, razon:"Semana de datos de empleo — NVDA lidera momentum IA. Soporte fuerte en $125, catalizador: actualizaciones Blackwell. Analistas Barclays/Wedbush reiteran Buy."},
-      {ticker:"SPY",  nombre:"S&P 500 ETF",   tipo:"COMPRA", entrada:"$592", target:"$610", stop_loss:"$581", confianza:85, razon:"ETF del S&P 500 en zona de ruptura. Semana de NFP — volatilidad aprovechable. Ideal para day trading de apertura y cierre de mercado."},
-      {ticker:"TSLA", nombre:"Tesla",         tipo:"COMPRA", entrada:"$348", target:"$385", stop_loss:"$325", confianza:82, razon:"Elon Musk menos distraído por DOGE, foco en Tesla. Modelo nueva plataforma barata en producción. Rebote técnico desde soporte clave."},
-      {ticker:"PLTR", nombre:"Palantir",      tipo:"COMPRA", entrada:"$122", target:"$140", stop_loss:"$112", confianza:88, razon:"Contratos gobierno USA aceleran (+127% YoY en US Commercial). AIP Platform dominando enterprise AI. Wedbush target $140."},
+      {ticker:"NVDA", nombre:"NVIDIA",        tipo:"COMPRA", entrada:"$131", target:"$158", stop_loss:"$121", confianza:95, razon:"La semana más importante del año para NVDA: Computex + anuncio de chips Blackwell Ultra. Goldman Sachs sube target a $160. Wedbush dice 'la mejor oportunidad de compra de 2026'. Demanda de hyperscalers (Microsoft, Google, Amazon) no muestra señales de desaceleración. Catalizador inminente."},
+      {ticker:"PLTR", nombre:"Palantir",      tipo:"COMPRA", entrada:"$125", target:"$148", stop_loss:"$114", confianza:90, razon:"Palantir acaba de ganar contrato con el Ejército de EE.UU. por $480M (confirmado viernes). Revenue US Commercial +127% YoY. AIP Platform siendo adoptado por Fortune 500. Wedbush: 'el software de IA más subestimado del mercado'. Target $148 en 30 días."},
+      {ticker:"META", nombre:"Meta Platforms", tipo:"COMPRA", entrada:"$622", target:"$695", stop_loss:"$588", confianza:91, razon:"Meta Connect se acerca — nuevo hardware de AR/VR esperado esta semana. Llama 4 superó GPT-4o en benchmarks clave. Margen operativo 42% récord. RPM de publicidad +18% YoY. Analistas de Cantor Fitzgerald reiteran $720. Setup técnico perfecto: rompe resistencia de $620."},
+      {ticker:"APP",  nombre:"AppLovin",      tipo:"COMPRA", entrada:"$315", target:"$380", stop_loss:"$292", confianza:87, razon:"AppLovin es la sorpresa del año en IA publicitaria. Revenue Q1 +40% YoY. Su modelo AXON 2.0 está destruyendo a los competidores en performance marketing. Piper Sandler target $400. La acción ha subido 180% en 12 meses y aún tiene momentum."},
     ],
     largo:[
-      {ticker:"AMD",  nombre:"AMD",           tipo:"COMPRA", entrada:"$172", target:"$210", stop_loss:"$155", confianza:86, razon:"MI300X GPU ganando terreno vs NVIDIA en data centers. Ryzen AI para laptops se acelera. BofA y Needham reiteran Buy con target $200+."},
-      {ticker:"META", nombre:"Meta Platforms", tipo:"COMPRA", entrada:"$618", target:"$710", stop_loss:"$575", confianza:89, razon:"IA generativa en Reels y anuncios disparó RPM. Llama 4 mejor modelo open-source. Margen operativo récord 42%. Target consenso $700+."},
-      {ticker:"AMZN", nombre:"Amazon",        tipo:"COMPRA", entrada:"$226", target:"$275", stop_loss:"$205", confianza:87, razon:"AWS creciendo 20%+ YoY, acelerando. Publicidad digital superando expectativas. RBC Capital y JPMorgan reiteran Overweight."},
-      {ticker:"GLD",  nombre:"SPDR Gold ETF", tipo:"COMPRA", entrada:"$315", target:"$338", stop_loss:"$302", confianza:80, razon:"Oro en zona de acumulación institucional. Incertidumbre macro + dólar presionado. Hedge ideal ante volatilidad de NFP el viernes."},
+      {ticker:"MSFT", nombre:"Microsoft",     tipo:"COMPRA", entrada:"$452", target:"$520", stop_loss:"$425", confianza:92, razon:"Azure IA creciendo 35% YoY — Copilot adoptado en 85% de Fortune 500. GitHub Copilot supera 2M de usuarios de pago. OpenAI partnership da ventaja competitiva única. Morgan Stanley target $530. La mejor IA Play con el menor riesgo del mercado."},
+      {ticker:"AMZN", nombre:"Amazon",        tipo:"COMPRA", entrada:"$226", target:"$280", stop_loss:"$208", confianza:89, razon:"AWS aceleró a 21% de crecimiento QoQ — superando a Azure por primera vez en 2026. Amazon Ads supera $60B anualizados. Robotics + Kuiper satellite internet son catalizadores 2026-2027. JPMorgan y RBC Capital reiteran Overweight. Setup técnico en breakout."},
+      {ticker:"GLD",  nombre:"SPDR Gold ETF", tipo:"COMPRA", entrada:"$320", target:"$345", stop_loss:"$308", confianza:83, razon:"Oro alcanzó nuevos máximos históricos esta semana. Bancos centrales comprando a ritmo récord (China +60T este mes). Dólar debilitándose por incertidumbre fiscal USA. Hedge perfecto para portfolios expuestos a tech. WisdomTree proyecta $3,500/oz para 2026."},
+      {ticker:"JPM",  nombre:"JPMorgan Chase", tipo:"COMPRA", entrada:"$268", target:"$310", stop_loss:"$252", confianza:84, razon:"La Reserva Federal señaló que podría bajar tasas en septiembre — JPM se beneficia por expansión de crédito. Banca de inversión Q1 +45% YoY. Jamie Dimon recompra acciones agresivamente. Dividendo creciente ($1.35/trimestre). Wells Fargo y Barclays reiteran Overweight con target $310."},
     ],
     dividendos:[
-      {ticker:"GLD",  nombre:"SPDR Gold ETF", yield_div:"—",    entrada:"$315", sector:"Cobertura/Oro", rating:"★★★★★"},
-      {ticker:"AMZN", nombre:"Amazon",        yield_div:"—",    entrada:"$226", sector:"Tech/Cloud",    rating:"★★★★★"},
+      {ticker:"JPM",  nombre:"JPMorgan Chase",  yield_div:"2.0%", entrada:"$268", sector:"Financiero",      rating:"★★★★★"},
+      {ticker:"KO",   nombre:"Coca-Cola",        yield_div:"3.1%", entrada:"$72",  sector:"Consumo Básico",  rating:"★★★★☆"},
+      {ticker:"VZ",   nombre:"Verizon",          yield_div:"6.5%", entrada:"$43",  sector:"Telecomunicaciones", rating:"★★★★☆"},
+      {ticker:"ABBV", nombre:"AbbVie",           yield_div:"3.5%", entrada:"$188", sector:"Salud/Pharma",    rating:"★★★★★"},
     ],
     crypto:[
-      {ticker:"COIN", nombre:"Coinbase",  tipo:"COMPRA", entrada:"$258", target:"$310", stop_loss:"$232", confianza:84, razon:"Volumen crypto en alza, ingresos de Coinbase correlacionados directamente. ETF de Bitcoin atrayendo nuevos usuarios. Posición estratégica única en cripto regulado USA."},
-      {ticker:"MSTR", nombre:"MicroStrategy", tipo:"COMPRA", entrada:"$398", target:"$470", stop_loss:"$362", confianza:81, razon:"Proxy de Bitcoin más puro del mercado. Acumulación activa: 568,840 BTC. Si BTC rompe $110K, MSTR supera $500. Alta beta para traders agresivos."},
+      {ticker:"COIN", nombre:"Coinbase",       tipo:"COMPRA", entrada:"$262", target:"$320", stop_loss:"$238", confianza:86, razon:"Bitcoin superó $107K esta semana — cada $10K de BTC = +15-20% en COIN. ETF de Bitcoin superó $120B en AUM. Coinbase es el custodio oficial de 9 de los 11 ETFs de Bitcoin en USA. Base (L2) superó 10M usuarios activos. Oppenheimer target $350."},
+      {ticker:"MSTR", nombre:"Strategy (MSTR)", tipo:"COMPRA", entrada:"$405", target:"$490", stop_loss:"$368", confianza:82, razon:"Strategy (ex-MicroStrategy) posee 576,230 BTC — el mayor acumulador corporativo del mundo. BTC en $107K = balance de $61.8B en Bitcoin. Saylor anunció esta semana que continuará comprando. Si BTC llega a $120K antes de fin de junio, MSTR supera $550. Alta beta, máxima volatilidad."},
+      {ticker:"IBIT",  nombre:"BlackRock Bitcoin ETF", tipo:"COMPRA", entrada:"$62", target:"$75", stop_loss:"$57", confianza:88, razon:"El ETF de Bitcoin más grande del mundo con $52B en AUM. Forma más simple y segura de exposición a BTC sin wallet. Flujos institucionales récord esta semana. Correlación perfecta con Bitcoin. Ideal para portfolios regulados o IRAs."},
     ],
   };
 
@@ -14745,7 +14742,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
       {/* Add / Edit form */}
       {showAdd && (
-        <div style={{background:"rgba(139,92,246,0.06)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:18,padding:"20px",marginBottom:16}}>
+        <div style={{background:"linear-gradient(145deg,rgba(10,14,26,0.97),rgba(15,20,42,0.95))",border:"1px solid rgba(139,92,246,0.3)",borderRadius:18,padding:"20px",marginBottom:16}}>
           <div style={{fontWeight:800,color:"#F1F5F9",fontSize:15,marginBottom:14}}>
             {editId?(isEN?"Edit Position":"Editar Posición"):(isEN?"New Position":"Nueva Posición")}
           </div>
@@ -14756,18 +14753,18 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               {key:"entryPrice",placeholder:isEN?"Entry price $":"Precio entrada $",label:isEN?"Entry $":"Entrada $",type:"number"},
             ].map(f=>(
               <div key={f.key}>
-                <div style={{fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:0.5}}>{f.label.toUpperCase()}</div>
+                <div style={{fontSize:10,color:"#94A3B8",fontWeight:700,marginBottom:4,letterSpacing:0.5}}>{f.label.toUpperCase()}</div>
                 <input value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:f.key==="ticker"?e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,""):e.target.value}))}
                   type={f.type||"text"} placeholder={f.placeholder}
-                  style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:14,outline:"none",fontFamily:"monospace",boxSizing:"border-box"}}/>
+                  style={{width:"100%",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:14,outline:"none",fontFamily:"monospace",boxSizing:"border-box",caretColor:"#A78BFA"}}/>
               </div>
             ))}
           </div>
           <div style={{marginBottom:12}}>
-            <div style={{fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:0.5}}>{isEN?"NOTE (OPTIONAL)":"NOTA (OPCIONAL)"}</div>
+            <div style={{fontSize:10,color:"#94A3B8",fontWeight:700,marginBottom:4,letterSpacing:0.5}}>{isEN?"NOTE (OPTIONAL)":"NOTA (OPCIONAL)"}</div>
             <input value={form.note} onChange={e=>setForm(p=>({...p,note:e.target.value}))}
               placeholder={isEN?"Your thesis, why you bought…":"Tu tesis, por qué compraste…"}
-              style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:13,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
+              style={{width:"100%",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:13,outline:"none",fontFamily:"inherit",boxSizing:"border-box",caretColor:"#A78BFA"}}/>
           </div>
           <div style={{display:"flex",gap:10}}>
             <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"11px",color:"#64748B",fontWeight:700,cursor:"pointer"}}>
