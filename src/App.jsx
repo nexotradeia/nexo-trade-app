@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 14:52:42
+// NEXO TRADE — build: 2026-05-31 16:49:04
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -15025,37 +15025,47 @@ function RadarGlobalPage({lang="es"}){
     return()=>{clearInterval(iv);clearInterval(ivTime);};
   },[]);
 
-  // Three.js globe (npm)
+  // Three.js globe (npm) — v3 clean
   useEffect(()=>{
     if(!cvsRef.current||!wrapRef.current)return;
     const W=wrapRef.current.clientWidth||700, H=480;
-    // helpers
     function l2v(lat,lon,r=5){const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));}
-    function glowTex(r,g,b,sz=128){const c=document.createElement('canvas');c.width=c.height=sz;const ctx=c.getContext('2d');const grd=ctx.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz/2);grd.addColorStop(0,`rgba(${r},${g},${b},1)`);grd.addColorStop(.4,`rgba(${r},${g},${b},.4)`);grd.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=grd;ctx.fillRect(0,0,sz,sz);return new THREE.CanvasTexture(c);}
+    function makeTex(fn,sz=256){const c=document.createElement('canvas');c.width=c.height=sz;fn(c.getContext('2d'),sz);return new THREE.CanvasTexture(c);}
+    function glowTex(r,g,b,sz=128){return makeTex((ctx,sz)=>{const grd=ctx.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz/2);grd.addColorStop(0,`rgba(${r},${g},${b},1)`);grd.addColorStop(.4,`rgba(${r},${g},${b},.4)`);grd.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=grd;ctx.fillRect(0,0,sz,sz);},sz);}
     function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
     // Renderer
     const renderer=new THREE.WebGLRenderer({canvas:cvsRef.current,antialias:true,alpha:true});
     renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setClearColor(0x000000,0);
     // Scene & Camera
     const scene=new THREE.Scene();
-    const camera=new THREE.PerspectiveCamera(45,W/H,0.1,100);
-    camera.position.set(0,0,13.5);
+    const camera=new THREE.PerspectiveCamera(45,W/H,0.1,1000);
+    camera.position.set(0,0,14);
+    // Stars
+    {const n=2000,pos=new Float32Array(n*3);for(let i=0;i<n;i++){const r=80+Math.random()*200,phi=Math.acos(2*Math.random()-1),theta=2*Math.PI*Math.random();pos[i*3]=r*Math.sin(phi)*Math.cos(theta);pos[i*3+1]=r*Math.cos(phi);pos[i*3+2]=r*Math.sin(phi)*Math.sin(theta);}
+    const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const st=makeTex((ctx,sz)=>{ctx.fillStyle='white';ctx.beginPath();ctx.arc(sz/2,sz/2,sz*.4,0,Math.PI*2);ctx.fill();},16);
+    scene.add(new THREE.Points(sg,new THREE.PointsMaterial({size:.18,map:st,transparent:true,opacity:.8,sizeAttenuation:true,depthWrite:false})));}
     // Lights
-    scene.add(new THREE.AmbientLight(0xffffff,.3));
-    const dL=new THREE.DirectionalLight(0x88aaff,.8);dL.position.set(5,3,5);scene.add(dL);
-    const pL=new THREE.PointLight(0x4466ff,.5,30);pL.position.set(-8,4,6);scene.add(pL);
-    // Globe
-    const G=new THREE.Group();G.rotation.x=0.22;scene.add(G);
-    const globeMat=new THREE.MeshPhongMaterial({color:0x0a1628,transparent:true,opacity:.97,shininess:60,specular:0x1144aa});
+    scene.add(new THREE.AmbientLight(0x223355,.7));
+    const sun=new THREE.DirectionalLight(0xffeedd,1.2);sun.position.set(8,4,6);scene.add(sun);
+    const rim=new THREE.DirectionalLight(0x3366ff,.5);rim.position.set(-8,-2,-5);scene.add(rim);
+    // Globe group
+    const G=new THREE.Group();G.rotation.x=0.2;scene.add(G);
+    // Globe sphere
+    const globeMat=new THREE.MeshPhongMaterial({color:0x0a1628,shininess:90,specular:0x224488});
     G.add(new THREE.Mesh(new THREE.SphereGeometry(5,64,64),globeMat));
-    try{new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/textures/land_ocean_ice_cloud_2048.jpg',t=>{globeMat.map=t;globeMat.color.set(0xffffff);globeMat.needsUpdate=true;});}catch{}
-    G.add(new THREE.Mesh(new THREE.SphereGeometry(5.25,64,64),new THREE.MeshPhongMaterial({color:0x1a5fff,transparent:true,opacity:.08,side:THREE.BackSide})));
+    new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/textures/land_ocean_ice_cloud_2048.jpg',t=>{globeMat.map=t;globeMat.color.set(0xffffff);globeMat.needsUpdate=true;},undefined,()=>{});
+    // Atmosphere layers
+    const atmMat=new THREE.MeshPhongMaterial({color:0x2266ff,transparent:true,opacity:.11,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false});
+    G.add(new THREE.Mesh(new THREE.SphereGeometry(5.45,64,64),atmMat));
+    G.add(new THREE.Mesh(new THREE.SphereGeometry(5.8,64,64),new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:.05,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false})));
     // Grid
-    const gm=new THREE.LineBasicMaterial({color:0x1a3060,transparent:true,opacity:.18});
-    for(let lat=-75;lat<=75;lat+=15){const pts=[];for(let lon=0;lon<=360;lon+=4)pts.push(l2v(lat,lon,5.02));G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));}
-    for(let lon=0;lon<360;lon+=15){const pts=[];for(let lat=-90;lat<=90;lat+=4)pts.push(l2v(lat,lon,5.02));G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));}
+    const gm=new THREE.LineBasicMaterial({color:0x1a3060,transparent:true,opacity:.15,blending:THREE.AdditiveBlending});
+    for(let lat=-75;lat<=75;lat+=15){const pts=[];for(let lon=0;lon<=360;lon+=3)pts.push(l2v(lat,lon,5.02));G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));}
+    for(let lon=0;lon<360;lon+=15){const pts=[];for(let lat=-90;lat<=90;lat+=3)pts.push(l2v(lat,lon,5.02));G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));}
     // Country glows
-    const CLRS=[[0,26,102],[0,85,204],[0,153,238],[0,221,170],[255,255,204]];
+    const HEAT=[[0,20,80],[0,60,180],[0,120,220],[0,200,150],[255,240,80]];
     const glowSps=[];
     function renderGlows(vMap){
       glowSps.forEach(s=>G.remove(s));glowSps.length=0;
@@ -15063,30 +15073,36 @@ function RadarGlobalPage({lang="es"}){
       Object.entries(RADAR_CD).forEach(([c,cd])=>{
         const v=vMap[c]||0;if(!v)return;
         const norm=Math.min(v/mx,1),ci=Math.min(Math.floor(norm*4),4);
-        const [r,g,b]=CLRS[ci];
-        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(r,g,b),transparent:true,opacity:.35+norm*.5,blending:THREE.AdditiveBlending,depthWrite:false}));
-        sp.position.copy(l2v(cd.lat,cd.lon,5.03));const s=cd.r*.38+.4;sp.scale.set(s,s,1);
+        const [r,g,b]=HEAT[ci];
+        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(r,g,b,192),transparent:true,opacity:.28+norm*.6,blending:THREE.AdditiveBlending,depthWrite:false}));
+        sp.position.copy(l2v(cd.lat,cd.lon,5.03));const s=cd.r*.42+.5;sp.scale.set(s,s,1);
         G.add(sp);glowSps.push(sp);
       });
     }
     renderGlows(RADAR_FALLBACK);
-    // Market dots + hit spheres
+    // Market dots
     const mktHits=[];
     RADAR_MKTS.forEach(m=>{
       const [r,g,b]=hex2rgb(m.col),open=isOpenR(m)||forceOpenR(m);
-      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(r,g,b),transparent:true,opacity:open?.9:.55,blending:THREE.AdditiveBlending,depthWrite:false}));
-      sp.position.copy(l2v(m.lat,m.lon,5.05));const s=m.sz*(open?1.3:.8);sp.scale.set(s,s,1);G.add(sp);
-      const hit=new THREE.Mesh(new THREE.SphereGeometry(.32,8,8),new THREE.MeshBasicMaterial({visible:false}));
-      hit.position.copy(l2v(m.lat,m.lon,5.05));hit.userData={...m};G.add(hit);mktHits.push(hit);
+      const pos=l2v(m.lat,m.lon,5.07);
+      // glow sprite
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(r,g,b,128),transparent:true,opacity:open?.8:.4,blending:THREE.AdditiveBlending,depthWrite:false}));
+      sp.position.copy(pos);const s=m.sz*(open?1.0:.65)*.75;sp.scale.set(s,s,1);G.add(sp);
+      // core dot
+      const dot=new THREE.Mesh(new THREE.SphereGeometry(m.sz*.022+.04,8,8),new THREE.MeshBasicMaterial({color:new THREE.Color(r/255,g/255,b/255)}));
+      dot.position.copy(pos);G.add(dot);
+      // hit sphere
+      const hit=new THREE.Mesh(new THREE.SphereGeometry(.35,8,8),new THREE.MeshBasicMaterial({visible:false}));
+      hit.position.copy(pos);hit.userData={...m};G.add(hit);mktHits.push(hit);
     });
     // Arcs
     const byId=Object.fromEntries(RADAR_MKTS.map(m=>[m.id,m]));
-    const am=new THREE.LineBasicMaterial({color:0x4488ff,transparent:true,opacity:.18,blending:THREE.AdditiveBlending});
+    const am=new THREE.LineBasicMaterial({color:0x4488ff,transparent:true,opacity:.2,blending:THREE.AdditiveBlending});
     RADAR_ARCS.forEach(([aid,bid])=>{
       const a=byId[aid],b=byId[bid];if(!a||!b)return;
-      const vA=l2v(a.lat,a.lon,5.08),vB=l2v(b.lat,b.lon,5.08);
-      const mid=new THREE.Vector3().addVectors(vA,vB).multiplyScalar(.5).normalize().multiplyScalar(5.08+vA.distanceTo(vB)*.4);
-      G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(new THREE.QuadraticBezierCurve3(vA,mid,vB).getPoints(48)),am));
+      const vA=l2v(a.lat,a.lon,5.1),vB=l2v(b.lat,b.lon,5.1);
+      const mid=new THREE.Vector3().addVectors(vA,vB).multiplyScalar(.5).normalize().multiplyScalar(5.1+vA.distanceTo(vB)*.45);
+      G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(new THREE.QuadraticBezierCurve3(vA,mid,vB).getPoints(60)),am));
     });
     // Click / drag
     const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
@@ -15099,134 +15115,20 @@ function RadarGlobalPage({lang="es"}){
     cvs.style.cursor='grab';
     cvs.addEventListener('click',onClick);cvs.addEventListener('mousedown',onMD);
     window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);
-    // Animate
-    let afId;
-    function animate(){afId=requestAnimationFrame(animate);if(!T.current.isPausedR)T.current.rot+=.002;G.rotation.y=T.current.rot;renderer.render(scene,camera);}
-    animate();
+    // Animate — Three.js only
+    let afId3,tick=0;
+    const animate3=()=>{afId3=requestAnimationFrame(animate3);tick+=.01;if(!T.current.isPausedR)T.current.rot+=.0018;G.rotation.y=T.current.rot;atmMat.opacity=.09+Math.sin(tick*.5)*.02;renderer.render(scene,camera);};
+    animate3();
     T.current.renderCountryGlows=renderGlows;
     // Live data
     const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),6000);
     fetch('https://api.coingecko.com/api/v3/exchanges?per_page=250',{signal:ctrl.signal})
       .then(r=>r.json()).then(data=>{const vm={};data.forEach(ex=>{if(ex.country)vm[ex.country]=(vm[ex.country]||0)+(ex.trade_volume_24h_btc||0);});T.current.volMap=vm;renderGlows(vm);setDataSrc(isEN?'Live data: CoinGecko':'Datos en vivo: CoinGecko');})
       .catch(()=>setDataSrc(isEN?'Source: estimated data':'Fuente: datos estimados'));
-    const MKT_RGB={nyse:[34,197,94]};// placeholder to satisfy linter
-    function proj(lat,lon){
-      const phi=(90-lat)*Math.PI/180, theta=lon*Math.PI/180+T.current.rot;
-      const x=R*Math.sin(phi)*Math.cos(theta), y=-R*Math.cos(phi), z=R*Math.sin(phi)*Math.sin(theta);
-      return{sx:cx+x,sy:cy+y,z,vis:z>-R*0.05};
-    }
-    function volRGB(country){
-      const vm=T.current.volMap, vals=Object.values(vm), mx=vals.length?Math.max(...vals):1;
-      const v=(vm[country]||0)/mx;
-      if(v<0.02)return[0,30,120]; if(v<0.1)return[0,80,200]; if(v<0.3)return[0,150,220]; if(v<0.6)return[0,210,160]; return[255,240,130];
-    }
-    function draw(){
-      const ctx=cvs.getContext('2d'); if(!ctx)return;
-      ctx.clearRect(0,0,W,H);
-      // Globe bg
-      const bg=ctx.createRadialGradient(cx-R*.25,cy-R*.25,R*.05,cx,cy,R);
-      bg.addColorStop(0,'#0e2245'); bg.addColorStop(.6,'#061020'); bg.addColorStop(1,'#020810');
-      ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fillStyle=bg; ctx.fill(); ctx.restore();
-      // Atmosphere
-      const atm=ctx.createRadialGradient(cx,cy,R*.88,cx,cy,R*1.15);
-      atm.addColorStop(0,'rgba(20,60,255,0.18)'); atm.addColorStop(.5,'rgba(10,30,180,0.07)'); atm.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.beginPath(); ctx.arc(cx,cy,R*1.15,0,Math.PI*2); ctx.fillStyle=atm; ctx.fill();
-      // Grid
-      for(let pass=0;pass<2;pass++){
-        ctx.strokeStyle=pass?'rgba(30,60,140,0.2)':'rgba(15,35,80,0.1)'; ctx.lineWidth=0.5;
-        for(let lat=-75;lat<=75;lat+=15){
-          let go=false; ctx.beginPath();
-          for(let lon=-180;lon<=180;lon+=4){const p=proj(lat,lon);if(!!p.vis!==!!pass)continue;go?ctx.lineTo(p.sx,p.sy):(ctx.moveTo(p.sx,p.sy),go=true);}
-          if(go)ctx.stroke();
-        }
-        for(let lon=-180;lon<180;lon+=15){
-          let go=false; ctx.beginPath();
-          for(let lat=-85;lat<=85;lat+=4){const p=proj(lat,lon);if(!!p.vis!==!!pass)continue;go?ctx.lineTo(p.sx,p.sy):(ctx.moveTo(p.sx,p.sy),go=true);}
-          if(go)ctx.stroke();
-        }
-      }
-      // Country glows
-      Object.entries(RADAR_CD).forEach(([country,cd])=>{
-        const p=proj(cd.lat,cd.lon);
-        const a=p.vis?0.35+p.z/R*0.35:0.04;
-        const gr=cd.r*R/28+4;
-        const [r,g,b]=volRGB(country);
-        const grd=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,gr);
-        grd.addColorStop(0,`rgba(${r},${g},${b},${a})`); grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.beginPath(); ctx.arc(p.sx,p.sy,gr,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
-      });
-      // Arcs
-      RADAR_ARCS.forEach(([aid,bid])=>{
-        const a=RADAR_MKTS.find(m=>m.id===aid), b=RADAR_MKTS.find(m=>m.id===bid); if(!a||!b)return;
-        const pA=proj(a.lat,a.lon), pB=proj(b.lat,b.lon); if(!pA.vis&&!pB.vis)return;
-        const mx=(pA.sx+pB.sx)/2, my=(pA.sy+pB.sy)/2;
-        ctx.beginPath(); ctx.moveTo(pA.sx,pA.sy);
-        ctx.quadraticCurveTo(cx+(mx-cx)*.35, cy+(my-cy)*.35, pB.sx,pB.sy);
-        ctx.strokeStyle='rgba(68,136,255,0.13)'; ctx.lineWidth=0.8; ctx.stroke();
-      });
-      // Market dots
-      RADAR_MKTS.forEach(mkt=>{
-        const p=proj(mkt.lat,mkt.lon);
-        const [r,g,b]=MKT_RGB[mkt.id]||[100,150,255];
-        const al=p.vis?0.95:0.08, dr=Math.max(5,mkt.sz*R*0.55);
-        const grd=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,dr*3);
-        grd.addColorStop(0,`rgba(${r},${g},${b},${al*.35})`); grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.beginPath(); ctx.arc(p.sx,p.sy,dr*3,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
-        ctx.beginPath(); ctx.arc(p.sx,p.sy,dr,0,Math.PI*2); ctx.fillStyle=`rgba(${r},${g},${b},${al})`; ctx.fill();
-        if(p.vis&&(isOpenR(mkt)||forceOpenR(mkt))){
-          ctx.beginPath(); ctx.arc(p.sx,p.sy,dr+3.5,0,Math.PI*2);
-          ctx.strokeStyle=`rgba(${r},${g},${b},0.55)`; ctx.lineWidth=1.5; ctx.stroke();
-        }
-      });
-      // Globe edge
-      ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.strokeStyle='rgba(40,90,220,0.4)'; ctx.lineWidth=1.5; ctx.stroke();
-      // Specular
-      const sp=ctx.createRadialGradient(cx-R*.4,cy-R*.35,0,cx-R*.1,cy-R*.1,R*.7);
-      sp.addColorStop(0,'rgba(255,255,255,0.07)'); sp.addColorStop(1,'rgba(255,255,255,0)');
-      ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fillStyle=sp; ctx.fill();
-    }
-    function animate(){
-      if(!T.current.isPausedR) T.current.rot+=0.003;
-      draw();
-      T.current.animId=requestAnimationFrame(animate);
-    }
-    animate();
-    // Fetch vol data
-    const ctrl=new AbortController(); setTimeout(()=>ctrl.abort(),6000);
-    fetch('https://api.coingecko.com/api/v3/exchanges?per_page=250',{signal:ctrl.signal})
-      .then(r=>r.json()).then(data=>{
-        const vm={};
-        data.forEach(ex=>{if(ex.country)vm[ex.country]=(vm[ex.country]||0)+(ex.trade_volume_24h_btc||0);});
-        T.current.volMap=vm;
-        setDataSrc(isEN?'Live data: CoinGecko':'Datos en vivo: CoinGecko');
-      }).catch(()=>{T.current.volMap=RADAR_FALLBACK; setDataSrc(isEN?'Source: estimated data':'Fuente: datos estimados');});
-    // Click
-    function onClick(e){
-      const rect=cvs.getBoundingClientRect(), sx=W/rect.width, sy=H/rect.height;
-      const mx=(e.clientX-rect.left)*sx, my=(e.clientY-rect.top)*sy;
-      let best=null, bd=28;
-      RADAR_MKTS.forEach(mkt=>{
-        const p=proj(mkt.lat,mkt.lon); if(!p.vis)return;
-        const d=Math.hypot(mx-p.sx,my-p.sy); if(d<bd){bd=d;best=mkt;}
-      });
-      if(best) setSelMkt(s=>s?.id===best.id?null:best);
-    }
-    // Drag
-    let drag=false, lx=0;
-    const onMD=(e)=>{drag=true;lx=e.clientX;cvs.style.cursor='grabbing';};
-    const onMM=(e)=>{if(!drag)return; T.current.rot+=(e.clientX-lx)*0.004; lx=e.clientX;};
-    const onMU=()=>{drag=false;cvs.style.cursor='grab';};
-    cvs.style.cursor='grab';
-    cvs.addEventListener('click',onClick);
-    cvs.addEventListener('mousedown',onMD);
-    window.addEventListener('mousemove',onMM);
-    window.addEventListener('mouseup',onMU);
     return()=>{
-      cancelAnimationFrame(T.current.animId);
-      cvs.removeEventListener('click',onClick);
-      cvs.removeEventListener('mousedown',onMD);
-      window.removeEventListener('mousemove',onMM);
-      window.removeEventListener('mouseup',onMU);
+      cancelAnimationFrame(afId3);
+      cvs.removeEventListener('click',onClick);cvs.removeEventListener('mousedown',onMD);
+      window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);
       renderer.dispose();
     };
   },[]);
