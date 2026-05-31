@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 19:54:12
+// NEXO TRADE — build: 2026-05-30 20:00:27
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -3057,7 +3057,7 @@ function GifPicker({onSelect,onClose,onText}){
   const tabs = [{k:"gif",l:"GIF 🎞️"},{k:"emoji",l:"Emojis 😎"},{k:"reaction",l:"Frases ⚡"},{k:"sticker",l:"Stickers 🎨"}];
 
   return(
-    <div style={{position:"absolute",top:"100%",left:0,right:0,background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 48px rgba(0,0,0,0.18)",zIndex:300,marginTop:6,overflow:"hidden"}}>
+    <div style={{position:"fixed",bottom:0,left:0,right:0,maxWidth:680,margin:"0 auto",background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:"16px 16px 0 0",boxShadow:"0 -8px 40px rgba(0,0,0,0.18)",zIndex:9999,overflow:"hidden"}}>
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.card2||"#f8fafc"}}>
         {tabs.map(t=>(
@@ -6982,10 +6982,12 @@ function PaperTrading({ user }){
   const refreshPrices = useCallback(async()=>{
     const tks=Object.keys(pf.positions);
     if(!tks.length) return;
+    const PAPER_CRYPTO_MAP_REF={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT",MATIC:"BINANCE:MATICUSDT",DOT:"BINANCE:DOTUSDT",SHIB:"BINANCE:SHIBUSDT",LTC:"BINANCE:LTCUSDT"};
     const next={};
     for(const tk of tks){
       try{
-        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINNHUB_KEY}`);
+        const sym=FH_SYM[tk]||PAPER_CRYPTO_MAP_REF[tk]||tk;
+        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
         const d=await r.json();
         if(d.c>0) next[tk]={price:d.c, pct:d.dp||0};
       }catch{}
@@ -6995,12 +6997,17 @@ function PaperTrading({ user }){
 
   useEffect(()=>{ refreshPrices(); },[]);
 
+  // Mapa de crypto para paper trading
+  const PAPER_CRYPTO_MAP={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT",MATIC:"BINANCE:MATICUSDT",DOT:"BINANCE:DOTUSDT",SHIB:"BINANCE:SHIBUSDT",LTC:"BINANCE:LTCUSDT"};
+  const resolveSym=(tk)=>FH_SYM[tk]||PAPER_CRYPTO_MAP[tk]||tk;
+
   // Buscar cotización al escribir ticker
   const fetchQuote = async(tk)=>{
     if(!tk||tk.length<1){setLiveQ(null);return;}
     setFetching(true);
     try{
-      const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk.toUpperCase()}&token=${FINNHUB_KEY}`);
+      const sym=resolveSym(tk.trim().toUpperCase());
+      const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
       const d=await r.json();
       if(d.c>0) setLiveQ({price:d.c, change:d.dp||0});
       else setLiveQ(null);
@@ -7202,15 +7209,26 @@ function PaperTrading({ user }){
         <div style={{background:"#fff",border:"1px solid rgba(15,23,42,0.09)",borderRadius:16,padding:"20px"}}>
           <h3 style={{fontWeight:800,fontSize:15,color:"#0F172A",marginBottom:16}}>💹 Comprar acciones</h3>
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {/* Quick picks */}
+            <div>
+              <div style={{fontSize:10,fontWeight:700,color:"#64748B",marginBottom:6}}>ACCESO RÁPIDO</div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                {["BTC","ETH","SOL","AAPL","NVDA","TSLA","MSFT","SPY","DOGE","XRP"].map(t=>(
+                  <button key={t} onClick={()=>{setTicker(t);setLiveQ(null);fetchQuote(t);}}
+                    style={{fontSize:11,fontWeight:700,padding:"4px 10px",borderRadius:7,border:"1px solid rgba(0,168,255,0.25)",background:ticker===t?"rgba(0,168,255,0.15)":"rgba(0,168,255,0.05)",color:"#00A8FF",cursor:"pointer",fontFamily:"monospace"}}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
             {/* Ticker input */}
             <div>
-              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>TICKER DE LA ACCIÓN</label>
+              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>TICKER DE LA ACCIÓN O CRYPTO</label>
               <div style={{display:"flex",gap:8}}>
                 <input value={ticker}
                   onChange={e=>{setTicker(e.target.value.toUpperCase());setLiveQ(null);}}
-                  onBlur={e=>fetchQuote(e.target.value)}
                   onKeyDown={e=>e.key==="Enter"&&fetchQuote(ticker)}
-                  placeholder="Ej: AAPL, NVDA, TSLA, BTC-USD"
+                  placeholder="Ej: AAPL, NVDA, BTC, ETH, SOL"
                   style={{flex:1,border:"1.5px solid rgba(15,23,42,0.12)",borderRadius:10,padding:"10px 14px",fontSize:14,fontFamily:"monospace",fontWeight:700,outline:"none",letterSpacing:1}}/>
                 <button onClick={()=>fetchQuote(ticker)}
                   style={{background:"linear-gradient(135deg,#00A8FF,#0090D4)",border:"none",borderRadius:10,padding:"10px 16px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer"}}>
