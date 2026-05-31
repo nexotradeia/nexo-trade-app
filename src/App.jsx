@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 13:31:41
+// NEXO TRADE — build: 2026-05-31 14:02:33
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5221,13 +5221,15 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:4}}>
                 <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>$0</span>
               </div>
-              <div style={{fontSize:12,color:"#475569",marginBottom:20}}>Para siempre gratis</div>
-              {FREE_FEATURES.map((f,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"7px 0",borderBottom:i<FREE_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
-                  <span style={{fontSize:11,color:"#00A8FF",flexShrink:0,marginTop:2}}>✓</span>
-                  <span style={{fontSize:12,color:"#94A3B8",lineHeight:1.4}}>{f}</span>
-                </div>
-              ))}
+              <div style={{fontSize:12,color:"#475569",marginBottom:14}}>Para siempre gratis</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
+                {FREE_FEATURES.map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(0,168,255,0.04)",borderRadius:7,border:"1px solid rgba(0,168,255,0.07)"}}>
+                    <span style={{fontSize:10,color:"#00A8FF",flexShrink:0,marginTop:2}}>✓</span>
+                    <span style={{fontSize:11,color:"#94A3B8",lineHeight:1.35}}>{f}</span>
+                  </div>
+                ))}
+              </div>
               <div style={{marginTop:24,padding:"12px",borderRadius:10,background:"rgba(0,168,255,0.04)",textAlign:"center",color:"#334155",fontSize:12,fontWeight:700,border:"1px solid rgba(0,168,255,0.1)"}}>
                 Plan actual
               </div>
@@ -5282,12 +5284,14 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 {billing==="annual" ? "Pago único anual · Sin renovación sorpresa" : "Cancela cuando quieras · Sin permanencia"}
               </div>
 
-              {VIP_FEATURES.map((f,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"7px 0",borderBottom:i<VIP_FEATURES.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
-                  <span style={{fontSize:11,color:"#A78BFA",flexShrink:0,marginTop:2}}>★</span>
-                  <span style={{fontSize:12,color:"#CBD5E1",lineHeight:1.4}}>{f}</span>
-                </div>
-              ))}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
+                {VIP_FEATURES.map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(124,58,237,0.06)",borderRadius:7,border:"1px solid rgba(124,58,237,0.1)"}}>
+                    <span style={{fontSize:10,color:"#A78BFA",flexShrink:0,marginTop:2}}>★</span>
+                    <span style={{fontSize:11,color:"#CBD5E1",lineHeight:1.35}}>{f}</span>
+                  </div>
+                ))}
+              </div>
 
               <div style={{marginTop:24}}>
                 {isPremium
