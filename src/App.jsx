@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 20:09:58
+// NEXO TRADE — build: 2026-05-30 20:13:27
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6134,15 +6134,82 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
   // Widget afiliado destacado — rota entre los 3 mejores pagadores
   const [affIdx, setAffIdx] = useState(0);
-  const TOP_AFFS = [AFFILIATES[0], AFFILIATES[2], AFFILIATES[3]]; // IBKR, Kraken, Bybit
+  const TOP_AFFS = [AFFILIATES[0], AFFILIATES[2], AFFILIATES[3]];
   const topAff = TOP_AFFS[affIdx % TOP_AFFS.length];
   useEffect(()=>{
     const t=setInterval(()=>setAffIdx(i=>(i+1)%TOP_AFFS.length),8000);
     return()=>clearInterval(t);
   },[]);
 
+  // Mini perfil popup
+  const [miniProfile, setMiniProfile] = useState(null);
+  const BOT_FULL_DATA = {
+    "CarlosInvierte": {avatar:"👨‍💼",color:"#7C3AED",badge:"Pro Trader",posts:312,followers:1840,points:4850,bio:"Trader técnico con 8 años de experiencia. Especialidad: setups de ruptura y análisis de volumen. 📈",specialty:"Análisis Técnico",location:"México 🇲🇽",joined:"Ene 2022",winRate:"73%"},
+    "SofiaWallSt":    {avatar:"👩‍💻",color:"#EC4899",badge:"Analista",posts:278,followers:2310,points:4120,bio:"CFA charterholder. Ex-analista en Goldman. Ahora comparto mis mejores ideas de inversión con la comunidad. 💎",specialty:"Análisis Fundamental",location:"Argentina 🇦🇷",joined:"Mar 2022",winRate:"68%"},
+    "MarcoBTC":       {avatar:"₿",  color:"#F7931A",badge:"Crypto Trader",posts:245,followers:3120,points:3780,bio:"Full-time crypto trader desde 2017. Sobreviví el bear de 2018 y 2022. DCA y paciencia son mis herramientas. ₿",specialty:"Cripto",location:"España 🇪🇸",joined:"Dic 2021",winRate:"71%"},
+    "AlexTradingMX":  {avatar:"⚡", color:"#F59E0B",badge:"Day Trader",posts:201,followers:980,points:3210,bio:"Day trader de futuros y opciones. Opero principalmente momentum y noticias. Consistencia > homerun. ⚡",specialty:"Day Trading",location:"México 🇲🇽",joined:"Jun 2022",winRate:"65%"},
+    "LucasMercados":  {avatar:"🦁", color:"#16A34A",badge:"Macro",posts:189,followers:1450,points:2940,bio:"Economista de formación. Sigo los ciclos macro y su impacto en acciones y commodities. Largo plazo siempre. 🌍",specialty:"Macro",location:"Chile 🇨🇱",joined:"Feb 2022",winRate:"70%"},
+    "ValentinaFinance":{avatar:"💎",color:"#06B6D4",badge:"Value Investor",posts:167,followers:1200,points:2650,bio:"Inversionista de valor al estilo Buffett. Busco empresas con moat y las tengo por años. Paciencia es rentabilidad. 💎",specialty:"Value Investing",location:"Colombia 🇨🇴",joined:"Ago 2022",winRate:"74%"},
+    "AndresTradePro": {avatar:"🎯", color:"#EF4444",badge:"Opciones",posts:154,followers:2780,points:2380,bio:"Especialista en estrategias de opciones: iron condors, spreads, covered calls. Risk/reward siempre primero. 🎯",specialty:"Opciones",location:"Venezuela 🇻🇪",joined:"May 2022",winRate:"69%"},
+    "IsabelAnalysis": {avatar:"📊", color:"#8B5CF6",badge:"Quant",posts:143,followers:890,points:2100,bio:"Ingeniera en datos → trader cuantitativo. Modelos estadísticos para encontrar edge en el mercado. 📊",specialty:"Trading Cuantitativo",location:"Perú 🇵🇪",joined:"Sep 2022",winRate:"72%"},
+    "RicardoInvest":  {avatar:"🏆", color:"#D97706",badge:"Swing Trader",posts:128,followers:760,points:1870,bio:"Swing trader de acciones USA. Busco setups de 2-6 semanas con buen R/R. Gestión de riesgo estricta. 🏆",specialty:"Swing Trading",location:"Uruguay 🇺🇾",joined:"Nov 2022",winRate:"67%"},
+    "NataliaTrader":  {avatar:"🌟", color:"#10B981",badge:"Growth",posts:115,followers:1560,points:1540,bio:"Inversionista growth. Me enfoco en empresas de alto crecimiento con ventajas competitivas reales. 🌟",specialty:"Growth Investing",location:"Bolivia 🇧🇴",joined:"Ene 2023",winRate:"66%"},
+  };
+
   return(
     <div>
+
+      {/* ── MINI PERFIL POPUP ── */}
+      {miniProfile&&(()=>{
+        const {name,info}=miniProfile;
+        const bd=BOT_FULL_DATA[name]||{avatar:info.avatar,color:info.color,badge:"Trader",posts:info.count*10,followers:Math.floor(Math.random()*1000)+200,points:1000,bio:"Trader activo en NexoTrade.",specialty:"Trading",location:"LATAM 🌎",joined:"2023",winRate:"65%"};
+        const lvl=bd.points>=4000?"💎 Élite":bd.points>=2000?"🏆 Pro":bd.points>=500?"⭐ Experto":"📈 Trader";
+        return(
+          <>
+          <div onClick={()=>setMiniProfile(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:8000}}/>
+          <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:8001,width:300,background:"#fff",borderRadius:20,boxShadow:"0 20px 60px rgba(0,0,0,0.25)",overflow:"hidden"}}>
+            {/* Header con color del trader */}
+            <div style={{background:`linear-gradient(135deg,${bd.color},${bd.color}99)`,padding:"24px 20px 16px",position:"relative"}}>
+              <button onClick={()=>setMiniProfile(null)} style={{position:"absolute",top:10,right:12,background:"rgba(255,255,255,0.2)",border:"none",borderRadius:"50%",width:26,height:26,cursor:"pointer",color:"#fff",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+              <div style={{width:64,height:64,borderRadius:18,background:"rgba(255,255,255,0.2)",border:"3px solid rgba(255,255,255,0.5)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,marginBottom:10}}>
+                {bd.avatar}
+              </div>
+              <div style={{fontWeight:900,color:"#fff",fontSize:18,lineHeight:1.2}}>@{name}</div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,0.75)",marginTop:3}}>{bd.badge} · {lvl}</div>
+            </div>
+            {/* Body */}
+            <div style={{padding:"16px 20px"}}>
+              {/* Bio */}
+              <p style={{margin:"0 0 14px",fontSize:12.5,color:"#334155",lineHeight:1.6}}>{bd.bio}</p>
+              {/* Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}}>
+                {[
+                  {label:"Posts",val:bd.posts.toLocaleString()},
+                  {label:"Seguidores",val:bd.followers.toLocaleString()},
+                  {label:"Win Rate",val:bd.winRate},
+                ].map(s=>(
+                  <div key={s.label} style={{background:"#F8FAFC",borderRadius:10,padding:"8px 6px",textAlign:"center"}}>
+                    <div style={{fontWeight:900,color:"#0F172A",fontSize:15}}>{s.val}</div>
+                    <div style={{fontSize:9,color:"#94A3B8",fontWeight:600,letterSpacing:0.3}}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Meta info */}
+              <div style={{display:"flex",flexDirection:"column",gap:5,marginBottom:14}}>
+                <div style={{fontSize:11,color:"#64748B",display:"flex",gap:6,alignItems:"center"}}><span>📍</span>{bd.location}</div>
+                <div style={{fontSize:11,color:"#64748B",display:"flex",gap:6,alignItems:"center"}}><span>🎯</span>Especialidad: <strong style={{color:"#334155"}}>{bd.specialty}</strong></div>
+                <div style={{fontSize:11,color:"#64748B",display:"flex",gap:6,alignItems:"center"}}><span>📅</span>Miembro desde {bd.joined}</div>
+              </div>
+              {/* Botón seguir */}
+              <button onClick={()=>{ onNeedAuth&&onNeedAuth(); setMiniProfile(null); }}
+                style={{width:"100%",background:`linear-gradient(135deg,${bd.color},${bd.color}cc)`,border:"none",borderRadius:12,padding:"11px",fontWeight:800,fontSize:13,color:"#fff",cursor:"pointer",boxShadow:`0 4px 16px ${bd.color}44`}}>
+                + Seguir a @{name}
+              </button>
+            </div>
+          </div>
+          </>
+        );
+      })()}
 
       {/* ── WIDGET AFILIADO DESTACADO (sidebar derecho) ── */}
       <a href={topAff.url} target="_blank" rel="noopener noreferrer" style={{display:"block",textDecoration:"none",marginBottom:10}}>
@@ -6391,13 +6458,17 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           <div style={card}>
             <div style={{fontSize:12,fontWeight:800,color:"#0F172A",marginBottom:12,letterSpacing:-0.2}}>🏆 Top Traders</div>
             {topList.map(([name,info],i)=>(
-              <div key={name} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<topList.length-1?"1px solid rgba(15,23,42,0.05)":"none"}}>
+              <div key={name} onClick={()=>setMiniProfile({name,info})}
+                style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<topList.length-1?"1px solid rgba(15,23,42,0.05)":"none",cursor:"pointer",borderRadius:8,transition:"background 0.15s"}}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.04)"}
+                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 <div style={{width:20,height:20,borderRadius:6,background:`${rankColors[i]}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:rankColors[i],flexShrink:0}}>#{i+1}</div>
                 <AvatarBubble emoji={info.avatar||"🦅"} color={info.color||C.accent} size={28}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"#0F172A",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name}</div>
-                  <div style={{fontSize:10,color:"#94A3B8"}}>{info.count} post{info.count!==1?"s":""} hoy</div>
+                  <div style={{fontSize:10,color:"#94A3B8"}}>{info.count} posts hoy</div>
                 </div>
+                <span style={{fontSize:10,color:"#CBD5E1"}}>›</span>
               </div>
             ))}
           </div>
