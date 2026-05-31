@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 11:28:05
+// NEXO TRADE — build: 2026-05-31 12:28:35
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5522,6 +5522,106 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           </div>
           <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver VIP →</button>
         </div>}
+
+        {/* ── IBKR CAMPUS — Webinars Gratuitos ── */}
+        <div style={{marginTop:28}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
+            <div style={{width:36,height:36,borderRadius:10,background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🏦</div>
+            <div>
+              <div style={{fontWeight:800,color:"#0F172A",fontSize:15}}>Webinars Gratuitos — IBKR Campus</div>
+              <div style={{fontSize:11,color:"#64748B",marginTop:1}}>Interactive Brokers · 100% gratis · Sin registro previo</div>
+            </div>
+            <a href="https://ibkrcampus.com/campus/webinar-categories/upcoming-webinars/" target="_blank" rel="noopener noreferrer"
+              style={{marginLeft:"auto",fontSize:11,fontWeight:700,color:"#1d4ed8",background:"rgba(29,78,216,0.08)",border:"1px solid rgba(29,78,216,0.2)",borderRadius:8,padding:"5px 12px",textDecoration:"none",flexShrink:0}}>
+              Ver todos ↗
+            </a>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:10}}>
+            {[
+              {titulo:"Options Trading Fundamentals",      nivel:"Principiante", tema:"Opciones",     emoji:"📊", desc:"Aprende cómo funcionan las opciones, calls, puts y estrategias básicas con ejemplos reales."},
+              {titulo:"Technical Analysis Masterclass",   nivel:"Intermedio",   tema:"Análisis Téc.", emoji:"📈", desc:"Patrones de velas, soportes, resistencias y los indicadores más usados por traders profesionales."},
+              {titulo:"Understanding Futures Markets",    nivel:"Intermedio",   tema:"Futuros",       emoji:"⚡", desc:"Cómo operar futuros de índices, commodities y divisas. Margin, leverage y gestión de riesgo."},
+              {titulo:"Fixed Income & Bond Investing",    nivel:"Principiante", tema:"Renta Fija",    emoji:"🏛️", desc:"Bonos del Tesoro, corporativos y municipales. Cómo construir un portafolio de renta fija."},
+              {titulo:"Crypto Trading Strategies",        nivel:"Intermedio",   tema:"Crypto",        emoji:"₿",  desc:"Bitcoin, Ethereum y altcoins. Análisis on-chain, DeFi y cómo operar con gestión de riesgo."},
+              {titulo:"ETF Investing for Beginners",      nivel:"Principiante", tema:"ETFs",          emoji:"🗂️", desc:"Los mejores ETFs del mercado: S&P 500, growth, dividendos y emergentes. Cómo construir cartera."},
+            ].map((w,i)=>{
+              const nivelColor = w.nivel==="Avanzado"?"#ef4444":w.nivel==="Intermedio"?"#f59e0b":"#10b981";
+              return(
+                <a key={i} href="https://ibkrcampus.com/campus/webinar-categories/upcoming-webinars/" target="_blank" rel="noopener noreferrer"
+                  style={{display:"block",background:"#fff",border:"1px solid rgba(15,23,42,0.08)",borderRadius:14,padding:"14px 16px",textDecoration:"none",transition:"all 0.15s",boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(29,78,216,0.3)";e.currentTarget.style.boxShadow="0 4px 12px rgba(29,78,216,0.08)";}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(15,23,42,0.08)";e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.04)";}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                    <span style={{fontSize:22}}>{w.emoji}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontWeight:700,color:"#0F172A",fontSize:13,lineHeight:1.3}}>{w.titulo}</div>
+                      <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap"}}>
+                        <span style={{fontSize:9,fontWeight:700,color:nivelColor,background:nivelColor+"15",borderRadius:5,padding:"1px 6px"}}>{w.nivel}</span>
+                        <span style={{fontSize:9,fontWeight:600,color:"#64748B",background:"rgba(15,23,42,0.05)",borderRadius:5,padding:"1px 6px"}}>{w.tema}</span>
+                        <span style={{fontSize:9,fontWeight:700,color:"#10b981",background:"rgba(16,185,129,0.1)",borderRadius:5,padding:"1px 6px"}}>GRATIS</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:8}}>{w.desc}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:"#1d4ed8"}}>Ver en IBKR Campus →</div>
+                </a>
+              );
+            })}
+          </div>
+          <div style={{marginTop:10,fontSize:10,color:"#94A3B8",textAlign:"center"}}>
+            Webinars impartidos por Interactive Brokers y proveedores financieros certificados · Registro gratuito en ibkrcampus.com
+          </div>
+        </div>
+
+        {/* ── E*TRADE + FOREX.com ── */}
+        <div style={{marginTop:20,display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          {/* E*TRADE */}
+          <div style={{background:"#fff",border:"1px solid rgba(15,23,42,0.08)",borderRadius:14,padding:"16px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+              <div style={{width:32,height:32,borderRadius:8,background:"rgba(80,163,57,0.1)",border:"1px solid rgba(80,163,57,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📗</div>
+              <div>
+                <div style={{fontWeight:800,color:"#0F172A",fontSize:13}}>E*TRADE Events</div>
+                <div style={{fontSize:10,color:"#64748B"}}>Live & On-Demand · Gratis</div>
+              </div>
+            </div>
+            <div style={{fontSize:11,color:"#64748B",lineHeight:1.6,marginBottom:12}}>
+              Webinars en vivo y grabados sobre stocks, opciones, ETFs y estrategias de inversión. Para todos los niveles.
+            </div>
+            {["Investing for Beginners","Options Strategies Live","Market Outlook Q2 2026","Retirement Planning 101"].map(t=>(
+              <div key={t} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 0",borderBottom:"1px solid rgba(15,23,42,0.05)"}}>
+                <span style={{fontSize:10,color:"#10b981"}}>▶</span>
+                <span style={{fontSize:11,color:"#334155",fontWeight:500}}>{t}</span>
+              </div>
+            ))}
+            <a href="https://us.etrade.com/knowledge/events" target="_blank" rel="noopener noreferrer"
+              style={{display:"block",marginTop:12,textAlign:"center",background:"rgba(80,163,57,0.08)",border:"1px solid rgba(80,163,57,0.2)",borderRadius:8,padding:"7px",fontSize:12,fontWeight:700,color:"#50a339",textDecoration:"none"}}>
+              Ver en E*TRADE ↗
+            </a>
+          </div>
+          {/* FOREX.com */}
+          <div style={{background:"#fff",border:"1px solid rgba(15,23,42,0.08)",borderRadius:14,padding:"16px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+              <div style={{width:32,height:32,borderRadius:8,background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>💹</div>
+              <div>
+                <div style={{fontWeight:800,color:"#0F172A",fontSize:13}}>FOREX.com Academy</div>
+                <div style={{fontSize:10,color:"#64748B"}}>Mercados en vivo · Q&A con expertos</div>
+              </div>
+            </div>
+            <div style={{fontSize:11,color:"#64748B",lineHeight:1.6,marginBottom:12}}>
+              Análisis de mercado en vivo, divisas, commodities y sesiones interactivas con traders profesionales.
+            </div>
+            {["Weekly Market Outlook","EUR/USD Live Analysis","Gold & Oil Trading","Fed Minutes Breakdown"].map(t=>(
+              <div key={t} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 0",borderBottom:"1px solid rgba(15,23,42,0.05)"}}>
+                <span style={{fontSize:10,color:"#00a8ff"}}>▶</span>
+                <span style={{fontSize:11,color:"#334155",fontWeight:500}}>{t}</span>
+              </div>
+            ))}
+            <a href="https://www.forex.com/en/trading-academy/webinars/" target="_blank" rel="noopener noreferrer"
+              style={{display:"block",marginTop:12,textAlign:"center",background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:8,padding:"7px",fontSize:12,fontWeight:700,color:"#00a8ff",textDecoration:"none"}}>
+              Ver en FOREX.com ↗
+            </a>
+          </div>
+        </div>
       </>}
 
       {/* ── ALERTAS EMAIL TAB ── */}
