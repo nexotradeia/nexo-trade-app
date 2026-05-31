@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 20:00:37
+// NEXO TRADE — build: 2026-05-30 20:04:55
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6370,6 +6370,15 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           if(!countMap[p.user])countMap[p.user]={count:0,avatar:p.avatar||"🦅",color:p.avatarColor||C.accent};
           countMap[p.user].count++;
         });
+        // Inyectar traders ficticios para poblar el ranking
+        const BOT_LB=[
+          {name:"CarlosInvierte", avatar:"👨‍💼", color:"#7C3AED", count:8},
+          {name:"SofiaWallSt",    avatar:"👩‍💻", color:"#EC4899", count:7},
+          {name:"MarcoBTC",       avatar:"₿",   color:"#F7931A", count:6},
+          {name:"RicardoInvest",  avatar:"🏆",  color:"#D97706", count:5},
+          {name:"NataliaTrader",  avatar:"🌟",  color:"#10B981", count:4},
+        ];
+        BOT_LB.forEach(b=>{ if(!countMap[b.name]) countMap[b.name]={count:b.count,avatar:b.avatar,color:b.color}; });
         const rankColors=["#F59E0B","#94A3B8","#CD7C3F"];
         const topList=Object.entries(countMap).sort((a,b)=>b[1].count-a[1].count).slice(0,3);
         if(!topList.length)return null;
@@ -13003,11 +13012,33 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Traders ficticios que siempre aparecen en el ranking
+  const BOT_PROFILES = [
+    {id:"bot-carlos",  username:"CarlosInvierte",    emoji:"👨‍💼", avatar_color:"#7C3AED", points:4850, isBot:true},
+    {id:"bot-sofia",   username:"SofiaWallSt",        emoji:"👩‍💻", avatar_color:"#EC4899", points:4120, isBot:true},
+    {id:"bot-marcos",  username:"MarcoBTC",            emoji:"₿",   avatar_color:"#F7931A", points:3780, isBot:true},
+    {id:"bot-alex",    username:"AlexTradingMX",       emoji:"⚡",  avatar_color:"#F59E0B", points:3210, isBot:true},
+    {id:"bot-lucas",   username:"LucasMercados",       emoji:"🦁",  avatar_color:"#16A34A", points:2940, isBot:true},
+    {id:"bot-vale",    username:"ValentinaFinance",    emoji:"💎",  avatar_color:"#06B6D4", points:2650, isBot:true},
+    {id:"bot-andres",  username:"AndresTradePro",      emoji:"🎯",  avatar_color:"#EF4444", points:2380, isBot:true},
+    {id:"bot-isabel",  username:"IsabelAnalysis",      emoji:"📊",  avatar_color:"#8B5CF6", points:2100, isBot:true},
+    {id:"bot-ricardo", username:"RicardoInvest",       emoji:"🏆",  avatar_color:"#D97706", points:1870, isBot:true},
+    {id:"bot-natalia", username:"NataliaTrader",       emoji:"🌟",  avatar_color:"#10B981", points:1540, isBot:true},
+  ];
+
   useEffect(()=>{
     supabase.from("profiles").select("id,username,emoji,avatar_color,points,created_at")
       .order("points",{ascending:false}).limit(50)
-      .then(({data})=>{ if(data) setProfiles(data); setLoading(false); })
-      .catch(()=>setLoading(false));
+      .then(({data})=>{
+        // Mezclar perfiles reales con bots, ordenar por puntos
+        const real = data||[];
+        const realIds = new Set(real.map(p=>p.id));
+        const merged = [...real, ...BOT_PROFILES.filter(b=>!realIds.has(b.id))]
+          .sort((a,b)=>(b.points||0)-(a.points||0));
+        setProfiles(merged);
+        setLoading(false);
+      })
+      .catch(()=>{ setProfiles(BOT_PROFILES); setLoading(false); });
   },[]);
 
   // Top posts by likes
@@ -13063,8 +13094,16 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
           </div>
         ) : profiles.map((p,i)=>{
           const lvl=getLevel(p.points||0);
-          const postCount=posts.filter(x=>(x.user_id||x.authorId)===p.id).length;
-          const totalLikes=posts.filter(x=>(x.user_id||x.authorId)===p.id).reduce((s,x)=>s+(x.likes||0),0);
+          // Bots tienen stats ficticias para que se vean activos
+          const BOT_STATS={
+            "bot-carlos": {posts:312,likes:4870},"bot-sofia":{posts:278,likes:3940},
+            "bot-marcos": {posts:245,likes:5210},"bot-alex":{posts:201,likes:2890},
+            "bot-lucas":  {posts:189,likes:2340},"bot-vale":{posts:167,likes:2100},
+            "bot-andres": {posts:154,likes:3780},"bot-isabel":{posts:143,likes:2650},
+            "bot-ricardo":{posts:128,likes:1980},"bot-natalia":{posts:115,likes:1760},
+          };
+          const postCount = p.isBot ? (BOT_STATS[p.id]?.posts||99) : posts.filter(x=>(x.user_id||x.authorId)===p.id).length;
+          const totalLikes = p.isBot ? (BOT_STATS[p.id]?.likes||999) : posts.filter(x=>(x.user_id||x.authorId)===p.id).reduce((s,x)=>s+(x.likes||0),0);
           const isMe = user?.id===p.id;
           return(
             <div key={p.id} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",marginBottom:8,background:isMe?"rgba(245,158,11,0.06)":"rgba(255,255,255,0.02)",border:`1px solid ${isMe?"rgba(245,158,11,0.25)":"rgba(255,255,255,0.06)"}`,borderRadius:14}}>
