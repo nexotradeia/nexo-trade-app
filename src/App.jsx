@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 11:13:01
+// NEXO TRADE — build: 2026-05-31 11:16:29
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11629,6 +11629,91 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               ))}
             </div>
           )}
+
+          {/* ── MARKWAYNE MULLIN PORTFOLIO ── */}
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>📋 Portafolio Destacado · Disclosure 2024</div>
+            <div style={{background:"linear-gradient(135deg,rgba(10,16,30,0.98),rgba(20,30,52,0.95))",border:"1px solid rgba(239,68,68,0.2)",borderRadius:16,padding:"16px 18px",boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
+              {/* Header */}
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+                <img src="https://www.quiverquant.com/images/M001190_congress_headshot.png" alt="Mullin"
+                  style={{width:52,height:52,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(239,68,68,0.4)",flexShrink:0}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9",letterSpacing:-0.3}}>Markwayne Mullin</div>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3,flexWrap:"wrap"}}>
+                    <span style={{fontSize:10,fontWeight:800,color:"#EF4444",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:5,padding:"1px 7px"}}>🔴 REP</span>
+                    <span style={{fontSize:10,color:"#475569"}}>Senado · Oklahoma</span>
+                    <a href="https://www.quiverquant.com/congresstrading/politician/Markwayne%20Mullin-M001190/net-worth" target="_blank" rel="noopener noreferrer"
+                      style={{fontSize:9,fontWeight:700,color:"#38BDF8",background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:5,padding:"1px 6px",textDecoration:"none",marginLeft:"auto"}}>Ver en QuiverQuant ↗</a>
+                  </div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontWeight:900,fontSize:18,background:"linear-gradient(135deg,#10B981,#06B6D4)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>$68.6M</div>
+                  <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.5}}>NET WORTH EST.</div>
+                </div>
+              </div>
+              {/* Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:14}}>
+                {[["512","Total Trades"],["$24.4M","Vol. Trades"],["Feb 2026","Últ. Trade"]].map(([v,l])=>(
+                  <div key={l} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8,padding:"7px",textAlign:"center"}}>
+                    <div style={{fontWeight:900,fontSize:13,color:"#F1F5F9"}}>{v}</div>
+                    <div style={{fontSize:9,color:"#475569",marginTop:2}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Stocks */}
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#10B981",letterSpacing:0.8,marginBottom:6}}>📈 ACCIONES (disclosure 2024)</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                  {[
+                    {t:"NVDA",r:"$100K–$250K"},{t:"AAPL",r:"$250K–$500K"},{t:"META",r:"$100K–$250K"},
+                    {t:"AMZN",r:"$100K–$250K"},{t:"LLY",r:"$100K–$250K"},{t:"KLAC",r:"$100K–$250K"},
+                    {t:"GOOGL",r:"$50K–$100K"},{t:"AMD",r:"$50K–$100K"},{t:"JPM",r:"$50K–$100K"},
+                    {t:"GS",r:"$50K–$100K"},{t:"BRK.B",r:"$50K–$100K"},{t:"COST",r:"$50K–$100K"},
+                    {t:"CAT",r:"$50K–$100K"},{t:"ADBE",r:"$50K–$100K"},{t:"AMAT",r:"$50K–$100K"},
+                    {t:"BLK",r:"$50K–$100K"},{t:"CRM",r:"$50K–$100K"},{t:"HD",r:"$50K–$100K"},
+                  ].map(({t,r})=>(
+                    <div key={t} style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:7,padding:"4px 9px",cursor:"pointer"}}
+                      onClick={()=>{ if(typeof setTickerPage==="function") setTickerPage(t); }}>
+                      <div style={{fontFamily:"monospace",fontWeight:800,fontSize:11,color:"#38BDF8"}}>{t}</div>
+                      <div style={{fontSize:9,color:"#334155",marginTop:1}}>{r}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* ETFs & Funds */}
+              <div>
+                <div style={{fontSize:10,fontWeight:700,color:"#A78BFA",letterSpacing:0.8,marginBottom:6}}>🏦 ETFs / FONDOS MUTUOS</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                  {[
+                    {t:"AGTHX",n:"Growth Fund of America",r:"$1M–$5M"},
+                    {t:"TRBCX",n:"T. Rowe Blue Chip Growth",r:"$1M–$5M"},
+                    {t:"IEMG",n:"iShares Emerg. Markets",r:"$1M–$5M"},
+                    {t:"IEFA",n:"iShares EAFE",r:"$1M–$5M"},
+                    {t:"VO",n:"Vanguard Mid-Cap ETF",r:"$1M–$5M"},
+                    {t:"GICIX",n:"GS Intl Small Cap",r:"$1M–$5M"},
+                    {t:"VNQ",n:"Vanguard Real Estate",r:"$500K–$1M"},
+                    {t:"IJR",n:"iShares S&P Small-Cap",r:"$500K–$1M"},
+                    {t:"IWB",n:"iShares Russell 1000",r:"$500K–$1M"},
+                    {t:"MDY",n:"SPDR MidCap 400",r:"$500K–$1M"},
+                    {t:"EZU",n:"iShares MSCI Eurozone",r:"$500K–$1M"},
+                    {t:"VAW",n:"Vanguard Materials",r:"$100K–$250K"},
+                  ].map(({t,n,r})=>(
+                    <div key={t} style={{background:"rgba(139,92,246,0.07)",border:"1px solid rgba(139,92,246,0.18)",borderRadius:7,padding:"4px 9px"}}>
+                      <div style={{fontFamily:"monospace",fontWeight:800,fontSize:11,color:"#A78BFA"}}>{t}</div>
+                      <div style={{fontSize:9,color:"#475569",marginTop:1}}>{n}</div>
+                      <div style={{fontSize:8,color:"#334155"}}>{r}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Footer */}
+              <div style={{marginTop:12,fontSize:9,color:"#334155",textAlign:"right"}}>
+                Fuente: Senate Financial Disclosure 2024 · Publicado Aug 13, 2025 · Vía QuiverQuantitative
+              </div>
+            </div>
+          </div>
 
           {/* Pelosi Tracker + Most Active */}
           {congress.length>0 && (()=>{
