@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 08:52:24
+// NEXO TRADE — build: 2026-05-31 10:29:52
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -4593,6 +4593,138 @@ function LiveConferenceModal({event, lang, onClose}){
   );
 }
 
+// ── NEXO TERMÓMETRO — Fear & Greed Index ─────────────────────────────────────
+function NexoTermometro() {
+  const [cryptoFG, setCryptoFG] = useState(null);
+  const [stockFG,  setStockFG]  = useState(null);
+  const [loading,  setLoading]  = useState(true);
+  const [updated,  setUpdated]  = useState(null);
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    // 1. Crypto Fear & Greed (alternative.me — gratis, sin API key)
+    try {
+      const r = await fetch("https://api.alternative.me/fng/?limit=1");
+      const d = await r.json();
+      if(d?.data?.[0]) setCryptoFG(parseInt(d.data[0].value));
+    } catch(e) { setCryptoFG(55); }
+    // 2. Stock sentiment: SPY + QQQ desde Finnhub
+    try {
+      const [spy, qqq] = await Promise.all([
+        fetch(`https://finnhub.io/api/v1/quote?symbol=SPY&token=${FINNHUB_KEY}`).then(r=>r.json()),
+        fetch(`https://finnhub.io/api/v1/quote?symbol=QQQ&token=${FINNHUB_KEY}`).then(r=>r.json()),
+      ]);
+      const avg = ((spy.dp||0) + (qqq.dp||0)) / 2;
+      // -3% = 0, 0% = 50, +3% = 100 (clamped)
+      setStockFG(Math.min(100, Math.max(0, Math.round(50 + avg/3*50))));
+    } catch(e) { setStockFG(50); }
+    setUpdated(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
+    setLoading(false);
+  }, []);
+
+  useEffect(()=>{ fetchAll(); },[fetchAll]);
+  useEffect(()=>{ const id=setInterval(fetchAll,3600000); return()=>clearInterval(id); },[fetchAll]);
+
+  const combined = cryptoFG!==null && stockFG!==null ? Math.round((cryptoFG+stockFG)/2) : cryptoFG??stockFG??50;
+  const label  = combined>=80?"Codicia Extrema":combined>=60?"Codicia":combined>=45?"Neutral":combined>=25?"Miedo":"Pánico Extremo";
+  const color  = combined>=80?"#22C55E":combined>=60?"#84CC16":combined>=45?"#EAB308":combined>=25?"#F97316":"#EF4444";
+  const emoji  = combined>=80?"🤑":combined>=60?"😄":combined>=45?"😐":combined>=25?"😨":"😱";
+
+  // SVG helpers — center (110,108), R=88
+  const CX=110, CY=108, R=88, R2=68;
+  const arc=(r,p1,p2)=>{
+    const a1=Math.PI*(1-p1/100), a2=Math.PI*(1-p2/100);
+    const x1=CX+r*Math.cos(a1), y1=CY-r*Math.sin(a1);
+    const x2=CX+r*Math.cos(a2), y2=CY-r*Math.sin(a2);
+    return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+  };
+  const needleX=(val)=>CX+R2*Math.cos(Math.PI*(1-val/100));
+  const needleY=(val)=>CY-R2*Math.sin(Math.PI*(1-val/100));
+
+  const ZONES=[
+    [0,20,"#EF4444"],[20,40,"#F97316"],[40,60,"#EAB308"],[60,80,"#84CC16"],[80,100,"#22C55E"],
+  ];
+
+  const MiniGauge=({val,label:lbl,icon})=>{
+    const c=val>=80?"#22C55E":val>=60?"#84CC16":val>=45?"#EAB308":val>=25?"#F97316":"#EF4444";
+    const bar=(v)=>{const a=Math.PI*(1-v/100);return{x:50+40*Math.cos(a),y:50-40*Math.sin(a)};};
+    const p1=bar(0), p2=bar(100);
+    return(
+      <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"12px 14px",textAlign:"center"}}>
+        <div style={{fontSize:11,color:"#475569",fontWeight:700,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>{icon} {lbl}</div>
+        <svg viewBox="0 0 100 55" width="90" height="50" style={{margin:"0 auto",display:"block"}}>
+          <path d={`M${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A40 40 0 0 1 ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`} stroke="rgba(255,255,255,0.08)" strokeWidth="8" fill="none" strokeLinecap="round"/>
+          {ZONES.map(([s,e,cl])=>(
+            <path key={s} d={`M${bar(s).x.toFixed(1)} ${bar(s).y.toFixed(1)} A40 40 0 0 1 ${bar(e).x.toFixed(1)} ${bar(e).y.toFixed(1)}`} stroke={cl} strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.7"/>
+          ))}
+          <line x1="50" y1="50" x2={bar(val).x.toFixed(1)} y2={bar(val).y.toFixed(1)} stroke="white" strokeWidth="2.5" strokeLinecap="round" style={{filter:"drop-shadow(0 0 3px white)"}}/>
+          <circle cx="50" cy="50" r="3.5" fill="white"/>
+        </svg>
+        {val===null?<div style={{color:"#334155",fontSize:11}}>--</div>:<>
+          <div style={{fontWeight:900,fontSize:20,color:c,fontFamily:"monospace",lineHeight:1}}>{val}</div>
+          <div style={{fontSize:10,color:c,fontWeight:700,marginTop:2}}>{val>=80?"Codicia Ext.":val>=60?"Codicia":val>=45?"Neutral":val>=25?"Miedo":"Pánico"}</div>
+        </>}
+      </div>
+    );
+  };
+
+  return(
+    <div style={{background:"linear-gradient(145deg,rgba(10,14,26,0.98),rgba(15,20,40,0.95))",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,padding:"20px 22px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:`radial-gradient(circle,${color}12,transparent 70%)`,pointerEvents:"none"}}/>
+      {/* Title */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,position:"relative"}}>
+        <div>
+          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:15}}>🌡️ Termómetro NexoTrade</div>
+          <div style={{fontSize:11,color:"#475569",marginTop:2}}>Índice Miedo/Codicia del mercado en español</div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          {updated&&<div style={{fontSize:10,color:"#334155",fontWeight:600}}>🕐 {updated}</div>}
+          <button onClick={fetchAll} style={{background:"transparent",border:`1px solid rgba(255,255,255,0.08)`,borderRadius:8,padding:"4px 10px",color:"#475569",fontSize:11,fontWeight:600,cursor:"pointer",marginTop:4}}>🔄 Actualizar</button>
+        </div>
+      </div>
+      {/* Main gauge */}
+      <div style={{textAlign:"center",marginBottom:16}}>
+        {loading
+          ?<div style={{height:130,display:"flex",alignItems:"center",justifyContent:"center",color:"#334155",fontSize:12}}>⏳ Calculando índice...</div>
+          :<>
+            <svg viewBox="0 0 220 115" width="220" height="115" style={{margin:"0 auto",display:"block"}}>
+              {/* Background arc */}
+              <path d={arc(R,0,100)} stroke="rgba(255,255,255,0.05)" strokeWidth="14" fill="none" strokeLinecap="round"/>
+              {/* Colored zones */}
+              {ZONES.map(([s,e,cl])=>(
+                <path key={s} d={arc(R,s,e)} stroke={cl} strokeWidth="14" fill="none" strokeLinecap="round" opacity="0.75"/>
+              ))}
+              {/* Active value highlight */}
+              <path d={arc(R,0,combined)} stroke={color} strokeWidth="6" fill="none" strokeLinecap="round" style={{filter:`drop-shadow(0 0 6px ${color}80)`}}/>
+              {/* Needle */}
+              <line x1={CX} y1={CY} x2={needleX(combined).toFixed(1)} y2={needleY(combined).toFixed(1)} stroke="white" strokeWidth="2.5" strokeLinecap="round" style={{filter:"drop-shadow(0 0 4px rgba(255,255,255,0.8))"}}/>
+              <circle cx={CX} cy={CY} r="5" fill="white" style={{filter:"drop-shadow(0 0 4px rgba(255,255,255,0.6))"}}/>
+              <circle cx={CX} cy={CY} r="2.5" fill="#0F172A"/>
+              {/* Value */}
+              <text x={CX} y={CY-14} textAnchor="middle" fill="#F1F5F9" fontSize="30" fontWeight="900" fontFamily="monospace">{combined}</text>
+              {/* Zone labels */}
+              <text x="18" y="108" textAnchor="middle" fill="#EF4444" fontSize="7.5" fontWeight="700">PÁNICO</text>
+              <text x="202" y="108" textAnchor="middle" fill="#22C55E" fontSize="7.5" fontWeight="700">CODICIA</text>
+            </svg>
+            <div style={{marginTop:-4}}>
+              <span style={{fontSize:22}}>{emoji}</span>
+              <span style={{fontSize:18,fontWeight:900,color:color,fontFamily:"monospace",marginLeft:8}}>{label}</span>
+            </div>
+          </>
+        }
+      </div>
+      {/* Mini gauges */}
+      {!loading&&<div style={{display:"flex",gap:10}}>
+        <MiniGauge val={cryptoFG} label="Crypto" icon="₿"/>
+        <MiniGauge val={stockFG}  label="Acciones (S&P)" icon="📈"/>
+      </div>}
+      <div style={{textAlign:"center",fontSize:10,color:"#1E293B",marginTop:12,fontWeight:600}}>
+        Crypto: Alternative.me Fear & Greed Index · Acciones: SPY+QQQ Finnhub · Actualización horaria
+      </div>
+    </div>
+  );
+}
+
 function TrendingPage({posts=[]}){
   const [quotes,setQuotes]=useState({});
   const [loading,setLoading]=useState(true);
@@ -4646,6 +4778,9 @@ function TrendingPage({posts=[]}){
 
   return(
     <div>
+      {/* Termómetro NexoTrade */}
+      <NexoTermometro/>
+
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,flexWrap:"wrap"}}>
         <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>🔥 Trending en NexoTrade</h2>
         <span style={{background:"rgba(239,68,68,0.08)",color:C.bear,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>Últimas 24h</span>
@@ -5531,7 +5666,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"📊", label:isEN?"Top Traders":"Tops Traders",             idx:1},
     {icon:"₿",  label:isEN?"₿ Crypto":"₿ Cripto",                   idx:2},
     {icon:"📈", label:isEN?"Markets":"Mercados",                     idx:3},
-    {icon:"🎮", label:isEN?"Paper Trading":"Paper Trading",             idx:9, vip:true, ai:true},
+    {icon:"🎮", label:isEN?"Paper Trading Sim":"Paper Trading Sim",     idx:9, vip:true, ai:true},
     {icon:"✦",  label:isEN?"VIP Premium":"Premium VIP",              idx:8, premium:true},
   ];
   const navMore = [
@@ -5544,7 +5679,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
     {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
     {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
-    {icon:"⛶",  label:isEN?"Trading Terminal":"Terminal Trading",    idx:43},
+    {icon:"🎮",  label:isEN?"Paper Trading Sim":"Paper Trading Sim",  idx:9, vip:true},
     {icon:"🏆", label:isEN?"Leaderboard":"Ranking",                  idx:40},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
@@ -6978,8 +7113,8 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
   if(!isPremium) return(
     <div style={{textAlign:"center",padding:"60px 20px",background:"rgba(10,16,30,0.98)",borderRadius:20,border:"1px solid rgba(245,158,11,0.2)"}}>
       <div style={{fontSize:52,marginBottom:16}}>🔒</div>
-      <h2 style={{color:"#F59E0B",fontWeight:900,marginBottom:8}}>{isEN?"Exclusive VIP Tools":"Herramientas VIP Exclusivas"}</h2>
-      <p style={{color:"#94A3B8",fontSize:15,marginBottom:24,maxWidth:400,margin:"0 auto 24px"}}>{isEN?"Sharpe Ratio calculator, win streak tracker, price alerts and more — VIP members only.":"Calculadora Sharpe Ratio, racha de ganancias, alertas de precio y más — solo para miembros VIP."}</p>
+      <h2 style={{color:"#F59E0B",fontWeight:900,marginBottom:8}}>{isEN?"Paper Trading Simulator VIP":"Paper Trading Simulador VIP"}</h2>
+      <p style={{color:"#94A3B8",fontSize:15,marginBottom:24,maxWidth:400,margin:"0 auto 24px"}}>{isEN?"Simulate trades with $100k virtual, Sharpe Ratio, win streak tracker, price alerts and more — VIP only.":"Simula con $100k virtual, Sharpe Ratio, racha de ganancias, alertas de precio y más — solo VIP."}</p>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer"}}>✦ {isEN?"Go VIP — $9.99/mo":"Hazte VIP — $9.99/mes"}</button>
     </div>
   );
@@ -7005,8 +7140,8 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
   return(
     <div>
       <div style={{marginBottom:20}}>
-        <h2 style={{color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}>🛠️ {isEN?"VIP Tools":"Herramientas VIP"}</h2>
-        <p style={{color:"#64748B",fontSize:13}}>{isEN?"Exclusive calculators and utilities for professional traders":"Calculadoras y utilidades exclusivas para traders profesionales"}</p>
+        <h2 style={{color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}>🎮 {isEN?"Paper Trading Simulator VIP":"Paper Trading Simulador VIP"}</h2>
+        <p style={{color:"#64748B",fontSize:13}}>{isEN?"Simulate trades risk-free + exclusive VIP calculators for professional traders":"Simula trades sin riesgo + herramientas VIP exclusivas para traders profesionales"}</p>
       </div>
       {/* Tabs */}
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:24}}>
@@ -13485,9 +13620,8 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
-  {label:isEN?"⛶ Trading Terminal":"⛶ Terminal Trading",idx:43},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
-  {label:isEN?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,vip:true},
+  {label:isEN?"🎮 Paper Trading Sim":"🎮 Paper Trading Sim",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
 ];
 
@@ -14294,6 +14428,134 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
 }
 
 // ── PORTFOLIO TRACKER PAGE ───────────────────────────────────────────────────
+// ── IA NEXO PORTFOLIO SCORE ──────────────────────────────────────────────────
+function calcPortfolioScore(positions, livePrices) {
+  if (!positions || positions.length < 2) return null;
+  const CRYPTO = new Set(['BTC','ETH','SOL','BNB','XRP','ADA','DOGE','SHIB','AVAX','MATIC','LINK','UNI','ATOM','DOT','LTC','NEAR','FTM','APT','ARB','OP']);
+  const TECH   = new Set(['NVDA','AAPL','MSFT','GOOGL','GOOG','META','AMZN','AMD','TSLA','INTC','QCOM','AVGO','TSM','ASML','ARM','SMCI','MU','AMAT','LRCX','ORCL','CRM','NOW','ADBE','SNOW']);
+  const enriched = positions.map(p => {
+    const tk = p.ticker.toUpperCase();
+    const lp = livePrices[tk];
+    const entry = parseFloat(p.entryPrice)||0;
+    const shares = parseFloat(p.shares)||0;
+    const curr = lp ? lp.price : entry;
+    return { tk, marketVal: curr*shares, costVal: entry*shares, pnlPct: entry>0?((curr-entry)/entry*100):0 };
+  });
+  const totalVal  = enriched.reduce((s,p)=>s+p.marketVal,0);
+  const totalCost = enriched.reduce((s,p)=>s+p.costVal,0);
+  if (totalVal<=0) return null;
+  const weighted = enriched.map(p=>({...p, weight:(p.marketVal/totalVal*100)}));
+  const topPos   = weighted.reduce((a,b)=>a.weight>b.weight?a:b);
+  const topW     = topPos.weight;
+  const n        = positions.length;
+  let cryptoW=0, techW=0;
+  weighted.forEach(p=>{ if(CRYPTO.has(p.tk)) cryptoW+=p.weight; else if(TECH.has(p.tk)) techW+=p.weight; });
+  const overallPnl = totalCost>0?((totalVal-totalCost)/totalCost*100):0;
+  const bigLosers  = weighted.filter(p=>p.pnlPct<-20);
+  // Score breakdown
+  const divScore  = n>=8?30:n>=5?26:n>=3?20:n>=2?12:5;
+  const concScore = topW>80?5:topW>60?12:topW>40?18:topW>25?22:25;
+  const dom       = Math.max(cryptoW, techW);
+  const sectScore = dom>85?5:dom>70?10:dom>50?15:20;
+  const perfScore = overallPnl>20?15:overallPnl>10?13:overallPnl>0?10:overallPnl>-10?7:overallPnl>-20?4:2;
+  const riskScore = Math.max(0, 10-bigLosers.length*4);
+  const total = divScore+concScore+sectScore+perfScore+riskScore;
+  const grade = total>=88?'A+':total>=80?'A':total>=72?'B+':total>=64?'B':total>=55?'C':total>=45?'D':'F';
+  const gradeColor = total>=80?'#00D26A':total>=64?'#F59E0B':'#FF4D6A';
+  // Insights
+  const insights=[];
+  if(topW>50) insights.push({icon:'⚠️',col:'#F59E0B',txt:`${topPos.tk} representa el ${topW.toFixed(0)}% de tu portfolio — alta concentración en un solo activo.`});
+  else insights.push({icon:'✅',col:'#00D26A',txt:`Buena distribución: ningún activo domina más del ${topW.toFixed(0)}% del total.`});
+  if(cryptoW>65) insights.push({icon:'🔮',col:'#A78BFA',txt:`${cryptoW.toFixed(0)}% en crypto — muy alta volatilidad. Considera balancear con acciones de valor o ETFs.`});
+  else if(techW>70) insights.push({icon:'💡',col:'#38BDF8',txt:`${techW.toFixed(0)}% en tecnología. NVDA, AMD y META se mueven juntas — no es diversificación real.`});
+  else if(cryptoW>0&&techW>0) insights.push({icon:'✅',col:'#00D26A',txt:`Buena mezcla de crypto y acciones. Considera agregar commodities o dividendos para más balance.`});
+  else insights.push({icon:'📊',col:'#38BDF8',txt:`Considera agregar activos no correlacionados como GLD, TLT o acciones internacionales.`});
+  if(overallPnl>15) insights.push({icon:'🚀',col:'#00D26A',txt:`+${overallPnl.toFixed(1)}% de retorno total — excelente. Considera asegurar ganancias en las posiciones más ganadoras.`});
+  else if(overallPnl>0) insights.push({icon:'📈',col:'#00D26A',txt:`+${overallPnl.toFixed(1)}% de retorno. En positivo — mantén la disciplina y respeta tus stop losses.`});
+  else if(overallPnl>-10) insights.push({icon:'⏳',col:'#94A3B8',txt:`${overallPnl.toFixed(1)}% ligeramente en rojo. Evalúa si tu tesis de inversión sigue siendo válida.`});
+  else insights.push({icon:'🛑',col:'#FF4D6A',txt:`${overallPnl.toFixed(1)}% en pérdida. Revisa tus stop losses y considera reducir riesgo en las posiciones más afectadas.`});
+  if(bigLosers.length>0){const w=bigLosers.reduce((a,b)=>a.pnlPct<b.pnlPct?a:b);insights.push({icon:'🔴',col:'#FF4D6A',txt:`${w.tk} lleva ${w.pnlPct.toFixed(1)}% de pérdida — si rompió tu stop loss, es momento de reevaluar.`});}
+  return { total, grade, gradeColor, divScore, concScore, sectScore, perfScore, riskScore, insights:insights.slice(0,3), topPos, topW, overallPnl, cryptoW, techW, n };
+}
+
+function PortfolioIAScoreCard({ positions, livePrices, isEN, onShare }) {
+  const sc = calcPortfolioScore(positions, livePrices);
+  if (!sc) return null;
+  const { total, grade, gradeColor, divScore, concScore, sectScore, perfScore, riskScore, insights } = sc;
+  const ARC_R=54, CIRC=Math.PI*ARC_R, dash=(total/100)*CIRC;
+  const label = total>=80?(isEN?'Excellent':'Excelente'):total>=65?(isEN?'Good':'Bueno'):total>=50?(isEN?'Average':'Regular'):(isEN?'Risky':'Riesgoso');
+  const shareText=`🤖 Mi Score de Portfolio — IA NEXO: ${total}/100 (${grade}) — ${label}\n\n📊 Análisis:\n${insights.map(i=>i.txt).join('\n')}\n\n#Portfolio #InversionesLatam #NexoTrade`;
+  return(
+    <div style={{background:"linear-gradient(145deg,rgba(10,14,26,0.98),rgba(15,20,40,0.95))",border:"1px solid rgba(139,92,246,0.25)",borderRadius:20,padding:"20px 22px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:`radial-gradient(circle,${gradeColor}12,transparent 70%)`,pointerEvents:"none"}}/>
+      {/* Header */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,position:"relative"}}>
+        <div>
+          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:15}}>🤖 {isEN?"IA NEXO Portfolio Score":"Score de Portfolio — IA NEXO"}</div>
+          <div style={{fontSize:11,color:"#475569",marginTop:2}}>{isEN?"AI analysis of your positions":"Análisis inteligente de tus posiciones"}</div>
+        </div>
+        <button onClick={()=>onShare&&onShare(shareText)} style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",borderRadius:10,padding:"7px 14px",color:"#A78BFA",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+          📤 {isEN?"Share":"Compartir"}
+        </button>
+      </div>
+      {/* Gauge + Insights */}
+      <div style={{display:"flex",gap:18,alignItems:"flex-start",flexWrap:"wrap"}}>
+        {/* SVG Gauge */}
+        <div style={{flexShrink:0,textAlign:"center"}}>
+          <svg width="136" height="84" viewBox="0 0 136 84">
+            {/* Track */}
+            <path d="M 14 76 A 54 54 0 0 1 122 76" stroke="rgba(255,255,255,0.06)" strokeWidth="11" fill="none" strokeLinecap="round"/>
+            {/* Score arc */}
+            <path d="M 14 76 A 54 54 0 0 1 122 76" stroke={gradeColor} strokeWidth="11" fill="none" strokeLinecap="round"
+              strokeDasharray={`${dash} ${CIRC}`} style={{filter:`drop-shadow(0 0 8px ${gradeColor}90)`,transition:"stroke-dasharray 1s ease"}}/>
+            {/* Number */}
+            <text x="68" y="66" textAnchor="middle" fill="#F1F5F9" fontSize="28" fontWeight="900" fontFamily="monospace">{total}</text>
+            <text x="68" y="78" textAnchor="middle" fill="#475569" fontSize="9" fontFamily="sans-serif">{isEN?"/ 100":"de 100"}</text>
+          </svg>
+          <div style={{marginTop:0,textAlign:"center"}}>
+            <span style={{fontSize:24,fontWeight:900,color:gradeColor,fontFamily:"monospace"}}>{grade}</span>
+            <div style={{fontSize:11,color:"#64748B",marginTop:1}}>{label}</div>
+          </div>
+        </div>
+        {/* Insights */}
+        <div style={{flex:1,minWidth:180}}>
+          {insights.map((ins,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<insights.length-1?10:0}}>
+              <span style={{fontSize:14,flexShrink:0,marginTop:1}}>{ins.icon}</span>
+              <span style={{fontSize:12,color:"#94A3B8",lineHeight:1.5}}>{ins.txt}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Breakdown bars */}
+      <div style={{marginTop:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:12,padding:"12px 14px"}}>
+        <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.8,marginBottom:10,textTransform:"uppercase"}}>{isEN?"Score Breakdown":"Desglose del Score"}</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
+          {[
+            {label:isEN?"Diversif.":"Diversif.",val:divScore,max:30},
+            {label:isEN?"Concentr.":"Concentr.",val:concScore,max:25},
+            {label:isEN?"Sectors":"Sectores",val:sectScore,max:20},
+            {label:isEN?"Return":"Rendim.",val:perfScore,max:15},
+            {label:isEN?"Risk":"Riesgo",val:riskScore,max:10},
+          ].map(({label,val,max})=>{
+            const pct=val/max*100;
+            const c=pct>=70?'#00D26A':pct>=40?'#F59E0B':'#FF4D6A';
+            return(
+              <div key={label} style={{textAlign:"center"}}>
+                <div style={{fontSize:9,color:"#334155",fontWeight:700,marginBottom:5,letterSpacing:0.3,textTransform:"uppercase"}}>{label}</div>
+                <div style={{height:4,background:"rgba(255,255,255,0.05)",borderRadius:4,overflow:"hidden",marginBottom:4}}>
+                  <div style={{height:"100%",width:`${pct}%`,background:c,borderRadius:4}}/>
+                </div>
+                <div style={{fontSize:10,color:c,fontWeight:800,fontFamily:"monospace"}}>{val}/{max}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPost, onNeedAuth }) {
   const isEN = lang==="en";
   const LS_KEY = `nexo_portfolio_${user?.id||"guest"}`;
@@ -14475,6 +14737,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           </div>
         )}
       </div>
+
+      {/* IA NEXO Portfolio Score */}
+      {positions.length>=2 && (
+        <PortfolioIAScoreCard positions={positions} livePrices={livePrices} isEN={isEN} onShare={(txt)=>setShareMsg(txt)}/>
+      )}
 
       {/* Add / Edit form */}
       {showAdd && (
