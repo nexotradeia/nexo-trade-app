@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 14:04:47
+// NEXO TRADE — build: 2026-05-31 14:10:56
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -15049,6 +15049,7 @@ function RadarGlobalPage({lang="es"}){
   // Three.js globe
   useEffect(()=>{
     let cancelled=false;
+    const safetyTimer=setTimeout(()=>{if(!cancelled)setLoading(false);},8000);
     const volMap={};
     async function loadDataR(){
       try{
@@ -15067,7 +15068,8 @@ function RadarGlobalPage({lang="es"}){
       }
     }
     function doInit(){
-      if(cancelled||!cvsRef.current||!wrapRef.current)return;
+      if(cancelled||!cvsRef.current||!wrapRef.current){if(!cancelled)setLoading(false);return;}
+      try{
       const THREE=window.THREE;
       const W=wrapRef.current.clientWidth||600, H=480;
       const renderer=new THREE.WebGLRenderer({canvas:cvsRef.current,antialias:true,alpha:true});
@@ -15258,14 +15260,17 @@ function RadarGlobalPage({lang="es"}){
         cancelAnimationFrame(T.current.afId);
         renderer.dispose();
       };
+      }catch(e){console.error('Globe init error:',e);if(!cancelled)setLoading(false);}
     }
     if(window.THREE){doInit();}
     else{
       const s=document.createElement('script');
       s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-      s.onload=doInit;document.head.appendChild(s);
+      s.onload=doInit;
+      s.onerror=()=>{if(!cancelled)setLoading(false);};
+      document.head.appendChild(s);
     }
-    return()=>{cancelled=true;if(T.current.cleanup)T.current.cleanup();};
+    return()=>{cancelled=true;clearTimeout(safetyTimer);if(T.current.cleanup)T.current.cleanup();};
   },[]);
 
   // pause toggle
