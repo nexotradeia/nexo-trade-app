@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-30 20:13:27
+// NEXO TRADE — build: 2026-05-31 08:37:42
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5544,6 +5544,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
     {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
     {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
+    {icon:"⛶",  label:isEN?"Trading Terminal":"Terminal Trading",    idx:43},
     {icon:"🏆", label:isEN?"Leaderboard":"Ranking",                  idx:40},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
@@ -6969,7 +6970,7 @@ function PredictionBanner({lang="es"}){
 }
 
 // ── VIP TOOLS PAGE ────────────────────────────────────────────────────────────
-function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es" }){
+function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onNavigate }){
   const [tool, setTool] = useState("riesgo");
   const isEN = lang === "en";
 
@@ -7018,7 +7019,17 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es" }){
       </div>
 
       {/* ── 0. PAPER TRADING ── */}
-      {tool==="paper" && <PaperTrading user={user}/>}
+      {tool==="paper" && (
+        <div>
+          <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
+            <button onClick={()=>onNavigate&&onNavigate(43)}
+              style={{background:"linear-gradient(135deg,#00E58F,#00A8FF)",border:"none",borderRadius:10,padding:"9px 18px",fontWeight:800,fontSize:13,color:"#0B0E1A",cursor:"pointer",display:"flex",alignItems:"center",gap:7,boxShadow:"0 4px 16px rgba(0,229,143,0.3)"}}>
+              ⛶ Abrir Terminal Completa
+            </button>
+          </div>
+          <PaperTrading user={user}/>
+        </div>
+      )}
 
       {/* ── 1. CALCULADORA RIESGO/RECOMPENSA ── */}
       {tool==="riesgo" && <RiskRewardCalc/>}
@@ -7408,6 +7419,358 @@ function PaperTrading({ user }){
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── PAPER TRADING PANTALLA COMPLETA (página 43) ──────────────────────────────
+const TV_SYM_MAP={
+  NVDA:"NASDAQ:NVDA",AAPL:"NASDAQ:AAPL",MSFT:"NASDAQ:MSFT",TSLA:"NASDAQ:TSLA",
+  META:"NASDAQ:META",AMZN:"NASDAQ:AMZN",GOOGL:"NASDAQ:GOOGL",PLTR:"NASDAQ:PLTR",
+  AMD:"NASDAQ:AMD",SMCI:"NASDAQ:SMCI",COIN:"NASDAQ:COIN",NFLX:"NASDAQ:NFLX",
+  UBER:"NYSE:UBER",JPM:"NYSE:JPM",BAC:"NYSE:BAC",V:"NYSE:V",MA:"NYSE:MA",
+  SPY:"AMEX:SPY",QQQ:"NASDAQ:QQQ",
+  BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",
+  BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",DOGE:"BINANCE:DOGEUSDT",
+  ADA:"BINANCE:ADAUSDT",AVAX:"BINANCE:AVAXUSDT",
+};
+const PAPER_CRYPTO_FULL={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT"};
+
+function PaperTradingFullPage({ user, onBack }){
+  const PAPER_KEY = `nexotrade_paper_${user?.id||"guest"}`;
+  const loadPF = ()=>{ try{ const s=localStorage.getItem(PAPER_KEY); return s?JSON.parse(s):{cash:100000,positions:{},trades:[]}; }catch{ return {cash:100000,positions:{},trades:[]}; } };
+
+  const [pf, setPf]           = useState(loadPF);
+  const [chartTk, setChartTk] = useState("NVDA");
+  const [interval, setInterval2] = useState("D");
+  const [ticker, setTicker]   = useState("");
+  const [shares, setShares]   = useState("");
+  const [liveQ, setLiveQ]     = useState(null);
+  const [fetching, setFetching] = useState(false);
+  const [prices, setPrices]   = useState({});
+  const [tab, setTab]         = useState("orden");   // orden | posiciones | historial
+  const [msg, setMsg]         = useState(null);
+  const [sellTicker, setSellTicker] = useState(null);
+  const [sellShares, setSellShares] = useState("");
+  const iframeRef = useRef(null);
+
+  useEffect(()=>{ try{localStorage.setItem(PAPER_KEY,JSON.stringify(pf));}catch{} },[pf]);
+
+  const resolveSym = (tk)=> FH_SYM[tk]||PAPER_CRYPTO_FULL[tk]||tk;
+  const tvSym = TV_SYM_MAP[chartTk]||`NASDAQ:${chartTk}`;
+
+  const refreshPrices = useCallback(async()=>{
+    const tks=Object.keys(pf.positions);
+    if(!tks.length) return;
+    const next={};
+    for(const tk of tks){
+      try{
+        const sym=resolveSym(tk);
+        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
+        const d=await r.json();
+        if(d.c>0) next[tk]={price:d.c,pct:d.dp||0};
+      }catch{}
+    }
+    setPrices(next);
+  },[pf.positions]);
+
+  useEffect(()=>{ refreshPrices(); },[]);
+
+  const fetchQuote = async(tk)=>{
+    if(!tk) return;
+    setFetching(true);
+    try{
+      const sym=resolveSym(tk.trim().toUpperCase());
+      const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
+      const d=await r.json();
+      if(d.c>0){ setLiveQ({price:d.c,change:d.dp||0}); setChartTk(tk.trim().toUpperCase()); }
+      else setLiveQ(null);
+    }catch{ setLiveQ(null); }
+    setFetching(false);
+  };
+
+  const showMsg=(text,ok=true)=>{setMsg({text,ok});setTimeout(()=>setMsg(null),3000);};
+  const fmtUSD=(n)=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtDate=(s)=>{const d=new Date(s);return`${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;};
+
+  const buy=()=>{
+    const sh=parseFloat(shares), tk=ticker.trim().toUpperCase()||chartTk;
+    if(!sh||sh<=0||!liveQ||!tk){showMsg("❌ Busca un ticker y elige cantidad",false);return;}
+    const cost=liveQ.price*sh;
+    if(cost>pf.cash){showMsg("❌ Efectivo insuficiente",false);return;}
+    setPf(prev=>{
+      const ex=prev.positions[tk];
+      const newSh=(ex?.shares||0)+sh;
+      const newAvg=ex?((ex.avgCost*ex.shares)+(liveQ.price*sh))/newSh:liveQ.price;
+      return{cash:prev.cash-cost,positions:{...prev.positions,[tk]:{shares:newSh,avgCost:newAvg}},trades:[{date:new Date().toISOString(),ticker:tk,action:"buy",shares:sh,price:liveQ.price},...prev.trades].slice(0,200)};
+    });
+    setPrices(p=>({...p,[tk]:{price:liveQ.price,pct:liveQ.change}}));
+    showMsg(`✅ Compraste ${sh} × $${tk} a ${fmtUSD(liveQ.price)}`);
+    setShares(""); setLiveQ(null); setTab("posiciones");
+  };
+
+  const sell=(tk,sh)=>{
+    sh=parseFloat(sh);
+    const pos=pf.positions[tk];
+    if(!pos||!sh||sh<=0||sh>pos.shares){showMsg("❌ Cantidad inválida",false);return;}
+    const sellPrice=prices[tk]?.price||pos.avgCost;
+    const rev=sellPrice*sh;
+    setPf(prev=>{
+      const newSh=prev.positions[tk].shares-sh;
+      const newPos={...prev.positions};
+      if(newSh<=0) delete newPos[tk];
+      else newPos[tk]={...prev.positions[tk],shares:newSh};
+      return{cash:prev.cash+rev,positions:newPos,trades:[{date:new Date().toISOString(),ticker:tk,action:"sell",shares:sh,price:sellPrice},...prev.trades].slice(0,200)};
+    });
+    showMsg(`✅ Vendiste ${sh} × $${tk} a ${fmtUSD(sellPrice)}`);
+    setSellTicker(null); setSellShares("");
+  };
+
+  const positions=Object.entries(pf.positions).map(([tk,pos])=>{
+    const cp=prices[tk]?.price||pos.avgCost;
+    const value=cp*pos.shares, cost=pos.avgCost*pos.shares;
+    const pnl=value-cost, pnlPct=(pnl/cost)*100;
+    return{tk,shares:pos.shares,avgCost:pos.avgCost,cp,value,pnl,pnlPct,pct:prices[tk]?.pct||0};
+  });
+  const totalInvested=positions.reduce((s,p)=>s+p.value,0);
+  const totalValue=pf.cash+totalInvested;
+  const totalPnl=totalValue-100000;
+  const isGain=totalPnl>=0;
+
+  const QUICK=["BTC","ETH","SOL","NVDA","AAPL","TSLA","MSFT","SPY","META","AMD","DOGE","XRP"];
+  const INTERVALS=[["1","1m"],["5","5m"],["15","15m"],["60","1h"],["240","4h"],["D","1D"],["W","1W"]];
+
+  return(
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 58px)",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
+
+      {/* Toast */}
+      {msg&&<div style={{position:"fixed",top:70,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:msg.ok?"#16A34A":"#DC2626",color:"#fff",padding:"10px 22px",borderRadius:12,fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.4)",whiteSpace:"nowrap"}}>{msg.text}</div>}
+
+      {/* ── TOP BAR ── */}
+      <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 16px",background:"#141722",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0,flexWrap:"wrap"}}>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,padding:"6px 12px",color:"#94A3B8",fontSize:12,fontWeight:700,cursor:"pointer"}}>← Volver</button>
+        <div style={{width:1,height:20,background:"rgba(255,255,255,0.08)"}}/>
+        <span style={{fontWeight:900,fontSize:15,color:"#00E58F",letterSpacing:0.5}}>🎮 Paper Trading</span>
+        <span style={{fontSize:10,background:"rgba(0,229,143,0.1)",color:"#00E58F",border:"1px solid rgba(0,229,143,0.2)",borderRadius:20,padding:"2px 8px",fontWeight:700}}>SIMULADO</span>
+        <div style={{marginLeft:"auto",display:"flex",gap:12,alignItems:"center"}}>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>CARTERA TOTAL</div>
+            <div style={{fontWeight:900,fontSize:16,fontFamily:"monospace",color:isGain?"#00E58F":"#FF4D6A"}}>{fmtUSD(totalValue)}</div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>P&L</div>
+            <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:isGain?"#00E58F":"#FF4D6A"}}>{isGain?"+":""}{fmtUSD(totalPnl)}</div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>EFECTIVO</div>
+            <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:"#00A8FF"}}>{fmtUSD(pf.cash)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── MAIN CONTENT ── */}
+      <div style={{display:"flex",flex:1,overflow:"hidden",minHeight:0}}>
+
+        {/* ── IZQUIERDA: CHART ── */}
+        <div style={{flex:"1 1 0",display:"flex",flexDirection:"column",minWidth:0,overflow:"hidden"}}>
+          {/* Ticker bar + intervalos */}
+          <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",background:"#141722",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap",flexShrink:0}}>
+            {/* Búsqueda */}
+            <div style={{display:"flex",gap:5,alignItems:"center"}}>
+              <input value={ticker} onChange={e=>{setTicker(e.target.value.toUpperCase());setLiveQ(null);}}
+                onKeyDown={e=>e.key==="Enter"&&(fetchQuote(ticker||chartTk))}
+                placeholder="Ej: NVDA, BTC, TSLA"
+                style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 10px",fontSize:12,color:"#E2E8F0",outline:"none",width:130,fontFamily:"monospace",fontWeight:700}}/>
+              <button onClick={()=>fetchQuote(ticker||chartTk)}
+                style={{background:"#00A8FF",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>
+                {fetching?"⏳":"🔍"}
+              </button>
+            </div>
+            {/* Quick tickers */}
+            <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+              {QUICK.map(t=>(
+                <button key={t} onClick={()=>{setChartTk(t);setTicker(t);fetchQuote(t);}}
+                  style={{fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:6,border:`1px solid ${chartTk===t?"#00A8FF":"rgba(255,255,255,0.1)"}`,background:chartTk===t?"rgba(0,168,255,0.15)":"rgba(255,255,255,0.04)",color:chartTk===t?"#00A8FF":"#94A3B8",cursor:"pointer",fontFamily:"monospace"}}>
+                  {t}
+                </button>
+              ))}
+            </div>
+            {/* Intervalos */}
+            <div style={{marginLeft:"auto",display:"flex",gap:3}}>
+              {INTERVALS.map(([v,l])=>(
+                <button key={v} onClick={()=>setInterval2(v)}
+                  style={{fontSize:10,fontWeight:700,padding:"3px 7px",borderRadius:5,border:"none",background:interval===v?"#00A8FF":"rgba(255,255,255,0.05)",color:interval===v?"#fff":"#64748B",cursor:"pointer"}}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Precio en vivo */}
+          {liveQ&&(
+            <div style={{display:"flex",gap:16,alignItems:"center",padding:"6px 14px",background:"rgba(0,168,255,0.06)",borderBottom:"1px solid rgba(0,168,255,0.1)",flexShrink:0}}>
+              <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#E2E8F0"}}>{fmtUSD(liveQ.price)}</span>
+              <span style={{fontWeight:800,fontSize:13,color:liveQ.change>=0?"#00E58F":"#FF4D6A"}}>{liveQ.change>=0?"+":""}{liveQ.change?.toFixed(2)}% hoy</span>
+              <span style={{fontSize:11,color:"#00E58F",background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.2)",borderRadius:8,padding:"2px 8px",fontWeight:700}}>✓ En vivo — ${chartTk}</span>
+            </div>
+          )}
+
+          {/* TradingView Chart */}
+          <div style={{flex:1,position:"relative",minHeight:0}}>
+            <iframe
+              key={`${tvSym}-${interval}`}
+              ref={iframeRef}
+              src={`https://s.tradingview.com/widgetembed/?frameElementId=nexo_tv&symbol=${encodeURIComponent(tvSym)}&interval=${interval}&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=141722&studies=%5B%5D&theme=dark&style=1&timezone=exchange&withdateranges=1&hide_top_toolbar=0&hide_legend=0&save_image=0`}
+              style={{width:"100%",height:"100%",border:"none",display:"block"}}
+              allow="fullscreen"
+              title="TradingView Chart"
+            />
+          </div>
+        </div>
+
+        {/* ── DERECHA: PANEL DE ÓRDENES ── */}
+        <div style={{width:310,background:"#141722",borderLeft:"1px solid rgba(255,255,255,0.06)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
+          {/* Tabs */}
+          <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
+            {[["orden","💹 Orden"],["posiciones","📊 Posiciones"],["historial","📋 Historial"]].map(([k,l])=>(
+              <button key={k} onClick={()=>setTab(k)}
+                style={{flex:1,padding:"10px 4px",border:"none",background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:tab===k?"#00E58F":"#64748B",borderBottom:tab===k?"2px solid #00E58F":"2px solid transparent",transition:"all 0.15s"}}>
+                {l}
+              </button>
+            ))}
+          </div>
+
+          <div style={{flex:1,overflowY:"auto",padding:"12px"}}>
+
+            {/* ── ORDEN ── */}
+            {tab==="orden"&&(
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{background:"rgba(0,229,143,0.05)",border:"1px solid rgba(0,229,143,0.15)",borderRadius:10,padding:"10px 12px"}}>
+                  <div style={{fontSize:10,color:"#64748B",fontWeight:600,marginBottom:2}}>TICKER SELECCIONADO</div>
+                  <div style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#00E58F"}}>${chartTk}</div>
+                  {liveQ&&<div style={{fontFamily:"monospace",fontSize:13,color:"#E2E8F0",fontWeight:700}}>{fmtUSD(liveQ.price)} <span style={{color:liveQ.change>=0?"#00E58F":"#FF4D6A",fontSize:11}}>{liveQ.change>=0?"+":""}{liveQ.change?.toFixed(2)}%</span></div>}
+                </div>
+
+                <div>
+                  <label style={{fontSize:10,fontWeight:700,color:"#64748B",display:"block",marginBottom:4}}>CANTIDAD</label>
+                  <input value={shares} onChange={e=>setShares(e.target.value)}
+                    type="number" min="0.01" step="0.01" placeholder="Ej: 10"
+                    style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 12px",fontSize:13,color:"#E2E8F0",outline:"none",boxSizing:"border-box",fontFamily:"monospace"}}/>
+                </div>
+
+                {liveQ&&shares&&parseFloat(shares)>0&&(
+                  <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:8,padding:"10px 12px",fontSize:12}}>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+                      <span style={{color:"#64748B"}}>Total</span>
+                      <span style={{fontFamily:"monospace",fontWeight:800,color:"#E2E8F0"}}>{fmtUSD(liveQ.price*parseFloat(shares))}</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between"}}>
+                      <span style={{color:"#64748B"}}>Efectivo restante</span>
+                      <span style={{fontFamily:"monospace",fontWeight:800,color:pf.cash-(liveQ.price*parseFloat(shares))>=0?"#00E58F":"#FF4D6A"}}>{fmtUSD(pf.cash-(liveQ.price*parseFloat(shares)))}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Botones COMPRA / VENTA */}
+                <button onClick={buy}
+                  disabled={!liveQ||!shares||parseFloat(shares)<=0}
+                  style={{background:liveQ&&shares?"linear-gradient(135deg,#00E58F,#16A34A)":"rgba(255,255,255,0.05)",border:"none",borderRadius:10,padding:"12px",fontWeight:900,fontSize:14,color:liveQ&&shares?"#0B0E1A":"#475569",cursor:liveQ&&shares?"pointer":"not-allowed",letterSpacing:0.3}}>
+                  ▲ COMPRAR {chartTk}
+                </button>
+
+                {pf.positions[chartTk]&&(
+                  <div>
+                    <div style={{fontSize:10,color:"#64748B",marginBottom:5,fontWeight:600}}>POSICIÓN ABIERTA EN ${chartTk}</div>
+                    <div style={{background:"rgba(255,77,106,0.06)",border:"1px solid rgba(255,77,106,0.15)",borderRadius:8,padding:"10px",marginBottom:8,fontSize:12}}>
+                      <div style={{color:"#94A3B8"}}>Tienes <strong style={{color:"#E2E8F0"}}>{pf.positions[chartTk].shares}</strong> acciones a <strong style={{color:"#E2E8F0"}}>{fmtUSD(pf.positions[chartTk].avgCost)}</strong></div>
+                    </div>
+                    {sellTicker===chartTk?(
+                      <div style={{display:"flex",gap:6}}>
+                        <input value={sellShares} onChange={e=>setSellShares(e.target.value)}
+                          type="number" min="0.01" step="0.01" placeholder={`máx ${pf.positions[chartTk].shares}`}
+                          style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:8,padding:"8px 10px",fontSize:12,color:"#E2E8F0",outline:"none"}}/>
+                        <button onClick={()=>sell(chartTk,sellShares)}
+                          style={{background:"#DC2626",border:"none",borderRadius:8,padding:"8px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>Vender</button>
+                        <button onClick={()=>setSellTicker(null)}
+                          style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,padding:"8px",color:"#94A3B8",cursor:"pointer"}}>✕</button>
+                      </div>
+                    ):(
+                      <button onClick={()=>{setSellTicker(chartTk);setSellShares("");}}
+                        style={{width:"100%",background:"rgba(255,77,106,0.1)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:10,padding:"10px",fontWeight:800,fontSize:13,color:"#FF4D6A",cursor:"pointer"}}>
+                        ▼ VENDER {chartTk}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                <div style={{fontSize:10,color:"#475569",textAlign:"center",marginTop:4}}>⚠️ Solo dinero virtual · No es dinero real</div>
+              </div>
+            )}
+
+            {/* ── POSICIONES ── */}
+            {tab==="posiciones"&&(
+              <div>
+                {positions.length===0?(
+                  <div style={{textAlign:"center",padding:"32px 16px",color:"#475569"}}>
+                    <div style={{fontSize:32,marginBottom:10}}>📭</div>
+                    <div style={{fontSize:13}}>Sin posiciones abiertas</div>
+                    <div style={{fontSize:11,marginTop:6}}>Ve a "Orden" y compra tu primera acción</div>
+                  </div>
+                ):(
+                  <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                    {positions.map(p=>(
+                      <div key={p.tk} onClick={()=>{setChartTk(p.tk);setTicker(p.tk);fetchQuote(p.tk);setTab("orden");}}
+                        style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${p.pnl>=0?"rgba(0,229,143,0.2)":"rgba(255,77,106,0.2)"}`,borderRadius:10,padding:"10px 12px",cursor:"pointer",transition:"background 0.15s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.06)"}
+                        onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                          <span style={{fontFamily:"monospace",fontWeight:900,color:"#E2E8F0",fontSize:13}}>${p.tk}</span>
+                          <span style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:p.pnl>=0?"#00E58F":"#FF4D6A"}}>{p.pnl>=0?"+":""}{fmtUSD(p.pnl)}</span>
+                        </div>
+                        <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#64748B"}}>
+                          <span>{p.shares} acc. · avg {fmtUSD(p.avgCost)}</span>
+                          <span style={{color:p.pnlPct>=0?"#00E58F":"#FF4D6A"}}>{p.pnlPct>=0?"+":""}{p.pnlPct.toFixed(2)}%</span>
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={refreshPrices}
+                      style={{background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:8,padding:"7px",color:"#00A8FF",fontSize:11,fontWeight:600,cursor:"pointer",marginTop:4}}>
+                      ↻ Actualizar precios
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── HISTORIAL ── */}
+            {tab==="historial"&&(
+              <div>
+                {pf.trades.length===0?(
+                  <div style={{textAlign:"center",padding:"32px 16px",color:"#475569",fontSize:13}}>Sin operaciones todavía</div>
+                ):(
+                  <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                    {pf.trades.slice(0,50).map((t,i)=>(
+                      <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.04)"}}>
+                        <div style={{width:26,height:26,borderRadius:8,background:t.action==="buy"?"rgba(0,229,143,0.12)":"rgba(255,77,106,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,color:t.action==="buy"?"#00E58F":"#FF4D6A",fontWeight:900}}>
+                          {t.action==="buy"?"▲":"▼"}
+                        </div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontWeight:700,fontSize:11,color:"#E2E8F0"}}>{t.action==="buy"?"COMPRA":"VENTA"} <span style={{fontFamily:"monospace",color:"#00A8FF"}}>${t.ticker}</span></div>
+                          <div style={{fontSize:10,color:"#475569"}}>{fmtDate(t.date)}</div>
+                        </div>
+                        <div style={{textAlign:"right"}}>
+                          <div style={{fontFamily:"monospace",fontSize:11,fontWeight:700,color:"#E2E8F0"}}>{fmtUSD(t.price*t.shares)}</div>
+                          <div style={{fontSize:9,color:"#475569"}}>{t.shares}×{fmtUSD(t.price)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -13122,6 +13485,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
+  {label:isEN?"⛶ Trading Terminal":"⛶ Terminal Trading",idx:43},
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
   {label:isEN?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
@@ -16285,7 +16649,7 @@ export default function App(){
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage posts={posts}/>;
     if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
-    if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang}/>;
+    if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===14) return <EconCalendarPage/>;
@@ -16305,6 +16669,7 @@ export default function App(){
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
     if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
     if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
+    if(page===43) return <PaperTradingFullPage user={user} onBack={()=>setPage(0)}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -17192,8 +17557,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -17210,8 +17575,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42)?"none":undefined}}>
+        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
