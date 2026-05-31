@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 10:56:07
+// NEXO TRADE — build: 2026-05-31 11:13:01
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -8481,38 +8481,39 @@ function AdminPicksModal({onClose}){
   );
 }
 
+// ── PICKS SEMANALES FALLBACK — semana 2–6 jun 2026 ──────────────────────────
+// Fuente: Goldman Sachs, Wedbush, JPMorgan, BofA, Barclays, TipRanks consensus
+const WEEKLY_PICKS_FALLBACK = {
+  corto:[
+    {ticker:"NVDA", nombre:"NVIDIA",         tipo:"COMPRA", entrada:"$131", target:"$158", stop_loss:"$121", confianza:95, razon:"Semana clave para NVDA: Computex + chips Blackwell Ultra. Goldman Sachs target $160. Wedbush: 'mejor oportunidad de compra de 2026'. Demanda de hyperscalers (MSFT, GOOG, AMZN) sin desaceleración. Catalizador inminente con anuncios de hardware."},
+    {ticker:"PLTR", nombre:"Palantir",       tipo:"COMPRA", entrada:"$125", target:"$148", stop_loss:"$114", confianza:90, razon:"Nuevo contrato con el Ejército de EE.UU. por $480M confirmado. Revenue US Commercial +127% YoY. AIP Platform adoptado masivamente por Fortune 500. Wedbush: 'el software de IA más subestimado del mercado'. Target $148 en 30 días."},
+    {ticker:"META", nombre:"Meta Platforms",  tipo:"COMPRA", entrada:"$622", target:"$695", stop_loss:"$588", confianza:91, razon:"Llama 4 superó GPT-4o en benchmarks clave. Margen operativo 42% récord histórico. RPM publicidad +18% YoY. Cantor Fitzgerald reitera $720. Próxima semana: Meta AI Summit con anuncios de AR/VR. Setup técnico en breakout de $620."},
+    {ticker:"APP",  nombre:"AppLovin",       tipo:"COMPRA", entrada:"$315", target:"$380", stop_loss:"$292", confianza:87, razon:"La sorpresa del año en IA publicitaria. Revenue Q1 +40% YoY. AXON 2.0 destruye a competidores en performance marketing. Piper Sandler target $400. Subió 180% en 12 meses y mantiene momentum fuerte."},
+  ],
+  largo:[
+    {ticker:"MSFT", nombre:"Microsoft",      tipo:"COMPRA", entrada:"$452", target:"$520", stop_loss:"$425", confianza:92, razon:"Azure IA +35% YoY. Copilot en 85% de Fortune 500. GitHub Copilot supera 2M usuarios de pago. Partnership OpenAI da ventaja única. Morgan Stanley target $530. La mejor IA Play con el menor riesgo del mercado."},
+    {ticker:"AMZN", nombre:"Amazon",         tipo:"COMPRA", entrada:"$226", target:"$280", stop_loss:"$208", confianza:89, razon:"AWS aceleró a 21% QoQ — superando a Azure por primera vez en 2026. Amazon Ads supera $60B anualizados. Robotics + satélites Kuiper como catalizadores 2026-27. JPMorgan y RBC Capital reiteran Overweight."},
+    {ticker:"GLD",  nombre:"SPDR Gold ETF",  tipo:"COMPRA", entrada:"$320", target:"$345", stop_loss:"$308", confianza:83, razon:"Oro en máximos históricos. Bancos centrales comprando a ritmo récord (China +60T/mes). Dólar débil por incertidumbre fiscal USA. Hedge ideal para portfolios tech. WisdomTree proyecta $3,500/oz para 2026."},
+    {ticker:"JPM",  nombre:"JPMorgan Chase", tipo:"COMPRA", entrada:"$268", target:"$310", stop_loss:"$252", confianza:84, razon:"Fed señaló posible baja de tasas en septiembre — JPM se beneficia por expansión de crédito. Banca de inversión Q1 +45% YoY. Dimon recompra acciones agresivamente. Dividendo $1.35/trimestre. Barclays reitera Overweight target $310."},
+  ],
+  dividendos:[
+    {ticker:"JPM",  nombre:"JPMorgan Chase", yield_div:"2.0%", entrada:"$268", sector:"Financiero",         rating:"★★★★★"},
+    {ticker:"KO",   nombre:"Coca-Cola",      yield_div:"3.1%", entrada:"$72",  sector:"Consumo Básico",     rating:"★★★★☆"},
+    {ticker:"VZ",   nombre:"Verizon",        yield_div:"6.5%", entrada:"$43",  sector:"Telecomunicaciones", rating:"★★★★☆"},
+    {ticker:"ABBV", nombre:"AbbVie",         yield_div:"3.5%", entrada:"$188", sector:"Salud/Pharma",       rating:"★★★★★"},
+  ],
+  crypto:[
+    {ticker:"COIN", nombre:"Coinbase",              tipo:"COMPRA", entrada:"$262", target:"$320", stop_loss:"$238", confianza:86, razon:"Bitcoin superó $107K — cada $10K de BTC = +15-20% en COIN. ETF Bitcoin supera $120B AUM. Coinbase es custodio oficial de 9 de 11 ETFs de BTC en USA. Base L2 supera 10M usuarios activos. Oppenheimer target $350."},
+    {ticker:"MSTR", nombre:"Strategy (MSTR)",        tipo:"COMPRA", entrada:"$405", target:"$490", stop_loss:"$368", confianza:82, razon:"Strategy posee 576,230 BTC — mayor acumulador corporativo del mundo. BTC en $107K = balance $61.8B. Saylor continúa comprando. Si BTC llega a $120K antes de julio, MSTR supera $550. Alta beta, máxima volatilidad."},
+    {ticker:"IBIT", nombre:"BlackRock Bitcoin ETF",  tipo:"COMPRA", entrada:"$62",  target:"$75",  stop_loss:"$57",  confianza:88, razon:"Mayor ETF de Bitcoin del mundo con $52B en AUM. Forma más simple y segura de exposición a BTC sin wallet. Flujos institucionales récord esta semana. Correlación perfecta con Bitcoin. Ideal para portfolios regulados o IRAs."},
+  ],
+};
+
 function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
-  const [picks,setPicks]=useState(null);
+  const [picks,setPicks]=useState(WEEKLY_PICKS_FALLBACK);
   const [showAdmin,setShowAdmin]=useState(false);
   const [livePrices,setLivePrices]=useState({});
   const semana = new Date().toLocaleDateString("es",{day:"numeric",month:"long",year:"numeric"});
-
-  // Picks semana 2–6 junio 2026 — fuente: Barclays, Wedbush, JPMorgan, BofA, Goldman Sachs, TipRanks
-  const FALLBACK = {
-    corto:[
-      {ticker:"NVDA", nombre:"NVIDIA",        tipo:"COMPRA", entrada:"$131", target:"$158", stop_loss:"$121", confianza:95, razon:"La semana más importante del año para NVDA: Computex + anuncio de chips Blackwell Ultra. Goldman Sachs sube target a $160. Wedbush dice 'la mejor oportunidad de compra de 2026'. Demanda de hyperscalers (Microsoft, Google, Amazon) no muestra señales de desaceleración. Catalizador inminente."},
-      {ticker:"PLTR", nombre:"Palantir",      tipo:"COMPRA", entrada:"$125", target:"$148", stop_loss:"$114", confianza:90, razon:"Palantir acaba de ganar contrato con el Ejército de EE.UU. por $480M (confirmado viernes). Revenue US Commercial +127% YoY. AIP Platform siendo adoptado por Fortune 500. Wedbush: 'el software de IA más subestimado del mercado'. Target $148 en 30 días."},
-      {ticker:"META", nombre:"Meta Platforms", tipo:"COMPRA", entrada:"$622", target:"$695", stop_loss:"$588", confianza:91, razon:"Meta Connect se acerca — nuevo hardware de AR/VR esperado esta semana. Llama 4 superó GPT-4o en benchmarks clave. Margen operativo 42% récord. RPM de publicidad +18% YoY. Analistas de Cantor Fitzgerald reiteran $720. Setup técnico perfecto: rompe resistencia de $620."},
-      {ticker:"APP",  nombre:"AppLovin",      tipo:"COMPRA", entrada:"$315", target:"$380", stop_loss:"$292", confianza:87, razon:"AppLovin es la sorpresa del año en IA publicitaria. Revenue Q1 +40% YoY. Su modelo AXON 2.0 está destruyendo a los competidores en performance marketing. Piper Sandler target $400. La acción ha subido 180% en 12 meses y aún tiene momentum."},
-    ],
-    largo:[
-      {ticker:"MSFT", nombre:"Microsoft",     tipo:"COMPRA", entrada:"$452", target:"$520", stop_loss:"$425", confianza:92, razon:"Azure IA creciendo 35% YoY — Copilot adoptado en 85% de Fortune 500. GitHub Copilot supera 2M de usuarios de pago. OpenAI partnership da ventaja competitiva única. Morgan Stanley target $530. La mejor IA Play con el menor riesgo del mercado."},
-      {ticker:"AMZN", nombre:"Amazon",        tipo:"COMPRA", entrada:"$226", target:"$280", stop_loss:"$208", confianza:89, razon:"AWS aceleró a 21% de crecimiento QoQ — superando a Azure por primera vez en 2026. Amazon Ads supera $60B anualizados. Robotics + Kuiper satellite internet son catalizadores 2026-2027. JPMorgan y RBC Capital reiteran Overweight. Setup técnico en breakout."},
-      {ticker:"GLD",  nombre:"SPDR Gold ETF", tipo:"COMPRA", entrada:"$320", target:"$345", stop_loss:"$308", confianza:83, razon:"Oro alcanzó nuevos máximos históricos esta semana. Bancos centrales comprando a ritmo récord (China +60T este mes). Dólar debilitándose por incertidumbre fiscal USA. Hedge perfecto para portfolios expuestos a tech. WisdomTree proyecta $3,500/oz para 2026."},
-      {ticker:"JPM",  nombre:"JPMorgan Chase", tipo:"COMPRA", entrada:"$268", target:"$310", stop_loss:"$252", confianza:84, razon:"La Reserva Federal señaló que podría bajar tasas en septiembre — JPM se beneficia por expansión de crédito. Banca de inversión Q1 +45% YoY. Jamie Dimon recompra acciones agresivamente. Dividendo creciente ($1.35/trimestre). Wells Fargo y Barclays reiteran Overweight con target $310."},
-    ],
-    dividendos:[
-      {ticker:"JPM",  nombre:"JPMorgan Chase",  yield_div:"2.0%", entrada:"$268", sector:"Financiero",      rating:"★★★★★"},
-      {ticker:"KO",   nombre:"Coca-Cola",        yield_div:"3.1%", entrada:"$72",  sector:"Consumo Básico",  rating:"★★★★☆"},
-      {ticker:"VZ",   nombre:"Verizon",          yield_div:"6.5%", entrada:"$43",  sector:"Telecomunicaciones", rating:"★★★★☆"},
-      {ticker:"ABBV", nombre:"AbbVie",           yield_div:"3.5%", entrada:"$188", sector:"Salud/Pharma",    rating:"★★★★★"},
-    ],
-    crypto:[
-      {ticker:"COIN", nombre:"Coinbase",       tipo:"COMPRA", entrada:"$262", target:"$320", stop_loss:"$238", confianza:86, razon:"Bitcoin superó $107K esta semana — cada $10K de BTC = +15-20% en COIN. ETF de Bitcoin superó $120B en AUM. Coinbase es el custodio oficial de 9 de los 11 ETFs de Bitcoin en USA. Base (L2) superó 10M usuarios activos. Oppenheimer target $350."},
-      {ticker:"MSTR", nombre:"Strategy (MSTR)", tipo:"COMPRA", entrada:"$405", target:"$490", stop_loss:"$368", confianza:82, razon:"Strategy (ex-MicroStrategy) posee 576,230 BTC — el mayor acumulador corporativo del mundo. BTC en $107K = balance de $61.8B en Bitcoin. Saylor anunció esta semana que continuará comprando. Si BTC llega a $120K antes de fin de junio, MSTR supera $550. Alta beta, máxima volatilidad."},
-      {ticker:"IBIT",  nombre:"BlackRock Bitcoin ETF", tipo:"COMPRA", entrada:"$62", target:"$75", stop_loss:"$57", confianza:88, razon:"El ETF de Bitcoin más grande del mundo con $52B en AUM. Forma más simple y segura de exposición a BTC sin wallet. Flujos institucionales récord esta semana. Correlación perfecta con Bitcoin. Ideal para portfolios regulados o IRAs."},
-    ],
-  };
 
   useEffect(()=>{
     const loadPicks=async()=>{
@@ -8531,8 +8532,8 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
       }catch(e){
         // Supabase error — usar FALLBACK
       }
-      // Si Supabase falla o está vacío → usar FALLBACK
-      setPicks(FALLBACK);
+      // Si Supabase falla o está vacío → mantener FALLBACK (ya es el estado inicial)
+      setPicks(WEEKLY_PICKS_FALLBACK);
     };
     loadPicks();
   },[showAdmin]);
