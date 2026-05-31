@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 11:18:01
+// NEXO TRADE — build: 2026-05-31 11:24:24
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -17205,9 +17205,12 @@ export default function App(){
             </div>
           </div>
         )}
-        {filtered2.map((p,i)=>(
-          <div key={p.id}>
-            <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))}/>
+        {displayFeed.map((p,i)=>(
+          <div key={p._key||p.id}>
+            {p._isBot
+              ? <BotPostCard post={p} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
+              : <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))}/>
+            }
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
@@ -17234,14 +17237,7 @@ export default function App(){
             {(i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
             )}
-            {/* Bot post de análisis cada 7 posts */}
-            {(i+1)%7===0 && BOT_POSTS[(Math.floor(i/7))%BOT_POSTS.length] && (
-              <BotPostCard post={BOT_POSTS[(Math.floor(i/7))%BOT_POSTS.length]} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
-            )}
-            {/* Post casual de trader cada 5 posts */}
-            {(i+1)%5===0 && CASUAL_BOT_POSTS[(Math.floor(i/5))%CASUAL_BOT_POSTS.length] && (
-              <BotPostCard post={CASUAL_BOT_POSTS[(Math.floor(i/5))%CASUAL_BOT_POSTS.length]} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
-            )}
+            {/* Bots ya inyectados directamente en displayFeed */}
             {/* AdSense banner cada 6 posts */}
             {(i+1)%6===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
             {!effectivePremium && (i+1)%5===0 && (
@@ -17287,6 +17283,27 @@ export default function App(){
     else if(sent==="viral")  base = [...base].sort((a,b)=>(b.likes||0)+(b.comments||0)-(a.likes||0)-(a.comments||0));
     return base;
   })();
+
+  // ── Mezclar bots en el feed — aparecen SIEMPRE cada 3 posts reales ──────────
+  const ALL_BOTS = [...CASUAL_BOT_POSTS, ...BOT_POSTS];
+  const displayFeed = (()=>{
+    const result = [];
+    let botIdx = 0;
+    const BOT_INTERVAL = 3; // un bot cada 3 posts reales
+    filtered2.forEach((post, i) => {
+      result.push(post);
+      if ((i + 1) % BOT_INTERVAL === 0) {
+        result.push({...ALL_BOTS[botIdx % ALL_BOTS.length], _isBot:true, _key:`bot_${botIdx}`});
+        botIdx++;
+      }
+    });
+    // Si no hay posts reales todavía → mostrar bots directamente para que el feed no esté vacío
+    if (filtered2.length === 0) {
+      ALL_BOTS.forEach((b, i) => result.push({...b, _isBot:true, _key:`bot_init_${i}`}));
+    }
+    return result;
+  })();
+
   const showingMockData = false; // ya no usamos mock posts
 
   return(
