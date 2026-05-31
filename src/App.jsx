@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 12:37:09
+// NEXO TRADE — build: 2026-05-31 13:26:23
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -5780,6 +5780,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🚀", label:"Movers 24H",                                  idx:7},
     {icon:"🎓", label:"Webinars",                                    idx:11},
     {icon:"📚", label:isEN?"Academy":"Academia",                     idx:12},
+    {icon:"🌍", label:isEN?"Global Radar":"Radar Global",           idx:44},
   ];
 
   return(
@@ -14855,6 +14856,514 @@ function PortfolioIAScoreCard({ positions, livePrices, isEN, onShare }) {
   );
 }
 
+// ── RADAR GLOBAL — Mapa del Dinero Global (3D Globe) ──────────────────────────
+const RADAR_MKTS = [
+  {id:'nyse',    name:'Nueva York',      city:'New York',      exc:'NYSE / NASDAQ',   lat:40.71, lon:-74.01,oh:[14.5,21],  idx:'S&P 500',      chg:'+0.82%',vol:'$28.4B',cap:'$46.2T',col:'#22c55e',sz:.18},
+  {id:'lse',     name:'Londres',         city:'London',        exc:'LSE / FTSE 100',  lat:51.51, lon:-.13,  oh:[8,16.5],  idx:'FTSE 100',     chg:'+0.31%',vol:'$8.2B', cap:'$3.9T', col:'#38bdf8',sz:.14},
+  {id:'tse',     name:'Tokio',           city:'Tokyo',         exc:'TSE / Nikkei 225',lat:35.68, lon:139.65,oh:[0,6.5],   idx:'Nikkei 225',   chg:'-0.14%',vol:'$12.1B',cap:'$6.2T', col:'#fb923c',sz:.15},
+  {id:'sse',     name:'Shanghái',        city:'Shanghai',      exc:'SSE / CSI 300',   lat:31.23, lon:121.47,oh:[1.5,7],   idx:'SSE Composite',chg:'+0.55%',vol:'$15.3B',cap:'$9.1T', col:'#f87171',sz:.15},
+  {id:'xetra',   name:'Frankfurt',       city:'Frankfurt',     exc:'XETRA / DAX 40',  lat:50.11, lon:8.68,  oh:[8,16.5],  idx:'DAX 40',       chg:'+0.47%',vol:'$6.8B', cap:'$2.1T', col:'#facc15',sz:.12},
+  {id:'hkex',    name:'Hong Kong',       city:'Hong Kong',     exc:'HKEX / HSI',      lat:22.32, lon:114.17,oh:[1.5,8],   idx:'Hang Seng',    chg:'+1.12%',vol:'$9.4B', cap:'$4.5T', col:'#f97316',sz:.13},
+  {id:'b3',      name:'São Paulo',       city:'São Paulo',     exc:'B3 / Ibovespa',   lat:-23.55,lon:-46.63,oh:[13,20],   idx:'Ibovespa',     chg:'+0.63%',vol:'$2.1B', cap:'$0.9T', col:'#4ade80',sz:.10},
+  {id:'asx',     name:'Sídney',          city:'Sydney',        exc:'ASX 200',         lat:-33.87,lon:151.21,oh:[0,6],     idx:'ASX 200',      chg:'+0.29%',vol:'$3.2B', cap:'$1.8T', col:'#a3e635',sz:.10},
+  {id:'sgx',     name:'Singapur',        city:'Singapore',     exc:'SGX / STI',       lat:1.35,  lon:103.82,oh:[1,9],    idx:'STI',          chg:'+0.18%',vol:'$1.4B', cap:'$0.7T', col:'#34d399',sz:.09},
+  {id:'tsx',     name:'Toronto',         city:'Toronto',       exc:'TSX / S&P TSX',   lat:43.65, lon:-79.38,oh:[14.5,21], idx:'S&P/TSX',      chg:'+0.71%',vol:'$4.1B', cap:'$2.8T', col:'#fb7185',sz:.11},
+  {id:'bse',     name:'Bombay',          city:'Mumbai',        exc:'BSE / SENSEX',    lat:19.08, lon:72.88, oh:[3.75,10], idx:'SENSEX',       chg:'+0.44%',vol:'$5.2B', cap:'$3.2T', col:'#fbbf24',sz:.11},
+  {id:'krx',     name:'Seúl',            city:'Seoul',         exc:'KRX / KOSPI',     lat:37.57, lon:126.98,oh:[0,6.5],  idx:'KOSPI',        chg:'-0.22%',vol:'$6.1B', cap:'$1.9T', col:'#818cf8',sz:.11},
+  {id:'bmv',     name:'Ciudad de México',city:'Mexico City',   exc:'BMV / IPC',       lat:19.43, lon:-99.13,oh:[14.5,21], idx:'IPC',          chg:'+0.38%',vol:'$0.6B', cap:'$0.4T', col:'#2dd4bf',sz:.09},
+  {id:'dfm',     name:'Dubái',           city:'Dubai',         exc:'DFM / DFMGI',     lat:25.20, lon:55.27, oh:[6,10],   idx:'DFMGI',        chg:'+0.15%',vol:'$0.8B', cap:'$0.5T', col:'#e879f9',sz:.09},
+  {id:'jse',     name:'Johannesburgo',   city:'Johannesburg',  exc:'JSE / Top 40',    lat:-26.20,lon:28.05, oh:[7,15],   idx:'JSE Top 40',   chg:'+0.20%',vol:'$1.1B', cap:'$1.0T', col:'#d4a57a',sz:.09},
+  {id:'tadawul', name:'Riad',            city:'Riyadh',        exc:'Tadawul / TASI',  lat:24.71, lon:46.68, oh:[6.5,13], idx:'TASI',         chg:'+0.35%',vol:'$1.9B', cap:'$2.4T', col:'#67e8f9',sz:.10},
+];
+const RADAR_ARCS=[['nyse','lse'],['nyse','b3'],['nyse','tsx'],['nyse','bmv'],['lse','xetra'],['lse','bse'],['lse','jse'],['lse','dfm'],['tse','sse'],['tse','hkex'],['tse','krx'],['tse','sgx'],['sse','hkex'],['sse','sgx'],['nyse','tse'],['lse','tse'],['bse','sgx'],['xetra','tadawul'],['b3','nyse']];
+const RADAR_MKT_COUNTRY={nyse:'United States',lse:'United Kingdom',tse:'Japan',sse:'China',xetra:'Germany',hkex:'Hong Kong',b3:'Brazil',asx:'Australia',sgx:'Singapore',tsx:'Canada',bse:'India',krx:'South Korea',bmv:'Mexico',dfm:'United Arab Emirates',jse:'South Africa',tadawul:'Saudi Arabia'};
+const RADAR_CD={
+  'United States':{lat:39.5,lon:-98.5,r:16},'South Korea':{lat:37.6,lon:127.0,r:3.5},
+  'Japan':{lat:36.2,lon:138.0,r:5},'United Kingdom':{lat:54.0,lon:-2.5,r:4},
+  'Singapore':{lat:1.35,lon:103.8,r:1},'Hong Kong':{lat:22.3,lon:114.2,r:1},
+  'Germany':{lat:51.2,lon:10.4,r:5},'France':{lat:46.2,lon:2.2,r:5},
+  'Brazil':{lat:-15.8,lon:-47.9,r:14},'Australia':{lat:-25.3,lon:133.8,r:12},
+  'India':{lat:20.6,lon:79.0,r:10},'China':{lat:35.9,lon:104.2,r:16},
+  'United Arab Emirates':{lat:23.4,lon:53.8,r:2},'Switzerland':{lat:46.8,lon:8.2,r:2},
+  'Netherlands':{lat:52.1,lon:5.3,r:2},'Canada':{lat:56.1,lon:-106.3,r:15},
+  'Malta':{lat:35.9,lon:14.5,r:.6},'Cayman Islands':{lat:19.3,lon:-81.4,r:.6},
+  'Seychelles':{lat:-4.7,lon:55.5,r:.6},'Estonia':{lat:58.6,lon:25.0,r:1.5},
+  'Turkey':{lat:38.9,lon:35.2,r:6},'Russia':{lat:61.5,lon:105.3,r:20},
+  'Poland':{lat:51.9,lon:19.1,r:4},'Mexico':{lat:23.6,lon:-102.6,r:9},
+  'Argentina':{lat:-38.4,lon:-63.6,r:10},'Thailand':{lat:15.9,lon:100.9,r:5},
+  'Indonesia':{lat:-0.8,lon:113.9,r:8},'Philippines':{lat:12.9,lon:121.8,r:4},
+  'Taiwan':{lat:23.7,lon:121.0,r:2},'Vietnam':{lat:14.1,lon:108.3,r:4},
+  'Nigeria':{lat:9.1,lon:8.7,r:6},'South Africa':{lat:-28.5,lon:24.7,r:6},
+  'Panama':{lat:8.5,lon:-80.8,r:1},'Cyprus':{lat:35.1,lon:33.4,r:1},
+  'Spain':{lat:40.5,lon:-3.7,r:5},'Italy':{lat:41.9,lon:12.6,r:5},
+  'Israel':{lat:31.0,lon:34.9,r:2},'Saudi Arabia':{lat:23.9,lon:45.1,r:7},
+  'Ukraine':{lat:48.4,lon:31.2,r:7},'Pakistan':{lat:30.4,lon:69.3,r:8},
+  'New Zealand':{lat:-40.9,lon:174.9,r:4},'Chile':{lat:-35.7,lon:-71.5,r:5},
+  'Colombia':{lat:4.6,lon:-74.1,r:5},'Lithuania':{lat:55.2,lon:23.9,r:1.5},
+  'Kazakhstan':{lat:47.2,lon:67.3,r:12},'Portugal':{lat:39.4,lon:-8.2,r:3},
+  'Bangladesh':{lat:23.7,lon:90.4,r:8},'Malaysia':{lat:4.2,lon:108.0,r:5},
+  'Egypt':{lat:26.8,lon:30.8,r:7},
+};
+const RADAR_TD={
+  'China':{total:280,crypto:59,stock:221,name:'China'},
+  'United States':{total:200,crypto:53,stock:158,name:'EE.UU.'},
+  'India':{total:175,crypto:94,stock:80,name:'India'},
+  'Japan':{total:45,crypto:10,stock:35,name:'Japón'},
+  'Brazil':{total:40,crypto:25,stock:15,name:'Brasil'},
+  'South Korea':{total:25,crypto:11,stock:14,name:'Corea del Sur'},
+  'United Kingdom':{total:25,crypto:7,stock:20,name:'Reino Unido'},
+  'Indonesia':{total:30,crypto:23,stock:7,name:'Indonesia'},
+  'Pakistan':{total:28,crypto:25,stock:3,name:'Pakistán'},
+  'Vietnam':{total:22,crypto:21,stock:1,name:'Vietnam'},
+  'Germany':{total:20,crypto:9,stock:12,name:'Alemania'},
+  'Russia':{total:20,crypto:14,stock:6,name:'Rusia'},
+  'Nigeria':{total:24,crypto:22,stock:2,name:'Nigeria'},
+  'Philippines':{total:18,crypto:16,stock:2,name:'Filipinas'},
+  'Canada':{total:18,crypto:5,stock:14,name:'Canadá'},
+  'Taiwan':{total:15,crypto:3,stock:12,name:'Taiwán'},
+  'France':{total:13,crypto:7,stock:7,name:'Francia'},
+  'Australia':{total:13,crypto:4,stock:9,name:'Australia'},
+  'Turkey':{total:12,crypto:9,stock:4,name:'Turquía'},
+  'Bangladesh':{total:10,crypto:9,stock:1,name:'Bangladés'},
+  'Mexico':{total:10,crypto:7,stock:3,name:'México'},
+  'Thailand':{total:10,crypto:7,stock:4,name:'Tailandia'},
+  'Argentina':{total:9,crypto:7,stock:2,name:'Argentina'},
+  'Malaysia':{total:7,crypto:4,stock:3,name:'Malasia'},
+  'Egypt':{total:7,crypto:5,stock:2,name:'Egipto'},
+  'South Africa':{total:6,crypto:4,stock:2,name:'Sudáfrica'},
+  'Spain':{total:5,crypto:3,stock:2,name:'España'},
+  'Poland':{total:5,crypto:3,stock:2,name:'Polonia'},
+  'Saudi Arabia':{total:5,crypto:3,stock:2,name:'Arabia Saudí'},
+  'Ukraine':{total:5,crypto:4,stock:1,name:'Ucrania'},
+  'Colombia':{total:4,crypto:3,stock:1,name:'Colombia'},
+  'Italy':{total:5,crypto:3,stock:2,name:'Italia'},
+  'Netherlands':{total:3,crypto:2,stock:1,name:'Países Bajos'},
+  'Kazakhstan':{total:3,crypto:2,stock:1,name:'Kazajistán'},
+  'United Arab Emirates':{total:4,crypto:3,stock:1,name:'EAU'},
+  'Switzerland':{total:2.5,crypto:2,stock:1,name:'Suiza'},
+  'Chile':{total:3,crypto:2,stock:1,name:'Chile'},
+  'Singapore':{total:2,crypto:1,stock:1,name:'Singapur'},
+  'Hong Kong':{total:2.5,crypto:1,stock:1.5,name:'Hong Kong'},
+  'Israel':{total:2,crypto:1.5,stock:1,name:'Israel'},
+  'New Zealand':{total:1.5,crypto:1,stock:1,name:'N. Zelanda'},
+  'Estonia':{total:0.5,crypto:0.4,stock:0.1,name:'Estonia'},
+  'Malta':{total:0.3,crypto:0.2,stock:0.1,name:'Malta'},
+  'Cayman Islands':{total:0.5,crypto:0.3,stock:0.2,name:'Islas Caimán'},
+  'Seychelles':{total:0.1,crypto:0.1,stock:0,name:'Seychelles'},
+  'Portugal':{total:1.5,crypto:1,stock:0.5,name:'Portugal'},
+};
+const RADAR_FALLBACK={
+  'China':92000,'United States':88000,'South Korea':74000,'Cayman Islands':36000,
+  'Japan':43000,'Seychelles':30000,'United Kingdom':33000,'Singapore':26000,
+  'Hong Kong':21000,'Germany':17000,'Estonia':15000,'Malta':13000,'India':12000,
+  'Canada':9500,'Australia':8500,'Switzerland':8000,'United Arab Emirates':8800,
+  'France':6500,'Taiwan':7200,'Brazil':7000,'Turkey':5800,'Russia':5200,
+  'Netherlands':5000,'Poland':3800,'Cyprus':4200,'Thailand':3700,'Indonesia':3300,
+  'Vietnam':2900,'Philippines':2500,'Lithuania':2300,'Nigeria':2900,'Ukraine':2600,
+  'Saudi Arabia':4000,'Israel':2200,'Spain':2400,'Italy':2100,'Portugal':1900,
+  'South Africa':1900,'Mexico':2300,'Argentina':2000,'Kazakhstan':1600,
+  'Pakistan':1500,'New Zealand':1600,'Chile':1500,'Colombia':1400,'Bangladesh':1400,
+  'Malaysia':2100,'Egypt':1200
+};
+function calcNowTradingR(isWknd){
+  const now=new Date();
+  const openC=new Set(RADAR_MKTS.filter(m=>{
+    if(isWknd){const h=now.getUTCHours()+now.getUTCMinutes()/60,[o,c]=m.oh;return o<c?h>=o&&h<c:h>=o||h<c;}
+    const day=now.getUTCDay();if(day===0||day===6)return false;
+    const h=now.getUTCHours()+now.getUTCMinutes()/60,[o,c]=m.oh;return o<c?h>=o&&h<c:h>=o||h<c;
+  }).map(m=>RADAR_MKT_COUNTRY[m.id]).filter(Boolean));
+  let total=30;
+  Object.entries(RADAR_TD).forEach(([c,d])=>{total+=d.total*(openC.has(c)?.22:.05);});
+  return total;
+}
+
+function RadarGlobalPage({lang="es"}){
+  const isEN=lang==="en";
+  const cvsRef=useRef(null);
+  const wrapRef=useRef(null);
+  const tipRef=useRef(null);
+  const T=useRef({});
+  const [selMkt,setSelMkt]=useState(null);
+  const [showStats,setShowStats]=useState(false);
+  const [isPaused,setIsPaused]=useState(false);
+  const [nowN,setNowN]=useState(0);
+  const [utcStr,setUtcStr]=useState('');
+  const [dataSrc,setDataSrc]=useState('');
+  const [loading,setLoading]=useState(true);
+
+  // helpers
+  const latLon2Vec=(lat,lon,r=5)=>{
+    const phi=(90-lat)*Math.PI/180, theta=(lon+180)*Math.PI/180;
+    return {x:-r*Math.sin(phi)*Math.cos(theta), y:r*Math.cos(phi), z:r*Math.sin(phi)*Math.sin(theta)};
+  };
+  const makeGlowTex=(col,sz=128)=>{
+    if(!window.THREE)return null;
+    const c=document.createElement('canvas');c.width=c.height=sz;
+    const ctx=c.getContext('2d');
+    const g=ctx.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz/2);
+    g.addColorStop(0,col);g.addColorStop(.4,col.replace(')',',0.4)').replace('rgb','rgba'));
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,sz,sz);
+    return new window.THREE.CanvasTexture(c);
+  };
+  const hexToRgb=(hex)=>{
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return `rgb(${r},${g},${b})`;
+  };
+  const isOpenR=(m)=>{
+    const now=new Date(),day=now.getUTCDay();
+    if(day===0||day===6)return false;
+    const h=now.getUTCHours()+now.getUTCMinutes()/60,[o,c]=m.oh;
+    return o<c?h>=o&&h<c:h>=o||h<c;
+  };
+  const forceOpenR=(m)=>{
+    const now=new Date();
+    const h=now.getUTCHours()+now.getUTCMinutes()/60,[o,c]=m.oh;
+    return o<c?h>=o&&h<c:h>=o||h<c;
+  };
+
+  // "operando ahora" counter
+  useEffect(()=>{
+    const isWknd=[0,6].includes(new Date().getUTCDay());
+    let display=calcNowTradingR(isWknd);
+    setNowN(Math.round(display));
+    const iv=setInterval(()=>{
+      const base=calcNowTradingR([0,6].includes(new Date().getUTCDay()));
+      display+=(base*(1+(Math.random()-.5)*.04)-display)*.08;
+      setNowN(Math.round(display));
+    },2000);
+    const ivTime=setInterval(()=>{
+      const n=new Date();
+      setUtcStr(`UTC ${n.getUTCHours().toString().padStart(2,'0')}:${n.getUTCMinutes().toString().padStart(2,'0')}`);
+    },1000);
+    return()=>{clearInterval(iv);clearInterval(ivTime);};
+  },[]);
+
+  // Three.js globe
+  useEffect(()=>{
+    let cancelled=false;
+    const volMap={};
+    async function loadDataR(){
+      try{
+        const ctrl=new AbortController();
+        setTimeout(()=>ctrl.abort(),5000);
+        const res=await fetch('https://api.coingecko.com/api/v3/exchanges?per_page=250',{signal:ctrl.signal});
+        const data=await res.json();
+        data.forEach(ex=>{
+          const c=ex.country;if(!c)return;
+          volMap[c]=(volMap[c]||0)+(ex.trade_volume_24h_btc||0);
+        });
+        if(!cancelled)setDataSrc(isEN?'Live data: CoinGecko':'Datos en vivo: CoinGecko');
+      }catch{
+        Object.assign(volMap,RADAR_FALLBACK);
+        if(!cancelled)setDataSrc(isEN?'Source: estimated exchange data':'Fuente: datos de exchanges estimados');
+      }
+    }
+    function doInit(){
+      if(cancelled||!cvsRef.current||!wrapRef.current)return;
+      const THREE=window.THREE;
+      const W=wrapRef.current.clientWidth||600, H=480;
+      const renderer=new THREE.WebGLRenderer({canvas:cvsRef.current,antialias:true,alpha:true});
+      renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+      const scene=new THREE.Scene();
+      const camera=new THREE.PerspectiveCamera(45,W/H,0.1,100);
+      camera.position.set(0,0,13.5);
+      // Lights
+      scene.add(new THREE.AmbientLight(0xffffff,.3));
+      const dLight=new THREE.DirectionalLight(0x88aaff,.8);
+      dLight.position.set(5,3,5);scene.add(dLight);
+      const pLight=new THREE.PointLight(0x4466ff,.5,30);
+      pLight.position.set(-8,4,6);scene.add(pLight);
+      // Globe group
+      const G=new THREE.Group();G.rotation.x=0.22;scene.add(G);
+      // Globe sphere
+      const globeGeo=new THREE.SphereGeometry(5,64,64);
+      const globeMat=new THREE.MeshPhongMaterial({color:0x0a1628,transparent:true,opacity:.97,shininess:60,specular:0x1144aa});
+      const globe=new THREE.Mesh(globeGeo,globeMat);G.add(globe);
+      // Try earth texture
+      try{
+        const tLoader=new THREE.TextureLoader();
+        tLoader.load(
+          'https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/textures/land_ocean_ice_cloud_2048.jpg',
+          (tex)=>{globeMat.map=tex;globeMat.color.set(0xffffff);globeMat.needsUpdate=true;},
+          undefined,
+          ()=>{}
+        );
+      }catch{}
+      // Atmosphere glow
+      const atmGeo=new THREE.SphereGeometry(5.25,64,64);
+      const atmMat=new THREE.MeshPhongMaterial({color:0x1a5fff,transparent:true,opacity:.08,side:THREE.BackSide});
+      G.add(new THREE.Mesh(atmGeo,atmMat));
+      // Grid lines (lat/lon)
+      const gridMat=new THREE.LineBasicMaterial({color:0x1a3060,transparent:true,opacity:.18});
+      for(let lat=-75;lat<=75;lat+=30){
+        const pts=[];
+        for(let lon=0;lon<=360;lon+=4){const v=latLon2Vec(lat,lon,5.02);pts.push(new THREE.Vector3(v.x,v.y,v.z));}
+        G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));
+      }
+      for(let lon=0;lon<360;lon+=30){
+        const pts=[];
+        for(let lat=-90;lat<=90;lat+=4){const v=latLon2Vec(lat,lon,5.02);pts.push(new THREE.Vector3(v.x,v.y,v.z));}
+        G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));
+      }
+      // Store refs
+      T.current={renderer,scene,camera,G,globe,cGlows:[],mktHits:[],cHits:[],afId:null,isDragging:false,prevMouse:{x:0,y:0},rotY:0,isPausedR:false};
+      // Country heat glows
+      function renderCountryGlows(vMap){
+        T.current.cGlows.forEach(s=>G.remove(s));T.current.cGlows=[];
+        T.current.cHits.forEach(s=>G.remove(s));T.current.cHits=[];
+        const maxV=Math.max(...Object.values(vMap),1);
+        const CLRS=['#001a66','#0055cc','#0099ee','#00ddaa','#ffffcc'];
+        Object.entries(RADAR_CD).forEach(([country,cd])=>{
+          const v=vMap[country]||0;
+          if(v===0)return;
+          const norm=Math.min(v/maxV,1);
+          const ci=Math.min(Math.floor(norm*4),4);
+          const col=CLRS[ci];
+          const r=cd.r*(0.5+norm*0.5);
+          const sz=r*0.35+0.4;
+          const glowTex=makeGlowTex(hexToRgb(col),128);
+          if(!glowTex)return;
+          const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,transparent:true,opacity:0.35+norm*0.45,blending:THREE.AdditiveBlending,depthWrite:false}));
+          const pv=latLon2Vec(cd.lat,cd.lon,5.03);
+          sp.position.set(pv.x,pv.y,pv.z);sp.scale.set(sz,sz,1);
+          sp.userData={type:'country',country,vol:v,traders:RADAR_TD[country]};
+          G.add(sp);T.current.cGlows.push(sp);
+          // invisible hit sphere
+          const hitGeo=new THREE.SphereGeometry(sz*0.35,8,8);
+          const hitMat=new THREE.MeshBasicMaterial({visible:false});
+          const hit=new THREE.Mesh(hitGeo,hitMat);
+          hit.position.set(pv.x,pv.y,pv.z);
+          hit.userData={type:'country',country,vol:v,traders:RADAR_TD[country]};
+          G.add(hit);T.current.cHits.push(hit);
+        });
+      }
+      T.current.renderCountryGlows=renderCountryGlows;
+      // Market dots
+      const mktByIdR={};
+      RADAR_MKTS.forEach(m=>{
+        mktByIdR[m.id]=m;
+        const open=isOpenR(m)||forceOpenR(m);
+        const glowTex=makeGlowTex(hexToRgb(m.col),128);
+        if(glowTex){
+          const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,transparent:true,opacity:open?.9:.5,blending:THREE.AdditiveBlending,depthWrite:false}));
+          const pv=latLon2Vec(m.lat,m.lon,5.05);
+          sp.position.set(pv.x,pv.y,pv.z);
+          const s=m.sz*(open?1.2:.7);sp.scale.set(s,s,1);
+          sp.userData={type:'mkt',...m};
+          G.add(sp);
+        }
+        // hit sphere for market
+        const hitGeo=new THREE.SphereGeometry(0.3,8,8);
+        const hitMat=new THREE.MeshBasicMaterial({visible:false});
+        const hit=new THREE.Mesh(hitGeo,hitMat);
+        const pv=latLon2Vec(m.lat,m.lon,5.05);
+        hit.position.set(pv.x,pv.y,pv.z);
+        hit.userData={type:'mkt',...m};
+        G.add(hit);T.current.mktHits.push(hit);
+      });
+      // Capital flow arcs
+      function makeArc(idA,idB){
+        const mA=mktByIdR[idA],mB=mktByIdR[idB];if(!mA||!mB)return;
+        const vA=latLon2Vec(mA.lat,mA.lon,5.08),vB=latLon2Vec(mB.lat,mB.lon,5.08);
+        const mid=new THREE.Vector3((vA.x+vB.x)/2,(vA.y+vB.y)/2,(vA.z+vB.z)/2);
+        const len=new THREE.Vector3(vA.x,vA.y,vA.z).distanceTo(new THREE.Vector3(vB.x,vB.y,vB.z));
+        mid.normalize().multiplyScalar(5.08+len*.38);
+        const curve=new THREE.QuadraticBezierCurve3(
+          new THREE.Vector3(vA.x,vA.y,vA.z),mid,new THREE.Vector3(vB.x,vB.y,vB.z)
+        );
+        const pts=curve.getPoints(48);
+        const arcMat=new THREE.LineBasicMaterial({color:0x4488ff,transparent:true,opacity:.18,blending:THREE.AdditiveBlending});
+        G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),arcMat));
+      }
+      RADAR_ARCS.forEach(([a,b])=>makeArc(a,b));
+      // Raycaster
+      const raycaster=new THREE.Raycaster();
+      const mouse=new THREE.Vector2();
+      const canvas=cvsRef.current;
+      function onMouseMove(e){
+        if(!canvas)return;
+        const rect=canvas.getBoundingClientRect();
+        mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
+        mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+        if(T.current.isDragging){
+          const dx=e.clientX-T.current.prevMouse.x;
+          T.current.rotY+=dx*.005;
+          T.current.prevMouse={x:e.clientX,y:e.clientY};
+          return;
+        }
+        raycaster.setFromCamera(mouse,camera);
+        const hits=[...T.current.mktHits,...T.current.cHits];
+        const ints=raycaster.intersectObjects(hits);
+        const tip=tipRef.current;if(!tip)return;
+        if(ints.length>0){
+          const ud=ints[0].object.userData;
+          canvas.style.cursor='pointer';
+          if(ud.type==='mkt'){
+            const open=isOpenR(ud)||forceOpenR(ud);
+            tip.innerHTML=`<div style="font-weight:700;font-size:13px;margin-bottom:4px">${ud.name} <span style="color:${ud.col}">${ud.exc}</span></div><div style="color:#94a3b8;font-size:11px;margin-bottom:6px">${ud.city}</div><div style="display:flex;gap:10px;font-size:12px"><span>${isEN?'Index':'Índice'}: ${ud.idx}</span><span style="color:${ud.chg.startsWith('+')?'#22c55e':'#f87171'}">${ud.chg}</span></div><div style="display:flex;gap:10px;font-size:11px;color:#94a3b8;margin-top:3px"><span>Vol: ${ud.vol}</span><span>Cap: ${ud.cap}</span></div><div style="margin-top:5px;font-size:11px;padding:2px 8px;border-radius:20px;display:inline-block;background:${open?'rgba(34,197,94,0.2)':'rgba(100,100,120,0.2)'};color:${open?'#4ade80':'#94a3b8'}">${open?(isEN?'● OPEN':'● ABIERTO'):(isEN?'● CLOSED':'● CERRADO')}</div>`;
+          }else{
+            const td=ud.traders;
+            tip.innerHTML=`<div style="font-weight:700;font-size:13px;margin-bottom:4px">🌍 ${ud.country}</div>${ud.vol?`<div style="color:#94a3b8;font-size:11px">Vol 24h: ${(ud.vol/1000).toFixed(1)}K BTC</div>`:''}${td?`<div style="font-size:11px;color:#94a3b8;margin-top:3px">${isEN?'Traders':'Inversores'}: <strong style="color:#e2e8f0">${td.total}M</strong> (₿${td.crypto}M + 📈${td.stock}M)</div>`:''}`;
+          }
+          tip.style.display='block';
+          const tx=Math.min(e.clientX+14,window.innerWidth-200),ty=e.clientY-60;
+          tip.style.left=tx+'px';tip.style.top=ty+'px';
+        }else{
+          canvas.style.cursor='grab';
+          tip.style.display='none';
+        }
+      }
+      function onClick(e){
+        raycaster.setFromCamera(mouse,camera);
+        const hits=[...T.current.mktHits,...T.current.cHits];
+        const ints=raycaster.intersectObjects(hits);
+        if(ints.length>0){
+          const ud=ints[0].object.userData;
+          if(ud.type==='mkt') setSelMkt(ud);
+        }
+      }
+      function onMouseDown(e){T.current.isDragging=true;T.current.prevMouse={x:e.clientX,y:e.clientY};canvas.style.cursor='grabbing';}
+      function onMouseUp(){T.current.isDragging=false;canvas.style.cursor='grab';}
+      canvas.addEventListener('mousemove',onMouseMove);
+      canvas.addEventListener('click',onClick);
+      canvas.addEventListener('mousedown',onMouseDown);
+      canvas.addEventListener('mouseup',onMouseUp);
+      canvas.style.cursor='grab';
+      // Animation
+      function animate(){
+        T.current.afId=requestAnimationFrame(animate);
+        if(!T.current.isPausedR)T.current.rotY+=.002;
+        G.rotation.y=T.current.rotY;
+        renderer.render(scene,camera);
+      }
+      animate();
+      setLoading(false);
+      // load data then render glows
+      loadDataR().then(()=>{
+        if(!cancelled&&T.current.renderCountryGlows)T.current.renderCountryGlows(Object.keys(volMap).length>0?volMap:RADAR_FALLBACK);
+      });
+      T.current.cleanup=()=>{
+        canvas.removeEventListener('mousemove',onMouseMove);
+        canvas.removeEventListener('click',onClick);
+        canvas.removeEventListener('mousedown',onMouseDown);
+        canvas.removeEventListener('mouseup',onMouseUp);
+        cancelAnimationFrame(T.current.afId);
+        renderer.dispose();
+      };
+    }
+    if(window.THREE){doInit();}
+    else{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      s.onload=doInit;document.head.appendChild(s);
+    }
+    return()=>{cancelled=true;if(T.current.cleanup)T.current.cleanup();};
+  },[]);
+
+  // pause toggle
+  const togglePause=()=>{
+    const next=!isPaused;
+    setIsPaused(next);
+    T.current.isPausedR=next;
+  };
+  // refresh
+  const doRefresh=()=>{
+    if(T.current.renderCountryGlows)T.current.renderCountryGlows(RADAR_FALLBACK);
+  };
+
+  const topByTraders=Object.entries(RADAR_TD).sort((a,b)=>b[1].total-a[1].total).slice(0,18);
+
+  return(
+    <div ref={wrapRef} style={{width:'100%',background:'#060d1a',borderRadius:16,overflow:'hidden',position:'relative',minHeight:480}}>
+      {/* Tooltip */}
+      <div ref={tipRef} style={{display:'none',position:'fixed',zIndex:9999,background:'rgba(6,13,26,0.96)',border:'1px solid rgba(68,136,255,0.35)',borderRadius:10,padding:'10px 14px',pointerEvents:'none',minWidth:160,maxWidth:240,boxShadow:'0 4px 20px rgba(0,0,0,0.5)',color:'#e2e8f0',lineHeight:1.5}}/>
+      {/* Header */}
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 18px',background:'rgba(0,0,0,0.3)',borderBottom:'1px solid rgba(68,136,255,0.12)'}}>
+        <div>
+          <div style={{fontSize:15,fontWeight:800,color:'#e2e8f0',letterSpacing:-.3}}>🌍 {isEN?'Global Radar':'Radar Global'}</div>
+          <div style={{fontSize:11,color:'#4488ff',marginTop:1}}>{isEN?'Global Capital Map':'Mapa del Dinero Global'} {utcStr&&<span style={{color:'#64748b',marginLeft:6}}>{utcStr}</span>}</div>
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          {dataSrc&&<span style={{fontSize:10,color:'#475569',background:'rgba(71,85,105,0.2)',padding:'2px 8px',borderRadius:20}}>{dataSrc}</span>}
+          <button onClick={doRefresh} title={isEN?'Refresh':'Actualizar'} style={{background:'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>↻ {isEN?'Refresh':'Refresh'}</button>
+          <button onClick={togglePause} title={isPaused?(isEN?'Play':'Reanudar'):(isEN?'Pause':'Pausar')} style={{background:'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>{isPaused?'▶':'⏸'}</button>
+          <button onClick={()=>setShowStats(s=>!s)} style={{background:showStats?'rgba(68,136,255,0.3)':'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>📊 {isEN?'Stats':'Stats'}</button>
+        </div>
+      </div>
+      {/* Canvas */}
+      <div style={{position:'relative'}}>
+        {loading&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:2,background:'rgba(6,13,26,0.7)'}}><div style={{color:'#4488ff',fontSize:13}}>⟳ {isEN?'Loading globe...':'Cargando globo...'}</div></div>}
+        <canvas ref={cvsRef} style={{display:'block',width:'100%',height:480}}/>
+        {/* Live counter */}
+        <div style={{position:'absolute',bottom:14,left:14,background:'rgba(6,13,26,0.88)',border:'1px solid rgba(68,136,255,0.25)',borderRadius:10,padding:'8px 14px',pointerEvents:'none'}}>
+          <div style={{fontSize:10,color:'#64748b',letterSpacing:.8,textTransform:'uppercase'}}>{isEN?'Trading now (est.)':'Operando ahora (est.)'}</div>
+          <div style={{fontSize:22,fontWeight:800,color:'#00ddaa',letterSpacing:-1,marginTop:1}}>{nowN.toLocaleString()}M</div>
+          <div style={{fontSize:10,color:'#475569',marginTop:1}}>{isEN?'investors worldwide':'inversores en todo el mundo'}</div>
+        </div>
+        {/* Market legend */}
+        <div style={{position:'absolute',bottom:14,right:14,background:'rgba(6,13,26,0.85)',border:'1px solid rgba(68,136,255,0.15)',borderRadius:10,padding:'8px 12px',maxWidth:170}}>
+          <div style={{fontSize:10,color:'#64748b',letterSpacing:.8,marginBottom:6,textTransform:'uppercase'}}>{isEN?'Heat Map':'Mapa de Calor'}</div>
+          {['#001a66','#0055cc','#0099ee','#00ddaa','#ffffcc'].map((c,i)=>(
+            <div key={c} style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
+              <div style={{width:10,height:10,borderRadius:2,background:c,flexShrink:0}}/>
+              <span style={{fontSize:10,color:'#94a3b8'}}>{['Mínimo','Bajo','Medio','Alto','Máximo'][i]}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Stats panel */}
+      {showStats&&(
+        <div style={{padding:'14px 18px',background:'rgba(0,0,0,0.25)',borderTop:'1px solid rgba(68,136,255,0.1)'}}>
+          <div style={{fontSize:13,fontWeight:700,color:'#e2e8f0',marginBottom:10}}>🌐 {isEN?'Traders by country (millions)':'Inversores por país (millones)'}</div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:6}}>
+            {topByTraders.map(([c,d],i)=>(
+              <div key={c} style={{background:'rgba(68,136,255,0.08)',border:'1px solid rgba(68,136,255,0.12)',borderRadius:8,padding:'7px 10px',display:'flex',alignItems:'center',gap:8}}>
+                <span style={{fontSize:11,color:'#475569',width:16}}>{i+1}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:11,fontWeight:700,color:'#e2e8f0',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{d.name}</div>
+                  <div style={{fontSize:10,color:'#64748b'}}>₿{d.crypto}M · 📈{d.stock}M</div>
+                </div>
+                <span style={{fontSize:12,fontWeight:800,color:'#00ddaa'}}>{d.total}M</span>
+              </div>
+            ))}
+          </div>
+          <div style={{fontSize:10,color:'#475569',marginTop:10}}>
+            {isEN?'Sources: Triple-A 2024 (crypto), WFE (stock exchanges), central bank reports. Estimates.':'Fuentes: Triple-A 2024 (cripto), WFE (bolsas), bancos centrales. Estimados.'}
+          </div>
+        </div>
+      )}
+      {/* Market detail panel */}
+      {selMkt&&(
+        <div style={{padding:'14px 18px',background:'rgba(0,0,0,0.3)',borderTop:'1px solid rgba(68,136,255,0.12)'}}>
+          <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12}}>
+            <div>
+              <div style={{fontSize:14,fontWeight:800,color:'#e2e8f0'}}>{selMkt.name} <span style={{color:selMkt.col,fontSize:13}}>{selMkt.exc}</span></div>
+              <div style={{fontSize:11,color:'#64748b',marginBottom:8}}>{selMkt.city}</div>
+              <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
+                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'INDEX':'ÍNDICE'}</div><div style={{fontSize:13,fontWeight:700,color:'#e2e8f0'}}>{selMkt.idx}</div></div>
+                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'CHANGE':'CAMBIO'}</div><div style={{fontSize:13,fontWeight:700,color:selMkt.chg.startsWith('+')?'#22c55e':'#f87171'}}>{selMkt.chg}</div></div>
+                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'VOLUME':'VOLUMEN'}</div><div style={{fontSize:13,fontWeight:700,color:'#e2e8f0'}}>{selMkt.vol}</div></div>
+                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'MARKET CAP':'CAP. BURSÁTIL'}</div><div style={{fontSize:13,fontWeight:700,color:'#e2e8f0'}}>{selMkt.cap}</div></div>
+              </div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
+              <div style={{fontSize:11,padding:'3px 10px',borderRadius:20,background:(isOpenR(selMkt)||forceOpenR(selMkt))?'rgba(34,197,94,0.15)':'rgba(100,100,120,0.15)',color:(isOpenR(selMkt)||forceOpenR(selMkt))?'#4ade80':'#94a3b8'}}>
+                {(isOpenR(selMkt)||forceOpenR(selMkt))?(isEN?'● OPEN':'● ABIERTO'):(isEN?'● CLOSED':'● CERRADO')}
+              </div>
+              <button onClick={()=>setSelMkt(null)} style={{background:'transparent',border:'1px solid rgba(100,116,139,0.3)',borderRadius:8,color:'#64748b',fontSize:11,padding:'3px 10px',cursor:'pointer'}}>✕</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Instruction */}
+      <div style={{padding:'8px 18px',background:'rgba(0,0,0,0.2)',borderTop:'1px solid rgba(68,136,255,0.06)',fontSize:10,color:'#334155',textAlign:'center'}}>
+        {isEN?'Click markets to view details · Drag to rotate · Countries glow by crypto exchange volume':'Click en mercados para ver detalles · Arrastra para rotar · Los países brillan según volumen de exchanges crypto'}
+      </div>
+    </div>
+  );
+}
+
 // ── ORACLE IA — Predicción estadística de escenarios ─────────────────────────
 function OracleIA({ positions, livePrices, isPremium, onNeedPremium, isEN }) {
   const [expanded, setExpanded] = useState(false);
@@ -17416,6 +17925,7 @@ export default function App(){
     if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
     if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===43) return <PaperTradingFullPage user={user} onBack={()=>setPage(0)}/>;
+    if(page===44) return <RadarGlobalPage lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -17972,7 +18482,7 @@ export default function App(){
             <div style={{flex:"1 1 300px",minWidth:0}}>
               <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,210,106,0.1)",border:`1px solid ${C.accent}33`,borderRadius:30,padding:"6px 16px",marginBottom:28}}>
                 <span style={{width:7,height:7,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 10px ${C.accent}`}}/>
-                <span style={{color:C.accent,fontSize:11,fontWeight:700,letterSpacing:1.2}}>{lang==="en"?"🇲🇽🇨🇴🇦🇷 HISPANIC TRADING COMMUNITY":"🇲🇽🇨🇴🇦🇷 COMUNIDAD HISPANA DE TRADING"}</span>
+                <span style={{color:C.accent,fontSize:11,fontWeight:700,letterSpacing:1.2}}>{lang==="en"?"🌍 GLOBAL TRADING COMMUNITY":"🌍 COMUNIDAD GLOBAL DE TRADING"}</span>
               </div>
               <h1 style={{fontSize:"clamp(36px,5vw,62px)",fontWeight:900,letterSpacing:-2,lineHeight:1.05,margin:"0 0 18px",color:"#fff"}}>
                 {lang==="en"?"Invest smarter.":"Invierte mejor."}<br/>
