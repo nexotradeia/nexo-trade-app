@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 10:03:46
+// NEXO TRADE — build: 2026-06-01 10:11:08
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10282,6 +10282,8 @@ function FlowPage({isPremium,onNeedPremium}){
   const [whaleErr,setWhaleErr]=useState(false);
   const [whaleTxs,setWhaleTxs]=useState([]); // simulated live feed
   const [whalePaused,setWhalePaused]=useState(false);
+  // Telegram alerted ref — must be BEFORE any early return (rules of hooks)
+  const alertedRef=useRef(new Set());
 
   const fetchWhales=async()=>{
     setWhaleLoad(true); setWhaleErr(false);
@@ -10381,7 +10383,6 @@ function FlowPage({isPremium,onNeedPremium}){
   visible.forEach(item=>{const s=scoreItem(item);if(s>topScore)topScore=s;});
 
   // Alerta Telegram cuando llega un Golden Sweep > $1M
-  const alertedRef=useRef(new Set());
   useEffect(()=>{
     const TG_TOKEN="8931471851:AAEupeDpPUwyBBqABXvgxoYKa1b9hniqq0c";
     const TG_CHANNEL="@NexoTradeSignals";
@@ -10492,7 +10493,7 @@ function FlowPage({isPremium,onNeedPremium}){
               position:"relative",
             }}>
               <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{item.time}</div>
-              <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{item.ticker}</div>
+              <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{isTop&&"🔥"}{item.ticker}</div>
               <div style={{fontSize:10,fontWeight:700}}>
                 {gold&&<span style={{background:"rgba(245,158,11,0.15)",color:"#F59E0B",borderRadius:5,padding:"2px 5px"}}>⭐ GOLDEN</span>}
                 {dark&&!gold&&<span style={{background:"rgba(139,92,246,0.15)",color:"#A78BFA",borderRadius:5,padding:"2px 5px"}}>🌑 DARK</span>}
@@ -10504,9 +10505,10 @@ function FlowPage({isPremium,onNeedPremium}){
               <div style={{fontSize:11,color:C.muted}}>{item.expiry||"—"}</div>
               <div style={{fontSize:11,color:item.otm>5?"#F59E0B":C.muted}}>{item.otm?`${item.otm}% OTM`:"—"}</div>
               <div style={{display:"flex",alignItems:"center",gap:4}}>
-                <span style={{background:isTop?"linear-gradient(135deg,#FF6000,#FF8C00)":bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:isTop?"#fff":bull?bullC:bearC,borderRadius:6,padding:"2px 10px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>
-                  {isTop?"🔥 TOP PICK":bull?"▲ BULLISH":"▼ BEARISH"}
-                </span>
+                {isTop
+                  ? <span style={{background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3}}>🔥 TOP PICK</span>
+                  : <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>{bull?"▲ BULLISH":"▼ BEARISH"}</span>
+                }
               </div>
             </div>
           );
@@ -13965,11 +13967,15 @@ function CryptoHubPage({ isPremium, onNeedPremium, lang="es", defaultSection="pe
 }
 
 const NAV_ITEMS = (t, isEN=false) => [
-  {label:t.feed,idx:0},{label:t.tops,idx:1},{label:t.crypto,idx:2},
+  // ── Trading & Mercados ──
+  {label:t.feed,idx:0},
+  {label:t.tops,idx:1},
   {label:t.acciones,idx:3},
-  {label:t.noticias,idx:5},{label:t.earnings,idx:6},{label:t.trending,idx:7},
-  {label:"🎓 Webinars",idx:11},
-  {label:isEN?"📚 Academy":"📚 Academia",idx:12},
+  {label:t.trending,idx:7},
+  {label:t.crypto,idx:2},
+  {label:t.earnings,idx:6},
+  {label:t.noticias,idx:5},
+  // ── Comunidad ──
   {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
   {label:isEN?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,vip:true},
   {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
@@ -13980,6 +13986,9 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
   {label:isEN?"🎮 Paper Trading Sim":"🎮 Paper Trading Sim",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
+  // ── Educación (último) ──
+  {label:"🎓 Webinars",idx:11},
+  {label:isEN?"📚 Academy":"📚 Academia",idx:12},
 ];
 
 // ── LEADERBOARD PAGE ──────────────────────────────────────────────────────────
