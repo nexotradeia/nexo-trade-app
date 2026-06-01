@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 18:47:06
+// NEXO TRADE — build: 2026-06-01 19:05:17
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10503,7 +10503,7 @@ function FlowPage({isPremium,onNeedPremium}){
   };
 
   return(
-    <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:C.bg,overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto",background:C.bg,borderRadius:16,padding:"16px 20px 24px",minHeight:400}}>
+    <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#0A111E",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto",background:"#0A111E",borderRadius:16,padding:"16px 20px 24px",minHeight:400}}>
 
       {/* ── 🐋 WHALE ALERT POPUP ── */}
       {whaleAlert&&(
@@ -14881,9 +14881,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Price Target",   w:120, render:(tk,d,m)=>vip(m.target,"","#6366F1")},
       {h:"Analyst Rating", w:140, render:(tk,d,m)=>isPremium?<span style={{fontWeight:700,fontSize:11,color:m.rating==="Strong Buy"?"#10B981":m.rating==="Buy"?"#3B82F6":m.rating==="Hold"?"#F59E0B":"#94A3B8"}}>{m.rating||"—"}</span>:upgBtn},
       {h:"Upside %",       w:110, render:(tk,d,m)=>vip(m.upside,"%")},
-      {h:"# Analysts",     w:110, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#1E293B"}}>{m.analysts!=null?m.analysts:"—"}</span>:upgBtn},
+      {h:"# Analysts",     w:110, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{m.analysts!=null?m.analysts:"—"}</span>:upgBtn},
       {h:"EPS Estimate",   w:120, render:(tk,d,m)=>vip(m.eps,"")},
-      {h:"Dividend Yield", w:130, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#1E293B"}}>{m.div!=null?(m.div===0?"—":Number(m.div).toFixed(2)+"%"):"—"}</span>:upgBtn},
+      {h:"Dividend Yield", w:130, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{m.div!=null?(m.div===0?"—":Number(m.div).toFixed(2)+"%"):"—"}</span>:upgBtn},
     ],
     health:[
       {h:"Name",           w:150, render:nm},
@@ -14900,8 +14900,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const cols = COLS[activeView]||COLS.returns;
   const totalW = cols.reduce((s,c)=>s+c.w, 0);
 
-  const thStyle = {fontSize:10,fontWeight:700,color:"#64748B",padding:"10px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid #E2E8F0",background:"#F8FAFC",userSelect:"none"};
-  const tdStyle = {padding:"11px 12px",borderBottom:"1px solid #F1F5F9",verticalAlign:"middle",whiteSpace:"nowrap"};
+  const thStyle = {fontSize:10,fontWeight:700,color:"#64748B",padding:"10px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid rgba(255,255,255,0.07)",background:"#0F1623",userSelect:"none"};
+  const tdStyle = {padding:"11px 12px",borderBottom:"1px solid rgba(255,255,255,0.05)",verticalAlign:"middle",whiteSpace:"nowrap"};
 
   // Export watchlist as CSV
   const exportCSV = () => {
@@ -15046,12 +15046,15 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </div>
       </div>
 
+      {/* ── BODY (dark section) ── */}
+      <div style={{background:"#0A111E",borderRadius:16,padding:"16px 16px 8px",marginTop:12}}>
+
       {/* ── ADD TICKER ── */}
       <div style={{display:"flex",gap:8,padding:"0 4px 12px"}}>
         <input value={input} onChange={e=>setInput(e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,10))}
           onKeyDown={e=>e.key==="Enter"&&addTicker()}
           placeholder="+ Add ticker: AAPL, BTC, NVDA…"
-          style={{width:260,background:"#F8FAFC",border:"1px solid #E2E8F0",borderRadius:8,padding:"8px 14px",color:"#1E293B",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
+          style={{width:260,background:"#141C2E",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",color:"#F1F5F9",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
         <button onClick={addTicker} style={{background:"#1E40AF",border:"none",borderRadius:8,padding:"8px 18px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>
           + {isEN?"Add":"Agregar"}
         </button>
@@ -15067,13 +15070,13 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
 
       {/* ── TABLE ── */}
       {tickers.length===0?(
-        <div style={{textAlign:"center",padding:"60px 20px",border:"2px dashed #E2E8F0",borderRadius:16}}>
+        <div style={{textAlign:"center",padding:"60px 20px",border:"2px dashed rgba(255,255,255,0.1)",borderRadius:16}}>
           <div style={{fontSize:40,marginBottom:12}}>👁</div>
-          <div style={{fontWeight:700,fontSize:16,color:"#1E293B",marginBottom:6}}>{isEN?"Watchlist vacía":"Your watchlist is empty"}</div>
+          <div style={{fontWeight:700,fontSize:16,color:"#F1F5F9",marginBottom:6}}>{isEN?"Watchlist vacía":"Your watchlist is empty"}</div>
           <div style={{color:"#64748B",fontSize:13}}>Agrega tickers arriba para comenzar</div>
         </div>
       ):(
-        <div style={{overflowX:"auto",border:"1px solid #E2E8F0",borderRadius:12,boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+        <div style={{overflowX:"auto",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
           <table style={{borderCollapse:"collapse",width:"100%",minWidth:totalW}}>
             <thead>
               <tr>
@@ -15083,13 +15086,13 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                 <th style={{...thStyle,width:60}}>×</th>
               </tr>
               {/* Filter row */}
-              <tr style={{background:"#F8FAFC"}}>
+              <tr style={{background:"#0F1623"}}>
                 {cols.map((c,i)=>(
-                  <td key={i} style={{padding:"4px 12px",borderBottom:"1px solid #E2E8F0"}}>
-                    <span style={{fontSize:10,color:"#94A3B8",fontFamily:"monospace"}}>&gt; #</span>
+                  <td key={i} style={{padding:"4px 12px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                    <span style={{fontSize:10,color:"#334155",fontFamily:"monospace"}}>&gt; #</span>
                   </td>
                 ))}
-                <td style={{padding:"4px 12px",borderBottom:"1px solid #E2E8F0"}}/>
+                <td style={{padding:"4px 12px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}/>
               </tr>
             </thead>
             <tbody>
@@ -15097,9 +15100,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                 const d = prices[tk];
                 const m = getMock(tk);
                 return(
-                  <tr key={tk} style={{background:rowIdx%2===0?"#fff":"#FAFAFA",transition:"background 0.1s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="#EFF6FF"}
-                    onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#fff":"#FAFAFA"}>
+                  <tr key={tk} style={{background:rowIdx%2===0?"#141C2E":"#0F1623",transition:"background 0.1s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(0,168,255,0.06)"}
+                    onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#141C2E":"#0F1623"}>
                     {cols.map((c,i)=>(
                       <td key={i} style={tdStyle}>{c.render(tk,d,m)}</td>
                     ))}
@@ -15117,9 +15120,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </div>
       )}
 
-      <div style={{fontSize:11,color:"#94A3B8",textAlign:"center",padding:"12px 0"}}>
+      <div style={{fontSize:11,color:"#475569",textAlign:"center",padding:"12px 0"}}>
         Precios: Finnhub · Delay ~15s · No es consejo financiero
       </div>
+      </div>{/* end dark body */}
     </div>
   );
 }
@@ -17154,17 +17158,17 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             </div>
           )}
           {tab==="options"&&(
-            <div style={{display:"grid",gridTemplateColumns:"68px 120px 80px 70px 60px 70px 70px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"70px 130px 85px 75px 65px 75px 75px 68px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
               {[["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["iv","IV"],["vol","Vol"],["chg","Chg%"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
           {tab==="intraday"&&(
-            <div style={{display:"grid",gridTemplateColumns:"68px 1fr 80px 68px 50px 58px 110px 88px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"70px 150px 90px 72px 55px 62px 110px 90px 68px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
               {[["s","Ticker"],["n","Nombre"],["p","Price"],["chg","Chg%"],["atr","ATR"],["rvol","RVol"],["pattern","Pattern"],["signal","Signal"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
           {tab==="scalping"&&(
-            <div style={{display:"grid",gridTemplateColumns:"68px 1fr 88px 80px 78px 58px 130px 68px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"70px 150px 90px 82px 80px 62px 130px 68px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
               {[["s","Ticker"],["n","Nombre"],["p","Price"],["spread","Spread"],["trades","Ops/hr"],["tf","TF"],["pattern","Setup"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
@@ -17178,10 +17182,10 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             return(
               <div key={i} style={{display:"grid",
                 gridTemplateColumns:tab==="stocks"?"72px 90px 95px 75px 58px 80px 90px 110px 130px 64px 80px":
-                  tab==="options"?"80px 160px 100px 80px 70px 80px 80px 68px":
-                  tab==="intraday"?"80px 180px 100px 80px 60px 70px 1fr 110px 68px":
-                  "80px 180px 100px 90px 80px 70px 1fr 68px",
-                padding:"10px 14px",borderBottom:`1px solid ${C.border}`,gap:6,
+                  tab==="options"?"70px 130px 85px 75px 65px 75px 75px 68px":
+                  tab==="intraday"?"70px 150px 90px 72px 55px 62px 110px 90px 68px":
+                  "70px 150px 90px 82px 80px 62px 130px 68px",
+                padding:"9px 14px",borderBottom:`1px solid ${C.border}`,gap:tab==="stocks"?6:8,
                 transition:"background 0.25s",background:isSelected?"rgba(139,92,246,0.08)":rowBg,
                 cursor:"default",alignItems:"center"}}
                 onMouseEnter={e=>{if(!flash&&!isSelected)e.currentTarget.style.background="rgba(139,92,246,0.05)";}}
