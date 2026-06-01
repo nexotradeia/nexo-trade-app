@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 17:35:13
+// NEXO TRADE — build: 2026-06-01 17:54:04
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10417,8 +10417,8 @@ function FlowPage({isPremium,onNeedPremium}){
 
   // Alerta Telegram cuando llega un Golden Sweep > $1M
   useEffect(()=>{
-    const TG_TOKEN="8931471851:AAEupeDpPUwyBBqABXvgxoYKa1b9hniqq0c";
-    const TG_CHANNEL="@NexoTradeSignals";
+    const TG_TOKEN="8931471851:AAFActqhqBuKO3oLq5Z7FQBkl9cTa8yDSbs";
+    const TG_CHANNEL="799353199";
     feed.forEach(item=>{
       if(!item.isGold||item.premium<1e6) return;
       if(alertedRef.current.has(item.id)) return;
@@ -10475,8 +10475,8 @@ function FlowPage({isPremium,onNeedPremium}){
 
   // ── Send TOP PICK to Telegram ─────────────────────────────────────────────
   const sendTopPickTelegram=(pick)=>{
-    const TG_TOKEN="8931471851:AAEupeDpPUwyBBqABXvgxoYKa1b9hniqq0c";
-    const TG_CHANNEL="@NexoTradeSignals";
+    const TG_TOKEN="8931471851:AAFActqhqBuKO3oLq5Z7FQBkl9cTa8yDSbs";
+    const TG_CHANNEL="799353199";
     const prem=(pick.premium/1e6).toFixed(2);
     const msg=`🔥 *TOP PICK INSTITUCIONAL — NEXO TRADE*\n\n`+
       `*${pick.ticker}* — $${prem}M\n`+
@@ -10572,7 +10572,7 @@ function FlowPage({isPremium,onNeedPremium}){
 
       {/* ── TOP PICK BANNER ── */}
       {topPick && filter!=="whales" && (
-        <div style={{background:"linear-gradient(135deg,rgba(255,96,0,0.18),rgba(255,140,0,0.10),rgba(255,96,0,0.06))",border:"2px solid rgba(255,140,0,0.6)",borderRadius:16,padding:"14px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:14,boxShadow:"0 0 32px rgba(255,140,0,0.20),inset 0 1px 0 rgba(255,255,255,0.05)",animation:"pulse 2.5s infinite"}}>
+        <div style={{background:"linear-gradient(135deg,rgba(255,96,0,0.18),rgba(255,140,0,0.10),rgba(255,96,0,0.06))",border:"2px solid rgba(255,140,0,0.6)",borderRadius:16,padding:"14px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:14,boxShadow:"0 0 32px rgba(255,140,0,0.20),inset 0 1px 0 rgba(255,255,255,0.05)",animation:"topPickGlow 3s ease-in-out infinite"}}>
           <span style={{fontSize:32,filter:"drop-shadow(0 0 8px rgba(255,140,0,0.8))"}}>🔥</span>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontWeight:900,fontSize:17,color:"#FF8C00",letterSpacing:-0.3,textShadow:"0 0 20px rgba(255,140,0,0.5)"}}>
@@ -10776,8 +10776,8 @@ function FlowPage({isPremium,onNeedPremium}){
                   : <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>{bull?"▲ BULLISH":"▼ BEARISH"}</span>
                 }
                 <button title="Enviar alerta a Telegram" onClick={()=>{
-                  const TG_TOKEN="8931471851:AAEupeDpPUwyBBqABXvgxoYKa1b9hniqq0c";
-                  const TG_CHANNEL="@NexoTradeSignals";
+                  const TG_TOKEN="8931471851:AAFActqhqBuKO3oLq5Z7FQBkl9cTa8yDSbs";
+                  const TG_CHANNEL="799353199";
                   const emoji=gold?"⭐":dark?"🌑":bull?"📈":"📉";
                   const msg=`${emoji} *FLUJO INSTITUCIONAL*\n\n*${item.ticker}* — ${fmt$(item.premium)}\n`+
                     `Tipo: ${gold?"Golden Sweep":dark?"Dark Pool":bull?"Call Block":"Put Block"} ${bull?"🟢 CALL":"🔴 PUT"}\n`+
@@ -18989,6 +18989,10 @@ export default function App(){
       @keyframes pulse {
         0%,100% { opacity:1; transform:scale(1); }
         50%      { opacity:0.5; transform:scale(1.3); }
+      }
+      @keyframes topPickGlow {
+        0%,100% { box-shadow:0 0 24px rgba(255,140,0,0.20),inset 0 1px 0 rgba(255,255,255,0.05); border-color:rgba(255,140,0,0.55); }
+        50%      { box-shadow:0 0 42px rgba(255,140,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08); border-color:rgba(255,180,0,0.85); }
       }
       @keyframes spin {
         from { transform:rotate(0deg); }
