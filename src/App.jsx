@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 17:17:00
+// NEXO TRADE — build: 2026-06-01 17:35:13
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10473,6 +10473,24 @@ function FlowPage({isPremium,onNeedPremium}){
     return{iv,delta,oi,score,analysis:analyses[seed%2]};
   };
 
+  // ── Send TOP PICK to Telegram ─────────────────────────────────────────────
+  const sendTopPickTelegram=(pick)=>{
+    const TG_TOKEN="8931471851:AAEupeDpPUwyBBqABXvgxoYKa1b9hniqq0c";
+    const TG_CHANNEL="@NexoTradeSignals";
+    const prem=(pick.premium/1e6).toFixed(2);
+    const msg=`🔥 *TOP PICK INSTITUCIONAL — NEXO TRADE*\n\n`+
+      `*${pick.ticker}* — $${prem}M\n`+
+      `Tipo: ⭐ Golden Sweep ${pick.isCall?"🟢 CALL":"🔴 PUT"}\n`+
+      (pick.strike?`Strike: $${pick.strike}  |  `:"") +
+      (pick.otm?`${pick.otm}% OTM\n`:"\n") +
+      (pick.expiry?`Expiry: ${pick.expiry}\n`:"") +
+      `\n⚡ *SEÑAL INSTITUCIONAL MASIVA*\nActividad inusual de mano fuerte detectada.\n\n🔗 nexotradeia.com`;
+    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:TG_CHANNEL,text:msg,parse_mode:"Markdown",disable_web_page_preview:true})
+    }).then(()=>{}).catch(()=>{});
+  };
+
   return(
     <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto"}}>
 
@@ -10526,7 +10544,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
               </span>
             </div>
-            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales · {topPick?`🔥 TOP PICK: ${topPick.ticker} $${(topPick.premium/1e6).toFixed(1)}M`:"sin golden sweep visible"}</div>
+            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales</div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -10551,6 +10569,29 @@ function FlowPage({isPremium,onNeedPremium}){
           </div>
         </div>
       </div>
+
+      {/* ── TOP PICK BANNER ── */}
+      {topPick && filter!=="whales" && (
+        <div style={{background:"linear-gradient(135deg,rgba(255,96,0,0.18),rgba(255,140,0,0.10),rgba(255,96,0,0.06))",border:"2px solid rgba(255,140,0,0.6)",borderRadius:16,padding:"14px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:14,boxShadow:"0 0 32px rgba(255,140,0,0.20),inset 0 1px 0 rgba(255,255,255,0.05)",animation:"pulse 2.5s infinite"}}>
+          <span style={{fontSize:32,filter:"drop-shadow(0 0 8px rgba(255,140,0,0.8))"}}>🔥</span>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontWeight:900,fontSize:17,color:"#FF8C00",letterSpacing:-0.3,textShadow:"0 0 20px rgba(255,140,0,0.5)"}}>
+              TOP PICK: {topPick.ticker} — ${(topPick.premium/1e6).toFixed(2)}M
+            </div>
+            <div style={{fontSize:11,color:"#F59E0B",marginTop:3,display:"flex",gap:10,flexWrap:"wrap"}}>
+              <span>{topPick.isCall?"📈 CALL":"📉 PUT"}</span>
+              {topPick.strike&&<span>Strike ${topPick.strike}</span>}
+              {topPick.expiry&&<span>Expiry {topPick.expiry}</span>}
+              {topPick.otm&&<span>{topPick.otm}% OTM</span>}
+              <span style={{color:"rgba(245,158,11,0.7)"}}>⭐ Golden Sweep · Señal institucional</span>
+            </div>
+          </div>
+          <button onClick={()=>sendTopPickTelegram(topPick)}
+            style={{background:"linear-gradient(135deg,rgba(0,136,204,0.25),rgba(0,136,204,0.15))",border:"1px solid rgba(0,136,204,0.5)",borderRadius:10,padding:"9px 16px",fontSize:12,fontWeight:800,color:"#29B6F6",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,boxShadow:"0 0 12px rgba(0,136,204,0.2)"}}>
+            ✈️ Enviar Telegram
+          </button>
+        </div>
+      )}
 
       {/* ── STATS STRIP ── */}
       {filter!=="whales" && (
@@ -10600,35 +10641,65 @@ function FlowPage({isPremium,onNeedPremium}){
         const maxH=Math.max(...hourlyCandles.map(c=>c.high));
         const minL=Math.min(...hourlyCandles.map(c=>c.low));
         const rng=maxH-minL||1;
-        const W=100; // viewBox width per candle slot
-        const H=80;  // viewBox height
-        const toY=(v)=>H-((v-minL)/rng)*(H-10)-5;
+        const SLOTS=hourlyCandles.length;
+        const W=68;
+        const H=100;
+        const PAD_T=8; const PAD_B=28;
+        const toY=(v)=>PAD_T+(H*(1-(v-minL)/rng));
         return(
-          <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:12,padding:"10px 14px",marginBottom:10}}>
-            <div style={{fontSize:10,fontWeight:700,color:"#475569",letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>📈 VOLUMEN DE ÓRDENES POR HORA</div>
-            <svg viewBox={`0 0 ${hourlyCandles.length*W} ${H+24}`} style={{width:"100%",height:90,overflow:"visible"}} preserveAspectRatio="none">
+          <div style={{background:"rgba(3,6,16,0.97)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"14px 16px 10px",marginBottom:10}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+              <div style={{fontSize:10,fontWeight:800,color:"#475569",letterSpacing:1,textTransform:"uppercase"}}>📊 ACTIVIDAD DE FLUJO POR HORA</div>
+              <div style={{display:"flex",gap:14,fontSize:9,color:"#475569"}}>
+                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#00D26A",borderRadius:1,display:"inline-block",boxShadow:"0 0 4px #00D26A"}}/>Alcista</span>
+                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#FF4D6A",borderRadius:1,display:"inline-block",boxShadow:"0 0 4px #FF4D6A"}}/>Bajista</span>
+              </div>
+            </div>
+            <svg viewBox={`0 0 ${SLOTS*W} ${H+PAD_T+PAD_B}`} style={{width:"100%",height:150,display:"block"}} preserveAspectRatio="xMidYMid meet">
               <defs>
-                <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(0,210,106,0.15)"/>
-                  <stop offset="100%" stopColor="rgba(0,210,106,0)"/>
-                </linearGradient>
+                <filter id="glow-up" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="glow-dn" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
               </defs>
+              {/* Horizontal grid */}
+              {[0,0.33,0.66,1].map((p,gi)=>(
+                <line key={gi} x1={0} y1={PAD_T+H*p} x2={SLOTS*W} y2={PAD_T+H*p}
+                  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="3,5"/>
+              ))}
               {hourlyCandles.map((c,i)=>{
                 const cx=i*W+W/2;
-                const bodyTop=Math.min(toY(c.open),toY(c.close));
-                const bodyBot=Math.max(toY(c.open),toY(c.close));
-                const bodyH=Math.max(bodyBot-bodyTop,2);
+                const oY=toY(c.open); const cY=toY(c.close);
+                const hY=toY(c.high); const lY=toY(c.low);
+                const bodyTop=Math.min(oY,cY);
+                const bodyH=Math.max(Math.abs(oY-cY),4);
+                const bw=W*0.50;
                 const col=c.isUp?"#00D26A":"#FF4D6A";
-                const colFill=c.isUp?"rgba(0,210,106,0.7)":"rgba(255,77,106,0.7)";
+                const fillCol=c.isUp?"rgba(0,210,106,0.88)":"rgba(255,77,106,0.88)";
+                const glowId=c.isUp?"url(#glow-up)":"url(#glow-dn)";
                 return(
                   <g key={i}>
-                    {/* Wick */}
-                    <line x1={cx} y1={toY(c.high)} x2={cx} y2={toY(c.low)} stroke={col} strokeWidth="1.5" strokeOpacity="0.6"/>
-                    {/* Body */}
-                    <rect x={cx-12} y={bodyTop} width={24} height={bodyH} fill={colFill} rx="2"
-                      style={{filter:`drop-shadow(0 0 4px ${col}60)`}}/>
+                    {/* Glow halo behind body */}
+                    <rect x={cx-bw/2-3} y={bodyTop-3} width={bw+6} height={bodyH+6}
+                      fill={c.isUp?"rgba(0,210,106,0.07)":"rgba(255,77,106,0.07)"} rx="4"/>
+                    {/* Top wick */}
+                    <line x1={cx} y1={hY} x2={cx} y2={bodyTop} stroke={col} strokeWidth="1.8" strokeOpacity="0.75"/>
+                    {/* Bottom wick */}
+                    <line x1={cx} y1={bodyTop+bodyH} x2={cx} y2={lY} stroke={col} strokeWidth="1.8" strokeOpacity="0.75"/>
+                    {/* Candle body */}
+                    <rect x={cx-bw/2} y={bodyTop} width={bw} height={bodyH}
+                      fill={fillCol} rx="3" filter={glowId}/>
+                    {/* Open/close tick marks on body sides */}
+                    <line x1={cx-bw/2-4} y1={oY} x2={cx-bw/2} y2={oY} stroke={col} strokeWidth="1.5" strokeOpacity="0.5"/>
+                    <line x1={cx+bw/2} y1={cY} x2={cx+bw/2+4} y2={cY} stroke={col} strokeWidth="1.5" strokeOpacity="0.5"/>
                     {/* Hour label */}
-                    <text x={cx} y={H+18} textAnchor="middle" fontSize="9" fill="#334155" fontFamily="monospace">{c.h}</text>
+                    <text x={cx} y={H+PAD_T+PAD_B-4} textAnchor="middle" fontSize="10" fill="#475569" fontFamily="monospace" fontWeight="700">{c.h}</text>
+                    {/* Up/down arrow */}
+                    <text x={cx} y={bodyTop-5} textAnchor="middle" fontSize="8" fill={col} opacity="0.7">{c.isUp?"▲":"▼"}</text>
                   </g>
                 );
               })}
