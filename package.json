@@ -9,11 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@remotion/core": "^1.0.0-y.46",
     "@supabase/supabase-js": "^2.67.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remotion": "^4.0.464"
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
