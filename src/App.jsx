@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 18:24:33
+// NEXO TRADE — build: 2026-06-01 18:25:18
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -3703,8 +3703,19 @@ function NoticiasPage({lang}){
       {/* Header */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
         <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📰 {lang==="en"?"Market News":"Noticias del Mercado"}</h2>
-        <span style={{background:"#fef2f2",color:C.bear,border:`1px solid ${C.bear}33`,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>🔴 LIVE</span>
-        <span style={{color:C.muted2,fontSize:11}}>{lastUp?`${lang==="en"?"Updated":"Actualizado"} ${lastUp}`:"Finnhub"}</span>
+        {lastUp
+          ? <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(34,197,94,0.1)",color:"#16a34a",border:"1px solid rgba(34,197,94,0.3)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>LIVE
+            </span>
+          : loading
+            ? <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(148,163,184,0.1)",color:"#64748b",border:"1px solid rgba(148,163,184,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>Cargando
+              </span>
+            : <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(148,163,184,0.1)",color:"#64748b",border:"1px solid rgba(148,163,184,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>Finnhub
+              </span>
+        }
+        <span style={{color:C.muted2,fontSize:11}}>{lastUp?`${lang==="en"?"Updated":"Actualizado"} ${lastUp}`:""}</span>
         <button onClick={()=>fetchNews(cat)} disabled={loading}
           style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:5,background:C.card2,border:`1px solid ${C.border}`,borderRadius:20,padding:"6px 14px",cursor:loading?"not-allowed":"pointer",color:C.muted,fontSize:12,fontWeight:700,transition:"all 0.2s"}}>
           <span style={{display:"inline-block",transition:"transform 0.6s",transform:spinning?"rotate(360deg)":"rotate(0deg)"}}>⟳</span>
