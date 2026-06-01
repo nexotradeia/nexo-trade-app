@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-05-31 16:59:37
+// NEXO TRADE — build: 2026-06-01 09:16:37
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10228,6 +10228,24 @@ const FLOW_TICKERS = ["NVDA","AAPL","TSLA","META","MSFT","AMZN","GOOGL","AMD","S
 const FLOW_TYPES   = ["Call Sweep","Put Sweep","Call Block","Put Block","Dark Pool","Golden Sweep"];
 const FLOW_EXPIRY  = ["05/30/26","06/06/26","06/20/26","07/18/26","08/15/26","09/19/26","12/19/26","01/16/27"];
 
+// ── Scoring de trades institucionales ──────────────────────────────────
+function scoreItem(item){
+  let s=0;
+  if(item.isGold)  s+=50;
+  if(item.isDark)  s+=8;
+  if(item.premium>=5e6)      s+=40;
+  else if(item.premium>=2e6) s+=25;
+  else if(item.premium>=1e6) s+=15;
+  else if(item.premium>=5e5) s+=5;
+  const otm=parseFloat(item.otm)||99;
+  if(otm<=1)      s+=30;
+  else if(otm<=2) s+=20;
+  else if(otm<=3) s+=15;
+  else if(otm<=5) s+=8;
+  if(item.isCall)  s+=5;
+  return s;
+}
+
 function generateFlowItem(id, basePrice){
   const ticker  = FLOW_TICKERS[Math.floor(Math.random()*FLOW_TICKERS.length)];
   const type    = FLOW_TYPES[Math.floor(Math.random()*FLOW_TYPES.length)];
@@ -10349,7 +10367,7 @@ function FlowPage({isPremium,onNeedPremium}){
   ];
 
   const visible=feed.filter(f=>{
-    if(filter==="whales") return false; // whale tab has its own section
+    if(filter==="whales") return false;
     if(f.premium<minPrem) return false;
     if(filter==="call") return f.isCall&&!f.isDark;
     if(filter==="put")  return !f.isCall&&!f.isDark;
@@ -10357,6 +10375,36 @@ function FlowPage({isPremium,onNeedPremium}){
     if(filter==="gold") return f.isGold;
     return true;
   });
+
+  // Top pick — trade con mayor score
+  const topPickId=useMemo(()=>{
+    if(!visible.length) return null;
+    return visible.reduce((best,item)=>scoreItem(item)>scoreItem(best)?item:best,visible[0]).id;
+  },[visible]);
+
+  // Alerta Telegram cuando llega un Golden Sweep > $1M
+  const alertedRef=useRef(new Set());
+  useEffect(()=>{
+    const TG_TOKEN="8931471851:AAEupeDpPUwyBBqABXvgxoYKa1b9hniqq0c";
+    const TG_CHANNEL="@NexoTradeSignals";
+    feed.forEach(item=>{
+      if(!item.isGold||item.premium<1e6) return;
+      if(alertedRef.current.has(item.id)) return;
+      alertedRef.current.add(item.id);
+      const score=scoreItem(item);
+      const msg=`⭐ *GOLDEN SWEEP ALERT*\n\n*${item.ticker}* — ${item.premium>=1e6?`$${(item.premium/1e6).toFixed(1)}M`:item.premium>=1e3?`$${(item.premium/1e3).toFixed(0)}K`:item.premium}\n`+
+        `Tipo: Golden Sweep ${item.isCall?"🟢 CALL":"🔴 PUT"}\n`+
+        (item.strike?`Strike: $${item.strike} | `:"")+(item.otm?`${item.otm}% OTM\n`:"\n")+
+        (item.expiry?`Expiry: ${item.expiry}\n`:"")+
+        `Score: ${score} pts\n\n`+
+        `💡 Alta convicción institucional\n🔗 nexotradeia.com\n\n#FlowInstitucional #GoldenSweep`;
+      fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({chat_id:TG_CHANNEL,text:msg,parse_mode:"Markdown",disable_web_page_preview:true})
+      }).catch(()=>{});
+    });
+  },[feed]);
 
   return(
     <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto"}}>
@@ -10426,6 +10474,7 @@ function FlowPage({isPremium,onNeedPremium}){
       <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:fullscreen?"calc(100vh - 280px)":600,overflowY:"auto"}}>
         {visible.map(item=>{
           const isNew=item.id===highlight;
+          const isTop=item.id===topPickId;
           const bull=item.isCall;
           const dark=item.isDark;
           const gold=item.isGold;
@@ -10436,12 +10485,14 @@ function FlowPage({isPremium,onNeedPremium}){
             <div key={item.id} style={{
               display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",
               gap:6,padding:"10px 16px",
-              background:isNew?`${accentC}12`:gold?"rgba(245,158,11,0.04)":dark?"rgba(139,92,246,0.03)":"rgba(255,255,255,0.01)",
-              border:`1px solid ${isNew?accentC+"50":gold?"rgba(245,158,11,0.15)":dark?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)"}`,
-              borderLeft:`3px solid ${accentC}`,
+              background:isTop?"rgba(255,100,0,0.08)":isNew?`${accentC}12`:gold?"rgba(245,158,11,0.04)":dark?"rgba(139,92,246,0.03)":"rgba(255,255,255,0.01)",
+              border:`1px solid ${isTop?"rgba(255,140,0,0.5)":isNew?accentC+"50":gold?"rgba(245,158,11,0.15)":dark?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)"}`,
+              borderLeft:`3px solid ${isTop?"#FF8C00":accentC}`,
               borderRadius:10,transition:"all 0.3s",
-              boxShadow:isNew?`0 0 16px ${accentC}25`:"none",
+              boxShadow:isTop?"0 0 20px rgba(255,140,0,0.2)":isNew?`0 0 16px ${accentC}25`:"none",
+              position:"relative",
             }}>
+            {isTop&&<div style={{position:"absolute",top:-10,left:12,background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",fontSize:9,fontWeight:900,padding:"2px 8px",borderRadius:20,letterSpacing:.5,boxShadow:"0 2px 8px rgba(255,100,0,0.4)"}}>🔥 TOP PICK</div>}
               <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{item.time}</div>
               <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{item.ticker}</div>
               <div style={{fontSize:10,fontWeight:700}}>
