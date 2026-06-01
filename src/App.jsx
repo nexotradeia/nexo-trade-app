@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 11:41:46
+// NEXO TRADE — build: 2026-06-01 12:04:14
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -18407,6 +18407,7 @@ export default function App(){
             {label:t.feed,idx:0},
             {label:lang==="en"?"📈 Stock Pick IA":"📈 Stock Pick IA",idx:3,badge:"NEW"},
             {label:t.noticias,idx:5},
+            {label:t.earnings,idx:6},
             {label:t.trending,idx:7},
             {label:lang==="en"?"📚 Academy":"📚 Academia",idx:12},
             {label:"🎓 Webinars",idx:11},
