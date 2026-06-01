@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 09:21:30
+// NEXO TRADE — build: 2026-06-01 09:24:28
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10492,9 +10492,11 @@ function FlowPage({isPremium,onNeedPremium}){
               boxShadow:isTop?"0 0 20px rgba(255,140,0,0.2)":isNew?`0 0 16px ${accentC}25`:"none",
               position:"relative",
             }}>
-            {isTop&&<div style={{position:"absolute",top:6,right:10,background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",fontSize:9,fontWeight:900,padding:"2px 8px",borderRadius:20,letterSpacing:.5,boxShadow:"0 2px 8px rgba(255,100,0,0.4)",zIndex:2}}>🔥 TOP PICK</div>}
               <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{item.time}</div>
-              <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{item.ticker}</div>
+              <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace",display:"flex",alignItems:"center",gap:5}}>
+                {item.ticker}
+                {isTop&&<span style={{fontSize:8,fontWeight:900,color:"#fff",background:"linear-gradient(135deg,#FF6000,#FF8C00)",padding:"2px 6px",borderRadius:10,letterSpacing:.4,boxShadow:"0 1px 6px rgba(255,100,0,0.5)",whiteSpace:"nowrap"}}>🔥 TOP</span>}
+              </div>
               <div style={{fontSize:10,fontWeight:700}}>
                 {gold&&<span style={{background:"rgba(245,158,11,0.15)",color:"#F59E0B",borderRadius:5,padding:"2px 5px"}}>⭐ GOLDEN</span>}
                 {dark&&!gold&&<span style={{background:"rgba(139,92,246,0.15)",color:"#A78BFA",borderRadius:5,padding:"2px 5px"}}>🌑 DARK</span>}
