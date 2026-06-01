@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 18:01:56
+// NEXO TRADE — build: 2026-06-01 18:24:33
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1514,7 +1514,7 @@ function AIAssistant({lang,onClose}){
       return "🚗 Tesla (TSLA) es líder en vehículos eléctricos y almacenamiento de energía. Su precio es muy volátil, influenciado por los comentarios de Elon Musk y las entregas trimestrales. También tiene negocios en energía solar y software FSD.\n\n⚠️ No es consejo financiero.";
     if(m.includes("apple") || m.includes("aapl"))
       return "🍎 Apple (AAPL) es la empresa más valiosa del mundo. Sus ingresos vienen del iPhone (~50%), servicios (App Store, iCloud ~25%) y Mac/iPad. Tiene $165B+ en caja y recompra acciones agresivamente. Se considera una inversión defensiva de calidad.\n\n⚠️ No es consejo financiero.";
-    return `🤖 Gracias por tu pregunta sobre "${msg.substring(0,40)}". En NexoTrade puedes ver análisis de la comunidad en el feed en tiempo real. Para análisis más profundos, revisa los Picks VIP semanales o pregunta en el feed a otros traders.\n\n⚠️ No es consejo financiero. Consulta un asesor antes de invertir.`;
+    return `🤖 Gracias por tu pregunta sobre "${msg.substring(0,40)}". En NexoTrade puedes ver análisis de la comunidad en el feed en tiempo real. Para análisis más profundos, revisa los Picks PREMIUM semanales o pregunta en el feed a otros traders.\n\n⚠️ No es consejo financiero. Consulta un asesor antes de invertir.`;
   };
 
   const send = async(text) => {
@@ -1920,7 +1920,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
     {id:"10posts",     emoji:"🔥", name:"En Racha",        desc:"10 publicaciones",                 unlocked:user.posts>=10},
     {id:"100likes",    emoji:"❤️", name:"100 Likes",       desc:"Recibiste 100 likes en total",     unlocked:(user.followers||0)>=50},
     {id:"verified",    emoji:"✅", name:"Verificado",      desc:"Identidad verificada",             unlocked:user.badges?.includes("verified")},
-    {id:"vip",         emoji:"👑", name:"Miembro VIP",     desc:"Suscripción VIP activa",           unlocked:user.badges?.includes("vip")},
+    {id:"vip",         emoji:"👑", name:"Miembro PREMIUM",     desc:"Suscripción PREMIUM activa",           unlocked:user.badges?.includes("vip")},
     {id:"top5",        emoji:"🏆", name:"Top 5 Trader",    desc:"Entraste al top 5 del leaderboard",unlocked:user.points>=3000},
     {id:"earlybird",   emoji:"🐦", name:"Early Adopter",   desc:"Usuario desde los inicios",        unlocked:true},
     {id:"pro",         emoji:"⚡", name:"Miembro PRO",     desc:"Suscripción PRO activa",           unlocked:user.badges?.includes("pro")},
@@ -2072,7 +2072,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                   </div>
                 )}
                 {user.badges?.includes("verified")&&<span style={{background:"rgba(59,130,246,0.25)",border:"1px solid rgba(59,130,246,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#93c5fd"}}>✓ Verificado</span>}
-                {user.badges?.includes("vip")&&<span style={{background:"linear-gradient(90deg,rgba(245,158,11,0.35),rgba(217,119,6,0.35))",border:"1px solid rgba(245,158,11,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#fcd34d"}}>VIP ✦</span>}
+                {user.badges?.includes("vip")&&<span style={{background:"linear-gradient(90deg,rgba(245,158,11,0.35),rgba(217,119,6,0.35))",border:"1px solid rgba(245,158,11,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#fcd34d"}}>PREMIUM ✦</span>}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                 <span style={{background:"rgba(0,0,0,0.3)",border:`1px solid ${accent}55`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#fff",display:"flex",alignItems:"center",gap:4}}>
@@ -2646,7 +2646,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             <span style={{fontWeight:700,color:"var(--c-text)",fontSize:14,cursor:"pointer",letterSpacing:-0.3}}
               onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
             {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#000",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
-            {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦VIP</span>}
+            {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦ PREMIUM</span>}
             {/* Botón + Seguir (solo si es otro usuario) */}
             {isOtherUser && onFollow && (
               <button onClick={e=>{e.stopPropagation();if(!user){onNeedAuth&&onNeedAuth();return;}onFollow(postUserId||post.user);}}
@@ -3181,8 +3181,8 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
         </div>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {isPremium
-            ? <span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ VIP</span>
-            : <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}}>✦ VIP</button>
+            ? <span style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ PREMIUM</span>
+            : <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}}>✦ PREMIUM</button>
           }
           {/* Flecha animada */}
           <span style={{fontSize:16,color:C.muted,display:"inline-block",transition:"transform 0.25s",transform:open?"rotate(180deg)":"rotate(0deg)",lineHeight:1}}>▾</span>
@@ -3232,7 +3232,7 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
           {!isPremium&&(
             <div style={{padding:"12px 18px",background:"linear-gradient(135deg,rgba(124,58,237,0.06),rgba(147,51,234,0.04))",borderTop:`1px solid ${C.border}`,textAlign:"center"}}>
               <span style={{fontSize:12,color:C.muted}}>Desbloquea el sentimiento histórico completo con </span>
-              <span onClick={onNeedPremium} style={{fontSize:12,color:"#7C3AED",fontWeight:800,cursor:"pointer"}}>NexoTrade VIP ✦</span>
+              <span onClick={onNeedPremium} style={{fontSize:12,color:"#7C3AED",fontWeight:800,cursor:"pointer"}}>NexoTrade PREMIUM ✦</span>
             </div>
           )}
         </>
@@ -4849,7 +4849,7 @@ function VipFeedCard({onGoVIP}){
 
       {/* Badge */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <span style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:0.8}}>✦ NEXO VIP</span>
+        <span style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:0.8}}>✦ NEXO PREMIUM</span>
         <span style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>Oferta especial</span>
       </div>
 
@@ -4858,19 +4858,19 @@ function VipFeedCard({onGoVIP}){
         Accede a picks exclusivos 📈
       </div>
       <div style={{color:"rgba(255,255,255,0.55)",fontSize:12,marginBottom:14,lineHeight:1.5}}>
-        Señales VIP · Picks semanales · Sala privada · Análisis en tiempo real
+        Señales PREMIUM · Picks semanales · Sala privada · Análisis en tiempo real
       </div>
 
       {/* Features */}
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
-        {["📊 Picks VIP","🔔 Alertas","💬 Sala privada","📅 Earnings"].map(f=>(
+        {["📊 Picks PREMIUM","🔔 Alertas","💬 Sala privada","📅 Earnings"].map(f=>(
           <span key={f} style={{background:"rgba(124,58,237,0.15)",border:"1px solid rgba(124,58,237,0.3)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"rgba(255,255,255,0.7)",fontWeight:600}}>{f}</span>
         ))}
       </div>
 
       {/* CTA */}
       <div style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",borderRadius:12,padding:"11px 20px",textAlign:"center",color:"#fff",fontWeight:900,fontSize:14,boxShadow:"0 4px 16px rgba(124,58,237,0.5)"}}>
-        ✦ Hazte VIP — Solo $9.99/mes →
+        ✦ Hazte PREMIUM — Solo $9.99/mes →
       </div>
     </div>
   );
@@ -4989,7 +4989,7 @@ function VipPopup({onClose, onGoVIP}){
 
         {/* Título */}
         <div style={{textAlign:"center",fontWeight:900,color:"#fff",fontSize:22,marginBottom:6,letterSpacing:-0.5}}>
-          Únete a NEXO VIP
+          Únete a NEXO PREMIUM
         </div>
         <div style={{textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:20,lineHeight:1.5}}>
           Los mejores traders ya están adentro. Accede a picks, señales y la sala privada.
@@ -4998,11 +4998,11 @@ function VipPopup({onClose, onGoVIP}){
         {/* Beneficios */}
         <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:22}}>
           {[
-            {icon:"📊", text:"Picks VIP semanales con entrada, target y stop"},
+            {icon:"📊", text:"Picks PREMIUM semanales con entrada, target y stop"},
             {icon:"🔔", text:"Alertas de precio en tiempo real"},
-            {icon:"💬", text:"Sala privada solo para miembros VIP"},
+            {icon:"💬", text:"Sala privada solo para miembros PREMIUM"},
             {icon:"📅", text:"Earnings calendar con análisis previo"},
-            {icon:"🏆", text:"Badge VIP exclusivo en tu perfil"},
+            {icon:"🏆", text:"Badge PREMIUM exclusivo en tu perfil"},
           ].map(({icon,text})=>(
             <div key={text} style={{display:"flex",alignItems:"center",gap:10}}>
               <span style={{fontSize:16,flexShrink:0}}>{icon}</span>
@@ -5062,7 +5062,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     "🤖 IA NEXO — 5 preguntas diarias",
   ];
 
-  const VIP_FEATURES = [
+  const PREMIUM_FEATURES = [
     "✓ Todo lo del plan Free, sin límites",
     "🧠 Stock Pick IA — 10 picks semanales con análisis completo",
     "💡 30+ Ideas de inversión con tesis, entrada, target y stop",
@@ -5071,7 +5071,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     "🐋 Flujo institucional — dark pool y sweeps en tiempo real",
     "📊 Opciones Crypto — cadena completa BTC/ETH/SOL 24h",
     "🔬 Advanced Screener — 20+ filtros técnicos y fundamentales",
-    "💼 Portfolio Tracker — seguimiento de inversiones con P&L en tiempo real",
+    "💼 Portafolio Oracle IA — seguimiento de inversiones con P&L en tiempo real",
     "🔮 Oracle IA — Predictor estadístico de escenarios alcistas / bajistas para tu portfolio",
     "🌍 Radar Global — Mapa del Dinero Global 3D con flujos de capital en vivo",
     "🎮 Terminal de Trading full-screen — simulador con crypto, acciones y opciones",
@@ -5083,8 +5083,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     "🔍 Insiders SEC — Form 4 en tiempo real",
     "🤖 IA NEXO de trading ilimitado",
     "🔔 Alertas de precio personalizadas por email",
-    "🎓 Academia completa — todos los cursos y webinars VIP",
-    "✦ Badge VIP dorado + acceso anticipado a nuevas funciones",
+    "🎓 Academia completa — todos los cursos y webinars PREMIUM",
+    "✦ Badge PREMIUM dorado + acceso anticipado a nuevas funciones",
   ];
 
   const SIGNALS = [
@@ -5139,7 +5139,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>¡Eres miembro Premium!</h1>
                 <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>Tienes acceso completo a todas las funciones exclusivas.</p>
                 <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-                  {["💡 Ideas VIP","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","🔍 Insiders SEC"].map(b=>(
+                  {["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","🔍 Insiders SEC"].map(b=>(
                     <span key={b} style={{background:C.bull+"22",color:C.bull,border:`1px solid ${C.bull}44`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700}}>{b}</span>
                   ))}
                 </div>
@@ -5148,7 +5148,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 {/* Urgency banner */}
                 <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:20,padding:"6px 16px",marginBottom:14}}>
                   <span style={{width:7,height:7,borderRadius:"50%",background:"#ef4444",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
-                  <span style={{color:"#f87171",fontSize:12,fontWeight:700,letterSpacing:0.5}}>🔥 {lang==="en"?"Only 23 VIP spots left this month":"Solo quedan 23 spots VIP este mes"}</span>
+                  <span style={{color:"#f87171",fontSize:12,fontWeight:700,letterSpacing:0.5}}>🔥 {lang==="en"?"Only 23 PREMIUM spots left this month":"Solo quedan 23 spots PREMIUM este mes"}</span>
                 </div>
                 <h1 style={{margin:"0 0 10px",color:"#fff",fontSize:"clamp(22px,4vw,30px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Take your trading to the next level":"Lleva tu trading al siguiente nivel"}</h1>
                 <p style={{margin:"0 auto 20px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, unlimited AI, email alerts and exclusive education.":"Señales en tiempo real, IA sin límites, alertas por email y formación exclusiva."}</p>
@@ -5179,7 +5179,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                     onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 40px rgba(124,58,237,0.75)";}}
                     onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 32px rgba(124,58,237,0.6)";}}>
                     {billing==="annual"
-                      ? (lang==="en" ? `✦ Get VIP Annual — $79/year` : `✦ Obtener VIP Anual — $79/año`)
+                      ? (lang==="en" ? `✦ Get PREMIUM Annual — $79/year` : `✦ Obtener PREMIUM Anual — $79/año`)
                       : (lang==="en" ? `✦ Start free 7 days — $9.99/mo` : `✦ Empieza gratis 7 días — $9.99/mes`)
                     }
                   </button>
@@ -5188,11 +5188,11 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   ? <div style={{fontSize:12,color:"#10B981",marginBottom:8,fontWeight:700}}>🎉 {lang==="en"?`You save $${savingsAnual}/year vs monthly`:`Ahorras $${savingsAnual} al año vs mensual`}</div>
                   : null
                 }
-                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"No card required · Cancel anytime · 840+ active VIP traders":"Sin tarjeta requerida · Cancela cuando quieras · 840+ traders VIP activos"}</div>
+                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"No card required · Cancel anytime · 840+ active PREMIUM traders":"Sin tarjeta requerida · Cancela cuando quieras · 840+ traders PREMIUM activos"}</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {(lang==="en"
-                    ?["💡 VIP Ideas","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
-                    :["💡 Ideas VIP","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","📅 Calendarios"]
+                    ?["💡 Ideas PREMIUM","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
+                    :["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","📅 Calendarios"]
                   ).map(b=>(
                     <span key={b} style={{background:"#ffffff15",border:"1px solid #ffffff22",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
                   ))}
@@ -5242,7 +5242,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ MÁS POPULAR</div>
             <div style={{position:"absolute",top:0,left:0,width:220,height:220,background:"radial-gradient(circle,rgba(124,58,237,0.1),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:1.5,marginBottom:10}}>✦ VIP</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:1.5,marginBottom:10}}>✦ PREMIUM</div>
 
               {/* Toggle mensual / anual inline */}
               <div style={{display:"flex",background:"rgba(0,0,0,0.3)",borderRadius:10,padding:3,gap:2,marginBottom:14,border:"1px solid rgba(255,255,255,0.07)"}}>
@@ -5286,7 +5286,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               </div>
 
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
-                {VIP_FEATURES.map((f,i)=>(
+                {PREMIUM_FEATURES.map((f,i)=>(
                   <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(124,58,237,0.06)",borderRadius:7,border:"1px solid rgba(124,58,237,0.1)"}}>
                     <span style={{fontSize:10,color:"#A78BFA",flexShrink:0,marginTop:2}}>★</span>
                     <span style={{fontSize:11,color:"#CBD5E1",lineHeight:1.35}}>{f}</span>
@@ -5296,7 +5296,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
               <div style={{marginTop:24}}>
                 {isPremium
-                  ? <div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>✅ Plan activo — ¡Gracias por ser VIP!</div>
+                  ? <div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>✅ Plan activo — ¡Gracias por ser PREMIUM!</div>
                   : <>
                     {billing==="annual" ? (
                       <>
@@ -5304,7 +5304,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                           style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 24px rgba(16,185,129,0.45)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
                           onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,0.6)";}}
                           onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 24px rgba(16,185,129,0.45)";}}>
-                          🎉 Obtener VIP Anual — $79/año →
+                          🎉 Obtener PREMIUM Anual — $79/año →
                         </button>
                         <div style={{textAlign:"center",fontSize:11,color:"#10B981",fontWeight:700,marginBottom:4}}>Ahorras ${savingsAnual} vs mensual · Acceso inmediato</div>
                         <div style={{textAlign:"center",fontSize:10,color:"#334155",cursor:"pointer",textDecoration:"underline"}} onClick={()=>setBilling("monthly")}>
@@ -5430,7 +5430,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             <h2 style={{margin:"0 0 4px",color:C.text,fontSize:18,fontWeight:800}}>🎓 Webinars en Vivo</h2>
             <p style={{margin:0,color:C.muted,fontSize:13}}>Formación con traders reales · Grabación incluida · Plazas limitadas</p>
           </div>
-          {isPremium && <div style={{background:"linear-gradient(135deg,#7C3AED22,#6D28D911)",border:"1px solid #7C3AED44",borderRadius:10,padding:"6px 14px",fontSize:12,fontWeight:700,color:"#a78bfa"}}>✦ VIP: 50% descuento aplicado</div>}
+          {isPremium && <div style={{background:"linear-gradient(135deg,#7C3AED22,#6D28D911)",border:"1px solid #7C3AED44",borderRadius:10,padding:"6px 14px",fontSize:12,fontWeight:700,color:"#a78bfa"}}>✦ PREMIUM: 50% descuento aplicado</div>}
         </div>
 
         <div style={{display:"flex",flexDirection:"column",gap:16}}>
@@ -5493,7 +5493,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   <div style={{flexShrink:0,textAlign:"center",minWidth:110}}>
                     {isPremium ? (
                       <>
-                        <div style={{fontSize:10,color:"#a78bfa",fontWeight:700,marginBottom:2}}>✦ PRECIO VIP</div>
+                        <div style={{fontSize:10,color:"#a78bfa",fontWeight:700,marginBottom:2}}>✦ PRECIO PREMIUM</div>
                         <div style={{fontSize:22,fontWeight:900,color:C.accent,lineHeight:1}}>${w.precioVip}</div>
                         <div style={{fontSize:11,color:C.muted2,textDecoration:"line-through",marginBottom:8}}>${w.precio}</div>
                         <button
@@ -5506,7 +5506,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                       <>
                         <div style={{fontSize:10,color:C.muted2,fontWeight:600,marginBottom:2}}>PRECIO</div>
                         <div style={{fontSize:22,fontWeight:900,color:C.text,lineHeight:1}}>${w.precio}</div>
-                        <div style={{fontSize:10,color:"#a78bfa",marginBottom:8}}>VIP paga ${w.precioVip}</div>
+                        <div style={{fontSize:10,color:"#a78bfa",marginBottom:8}}>PREMIUM paga ${w.precioVip}</div>
                         <button
                           onClick={handleBuyWebinar}
                           disabled={isSoldOut}
@@ -5525,10 +5525,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         {!isPremium && <div style={{marginTop:20,background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #7C3AED44",borderRadius:16,padding:20,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
           <span style={{fontSize:32}}>✦</span>
           <div style={{flex:1}}>
-            <div style={{fontWeight:800,color:"#a78bfa",fontSize:15,marginBottom:4}}>Hazte VIP y ahorra 50% en todos los webinars</div>
-            <div style={{color:"#7c3aed",fontSize:13}}>Por solo $9.99/mes tienes acceso a precios VIP, picks semanales, señales y grabaciones de todos los webinars anteriores.</div>
+            <div style={{fontWeight:800,color:"#a78bfa",fontSize:15,marginBottom:4}}>Hazte PREMIUM y ahorra 50% en todos los webinars</div>
+            <div style={{color:"#7c3aed",fontSize:13}}>Por solo $9.99/mes tienes acceso a precios PREMIUM, picks semanales, señales y grabaciones de todos los webinars anteriores.</div>
           </div>
-          <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver VIP →</button>
+          <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver PREMIUM →</button>
         </div>}
 
         {/* ── IBKR CAMPUS — Webinars Gratuitos ── */}
@@ -5769,7 +5769,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"₿",  label:isEN?"₿ Crypto":"₿ Cripto",                   idx:2},
     {icon:"📈", label:isEN?"Markets":"Mercados",                     idx:3},
     {icon:"🎮", label:isEN?"Paper Trading Sim":"Paper Trading Sim",     idx:9, vip:true, ai:true},
-    {icon:"✦",  label:isEN?"VIP Premium":"Premium VIP",              idx:8, premium:true},
+    {icon:"✦",  label:isEN?"PREMIUM":"PREMIUM",              idx:8, premium:true},
   ];
   const navMore = [
     {icon:"📅", label:isEN?"Economic Calendar":"Calendario",         idx:14},
@@ -5777,7 +5777,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🚀", label:"IPOs 2026",                                   idx:16},
     {icon:"⛏️", label:isEN?"Commodities":"Commodities",              idx:18},
     {icon:"🔍", label:isEN?"Screener":"Screener",                    idx:17, vip:true},
-    {icon:"💼", label:isEN?"My Portfolio":"Mi Portfolio",            idx:37, vip:true},
+    {icon:"💼", label:isEN?"Oracle IA Portfolio":"Portafolio Oracle IA",            idx:37, vip:true},
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
     {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
     {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
@@ -6003,7 +6003,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                   color: premium?"#7C3AED": isActive?"#0EA5E9":"#334155",
                   flex:1
                 }}>{label}</span>
-                {premium && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>VIP</span>}
+                {premium && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PREMIUM</span>}
                 {vip && !premium && !ai && <span style={{fontSize:9,fontWeight:700,color:"#0EA5E9",background:"rgba(14,165,233,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
                 {ai && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#6366F1,#8B5CF6)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>IA</span>}
               </div>
@@ -6659,7 +6659,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       {!user && (
         <div style={{...card,background:"linear-gradient(145deg,#1E1B4B,#2D1B69)",border:"1px solid rgba(124,58,237,0.3)",textAlign:"center"}}>
           <div style={{fontSize:26,marginBottom:6}}>✦</div>
-          <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>VIP Member</div>
+          <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>PREMIUM Member</div>
           <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</div>
           <div style={{fontSize:22,fontWeight:900,color:"#fff",marginBottom:10}}>
             <span style={{color:"#A78BFA"}}>$9.99</span>
@@ -6667,7 +6667,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           </div>
           <button onClick={()=>window.open(STRIPE_PAYMENT_LINK,"_blank")}
             style={{width:"100%",padding:"10px",background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:10,color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",boxShadow:"0 6px 20px rgba(124,58,237,0.4)",fontFamily:"inherit"}}>
-            ✦ Empezar VIP →
+            ✦ Empezar PREMIUM →
           </button>
           <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:8}}>7 días gratis · Sin compromiso</div>
         </div>
@@ -6826,7 +6826,7 @@ function ReferralSection({ user }) {
         <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#00A8FF22,#7C3AED22)",border:"1px solid rgba(0,168,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🔗</div>
         <div>
           <div style={{fontWeight:800,fontSize:13,color:"var(--c-text,#0F172A)"}}>Programa de Referidos</div>
-          <div style={{fontSize:10,color:"#64748B"}}>Gana 1 mes VIP gratis por cada amigo que se suscriba</div>
+          <div style={{fontSize:10,color:"#64748B"}}>Gana 1 mes PREMIUM gratis por cada amigo que se suscriba</div>
         </div>
         {refCount !== null && (
           <div style={{marginLeft:"auto",textAlign:"center",background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,padding:"5px 10px"}}>
@@ -6839,8 +6839,8 @@ function ReferralSection({ user }) {
       {/* Rewards */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}}>
         {[
-          {icon:"🎁",title:"Tú ganas",val:"1 mes VIP gratis",sub:"por cada referido VIP"},
-          {icon:"🤝",title:"Tu amigo gana",val:"7 días gratis",sub:"al suscribirse VIP"},
+          {icon:"🎁",title:"Tú ganas",val:"1 mes PREMIUM gratis",sub:"por cada referido PREMIUM"},
+          {icon:"🤝",title:"Tu amigo gana",val:"7 días gratis",sub:"al suscribirse PREMIUM"},
         ].map((r,i)=>(
           <div key={i} style={{background:"rgba(255,255,255,0.5)",border:"1px solid rgba(0,0,0,0.06)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
             <div style={{fontSize:16,marginBottom:2}}>{r.icon}</div>
@@ -6872,7 +6872,7 @@ function ReferralSection({ user }) {
 
       {/* Compartir */}
       <div style={{display:"flex",gap:6}}>
-        <a href={`https://twitter.com/intent/tweet?text=📈 Acabo de unirme a NexoTrade, la red social de traders en español. Picks VIP, IA y más. Únete aquí: ${refLink}`}
+        <a href={`https://twitter.com/intent/tweet?text=📈 Acabo de unirme a NexoTrade, la red social de traders en español. Picks PREMIUM, IA y más. Únete aquí: ${refLink}`}
           target="_blank" rel="noopener noreferrer"
           style={{flex:1,background:"#0F172A",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
           𝕏 Twitter/X
@@ -6948,7 +6948,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"News":"Noticias",                 page:5},
         {label: isEN?"Earnings":"Earnings",             page:6},
         {label: "🤖 IA NEXO",                            page:9},
-        {label: isEN?"VIP Ideas ✦":"Ideas VIP ✦",      page:21},
+        {label: isEN?"✦ Ideas PREMIUM":"✦ Ideas PREMIUM",      page:21},
       ]
     },
     {
@@ -6969,7 +6969,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"Live Webinars":"Webinars",         page:11},
         {label: isEN?"Academy":"Academia",               page:12},
         {label: isEN?"Messages":"Mensajes",              page:22},
-        {label: isEN?"VIP $9.99/mo ✦":"VIP $9.99/mes ✦",page:8},
+        {label: isEN?"PREMIUM $9.99/mes ✦":"PREMIUM $9.99/mes ✦",page:8},
         {label: isEN?"Join free →":"Únete gratis →",     action:"auth"},
       ]
     },
@@ -7216,9 +7216,9 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
   if(!isPremium) return(
     <div style={{textAlign:"center",padding:"60px 20px",background:"rgba(10,16,30,0.98)",borderRadius:20,border:"1px solid rgba(245,158,11,0.2)"}}>
       <div style={{fontSize:52,marginBottom:16}}>🔒</div>
-      <h2 style={{color:"#F59E0B",fontWeight:900,marginBottom:8}}>{isEN?"Paper Trading Simulator VIP":"Paper Trading Simulador VIP"}</h2>
-      <p style={{color:"#94A3B8",fontSize:15,marginBottom:24,maxWidth:400,margin:"0 auto 24px"}}>{isEN?"Simulate trades with $100k virtual, Sharpe Ratio, win streak tracker, price alerts and more — VIP only.":"Simula con $100k virtual, Sharpe Ratio, racha de ganancias, alertas de precio y más — solo VIP."}</p>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer"}}>✦ {isEN?"Go VIP — $9.99/mo":"Hazte VIP — $9.99/mes"}</button>
+      <h2 style={{color:"#F59E0B",fontWeight:900,marginBottom:8}}>{isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}</h2>
+      <p style={{color:"#94A3B8",fontSize:15,marginBottom:24,maxWidth:400,margin:"0 auto 24px"}}>{isEN?"Simulate trades with $100k virtual, Sharpe Ratio, win streak tracker, price alerts and more — PREMIUM only.":"Simula con $100k virtual, Sharpe Ratio, racha de ganancias, alertas de precio y más — solo PREMIUM."}</p>
+      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer"}}>✦ {isEN?"Go PREMIUM — $9.99/mo":"Hazte PREMIUM — $9.99/mes"}</button>
     </div>
   );
 
@@ -7243,8 +7243,8 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
   return(
     <div>
       <div style={{marginBottom:20}}>
-        <h2 style={{color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}>🎮 {isEN?"Paper Trading Simulator VIP":"Paper Trading Simulador VIP"}</h2>
-        <p style={{color:"#64748B",fontSize:13}}>{isEN?"Simulate trades risk-free + exclusive VIP calculators for professional traders":"Simula trades sin riesgo + herramientas VIP exclusivas para traders profesionales"}</p>
+        <h2 style={{color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}>🎮 {isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}</h2>
+        <p style={{color:"#64748B",fontSize:13}}>{isEN?"Simulate trades risk-free + exclusive PREMIUM calculators for professional traders":"Simula trades sin riesgo + herramientas PREMIUM exclusivas para traders profesionales"}</p>
       </div>
       {/* Tabs */}
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:24}}>
@@ -8689,7 +8689,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         ))}
       </div>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:12,padding:"14px 36px",color:"#fff",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(124,58,237,0.4)"}}>
-        ✦ Hazte VIP — $9.99/mes
+        ✦ Hazte PREMIUM — $9.99/mes
       </button>
     </div>
   );
@@ -8831,7 +8831,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <span style={{background:"linear-gradient(135deg,rgba(139,92,246,0.3),rgba(109,40,217,0.2))",color:"#A78BFA",border:"1px solid rgba(139,92,246,0.4)",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:1}}>✦ EXCLUSIVO VIP</span>
+              <span style={{background:"linear-gradient(135deg,rgba(139,92,246,0.3),rgba(109,40,217,0.2))",color:"#A78BFA",border:"1px solid rgba(139,92,246,0.4)",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:1}}>✦ EXCLUSIVO PREMIUM</span>
               <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:700,color:"#00D26A"}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>EN VIVO
               </span>
@@ -8926,7 +8926,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
             {[
               {v:`${CURSOS.length} cursos`,l:"Disponibles"},
               {v:"Acceso de por vida",l:"Sin caducidad"},
-              {v:"VIP 40% off",l:"Descuento miembros"},
+              {v:"PREMIUM 40% off",l:"Descuento miembros"},
             ].map((s,i)=>(
               <div key={i} style={{background:"#ffffff10",borderRadius:12,padding:"10px 18px",border:"1px solid #ffffff15"}}>
                 <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{s.v}</div>
@@ -8940,8 +8940,8 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
       {/* VIP banner */}
       {!isPremium && <div style={{background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #7C3AED44",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
         <span style={{fontSize:24}}>✦</span>
-        <div style={{flex:1,fontSize:13,color:"#a78bfa"}}><strong>VIP ($9.99/mes)</strong> — obtén hasta 40% de descuento en todos los cursos.</div>
-        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver VIP →</button>
+        <div style={{flex:1,fontSize:13,color:"#a78bfa"}}><strong>PREMIUM ($9.99/mes)</strong> — obtén hasta 40% de descuento en todos los cursos.</div>
+        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver PREMIUM →</button>
       </div>}
 
       {/* Cursos — Próximamente */}
@@ -9875,7 +9875,7 @@ function ScreenerPage({isPremium, onNeedPremium}) {
   if(!isPremium) return(
     <div style={{maxWidth:700,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
       <div style={{fontSize:64,marginBottom:16}}>🔒</div>
-      <div style={{fontSize:28,fontWeight:900,color:C.text,marginBottom:8}}>Stock Screener VIP</div>
+      <div style={{fontSize:28,fontWeight:900,color:C.text,marginBottom:8}}>Stock Screener PREMIUM</div>
       <div style={{fontSize:15,color:C.muted,marginBottom:28,lineHeight:1.6}}>
         Filtra más de 10,000 acciones por momentum, valoración, dividendo y crecimiento.<br/>
         Descubre oportunidades antes que el mercado.
@@ -9886,7 +9886,7 @@ function ScreenerPage({isPremium, onNeedPremium}) {
         ))}
       </div>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
-        ✦ Activar VIP — $9.99/mes
+        ✦ Activar PREMIUM — $9.99/mes
       </button>
       <div style={{fontSize:11,color:C.muted2,marginTop:12}}>Cancela cuando quieras · Acceso inmediato</div>
     </div>
@@ -9902,7 +9902,7 @@ function ScreenerPage({isPremium, onNeedPremium}) {
           <div style={{flex:1}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <div style={{fontSize:20,fontWeight:800,color:C.text}}>Stock Screener</div>
-              <span style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px"}}>VIP</span>
+              <span style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",borderRadius:20,padding:"3px 10px"}}>PREMIUM</span>
             </div>
             <div style={{fontSize:12,color:C.muted}}>{preset?.desc} · {quotes.length} resultados</div>
           </div>
@@ -10057,7 +10057,7 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
         Ve qué están comprando Warren Buffett, Cathie Wood, Michael Burry y más — actualizado con datos SEC 13F.
       </div>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
-        ✦ Activar VIP — $9.99/mes
+        ✦ Activar PREMIUM — $9.99/mes
       </button>
     </div>
   );
@@ -10366,7 +10366,7 @@ function FlowPage({isPremium,onNeedPremium}){
   if(!isPremium) return(
     <div style={{maxWidth:600,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
       <div style={{fontSize:64,marginBottom:16}}>🐋</div>
-      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Flujo Institucional VIP</div>
+      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Flujo Institucional PREMIUM</div>
       <div style={{fontSize:14,color:C.muted,marginBottom:28,lineHeight:1.7,maxWidth:440,margin:"0 auto 28px"}}>
         Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps.
       </div>
@@ -10376,7 +10376,7 @@ function FlowPage({isPremium,onNeedPremium}){
         ))}
       </div>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(124,58,237,0.35)"}}>
-        ✦ Activar VIP — $9.99/mes
+        ✦ Activar PREMIUM — $9.99/mes
       </button>
     </div>
   );
@@ -11692,7 +11692,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           <button key={t.k} onClick={()=>{ if(t.vip&&!isPremium){onNeedPremium();return;} setTab(t.k); }}
             style={{background:tab===t.k?"linear-gradient(135deg,#8B5CF6,#6D28D9)":"transparent",border:`1.5px solid ${tab===t.k?"transparent":C.border}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(124,58,237,0.3)":"none",display:"flex",alignItems:"center",gap:6}}>
             {t.l}
-            {t.vip&&<span style={{fontSize:9,fontWeight:800,background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:0.5}}>VIP</span>}
+            {t.vip&&<span style={{fontSize:9,fontWeight:800,background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:0.5}}>PREMIUM</span>}
           </button>
         ))}
         {/* Search bar */}
@@ -11779,11 +11779,11 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             {/* Banner CTA si es free */}
             {!isPremium && (
               <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.1),rgba(99,102,241,0.07))",border:"1px solid rgba(124,58,237,0.22)",borderRadius:16,padding:"18px 24px",marginTop:16,textAlign:"center"}}>
-                <div style={{fontWeight:800,color:"#A78BFA",fontSize:14,marginBottom:4}}>🏛️ Accede a los {GURUS_13F.length} portafolios institucionales con VIP</div>
+                <div style={{fontWeight:800,color:"#A78BFA",fontSize:14,marginBottom:4}}>🏛️ Accede a los {GURUS_13F.length} portafolios institucionales con PREMIUM</div>
                 <div style={{fontSize:12,color:"#64748b",marginBottom:12}}>Buffett · Ackman · Burry · ARK · Insiders SEC · Dark Pools</div>
                 <button onClick={onNeedPremium}
                   style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(124,58,237,0.4)"}}>
-                  ✦ Activar VIP — 7 días gratis →
+                  ✦ Activar PREMIUM — 7 días gratis →
                 </button>
               </div>
             )}
@@ -12907,7 +12907,7 @@ function IdeasPage({ isPremium, onNeedPremium }) {
                     <div style={{background:"rgba(12,10,30,0.97)",border:"1px solid rgba(124,58,237,0.4)",borderRadius:16,padding:"20px 24px",textAlign:"center",maxWidth:240,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
                       <div style={{fontSize:28,marginBottom:8}}>🔒</div>
                       <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:6}}>+{filtered.length - 3} ideas bloqueadas</div>
-                      <div style={{fontSize:12,color:"#94a3b8",marginBottom:14}}>Hazte VIP para ver todas las señales, tesis y precios objetivo</div>
+                      <div style={{fontSize:12,color:"#94a3b8",marginBottom:14}}>Hazte PREMIUM para ver todas las señales, tesis y precios objetivo</div>
                       <button onClick={onNeedPremium}
                         style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"10px 20px",fontSize:13,fontWeight:800,cursor:"pointer",width:"100%"}}>
                         ✦ Ver todas — $9.99/mes
@@ -12923,11 +12923,11 @@ function IdeasPage({ isPremium, onNeedPremium }) {
         {/* Banner debajo si hay más páginas y es free */}
         {!isPremium && page === 1 && (
           <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.12),rgba(99,102,241,0.08))",border:"1px solid rgba(124,58,237,0.25)",borderRadius:16,padding:"20px 24px",marginTop:4,marginBottom:20,textAlign:"center"}}>
-            <div style={{fontWeight:800,color:"#A78BFA",fontSize:15,marginBottom:6}}>✦ Desbloquea {IDEAS_DATA.length - 3} ideas más con VIP</div>
+            <div style={{fontWeight:800,color:"#A78BFA",fontSize:15,marginBottom:6}}>✦ Desbloquea {IDEAS_DATA.length - 3} ideas más con PREMIUM</div>
             <div style={{fontSize:13,color:"#64748b",marginBottom:14}}>Señales de compra/venta, tesis completa, precio objetivo y stop loss actualizado en tiempo real</div>
             <button onClick={onNeedPremium}
               style={{background:"linear-gradient(135deg,#7C3AED,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"12px 32px",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(124,58,237,0.4)"}}>
-              ✦ Activar VIP — 7 días gratis →
+              ✦ Activar PREMIUM — 7 días gratis →
             </button>
           </div>
         )}
@@ -14287,13 +14287,13 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:t.noticias,idx:5},
   // ── Comunidad ──
   {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
-  {label:isEN?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,vip:true},
+  {label:isEN?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,vip:true},
   {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
   {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
-  {label:isEN?"💼 My Portfolio":"💼 Mi Portfolio",idx:37,vip:true},
+  {label:isEN?"💼 Oracle IA Portfolio":"💼 Portafolio Oracle IA",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
-  {label:isEN?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,vip:true},
+  {label:isEN?"🐋 Flujo PREMIUM":"🐋 Flujo PREMIUM",idx:20,vip:true},
   {label:isEN?"🎮 Paper Trading Sim":"🎮 Paper Trading Sim",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
   // ── Educación (último) ──
@@ -14562,7 +14562,7 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
      text: isEN ? "Welcome to NexoTrade! Complete your profile to get <strong>+50 points</strong>" : "¡Bienvenido a NexoTrade! Completa tu perfil para ganar <strong>+50 puntos</strong>",
      time: user.created_at||new Date().toISOString()},
     {id:"sys_vip", type:"system", icon:"✦",
-     text: isEN ? "Upgrade to <strong>VIP</strong> and access Picks, Portfolio Tracker, and more for $9.99/mo" : "Actualiza a <strong>VIP</strong> y accede a Picks, Portfolio Tracker y más por $9.99/mes",
+     text: isEN ? "Upgrade to <strong>PREMIUM</strong> and access Picks, Portfolio Tracker, and more for $9.99/mo" : "Actualiza a <strong>PREMIUM</strong> y accede a Picks, Portfolio Tracker y más por $9.99/mes",
      time: new Date(Date.now()-86400000).toISOString()},
   ];
 
@@ -14810,7 +14810,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     }}
     onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,#6D28D9,#9333EA)";e.currentTarget.style.transform="scale(1.05)";}}
     onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,#7C3AED,#A855F7)";e.currentTarget.style.transform="scale(1)";}}>
-      ✦ VIP
+      ✦ PREMIUM
     </button>
   );
   // vip(value, suffix) → muestra dato si es premium, si no botón
@@ -14932,7 +14932,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
               <span style={{fontSize:28}}>📊</span>
               <div>
                 <div style={{fontSize:22,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5,lineHeight:1}}>
-                  {isEN?"Portfolio Tracker":"Portfolio Tracker"}
+                  {isEN?"Oracle IA Portfolio":"Portafolio Oracle IA"}
                 </div>
                 <div style={{fontSize:12,color:"rgba(148,163,184,0.8)",marginTop:2}}>
                   {isEN?"Real-time prices · 24h · Finnhub":"Precios en tiempo real · 24h · Finnhub"}
@@ -15685,10 +15685,10 @@ function OracleIA({ positions, livePrices, isPremium, onNeedPremium, isEN }) {
         <div style={{width:42,height:42,borderRadius:12,background:"linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.2))",border:"1px solid rgba(139,92,246,0.4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,boxShadow:"0 0 16px rgba(139,92,246,0.25)"}}>🔮</div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9",letterSpacing:-0.3}}>Oracle IA</div>
-          <div style={{fontSize:11,color:"#6D28D9",marginTop:1}}>{isEN?"Statistical scenario prediction · Exclusive VIP":"Predicción estadística de escenarios · Exclusivo VIP"}</div>
+          <div style={{fontSize:11,color:"#6D28D9",marginTop:1}}>{isEN?"Statistical scenario prediction · Exclusive PREMIUM":"Predicción estadística de escenarios · Exclusivo PREMIUM"}</div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:10,fontWeight:800,color:"#A78BFA",background:"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",borderRadius:6,padding:"2px 8px"}}>VIP</span>
+          <span style={{fontSize:10,fontWeight:800,color:"#A78BFA",background:"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",borderRadius:6,padding:"2px 8px"}}>PREMIUM</span>
           <span style={{color:"#475569",fontSize:14,transition:"transform 0.2s",transform:expanded?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
         </div>
       </div>
@@ -15717,7 +15717,7 @@ function OracleIA({ positions, livePrices, isPremium, onNeedPremium, isEN }) {
                 style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",border:"none",borderRadius:14,padding:"13px 36px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(124,58,237,0.4)",letterSpacing:0.3}}>
                 🔮 {isEN?"Activate Oracle":"Activar Oracle"}
               </button>
-              {!isPremium && <div style={{marginTop:10,fontSize:11,color:"#475569"}}>{isEN?"VIP exclusive · $9.99/month":"Exclusivo VIP · $9.99/mes"}</div>}
+              {!isPremium && <div style={{marginTop:10,fontSize:11,color:"#475569"}}>{isEN?"PREMIUM exclusive · $9.99/month":"Exclusivo PREMIUM · $9.99/mes"}</div>}
             </div>
           )}
 
@@ -15888,7 +15888,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   if(!isPremium) return(
     <div style={{maxWidth:520,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
       <div style={{fontSize:60,marginBottom:16}}>📊</div>
-      <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:24,marginBottom:8}}>{isEN?"Portfolio Tracker":"Mi Portfolio"}</h2>
+      <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:24,marginBottom:8}}>{isEN?"Oracle IA Portfolio":"Portafolio Oracle IA"}</h2>
       <p style={{color:"#64748B",fontSize:15,lineHeight:1.7,marginBottom:28}}>
         {isEN?"Track your positions, monitor P&L in real time and share your best trades with the community.":"Registra tus posiciones, monitorea tu P&L en tiempo real y comparte tus mejores trades con la comunidad."}
       </p>
@@ -15904,7 +15904,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         ))}
       </div>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#7C3AED,#9333EA)",border:"none",borderRadius:12,padding:"14px 36px",color:"#fff",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(124,58,237,0.4)"}}>
-        ✦ {isEN?"Go VIP — $9.99/mo":"Hazte VIP — $9.99/mes"}
+        ✦ {isEN?"Go PREMIUM — $9.99/mo":"Hazte PREMIUM — $9.99/mes"}
       </button>
     </div>
   );
@@ -16439,11 +16439,11 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
       <h2 style={{color:C.text,fontWeight:800,fontSize:22,marginBottom:8}}>{isEN?"Congress Trades":"Trades del Congreso"}</h2>
       <p style={{color:C.muted,fontSize:15,marginBottom:24,lineHeight:1.6}}>
         {isEN
-          ? "See what US Congress members are buying and selling in real time. VIP exclusive."
-          : "Mira qué están comprando y vendiendo los congresistas de EE.UU. en tiempo real. Exclusivo VIP."}
+          ? "See what US Congress members are buying and selling in real time. PREMIUM exclusive."
+          : "Mira qué están comprando y vendiendo los congresistas de EE.UU. en tiempo real. Exclusivo PREMIUM."}
       </p>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#f59e0b,#ef4444)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontWeight:800,fontSize:16,cursor:"pointer",boxShadow:"0 4px 20px rgba(245,158,11,0.4)"}}>
-        ✦ {isEN?"Unlock VIP":"Desbloquear VIP"}
+        ✦ {isEN?"Unlock PREMIUM":"Desbloquear PREMIUM"}
       </button>
     </div>
   );
@@ -16480,7 +16480,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
         <div>
           <h1 style={{color:C.text,fontWeight:900,fontSize:22,margin:"0 0 4px",display:"flex",alignItems:"center",gap:8}}>
             🏛️ {isEN?"Congress Trades":"Trades del Congreso"}
-            <span style={{background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:12,fontWeight:800}}>VIP</span>
+            <span style={{background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:12,fontWeight:800}}>PREMIUM</span>
             {source==="capitoltrades"&&<span style={{background:"rgba(16,185,129,0.12)",color:"#10B981",border:"1px solid rgba(16,185,129,0.25)",borderRadius:8,fontSize:10,fontWeight:700,padding:"2px 7px"}}>🔴 LIVE</span>}
           </h1>
           <p style={{color:C.muted,fontSize:13,margin:0}}>
@@ -16805,11 +16805,11 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       <h2 style={{color:C.text,fontWeight:800,fontSize:22,marginBottom:8}}>{isEN?"Advanced Screener":"Screener Avanzado"}</h2>
       <p style={{color:C.muted,fontSize:15,marginBottom:24,lineHeight:1.6}}>
         {isEN
-          ? "Scan stocks, options, intraday setups and scalping opportunities with AI-powered signals. VIP exclusive."
-          : "Escanea acciones, opciones, setups intraday y scalping con señales potenciadas por IA. Exclusivo VIP."}
+          ? "Scan stocks, options, intraday setups and scalping opportunities with AI-powered signals. PREMIUM exclusive."
+          : "Escanea acciones, opciones, setups intraday y scalping con señales potenciadas por IA. Exclusivo PREMIUM."}
       </p>
       <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#8B5CF6,#6366F1)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontWeight:800,fontSize:16,cursor:"pointer",boxShadow:"0 4px 20px rgba(139,92,246,0.4)"}}>
-        ✦ {isEN?"Unlock VIP":"Desbloquear VIP"}
+        ✦ {isEN?"Unlock PREMIUM":"Desbloquear PREMIUM"}
       </button>
     </div>
   );
@@ -16883,7 +16883,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           <div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
               <span style={{fontSize:22,fontWeight:900,color:C.text,letterSpacing:"-0.5px"}}>🔬 {isEN?"Advanced Screener":"Screener Avanzado"}</span>
-              <span style={{background:"linear-gradient(135deg,#8B5CF6,#6366F1)",color:"#fff",fontSize:10,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>VIP</span>
+              <span style={{background:"linear-gradient(135deg,#8B5CF6,#6366F1)",color:"#fff",fontSize:10,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
               {/* Live indicator */}
               <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:20,padding:"3px 10px"}}>
                 <div style={{width:7,height:7,borderRadius:"50%",background:wsStatus==="live"?"#10B981":"#F59E0B",boxShadow:wsStatus==="live"?"0 0 6px #10B981":"0 0 6px #F59E0B",animation:"pulse 1.5s infinite"}}/>
@@ -17564,10 +17564,10 @@ function TermsPage({onBack, lang}){
           :"Eres responsable de mantener la confidencialidad de las credenciales de tu cuenta. Debes tener al menos 18 años para usar NexoTrade. Se permite una cuenta por persona."
         }</p>
       </LegalSection>
-      <LegalSection title={isEN?"5. VIP Membership":"5. Membresía VIP"}>
+      <LegalSection title={isEN?"5. PREMIUM Membership":"5. Membresía PREMIUM"}>
         <p>{isEN
-          ?"VIP memberships are billed monthly at $9.99/month. You may cancel at any time. Refunds are not provided for partial billing periods. Features included in VIP may change with notice."
-          :"Las membresías VIP se facturan mensualmente a $9.99/mes. Puedes cancelar en cualquier momento. No se proporcionan reembolsos por períodos de facturación parciales. Las características incluidas en VIP pueden cambiar con aviso previo."
+          ?"PREMIUM memberships are billed monthly at $9.99/month. You may cancel at any time. Refunds are not provided for partial billing periods. Features included in PREMIUM may change with notice."
+          :"Las membresías PREMIUM se facturan mensualmente a $9.99/mes. Puedes cancelar en cualquier momento. No se proporcionan reembolsos por períodos de facturación parciales. Las características incluidas en PREMIUM pueden cambiar con aviso previo."
         }</p>
       </LegalSection>
       <LegalSection title={isEN?"6. Modifications":"6. Modificaciones"}>
@@ -17828,8 +17828,8 @@ function AdminDashboard(){
         {[
           {icon:"👥",label:"Usuarios totales",value:stats.totalUsers,color:"#10b981",sub:`+${stats.newWeek} esta semana`},
           {icon:"🆕",label:"Nuevos hoy",value:stats.newToday,color:"#3b82f6",sub:"registros de hoy"},
-          {icon:"✦",label:"Miembros VIP",value:stats.vipCount,color:"#a78bfa",sub:`$${(stats.vipCount*9.99).toFixed(0)}/mes estimado`},
-          {icon:"💰",label:"MRR estimado",value:`$${ingresoEstimado}`,color:"#f59e0b",sub:"solo Stripe VIP"},
+          {icon:"✦",label:"Miembros PREMIUM",value:stats.vipCount,color:"#a78bfa",sub:`$${(stats.vipCount*9.99).toFixed(0)}/mes estimado`},
+          {icon:"💰",label:"MRR estimado",value:`$${ingresoEstimado}`,color:"#f59e0b",sub:"solo Stripe PREMIUM"},
           {icon:"📝",label:"Posts hoy",value:stats.postsHoy,color:"#06b6d4",sub:`${stats.totalPosts} en total`},
           {icon:"📧",label:"Newsletter",value:stats.totalSubs,color:"#ec4899",sub:"emails capturados"},
         ].map((k,i)=>(
@@ -17861,7 +17861,7 @@ function AdminDashboard(){
           <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
             <h3 style={{margin:"0 0 16px",color:C.text,fontSize:14,fontWeight:800}}>💰 Ingresos estimados</h3>
             {[
-              {label:"VIP $9.99/mes",value:`$${(stats.vipCount*9.99).toFixed(2)}`,color:"#a78bfa"},
+              {label:"PREMIUM $9.99/mes",value:`$${(stats.vipCount*9.99).toFixed(2)}`,color:"#a78bfa"},
               {label:"Webinars (promedio 2/mes)",value:"$0.00 — pendiente Stripe",color:C.muted2},
               {label:"Cursos",value:"$0.00 — pendiente Stripe",color:C.muted2},
               {label:"Job Board",value:"$0.00 — pendiente",color:C.muted2},
@@ -17878,7 +17878,7 @@ function AdminDashboard(){
               {label:"Nuevos usuarios",value:`+${stats.newWeek}`,color:"#10b981"},
               {label:"Posts publicados",value:`+${stats.postsHoy} hoy`,color:"#3b82f6"},
               {label:"Emails newsletter",value:`${stats.totalSubs} total`,color:"#ec4899"},
-              {label:"Ratio VIP/Total",value:`${stats.totalUsers>0?((stats.vipCount/stats.totalUsers)*100).toFixed(1):0}%`,color:"#f59e0b"},
+              {label:"Ratio PREMIUM/Total",value:`${stats.totalUsers>0?((stats.vipCount/stats.totalUsers)*100).toFixed(1):0}%`,color:"#f59e0b"},
             ].map((r,i)=>(
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:i<3?`1px solid ${C.border}`:"none"}}>
                 <span style={{color:C.muted,fontSize:13}}>{r.label}</span>
@@ -17898,7 +17898,7 @@ function AdminDashboard(){
               {l:"Total registrados",v:stats.totalUsers,c:"#10b981"},
               {l:"Nuevos esta semana",v:stats.newWeek,c:"#3b82f6"},
               {l:"Nuevos hoy",v:stats.newToday,c:"#f59e0b"},
-              {l:"Miembros VIP activos",v:stats.vipCount,c:"#a78bfa"},
+              {l:"Miembros PREMIUM activos",v:stats.vipCount,c:"#a78bfa"},
               {l:"Usuarios free",v:stats.totalUsers-stats.vipCount,c:C.muted},
               {l:"Conversión VIP",v:`${stats.totalUsers>0?((stats.vipCount/stats.totalUsers)*100).toFixed(1):0}%`,c:"#ec4899"},
             ].map((s,i)=>(
@@ -17972,7 +17972,7 @@ function WelcomeModal({name, onClose, onGoVip}){
     {emoji:"📈", titulo:"Publica tu primera idea", desc:"Comparte tu análisis con miles de traders"},
     {emoji:"👥", titulo:"Sigue a top traders",     desc:"Descubre quién está ganando en el leaderboard"},
     {emoji:"🎮", titulo:"Paper trading $100k",     desc:"Practica sin arriesgar dinero real"},
-    {emoji:"✦",  titulo:"Hazte VIP por $9.99/mes", desc:"Picks semanales, señales y mucho más"},
+    {emoji:"✦",  titulo:"Hazte PREMIUM por $9.99/mes", desc:"Picks semanales, señales y mucho más"},
   ];
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
@@ -18011,7 +18011,7 @@ function WelcomeModal({name, onClose, onGoVip}){
 
         {/* CTAs */}
         <div style={{display:"flex",gap:10,flexDirection:"column"}}>
-          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",width:"100%"}}>✦ Ver plan VIP — 50% en webinars</button>
+          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#7C3AED,#4c1d95)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",width:"100%"}}>✦ Ver plan PREMIUM — 50% en webinars</button>
           <button onClick={onClose} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:12,padding:"11px",color:C.muted,fontSize:13,fontWeight:600,cursor:"pointer",width:"100%"}}>Explorar el feed →</button>
         </div>
       </div>
@@ -18165,7 +18165,7 @@ export default function App(){
       {n:"Luis H.",loc:"Perú"},        {n:"Camila T.",loc:"Venezuela"},
       {n:"Javier O.",loc:"México"},    {n:"Isabella N.",loc:"Colombia"},
     ];
-    const actions=["se acaba de registrar 🎉","compró membresía VIP ⭐","hizo su primer pick 🎯","se unió a la comunidad 🚀"];
+    const actions=["se acaba de registrar 🎉","compró membresía PREMIUM ⭐","hizo su primer pick 🎯","se unió a la comunidad 🚀"];
     let idx=0;
     const show=()=>{
       const p=names[idx%names.length];
@@ -18255,7 +18255,7 @@ export default function App(){
         const reg = await navigator.serviceWorker.ready;
         // Solo mostramos notificación de bienvenida local (no requiere servidor)
         reg.showNotification("🔔 NexoTrade activado",{
-          body:"Te avisaremos cuando haya picks VIP nuevos y posts trending.",
+          body:"Te avisaremos cuando haya picks PREMIUM nuevos y posts trending.",
           icon:"/logo_nexo.png",
           badge:"/favicon.svg",
           tag:"nexo-welcome-push",
@@ -19150,13 +19150,13 @@ export default function App(){
         </div>
         {/* ── ROW 2: VIP TABS ── */}
         <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"linear-gradient(90deg,rgba(245,158,11,0.02),rgba(245,158,11,0.05),rgba(245,158,11,0.02))",borderTop:"1px solid rgba(245,158,11,0.13)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
-          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:0.9,color:"#F59E0B",background:"linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.07))",border:"1.5px solid rgba(245,158,11,0.26)",borderRadius:7,padding:"3px 10px",margin:"0 18px 0 0",whiteSpace:"nowrap",boxShadow:"0 0 8px rgba(245,158,11,0.08)"}}>👑 VIP</span>
+          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:0.9,color:"#F59E0B",background:"linear-gradient(135deg,rgba(245,158,11,0.22),rgba(245,158,11,0.10))",border:"1.5px solid rgba(245,158,11,0.45)",borderRadius:7,padding:"3px 10px",margin:"0 18px 0 0",whiteSpace:"nowrap",boxShadow:"0 0 10px rgba(245,158,11,0.15)",cursor:"pointer",transition:"all 0.2s"}}>👑 PREMIUM</span>
           {[
-            {label:lang==="en"?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,locked:!effectivePremium},
-            {label:lang==="en"?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,locked:!effectivePremium},
+            {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
+            {label:lang==="en"?"🐋 Flujo PREMIUM":"🐋 Flujo PREMIUM",idx:20,locked:!effectivePremium},
             {label:"🏛️ Wall St. & Capitol",idx:19,locked:!effectivePremium},
             {label:lang==="en"?"🔬 Screener":"🔬 Screener",idx:36,locked:!effectivePremium},
-            {label:lang==="en"?"💼 Portfolio":"💼 Portfolio",idx:37,locked:!effectivePremium},
+            {label:lang==="en"?"💼 Oracle IA":"💼 Oracle IA",idx:37,locked:!effectivePremium},
             {label:"👁 Watchlist",idx:38},
             {label:lang==="en"?"🚨 Alerts":"🚨 Alertas",idx:42},
             {label:lang==="en"?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,locked:!effectivePremium},
@@ -19179,9 +19179,6 @@ export default function App(){
           </button>
         </div>
       </nav>
-
-      {/* TICKER STRIP — barra de precios en tiempo real */}
-      <TickerStrip/>
 
       {/* HERO LANDING */}
       {showLanding && page===0 && (
@@ -19285,7 +19282,7 @@ export default function App(){
                 <div style={{fontSize:18,fontWeight:900,color:"#10b981"}}>+2.8%</div>
               </div>
               <div style={{position:"absolute",bottom:-12,left:-12,background:"rgba(15,23,42,0.97)",border:"1px solid #7C3AED44",borderRadius:12,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
-                <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>{lang==="en"?"VIP this week":"VIP esta semana"}</div>
+                <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>{lang==="en"?"PREMIUM this week":"PREMIUM esta semana"}</div>
                 <div style={{fontSize:13,fontWeight:800,color:"#a78bfa"}}>{lang==="en"?"✦ 10 picks ready":"✦ 10 picks listos"}</div>
               </div>
             </div>
@@ -19323,13 +19320,13 @@ export default function App(){
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20}}>
               {(lang==="en" ? [
                 {icon:"📊",t:"Traders Feed",d:"See real-time analyses and strategies from thousands of Hispanic investors. Filter by bullish, bearish or trending.",c:"#10b981"},
-                {icon:"🎯",t:"Weekly VIP Picks",d:"Every Monday 9AM: 10 stocks selected by our top-performing traders with proven track records.",c:"#a78bfa"},
+                {icon:"🎯",t:"Weekly PREMIUM Picks",d:"Every Monday 9AM: 10 stocks selected by our top-performing traders with proven track records.",c:"#a78bfa"},
                 {icon:"🤖",t:"Trading AI",d:"Chat with our market-specialized AI. Analyze tickers, strategies and risk management.",c:"#3b82f6"},
                 {icon:"🎮",t:"Paper Trading",d:"Practice with $100,000 virtual. Compete on the leaderboard and prove your strategy before risking real money.",c:"#f59e0b"},
                 {icon:"🎓",t:"Academy & Webinars",d:"Recorded courses ($39-$99) and live webinars ($29-$79). Learn technical analysis, crypto, options and more.",c:"#ef4444"},
               ] : [
                 {icon:"📊",t:"Feed de Traders",d:"Ve análisis y estrategias en tiempo real de miles de inversores hispanos. Filtra por alcistas, bajistas o trending.",c:"#10b981"},
-                {icon:"🎯",t:"Picks VIP Semanales",d:"Cada lunes 9AM: 10 acciones seleccionadas por nuestros traders con mayor historial de aciertos.",c:"#a78bfa"},
+                {icon:"🎯",t:"Picks PREMIUM Semanales",d:"Cada lunes 9AM: 10 acciones seleccionadas por nuestros traders con mayor historial de aciertos.",c:"#a78bfa"},
                 {icon:"🤖",t:"IA de Trading",d:"Chatea con nuestra IA especializada en mercados. Analiza tickers, estrategias y gestión de riesgo.",c:"#3b82f6"},
                 {icon:"🎮",t:"Paper Trading",d:"Practica con $100,000 virtuales. Compite en el leaderboard y demuestra tu estrategia antes de arriesgar.",c:"#f59e0b"},
                 {icon:"🎓",t:"Academia & Webinars",d:"Cursos grabados ($39-$99) y webinars en vivo ($29-$79). Aprende análisis técnico, crypto, opciones y más.",c:"#ef4444"},
@@ -19356,11 +19353,11 @@ export default function App(){
               {(lang==="en" ? [
                 {n:"1",icon:"📝",t:"Create your free account",d:"In 30 seconds. Just your email."},
                 {n:"2",icon:"📊",t:"Explore the feed",d:"See real trader analyses. Follow the best."},
-                {n:"3",icon:"💰",t:"Start winning",d:"Apply the strategies. Go VIP for exclusive picks."},
+                {n:"3",icon:"💰",t:"Start winning",d:"Apply the strategies. Go PREMIUM for exclusive picks."},
               ] : [
                 {n:"1",icon:"📝",t:"Crea tu cuenta gratis",d:"En 30 segundos. Solo necesitas un email."},
                 {n:"2",icon:"📊",t:"Explora el feed",d:"Ve análisis de traders reales. Sigue a los mejores."},
-                {n:"3",icon:"💰",t:"Empieza a ganar",d:"Aplica las estrategias. Hazte VIP para los picks exclusivos."},
+                {n:"3",icon:"💰",t:"Empieza a ganar",d:"Aplica las estrategias. Hazte PREMIUM para los picks exclusivos."},
               ]).map((s,i)=>(
                 <div key={i} style={{flex:"1 1 220px",maxWidth:280,padding:"0 20px",position:"relative"}}>
                   {i<2&&<div style={{position:"absolute",top:28,right:-10,width:20,height:2,background:"linear-gradient(90deg,#10b981,#3b82f6)",display:"block"}} className="nexo-step-line"/>}
@@ -19384,7 +19381,7 @@ export default function App(){
             <p style={{textAlign:"center",margin:"0 0 44px",color:"#64748b",fontSize:15}}>{lang==="en"?"Real investors, real results":"Inversores reales, resultados reales"}</p>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20}}>
               {[
-                {n:"María G.",loc:"México",e:"🦅",c:"#10b981",r:5,t:"Los picks VIP son increíbles. En 3 meses duplicé mi portafolio siguiendo las señales. Antes no sabía ni qué era un stop loss."},
+                {n:"María G.",loc:"México",e:"🦅",c:"#10b981",r:5,t:"Los picks PREMIUM son increíbles. En 3 meses duplicé mi portafolio siguiendo las señales. Antes no sabía ni qué era un stop loss."},
                 {n:"Carlos R.",loc:"Colombia",e:"🐺",c:"#7C3AED",r:5,t:"La comunidad es lo mejor. Antes invertía solo y cometía muchos errores. Aquí aprendí análisis técnico real de traders con historial probado."},
                 {n:"Ana T.",loc:"Argentina",e:"🦁",c:"#F59E0B",r:5,t:"El webinar de opciones me cambió la vida. Ahora genero ingresos extra con covered calls cada mes. Vale cada peso que pagué."},
                 {n:"Luis M.",loc:"España",e:"🐉",c:"#3b82f6",r:5,t:"El bot de IA me ayuda a filtrar las mejores oportunidades. Le pregunto sobre cualquier ticker y me da análisis al nivel de un profesional."},
@@ -19417,7 +19414,7 @@ export default function App(){
             {/* Badge ahorro anual */}
             <div style={{textAlign:"center",marginBottom:36}}>
               <span style={{background:"rgba(0,210,106,0.12)",border:"1px solid rgba(0,210,106,0.3)",borderRadius:20,padding:"5px 16px",color:"#10b981",fontSize:12,fontWeight:700}}>
-                {lang==="en"?"💡 Annual VIP plan: $79.99/yr — save $39.89 (33% OFF)":"💡 Plan anual VIP: $79.99/año — ahorra $39.89 (33% OFF)"}
+                {lang==="en"?"💡 Annual PREMIUM plan: $79.99/yr — save $39.89 (33% OFF)":"💡 Plan anual PREMIUM: $79.99/año — ahorra $39.89 (33% OFF)"}
               </span>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,alignItems:"start"}}>
@@ -19432,7 +19429,7 @@ export default function App(){
                     {t:"Paper trading $100k virtuales",ok:true},
                     {t:"Leaderboard de la comunidad",ok:true},
                     {t:"IA NEXO básico (10 consultas/día)",ok:true},
-                    {t:"Picks VIP semanales",ok:false},
+                    {t:"Picks PREMIUM semanales",ok:false},
                     {t:"Señales de trading en vivo",ok:false},
                     {t:"Alertas de precio",ok:false},
                     {t:"Descuentos en webinars",ok:false},
@@ -19440,28 +19437,28 @@ export default function App(){
                   cta:"Empezar gratis",action:()=>setAuth("register")
                 },
                 {
-                  plan:"VIP ✦",badge:"⚡ MÁS POPULAR",
+                  plan:"PREMIUM ✦",badge:"⚡ MÁS POPULAR",
                   precio:"$9.99",periodo:"/mes · o $79.99/año",
                   color:"#a78bfa",bg:"linear-gradient(135deg,#1a0f2e,#1e1040)",border:"#7C3AED",btnBg:"linear-gradient(135deg,#7C3AED,#4c1d95)",btnBorder:"#7C3AED",
                   featured:true,
                   features:[
                     {t:"Todo lo del plan Free",ok:true},
-                    {t:"10 picks VIP semanales (lunes 9am)",ok:true},
+                    {t:"10 picks PREMIUM semanales (lunes 9am)",ok:true},
                     {t:"Señales de trading en vivo",ok:true},
                     {t:"Alertas de precio ilimitadas",ok:true},
                     {t:"50% OFF en webinars y cursos",ok:true},
-                    {t:"Badge VIP en tu perfil",ok:true},
+                    {t:"Badge PREMIUM en tu perfil",ok:true},
                     {t:"IA NEXO ilimitado",ok:true},
-                    {t:"Herramientas VIP exclusivas",ok:true},
+                    {t:"Herramientas PREMIUM exclusivas",ok:true},
                   ],
-                  cta:"Probar VIP",action:()=>setAuth("register")
+                  cta:"Probar PREMIUM",action:()=>setAuth("register")
                 },
                 {
                   plan:"PRO 🚀",badge:"Para traders serios",
                   precio:"$24.99",periodo:"/mes",
                   color:"#00A8FF",bg:"linear-gradient(135deg,#061828,#082038)",border:"#00A8FF",btnBg:"linear-gradient(135deg,#00A8FF,#0066CC)",btnBorder:"#00A8FF",
                   features:[
-                    {t:"Todo lo del plan VIP",ok:true},
+                    {t:"Todo lo del plan PREMIUM",ok:true},
                     {t:"Señales PRO con R:R detallado",ok:true},
                     {t:"Acceso anticipado a picks (dom 8pm)",ok:true},
                     {t:"Análisis técnico IA sin límite",ok:true},
@@ -19500,7 +19497,7 @@ export default function App(){
                     onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
                     {p.cta} →
                   </button>
-                  {p.plan==="VIP ✦"&&<div style={{textAlign:"center",marginTop:10,color:"#475569",fontSize:11}}>o $79.99/año (ahorra $39.89) · sin tarjeta para probar</div>}
+                  {p.plan==="PREMIUM ✦"&&<div style={{textAlign:"center",marginTop:10,color:"#475569",fontSize:11}}>o $79.99/año (ahorra $39.89) · sin tarjeta para probar</div>}
                 </div>
               ))}
             </div>
@@ -19627,7 +19624,7 @@ export default function App(){
           <div style={{fontSize:28,flexShrink:0}}>🔔</div>
           <div style={{flex:1}}>
             <div style={{color:C.text,fontWeight:800,fontSize:14,marginBottom:4}}>¿Activar notificaciones?</div>
-            <div style={{color:C.muted2,fontSize:12,lineHeight:1.5,marginBottom:14}}>Te avisamos cuando haya picks VIP nuevos, posts trending y alertas de precio.</div>
+            <div style={{color:C.muted2,fontSize:12,lineHeight:1.5,marginBottom:14}}>Te avisamos cuando haya picks PREMIUM nuevos, posts trending y alertas de precio.</div>
             <div style={{display:"flex",gap:8}}>
               <button onClick={activarPush} style={{flex:1,background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Activar →</button>
               <button onClick={()=>{setShowPushPrompt(false);localStorage.setItem("nexo-push-asked","1");}} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 14px",color:C.muted2,fontSize:12,cursor:"pointer"}}>Ahora no</button>
