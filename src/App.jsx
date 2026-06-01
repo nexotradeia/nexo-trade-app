@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 09:52:25
+// NEXO TRADE — build: 2026-06-01 10:03:46
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10503,10 +10503,9 @@ function FlowPage({isPremium,onNeedPremium}){
               <div style={{fontSize:12,color:C.text,fontFamily:"monospace"}}>{item.strike?`$${item.strike}`:"—"}</div>
               <div style={{fontSize:11,color:C.muted}}>{item.expiry||"—"}</div>
               <div style={{fontSize:11,color:item.otm>5?"#F59E0B":C.muted}}>{item.otm?`${item.otm}% OTM`:"—"}</div>
-              <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
-                {isTop&&<span style={{background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",borderRadius:6,padding:"2px 7px",fontSize:9,fontWeight:900,letterSpacing:.4,boxShadow:"0 1px 8px rgba(255,100,0,0.5)"}}>🔥 TOP PICK</span>}
-                <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 10px",fontSize:10,fontWeight:700}}>
-                  {bull?"▲ BULLISH":"▼ BEARISH"}
+              <div style={{display:"flex",alignItems:"center",gap:4}}>
+                <span style={{background:isTop?"linear-gradient(135deg,#FF6000,#FF8C00)":bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:isTop?"#fff":bull?bullC:bearC,borderRadius:6,padding:"2px 10px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>
+                  {isTop?"🔥 TOP PICK":bull?"▲ BULLISH":"▼ BEARISH"}
                 </span>
               </div>
             </div>
