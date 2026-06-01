@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 19:49:12
+// NEXO TRADE — build: 2026-06-01 19:55:20
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4756,57 +4756,20 @@ function NexoTermometro() {
 }
 
 // ── TRENDING PAGE — Movers 24H ──────────────────────────────────────────────
-const DAILY_MOVERS = [
-  {
-    ticker:"ORCL", name:"Oracle Corp.", sector:"Cloud/IA",
-    mentions:847, badge:"VIRAL", badgeColor:"#EF4444", badgeIcon:"🔥",
-    bull:94, bear:6,
-    why:"Earnings Q4 sorpresa positiva. Contratos cloud con OpenAI anunciados. Volumen 8x el promedio.",
-    volX:8, volLabel:"18.4M",
-    sparkDir:"up", flames:3,
-    fallbackPrice:248.15, fallbackChg:9.91,
-    rankColor:"#F59E0B",
-  },
-  {
-    ticker:"AMZN", name:"Amazon.com", sector:"E-Commerce/Cloud",
-    mentions:412, badge:"BAJISTA", badgeColor:"#6366F1", badgeIcon:"📉",
-    bull:38, bear:62,
-    why:"Corrección tras subida de 12%. Dudas sobre márgenes en AWS. Volumen vendedor institucional elevado.",
-    volX:4, volLabel:"31M",
-    sparkDir:"down", flames:2,
-    fallbackPrice:261.26, fallbackChg:-3.47,
-    rankColor:"#94A3B8",
-  },
-  {
-    ticker:"AAPL", name:"Apple Inc.", sector:"Tech/Hardware",
-    mentions:284, badge:"ATENCIÓN", badgeColor:"#F59E0B", badgeIcon:"⚠️",
-    bull:52, bear:48,
-    why:"Rumores de retraso en iPhone 18. Analistas reducen precio objetivo. Soporte clave en $300 en la mira.",
-    volX:3, volLabel:"24M",
-    sparkDir:"down", flames:2,
-    fallbackPrice:306.21, fallbackChg:-1.84,
-    rankColor:"#CD7F32",
-  },
-  {
-    ticker:"NVDA", name:"NVIDIA Corp.", sector:"Semiconductores/IA",
-    mentions:198, badge:"GOLDEN", badgeColor:"#F59E0B", badgeIcon:"⭐",
-    bull:82, bear:18,
-    why:"Nuevo contrato con Microsoft Azure para chips H200. Golden Sweep $4.1M detectado esta tarde.",
-    volX:5, volLabel:"58M",
-    sparkDir:"up", flames:2,
-    fallbackPrice:224.36, fallbackChg:6.26,
-    rankColor:"#64748B",
-  },
-  {
-    ticker:"BTC", name:"Bitcoin", sector:"Crypto",
-    mentions:156, badge:"WHALE", badgeColor:"#06B6D4", badgeIcon:"🐋",
-    bull:71, bear:29,
-    why:"Ballena movió $8.4M en opciones CALL. Congreso de EE.UU. debatiendo Bitcoin Reserve Act.",
-    volX:2, volLabel:"$42B",
-    sparkDir:"up", flames:1,
-    fallbackPrice:71126, fallbackChg:1.24,
-    rankColor:"#64748B",
-  },
+// Pool amplio — se seleccionan los 5 mayores movers en tiempo real
+const ALL_MOVERS_POOL = [
+  {ticker:"ORCL",name:"Oracle Corp.",sector:"Cloud/IA",bull:88,bear:12,why:"Earnings Q4 sorpresa positiva. Contratos cloud con OpenAI anunciados. Volumen 8x el promedio.",volX:8,volLabel:"18.4M",badge:"VIRAL",badgeColor:"#EF4444",badgeIcon:"🔥",flames:3,fallbackPrice:248.15,fallbackChg:9.91},
+  {ticker:"NVDA",name:"NVIDIA Corp.",sector:"Semiconductores/IA",bull:82,bear:18,why:"Nuevo contrato con Microsoft Azure para chips H200. Golden Sweep $4.1M detectado. Demanda record de Blackwell.",volX:5,volLabel:"58M",badge:"GOLDEN",badgeColor:"#F59E0B",badgeIcon:"⭐",flames:2,fallbackPrice:224.36,fallbackChg:6.26},
+  {ticker:"TSLA",name:"Tesla Inc.",sector:"EV/Auto",bull:41,bear:59,why:"Volumen vendedor institucional. Preocupación por márgenes Q2. Analistas recortan precio objetivo a $190.",volX:4,volLabel:"92M",badge:"BAJISTA",badgeColor:"#6366F1",badgeIcon:"📉",flames:2,fallbackPrice:332.18,fallbackChg:-4.12},
+  {ticker:"AMZN",name:"Amazon.com",sector:"E-Commerce/Cloud",bull:76,bear:24,why:"AWS acelera crecimiento. Analistas elevan precio objetivo a $280. Flujo institucional alcista detectado.",volX:4,volLabel:"31M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:2,fallbackPrice:261.26,fallbackChg:3.47},
+  {ticker:"AAPL",name:"Apple Inc.",sector:"Tech/Hardware",bull:52,bear:48,why:"Rumores de retraso en iPhone 18. Analistas reducen precio objetivo. Soporte clave en $300 en la mira.",volX:3,volLabel:"24M",badge:"ATENCIÓN",badgeColor:"#F59E0B",badgeIcon:"⚠️",flames:2,fallbackPrice:306.21,fallbackChg:-1.84},
+  {ticker:"META",name:"Meta Platforms",sector:"Social/IA",bull:84,bear:16,why:"Llama 4 supera benchmarks. Ingresos publicitarios Q2 baten estimados. Institucionales compran agresivo.",volX:6,volLabel:"21M",badge:"VIRAL",badgeColor:"#EF4444",badgeIcon:"🔥",flames:3,fallbackPrice:712.45,fallbackChg:5.83},
+  {ticker:"MSFT",name:"Microsoft Corp.",sector:"Cloud/IA",bull:79,bear:21,why:"Azure crece 35% YoY. Copilot supera 1M usuarios empresariales. Analistas elevan target a $520.",volX:3,volLabel:"19M",badge:"GOLDEN",badgeColor:"#F59E0B",badgeIcon:"⭐",flames:2,fallbackPrice:481.32,fallbackChg:2.91},
+  {ticker:"AMD",name:"Advanced Micro Devices",sector:"Semiconductores",bull:73,bear:27,why:"MI300X gana cuota a NVIDIA en centros de datos. Earnings beat. Analistas elevan precio objetivo.",volX:5,volLabel:"44M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:2,fallbackPrice:178.64,fallbackChg:4.55},
+  {ticker:"COIN",name:"Coinbase Global",sector:"Crypto/Fintech",bull:67,bear:33,why:"Volumen de trading crypto en máximos de 6 meses. Aprobación ETF Solana avanza en SEC. Flujo alcista.",volX:7,volLabel:"12M",badge:"WHALE",badgeColor:"#06B6D4",badgeIcon:"🐋",flames:2,fallbackPrice:284.90,fallbackChg:7.22},
+  {ticker:"NFLX",name:"Netflix Inc.",sector:"Streaming",bull:71,bear:29,why:"Suscriptores ad-tier crecen 34% QoQ. Deportes en vivo impulsa retención. Wall St. sube targets.",volX:3,volLabel:"6.2M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:2,fallbackPrice:1142.60,fallbackChg:2.18},
+  {ticker:"GOOGL",name:"Alphabet Inc.",sector:"Ads/Cloud/IA",bull:74,bear:26,why:"Gemini Ultra integrado en Workspace. Google Cloud acelera. Ingresos búsqueda resistentes pese a IA.",volX:4,volLabel:"22M",badge:"GOLDEN",badgeColor:"#F59E0B",badgeIcon:"⭐",flames:2,fallbackPrice:196.40,fallbackChg:3.67},
+  {ticker:"BTC",name:"Bitcoin",sector:"Crypto",bull:71,bear:29,why:"Ballena movió $8.4M en opciones CALL. Congreso EE.UU. debate Bitcoin Reserve Act. ETF inflows $400M.",volX:2,volLabel:"$42B",badge:"WHALE",badgeColor:"#06B6D4",badgeIcon:"🐋",flames:1,fallbackPrice:71126,fallbackChg:1.24},
 ];
 
 function MoverSparkline({dir, chg}){
@@ -4835,30 +4798,42 @@ function MoverSparkline({dir, chg}){
 function TrendingPage({posts=[]}){
   const [quotes,setQuotes]=useState({});
   const [loading,setLoading]=useState(true);
+  const [refreshing,setRefreshing]=useState(false);
   const [lastUpdate,setLastUpdate]=useState(null);
+  const [top5,setTop5]=useState(ALL_MOVERS_POOL.slice(0,5));
 
-  const fetchQuotes=useCallback(()=>{
-    setLoading(true);
-    const tickers = DAILY_MOVERS.map(m=>m.ticker);
-    Promise.all(
-      tickers.map(ticker=>
-        fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
-          .then(r=>r.json())
-          .then(q=>({ticker, price:q.c&&q.c>0?q.c:null, change:q.dp??null}))
-          .catch(()=>({ticker, price:null, change:null}))
-      )
-    ).then(results=>{
+  const fetchQuotes=useCallback(async(isRefresh=false)=>{
+    if(isRefresh) setRefreshing(true);
+    else setLoading(true);
+    const tickers=ALL_MOVERS_POOL.map(m=>m.ticker);
+    try{
+      const results=await Promise.all(
+        tickers.map(ticker=>
+          fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
+            .then(r=>r.json())
+            .then(q=>({ticker,price:q.c&&q.c>0?q.c:null,change:q.dp??null}))
+            .catch(()=>({ticker,price:null,change:null}))
+        )
+      );
       const q={};
       results.forEach(r=>{q[r.ticker]=r;});
       setQuotes(q);
+      // Sort pool by absolute % change (biggest movers first), pick top 5
+      const sorted=[...ALL_MOVERS_POOL].sort((a,b)=>{
+        const ca=Math.abs(q[a.ticker]?.change??a.fallbackChg);
+        const cb=Math.abs(q[b.ticker]?.change??b.fallbackChg);
+        return cb-ca;
+      });
+      setTop5(sorted.slice(0,5));
       setLastUpdate(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
-      setLoading(false);
-    });
+    }catch{}
+    setLoading(false);
+    setRefreshing(false);
   },[]);
 
-  useEffect(()=>{ fetchQuotes(); },[fetchQuotes]);
+  useEffect(()=>{ fetchQuotes(false); },[fetchQuotes]);
   useEffect(()=>{
-    const t=setInterval(fetchQuotes,60000);
+    const t=setInterval(()=>fetchQuotes(false),60000);
     return()=>clearInterval(t);
   },[fetchQuotes]);
 
@@ -4880,14 +4855,20 @@ function TrendingPage({posts=[]}){
         <span style={{background:"rgba(239,68,68,0.12)",color:"#EF4444",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,border:"1px solid rgba(239,68,68,0.25)"}}>
           ● ÚLTIMAS 24H
         </span>
+        {/* Refresh button */}
+        <button onClick={()=>fetchQuotes(true)} disabled={refreshing||loading}
+          style={{display:"flex",alignItems:"center",gap:5,background:refreshing?"rgba(0,168,255,0.15)":"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:20,padding:"4px 13px",fontSize:11,fontWeight:700,color:"#00A8FF",cursor:refreshing?"not-allowed":"pointer",transition:"all 0.2s"}}>
+          <span style={{display:"inline-block",animation:refreshing?"spin 0.7s linear infinite":"none",fontSize:12}}>🔄</span>
+          {refreshing?"Actualizando…":"Refrescar"}
+        </button>
         <span style={{marginLeft:"auto",fontSize:11,color:"#22c55e",fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
           <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>
-          {loading?"Actualizando…":`En vivo · ${lastUpdate}`}
+          {loading&&!refreshing?"Cargando…":`En vivo · ${lastUpdate||"--:--"}`}
         </span>
       </div>
 
       {/* Cards */}
-      {DAILY_MOVERS.map((m,i)=>{
+      {top5.map((m,i)=>{
         const q=quotes[m.ticker]||{};
         const price = q.price ?? m.fallbackPrice;
         const chg   = q.change ?? m.fallbackChg;
