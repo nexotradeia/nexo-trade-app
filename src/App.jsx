@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 16:31:51
+// NEXO TRADE — build: 2026-06-01 16:43:30
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10291,6 +10291,25 @@ function FlowPage({isPremium,onNeedPremium}){
   const [whalePaused,setWhalePaused]=useState(false);
   // Telegram alerted ref — must be BEFORE any early return (rules of hooks)
   const alertedRef=useRef(new Set());
+  // Whale Alert popup
+  const [whaleAlert,setWhaleAlert]=useState(null);
+  const whaleAlertTimer=useRef(null);
+  // Expandable rows
+  const [expandedId,setExpandedId]=useState(null);
+  // Hourly candles — generated once, deterministic
+  const [hourlyCandles]=useState(()=>{
+    const HRS=["8AM","9AM","10AM","11AM","12PM","1PM","2PM","NOW"];
+    const seeds=[3.2,5.8,4.1,7.3,6.0,8.9,5.5,9.4];
+    return HRS.map((h,i)=>{
+      const base=seeds[i];
+      const isUp=[1,1,0,1,0,1,1,1][i];
+      const open=base;
+      const close=isUp?base*1.22:base*0.81;
+      const high=Math.max(open,close)*1.07;
+      const low=Math.min(open,close)*0.94;
+      return{h,open,close,high,low,isUp:!!isUp};
+    });
+  });
 
   const fetchWhales=async()=>{
     setWhaleLoad(true); setWhaleErr(false);
@@ -10334,6 +10353,12 @@ function FlowPage({isPremium,onNeedPremium}){
       setHighlight(item.id);
       setFeed(prev=>[item,...prev.slice(0,49)]);
       setTimeout(()=>setHighlight(null),1200);
+      // 🐋 Whale Alert: show popup for orders ≥ $2M
+      if(item.premium>=2e6){
+        clearTimeout(whaleAlertTimer.current);
+        setWhaleAlert(item);
+        whaleAlertTimer.current=setTimeout(()=>setWhaleAlert(null),5000);
+      }
     },3500);
     return()=>clearInterval(iv);
   },[paused,isPremium]);
@@ -10413,8 +10438,82 @@ function FlowPage({isPremium,onNeedPremium}){
     });
   },[feed]);
 
+  // ── Stats strip computed values ──
+  const callItems=visible.filter(f=>f.isCall&&!f.isDark);
+  const putItems=visible.filter(f=>!f.isCall&&!f.isDark);
+  const totalCallPrem=callItems.reduce((s,f)=>s+f.premium,0);
+  const totalPutPrem=putItems.reduce((s,f)=>s+f.premium,0);
+  const totalFlowPrem=(totalCallPrem+totalPutPrem)||1;
+  const callPct=Math.round(totalCallPrem/totalFlowPrem*100);
+  const bigItem=visible.length?visible.reduce((b,f)=>f.premium>b.premium?f:b,visible[0]):null;
+  const ratio=totalPutPrem>0?(totalCallPrem/totalPutPrem).toFixed(1):"∞";
+
+  // ── IA analysis for expanded row (deterministic per item) ──
+  const getIA=(item)=>{
+    const n=typeof item.id==="number"?item.id:parseInt(String(item.id))||999;
+    const seed=(n*31+17)%100;
+    const iv=(18+seed*0.38+(parseFloat(item.otm)||3)*1.8).toFixed(1);
+    const delta=item.isCall?(0.28+seed*0.004).toFixed(2):(-(0.28+seed*0.004)).toFixed(2);
+    const oi=((seed*1237+4800)).toLocaleString("en-US");
+    const score=scoreItem(item);
+    const tier=item.premium>=3e6?"muy alta":item.premium>=1e6?"alta":"moderada";
+    const bull=item.isCall;
+    const prem=fmt$(item.premium);
+    const ticker=item.ticker;
+    const expStr=item.expiry?` con expiry ${item.expiry}`:"";
+    const otmStr=item.otm?` a ${item.otm}% OTM`:"";
+    const analyses=[
+      bull
+        ?`Institución acumula $${ticker} ${prem} en calls${otmStr}${expStr}. Convicción ${tier}. El tamaño implica posicionamiento direccional alcista o cobertura de short. Score: ${score}/100.`
+        :`Put block de ${prem} en $${ticker}${otmStr}${expStr}. Convicción ${tier}. Posible cobertura defensiva de cartera larga o apuesta bajista de mano fuerte. Score: ${score}/100.`,
+      bull
+        ?`Call sweep agresivo en $${ticker} — ${prem}${otmStr}. La velocidad de ejecución y el tamaño sugieren información asimétrica. Monitorear catalizadores próximos${expStr}.`
+        :`Flujo de puts en $${ticker} inusualmente grande (${prem}). IV elevada (${iv}%) implica que el mercado está priceando volatilidad. Posible evento binario cercano.`,
+    ];
+    return{iv,delta,oi,score,analysis:analyses[seed%2]};
+  };
+
   return(
     <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto"}}>
+
+      {/* ── 🐋 WHALE ALERT POPUP ── */}
+      {whaleAlert&&(
+        <div style={{position:"fixed",top:20,right:20,zIndex:9990,animation:"whaleSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1)"}}
+          onClick={()=>setWhaleAlert(null)}>
+          <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.96))",border:`2px solid ${whaleAlert.isCall?"rgba(0,210,106,0.6)":"rgba(255,77,106,0.6)"}`,borderRadius:18,padding:"16px 20px",minWidth:300,maxWidth:360,boxShadow:`0 8px 40px ${whaleAlert.isCall?"rgba(0,210,106,0.3)":"rgba(255,77,106,0.3)"},0 0 0 1px rgba(255,255,255,0.05)`,cursor:"pointer",position:"relative",overflow:"hidden"}}>
+            {/* animated glow bg */}
+            <div style={{position:"absolute",inset:0,background:whaleAlert.isCall?"radial-gradient(ellipse at top right,rgba(0,210,106,0.08),transparent 70%)":"radial-gradient(ellipse at top right,rgba(255,77,106,0.08),transparent 70%)",pointerEvents:"none"}}/>
+            {/* countdown bar */}
+            <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:"rgba(255,255,255,0.06)",borderRadius:"0 0 18px 18px"}}>
+              <div style={{height:"100%",background:whaleAlert.isCall?"#00D26A":"#FF4D6A",borderRadius:"0 0 18px 18px",animation:"whaleCountdown 5s linear forwards"}}/>
+            </div>
+            <div style={{position:"relative"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                <span style={{fontSize:28,animation:"whaleBounce 0.6s ease infinite alternate"}}>🐋</span>
+                <div>
+                  <div style={{fontWeight:900,fontSize:13,color:"#F1F5F9",letterSpacing:0.3}}>WHALE ALERT</div>
+                  <div style={{fontSize:10,color:whaleAlert.isCall?"#00D26A":"#FF4D6A",fontWeight:800,letterSpacing:1}}>{whaleAlert.isCall?"▲ CALL MASIVO":"▼ PUT MASIVO"}</div>
+                </div>
+                <div style={{marginLeft:"auto",fontWeight:900,fontSize:22,color:whaleAlert.isCall?"#00D26A":"#FF4D6A",fontFamily:"monospace"}}>{fmt$(whaleAlert.premium)}</div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+                {[
+                  {l:"Ticker",v:whaleAlert.ticker,c:whaleAlert.isCall?"#00D26A":"#FF4D6A"},
+                  {l:"Strike",v:whaleAlert.strike?`$${whaleAlert.strike}`:"Dark Pool",c:"#F1F5F9"},
+                  {l:"Expiry",v:whaleAlert.expiry||"—",c:"#94A3B8"},
+                ].map(({l,v,c})=>(
+                  <div key={l} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 8px",textAlign:"center"}}>
+                    <div style={{fontSize:8,color:"#475569",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:2}}>{l}</div>
+                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:c}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:8,fontSize:10,color:"#475569",textAlign:"center"}}>Click para cerrar · Auto-cierra en 5s</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)"}}/>
@@ -10453,6 +10552,91 @@ function FlowPage({isPremium,onNeedPremium}){
         </div>
       </div>
 
+      {/* ── STATS STRIP ── */}
+      {filter!=="whales" && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginBottom:10}}>
+          {[
+            {l:"FLUJO CALLS",v:fmt$(totalCallPrem),c:"#00D26A",icon:"📈"},
+            {l:"FLUJO PUTS",v:fmt$(totalPutPrem),c:"#FF4D6A",icon:"📉"},
+            {l:"RATIO CALL/PUT",v:`${ratio}x`,c:parseFloat(ratio)>=2?"#00D26A":parseFloat(ratio)>=1?"#F59E0B":"#FF4D6A",icon:"⚖️",sub:parseFloat(ratio)>=2?"Muy alcista 🔥":parseFloat(ratio)>=1?"Neutral":"Bajista"},
+            {l:"ORDEN MÁS GRANDE",v:bigItem?fmt$(bigItem.premium):"—",c:"#F59E0B",icon:"👑",sub:bigItem?`${bigItem.ticker} ${bigItem.isCall?"CALL":"PUT"}`:""},
+            {l:"ÓRDENES TOTALES",v:visible.length,c:"#60A5FA",icon:"📊",sub:"Actualizado ahora"},
+          ].map(s=>(
+            <div key={s.l} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:12,padding:"12px 14px",position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${s.c},transparent)`}}/>
+              <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.8,textTransform:"uppercase",marginBottom:4}}>{s.icon} {s.l}</div>
+              <div style={{fontWeight:900,fontSize:18,color:s.c,fontFamily:"monospace",letterSpacing:-0.5}}>{s.v}</div>
+              {s.sub&&<div style={{fontSize:10,color:"#475569",marginTop:2}}>{s.sub}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── FLOW METER ── */}
+      {filter!=="whales" && (
+        <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:12,padding:"10px 14px",marginBottom:10}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontSize:11,fontWeight:800,color:"#00D26A"}}>▲ CALLS {callPct}% · {fmt$(totalCallPrem)}</span>
+            </div>
+            <div style={{fontSize:11,fontWeight:700,color:"#475569"}}>FLUJO NETO</div>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontSize:11,fontWeight:800,color:"#FF4D6A"}}>{fmt$(totalPutPrem)} · PUTS {100-callPct}% ▼</span>
+            </div>
+          </div>
+          <div style={{height:10,borderRadius:6,overflow:"hidden",display:"flex"}}>
+            <div style={{flex:callPct,background:"linear-gradient(90deg,#00A84080,#00D26A)",transition:"flex 0.5s ease"}}/>
+            <div style={{flex:100-callPct,background:"linear-gradient(90deg,#FF4D6A,#FF4D6A80)",transition:"flex 0.5s ease"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:9,color:"#334155"}}>
+            <span>Vol total: {fmt$(totalCallPrem+totalPutPrem)}</span>
+            <span>• {visible.length} órdenes</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── CANDLESTICK CHART ── */}
+      {filter!=="whales" && (()=>{
+        const maxH=Math.max(...hourlyCandles.map(c=>c.high));
+        const minL=Math.min(...hourlyCandles.map(c=>c.low));
+        const rng=maxH-minL||1;
+        const W=100; // viewBox width per candle slot
+        const H=80;  // viewBox height
+        const toY=(v)=>H-((v-minL)/rng)*(H-10)-5;
+        return(
+          <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:12,padding:"10px 14px",marginBottom:10}}>
+            <div style={{fontSize:10,fontWeight:700,color:"#475569",letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>📈 VOLUMEN DE ÓRDENES POR HORA</div>
+            <svg viewBox={`0 0 ${hourlyCandles.length*W} ${H+24}`} style={{width:"100%",height:90,overflow:"visible"}} preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(0,210,106,0.15)"/>
+                  <stop offset="100%" stopColor="rgba(0,210,106,0)"/>
+                </linearGradient>
+              </defs>
+              {hourlyCandles.map((c,i)=>{
+                const cx=i*W+W/2;
+                const bodyTop=Math.min(toY(c.open),toY(c.close));
+                const bodyBot=Math.max(toY(c.open),toY(c.close));
+                const bodyH=Math.max(bodyBot-bodyTop,2);
+                const col=c.isUp?"#00D26A":"#FF4D6A";
+                const colFill=c.isUp?"rgba(0,210,106,0.7)":"rgba(255,77,106,0.7)";
+                return(
+                  <g key={i}>
+                    {/* Wick */}
+                    <line x1={cx} y1={toY(c.high)} x2={cx} y2={toY(c.low)} stroke={col} strokeWidth="1.5" strokeOpacity="0.6"/>
+                    {/* Body */}
+                    <rect x={cx-12} y={bodyTop} width={24} height={bodyH} fill={colFill} rx="2"
+                      style={{filter:`drop-shadow(0 0 4px ${col}60)`}}/>
+                    {/* Hour label */}
+                    <text x={cx} y={H+18} textAnchor="middle" fontSize="9" fill="#334155" fontFamily="monospace">{c.h}</text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        );
+      })()}
+
       {/* Filter tabs */}
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
         {FILTERS.map(f=>(
@@ -10488,17 +10672,21 @@ function FlowPage({isPremium,onNeedPremium}){
           const bullC="#00D26A"; const bearC="#FF4D6A"; const darkC="#A78BFA"; const goldC="#F59E0B";
           const accentC=gold?goldC:dark?darkC:bull?bullC:bearC;
           const bigPrem=item.premium>=1e6;
+          const isExpanded=expandedId===item.id;
+          const ia=isExpanded?getIA(item):null;
           return(
-            <div key={item.id} style={{
+            <div key={item.id} style={{borderRadius:10,overflow:"hidden",marginBottom:0}}>
+            <div style={{
               display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",
               gap:6,padding:"10px 16px",
-              background:isTop?"rgba(255,100,0,0.08)":isNew?`${accentC}12`:gold?"rgba(245,158,11,0.04)":dark?"rgba(139,92,246,0.03)":"rgba(255,255,255,0.01)",
-              border:`1px solid ${isTop?"rgba(255,140,0,0.5)":isNew?accentC+"50":gold?"rgba(245,158,11,0.15)":dark?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)"}`,
+              background:isExpanded?`${accentC}18`:isTop?"rgba(255,100,0,0.08)":isNew?`${accentC}12`:gold?"rgba(245,158,11,0.04)":dark?"rgba(139,92,246,0.03)":"rgba(255,255,255,0.01)",
+              border:`1px solid ${isExpanded?accentC+"60":isTop?"rgba(255,140,0,0.5)":isNew?accentC+"50":gold?"rgba(245,158,11,0.15)":dark?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)"}`,
               borderLeft:`3px solid ${isTop?"#FF8C00":accentC}`,
-              borderRadius:10,transition:"all 0.3s",
+              borderBottom:isExpanded?"none":"inherit",
+              transition:"all 0.3s",
               boxShadow:isTop?"0 0 20px rgba(255,140,0,0.2)":isNew?`0 0 16px ${accentC}25`:"none",
-              position:"relative",
-            }}>
+              position:"relative",cursor:"pointer",
+            }} onClick={()=>setExpandedId(isExpanded?null:item.id)}>
               <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{item.time}</div>
               <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{isTop&&"🔥"}{item.ticker}</div>
               <div style={{fontSize:10,fontWeight:700}}>
@@ -10537,6 +10725,34 @@ function FlowPage({isPremium,onNeedPremium}){
                 </button>
               </div>
             </div>
+            </div>{/* closes row grid div */}
+            {/* ── EXPANDED AI PANEL ── */}
+            {isExpanded && ia && (
+              <div style={{background:`linear-gradient(135deg,${accentC}08,rgba(10,14,26,0.97))`,border:`1px solid ${accentC}30`,borderTop:"none",padding:"14px 18px",animation:"fadeIn 0.2s ease"}}>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+                  {[
+                    {l:"IV (Volatilidad Impl.)",v:ia.iv+"%",c:"#A78BFA"},
+                    {l:"Delta",v:ia.delta,c:bull?"#00D26A":"#FF4D6A"},
+                    {l:"Open Interest",v:ia.oi+" contr.",c:"#60A5FA"},
+                    {l:"IA Score",v:ia.score+"/100",c:ia.score>=70?"#00D26A":ia.score>=40?"#F59E0B":"#FF4D6A"},
+                  ].map(({l,v,c})=>(
+                    <div key={l} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"10px 12px",textAlign:"center"}}>
+                      <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:4}}>{l}</div>
+                      <div style={{fontFamily:"monospace",fontWeight:900,fontSize:15,color:c}}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid ${accentC}20`,borderRadius:10,padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:18,flexShrink:0}}>🤖</span>
+                  <div>
+                    <div style={{fontSize:10,fontWeight:800,color:accentC,marginBottom:4,letterSpacing:0.5}}>ANÁLISIS IA NEXO</div>
+                    <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.6}}>{ia.analysis}</div>
+                  </div>
+                </div>
+                <div style={{marginTop:8,fontSize:9,color:"#1E293B",textAlign:"right"}}>↑ Click en la fila para cerrar · Solo educativo</div>
+              </div>
+            )}
+            </div> {/* closes outer row wrapper */}
           );
         })}
       </div>
