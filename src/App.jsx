@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 19:26:45
+// NEXO TRADE — build: 2026-06-01 19:35:50
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10889,8 +10889,8 @@ function FlowPage({isPremium,onNeedPremium}){
             <div style={{
               display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",
               gap:6,padding:"10px 16px",
-              background:isExpanded?`${accentC}18`:isTop?"rgba(255,100,0,0.08)":isNew?`${accentC}12`:gold?"rgba(245,158,11,0.04)":dark?"rgba(139,92,246,0.03)":"rgba(255,255,255,0.01)",
-              border:`1px solid ${isExpanded?accentC+"60":isTop?"rgba(255,140,0,0.5)":isNew?accentC+"50":gold?"rgba(245,158,11,0.15)":dark?"rgba(139,92,246,0.1)":"rgba(255,255,255,0.04)"}`,
+              background:isExpanded?`${accentC}18`:isTop?"rgba(255,100,0,0.08)":isNew?`${accentC}12`:gold?"rgba(245,158,11,0.08)":dark?"rgba(139,92,246,0.06)":C.card2,
+              border:`1px solid ${isExpanded?accentC+"60":isTop?"rgba(255,140,0,0.5)":isNew?accentC+"50":gold?"rgba(245,158,11,0.25)":dark?"rgba(139,92,246,0.18)":C.border}`,
               borderLeft:`3px solid ${isTop?"#FF8C00":accentC}`,
               borderBottom:isExpanded?"none":"inherit",
               transition:"all 0.3s",
