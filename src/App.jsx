@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 10:33:56
+// NEXO TRADE — build: 2026-06-01 10:37:19
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -14390,13 +14390,18 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     if(!tickers.length){ setLoading(false); return; }
     setLoading(true);
     const cryptoMap={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT"};
-    const results = await Promise.all(tickers.map(async tk=>{
+    // Escalonar llamadas 300ms para evitar rate limit de Finnhub
+    const results = await Promise.all(tickers.map(async (tk,idx)=>{
+      await new Promise(res=>setTimeout(res,idx*300));
       const sym = cryptoMap[tk]||tk;
       try {
         const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
+        if(!r.ok) throw new Error("http "+r.status);
         const d = await r.json();
-        if(d.c>0) return {ticker:tk, price:d.c, change:d.dp||0, high:d.h||0, low:d.l||0, open:d.o||0, prev:d.pc||0};
-      } catch{}
+        // d.c = precio actual, d.pc = prev close como fallback
+        const price = d.c>0 ? d.c : (d.pc>0 ? d.pc : null);
+        if(price) return {ticker:tk, price, change:d.dp||0, high:d.h||price, low:d.l||price, open:d.o||price, prev:d.pc||price};
+      } catch(e){ console.warn("Finnhub",tk,e.message); }
       return {ticker:tk, price:null, change:null};
     }));
     const map={};
@@ -14472,6 +14477,11 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     AMD: {ytd:8.2,w52h:-22.4,w1:3.8,w2:6.4,w3:8.8,w4:12.4,m3:14.8,m6:8.4,beta:1.88,vol:44.8,pe:null,pb:4.8,roe:null,roa:null,margin:18.4,target:145,rating:"Buy",upside:18.4,analysts:42,eps:3.28,de:0.1,cr:2.8,qr:2.2,icov:null,fcf:2.14,div:0.0},
     ARM: {ytd:42.4,w52h:-8.4,w1:4.2,w2:8.4,w3:12.8,w4:18.4,m3:28.8,m6:38.4,beta:2.12,vol:52.4,pe:148.4,pb:18.4,roe:12.4,roa:8.8,margin:38.4,target:165,rating:"Hold",upside:14.8,analysts:24,eps:0.84,de:0.2,cr:3.2,qr:2.8,icov:22.4,fcf:0.68,div:0.0},
     JPM: {ytd:22.8,w52h:-1.2,w1:2.2,w2:3.8,w3:5.4,w4:7.8,m3:14.4,m6:20.8,beta:1.18,vol:18.4,pe:14.4,pb:2.2,roe:18.4,roa:1.8,margin:32.4,target:280,rating:"Buy",upside:10.4,analysts:32,eps:18.42,de:2.8,cr:null,qr:null,icov:null,fcf:null,div:4.2},
+    NOW: {ytd:14.2,w52h:-4.8,w1:1.8,w2:3.4,w3:5.2,w4:7.4,m3:12.4,m6:18.8,beta:1.22,vol:28.4,pe:62.4,pb:14.8,roe:18.4,roa:8.8,margin:22.4,target:1050,rating:"Buy",upside:12.8,analysts:36,eps:15.84,de:0.3,cr:1.4,qr:1.2,icov:18.4,fcf:14.2,div:0.0},
+    META:{ytd:24.8,w52h:-2.1,w1:2.4,w2:4.8,w3:7.2,w4:10.4,m3:18.8,m6:28.4,beta:1.28,vol:32.4,pe:28.4,pb:8.8,roe:38.4,roa:22.8,margin:34.8,target:650,rating:"Strong Buy",upside:16.4,analysts:52,eps:22.48,de:0.1,cr:2.8,qr:2.4,icov:null,fcf:18.4,div:0.0},
+    COIN:{ytd:38.4,w52h:-12.4,w1:4.2,w2:8.4,w3:12.8,w4:18.4,m3:28.4,m6:44.8,beta:2.84,vol:62.4,pe:null,pb:8.4,roe:null,roa:null,margin:38.4,target:280,rating:"Buy",upside:18.4,analysts:28,eps:8.42,de:0.8,cr:2.4,qr:2.2,icov:null,fcf:6.84,div:0.0},
+    MELI:{ytd:22.4,w52h:-3.8,w1:2.8,w2:4.8,w3:7.4,w4:10.8,m3:18.4,m6:28.4,beta:1.44,vol:36.4,pe:52.4,pb:14.8,roe:22.4,roa:12.4,margin:14.8,target:2400,rating:"Buy",upside:14.8,analysts:32,eps:38.42,de:2.4,cr:1.4,qr:1.2,icov:8.4,fcf:28.4,div:0.0},
+    NU:  {ytd:28.4,w52h:-8.4,w1:3.4,w2:6.8,w3:10.4,w4:14.8,m3:24.4,m6:38.4,beta:1.88,vol:48.4,pe:42.4,pb:6.8,roe:22.4,roa:4.8,margin:28.4,target:18,rating:"Buy",upside:22.4,analysts:22,eps:0.48,de:4.2,cr:null,qr:null,icov:null,fcf:0.28,div:0.0},
   };
   const getMock = (tk) => MOCK[tk] || {ytd:parseFloat((Math.random()*40-10).toFixed(1)),w52h:parseFloat((Math.random()*-30).toFixed(1)),w1:parseFloat((Math.random()*8-2).toFixed(1)),w2:parseFloat((Math.random()*10-2).toFixed(1)),w3:parseFloat((Math.random()*14-3).toFixed(1)),w4:parseFloat((Math.random()*18-4).toFixed(1)),m3:parseFloat((Math.random()*30-5).toFixed(1)),m6:parseFloat((Math.random()*50-8).toFixed(1)),beta:parseFloat((Math.random()*2+0.5).toFixed(2)),vol:parseFloat((Math.random()*40+15).toFixed(1)),pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:null};
 
@@ -14551,7 +14561,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Upside %",       w:110, render:(tk,d,m)=>vip(m.upside,"%")},
       {h:"# Analysts",     w:110, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#1E293B"}}>{m.analysts!=null?m.analysts:"—"}</span>:upgBtn},
       {h:"EPS Estimate",   w:120, render:(tk,d,m)=>vip(m.eps,"")},
-      {h:"Dividend %",     w:120, render:(tk,d,m)=>vip(m.div,"%")},
+      {h:"Dividend Yield", w:130, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#1E293B"}}>{m.div!=null?(m.div===0?"—":Number(m.div).toFixed(2)+"%"):"—"}</span>:upgBtn},
     ],
     health:[
       {h:"Name",           w:150, render:nm},
