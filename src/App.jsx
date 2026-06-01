@@ -7190,7 +7190,7 @@ function PredictionBanner({lang="es"}){
     setVoted(dir);
   };
   return(
-    <div style={{background:`linear-gradient(135deg,rgba(0,210,106,0.04),rgba(60,142,250,0.04))`,borderBottom:`1px solid ${C.glassBorder}`,padding:"6px 16px"}}>
+    <div style={{background:`linear-gradient(135deg,rgba(0,210,106,0.13),rgba(60,142,250,0.10))`,borderBottom:`1px solid rgba(0,210,106,0.28)`,padding:"8px 16px"}}>
       <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
         <span style={{background:C.gold+"22",color:C.gold,border:`1px solid ${C.gold}44`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0}}>🔥 {isEN?"PREDICTION OF THE DAY":"PREDICCIÓN DEL DÍA"}</span>
         <span style={{color:"#fff",fontWeight:700,fontSize:12,flex:1}}>{isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}</span>
@@ -10516,6 +10516,25 @@ function FlowPage({isPremium,onNeedPremium}){
                   ? <span style={{background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3}}>🔥 TOP PICK</span>
                   : <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>{bull?"▲ BULLISH":"▼ BEARISH"}</span>
                 }
+                <button title="Enviar alerta a Telegram" onClick={()=>{
+                  const TG_TOKEN="8931471851:AAEupeDpPUwyBBqABXvgxoYKa1b9hniqq0c";
+                  const TG_CHANNEL="@NexoTradeSignals";
+                  const emoji=gold?"⭐":dark?"🌑":bull?"📈":"📉";
+                  const msg=`${emoji} *FLUJO INSTITUCIONAL*\n\n*${item.ticker}* — ${fmt$(item.premium)}\n`+
+                    `Tipo: ${gold?"Golden Sweep":dark?"Dark Pool":bull?"Call Block":"Put Block"} ${bull?"🟢 CALL":"🔴 PUT"}\n`+
+                    (item.strike?`Strike: ${item.strike} | `:"")+
+                    (item.otm?`${item.otm}% OTM\n`:"\n")+
+                    (item.expiry?`Expiry: ${item.expiry}\n`:"")+
+                    `\n💡 Sentimiento: ${bull?"ALCISTA 📈":"BAJISTA 📉"}\n🔗 nexotradeia.com`;
+                  fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+                    method:"POST",headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({chat_id:TG_CHANNEL,text:msg,parse_mode:"Markdown",disable_web_page_preview:true})
+                  }).then(()=>{}).catch(()=>{});
+                }} style={{background:"rgba(0,136,204,0.15)",border:"1px solid rgba(0,136,204,0.35)",borderRadius:5,padding:"2px 6px",fontSize:12,cursor:"pointer",lineHeight:1,color:"#29B6F6",flexShrink:0,transition:"all 0.15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(0,136,204,0.3)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="rgba(0,136,204,0.15)"}>
+                  ✈️
+                </button>
               </div>
             </div>
           );
@@ -13022,6 +13041,7 @@ function CryptoPerformancePage({ lang="es" }) {
 
   const fetchAll = useCallback(async () => {
     setErr(null);
+    setLoading(true);
     try {
       const [coinsRes, globalRes, fgRes] = await Promise.all([
         fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h,24h,7d,30d")
@@ -16085,6 +16105,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const [wsStatus, setWsStatus]     = useState("connecting"); // connecting|live|polling
   const [alerts, setAlerts2]         = useState([]); // [{id,ticker,msg,chg,ts}]
   const [flashRows, setFlashRows]    = useState({}); // {ticker: "up"|"down"}
+  const [refreshing, setRefreshing]  = useState(false);
   const prevPrices = useRef({});
   const alertedTickers = useRef({});
   const wsRef = useRef(null);
@@ -16294,8 +16315,9 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
               {lastUpdate && <span style={{color:C.muted2,marginLeft:8}}>· {isEN?"Updated":"Actualizado"} {lastUpdate.toLocaleTimeString()}</span>}
             </p>
           </div>
-          <button onClick={fetchPricesREST} style={{background:"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",color:"#A78BFA",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
-            ↻ {isEN?"Refresh":"Actualizar"}
+            <button onClick={async()=>{setRefreshing(true);await fetchPricesREST();setRefreshing(false);}} disabled={refreshing}
+            style={{background:refreshing?"rgba(139,92,246,0.25)":"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",color:"#A78BFA",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:700,cursor:refreshing?"not-allowed":"pointer",display:"flex",alignItems:"center",gap:6,opacity:refreshing?0.7:1,transition:"all 0.15s"}}>
+            {refreshing?"⏳":"↻"} {refreshing?(isEN?"Updating...":"Actualizando..."):(isEN?"Refresh":"Actualizar")}
           </button>
         </div>
       </div>
