@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 09:35:38
+// NEXO TRADE — build: 2026-06-01 09:52:25
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10376,9 +10376,9 @@ function FlowPage({isPremium,onNeedPremium}){
     return true;
   });
 
-  // Top pick — cálculo directo sin useMemo
-  let topPickId=null,topScore=-1;
-  visible.forEach(item=>{const s=scoreItem(item);if(s>topScore){topScore=s;topPickId=item.id;}});
+  // Top pick — score máximo del feed visible
+  let topScore=0;
+  visible.forEach(item=>{const s=scoreItem(item);if(s>topScore)topScore=s;});
 
   // Alerta Telegram cuando llega un Golden Sweep > $1M
   const alertedRef=useRef(new Set());
@@ -10472,7 +10472,8 @@ function FlowPage({isPremium,onNeedPremium}){
       <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:fullscreen?"calc(100vh - 280px)":600,overflowY:"auto"}}>
         {visible.map(item=>{
           const isNew=item.id===highlight;
-          const isTop=item.id===topPickId;
+          const itemScore=scoreItem(item);
+          const isTop=itemScore>0&&itemScore===topScore;
           const bull=item.isCall;
           const dark=item.isDark;
           const gold=item.isGold;
