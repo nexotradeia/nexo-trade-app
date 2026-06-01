@@ -18423,8 +18423,8 @@ export default function App(){
           </div>
         </div>
         {/* ── ROW 1: FREE TABS ── */}
-        <div style={{display:"flex",alignItems:"center",borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1180,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:36}}>
-          <span style={{flexShrink:0,fontSize:9,fontWeight:800,letterSpacing:1.2,color:"#00A8FF",background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:5,padding:"2px 6px",margin:"0 8px 0 2px"}}>FREE</span>
+        <div style={{display:"flex",alignItems:"center",borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:46}}>
+          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:1.2,color:"#00A8FF",background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:6,padding:"3px 8px",margin:"0 10px 0 4px"}}>FREE</span>
           {[
             {label:t.feed,idx:0},
             {label:lang==="en"?"📈 Stock Pick IA":"📈 Stock Pick IA",idx:3,badge:"NEW"},
@@ -18436,18 +18436,18 @@ export default function App(){
             {label:lang==="en"?"💬 Messages":"💬 Mensajes",idx:22},
           ].map(n=>(
             <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-              style={{background:"transparent",border:"none",borderBottom:`2px solid ${page===n.idx?"#00A8FF":"transparent"}`,padding:"0 12px",height:36,cursor:"pointer",color:page===n.idx?"#00A8FF":"var(--c-muted)",fontSize:12,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0,fontFamily:"inherit"}}
+              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,padding:"0 16px",height:46,cursor:"pointer",color:page===n.idx?"#00A8FF":"var(--c-muted)",fontSize:13,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:5,flexShrink:0,fontFamily:"inherit"}}
               onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";}}}
               onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";}}}
             >
               {n.label}
-              {n.badge&&<span style={{fontSize:8,fontWeight:800,color:"#00A8FF",background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:4,padding:"1px 4px",letterSpacing:0.5}}>{n.badge}</span>}
+              {n.badge&&<span style={{fontSize:9,fontWeight:800,color:"#00A8FF",background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:4,padding:"2px 5px",letterSpacing:0.5}}>{n.badge}</span>}
             </button>
           ))}
         </div>
         {/* ── ROW 2: VIP TABS ── */}
-        <div style={{display:"flex",alignItems:"center",background:"rgba(245,158,11,0.03)",borderTop:"1px solid rgba(245,158,11,0.1)",overflowX:"auto",maxWidth:1180,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:34}}>
-          <span style={{flexShrink:0,fontSize:9,fontWeight:800,letterSpacing:0.8,color:"#F59E0B",background:"rgba(245,158,11,0.12)",borderRadius:5,padding:"2px 6px",margin:"0 6px 0 2px"}}>👑 VIP</span>
+        <div style={{display:"flex",alignItems:"center",background:"rgba(245,158,11,0.03)",borderTop:"1px solid rgba(245,158,11,0.1)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:42}}>
+          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:0.8,color:"#F59E0B",background:"rgba(245,158,11,0.12)",borderRadius:6,padding:"3px 8px",margin:"0 8px 0 4px"}}>👑 VIP</span>
           {[
             {label:lang==="en"?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,locked:!effectivePremium},
             {label:lang==="en"?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,locked:!effectivePremium},
@@ -18461,7 +18461,7 @@ export default function App(){
             const active=page===n.idx;
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:"transparent",border:"none",borderBottom:`2px solid ${active?"#F59E0B":"transparent"}`,padding:"0 10px",height:34,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:12,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:3,flexShrink:0,fontFamily:"inherit"}}
+                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${active?"#F59E0B":"transparent"}`,padding:"0 14px",height:42,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:13,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0,fontFamily:"inherit"}}
                 onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#F59E0B";}}}
                 onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)";}}}
               >
