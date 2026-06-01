@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 16:43:30
+// NEXO TRADE — build: 2026-06-01 16:44:09
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -18806,6 +18806,34 @@ export default function App(){
       }
       .post-card-new {
         animation: postSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) both, postPulse 0.9s ease 0.35s;
+      }
+      @keyframes whaleSlideIn {
+        from { opacity:0; transform:translateX(120px) scale(0.85); }
+        to   { opacity:1; transform:translateX(0) scale(1); }
+      }
+      @keyframes whaleCountdown {
+        from { width:100%; }
+        to   { width:0%; }
+      }
+      @keyframes whaleBounce {
+        from { transform:translateY(0); }
+        to   { transform:translateY(-4px); }
+      }
+      @keyframes fadeIn {
+        from { opacity:0; transform:translateY(4px); }
+        to   { opacity:1; transform:translateY(0); }
+      }
+      @keyframes fadeInRow {
+        from { opacity:0; transform:translateX(-8px); }
+        to   { opacity:1; transform:translateX(0); }
+      }
+      @keyframes pulse {
+        0%,100% { opacity:1; transform:scale(1); }
+        50%      { opacity:0.5; transform:scale(1.3); }
+      }
+      @keyframes spin {
+        from { transform:rotate(0deg); }
+        to   { transform:rotate(360deg); }
       }
     `}</style>
     <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s",overflowX:"hidden"}}>
