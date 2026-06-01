@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 12:04:14
+// NEXO TRADE — build: 2026-06-01 16:30:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10511,7 +10511,7 @@ function FlowPage({isPremium,onNeedPremium}){
               <div style={{fontSize:12,color:C.text,fontFamily:"monospace"}}>{item.strike?`$${item.strike}`:"—"}</div>
               <div style={{fontSize:11,color:C.muted}}>{item.expiry||"—"}</div>
               <div style={{fontSize:11,color:item.otm>5?"#F59E0B":C.muted}}>{item.otm?`${item.otm}% OTM`:"—"}</div>
-              <div style={{display:"flex",alignItems:"center",gap:4}}>
+              <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                 {isTop
                   ? <span style={{background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3}}>🔥 TOP PICK</span>
                   : <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>{bull?"▲ BULLISH":"▼ BEARISH"}</span>
@@ -10522,7 +10522,7 @@ function FlowPage({isPremium,onNeedPremium}){
                   const emoji=gold?"⭐":dark?"🌑":bull?"📈":"📉";
                   const msg=`${emoji} *FLUJO INSTITUCIONAL*\n\n*${item.ticker}* — ${fmt$(item.premium)}\n`+
                     `Tipo: ${gold?"Golden Sweep":dark?"Dark Pool":bull?"Call Block":"Put Block"} ${bull?"🟢 CALL":"🔴 PUT"}\n`+
-                    (item.strike?`Strike: ${item.strike} | `:"")+
+                    (item.strike?`Strike: $${item.strike} | `:"")+
                     (item.otm?`${item.otm}% OTM\n`:"\n")+
                     (item.expiry?`Expiry: ${item.expiry}\n`:"")+
                     `\n💡 Sentimiento: ${bull?"ALCISTA 📈":"BAJISTA 📉"}\n🔗 nexotradeia.com`;
@@ -13045,20 +13045,22 @@ function CryptoPerformancePage({ lang="es" }) {
     try {
       const [coinsRes, globalRes, fgRes] = await Promise.all([
         fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h,24h,7d,30d")
-          .then(r => r.json()).catch(()=>null),
-        fetch("https://api.coingecko.com/api/v3/global").then(r => r.json()).catch(()=>null),
-        fetch("https://api.alternative.me/fng/?limit=1").then(r => r.json()).catch(()=>null),
+          .then(r => r.ok ? r.json() : null).catch(()=>null),
+        fetch("https://api.coingecko.com/api/v3/global").then(r => r.ok ? r.json() : null).catch(()=>null),
+        fetch("https://api.alternative.me/fng/?limit=1").then(r => r.ok ? r.json() : null).catch(()=>null),
       ]);
-      if (Array.isArray(coinsRes)) { setCoins(coinsRes); setErr(null); setLoading(false); }
-      else { setLoading(prev => { if(prev) setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando..."); return false; }); }
+      if (Array.isArray(coinsRes)) { setCoins(coinsRes); setErr(null); }
+      else { setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando..."); }
       if (globalRes?.data) setGlobal(globalRes.data);
       if (fgRes?.data?.[0]) setFearGreed(fgRes.data[0]);
       setLastUpdate(new Date());
       setCountdown(60);
     } catch(e) {
-      setLoading(prev => { if(prev) setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando..."); return false; });
+      setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando...");
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [isEN]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
   useEffect(() => {
@@ -16315,7 +16317,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
               {lastUpdate && <span style={{color:C.muted2,marginLeft:8}}>· {isEN?"Updated":"Actualizado"} {lastUpdate.toLocaleTimeString()}</span>}
             </p>
           </div>
-            <button onClick={async()=>{setRefreshing(true);await fetchPricesREST();setRefreshing(false);}} disabled={refreshing}
+          <button onClick={async()=>{setRefreshing(true);await fetchPricesREST();setRefreshing(false);}} disabled={refreshing}
             style={{background:refreshing?"rgba(139,92,246,0.25)":"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",color:"#A78BFA",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:700,cursor:refreshing?"not-allowed":"pointer",display:"flex",alignItems:"center",gap:6,opacity:refreshing?0.7:1,transition:"all 0.15s"}}>
             {refreshing?"⏳":"↻"} {refreshing?(isEN?"Updating...":"Actualizando..."):(isEN?"Refresh":"Actualizar")}
           </button>
@@ -18423,8 +18425,8 @@ export default function App(){
           </div>
         </div>
         {/* ── ROW 1: FREE TABS ── */}
-        <div style={{display:"flex",alignItems:"center",borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:46}}>
-          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:1.2,color:"#00A8FF",background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:6,padding:"3px 8px",margin:"0 10px 0 4px"}}>FREE</span>
+        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:52}}>
+          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:1.4,color:"#00A8FF",background:"linear-gradient(135deg,rgba(0,168,255,0.13),rgba(0,168,255,0.06))",border:"1.5px solid rgba(0,168,255,0.24)",borderRadius:7,padding:"3px 10px",margin:"0 20px 0 0",whiteSpace:"nowrap",boxShadow:"0 0 8px rgba(0,168,255,0.08)"}}>FREE</span>
           {[
             {label:t.feed,idx:0},
             {label:lang==="en"?"📈 Stock Pick IA":"📈 Stock Pick IA",idx:3,badge:"NEW"},
@@ -18436,9 +18438,9 @@ export default function App(){
             {label:lang==="en"?"💬 Messages":"💬 Mensajes",idx:22},
           ].map(n=>(
             <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,padding:"0 16px",height:46,cursor:"pointer",color:page===n.idx?"#00A8FF":"var(--c-muted)",fontSize:13,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:5,flexShrink:0,fontFamily:"inherit"}}
-              onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";}}}
-              onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";}}}
+              style={{background:page===n.idx?"rgba(0,168,255,0.07)":"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,padding:"0 19px",height:52,cursor:"pointer",color:page===n.idx?"#00A8FF":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit",letterSpacing:page===n.idx?0.1:0}}
+              onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}}
+              onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";e.currentTarget.style.background="transparent";}}}
             >
               {n.label}
               {n.badge&&<span style={{fontSize:9,fontWeight:800,color:"#00A8FF",background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:4,padding:"2px 5px",letterSpacing:0.5}}>{n.badge}</span>}
@@ -18446,8 +18448,8 @@ export default function App(){
           ))}
         </div>
         {/* ── ROW 2: VIP TABS ── */}
-        <div style={{display:"flex",alignItems:"center",background:"rgba(245,158,11,0.03)",borderTop:"1px solid rgba(245,158,11,0.1)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:42}}>
-          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:0.8,color:"#F59E0B",background:"rgba(245,158,11,0.12)",borderRadius:6,padding:"3px 8px",margin:"0 8px 0 4px"}}>👑 VIP</span>
+        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"linear-gradient(90deg,rgba(245,158,11,0.02),rgba(245,158,11,0.05),rgba(245,158,11,0.02))",borderTop:"1px solid rgba(245,158,11,0.13)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
+          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:0.9,color:"#F59E0B",background:"linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.07))",border:"1.5px solid rgba(245,158,11,0.26)",borderRadius:7,padding:"3px 10px",margin:"0 18px 0 0",whiteSpace:"nowrap",boxShadow:"0 0 8px rgba(245,158,11,0.08)"}}>👑 VIP</span>
           {[
             {label:lang==="en"?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,locked:!effectivePremium},
             {label:lang==="en"?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,locked:!effectivePremium},
@@ -18461,17 +18463,17 @@ export default function App(){
             const active=page===n.idx;
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${active?"#F59E0B":"transparent"}`,padding:"0 14px",height:42,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:13,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0,fontFamily:"inherit"}}
-                onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#F59E0B";}}}
-                onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)";}}}
+                style={{background:active?"rgba(245,158,11,0.09)":"transparent",border:"none",borderBottom:`2.5px solid ${active?"#F59E0B":"transparent"}`,padding:"0 16px",height:47,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:13.5,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:5,flexShrink:0,fontFamily:"inherit"}}
+                onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#F59E0B";e.currentTarget.style.background="rgba(245,158,11,0.05)";}}}
+                onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)";e.currentTarget.style.background="transparent";}}}
               >
-                {n.locked&&<span style={{fontSize:10,opacity:0.7}}>🔒</span>}
+                {n.locked&&<span style={{fontSize:10,opacity:0.65}}>🔒</span>}
                 {n.label}
               </button>
             );
           })}
           <button onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{marginLeft:"auto",flexShrink:0,background:page===8?"linear-gradient(135deg,#7C3AED,#9333EA)":"transparent",border:page===8?"none":"1px solid rgba(124,58,237,0.3)",borderRadius:14,padding:"4px 12px",cursor:"pointer",color:page===8?"#fff":"#A78BFA",fontSize:11,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:page===8?"0 0 14px rgba(124,58,237,0.3)":"none",transition:"all 0.2s",marginRight:4}}>
+            style={{position:"absolute",right:8,flexShrink:0,background:page===8?"linear-gradient(135deg,#7C3AED,#9333EA)":"transparent",border:page===8?"none":"1px solid rgba(124,58,237,0.3)",borderRadius:14,padding:"4px 13px",cursor:"pointer",color:page===8?"#fff":"#A78BFA",fontSize:11,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:page===8?"0 0 14px rgba(124,58,237,0.3)":"none",transition:"all 0.2s"}}>
             ✦ Premium
           </button>
         </div>
