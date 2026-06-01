@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 19:35:50
+// NEXO TRADE — build: 2026-06-01 19:49:12
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4120,69 +4120,79 @@ function SidebarTickerWidget(){
 
 function EarningsPage({lang}){
   const isEN = lang==="en";
-  const [liveEvent,    setLiveEvent]    = useState(null);
-  const [selected,     setSelected]     = useState(null);
-  const [voted,        setVoted]        = useState({});
-  const [votes,        setVotes]        = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker,e.bull_pct])));
-  const [earnings,     setEarnings]     = useState(MOCK_EARNINGS);
-  const [loadingEar,   setLoadingEar]   = useState(true);
-  const [viewMode,     setViewMode]     = useState("month"); // "week" | "month"
-  const [companyNames, setCompanyNames] = useState({});
-  const [search,       setSearch]       = useState("");
-  const [refreshKey,   setRefreshKey]   = useState(0);
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
 
+  // ── State ──
+  const [calYear,  setCalYear]  = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [selDay,   setSelDay]   = useState(todayStr);
+  const [horaFilter, setHoraFilter] = useState("all");
+  const [search,   setSearch]   = useState("");
+  const [showAll,  setShowAll]  = useState(false);
+  const [favorites,setFavorites]= useState(()=>new Set());
+  const [earnings, setEarnings] = useState(MOCK_EARNINGS);
+  const [loadingEar,setLoadingEar]= useState(true);
+  const [companyNames,setCompanyNames]= useState({});
+  const [refreshKey,setRefreshKey]= useState(0);
+  const [voted,    setVoted]    = useState({});
+  const [votes,    setVotes]    = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker,e.bull_pct])));
+  const [liveEvent,setLiveEvent]= useState(null);
+
+  // ── Static lookup data ──
+  const MKTCAP_MAP={TSLA:"$1.0T",MSFT:"$3.4T",GOOGL:"$2.4T",META:"$1.7T",NVDA:"$5.5T",AAPL:"$4.6T",NFLX:"$480B",AMZN:"$2.3T",MU:"$165B",JPM:"$700B",GS:"$180B",GM:"$48B",NXP:"$52B",BABB:"$2.1B",CUEN:"$420M",HFUS:"$180M",TESI:"$310M",COOT:"$290M"};
+  const EPS_PREV_MAP={TSLA:"$0.45",MSFT:"$2.69",GOOGL:"$1.89",META:"$4.39",NVDA:"$4.93",AAPL:"$1.53",NFLX:"$4.21",AMZN:"$1.16",MU:"$1.01",JPM:"$4.44",GS:"$11.58",GM:"$2.44",NXP:"$2.88",BABB:"$0.18",CUEN:"$0.09"};
+  const HIGH_IMPACT=new Set(["TSLA","NVDA","AAPL","MSFT","META","GOOGL","AMZN","JPM","NFLX","MU","GS","AMZN","BAC","WMT","DIS","INTC","AMD","QCOM","CRM","ORCL"]);
+  const MED_IMPACT =new Set(["NXP","BABB","GM","F","XOM","CVX","UBER","LYFT","SNAP","TWTR","PINS","ROKU","ETSY","SHOP"]);
+  const getImpact=(t)=>HIGH_IMPACT.has(t)?"Alto":MED_IMPACT.has(t)?"Medio":"Bajo";
+  const impactColor=(imp)=>imp==="Alto"?"#EF4444":imp==="Medio"?"#F59E0B":"#94A3B8";
+  const tickerBg=(t)=>{
+    const cols=["#1E3A5F","#7C2D12","#065F46","#4C1D95","#1E3A8A","#7C3AED","#B45309","#1E40AF","#9D174D","#064E3B"];
+    let h=0; for(const c of t) h=(h*31+c.charCodeAt(0))%cols.length;
+    return cols[h];
+  };
+  const MONTH_NAMES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  const DAY_NAMES=["D","L","M","X","J","V","S"];
+
+  // ── Fetch from Finnhub for current month ──
   useEffect(()=>{
     setLoadingEar(true);
-    const today  = new Date();
-    const from   = today.toISOString().slice(0,10);
-    const days   = viewMode==="month" ? 31 : 14;
-    const to     = new Date(today.getTime()+days*24*60*60*1000).toISOString().slice(0,10);
-    const todayStr = from;
-
+    const from=new Date(calYear,calMonth,1).toISOString().slice(0,10);
+    const to=new Date(calYear,calMonth+1,0).toISOString().slice(0,10);
     fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_KEY}`)
       .then(r=>r.json())
       .then(async data=>{
         if(!data?.earningsCalendar?.length){ setLoadingEar(false); return; }
-        const all = data.earningsCalendar
-          .filter(e=>e.date>=todayStr)
-          .map(e=>{
-            const mock=MOCK_EARNINGS.find(m=>m.ticker===e.symbol)||{};
-            const dateObj=new Date(e.date+"T12:00:00");
-            const isToday=e.date===todayStr;
-            const dayLabel=isToday?(isEN?"Today":"Hoy"):dateObj.toLocaleDateString(isEN?"en-US":"es-ES",{weekday:"short",day:"numeric",month:"short"});
-            const hora=e.hour==="bmo"?(isEN?"Before open":"Antes apertura"):(isEN?"After close":"Tras cierre");
-            const revEst=e.revenueEstimate?(e.revenueEstimate>=1e9?`$${(e.revenueEstimate/1e9).toFixed(1)}B`:`$${(e.revenueEstimate/1e6).toFixed(0)}M`):mock.rev_est||"—";
-            const epsEst=e.epsEstimate!=null?`$${e.epsEstimate.toFixed(2)}`:mock.eps_est||"—";
-            return{
-              ticker:e.symbol, nombre:mock.nombre||e.symbol,
-              fecha:dayLabel, fechaEn:dayLabel, rawDate:e.date,
-              hora, eps_est:epsEst, rev_est:revEst,
-              sorpresa:e.epsActual!=null&&e.epsEstimate!=null?(e.epsActual>=e.epsEstimate?`+${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`:`${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`):mock.sorpresa||null,
-              bull_pct:mock.bull_pct||50, community_votes:mock.community_votes||0,
-              live:mock.live||false, live_viewers:mock.live_viewers||0,
-              live_title:mock.live_title||"Earnings Call", live_speaker:mock.live_speaker||"",
-              ir_url:mock.ir_url||null, yt_url:mock.yt_url||null, yt_embed:mock.yt_embed||null,
-              emoji:mock.emoji||"📊", sector:mock.sector||"",
-            };
-          });
+        const all=data.earningsCalendar.map(e=>{
+          const mock=MOCK_EARNINGS.find(m=>m.ticker===e.symbol)||{};
+          const epsEst=e.epsEstimate!=null?`$${e.epsEstimate.toFixed(2)}`:mock.eps_est||"—";
+          const revEst=e.revenueEstimate?(e.revenueEstimate>=1e9?`$${(e.revenueEstimate/1e9).toFixed(1)}B`:`$${(e.revenueEstimate/1e6).toFixed(0)}M`):mock.rev_est||"—";
+          return{
+            ticker:e.symbol, nombre:mock.nombre||e.symbol,
+            rawDate:e.date, horaRaw:e.hour||"amc",
+            hora:e.hour==="bmo"?"Before open":"After close",
+            eps_est:epsEst, eps_prev:EPS_PREV_MAP[e.symbol]||null,
+            rev_est:revEst,
+            sorpresa:e.epsActual!=null&&e.epsEstimate!=null?(e.epsActual>=e.epsEstimate?`+${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`:`${((e.epsActual-e.epsEstimate)/Math.abs(e.epsEstimate)*100).toFixed(0)}%`):mock.sorpresa||null,
+            bull_pct:mock.bull_pct||50, community_votes:mock.community_votes||0,
+            live:mock.live||false, live_viewers:mock.live_viewers||0,
+            live_title:mock.live_title||"Earnings Call", live_speaker:mock.live_speaker||"",
+            ir_url:mock.ir_url||null, yt_url:mock.yt_url||null, emoji:mock.emoji||"📊", sector:mock.sector||"",
+          };
+        });
         if(all.length>0){
           setEarnings(all);
           setVotes(Object.fromEntries(all.map(e=>[e.ticker,e.bull_pct])));
-          // ── Fetch real company names for unknown tickers ──
-          const unknown=[...new Set(all.filter(e=>!MOCK_EARNINGS.find(m=>m.ticker===e.ticker)).map(e=>e.ticker))].slice(0,30);
+          const unknown=[...new Set(all.filter(e=>!MOCK_EARNINGS.find(m=>m.ticker===e.ticker)).map(e=>e.ticker))].slice(0,20);
           if(unknown.length>0){
-            const results=await Promise.allSettled(
-              unknown.map(sym=>fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FINNHUB_KEY}`)
-                .then(r=>r.json()).then(d=>({sym,name:d.name||sym})).catch(()=>({sym,name:sym})))
-            );
+            const results=await Promise.allSettled(unknown.map(sym=>fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FINNHUB_KEY}`).then(r=>r.json()).then(d=>({sym,name:d.name||sym})).catch(()=>({sym,name:sym}))));
             const nm={};
             results.forEach(r=>{if(r.status==="fulfilled"&&r.value.name!==r.value.sym)nm[r.value.sym]=r.value.name;});
             setCompanyNames(nm);
           }
         }
-      })
-      .catch(()=>{}).finally(()=>setLoadingEar(false));
-  },[lang,viewMode,refreshKey]);
+      }).catch(()=>{}).finally(()=>setLoadingEar(false));
+  },[calMonth,calYear,refreshKey]);
 
   const vote=(ticker,dir)=>{
     if(voted[ticker])return;
@@ -4190,236 +4200,250 @@ function EarningsPage({lang}){
     setVotes(v=>({...v,[ticker]:dir==="bull"?Math.min(99,v[ticker]+1):Math.max(1,v[ticker]-1)}));
   };
 
-  const allEarnings = earnings.map(e=>({...e,nombre:companyNames[e.ticker]||e.nombre}));
-  const filtered    = search
-    ? allEarnings.filter(e=>e.ticker.toLowerCase().includes(search.toLowerCase())||e.nombre.toLowerCase().includes(search.toLowerCase()))
-    : allEarnings;
-  const byDate      = filtered.reduce((acc,e)=>{(acc[e.rawDate]=acc[e.rawDate]||[]).push(e);return acc;},{});
-  const sortedDates = Object.keys(byDate).sort();
-  const sel         = selected ? allEarnings.find(e=>e.ticker===selected) : null;
+  // ── Derived data ──
+  const allEarnings=earnings.map(e=>({...e,nombre:companyNames[e.ticker]||e.nombre}));
+  const earningsByDate=allEarnings.reduce((acc,e)=>{(acc[e.rawDate]=acc[e.rawDate]||[]).push(e);return acc;},{});
+  const selDayAll=allEarnings.filter(e=>e.rawDate===selDay);
+  const selFiltered=selDayAll.filter(e=>{
+    if(horaFilter==="bmo"&&e.horaRaw!=="bmo")return false;
+    if(horaFilter==="amc"&&e.horaRaw!=="amc")return false;
+    if(search&&!e.ticker.toLowerCase().includes(search.toLowerCase())&&!e.nombre.toLowerCase().includes(search.toLowerCase()))return false;
+    return true;
+  });
+  const displayed=showAll?selFiltered:selFiltered.slice(0,8);
+  const highImpactCount=selDayAll.filter(e=>getImpact(e.ticker)==="Alto").length;
+  const avgBull=selDayAll.length?Math.round(selDayAll.reduce((s,e)=>s+(votes[e.ticker]||50),0)/selDayAll.length):0;
+  const nextCall=selDayAll.find(e=>e.horaRaw==="amc")||selDayAll[0];
+  const upcoming=allEarnings.filter(e=>e.rawDate>=todayStr).sort((a,b)=>a.rawDate.localeCompare(b.rawDate));
+  const upcomingUniq=Object.values(upcoming.reduce((acc,e)=>{if(!acc[e.rawDate+e.ticker])acc[e.rawDate+e.ticker]=e;return acc;},{})).slice(0,10);
+
+  // Calendar
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const firstDow=new Date(calYear,calMonth,1).getDay();
+  const prevMonth=()=>{ if(calMonth===0){setCalMonth(11);setCalYear(y=>y-1);}else setCalMonth(m=>m-1); };
+  const nextMonth=()=>{ if(calMonth===11){setCalMonth(0);setCalYear(y=>y+1);}else setCalMonth(m=>m+1); };
+  const formatDay=()=>{
+    if(!selDay)return"";
+    return new Date(selDay+"T12:00:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  };
 
   return(
-    <div style={{background:"#090e1a",minHeight:"100vh",fontFamily:"system-ui,-apple-system,sans-serif"}}>
+    <div style={{background:C.bg,minHeight:"100vh"}}>
+      <div style={{maxWidth:1440,margin:"0 auto",padding:"16px",display:"grid",gridTemplateColumns:"260px 1fr",gap:16,alignItems:"start"}}>
 
-      {/* ── HEADER ── */}
-      <div style={{background:"linear-gradient(180deg,#0d1627,#090e1a)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"14px 24px"}}>
-        <div style={{maxWidth:1600,margin:"0 auto",display:"flex",alignItems:"center",flexWrap:"wrap",gap:12}}>
-          <div>
-            <div style={{fontSize:18,fontWeight:900,color:"#f1f5f9",letterSpacing:-0.5}}>📅 Earnings Calendar</div>
-            <div style={{fontSize:10,color:"#475569",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase",marginTop:1}}>
-              {isEN?"Real-time · Powered by Finnhub":"Tiempo real · Powered by Finnhub"}
+        {/* ── LEFT SIDEBAR ── */}
+        <div style={{position:"sticky",top:72}}>
+          {/* Calendar card */}
+          <div style={{background:C.card,borderRadius:14,padding:"16px",border:`1px solid ${C.border}`,marginBottom:12}}>
+            {/* Month nav */}
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+              <div style={{fontSize:13,fontWeight:800,color:C.text}}>{MONTH_NAMES[calMonth]} {calYear}</div>
+              <div style={{display:"flex",gap:4}}>
+                <button onClick={prevMonth} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:6,width:26,height:26,cursor:"pointer",fontSize:13,color:C.muted,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>‹</button>
+                <button onClick={nextMonth} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:6,width:26,height:26,cursor:"pointer",fontSize:13,color:C.muted,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>›</button>
+              </div>
+            </div>
+            {/* Day-of-week headers */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",marginBottom:4}}>
+              {DAY_NAMES.map(d=><div key={d} style={{textAlign:"center",fontSize:9,fontWeight:700,color:C.muted2,padding:"2px 0"}}>{d}</div>)}
+            </div>
+            {/* Days grid */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px 0"}}>
+              {Array(firstDow).fill(null).map((_,i)=><div key={`ep${i}`}/>)}
+              {Array.from({length:daysInMonth},(_,i)=>{
+                const day=i+1;
+                const dStr=`${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                const hasEar=!!earningsByDate[dStr];
+                const cnt=earningsByDate[dStr]?.length||0;
+                const isT=dStr===todayStr;
+                const isSel=dStr===selDay;
+                return(
+                  <div key={day} onClick={()=>{if(hasEar){setSelDay(dStr);setShowAll(false);}}}
+                    style={{textAlign:"center",padding:"4px 1px",borderRadius:7,cursor:hasEar?"pointer":"default",background:isSel?"#00A8FF":isT?"rgba(0,168,255,0.12)":"transparent"}}
+                    onMouseEnter={e=>{if(!isSel&&hasEar)e.currentTarget.style.background="rgba(0,168,255,0.08)";}}
+                    onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isT?"rgba(0,168,255,0.12)":"transparent";}}>
+                    <div style={{fontSize:11,fontWeight:isSel||isT?800:400,color:isSel?"#fff":isT?"#00A8FF":C.text,lineHeight:"18px"}}>{day}</div>
+                    {hasEar&&(
+                      <div style={{display:"flex",justifyContent:"center",gap:"2px",marginTop:1}}>
+                        {cnt>=3
+                          ?[["#EF4444"],["#F59E0B"],["#10B981"]].map(([c],ci)=><div key={ci} style={{width:4,height:4,borderRadius:"50%",background:isSel?"rgba(255,255,255,0.8)":c}}/>)
+                          :cnt===2
+                          ?[["#EF4444"],["#F59E0B"]].map(([c],ci)=><div key={ci} style={{width:4,height:4,borderRadius:"50%",background:isSel?"rgba(255,255,255,0.8)":c}}/>)
+                          :<div style={{width:4,height:4,borderRadius:"50%",background:isSel?"rgba(255,255,255,0.8)":"#00A8FF"}}/>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Week / Month toggle */}
-          <div style={{display:"flex",gap:2,background:"rgba(255,255,255,0.05)",borderRadius:9,padding:3}}>
-            {[["week",isEN?"2 Weeks":"2 Semanas"],["month",isEN?"Full Month":"Mes Completo"]].map(([id,lbl])=>(
-              <button key={id} onClick={()=>setViewMode(id)}
-                style={{background:viewMode===id?"#00A8FF":"transparent",color:viewMode===id?"#fff":"#64748b",border:"none",borderRadius:6,padding:"5px 14px",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
-                {lbl}
+          {/* Upcoming list */}
+          <div style={{background:C.card,borderRadius:14,padding:"14px 16px",border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:10}}>PRÓXIMOS EARNINGS</div>
+            {upcomingUniq.map((e,idx)=>{
+              const d=new Date(e.rawDate+"T12:00:00");
+              const isT=e.rawDate===todayStr;
+              return(
+                <div key={`up-${e.ticker}-${e.rawDate}`} onClick={()=>{setSelDay(e.rawDate);setShowAll(false);}}
+                  style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:idx<upcomingUniq.length-1?`1px solid ${C.border}`:"none",cursor:"pointer",transition:"opacity 0.15s"}}
+                  onMouseEnter={ev=>ev.currentTarget.style.opacity="0.7"}
+                  onMouseLeave={ev=>ev.currentTarget.style.opacity="1"}>
+                  <div style={{width:34,height:34,borderRadius:8,background:isT?"rgba(0,168,255,0.1)":C.card2,border:`1px solid ${C.border}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <div style={{fontSize:12,fontWeight:900,color:isT?"#00A8FF":C.text,lineHeight:1}}>{d.getDate()}</div>
+                    <div style={{fontSize:8,color:C.muted,fontWeight:600}}>{MONTH_NAMES[d.getMonth()].slice(0,3)}</div>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:800,fontSize:12,color:C.text,fontFamily:"monospace"}}>{e.ticker}</div>
+                    <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
+                  </div>
+                  <div style={{fontSize:9,color:e.horaRaw==="bmo"?"#00A8FF":"#A78BFA",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>{e.horaRaw==="bmo"?"Before":"After"}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── RIGHT MAIN ── */}
+        <div>
+          {/* Day header + filters */}
+          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:10}}>
+            <div>
+              <div style={{fontSize:20,fontWeight:900,color:C.text,letterSpacing:-0.5,textTransform:"capitalize"}}>{formatDay()}</div>
+              <div style={{fontSize:12,color:C.muted,marginTop:2}}>{selDayAll.length} empresas reportan {selDay===todayStr?"hoy":"ese día"}</div>
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+              {/* Hora filter */}
+              <div style={{display:"flex",background:C.card,border:`1px solid ${C.border}`,borderRadius:10,overflow:"hidden"}}>
+                {[{k:"all",l:"Todas"},{k:"bmo",l:"Before open"},{k:"amc",l:"After close"}].map(f=>(
+                  <button key={f.k} onClick={()=>setHoraFilter(f.k)} style={{padding:"7px 13px",fontSize:11,fontWeight:700,border:"none",cursor:"pointer",background:horaFilter===f.k?"#00A8FF":"transparent",color:horaFilter===f.k?"#fff":C.muted,transition:"all 0.15s",whiteSpace:"nowrap"}}>{f.l}</button>
+                ))}
+              </div>
+              {/* Search */}
+              <div style={{position:"relative"}}>
+                <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",color:C.muted2,fontSize:12}}>🔍</span>
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar ticker..."
+                  style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 10px 7px 28px",fontSize:12,color:C.text,outline:"none",width:150,fontFamily:"inherit"}}/>
+              </div>
+              <button onClick={()=>setRefreshKey(k=>k+1)} disabled={loadingEar}
+                style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 12px",fontSize:13,cursor:"pointer",color:C.muted}}>
+                {loadingEar?"⏳":"🔄"}
               </button>
+            </div>
+          </div>
+
+          {/* 4 Stat cards */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
+            {[
+              {icon:"📅",l:"REPORTAN HOY",v:selDayAll.length,c:C.text,mono:true},
+              {icon:"🔴",l:"ALTO IMPACTO",v:highImpactCount,c:"#EF4444",mono:true},
+              {icon:"📈",l:"CONSENSO ALCISTA",v:`${avgBull}%`,c:avgBull>=60?"#10B981":avgBull>=40?"#F59E0B":"#EF4444",mono:true},
+              {icon:"⏰",l:"PRÓXIMO CALL",v:nextCall?`${nextCall.ticker} · ${nextCall.horaRaw==="bmo"?"Pre-mkt":"4PM"}`:"—",c:"#00A8FF",mono:false},
+            ].map(s=>(
+              <div key={s.l} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px"}}>
+                <div style={{fontSize:9,color:C.muted,fontWeight:700,letterSpacing:0.7,textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
+                  <span>{s.icon}</span>{s.l}
+                </div>
+                <div style={{fontSize:s.mono?22:14,fontWeight:900,color:s.c,fontFamily:s.mono?"monospace":"inherit",lineHeight:1.2}}>{s.v}</div>
+              </div>
             ))}
           </div>
 
-          {/* Search */}
-          <input value={search} onChange={e=>setSearch(e.target.value)}
-            placeholder={isEN?"Search AAPL, Tesla...":"Buscar AAPL, Tesla..."}
-            style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#f1f5f9",padding:"6px 12px",fontSize:12,outline:"none",width:200}}/>
-
-          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
-            {loadingEar
-              ?<span style={{color:"#475569",fontSize:11}}>⏳ {isEN?"Loading...":"Cargando..."}</span>
-              :<span style={{color:"#22c55e",fontSize:11,fontWeight:700}}>🟢 {isEN?"Live":"En vivo"} · {filtered.length} {isEN?"companies":"empresas"}</span>}
-            <button onClick={()=>setRefreshKey(k=>k+1)} disabled={loadingEar}
-              style={{background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:8,color:"#00A8FF",padding:"6px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-              {loadingEar?"⏳":"🔄"} {isEN?"Refresh":"Actualizar"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ── BODY ── */}
-      <div style={{maxWidth:1600,margin:"0 auto",padding:"16px 24px",display:"grid",gridTemplateColumns:sel&&window.innerWidth>=768?"1fr 360px":"1fr",gap:20,alignItems:"start"}}>
-
-        {/* LEFT — list */}
-        <div>
-          {/* Next call banner */}
-          {(()=>{
-            const next=allEarnings.find(e=>!e.live);
-            if(!next) return null;
-            return(
-              <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03))",border:"1px solid rgba(245,158,11,0.2)",borderRadius:12,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
-                <div style={{fontSize:28}}>{next.emoji||"📅"}</div>
-                <div style={{flex:1}}>
-                  <div style={{color:"#f59e0b",fontSize:11,fontWeight:700,letterSpacing:1,marginBottom:2}}>{isEN?"NEXT EARNINGS CALL":"PRÓXIMA EARNINGS CALL"}</div>
-                  <div style={{color:"#e2e8f0",fontWeight:800,fontSize:14}}>{next.ticker} — {next.nombre}</div>
-                  <div style={{color:"#64748b",fontSize:12}}>{next.live_speaker} · {next.fecha} · {next.hora}</div>
-                </div>
-                <div style={{display:"flex",gap:8,flexShrink:0}}>
-                  {next.ir_url&&<button onClick={e=>{e.stopPropagation();window.open(next.ir_url,"_blank","noopener,noreferrer");}}
-                    style={{background:"rgba(245,158,11,0.15)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 14px",color:"#f59e0b",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
-                    🏢 IR Page →
-                  </button>}
-                  {next.yt_url&&<button onClick={e=>{e.stopPropagation();window.open(next.yt_url,"_blank","noopener,noreferrer");}}
-                    style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"7px 14px",color:"#ef4444",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
-                    ▶ YouTube →
-                  </button>}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Date groups */}
-          {sortedDates.map(rawDate=>{
-            const group=byDate[rawDate];
-            const dateLabel=group[0]?.fecha||rawDate;
-            return(
-              <div key={rawDate} style={{marginBottom:16}}>
-                <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,marginBottom:8,paddingLeft:2,textTransform:"uppercase",display:"flex",alignItems:"center",gap:8}}>
-                  {dateLabel}
-                  <span style={{fontSize:10,color:"#334155",fontWeight:500,textTransform:"none",letterSpacing:0}}>
-                    — {group.length} {isEN?"companies":"empresas"}
-                  </span>
-                </div>
-                {group.map(e=>{
-                  const bull=votes[e.ticker]??50;
-                  const isToday=e.rawDate===new Date().toISOString().slice(0,10);
-                  const isSel=selected===e.ticker;
-                  return(
-                    <div key={e.ticker}
-                      onClick={()=>setSelected(isSel?null:e.ticker)}
-                      style={{
-                        display:"flex",alignItems:"center",gap:10,
-                        background:isSel?"rgba(0,229,143,0.06)":isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)",
-                        border:`1px solid ${isSel?"rgba(0,229,143,0.25)":isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)"}`,
-                        borderRadius:11,padding:"10px 14px",marginBottom:5,cursor:"pointer",transition:"all 0.15s",
-                        boxShadow:isSel?"0 0 20px rgba(0,229,143,0.1)":"none"
-                      }}
-                      onMouseEnter={e2=>{if(!isSel){e2.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e2.currentTarget.style.background="rgba(14,22,40,0.9)";}}}
-                      onMouseLeave={e2=>{if(!isSel){e2.currentTarget.style.borderColor=isToday?"rgba(245,158,11,0.2)":"rgba(255,255,255,0.055)";e2.currentTarget.style.background=isToday?"rgba(245,158,11,0.05)":"rgba(14,22,40,0.7)";}}}
-                    >
-                      <span style={{fontSize:18,flexShrink:0}}>{e.emoji||"📊"}</span>
-                      <span style={{fontFamily:"monospace",fontSize:13,fontWeight:800,color:isToday?C.gold:C.accent,minWidth:52,letterSpacing:0.5}}>{e.ticker}</span>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:13,fontWeight:600,color:"#CBD5E1",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
-                        {e.sector&&<div style={{fontSize:10,color:"#475569"}}>{e.sector}</div>}
-                      </div>
-                      <span style={{fontSize:11,color:"#475569",whiteSpace:"nowrap",flexShrink:0}}>{e.hora}</span>
-                      {e.eps_est!=="—"&&<div style={{fontSize:10,color:"#00A8FF",background:"rgba(0,168,255,0.08)",border:"1px solid rgba(0,168,255,0.15)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap",flexShrink:0,fontFamily:"monospace"}}>EPS {e.eps_est}</div>}
-                      {e.rev_est!=="—"&&<div style={{fontSize:10,color:"#94a3b8",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap",flexShrink:0,fontFamily:"monospace"}}>{e.rev_est}</div>}
-                      {e.ir_url&&<a href={e.ir_url} target="_blank" rel="noopener noreferrer"
-                        onClick={ev=>ev.stopPropagation()}
-                        style={{background:"rgba(255,255,255,0.04)",border:"1px solid #1e293b",borderRadius:7,padding:"3px 8px",fontSize:10,fontWeight:600,color:"#64748b",textDecoration:"none",whiteSpace:"nowrap",flexShrink:0}}>
-                        🏢 IR
-                      </a>}
-                      {e.live&&<span onClick={ev=>{ev.stopPropagation();setLiveEvent(e);}} style={{background:"#ef4444",borderRadius:12,padding:"3px 10px",fontSize:10,fontWeight:800,color:"#fff",whiteSpace:"nowrap",cursor:"pointer",boxShadow:"0 0 10px rgba(239,68,68,0.5)"}}>🔴 EN VIVO</span>}
-                      <div style={{display:"flex",gap:0,background:"rgba(255,255,255,0.04)",borderRadius:8,overflow:"hidden",border:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-                        <span style={{fontSize:10,fontWeight:800,color:C.bull,padding:"3px 7px",background:"rgba(0,229,143,0.08)"}}>{bull}%</span>
-                        <span style={{fontSize:10,fontWeight:800,color:C.bear,padding:"3px 7px",background:"rgba(255,77,106,0.08)"}}>{100-bull}%</span>
-                      </div>
-                      <span style={{color:"#334155",fontSize:14,transition:"transform 0.2s",transform:isSel?"rotate(90deg)":"none",flexShrink:0}}>›</span>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-
-          {!loadingEar&&sortedDates.length===0&&(
-            <div style={{textAlign:"center",padding:"60px 20px",color:"#475569",fontSize:14}}>
-              {search?`${isEN?"No results for":"Sin resultados para"} "${search}"`:(isEN?"No earnings found for this period":"Sin earnings para este período")}
-            </div>
-          )}
-
-          {loadingEar&&(
-            <div style={{display:"flex",flexDirection:"column",gap:6}}>
-              {Array(12).fill(0).map((_,i)=>(
-                <div key={i} style={{height:48,background:"rgba(255,255,255,0.04)",borderRadius:11,animation:"pulse 1.4s infinite"}}/>
+          {/* Table */}
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
+            {/* Header */}
+            <div style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr",gap:8,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
+              {["","EMPRESA","HORA","EPS EST.","MKT CAP","IMPACTO","SENTIMIENTO"].map(h=>(
+                <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.6,textTransform:"uppercase"}}>{h}</div>
               ))}
             </div>
-          )}
 
-          <div style={{marginTop:16,fontSize:10,color:"#334155",textAlign:"center"}}>
-            📡 {isEN?"Data: Finnhub API · Real-time earnings calendar · Not financial advice":"Datos: Finnhub API · Calendario de earnings en tiempo real · No es consejo financiero"}
+            {/* Loading skeletons */}
+            {loadingEar&&Array(6).fill(0).map((_,i)=>(
+              <div key={i} style={{height:56,background:i%2===0?C.card:C.card2,borderBottom:`1px solid ${C.border}`,animation:"pulse 1.4s infinite"}}/>
+            ))}
+
+            {/* Empty state */}
+            {!loadingEar&&displayed.length===0&&(
+              <div style={{textAlign:"center",padding:"48px 20px",color:C.muted,fontSize:13}}>
+                {selDayAll.length===0?"No hay earnings reportados para este día":"Sin resultados para los filtros aplicados"}
+              </div>
+            )}
+
+            {/* Rows */}
+            {displayed.map((e,idx)=>{
+              const bull=votes[e.ticker]||50;
+              const impact=getImpact(e.ticker);
+              const mktcap=MKTCAP_MAP[e.ticker]||"—";
+              const isFav=favorites.has(e.ticker);
+              const bg=tickerBg(e.ticker);
+              return(
+                <div key={`${e.ticker}-${e.rawDate}`}
+                  style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center"}}
+                  onMouseEnter={ev=>ev.currentTarget.style.background="rgba(0,168,255,0.04)"}
+                  onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
+                  {/* Star */}
+                  <div onClick={()=>setFavorites(f=>{const s=new Set(f);isFav?s.delete(e.ticker):s.add(e.ticker);return s;})}
+                    style={{cursor:"pointer",fontSize:14,color:isFav?"#F59E0B":C.muted2,textAlign:"center",lineHeight:1}}>
+                    {isFav?"★":"☆"}
+                  </div>
+                  {/* Company */}
+                  <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
+                    <div style={{width:36,height:36,borderRadius:8,background:bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:"#fff",flexShrink:0,letterSpacing:-0.5}}>
+                      {e.ticker.slice(0,2)}
+                    </div>
+                    <div style={{minWidth:0}}>
+                      <div style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>{e.ticker}</div>
+                      <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
+                    </div>
+                  </div>
+                  {/* Hora badge */}
+                  <div>
+                    <span style={{background:e.horaRaw==="bmo"?"rgba(0,168,255,0.08)":"rgba(167,139,250,0.1)",color:e.horaRaw==="bmo"?"#00A8FF":"#A78BFA",border:`1px solid ${e.horaRaw==="bmo"?"rgba(0,168,255,0.2)":"rgba(167,139,250,0.25)"}`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>
+                      {e.hora}
+                    </span>
+                  </div>
+                  {/* EPS Est */}
+                  <div>
+                    <div style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>{e.eps_est}</div>
+                    {e.eps_prev&&<div style={{fontSize:10,color:C.muted}}>Ant: {e.eps_prev}</div>}
+                  </div>
+                  {/* MKT CAP */}
+                  <div style={{fontSize:12,color:C.text,fontWeight:600,fontFamily:"monospace"}}>{mktcap}</div>
+                  {/* Impacto */}
+                  <div style={{display:"flex",alignItems:"center",gap:5}}>
+                    <div style={{width:7,height:7,borderRadius:"50%",background:impactColor(impact),flexShrink:0}}/>
+                    <span style={{fontSize:11,fontWeight:700,color:impactColor(impact)}}>{impact}</span>
+                  </div>
+                  {/* Sentimiento */}
+                  <div>
+                    <div style={{display:"flex",height:6,borderRadius:4,overflow:"hidden",marginBottom:3}}>
+                      <div style={{width:`${bull}%`,background:"#10B981"}}/>
+                      <div style={{flex:1,background:"#EF4444"}}/>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:9,fontWeight:700}}>
+                      <span style={{color:"#10B981"}}>▲ {bull}%</span>
+                      <span style={{color:"#EF4444"}}>{100-bull}% ▼</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Ver más */}
+            {!showAll&&selFiltered.length>8&&(
+              <button onClick={()=>setShowAll(true)}
+                style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:`1px solid ${C.border}`,cursor:"pointer",color:"#00A8FF",fontSize:12,fontWeight:700}}>
+                + Ver {selFiltered.length-8} empresas más de este día
+              </button>
+            )}
+          </div>
+
+          <div style={{marginTop:10,fontSize:10,color:C.muted2,textAlign:"center"}}>
+            📡 Datos: Finnhub API · Calendario en tiempo real · No es consejo financiero
           </div>
         </div>
-
-        {/* RIGHT — Detail panel */}
-        {sel&&(()=>{
-          const bull=votes[sel.ticker]??50;
-          const bear=100-bull;
-          const myVote=voted[sel.ticker];
-          const isToday=sel.rawDate===new Date().toISOString().slice(0,10);
-          return(
-            <div style={{position:"sticky",top:88}}>
-              <div style={{background:"rgba(14,22,40,0.97)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:16,padding:"20px",backdropFilter:"blur(20px)",boxShadow:"0 20px 60px rgba(0,0,0,0.7)"}}>
-                <button onClick={()=>setSelected(null)} style={{float:"right",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,width:28,height:28,color:"#94a3b8",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>✕</button>
-                <div style={{marginBottom:16,paddingRight:36}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                    <span style={{fontFamily:"monospace",fontSize:22,fontWeight:900,color:isToday?C.gold:C.accent}}>${sel.ticker}</span>
-                    {isToday&&<span style={{background:"rgba(245,158,11,0.15)",color:C.gold,border:"1px solid rgba(245,158,11,0.3)",borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:800}}>🔥 HOY</span>}
-                  </div>
-                  <div style={{fontSize:14,color:"#94A3B8",fontWeight:600}}>{sel.nombre}</div>
-                  <div style={{fontSize:12,color:"#475569",marginTop:2}}>{sel.fecha} · {sel.hora}</div>
-                </div>
-
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-                  {[["EPS Est.",sel.eps_est,C.accent],["Rev. Est.",sel.rev_est,C.blue],
-                    ...(sel.sorpresa?[["Sorpresa",sel.sorpresa,sel.sorpresa?.startsWith("+")?C.bull:C.bear]]:[])]
-                    .map(([label,val,col])=>(
-                    <div key={label} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:9,padding:"10px 12px"}}>
-                      <div style={{fontSize:10,color:"#475569",fontWeight:600,marginBottom:4,letterSpacing:0.3}}>{label}</div>
-                      <div style={{fontFamily:"monospace",fontSize:16,fontWeight:800,color:col}}>{val}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{marginBottom:16}}>
-                  <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8,textTransform:"uppercase"}}>{isEN?"Community Sentiment":"Sentimiento de la Comunidad"}</div>
-                  <div style={{textAlign:"center",marginBottom:8}}>
-                    <svg viewBox="0 0 120 65" style={{width:"100%",maxWidth:160,margin:"0 auto",display:"block"}}>
-                      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" strokeLinecap="round"/>
-                      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#gaugeGrad2)" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${bull*1.57} 157`}/>
-                      <defs>
-                        <linearGradient id="gaugeGrad2" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#ef4444"/>
-                          <stop offset="50%" stopColor="#F59E0B"/>
-                          <stop offset="100%" stopColor="#00E58F"/>
-                        </linearGradient>
-                      </defs>
-                      <text x="60" y="52" textAnchor="middle" fontSize="18" fontWeight="900" fill="#F1F5F9">{bull}%</text>
-                    </svg>
-                    <div style={{fontSize:12,color:"#64748B",marginTop:-4}}>
-                      <span style={{color:C.bull,fontWeight:700}}>👍 Bullish</span> / <span style={{color:C.bear,fontWeight:700}}>{bear}% Bearish 👎</span>
-                    </div>
-                    <div style={{fontSize:11,color:"#334155",marginTop:4}}>💬 {(sel.community_votes||0).toLocaleString()} {isEN?"votes":"votos"}</div>
-                  </div>
-                  <div style={{height:6,background:"rgba(255,255,255,0.05)",borderRadius:6,overflow:"hidden",display:"flex",marginBottom:12}}>
-                    <div style={{width:`${bull}%`,background:`linear-gradient(90deg,${C.bull},#00c4d4)`,transition:"width 0.5s"}}/>
-                    <div style={{flex:1,background:`linear-gradient(90deg,rgba(255,100,100,0.5),${C.bear})`}}/>
-                  </div>
-                  <div style={{display:"flex",gap:8}}>
-                    <button onClick={()=>vote(sel.ticker,"bull")} disabled={!!myVote}
-                      style={{flex:1,background:myVote==="bull"?"rgba(0,229,143,0.15)":"transparent",border:`1.5px solid ${myVote==="bull"?C.bull:"rgba(0,229,143,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bull"?C.bull:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
-                      {myVote==="bull"?"✓ Alcista":"▲ Soy Alcista"}
-                    </button>
-                    <button onClick={()=>vote(sel.ticker,"bear")} disabled={!!myVote}
-                      style={{flex:1,background:myVote==="bear"?"rgba(255,77,106,0.15)":"transparent",border:`1.5px solid ${myVote==="bear"?C.bear:"rgba(255,77,106,0.2)"}`,borderRadius:9,padding:"10px 0",cursor:myVote?"not-allowed":"pointer",color:myVote==="bear"?C.bear:"#64748B",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
-                      {myVote==="bear"?"✓ Bajista":"▼ Soy Bajista"}
-                    </button>
-                  </div>
-                </div>
-
-                {sel.live&&<button onClick={()=>setLiveEvent(sel)} style={{width:"100%",background:"#ef4444",border:"none",borderRadius:9,padding:"10px",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 0 20px rgba(239,68,68,0.4)"}}>
-                  <span style={{width:8,height:8,borderRadius:"50%",background:"#fff",display:"inline-block"}}/>
-                  {sel.live_title} — EN VIVO
-                </button>}
-              </div>
-            </div>
-          );
-        })()}
       </div>
-
       {liveEvent&&<LiveConferenceModal event={liveEvent} lang={lang} onClose={()=>setLiveEvent(null)}/>}
     </div>
   );
@@ -10435,6 +10459,13 @@ function FlowPage({isPremium,onNeedPremium}){
   const whaleAlertTimer=useRef(null);
   // Expandable rows
   const [expandedId,setExpandedId]=useState(null);
+  // ── Telegram Alert Config ──
+  const [tgConfig,setTgConfig]=useState(()=>{
+    try{ return JSON.parse(localStorage.getItem("nexo-tg-config")||"null")||{enabled:true,minPrem:2e6,callsOnly:true,goldenOnly:false,minVol:0}; }
+    catch{ return {enabled:true,minPrem:2e6,callsOnly:true,goldenOnly:false,minVol:0}; }
+  });
+  const [showTgPanel,setShowTgPanel]=useState(false);
+  useEffect(()=>{ try{localStorage.setItem("nexo-tg-config",JSON.stringify(tgConfig));}catch{} },[tgConfig]);
   // Hourly candles — generated once, deterministic
   const [hourlyCandles]=useState(()=>{
     const HRS=["8AM","9AM","10AM","11AM","12PM","1PM","2PM","NOW"];
@@ -10554,28 +10585,36 @@ function FlowPage({isPremium,onNeedPremium}){
   const _golds = visible.filter(i=>i.isGold);
   const topPick = _golds.length ? _golds.reduce((best,cur)=>cur.premium>best.premium?cur:best,_golds[0]) : null;
 
-  // Alerta Telegram cuando llega un Golden Sweep > $1M
+  // ── Auto-Alerta Telegram (configurable) ──
   useEffect(()=>{
+    if(!tgConfig.enabled) return;
     const TG_TOKEN="8931471851:AAFActqhqBuKO3oLq5Z7FQBkl9cTa8yDSbs";
     const TG_CHANNEL="799353199";
     feed.forEach(item=>{
-      if(!item.isGold||item.premium<1e6) return;
+      // Filtros configurables
+      if(item.premium<tgConfig.minPrem) return;
+      if(tgConfig.callsOnly&&!item.isCall) return;
+      if(tgConfig.goldenOnly&&!item.isGold) return;
       if(alertedRef.current.has(item.id)) return;
       alertedRef.current.add(item.id);
       const score=scoreItem(item);
-      const msg=`⭐ *GOLDEN SWEEP ALERT*\n\n*${item.ticker}* — ${item.premium>=1e6?`$${(item.premium/1e6).toFixed(1)}M`:item.premium>=1e3?`$${(item.premium/1e3).toFixed(0)}K`:item.premium}\n`+
-        `Tipo: Golden Sweep ${item.isCall?"🟢 CALL":"🔴 PUT"}\n`+
-        (item.strike?`Strike: $${item.strike} | `:"")+(item.otm?`${item.otm}% OTM\n`:"\n")+
+      const typeLabel=item.isGold?"⭐ Golden Sweep":item.isDark?"🌑 Dark Pool":item.isCall?"📈 Call Sweep":"📉 Put Block";
+      const premLabel=item.premium>=1e6?`$${(item.premium/1e6).toFixed(1)}M`:item.premium>=1e3?`$${(item.premium/1e3).toFixed(0)}K`:`$${item.premium}`;
+      const msg=`${item.isGold?"⭐":item.isCall?"🟢":"🔴"} *FLUJO INSTITUCIONAL — NEXO TRADE*\n\n`+
+        `*${item.ticker}* — ${premLabel}\n`+
+        `Tipo: ${typeLabel} ${item.isCall?"CALL 🟢":"PUT 🔴"}\n`+
+        (item.strike?`Strike: $${item.strike}  |  `:"")+
+        (item.otm?`${item.otm}% OTM\n`:"\n")+
         (item.expiry?`Expiry: ${item.expiry}\n`:"")+
-        `Score: ${score} pts\n\n`+
-        `💡 Alta convicción institucional\n🔗 nexotradeia.com\n\n#FlowInstitucional #GoldenSweep`;
+        `Score IA: ${score}/100\n\n`+
+        `💡 ${item.isCall?"Sentimiento alcista 📈":"Sentimiento bajista 📉"}\n🔗 nexotradeia.com\n\n#FlowInstitucional`;
       fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({chat_id:TG_CHANNEL,text:msg,parse_mode:"Markdown",disable_web_page_preview:true})
       }).catch(()=>{});
     });
-  },[feed]);
+  },[feed,tgConfig]);
 
   // ── Stats strip computed values ──
   const callItems=visible.filter(f=>f.isCall&&!f.isDark);
@@ -10729,6 +10768,84 @@ function FlowPage({isPremium,onNeedPremium}){
             style={{background:"linear-gradient(135deg,rgba(0,136,204,0.25),rgba(0,136,204,0.15))",border:"1px solid rgba(0,136,204,0.5)",borderRadius:10,padding:"9px 16px",fontSize:12,fontWeight:800,color:"#29B6F6",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,boxShadow:"0 0 12px rgba(0,136,204,0.2)"}}>
             ✈️ Enviar Telegram
           </button>
+        </div>
+      )}
+
+      {/* ── ⚙️ TELEGRAM ALERT CONFIG PANEL ── */}
+      {filter!=="whales" && (
+        <div style={{marginBottom:10}}>
+          {/* Toggle button */}
+          <button onClick={()=>setShowTgPanel(v=>!v)}
+            style={{display:"flex",alignItems:"center",gap:7,background:tgConfig.enabled?"rgba(0,168,255,0.08)":"rgba(255,255,255,0.04)",border:`1px solid ${tgConfig.enabled?"rgba(0,168,255,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:10,padding:"6px 14px",fontSize:11,fontWeight:700,color:tgConfig.enabled?"#29B6F6":"#64748B",cursor:"pointer",transition:"all 0.2s"}}>
+            <span style={{fontSize:14}}>✈️</span>
+            <span>Alertas Telegram</span>
+            <span style={{background:tgConfig.enabled?"#00D26A":"#64748B",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>{tgConfig.enabled?"ACTIVO":"OFF"}</span>
+            <span style={{marginLeft:2,fontSize:10,color:"#475569"}}>{showTgPanel?"▲":"▼"}</span>
+          </button>
+          {/* Config panel */}
+          {showTgPanel&&(
+            <div style={{marginTop:8,background:"rgba(10,14,26,0.97)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:14,padding:"16px 18px",display:"flex",flexDirection:"column",gap:12}}>
+              <div style={{fontSize:12,fontWeight:800,color:"#F1F5F9",letterSpacing:0.3,display:"flex",alignItems:"center",gap:8}}>
+                ⚙️ Configurar alertas automáticas a Telegram
+                <span style={{fontSize:10,color:"#475569",fontWeight:500}}>— solo llegan las que cumplan todos los filtros</span>
+              </div>
+              {/* Row 1 — Enable toggle + Min Premium */}
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+                {/* On/Off */}
+                <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700}}>Auto-envío</span>
+                  <button onClick={()=>setTgConfig(c=>({...c,enabled:!c.enabled}))}
+                    style={{width:40,height:22,borderRadius:11,border:"none",cursor:"pointer",background:tgConfig.enabled?"#00D26A":"#334155",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                    <div style={{position:"absolute",top:3,left:tgConfig.enabled?21:3,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left 0.2s",boxShadow:"0 1px 4px rgba(0,0,0,0.3)"}}/>
+                  </button>
+                  <span style={{fontSize:11,fontWeight:800,color:tgConfig.enabled?"#00D26A":"#64748B"}}>{tgConfig.enabled?"ON":"OFF"}</span>
+                </div>
+                {/* Min Premium */}
+                <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)",flex:1,minWidth:220}}>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Premium mínimo</span>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                    {[{l:"Todos",v:0},{l:"$500K",v:5e5},{l:"$1M",v:1e6},{l:"$2M",v:2e6},{l:"$5M",v:5e6}].map(opt=>(
+                      <button key={opt.v} onClick={()=>setTgConfig(c=>({...c,minPrem:opt.v}))}
+                        style={{background:tgConfig.minPrem===opt.v?"rgba(0,168,255,0.2)":"transparent",border:`1px solid ${tgConfig.minPrem===opt.v?"rgba(0,168,255,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 9px",fontSize:11,fontWeight:700,color:tgConfig.minPrem===opt.v?"#29B6F6":"#64748B",cursor:"pointer"}}>
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Row 2 — Tipo de orden */}
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Dirección</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[{l:"📈📉 Ambas",calls:false},{l:"📈 Solo CALLS",calls:true}].map(opt=>(
+                      <button key={opt.l} onClick={()=>setTgConfig(c=>({...c,callsOnly:opt.calls}))}
+                        style={{background:tgConfig.callsOnly===opt.calls?"rgba(0,210,106,0.15)":"transparent",border:`1px solid ${tgConfig.callsOnly===opt.calls?"rgba(0,210,106,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.callsOnly===opt.calls?"#00D26A":"#64748B",cursor:"pointer"}}>
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Tipo orden</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[{l:"⭐ Solo Golden",golden:true},{l:"🌊 Todos",golden:false}].map(opt=>(
+                      <button key={opt.l} onClick={()=>setTgConfig(c=>({...c,goldenOnly:opt.golden}))}
+                        style={{background:tgConfig.goldenOnly===opt.golden?"rgba(245,158,11,0.15)":"transparent",border:`1px solid ${tgConfig.goldenOnly===opt.golden?"rgba(245,158,11,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.goldenOnly===opt.golden?"#F59E0B":"#64748B",cursor:"pointer"}}>
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Summary */}
+              <div style={{fontSize:11,color:"#475569",borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:10}}>
+                📡 Recibirás alertas de: <span style={{color:"#29B6F6",fontWeight:700}}>
+                  {tgConfig.callsOnly?"solo CALLS":"CALLS y PUTS"} · {tgConfig.goldenOnly?"solo Golden Sweeps":"todos los tipos"} · premium {tgConfig.minPrem===0?"sin límite":tgConfig.minPrem>=1e6?`≥ $${tgConfig.minPrem/1e6}M`:`≥ $${tgConfig.minPrem/1e3}K`}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
