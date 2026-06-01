@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 16:45:05
+// NEXO TRADE — build: 2026-06-01 16:59:16
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -17040,11 +17040,23 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
     return "default";
   });
   const [fired, setFired] = useState({}); // {alertId: true} transient in-session
+  const [liveMap, setLiveMap] = useState({}); // {TICKER: currentPrice} for proximity bars
+  const [portfolioTickers, setPortfolioTickers] = useState([]); // smart suggestions
 
   // ── Persist ───────────────────────────────────────────────────────────────
   useEffect(() => {
     localStorage.setItem(ALERT_STORAGE_KEY, JSON.stringify(alerts));
   }, [alerts]);
+
+  // ── Read portfolio tickers for smart suggestions ──────────────────────────
+  useEffect(() => {
+    try {
+      const key = `nexo_portfolio_${user?.id||"guest"}`;
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+      const ticks = [...new Set(data.map(p => (p.ticker||p.symbol||"").toUpperCase()).filter(Boolean))];
+      setPortfolioTickers(ticks);
+    } catch{}
+  }, [user?.id]);
 
   // ── Request notification permission ───────────────────────────────────────
   const requestPermission = async () => {
@@ -17097,6 +17109,7 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
         )
       );
       setLastCheck(new Date().toLocaleTimeString());
+      setLiveMap(prev => ({...prev, ...prices})); // update live prices for proximity bars
 
       setAlerts(prev => prev.map(a => {
         if (a.triggered) return a;
@@ -17137,6 +17150,10 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
 
   const activeCount  = alerts.filter(a => !a.triggered).length;
   const firedCount   = alerts.filter(a => a.triggered).length;
+
+  // ── Smart portfolio suggestions ───────────────────────────────────────────
+  const alertedTickers = new Set(alerts.map(a => a.ticker));
+  const suggestedTickers = portfolioTickers.filter(t => !alertedTickers.has(t)).slice(0, 3);
 
   return (
     <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 16px", fontFamily: "system-ui,-apple-system,sans-serif" }}>
@@ -17186,6 +17203,30 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
           </button>
         )}
       </div>
+
+      {/* ── Smart Portfolio Suggestions ───────────────────────────────────────── */}
+      {suggestedTickers.length > 0 && (
+        <div style={{ background: C.card, border: `1px solid rgba(0,168,255,0.25)`, borderRadius: 16, padding: "16px 18px", marginBottom: 20 }}>
+          <div style={{ fontWeight: 800, fontSize: 14, color: C.text, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+            <span>💡</span>
+            {isEN ? "Suggestions from your Portfolio" : "Sugerencias de tu Portafolio"}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {suggestedTickers.map(sym => (
+              <div key={sym} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontWeight: 800, fontSize: 13, color: C.text, minWidth: 60 }}>${sym}</span>
+                <span style={{ fontSize: 12, color: C.muted, flex: 1 }}>
+                  {isEN ? "You hold this — create a stop-loss alert?" : "Tienes esta posición — ¿crear alerta stop-loss?"}
+                </span>
+                <button onClick={() => { setTicker(sym); setDirection("below"); }}
+                  style={{ background: "rgba(0,168,255,0.10)", border: "1px solid rgba(0,168,255,0.25)", borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, color: C.accent, cursor: "pointer", whiteSpace: "nowrap" }}>
+                  {isEN ? "Set Alert" : "Crear alerta"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Add alert form */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: "18px 18px 20px", marginBottom: 20 }}>
@@ -17270,52 +17311,100 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
               {isEN ? "Active Alerts" : "Alertas Activas"}
             </div>
           )}
-          {alerts.filter(a => !a.triggered).map(a => (
-            <div key={a.id} style={{ background: C.card, border: `1.5px solid ${a.direction==="above"?"rgba(22,163,74,0.25)":"rgba(220,38,38,0.25)"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: a.direction==="above"?C.bullBg:C.bearBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
-                {a.direction === "above" ? "📈" : "📉"}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontWeight: 800, fontSize: 14, color: C.text }}>${a.ticker}</span>
-                  <span style={{ background: a.direction==="above"?C.bullBg:C.bearBg, color: a.direction==="above"?C.bull:C.bear, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>
-                    {a.direction === "above" ? "≥" : "≤"} ${a.targetPrice}
-                  </span>
-                </div>
-                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
-                  {isEN ? "Added" : "Creada"} {a.createdAt}
-                </div>
-              </div>
-              <button onClick={() => deleteAlert(a.id)}
-                style={{ background: "none", border: "none", color: C.muted, fontSize: 18, cursor: "pointer", padding: "4px 6px", borderRadius: 8, opacity: 0.6 }}>×</button>
-            </div>
-          ))}
-
-          {/* Triggered alerts */}
-          {alerts.filter(a => a.triggered).length > 0 && (
-            <>
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", margin: "10px 0 4px" }}>
-                {isEN ? "Triggered" : "Disparadas"}
-              </div>
-              {alerts.filter(a => a.triggered).map(a => (
-                <div key={a.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, opacity: 0.7 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: C.bullBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>✅</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontWeight: 800, fontSize: 13, color: C.text }}>${a.ticker}</span>
-                      <span style={{ background: C.bullBg, color: C.bull, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>
-                        {isEN ? "Triggered" : "Disparada"} {a.triggeredAt || ""}
+          {alerts.filter(a => !a.triggered).map(a => {
+            const cur = liveMap[a.ticker];
+            const pct = cur
+              ? (a.direction==="above"
+                  ? Math.min(cur / a.targetPrice * 100, 100)
+                  : Math.min(a.targetPrice / cur * 100, 100))
+              : null;
+            const dist = cur ? Math.abs(cur - a.targetPrice) : null;
+            const isNear = pct !== null && pct >= 98;
+            return (
+              <div key={a.id} style={{ background: C.card, border: `1.5px solid ${isNear?"rgba(245,158,11,0.5)":a.direction==="above"?"rgba(22,163,74,0.25)":"rgba(220,38,38,0.25)"}`, borderRadius: 14, padding: "14px 16px 12px", transition: "border-color 0.3s" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: a.direction==="above"?C.bullBg:C.bearBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
+                    {a.direction === "above" ? "📈" : "📉"}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 800, fontSize: 14, color: C.text }}>${a.ticker}</span>
+                      <span style={{ background: a.direction==="above"?C.bullBg:C.bearBg, color: a.direction==="above"?C.bull:C.bear, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>
+                        {a.direction === "above" ? "≥" : "≤"} ${a.targetPrice}
                       </span>
+                      {isNear && (
+                        <span style={{ background: "rgba(245,158,11,0.15)", color: C.gold, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 800, animation: "pulse 1.2s infinite" }}>
+                          🔥 {isEN?"NEAR":"CERCA"}
+                        </span>
+                      )}
+                      {cur && !isNear && (
+                        <span style={{ fontSize: 11, color: C.muted }}>
+                          {isEN?"Now":"Ahora"}: ${cur.toFixed(2)}
+                        </span>
+                      )}
                     </div>
-                    <div style={{ fontSize: 11, color: C.muted }}>
-                      {a.direction === "above" ? "≥" : "≤"} ${a.targetPrice}
-                      {a.triggeredPrice ? ` → $${Number(a.triggeredPrice).toFixed(2)}` : ""}
+                    <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
+                      {isEN ? "Added" : "Creada"} {a.createdAt}
+                      {dist !== null && ` · ${isEN?"$"+dist.toFixed(2)+" away":"a $"+dist.toFixed(2)+" del objetivo"}`}
                     </div>
                   </div>
                   <button onClick={() => deleteAlert(a.id)}
                     style={{ background: "none", border: "none", color: C.muted, fontSize: 18, cursor: "pointer", padding: "4px 6px", borderRadius: 8, opacity: 0.6 }}>×</button>
                 </div>
-              ))}
+                {/* ── Proximity bar ── */}
+                {pct !== null && (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 10, color: C.muted, fontWeight: 600 }}>
+                        {isEN ? "Proximity to target" : "Proximidad al objetivo"}
+                      </span>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: isNear ? C.gold : a.direction==="above" ? C.bull : C.bear }}>
+                        {pct.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div style={{ height: 5, borderRadius: 99, background: C.border, overflow: "hidden" }}>
+                      <div style={{
+                        height: "100%",
+                        width: `${pct}%`,
+                        borderRadius: 99,
+                        background: isNear
+                          ? `linear-gradient(90deg, ${a.direction==="above"?C.bull:C.bear}, ${C.gold})`
+                          : a.direction==="above" ? C.bull : C.bear,
+                        transition: "width 0.6s ease",
+                      }}/>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* ── Recent Activations feed ── */}
+          {alerts.filter(a => a.triggered).length > 0 && (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", margin: "14px 0 8px", display: "flex", alignItems: "center", gap: 6 }}>
+                <span>📡</span>{isEN ? "Recent Activations" : "Activaciones Recientes"}
+              </div>
+              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, overflow: "hidden" }}>
+                {alerts.filter(a => a.triggered).map((a, idx, arr) => (
+                  <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderBottom: idx < arr.length-1 ? `1px solid ${C.border}` : "none" }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: C.bull, flexShrink: 0 }}/>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <span style={{ fontWeight: 800, fontSize: 13, color: C.text }}>${a.ticker}</span>
+                        <span style={{ background: C.bullBg, color: C.bull, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>✅ {isEN?"Triggered":"Disparada"}</span>
+                        {a.triggeredAt && <span style={{ fontSize: 11, color: C.muted }}>{a.triggeredAt}</span>}
+                      </div>
+                      <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
+                        {a.direction === "above" ? "≥" : "≤"} ${a.targetPrice}
+                        {a.triggeredPrice ? ` → $${Number(a.triggeredPrice).toFixed(2)}` : ""}
+                      </div>
+                    </div>
+                    <button onClick={() => deleteAlert(a.id)}
+                      style={{ background: "none", border: "none", color: C.muted, fontSize: 18, cursor: "pointer", padding: "4px 6px", borderRadius: 8, opacity: 0.6 }}>×</button>
+                  </div>
+                ))}
+              </div>
             </>
           )}
         </div>
