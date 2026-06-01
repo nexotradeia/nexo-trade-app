@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 09:16:37
+// NEXO TRADE — build: 2026-06-01 09:21:17
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10492,7 +10492,7 @@ function FlowPage({isPremium,onNeedPremium}){
               boxShadow:isTop?"0 0 20px rgba(255,140,0,0.2)":isNew?`0 0 16px ${accentC}25`:"none",
               position:"relative",
             }}>
-            {isTop&&<div style={{position:"absolute",top:-10,left:12,background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",fontSize:9,fontWeight:900,padding:"2px 8px",borderRadius:20,letterSpacing:.5,boxShadow:"0 2px 8px rgba(255,100,0,0.4)"}}>🔥 TOP PICK</div>}
+            {isTop&&<div style={{position:"absolute",top:6,right:10,background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",fontSize:9,fontWeight:900,padding:"2px 8px",borderRadius:20,letterSpacing:.5,boxShadow:"0 2px 8px rgba(255,100,0,0.4)",zIndex:2}}>🔥 TOP PICK</div>}
               <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{item.time}</div>
               <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{item.ticker}</div>
               <div style={{fontSize:10,fontWeight:700}}>
