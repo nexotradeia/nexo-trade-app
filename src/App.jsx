@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 09:24:28
+// NEXO TRADE — build: 2026-06-01 09:27:34
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10493,10 +10493,7 @@ function FlowPage({isPremium,onNeedPremium}){
               position:"relative",
             }}>
               <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{item.time}</div>
-              <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace",display:"flex",alignItems:"center",gap:5}}>
-                {item.ticker}
-                {isTop&&<span style={{fontSize:8,fontWeight:900,color:"#fff",background:"linear-gradient(135deg,#FF6000,#FF8C00)",padding:"2px 6px",borderRadius:10,letterSpacing:.4,boxShadow:"0 1px 6px rgba(255,100,0,0.5)",whiteSpace:"nowrap"}}>🔥 TOP</span>}
-              </div>
+              <div style={{fontWeight:800,fontSize:13,color:accentC,fontFamily:"monospace"}}>{item.ticker}</div>
               <div style={{fontSize:10,fontWeight:700}}>
                 {gold&&<span style={{background:"rgba(245,158,11,0.15)",color:"#F59E0B",borderRadius:5,padding:"2px 5px"}}>⭐ GOLDEN</span>}
                 {dark&&!gold&&<span style={{background:"rgba(139,92,246,0.15)",color:"#A78BFA",borderRadius:5,padding:"2px 5px"}}>🌑 DARK</span>}
@@ -10507,7 +10504,8 @@ function FlowPage({isPremium,onNeedPremium}){
               <div style={{fontSize:12,color:C.text,fontFamily:"monospace"}}>{item.strike?`$${item.strike}`:"—"}</div>
               <div style={{fontSize:11,color:C.muted}}>{item.expiry||"—"}</div>
               <div style={{fontSize:11,color:item.otm>5?"#F59E0B":C.muted}}>{item.otm?`${item.otm}% OTM`:"—"}</div>
-              <div style={{display:"flex",alignItems:"center"}}>
+              <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
+                {isTop&&<span style={{background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",borderRadius:6,padding:"2px 7px",fontSize:9,fontWeight:900,letterSpacing:.4,boxShadow:"0 1px 8px rgba(255,100,0,0.5)"}}>🔥 TOP PICK</span>}
                 <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 10px",fontSize:10,fontWeight:700}}>
                   {bull?"▲ BULLISH":"▼ BEARISH"}
                 </span>
