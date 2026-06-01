@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 19:23:19
+// NEXO TRADE — build: 2026-06-01 19:26:45
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -14799,7 +14799,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const DEFAULT_TICKERS = ["AAPL","NVDA","TSLA","MSFT","BTC","ETH","SPY","AMZN"];
 
   const [tickers, setTickers] = useState(()=>{
-    try { const s=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return s||DEFAULT_TICKERS; } catch { return DEFAULT_TICKERS; }
+    try { const s=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return (s && s.length > 0) ? s : DEFAULT_TICKERS; } catch { return DEFAULT_TICKERS; }
   });
   const [prices, setPrices] = useState({});
   const [loading, setLoading] = useState(true);
