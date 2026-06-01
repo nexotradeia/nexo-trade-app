@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 17:10:21
+// NEXO TRADE — build: 2026-06-01 17:17:00
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10725,7 +10725,6 @@ function FlowPage({isPremium,onNeedPremium}){
                 </button>
               </div>
             </div>
-            </div>{/* closes row grid div */}
             {/* ── EXPANDED AI PANEL ── */}
             {isExpanded && ia && (
               <div style={{background:`linear-gradient(135deg,${accentC}08,rgba(10,14,26,0.97))`,border:`1px solid ${accentC}30`,borderTop:"none",padding:"14px 18px",animation:"fadeIn 0.2s ease"}}>
@@ -10752,7 +10751,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 <div style={{marginTop:8,fontSize:9,color:"#1E293B",textAlign:"right"}}>↑ Click en la fila para cerrar · Solo educativo</div>
               </div>
             )}
-            </div> {/* closes outer row wrapper */}
+            </div>
           );
         })}
       </div>
