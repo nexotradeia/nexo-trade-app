@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 17:55:12
+// NEXO TRADE — build: 2026-06-01 18:01:56
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10492,7 +10492,7 @@ function FlowPage({isPremium,onNeedPremium}){
   };
 
   return(
-    <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto"}}>
+    <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:"#060A14",overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto",background:"#060A14",borderRadius:16,padding:"16px 20px 24px",minHeight:400}}>
 
       {/* ── 🐋 WHALE ALERT POPUP ── */}
       {whaleAlert&&(
