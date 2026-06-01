@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 10:43:01
+// NEXO TRADE — build: 2026-06-01 11:07:35
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -12223,7 +12223,7 @@ function BotPostCard({post,onTickerClick,lang}){
   const isBear = post.sentiment==="bear";
   const sentColor = isBull?C.bull:isBear?C.bear:C.muted;
   const sentBg    = isBull?C.bullBg:isBear?C.bearBg:C.accentDim;
-  const sentLabel = isBull?(isEN?"▲ COMPRA":"▲ COMPRA"):isBear?(isEN?"▼ VENTA":"▼ VENTA"):(isEN?"◆ HOLD":"◆ HOLD");
+  const sentLabel = isBull?"▲ BUY":isBear?"▼ SELL":"◆ HOLD";
   const mainName  = TICKER_NAMES[post.ticker];
   return(
     <div style={{background:C.card,border:`1.5px solid ${isBull?"rgba(22,163,74,0.22)":isBear?"rgba(220,38,38,0.22)":C.border}`,borderRadius:16,padding:"14px 16px",marginBottom:6,boxShadow:C.shadow,transition:"transform 0.18s"}}
@@ -17378,6 +17378,12 @@ export default function App(){
   const [newPostId,setNewPostId]= useState(null);
   const [page,setPage]         = useState(()=>{ try{ const p=parseInt(localStorage.getItem("nexo_page")||"0"); return isNaN(p)?0:p; }catch{return 0;} });
   const [sent,setSent]         = useState("all");
+  // ── Bots dinámicos: postean automáticamente cada ~22s ──────────────────────
+  const [liveBots,setLiveBots] = useState(()=>{
+    // Mostrar los primeros 8 bots al cargar para que el feed nunca esté vacío
+    const ALL = [...CASUAL_BOT_POSTS, ...BOT_POSTS];
+    return ALL.slice(0,8).map((b,i)=>({...b,_isBot:true,_key:`live_init_${i}`,time:"just now"}));
+  });
   const [auth,setAuth]         = useState(null);
   const [user,setUser]         = useState(_getSavedUser); // ← restaura al instante
   const [following,setFollow]  = useState([]);
@@ -17474,6 +17480,25 @@ export default function App(){
     }, 12000);
     return ()=>clearTimeout(delay);
   },[]);
+  // ── Bots dinámicos: cada 18-25s un bot "postea" al tope del feed ─────────────
+  useEffect(()=>{
+    const ALL = [...CASUAL_BOT_POSTS, ...BOT_POSTS];
+    let idx = 8; // empieza después de los 8 iniciales
+    const tick = () => {
+      const bot = ALL[idx % ALL.length];
+      const times = ["just now","1m ago","2m ago"];
+      setLiveBots(prev => [{
+        ...bot,
+        _isBot:true,
+        _key:`live_${Date.now()}`,
+        time: times[Math.floor(Math.random()*times.length)],
+      }, ...prev.slice(0, 29)]); // máximo 30 bots vivos
+      idx++;
+    };
+    const iv = setInterval(tick, 18000 + Math.random()*7000);
+    return () => clearInterval(iv);
+  }, []);
+
   const [newsletterEmail,setNewsletterEmail] = useState("");
   const [newsletterDone,setNewsletterDone]   = useState(false);
   const [showNewsletter,setShowNewsletter]   = useState(
@@ -18008,23 +18033,19 @@ export default function App(){
     return base;
   })();
 
-  // ── Mezclar bots en el feed — aparecen SIEMPRE cada 3 posts reales ──────────
-  const ALL_BOTS = [...CASUAL_BOT_POSTS, ...BOT_POSTS];
+  // ── Mezclar liveBots + posts reales en el feed ───────────────────────────────
   const displayFeed = (()=>{
     const result = [];
-    let botIdx = 0;
-    const BOT_INTERVAL = 1; // un bot cada 1 post real (alternado)
+    // liveBots siempre van primero (los más recientes al tope)
+    liveBots.forEach(b => result.push(b));
+    // Intercalar posts reales entre bots adicionales cada 2 posts reales
     filtered2.forEach((post, i) => {
       result.push(post);
-      if ((i + 1) % BOT_INTERVAL === 0) {
-        result.push({...ALL_BOTS[botIdx % ALL_BOTS.length], _isBot:true, _key:`bot_${botIdx}`});
-        botIdx++;
+      if ((i + 1) % 2 === 0) {
+        const ALL = [...CASUAL_BOT_POSTS, ...BOT_POSTS];
+        result.push({...ALL[(liveBots.length + i) % ALL.length], _isBot:true, _key:`bot_filler_${i}`});
       }
     });
-    // Si no hay posts reales todavía → mostrar bots directamente para que el feed no esté vacío
-    if (filtered2.length === 0) {
-      ALL_BOTS.forEach((b, i) => result.push({...b, _isBot:true, _key:`bot_init_${i}`}));
-    }
     return result;
   })();
 
@@ -18120,7 +18141,7 @@ export default function App(){
 
         /* ── TABS ── */
         .nexo-tabs { justify-content: flex-start !important; }
-        .nexo-tabs button { padding: 10px 10px !important; font-size: 11px !important; }
+        .nexo-tabs button { padding: 0 8px !important; font-size: 11px !important; }
 
         /* ── MARKET CARDS scroll horizontal ── */
         .nexo-market-grid {
@@ -18289,7 +18310,7 @@ export default function App(){
 
       {/* NAVBAR */}
       <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,height:58,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,height:52,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Logo — integrado al navbar */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
@@ -18371,27 +18392,57 @@ export default function App(){
             }
           </div>
         </div>
-        {/* Tabs — bigger, professional */}
-        <div className="nexo-tabs" style={{display:"flex",gap:0,borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1180,margin:"0 auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
-          {NAV_ITEMS(t, lang==="en").map(n=>{
-            if(n.premium){
-              const active=page===n.idx;
-              return(
-                <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                  style={{background:active?"linear-gradient(135deg,#7C3AED,#9333EA)":"transparent",border:active?"none":"1px solid rgba(124,58,237,0.35)",borderBottom:"none",borderRadius:20,margin:"6px 6px 6px auto",padding:"6px 16px",cursor:"pointer",color:active?"#fff":"#A78BFA",fontSize:13,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5,letterSpacing:0.3,boxShadow:active?"0 0 18px rgba(124,58,237,0.4)":"none",transition:"all 0.2s"}}>
-                  ✦ Premium
-                </button>
-              );
-            }
+        {/* ── ROW 1: FREE TABS ── */}
+        <div style={{display:"flex",alignItems:"center",borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1180,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:36}}>
+          <span style={{flexShrink:0,fontSize:9,fontWeight:800,letterSpacing:1.2,color:"#00A8FF",background:"rgba(0,168,255,0.1)",border:"1px solid rgba(0,168,255,0.18)",borderRadius:5,padding:"2px 6px",margin:"0 8px 0 2px"}}>FREE</span>
+          {[
+            {label:t.feed,idx:0},
+            {label:lang==="en"?"📈 Stock Pick IA":"📈 Stock Pick IA",idx:3,badge:"NEW"},
+            {label:t.noticias,idx:5},
+            {label:t.trending,idx:7},
+            {label:lang==="en"?"📚 Academy":"📚 Academia",idx:12},
+            {label:"🎓 Webinars",idx:11},
+            {label:lang==="en"?"💬 Messages":"💬 Mensajes",idx:22},
+          ].map(n=>(
+            <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
+              style={{background:"transparent",border:"none",borderBottom:`2px solid ${page===n.idx?"#00A8FF":"transparent"}`,padding:"0 12px",height:36,cursor:"pointer",color:page===n.idx?"#00A8FF":"var(--c-muted)",fontSize:12,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0,fontFamily:"inherit"}}
+              onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";}}}
+              onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";}}}
+            >
+              {n.label}
+              {n.badge&&<span style={{fontSize:8,fontWeight:800,color:"#00A8FF",background:"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:4,padding:"1px 4px",letterSpacing:0.5}}>{n.badge}</span>}
+            </button>
+          ))}
+        </div>
+        {/* ── ROW 2: VIP TABS ── */}
+        <div style={{display:"flex",alignItems:"center",background:"rgba(245,158,11,0.03)",borderTop:"1px solid rgba(245,158,11,0.1)",overflowX:"auto",maxWidth:1180,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:34}}>
+          <span style={{flexShrink:0,fontSize:9,fontWeight:800,letterSpacing:0.8,color:"#F59E0B",background:"rgba(245,158,11,0.12)",borderRadius:5,padding:"2px 6px",margin:"0 6px 0 2px"}}>👑 VIP</span>
+          {[
+            {label:lang==="en"?"💡 VIP Ideas":"💡 Ideas VIP",idx:21,locked:!effectivePremium},
+            {label:lang==="en"?"🐋 VIP Flow":"🐋 Flujo VIP",idx:20,locked:!effectivePremium},
+            {label:"🏛️ Wall St. & Capitol",idx:19,locked:!effectivePremium},
+            {label:lang==="en"?"🔬 Screener":"🔬 Screener",idx:36,locked:!effectivePremium},
+            {label:lang==="en"?"💼 Portfolio":"💼 Portfolio",idx:37,locked:!effectivePremium},
+            {label:"👁 Watchlist",idx:38},
+            {label:lang==="en"?"🚨 Alerts":"🚨 Alertas",idx:42},
+            {label:lang==="en"?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,locked:!effectivePremium},
+          ].map(n=>{
+            const active=page===n.idx;
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#00A8FF":"transparent"}`,margin:"0",padding:"13px 20px",cursor:"pointer",color:page===n.idx?"#00A8FF":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",letterSpacing:0.1,display:"flex",alignItems:"center",gap:5,fontFamily:"inherit"}}
-                onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#00A8FF";e.currentTarget.style.background="rgba(0,168,255,0.04)";}}}
-                onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";e.currentTarget.style.background="transparent";}}}>
+                style={{background:"transparent",border:"none",borderBottom:`2px solid ${active?"#F59E0B":"transparent"}`,padding:"0 10px",height:34,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:12,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.15s",display:"flex",alignItems:"center",gap:3,flexShrink:0,fontFamily:"inherit"}}
+                onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#F59E0B";}}}
+                onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)";}}}
+              >
+                {n.locked&&<span style={{fontSize:10,opacity:0.7}}>🔒</span>}
                 {n.label}
               </button>
             );
           })}
+          <button onClick={()=>{setPage(8);setShowLanding(false);}}
+            style={{marginLeft:"auto",flexShrink:0,background:page===8?"linear-gradient(135deg,#7C3AED,#9333EA)":"transparent",border:page===8?"none":"1px solid rgba(124,58,237,0.3)",borderRadius:14,padding:"4px 12px",cursor:"pointer",color:page===8?"#fff":"#A78BFA",fontSize:11,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:page===8?"0 0 14px rgba(124,58,237,0.3)":"none",transition:"all 0.2s",marginRight:4}}>
+            ✦ Premium
+          </button>
         </div>
       </nav>
 
