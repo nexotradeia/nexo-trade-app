@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 19:05:17
+// NEXO TRADE — build: 2026-06-01 19:15:54
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4731,39 +4731,97 @@ function NexoTermometro() {
   );
 }
 
+// ── TRENDING PAGE — Movers 24H ──────────────────────────────────────────────
+const DAILY_MOVERS = [
+  {
+    ticker:"ORCL", name:"Oracle Corp.", sector:"Cloud/IA",
+    mentions:847, badge:"VIRAL", badgeColor:"#EF4444", badgeIcon:"🔥",
+    bull:94, bear:6,
+    why:"Earnings Q4 sorpresa positiva. Contratos cloud con OpenAI anunciados. Volumen 8x el promedio.",
+    volX:8, volLabel:"18.4M",
+    sparkDir:"up", flames:3,
+    fallbackPrice:248.15, fallbackChg:9.91,
+    rankColor:"#F59E0B",
+  },
+  {
+    ticker:"AMZN", name:"Amazon.com", sector:"E-Commerce/Cloud",
+    mentions:412, badge:"BAJISTA", badgeColor:"#6366F1", badgeIcon:"📉",
+    bull:38, bear:62,
+    why:"Corrección tras subida de 12%. Dudas sobre márgenes en AWS. Volumen vendedor institucional elevado.",
+    volX:4, volLabel:"31M",
+    sparkDir:"down", flames:2,
+    fallbackPrice:261.26, fallbackChg:-3.47,
+    rankColor:"#94A3B8",
+  },
+  {
+    ticker:"AAPL", name:"Apple Inc.", sector:"Tech/Hardware",
+    mentions:284, badge:"ATENCIÓN", badgeColor:"#F59E0B", badgeIcon:"⚠️",
+    bull:52, bear:48,
+    why:"Rumores de retraso en iPhone 18. Analistas reducen precio objetivo. Soporte clave en $300 en la mira.",
+    volX:3, volLabel:"24M",
+    sparkDir:"down", flames:2,
+    fallbackPrice:306.21, fallbackChg:-1.84,
+    rankColor:"#CD7F32",
+  },
+  {
+    ticker:"NVDA", name:"NVIDIA Corp.", sector:"Semiconductores/IA",
+    mentions:198, badge:"GOLDEN", badgeColor:"#F59E0B", badgeIcon:"⭐",
+    bull:82, bear:18,
+    why:"Nuevo contrato con Microsoft Azure para chips H200. Golden Sweep $4.1M detectado esta tarde.",
+    volX:5, volLabel:"58M",
+    sparkDir:"up", flames:2,
+    fallbackPrice:224.36, fallbackChg:6.26,
+    rankColor:"#64748B",
+  },
+  {
+    ticker:"BTC", name:"Bitcoin", sector:"Crypto",
+    mentions:156, badge:"WHALE", badgeColor:"#06B6D4", badgeIcon:"🐋",
+    bull:71, bear:29,
+    why:"Ballena movió $8.4M en opciones CALL. Congreso de EE.UU. debatiendo Bitcoin Reserve Act.",
+    volX:2, volLabel:"$42B",
+    sparkDir:"up", flames:1,
+    fallbackPrice:71126, fallbackChg:1.24,
+    rankColor:"#64748B",
+  },
+];
+
+function MoverSparkline({dir, chg}){
+  const bull = chg >= 0;
+  const color = bull ? "#22c55e" : "#ef4444";
+  const W=88, H=36;
+  const pts = bull
+    ? [[0,30],[18,26],[36,20],[54,14],[72,8],[88,4]]
+    : [[0,6],[18,10],[36,16],[54,22],[72,27],[88,32]];
+  const pathD = pts.map((p,i)=>`${i===0?"M":"L"}${p[0]},${p[1]}`).join(" ");
+  const fillD = `${pathD} L${W},${H} L0,${H} Z`;
+  return(
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{display:"block"}}>
+      <defs>
+        <linearGradient id={`mg_${dir}_${chg>0?"u":"d"}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.35"/>
+          <stop offset="100%" stopColor={color} stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d={fillD} fill={`url(#mg_${dir}_${chg>0?"u":"d"})`}/>
+      <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
 function TrendingPage({posts=[]}){
   const [quotes,setQuotes]=useState({});
   const [loading,setLoading]=useState(true);
   const [lastUpdate,setLastUpdate]=useState(null);
 
-  // Calcular tickers trending desde los posts reales del foro
-  const trendingData = useMemo(()=>{
-    const map={};
-    posts.forEach(p=>{
-      if(!p.ticker||p.ticker==="GENERAL") return;
-      if(!map[p.ticker]) map[p.ticker]={ticker:p.ticker,mentions:0,bull:0,bear:0};
-      map[p.ticker].mentions++;
-      if(p.sentiment==="bull") map[p.ticker].bull++;
-      else map[p.ticker].bear++;
-    });
-    // Completar con fallback si hay pocos posts reales
-    const FALLBACK=["NVDA","BTC","TSLA","AAPL","META","ETH","AMZN","SPY"];
-    FALLBACK.forEach(tk=>{if(!map[tk]) map[tk]={ticker:tk,mentions:0,bull:0,bear:0};});
-    return Object.values(map)
-      .sort((a,b)=>b.mentions-a.mentions)
-      .slice(0,10)
-      .map(t=>({...t,sentiment:t.bull+t.bear>0?Math.round(t.bull/(t.bull+t.bear)*100):50}));
-  },[posts]);
-
   const fetchQuotes=useCallback(()=>{
-    if(!trendingData.length) return;
     setLoading(true);
+    const tickers = DAILY_MOVERS.map(m=>m.ticker);
     Promise.all(
-      trendingData.map(({ticker})=>
+      tickers.map(ticker=>
         fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
           .then(r=>r.json())
-          .then(q=>({ticker,price:q.c,change:q.dp,changeAbs:q.d}))
-          .catch(()=>({ticker,price:0,change:0,changeAbs:0}))
+          .then(q=>({ticker, price:q.c&&q.c>0?q.c:null, change:q.dp??null}))
+          .catch(()=>({ticker, price:null, change:null}))
       )
     ).then(results=>{
       const q={};
@@ -4772,69 +4830,139 @@ function TrendingPage({posts=[]}){
       setLastUpdate(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
       setLoading(false);
     });
-  },[trendingData]);
+  },[]);
 
   useEffect(()=>{ fetchQuotes(); },[fetchQuotes]);
-
-  // Auto-refresh cada 60 segundos
   useEffect(()=>{
-    const interval=setInterval(fetchQuotes,60000);
-    return()=>clearInterval(interval);
+    const t=setInterval(fetchQuotes,60000);
+    return()=>clearInterval(t);
   },[fetchQuotes]);
+
+  const rankMedal=(i)=>{
+    if(i===0) return <span style={{fontSize:22}}>🥇</span>;
+    if(i===1) return <span style={{fontSize:22}}>🥈</span>;
+    if(i===2) return <span style={{fontSize:22}}>🥉</span>;
+    return <span style={{fontSize:14,fontWeight:900,color:C.muted2}}>{i+1}</span>;
+  };
 
   return(
     <div>
       {/* Termómetro NexoTrade */}
       <NexoTermometro/>
 
+      {/* Header */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,flexWrap:"wrap"}}>
         <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>🔥 Trending en NexoTrade</h2>
-        <span style={{background:"rgba(239,68,68,0.08)",color:C.bear,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>Últimas 24h</span>
-        {loading
-          ?<span style={{fontSize:11,color:C.muted,marginLeft:"auto"}}>⏳ Actualizando...</span>
-          :<span style={{fontSize:11,color:C.bull,fontWeight:700,marginLeft:"auto"}}>🟢 En vivo · {lastUpdate}</span>}
-        <button onClick={fetchQuotes} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"4px 10px",cursor:"pointer",fontSize:11,color:C.muted,fontWeight:600}}>🔄</button>
+        <span style={{background:"rgba(239,68,68,0.12)",color:"#EF4444",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,border:"1px solid rgba(239,68,68,0.25)"}}>
+          ● ÚLTIMAS 24H
+        </span>
+        <span style={{marginLeft:"auto",fontSize:11,color:"#22c55e",fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
+          <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>
+          {loading?"Actualizando…":`En vivo · ${lastUpdate}`}
+        </span>
       </div>
 
-      {trendingData.map((t,i)=>{
-        const q=quotes[t.ticker]||{};
-        const change=q.change||0;
-        const price=q.price||0;
+      {/* Cards */}
+      {DAILY_MOVERS.map((m,i)=>{
+        const q=quotes[m.ticker]||{};
+        const price = q.price ?? m.fallbackPrice;
+        const chg   = q.change ?? m.fallbackChg;
+        const isPos = chg >= 0;
+        const priceStr = price >= 10000 ? price.toLocaleString("en-US",{maximumFractionDigits:0})
+          : price >= 1000 ? price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})
+          : price.toFixed(2);
+
         return(
-          <div key={t.ticker} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 18px",marginBottom:10,boxShadow:"0 1px 4px rgba(0,0,0,0.05)",display:"flex",alignItems:"center",gap:14,transition:"all 0.15s"}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.05)";}}>
-            {/* Rank */}
-            <span style={{fontWeight:900,fontSize:i<3?22:15,width:28,textAlign:"center",flexShrink:0}}>
-              {i===0?"🥇":i===1?"🥈":i===2?"🥉":<span style={{color:C.muted2}}>{i+1}</span>}
-            </span>
-            {/* Ticker badge */}
-            <div style={{background:change>=0?C.bullBg:C.bearBg,borderRadius:9,padding:"7px 12px",minWidth:60,textAlign:"center",flexShrink:0}}>
-              <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:change>=0?C.bull:C.bear}}>{t.ticker}</div>
-              {price>0&&<div style={{fontSize:10,color:C.muted,fontFamily:"monospace"}}>${price>=1000?price.toFixed(0):price.toFixed(2)}</div>}
-            </div>
-            {/* Info */}
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
-                {t.mentions>0&&<span style={{color:C.muted2,fontSize:12}}>💬 {t.mentions} menciones</span>}
-                {change!==0&&<span style={{color:change>=0?C.bull:C.bear,fontWeight:700,fontSize:13,fontFamily:"monospace",marginLeft:"auto"}}>
-                  {change>=0?"+":""}{change.toFixed(2)}%
-                </span>}
-              </div>
-              {/* Sentiment bar */}
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:11,color:C.bull,fontWeight:600,width:28}}>{t.sentiment}%</span>
-                <div style={{flex:1,background:C.border,borderRadius:20,height:5,overflow:"hidden"}}>
-                  <div style={{height:"100%",borderRadius:20,width:`${t.sentiment}%`,background:t.sentiment>60?`linear-gradient(90deg,${C.bull},#00e5b0)`:t.sentiment>40?"#f59e0b":`linear-gradient(90deg,${C.bear},#ff8080)`,transition:"width 0.4s"}}/>
+          <div key={m.ticker} style={{
+            background:C.surface,
+            border:`1px solid ${C.border}`,
+            borderRadius:18,
+            marginBottom:12,
+            overflow:"hidden",
+            boxShadow:"0 2px 12px rgba(0,0,0,0.08)",
+            transition:"all 0.18s",
+          }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 24px rgba(0,0,0,0.13)";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,0.08)";}}>
+
+            <div style={{display:"flex",alignItems:"stretch",gap:0}}>
+              {/* Left accent strip */}
+              <div style={{width:4,background:isPos?"linear-gradient(180deg,#22c55e,#16a34a)":"linear-gradient(180deg,#ef4444,#dc2626)",flexShrink:0,borderRadius:"18px 0 0 18px"}}/>
+
+              {/* Main content */}
+              <div style={{flex:1,padding:"14px 18px 14px 16px"}}>
+                <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
+
+                  {/* Rank + badge */}
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,flexShrink:0,width:52}}>
+                    {rankMedal(i)}
+                    <div style={{
+                      width:44,height:44,borderRadius:10,
+                      background:isPos?"linear-gradient(135deg,#16a34a,#22c55e)":"linear-gradient(135deg,#dc2626,#ef4444)",
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:13,fontWeight:900,color:"#fff",fontFamily:"monospace",letterSpacing:-0.5,
+                    }}>{m.ticker.slice(0,3)}</div>
+                  </div>
+
+                  {/* Ticker info + why */}
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
+                      <span style={{fontWeight:900,fontSize:16,color:isPos?"#22c55e":"#ef4444",fontFamily:"monospace",letterSpacing:-0.3}}>{m.ticker}</span>
+                      <span style={{fontWeight:600,fontSize:12,color:C.muted}}>${priceStr}</span>
+                      <span style={{fontSize:11,color:C.muted2}}>{m.name}</span>
+                    </div>
+                    <div style={{fontSize:12,color:C.muted,lineHeight:1.5,marginBottom:8}}>
+                      <span style={{fontWeight:700,color:C.text}}>¿Por qué trending? </span>{m.why}
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                      <span style={{fontSize:12,color:C.muted2}}>💬 <strong style={{color:C.text}}>{m.mentions}</strong> menciones</span>
+                      {/* Badge */}
+                      <span style={{
+                        background:`${m.badgeColor}18`,
+                        color:m.badgeColor,
+                        border:`1px solid ${m.badgeColor}44`,
+                        borderRadius:20,padding:"2px 10px",fontSize:10,fontWeight:800,letterSpacing:0.4,
+                        display:"flex",alignItems:"center",gap:4,
+                      }}>{m.badgeIcon} {m.badge}</span>
+                    </div>
+                    {/* Sentiment bar */}
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
+                      <span style={{fontSize:11,color:"#22c55e",fontWeight:700,minWidth:32}}>▲ {m.bull}%</span>
+                      <div style={{flex:1,height:6,borderRadius:20,overflow:"hidden",background:"rgba(239,68,68,0.18)"}}>
+                        <div style={{
+                          height:"100%",width:`${m.bull}%`,borderRadius:20,
+                          background:"linear-gradient(90deg,#22c55e,#16a34a)",
+                          transition:"width 0.5s",
+                        }}/>
+                      </div>
+                      <span style={{fontSize:11,color:"#ef4444",fontWeight:700,minWidth:36,textAlign:"right"}}>{m.bear}% ▼</span>
+                    </div>
+                  </div>
+
+                  {/* Right: sparkline + stats */}
+                  <div style={{flexShrink:0,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4,minWidth:130}}>
+                    <div style={{position:"relative"}}>
+                      <div style={{position:"absolute",top:2,right:2,fontSize:9,color:C.muted2,fontWeight:600,letterSpacing:0.3}}>24H</div>
+                      <MoverSparkline dir={m.sparkDir} chg={chg}/>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      <span style={{fontSize:15}}>{Array.from({length:m.flames},(_,k)=><span key={k}>🔥</span>)}</span>
+                      <span style={{fontSize:17,fontWeight:900,color:isPos?"#22c55e":"#ef4444",fontFamily:"monospace",letterSpacing:-0.5}}>
+                        {isPos?"+":""}{chg.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div style={{fontSize:10,color:C.muted2}}>Vol. {m.volX}x &nbsp;<strong style={{color:C.muted}}>Vol: {m.volLabel}</strong></div>
+                  </div>
+
                 </div>
-                <span style={{fontSize:11,color:C.bear,fontWeight:600,width:28,textAlign:"right"}}>{100-t.sentiment}%</span>
               </div>
             </div>
           </div>
         );
       })}
-      <div style={{textAlign:"center",color:C.muted2,fontSize:11,marginTop:8}}>
-        🔄 Se actualiza automáticamente cada 60 segundos
+
+      <div style={{textAlign:"center",color:C.muted2,fontSize:11,marginTop:4}}>
+        🔄 Precios en tiempo real · Curación editorial diaria · nexotradeia.com
       </div>
     </div>
   );
