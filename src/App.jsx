@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 11:07:35
+// NEXO TRADE — build: 2026-06-01 11:13:43
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10271,7 +10271,14 @@ function generateFlowItem(id, basePrice){
 
 function FlowPage({isPremium,onNeedPremium}){
   const [filter,setFilter]=useState("all");
-  const [feed,setFeed]=useState(()=>Array.from({length:25},(_,i)=>generateFlowItem(i)));
+  const [feed,setFeed]=useState(()=>{
+    // Garantizamos al menos 3 Golden Sweeps en el feed inicial
+    const items=Array.from({length:22},(_,i)=>generateFlowItem(i));
+    const gs1={...generateFlowItem(22),type:"Golden Sweep",isGold:true,isCall:true,isDark:false,premium:Math.floor(Math.random()*3000+1000)*1e3,ticker:"NVDA"};
+    const gs2={...generateFlowItem(23),type:"Golden Sweep",isGold:true,isCall:true,isDark:false,premium:Math.floor(Math.random()*3000+1000)*1e3,ticker:"META"};
+    const gs3={...generateFlowItem(24),type:"Golden Sweep",isGold:true,isCall:true,isDark:false,premium:Math.floor(Math.random()*3000+1000)*1e3,ticker:"AAPL"};
+    return [...items,gs1,gs2,gs3];
+  });
   const [paused,setPaused]=useState(false);
   const [highlight,setHighlight]=useState(null);
   const [minPrem,setMinPrem]=useState(0);
@@ -10379,8 +10386,9 @@ function FlowPage({isPremium,onNeedPremium}){
   });
 
   // Top pick — el Golden Sweep con mayor premium en el feed visible
-  const topGold = visible.filter(i=>i.isGold).sort((a,b)=>b.premium-a.premium)[0]||null;
-  const topItemId = topGold ? topGold.id : null;
+  // Usamos referencia de objeto (===) en vez de ID para evitar fallos de comparación
+  const _golds = visible.filter(i=>i.isGold);
+  const topPick = _golds.length ? _golds.reduce((best,cur)=>cur.premium>best.premium?cur:best,_golds[0]) : null;
 
   // Alerta Telegram cuando llega un Golden Sweep > $1M
   useEffect(()=>{
@@ -10419,7 +10427,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
               </span>
             </div>
-            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales · {topItemId?"🔥 TOP PICK activo":"sin golden sweep visible"}</div>
+            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales · {topPick?`🔥 TOP PICK: ${topPick.ticker} $${(topPick.premium/1e6).toFixed(1)}M`:"sin golden sweep visible"}</div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -10473,7 +10481,7 @@ function FlowPage({isPremium,onNeedPremium}){
       <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:fullscreen?"calc(100vh - 280px)":600,overflowY:"auto"}}>
         {visible.map(item=>{
           const isNew=item.id===highlight;
-          const isTop=topItemId!==null&&item.id===topItemId;
+          const isTop=topPick!==null&&item===topPick;
           const bull=item.isCall;
           const dark=item.isDark;
           const gold=item.isGold;
