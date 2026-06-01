@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 10:28:35
+// NEXO TRADE — build: 2026-06-01 10:33:56
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10378,12 +10378,9 @@ function FlowPage({isPremium,onNeedPremium}){
     return true;
   });
 
-  // Top pick — item con score máximo del feed visible (comparación por ID, no por score)
-  const topItem = visible.reduce((best,cur)=>{
-    const cs=scoreItem(cur), bs=best?scoreItem(best):-1;
-    return cs>bs?cur:best;
-  }, null);
-  const topItemId = topItem ? topItem.id : null;
+  // Top pick — el Golden Sweep con mayor premium en el feed visible
+  const topGold = visible.filter(i=>i.isGold).sort((a,b)=>b.premium-a.premium)[0]||null;
+  const topItemId = topGold ? topGold.id : null;
 
   // Alerta Telegram cuando llega un Golden Sweep > $1M
   useEffect(()=>{
@@ -10422,7 +10419,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
               </span>
             </div>
-            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales</div>
+            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales · {topItemId?"🔥 TOP PICK activo":"sin golden sweep visible"}</div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
