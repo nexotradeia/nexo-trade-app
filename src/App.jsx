@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 19:07:42
+// NEXO TRADE — build: 2026-06-02 19:24:49
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1872,14 +1872,15 @@ function AuthModal({mode,onClose,onAuth,lang}){
         try{
           const controller = new AbortController();
           const tid = setTimeout(()=>controller.abort(), 8000);
-          const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          // Usar proxy del servidor (evita problemas de red móvil con Supabase)
+          const r = await fetch(`/api/auth`, {
             method:"POST", signal:controller.signal,
-            headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`},
+            headers:{"Content-Type":"application/json"},
             body:JSON.stringify({email, password:pass})
           });
           clearTimeout(tid);
           const json = await r.json();
-          if(!r.ok || json.error || json.error_code){ authErr = json.msg || json.error_description || json.error || "Error"; }
+          if(!r.ok){ authErr = json.error || "Error al iniciar sesión"; }
           else { authData = json; }
         }catch(e){
           if(e.name==="AbortError"){ authErr = "timeout"; }
