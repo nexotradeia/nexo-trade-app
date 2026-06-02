@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 17:58:35
+// NEXO TRADE — build: 2026-06-02 18:09:45
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -591,6 +591,15 @@ const SEARCH_TICKERS = [
   "ZS","OKTA","DDOG","ESTC","MDB","CFLT","RPD","SWI","TENB","QLYS","VRNS",
   "SAIL","SUMO","AI","BBAI","SOUN","GFAI","PRCT","TMDX","RXRX","EXAI",
   "BNKG","CLBR","CFFE","NRXP","AEYE","HOFV","GHIX","PSFE","GLEO","AJAX",
+  // ── Biotech / Small-cap populares ────────────────────────────
+  "NBIS","NVAX","SRPT","RARE","ALNY","IONS","EXEL","HALO","INSM","KROS",
+  "RCKT","ARWR","BEAM","EDIT","NTLA","CRSP","PACIFIC","ACAD","SAGE","AXSM",
+  "INVA","ITCI","PTGX","THTX","TBPH","FOLD","LGND","NKTR","BLUE","FATE",
+  "SGEN","KYMR","MGNX","IMVT","PRGO","JAZZ","ENDP","MYL","TEVA","AGN",
+  // ── Tech small/mid cap ────────────────────────────────────────
+  "AEHR","SMTC","COHR","LITE","AAOI","MRVL","VIAV","NPKI","IIVI","FNSR",
+  "GLW","OLED","MKSI","UCTT","ACLS","ONTO","WOLF","SWKS","QRVO","MTSI",
+  "FORM","ALGM","DIOD","MPWR","SITM","AEIS","AMBA","CEVA","SLAB","POWI",
   // ── ADRs LatAm ────────────────────────────────────────────────
   "TV","VALE","PBR","ITUB","BBD","BBDO","GGB","SID","GGBR","CSNA","BRFS",
   "CIB","EC","ETSY","MELI","NU","STNE","PAGS","ARCO","VNET","DESP","IFS",
