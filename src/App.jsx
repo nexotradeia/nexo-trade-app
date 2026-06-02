@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 04:48:52
+// NEXO TRADE — build: 2026-06-02 04:51:34
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10448,6 +10448,7 @@ function generateFlowItem(id, basePrice){
   const isDark  = type==="Dark Pool";
   const isGold  = type==="Golden Sweep";
   const prices  = {NVDA:131,AAPL:207,TSLA:338,META:596,MSFT:448,AMZN:226,GOOGL:178,AMD:116,SPY:582,QQQ:497,COIN:238,PLTR:124,ARM:148,SMCI:52,MU:118,CRWD:412,NFLX:1084,JPM:248,GS:572,AVGO:196};
+  const sma200  = {NVDA:95,AAPL:182,TSLA:248,META:478,MSFT:385,AMZN:196,GOOGL:156,AMD:92,SPY:512,QQQ:432,COIN:186,PLTR:76,ARM:91,SMCI:31,MU:89,CRWD:295,NFLX:875,JPM:218,GS:481,AVGO:157};
   const price   = prices[ticker]||100;
   const strike  = isDark ? null : Math.round(price*(isCall?1.03:0.97)/5)*5;
   const premium = isDark
@@ -10461,7 +10462,10 @@ function generateFlowItem(id, basePrice){
   const now     = new Date();
   now.setSeconds(now.getSeconds()-Math.floor(Math.random()*180));
   const time    = now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  return {id,ticker,type,isCall,isDark,isGold,price,strike,premium,size,expiry,otm,time,sentiment:isCall?"bullish":"bearish"};
+  const aboveSMA200 = price > (sma200[ticker]||price*0.85);
+  // highVol: proxy — size >1K contratos o premium >$3M indica volumen inusual alto
+  const highVol = size>1000 || premium>3e6;
+  return {id,ticker,type,isCall,isDark,isGold,price,strike,premium,size,expiry,otm,time,sentiment:isCall?"bullish":"bearish",aboveSMA200,highVol};
 }
 
 function FlowPage({isPremium,onNeedPremium}){
@@ -10497,11 +10501,14 @@ function FlowPage({isPremium,onNeedPremium}){
   const [tgConfig,setTgConfig]=useState(()=>{
     try{
       const saved=JSON.parse(localStorage.getItem("nexo-tg-config")||"null");
-      // Si el minPrem guardado era el antiguo default ($2M), actualizarlo a $20M
-      if(saved&&saved.minPrem<=2e6) saved.minPrem=2e7;
-      return saved||{enabled:true,minPrem:2e7,callsOnly:true,goldenOnly:false,minVol:0};
+      // Subir minPrem a $50M si tenía valores viejos bajos
+      if(saved&&saved.minPrem<=2e7) saved.minPrem=5e7;
+      // Agregar nuevos filtros con defaults si no existen
+      if(saved&&saved.aboveSMA200===undefined) saved.aboveSMA200=true;
+      if(saved&&saved.highVol===undefined) saved.highVol=true;
+      return saved||{enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true};
     }
-    catch{ return {enabled:true,minPrem:2e7,callsOnly:true,goldenOnly:false,minVol:0}; }
+    catch{ return {enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true}; }
   });
   const [showTgPanel,setShowTgPanel]=useState(false);
   useEffect(()=>{ try{localStorage.setItem("nexo-tg-config",JSON.stringify(tgConfig));}catch{} },[tgConfig]);
@@ -10640,6 +10647,8 @@ function FlowPage({isPremium,onNeedPremium}){
       if(item.premium<tgConfig.minPrem) return;
       if(tgConfig.callsOnly&&!item.isCall) return;
       if(tgConfig.goldenOnly&&!item.isGold) return;
+      if(tgConfig.aboveSMA200&&!item.aboveSMA200) return;
+      if(tgConfig.highVol&&!item.highVol) return;
       if(alertedRef.current.has(item.id)) return;
       alertedRef.current.add(item.id);
       try{sessionStorage.setItem("nexo-flow-alerted",JSON.stringify([...alertedRef.current].slice(-300)));}catch{}
@@ -10850,7 +10859,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)",flex:1,minWidth:220}}>
                   <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Premium mínimo</span>
                   <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                    {[{l:"Todos",v:0},{l:"$1M",v:1e6},{l:"$2M",v:2e6},{l:"$5M",v:5e6},{l:"$8M",v:8e6},{l:"$10M",v:1e7},{l:"$15M",v:1.5e7},{l:"$20M+",v:2e7}].map(opt=>(
+                    {[{l:"$5M",v:5e6},{l:"$10M",v:1e7},{l:"$20M",v:2e7},{l:"$30M",v:3e7},{l:"$50M+",v:5e7},{l:"$100M+",v:1e8}].map(opt=>(
                       <button key={opt.v} onClick={()=>setTgConfig(c=>({...c,minPrem:opt.v}))}
                         style={{background:tgConfig.minPrem===opt.v?"rgba(0,168,255,0.2)":"transparent",border:`1px solid ${tgConfig.minPrem===opt.v?"rgba(0,168,255,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 9px",fontSize:11,fontWeight:700,color:tgConfig.minPrem===opt.v?"#29B6F6":"#64748B",cursor:"pointer"}}>
                         {opt.l}
@@ -10884,10 +10893,35 @@ function FlowPage({isPremium,onNeedPremium}){
                   </div>
                 </div>
               </div>
+              {/* Row 3 — SMA200 + HighVol */}
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>📈 Sobre SMA200</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[{l:"✅ Sí (recomendado)",v:true},{l:"❌ No filtrar",v:false}].map(opt=>(
+                      <button key={String(opt.v)} onClick={()=>setTgConfig(c=>({...c,aboveSMA200:opt.v}))}
+                        style={{background:tgConfig.aboveSMA200===opt.v?"rgba(16,185,129,0.15)":"transparent",border:`1px solid ${tgConfig.aboveSMA200===opt.v?"rgba(16,185,129,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.aboveSMA200===opt.v?"#10B981":"#64748B",cursor:"pointer"}}>
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>⚡ Alta volatilidad</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[{l:"✅ Sí (>1K contratos)",v:true},{l:"❌ No filtrar",v:false}].map(opt=>(
+                      <button key={String(opt.v)} onClick={()=>setTgConfig(c=>({...c,highVol:opt.v}))}
+                        style={{background:tgConfig.highVol===opt.v?"rgba(245,158,11,0.15)":"transparent",border:`1px solid ${tgConfig.highVol===opt.v?"rgba(245,158,11,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.highVol===opt.v?"#F59E0B":"#64748B",cursor:"pointer"}}>
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
               {/* Summary */}
               <div style={{fontSize:11,color:"#475569",borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:10}}>
                 📡 Recibirás alertas de: <span style={{color:"#29B6F6",fontWeight:700}}>
-                  {tgConfig.callsOnly?"solo CALLS":"CALLS y PUTS"} · {tgConfig.goldenOnly?"solo Golden Sweeps":"todos los tipos"} · premium {tgConfig.minPrem===0?"sin límite":tgConfig.minPrem>=1e6?`≥ $${tgConfig.minPrem/1e6}M`:`≥ $${tgConfig.minPrem/1e3}K`}
+                  {tgConfig.callsOnly?"solo CALLS":"CALLS y PUTS"} · {tgConfig.goldenOnly?"solo Golden Sweeps":"todos los tipos"} · premium ≥ ${tgConfig.minPrem>=1e9?(tgConfig.minPrem/1e9).toFixed(0)+"B":tgConfig.minPrem>=1e6?(tgConfig.minPrem/1e6).toFixed(0)+"M":(tgConfig.minPrem/1e3).toFixed(0)+"K"}{tgConfig.aboveSMA200?" · sobre SMA200":""}{tgConfig.highVol?" · alta volatilidad":""}
                 </span>
               </div>
             </div>
