@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 19:55:20
+// NEXO TRADE — build: 2026-06-01 20:00:12
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4131,6 +4131,7 @@ function EarningsPage({lang}){
   const [search,   setSearch]   = useState("");
   const [showAll,  setShowAll]  = useState(false);
   const [favorites,setFavorites]= useState(()=>new Set());
+  const [alertedEar,setAlertedEar]=useState(()=>new Set());
   const [earnings, setEarnings] = useState(MOCK_EARNINGS);
   const [loadingEar,setLoadingEar]= useState(true);
   const [companyNames,setCompanyNames]= useState({});
@@ -4225,6 +4226,28 @@ function EarningsPage({lang}){
   const formatDay=()=>{
     if(!selDay)return"";
     return new Date(selDay+"T12:00:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  };
+
+  const sendEarningsAlert=(e)=>{
+    const TG_TOKEN="8931471851:AAFActqhqBuKO3oLq5Z7FQBkl9cTa8yDSbs";
+    const TG_CHANNEL="799353199";
+    const impact=getImpact(e.ticker);
+    const bull=votes[e.ticker]||50;
+    const dateLabel=new Date(e.rawDate+"T12:00:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    const impactEmoji=impact==="Alto"?"🔴":impact==="Medio"?"🟡":"⚪";
+    const msg=`📅 *EARNINGS ALERT — NEXO TRADE*\n\n`+
+      `*${e.ticker}* — ${e.nombre}\n`+
+      `📆 Fecha: ${dateLabel}\n`+
+      `⏰ Horario: ${e.hora}\n`+
+      (e.eps_est&&e.eps_est!=="—"?`💰 EPS Est.: ${e.eps_est}${e.eps_prev?` (Ant: ${e.eps_prev})`:""}\n`:"")+
+      `${impactEmoji} Impacto: ${impact}\n`+
+      `📈 Sentimiento: ${bull}% alcista · ${100-bull}% bajista\n\n`+
+      `⚡ Configura tu posición antes del reporte\n🔗 nexotradeia.com\n\n#Earnings #${e.ticker}`;
+    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:TG_CHANNEL,text:msg,parse_mode:"Markdown",disable_web_page_preview:true})
+    }).catch(()=>{});
+    setAlertedEar(s=>{const n=new Set(s);n.add(e.ticker+e.rawDate);return n;});
   };
 
   return(
@@ -4352,8 +4375,8 @@ function EarningsPage({lang}){
           {/* Table */}
           <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
             {/* Header */}
-            <div style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr",gap:8,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
-              {["","EMPRESA","HORA","EPS EST.","MKT CAP","IMPACTO","SENTIMIENTO"].map(h=>(
+            <div style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
+              {["","EMPRESA","HORA","EPS EST.","MKT CAP","IMPACTO","SENTIMIENTO",""].map(h=>(
                 <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.6,textTransform:"uppercase"}}>{h}</div>
               ))}
             </div>
@@ -4377,9 +4400,10 @@ function EarningsPage({lang}){
               const mktcap=MKTCAP_MAP[e.ticker]||"—";
               const isFav=favorites.has(e.ticker);
               const bg=tickerBg(e.ticker);
+              const isAlerked=alertedEar.has(e.ticker+e.rawDate);
               return(
                 <div key={`${e.ticker}-${e.rawDate}`}
-                  style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center"}}
+                  style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center"}}
                   onMouseEnter={ev=>ev.currentTarget.style.background="rgba(0,168,255,0.04)"}
                   onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
                   {/* Star */}
@@ -4426,6 +4450,22 @@ function EarningsPage({lang}){
                       <span style={{color:"#EF4444"}}>{100-bull}% ▼</span>
                     </div>
                   </div>
+                  {/* Alert Telegram */}
+                  <button
+                    onClick={ev=>{ev.stopPropagation();sendEarningsAlert(e);}}
+                    title={isAlerked?"Alerta enviada a Telegram":"Enviar alerta a Telegram"}
+                    style={{
+                      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:1,
+                      background:isAlerked?"rgba(0,210,106,0.12)":"rgba(0,136,204,0.1)",
+                      border:`1px solid ${isAlerked?"rgba(0,210,106,0.35)":"rgba(0,136,204,0.3)"}`,
+                      borderRadius:8,padding:"5px 6px",cursor:"pointer",transition:"all 0.2s",
+                      width:44,height:38,
+                    }}
+                    onMouseEnter={ev=>ev.currentTarget.style.background=isAlerked?"rgba(0,210,106,0.2)":"rgba(0,136,204,0.2)"}
+                    onMouseLeave={ev=>ev.currentTarget.style.background=isAlerked?"rgba(0,210,106,0.12)":"rgba(0,136,204,0.1)"}>
+                    <span style={{fontSize:14,lineHeight:1}}>{isAlerked?"✅":"🔔"}</span>
+                    <span style={{fontSize:8,fontWeight:700,color:isAlerked?"#00D26A":"#29B6F6",lineHeight:1}}>{isAlerked?"Sent":"Alert"}</span>
+                  </button>
                 </div>
               );
             })}
@@ -10785,7 +10825,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)",flex:1,minWidth:220}}>
                   <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Premium mínimo</span>
                   <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                    {[{l:"Todos",v:0},{l:"$500K",v:5e5},{l:"$1M",v:1e6},{l:"$2M",v:2e6},{l:"$5M",v:5e6}].map(opt=>(
+                    {[{l:"Todos",v:0},{l:"$500K",v:5e5},{l:"$1M",v:1e6},{l:"$2M",v:2e6},{l:"$5M",v:5e6},{l:"$6M",v:6e6},{l:"$8M",v:8e6},{l:"$10M+",v:1e7}].map(opt=>(
                       <button key={opt.v} onClick={()=>setTgConfig(c=>({...c,minPrem:opt.v}))}
                         style={{background:tgConfig.minPrem===opt.v?"rgba(0,168,255,0.2)":"transparent",border:`1px solid ${tgConfig.minPrem===opt.v?"rgba(0,168,255,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 9px",fontSize:11,fontWeight:700,color:tgConfig.minPrem===opt.v?"#29B6F6":"#64748B",cursor:"pointer"}}>
                         {opt.l}
