@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 05:05:12
+// NEXO TRADE — build: 2026-06-02 06:38:06
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -144,7 +144,7 @@ const LANGS = {
     publish:"Publicar →", bullish:"▲ ALCISTA", bearish:"▼ BAJISTA",
     followers:"Seguidores", following:"Siguiendo", points:"Puntos", posts:"Posts",
     follow:"+ Seguir", following_btn:"✓ Siguiendo", welcome:"Bienvenido de vuelta",
-    join:"Únete a NexoTrade", tagline:"La comunidad inversora en español",
+    join:"Únete a NexoTrade", tagline:"La plataforma global de trading",
     top5:"🏆 Top 5 Foristas", reputation:"Por puntos de reputación",
     markets:"📡 Mercados ahora", whofollow:"👥 A quién seguir",
     aiAssistant:"🤖 IA NEXO", askAI:"Pregunta a IA NEXO...",
@@ -6131,7 +6131,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
           </> : <>
             {/* No logueado */}
             <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14,marginBottom:4}}>{lang==="en"?"Join NexoTrade!":"¡Únete a NexoTrade!"}</div>
-            <div style={{fontSize:12,color:"rgba(148,163,184,0.7)",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading Spanish-speaking investor community 🌎":"La comunidad inversora en español 🌎"}</div>
+            <div style={{fontSize:12,color:"rgba(148,163,184,0.7)",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading global investor community 🌎":"La comunidad global de inversores 🌎"}</div>
             <button onClick={onNeedAuth}
               style={{width:"100%",background:"linear-gradient(135deg,#8B5CF6,#6D28D9)",color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:800,fontSize:13,cursor:"pointer",boxShadow:"0 4px 16px rgba(139,92,246,0.4)",transition:"box-shadow 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.boxShadow="0 6px 22px rgba(139,92,246,0.55)"}
@@ -7062,7 +7062,7 @@ function ReferralSection({ user }) {
 
       {/* Compartir */}
       <div style={{display:"flex",gap:6}}>
-        <a href={`https://twitter.com/intent/tweet?text=📈 Acabo de unirme a NexoTrade, la red social de traders en español. Picks PREMIUM, IA y más. Únete aquí: ${refLink}`}
+        <a href={`https://twitter.com/intent/tweet?text=📈 Acabo de unirme a NexoTrade, la plataforma global de trading. Picks PREMIUM, IA y más. Únete aquí: ${refLink}`}
           target="_blank" rel="noopener noreferrer"
           style={{flex:1,background:"#0F172A",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
           𝕏 Twitter/X
@@ -7187,7 +7187,7 @@ function Footer({ setPage, onAuth, lang="es" }){
           </div>
           {/* Tagline */}
           <p style={{color:"#475569",fontSize:12,margin:0,lineHeight:1.6,maxWidth:420,textAlign:"center"}}>
-            {isEN?"The most active Spanish-speaking investor community.":"La comunidad de inversores hispanohablantes más activa."}<br/>
+            {isEN?"The most active global investor community.":"La comunidad de inversores más activa del mundo."}<br/>
             <span style={{color:"rgba(139,92,246,0.7)"}}>{isEN?"Real signals · Integrated AI · No commissions":"Señales reales · IA integrada · Sin comisiones"}</span>
           </p>
           {/* CTA */}
@@ -9183,7 +9183,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
           </div>
 
           {/* ── Próximamente x3 ── */}
-          {["🎓 Academia en español","💼 Prop Firm","📈 Plataforma de inversión"].map((label,i)=>(
+          {["🎓 Academia Global","💼 Prop Firm","📈 Plataforma de inversión"].map((label,i)=>(
             <div key={i} style={{background:C.surface,border:`1px dashed ${C.border}`,borderRadius:16,padding:"18px 20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,minHeight:220,textAlign:"center",opacity:0.7}}>
               <div style={{fontSize:36}}>🔜</div>
               <div style={{fontSize:13,fontWeight:800,color:C.muted}}>{label}</div>
@@ -11064,7 +11064,7 @@ function FlowPage({isPremium,onNeedPremium}){
 
       {/* Table — scrollable on mobile — hidden when whale tab is active */}
       {filter!=="whales" && <div className="nexo-scroll-x" style={{marginBottom:4}}>
-      <div style={{minWidth:680}}>
+      <div style={{minWidth:860}}>
       {/* Table header */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
         {["HORA","TICKER","TIPO","PREMIUM","TAMAÑO","STRIKE","EXPIRY","OTM","SENTIMIENTO"].map(h=>(
@@ -11109,8 +11109,8 @@ function FlowPage({isPremium,onNeedPremium}){
               <div style={{fontSize:12,color:C.muted}}>{fmtSize(item.size)}{dark?" shs":" contr."}</div>
               <div style={{fontSize:12,color:C.text,fontFamily:"monospace"}}>{item.strike?`$${item.strike}`:"—"}</div>
               <div style={{fontSize:11,color:C.muted}}>{item.expiry||"—"}</div>
-              <div style={{fontSize:11,color:item.otm>5?"#F59E0B":C.muted}}>{item.otm?`${item.otm}% OTM`:"—"}</div>
-              <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+              <div style={{fontSize:11,color:parseFloat(item.otm)>5?"#F59E0B":C.muted}}>{item.otm?`${item.otm}% OTM`:"—"}</div>
+              <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"nowrap",overflow:"hidden"}}>
                 {isTop
                   ? <span style={{background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3}}>🔥 TOP PICK</span>
                   : <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>{bull?"▲ BULLISH":"▼ BEARISH"}</span>
@@ -11144,7 +11144,7 @@ function FlowPage({isPremium,onNeedPremium}){
                     {l:"IV (Volatilidad Impl.)",v:ia.iv+"%",c:"#A78BFA"},
                     {l:"Delta",v:ia.delta,c:bull?"#00D26A":"#FF4D6A"},
                     {l:"Open Interest",v:ia.oi+" contr.",c:"#60A5FA"},
-                    {l:"IA Score",v:ia.score+"/100",c:ia.score>=70?"#00D26A":ia.score>=40?"#F59E0B":"#FF4D6A"},
+                    {l:"IA Score",v:Math.min(ia.score,100)+"/100",c:ia.score>=70?"#00D26A":ia.score>=40?"#F59E0B":"#FF4D6A"},
                   ].map(({l,v,c})=>(
                     <div key={l} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"10px 12px",textAlign:"center"}}>
                       <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:4}}>{l}</div>
@@ -18067,8 +18067,8 @@ function AboutPage({onBack, lang}){
     <LegalPage title={isEN?"About NexoTrade":"Sobre NexoTrade"} onBack={onBack} lang={lang}>
       <LegalSection title={isEN?"Who We Are":"Quiénes Somos"}>
         <p>{isEN
-          ?"NexoTrade is the leading investment community for Spanish-speaking traders worldwide. Our mission is to democratize access to financial markets through education, AI tools, and collaborative analysis."
-          :"NexoTrade es la comunidad de inversión líder para traders hispanohablantes en todo el mundo. Nuestra misión es democratizar el acceso a los mercados financieros a través de educación, herramientas de IA y análisis colaborativo."
+          ?"NexoTrade is the leading global investment community for traders worldwide. Our mission is to democratize access to financial markets through education, AI tools, and collaborative analysis."
+          :"NexoTrade es la comunidad de inversión global líder para traders de todo el mundo. Nuestra misión es democratizar el acceso a los mercados financieros a través de educación, herramientas de IA y análisis colaborativo."
         }</p>
       </LegalSection>
       <LegalSection title={isEN?"Our Platform":"Nuestra Plataforma"}>
@@ -18551,7 +18551,7 @@ function WelcomeModal({name, onClose, onGoVip}){
         <div style={{textAlign:"center",marginBottom:24}}>
           <div style={{fontSize:56,marginBottom:8}}>🎉</div>
           <h2 style={{margin:"0 0 6px",color:C.text,fontSize:22,fontWeight:900}}>¡Bienvenido, {name}!</h2>
-          <p style={{margin:0,color:C.muted,fontSize:13}}>Ya eres parte de la comunidad de inversores hispanos más activa.</p>
+          <p style={{margin:0,color:C.muted,fontSize:13}}>Ya eres parte de la comunidad global de inversores más activa.</p>
         </div>
 
         {/* Steps */}
@@ -19807,8 +19807,8 @@ export default function App(){
               </h1>
               <p style={{fontSize:17,color:"#94a3b8",lineHeight:1.75,margin:"0 0 32px",maxWidth:480}}>
                 {lang==="en"
-                  ? <>The <strong style={{color:"#fff"}}>Spanish-language</strong> social trading platform where thousands of investors share analysis, weekly picks, and real strategies — powered by AI.</>
-                  : <>La plataforma de trading social <strong style={{color:"#fff"}}>en español</strong> donde miles de inversores comparten análisis, picks semanales y estrategias reales — potenciada por IA.</>
+                  ? <>The <strong style={{color:"#fff"}}>global</strong> social trading platform where thousands of investors worldwide share analysis, weekly picks, and real strategies — powered by AI.</>
+                  : <>La plataforma de trading social <strong style={{color:"#fff"}}>global</strong> donde miles de inversores del mundo comparten análisis, picks semanales y estrategias reales — potenciada por IA.</>
                 }
               </p>
               {/* CTA principal — más grande y urgente */}
@@ -19903,7 +19903,7 @@ export default function App(){
               {val:"40K+", label:lang==="en"?"ideas shared":"ideas compartidas", icon:"📊", c:"#3B8EFA"},
               {val:"4.9★", label:lang==="en"?"average rating":"calificación promedio", icon:"⭐", c:"#F59E0B"},
               {val:"92%", label:lang==="en"?"pick accuracy":"precisión en picks", icon:"🎯", c:"#a78bfa"},
-              {val:"#1", label:lang==="en"?"Spanish trading community":"comunidad trading hispana", icon:"🏆", c:"#00A8FF"},
+              {val:"#1", label:lang==="en"?"Global trading community":"comunidad trading global", icon:"🏆", c:"#00A8FF"},
             ].map((s,i)=>(
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 20px",borderRight:i<4?"1px solid rgba(255,255,255,0.06)":"none"}}>
                 <span style={{fontSize:22}}>{s.icon}</span>
@@ -19925,13 +19925,13 @@ export default function App(){
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20}}>
               {(lang==="en" ? [
-                {icon:"📊",t:"Traders Feed",d:"See real-time analyses and strategies from thousands of Hispanic investors. Filter by bullish, bearish or trending.",c:"#10b981"},
+                {icon:"📊",t:"Traders Feed",d:"See real-time analyses and strategies from thousands of investors worldwide. Filter by bullish, bearish or trending.",c:"#10b981"},
                 {icon:"🎯",t:"Weekly PREMIUM Picks",d:"Every Monday 9AM: 10 stocks selected by our top-performing traders with proven track records.",c:"#a78bfa"},
                 {icon:"🤖",t:"Trading AI",d:"Chat with our market-specialized AI. Analyze tickers, strategies and risk management.",c:"#3b82f6"},
                 {icon:"🎮",t:"Paper Trading",d:"Practice with $100,000 virtual. Compete on the leaderboard and prove your strategy before risking real money.",c:"#f59e0b"},
                 {icon:"🎓",t:"Academy & Webinars",d:"Recorded courses ($39-$99) and live webinars ($29-$79). Learn technical analysis, crypto, options and more.",c:"#ef4444"},
               ] : [
-                {icon:"📊",t:"Feed de Traders",d:"Ve análisis y estrategias en tiempo real de miles de inversores hispanos. Filtra por alcistas, bajistas o trending.",c:"#10b981"},
+                {icon:"📊",t:"Feed de Traders",d:"Ve análisis y estrategias en tiempo real de miles de inversores del mundo. Filtra por alcistas, bajistas o trending.",c:"#10b981"},
                 {icon:"🎯",t:"Picks PREMIUM Semanales",d:"Cada lunes 9AM: 10 acciones seleccionadas por nuestros traders con mayor historial de aciertos.",c:"#a78bfa"},
                 {icon:"🤖",t:"IA de Trading",d:"Chatea con nuestra IA especializada en mercados. Analiza tickers, estrategias y gestión de riesgo.",c:"#3b82f6"},
                 {icon:"🎮",t:"Paper Trading",d:"Practica con $100,000 virtuales. Compite en el leaderboard y demuestra tu estrategia antes de arriesgar.",c:"#f59e0b"},
@@ -19991,7 +19991,7 @@ export default function App(){
                 {n:"Carlos R.",loc:"Colombia",e:"🐺",c:"#7C3AED",r:5,t:"La comunidad es lo mejor. Antes invertía solo y cometía muchos errores. Aquí aprendí análisis técnico real de traders con historial probado."},
                 {n:"Ana T.",loc:"Argentina",e:"🦁",c:"#F59E0B",r:5,t:"El webinar de opciones me cambió la vida. Ahora genero ingresos extra con covered calls cada mes. Vale cada peso que pagué."},
                 {n:"Luis M.",loc:"España",e:"🐉",c:"#3b82f6",r:5,t:"El bot de IA me ayuda a filtrar las mejores oportunidades. Le pregunto sobre cualquier ticker y me da análisis al nivel de un profesional."},
-                {n:"Patricia V.",loc:"Miami",e:"🦈",c:"#ef4444",r:5,t:"El Job Board me consiguió trabajo en una firma de trading en 2 semanas. La red de contactos hispanos en finanzas que hay aquí es única."},
+                {n:"Patricia V.",loc:"Miami",e:"🦈",c:"#ef4444",r:5,t:"El Job Board me consiguió trabajo en una firma de trading en 2 semanas. La red de contactos en finanzas que hay aquí es única en el mundo."},
                 {n:"Diego F.",loc:"Chile",e:"🐻",c:"#06b6d4",r:5,t:"Empecé con paper trading y en 6 meses pasé a dinero real con confianza. El leaderboard me motivó a estudiar más y mejorar mi estrategia."},
               ].map((t,i)=>(
                 <div key={i} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,padding:"22px 20px"}}>
@@ -20109,7 +20109,7 @@ export default function App(){
             </div>
             {/* Garantía */}
             <div style={{textAlign:"center",marginTop:32,color:"#475569",fontSize:13}}>
-              🔒 Pago 100% seguro via Stripe · Cancela en cualquier momento · Soporte en español
+              🔒 Pago 100% seguro via Stripe · Cancela en cualquier momento · Soporte 24/7
             </div>
           </div>
         </div>
@@ -20119,13 +20119,13 @@ export default function App(){
           <div style={{maxWidth:600,margin:"0 auto"}}>
             <div style={{fontSize:48,marginBottom:16}}>🚀</div>
             <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4vw,40px)",fontWeight:900}}>{lang==="en"?"Ready to invest smarter?":"¿Listo para invertir mejor?"}</h2>
-            <p style={{margin:"0 0 32px",color:"#64748b",fontSize:16,lineHeight:1.7}}>{lang==="en"?"Join over 8,400 Hispanic traders already using NexoTrade to make better investment decisions.":"Únete a más de 8,400 traders hispanos que ya están usando NexoTrade para tomar mejores decisiones de inversión."}</p>
+            <p style={{margin:"0 0 32px",color:"#64748b",fontSize:16,lineHeight:1.7}}>{lang==="en"?"Join over 8,400 traders worldwide already using NexoTrade to make better investment decisions.":"Únete a más de 8,400 traders de todo el mundo que ya están usando NexoTrade para tomar mejores decisiones de inversión."}</p>
             <button onClick={()=>setAuth("register")} style={{background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:14,padding:"18px 52px",fontSize:17,fontWeight:800,color:"#000",cursor:"pointer",boxShadow:`0 0 40px ${C.accent}55`,display:"inline-block",transition:"transform 0.15s, box-shadow 0.2s"}}
               onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 48px ${C.accent}70`;}}
               onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=`0 0 40px ${C.accent}55`;}}>
               {lang==="en"?"Create free account — zero risk →":"Crear cuenta gratis — 0 riesgo →"}
             </button>
-            <div style={{marginTop:20,color:"#334155",fontSize:13}}>{lang==="en"?"No credit card · Cancel anytime · Support in Spanish":"Sin tarjeta de crédito · Cancela cuando quieras · En español"}</div>
+            <div style={{marginTop:20,color:"#334155",fontSize:13}}>{lang==="en"?"No credit card · Cancel anytime · 24/7 Support":"Sin tarjeta de crédito · Cancela cuando quieras · Soporte 24/7"}</div>
           </div>
         </div>
 
