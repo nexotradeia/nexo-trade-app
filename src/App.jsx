@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 18:09:45
+// NEXO TRADE — build: 2026-06-02 18:10:48
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -15338,8 +15338,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     ? <span style={{fontFamily:"monospace",color:color||(val!=null&&typeof val==="number"&&suffix==="%"?pctColor(val):"#1E293B")}}>{val!=null?Number(val).toFixed(1)+suffix:"—"}</span>
     : upgBtn;
 
-  const nm = (tk,d,m) => <><div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:"#1E293B"}}>{tk}</div><div style={{fontSize:10,color:"#94A3B8"}}>{tk}</div></>;
-  const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:700,color:"#1E293B"}}>{fmtPrice(d?.price??null,tk)}</span>;
+  const TICKER_NAMES_W={AAPL:"Apple",MSFT:"Microsoft",NVDA:"NVIDIA",GOOGL:"Alphabet",AMZN:"Amazon",META:"Meta",TSLA:"Tesla",AMD:"AMD",PLTR:"Palantir",COIN:"Coinbase",NFLX:"Netflix",AVGO:"Broadcom",ORCL:"Oracle",CRM:"Salesforce",NOW:"ServiceNow",DDOG:"Datadog",CRWD:"CrowdStrike",SNOW:"Snowflake",UBER:"Uber",ABNB:"Airbnb",SHOP:"Shopify",MELI:"MercadoLibre",NU:"Nubank",BTC:"Bitcoin",ETH:"Ethereum",SOL:"Solana",SPY:"S&P 500 ETF",QQQ:"Nasdaq ETF",GLD:"Gold ETF",JPM:"JPMorgan",BAC:"Bank of America",GS:"Goldman Sachs",V:"Visa",MA:"Mastercard",PYPL:"PayPal",NBIS:"NeuroBo Pharma",GLW:"Corning",INTC:"Intel",MU:"Micron",QCOM:"Qualcomm",TXN:"Texas Instr.",SMCI:"Super Micro",ARM:"ARM Holdings",RIVN:"Rivian",NIO:"NIO",BABA:"Alibaba",JD:"JD.com",PDD:"PDD Holdings",VALE:"Vale",PBR:"Petrobras",ITUB:"Itaú",BBD:"Bradesco",GGB:"Gerdau"};
+  const nm = (tk,d,m) => <><div style={{fontWeight:900,fontSize:15,fontFamily:"monospace",color:"#F1F5F9",letterSpacing:0.5}}>{tk}</div><div style={{fontSize:10,color:"#64748B",marginTop:1}}>{TICKER_NAMES_W[tk]||tk}</div></>;
+  const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:800,fontSize:15,color:d?.price!=null?"#E2E8F0":"#475569"}}>{fmtPrice(d?.price??null,tk)}</span>;
   const COLS = {
     market:[
       {h:"Name",           w:150, render:nm},
@@ -15350,7 +15351,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         : <span style={{color:"#475569",fontSize:11}}>—</span>},
       {h:"Day High",       w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#10B981"}}>{fmtPrice(d?.high??null,tk)}</span>},
       {h:"Day Low",        w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#EF4444"}}>{fmtPrice(d?.low??null,tk)}</span>},
-      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#1E293B"}}>{numFmt(m.beta)}</span>},
+      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{numFmt(m.beta)}</span>},
       {h:"Volatility %",   w:110, render:(tk,d,m)=>vip(m.vol,"%")},
       {h:"Open",           w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#64748B"}}>{fmtPrice(d?.open??null,tk)}</span>},
       {h:"Prev Close",     w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#64748B"}}>{fmtPrice(d?.prev??null,tk)}</span>},
@@ -15380,7 +15381,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     efficiency:[
       {h:"Name",       w:150, render:nm},
       {h:"Price",      w:110, render:pr},
-      {h:"P/E Ratio",  w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#1E293B"}}>{m.pe!=null?numFmt(m.pe):"—"}</span>},
+      {h:"P/E Ratio",  w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{m.pe!=null?numFmt(m.pe):"—"}</span>},
       {h:"P/B Ratio",  w:100, render:(tk,d,m)=>vip(m.pb,"")},
       {h:"ROE %",      w:90,  render:(tk,d,m)=>vip(m.roe,"%")},
       {h:"ROA %",      w:90,  render:(tk,d,m)=>vip(m.roa,"%")},
