@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 08:46:54
+// NEXO TRADE — build: 2026-06-02 09:13:08
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -9026,17 +9026,28 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
   };
 
   const DivCard=({p})=>(
-    <div style={{background:C2.card,border:`1px solid ${C2.border}`,borderRadius:14,padding:"16px",marginBottom:10,borderLeft:"3px solid #F59E0B"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#F1F5F9"}}>${p.ticker}</span>
-          <span style={{fontSize:12,color:"#64748B",marginLeft:8}}>{p.nombre}</span>
-          <div style={{fontSize:11,color:"#94A3B8",marginTop:4}}>{p.sector}</div>
+    <div style={{background:C2.card,border:`1px solid rgba(245,158,11,0.25)`,borderRadius:16,padding:"18px",marginBottom:10,borderLeft:"4px solid #F59E0B",overflow:"hidden",position:"relative"}}>
+      <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:"radial-gradient(circle,rgba(245,158,11,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
+      {/* Yield hero */}
+      <div style={{display:"flex",alignItems:"flex-start",gap:16}}>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+            <span style={{fontFamily:"monospace",fontWeight:900,fontSize:17,color:"#F1F5F9"}}>${p.ticker}</span>
+            <span style={{fontSize:12,color:"#94A3B8"}}>{p.nombre}</span>
+          </div>
+          <div style={{fontSize:11,color:"#64748B",marginBottom:10}}>{p.sector}</div>
+          {p.entrada && (
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,padding:"4px 10px"}}>
+              <span style={{fontSize:10,color:"#64748B",fontWeight:700}}>ENTRADA</span>
+              <span style={{fontSize:13,fontWeight:800,fontFamily:"monospace",color:"#F1F5F9"}}>{p.entrada}</span>
+            </div>
+          )}
         </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontWeight:900,color:"#F59E0B",fontSize:22}}>{p.yield_div}</div>
-          <div style={{fontSize:11,color:"#64748B"}}>dividendo anual</div>
-          <div style={{color:"#F59E0B",fontSize:13,marginTop:2}}>{p.rating}</div>
+        {/* Yield badge grande */}
+        <div style={{textAlign:"center",background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.3)",borderRadius:14,padding:"12px 18px",flexShrink:0}}>
+          <div style={{fontWeight:900,color:"#F59E0B",fontSize:36,lineHeight:1,letterSpacing:-1}}>{p.yield_div}</div>
+          <div style={{fontSize:10,color:"#92400E",fontWeight:800,letterSpacing:1,marginTop:4}}>YIELD ANUAL</div>
+          <div style={{color:"#F59E0B",fontSize:13,marginTop:6}}>{p.rating}</div>
         </div>
       </div>
     </div>
@@ -9831,19 +9842,49 @@ const DIV_FALLBACK = [
 ];
 
 function DividendCalendarPage() {
+  const curYear = new Date().getFullYear();
+  const [yearTab, setYearTab] = useState(String(curYear));
   const [divs,    setDivs]    = useState(DIV_FALLBACK);
   const [loading, setLoading] = useState(true);
+  const [source,  setSource]  = useState("local");
   const [sector,  setSector]  = useState("todos");
   const today = new Date().toISOString().split("T")[0];
   const sectors = ["todos","Tecnología","Salud","Consumo","Energía","Telecomunicaciones","Finanzas","REITs","Utilities","BDC/Yield"];
 
-  useEffect(()=>{
-    fetch("/api/dividends")
+  const fetchDivs = (year) => {
+    setLoading(true);
+    // Para años futuros usamos fallback con fechas proyectadas (+N años)
+    const diffYears = parseInt(year) - curYear;
+    fetch(`/api/dividends?year=${year}`)
       .then(r=>r.json())
-      .then(d=>{ if(d.dividends && d.dividends.length>3) setDivs(d.dividends); })
-      .catch(()=>{})
+      .then(d=>{
+        if(d.dividends && d.dividends.length > 3){
+          // Mezclar con DIV_FALLBACK para completar yield/precio que FMP no devuelve
+          const merged = DIV_FALLBACK.map(fb=>{
+            const live = d.dividends.find(x=>x.ticker===fb.ticker);
+            return live ? {...fb, exDate:live.exDate||fb.exDate, payDate:live.payDate||fb.payDate, quarterly:live.quarterly!=="—"?live.quarterly:fb.quarterly} : fb;
+          });
+          setDivs(merged);
+          setSource("live");
+        } else if(diffYears > 0){
+          // Proyectar fechas del fallback sumando años
+          const projected = DIV_FALLBACK.map(fb=>({
+            ...fb,
+            exDate:  fb.exDate  ? fb.exDate.replace(/^\d{4}/,  String(parseInt(fb.exDate.slice(0,4))+diffYears))  : fb.exDate,
+            payDate: fb.payDate ? fb.payDate.replace(/^\d{4}/, String(parseInt(fb.payDate.slice(0,4))+diffYears)) : fb.payDate,
+          }));
+          setDivs(projected);
+          setSource("projected");
+        } else {
+          setDivs(DIV_FALLBACK);
+          setSource("local");
+        }
+      })
+      .catch(()=>{ setDivs(DIV_FALLBACK); setSource("local"); })
       .finally(()=>setLoading(false));
-  },[]);
+  };
+
+  useEffect(()=>{ fetchDivs(yearTab); },[yearTab]);
 
   const rows = divs.filter(d=> sector==="todos" || d.sector===sector);
   const soon = (dateStr) => dateStr && dateStr >= today && new Date(dateStr)-new Date(today) < 30*864e5;
@@ -9852,13 +9893,28 @@ function DividendCalendarPage() {
   return(
     <div style={{maxWidth:900,margin:"0 auto"}}>
       <div style={{background:C.card,borderRadius:16,padding:"20px 24px",marginBottom:16,boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
-        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
           <span style={{fontSize:30}}>💰</span>
-          <div>
-            <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de Dividendos</div>
-            <div style={{fontSize:12,color:C.muted}}>Próximas fechas ex-dividendo y pagos de las principales empresas</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de Dividendos</div>
+              {source==="live"      && <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● LIVE</span>}
+              {source==="projected" && <span style={{fontSize:10,fontWeight:700,color:"#F59E0B",background:"rgba(245,158,11,0.1)",borderRadius:10,padding:"2px 8px"}}>PROYECTADO</span>}
+              {source==="local"     && <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>CURATED</span>}
+            </div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Próximas fechas ex-dividendo y pagos de las principales empresas</div>
           </div>
-          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",marginLeft:"auto"}}>Actualizando...</span>}
+          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px"}}>Actualizando...</span>}
+        </div>
+        {/* Year tabs */}
+        <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+          {[String(curYear), String(curYear+1), String(curYear+2)].map(y=>(
+            <button key={y} onClick={()=>setYearTab(y)}
+              style={{padding:"5px 16px",borderRadius:20,border:`2px solid ${yearTab===y?C.bull:C.border}`,background:yearTab===y?C.bull+"18":"transparent",cursor:"pointer",transition:"all 0.15s"}}>
+              <span style={{fontSize:13,fontWeight:800,color:yearTab===y?C.bull:C.muted}}>{y}</span>
+              {y!==String(curYear) && <span style={{fontSize:10,color:yearTab===y?C.bull:C.muted2,fontWeight:600,marginLeft:4}}>Proy.</span>}
+            </button>
+          ))}
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {sectors.map(s=>(
@@ -9897,7 +9953,9 @@ function DividendCalendarPage() {
         })}
       </div>
       </div>{/* /nexo-scroll-x */}
-      <div style={{textAlign:"center",padding:"14px 0",fontSize:11,color:C.muted2}}>Ex-fecha es el último día para comprar y recibir el dividendo · Datos orientativos</div>
+      <div style={{textAlign:"center",padding:"14px 0",fontSize:11,color:C.muted2}}>
+        {source==="live" ? "⚡ Datos via FMP en tiempo real" : source==="projected" ? `📅 Fechas proyectadas para ${yearTab} basadas en historial — pueden variar` : "📋 Lista curada · Ex-fecha es el último día para comprar y recibir el dividendo"}
+      </div>
     </div>
   );
 }
@@ -9909,7 +9967,6 @@ const IPOS_2026 = [
   {company:"Venture Global LNG",   ticker:"VG",    exchange:"NYSE",    date:"2026-01-24",range:"$25",     raise:"$1.75B", sector:"Energy",      status:"trading",   desc:"Major U.S. LNG exporter. One of the biggest IPOs of the year by capital raised."},
   {company:"eToro Group Ltd",      ticker:"ETOR",  exchange:"NASDAQ",  date:"2026-05-14",range:"$52",     raise:"$620M",  sector:"Fintech",     status:"trading",   desc:"Social trading platform with 35M registered users worldwide. Debuted above range."},
   {company:"Klarna Bank AB",       ticker:"KLAR",  exchange:"NYSE",    date:"2026-07-01",range:"$68–$72", raise:"$1.0B",  sector:"Fintech",     status:"upcoming",  desc:"Europe's leading BNPL platform with 85M users across 45 countries. Highly anticipated."},
-  // ── Coming soon ─────────────────────────────────────────────────────────────
   {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2026-07-08",range:"$22–$26", raise:"$600M",  sector:"Neobank",     status:"upcoming",  desc:"U.S. neobank with 22M active accounts. No overdraft fees model disrupting traditional banking."},
   {company:"SHEIN Group Ltd",      ticker:"SHEI",  exchange:"NYSE",    date:"2026-07-22",range:"$60–$70", raise:"$5.0B",  sector:"Retail",      status:"upcoming",  desc:"Ultra-fast fashion e-commerce giant. Est. valuation $65B. Highly controversial ESG profile."},
   {company:"Discord Inc",          ticker:"DCRD",  exchange:"NASDAQ",  date:"2026-08-14",range:"$35–$42", raise:"$800M",  sector:"Social",      status:"upcoming",  desc:"Community platform with 150M monthly users. Expanding beyond gaming into business and education."},
@@ -9918,34 +9975,54 @@ const IPOS_2026 = [
   {company:"Panera Brands",        ticker:"PNRA",  exchange:"NYSE",    date:"2026-09-30",range:"$16–$20", raise:"$900M",  sector:"Food",        status:"upcoming",  desc:"Bakery-café chain with 2,100+ locations in the U.S. Re-listing after going private in 2017."},
   {company:"Cerebras Systems",     ticker:"CBRS",  exchange:"NASDAQ",  date:"2026-10-10",range:"$28–$35", raise:"$450M",  sector:"Semiconductors",status:"upcoming",desc:"AI chip designer building wafer-scale processors for LLM training. Direct NVIDIA competitor."},
   {company:"Databricks Inc",       ticker:"DBRK",  exchange:"NASDAQ",  date:"2026-Q4",   range:"TBD",     raise:"$2.0B+", sector:"Cloud/AI",    status:"upcoming",  desc:"Data and AI platform valued at $62B in last private round. One of the most anticipated tech IPOs."},
-  {company:"OpenAI",               ticker:"TBD",   exchange:"TBD",     date:"2027+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"upcoming",  desc:"Creator of ChatGPT. No confirmed IPO timeline but widely expected. Most anticipated offering ever."},
+];
+const IPOS_2027 = [
+  {company:"Stripe Inc",           ticker:"STRP",  exchange:"NASDAQ",  date:"2027-Q1",   range:"TBD",     raise:"~$2.0B", sector:"Fintech",     status:"expected",  valuation:"$65B+",  desc:"La mayor plataforma de pagos digitales del mundo. 1M+ empresas. IPO más esperado del sector fintech."},
+  {company:"Epic Games",           ticker:"EPIC",  exchange:"NASDAQ",  date:"2027-Q2",   range:"TBD",     raise:"~$1.5B", sector:"Gaming/Tech", status:"expected",  valuation:"$30B",   desc:"Creador de Fortnite y Unreal Engine. Motor gráfico usado por Hollywood y la industria del gaming."},
+  {company:"Waymo (Alphabet)",     ticker:"WAYMO", exchange:"NASDAQ",  date:"2027-Q2",   range:"TBD",     raise:"~$3.0B", sector:"Autonomous",  status:"expected",  valuation:"$45B",   desc:"Líder global en vehículos autónomos. Subsidiaria de Alphabet con 10M+ millas autónomas acumuladas."},
+  {company:"Plaid Inc",            ticker:"PLAI",  exchange:"NYSE",    date:"2027-Q3",   range:"TBD",     raise:"~$800M", sector:"Fintech",     status:"expected",  valuation:"$13B",   desc:"Infraestructura financiera open banking. Conecta 12,000+ instituciones financieras con 8,000+ apps."},
+  {company:"Canva Pty Ltd",        ticker:"CNVA",  exchange:"NYSE",    date:"2027-Q3",   range:"TBD",     raise:"~$1.0B", sector:"SaaS/Design", status:"expected",  valuation:"$26B",   desc:"Plataforma de diseño con 185M usuarios en 190 países. Crecimiento de ingresos >40% YoY."},
+  {company:"Grammarly Inc",        ticker:"GRML",  exchange:"NASDAQ",  date:"2027-Q4",   range:"TBD",     raise:"~$500M", sector:"AI/SaaS",     status:"expected",  valuation:"$13B",   desc:"Asistente de escritura con IA. 30M usuarios diarios. Expansión agresiva en enterprise con AI."},
+  {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2027",      range:"TBD",     raise:"~$600M", sector:"Neobank",     status:"expected",  valuation:"$25B",   desc:"Si no completa su IPO en 2026, se espera en 2027. Neobank con 22M cuentas activas en EE.UU."},
+  {company:"Discord Inc",          ticker:"DCRD",  exchange:"NASDAQ",  date:"2027",      range:"TBD",     raise:"~$800M", sector:"Social",      status:"expected",  valuation:"$15B",   desc:"Si no completa su IPO en 2026, se espera en 2027. 150M usuarios activos mensuales."},
+];
+const IPOS_2028 = [
+  {company:"OpenAI",               ticker:"TBD",   exchange:"TBD",     date:"2028+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"rumored",   valuation:"$300B+", desc:"Creador de ChatGPT. El IPO más anticipado de la historia. Sin fecha confirmada — posible 2028 o posterior."},
+  {company:"Anthropic",            ticker:"ANTH",  exchange:"NASDAQ",  date:"2028+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"rumored",   valuation:"$61B",   desc:"Empresa de IA fundada por ex-OpenAI. Creadora de Claude. Respaldada por Google y Amazon."},
+  {company:"xAI (Elon Musk)",      ticker:"XAI",   exchange:"NASDAQ",  date:"2028+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"rumored",   valuation:"$50B",   desc:"Empresa de IA de Elon Musk, creadora de Grok. Integración con X (Twitter) y Tesla esperada."},
+  {company:"SpaceX",               ticker:"SPCE2", exchange:"TBD",     date:"2028+",     range:"TBD",     raise:"TBD",    sector:"Aerospace",   status:"rumored",   valuation:"$180B",  desc:"La empresa privada más valiosa del mundo. Musk ha dicho repetidamente que no planea hacerla pública pronto."},
+  {company:"Figma Inc",            ticker:"FGMA",  exchange:"NASDAQ",  date:"2028+",     range:"TBD",     raise:"TBD",    sector:"SaaS/Design", status:"rumored",   valuation:"$12.5B", desc:"Plataforma de diseño colaborativo líder. Acuerdo con Adobe bloqueado por reguladores — IPO independiente esperado."},
+  {company:"Databricks Inc",       ticker:"DBRK",  exchange:"NASDAQ",  date:"2027–2028", range:"TBD",     raise:"$2.0B+", sector:"Cloud/AI",    status:"rumored",   valuation:"$62B",   desc:"Plataforma de datos e IA. Valorada en $62B en última ronda privada. Una de las más esperadas en cloud."},
 ];
 
 function IpoCalendarPage() {
+  const [yearTab, setYearTab] = useState("2026");
   const [filter,  setFilter]  = useState("all");
   const [ipos,    setIpos]    = useState(IPOS_2026);
   const [loading, setLoading] = useState(true);
   const [source,  setSource]  = useState("local");
   const [lastUp,  setLastUp]  = useState("");
-  const [total,   setTotal]   = useState(IPOS_2026.length);
   const today = new Date().toISOString().split("T")[0];
+
   const STATUS = {
-    upcoming:{color:C.accent, bg:C.accentDim, label:"Upcoming"},
-    priced:  {color:C.purple, bg:C.purpleBg,  label:"Priced"},
-    trading: {color:C.bull,   bg:C.bullBg,    label:"Trading"},
+    upcoming:{color:C.accent,              bg:C.accentDim,              label:"Upcoming"},
+    priced:  {color:C.purple,              bg:C.purpleBg,               label:"Priced"},
+    trading: {color:C.bull,                bg:C.bullBg,                  label:"Trading"},
+    expected:{color:"#F59E0B",             bg:"rgba(245,158,11,0.1)",   label:"Esperado"},
+    rumored: {color:"#94A3B8",             bg:"rgba(148,163,184,0.1)", label:"Rumor"},
   };
 
   const autoStatus = (ipo) => {
     if(!ipo.date||ipo.date.includes("Q")||ipo.date.includes("+")) return "upcoming";
     const d = new Date(ipo.date);
-    const now = new Date();
-    const diffDays = (d - now) / (1000*60*60*24);
+    const diffDays = (d - new Date()) / (1000*60*60*24);
     if(diffDays > 7)  return "upcoming";
     if(diffDays > -3) return "priced";
     return "trading";
   };
 
   const fetchData = () => {
+    if(yearTab !== "2026"){ setLoading(false); return; }
     setLoading(true);
     const withAutoStatus = IPOS_2026.map(ipo => ({...ipo, status: autoStatus(ipo)}));
     setIpos(withAutoStatus);
@@ -9957,20 +10034,15 @@ function IpoCalendarPage() {
           IPOS_2026.forEach(seed=>{
             const exists = merged.find(x=>x.ticker===seed.ticker||x.company.toLowerCase().includes(seed.company.split(" ")[0].toLowerCase()));
             if(!exists) merged.push({...seed, status: autoStatus(seed)});
-            else {
-              exists.desc   = exists.desc   || seed.desc;
-              exists.sector = exists.sector || seed.sector;
-              exists.status = autoStatus(exists);
-            }
+            else{ exists.desc=exists.desc||seed.desc; exists.sector=exists.sector||seed.sector; exists.status=autoStatus(exists); }
           });
           merged.sort((a,b)=>{
-            const order = {upcoming:0, priced:1, trading:2};
-            if(order[a.status] !== order[b.status]) return order[a.status]-order[b.status];
+            const order={upcoming:0,priced:1,trading:2};
+            if(order[a.status]!==order[b.status]) return order[a.status]-order[b.status];
             return (a.date||"9999").localeCompare(b.date||"9999");
           });
           setIpos(merged);
           setSource(d.source==="fmp"?"live":"local");
-          setTotal(merged.length);
         }
       })
       .catch(()=>{})
@@ -9980,10 +10052,34 @@ function IpoCalendarPage() {
       });
   };
 
-  useEffect(()=>{ fetchData(); },[]);
+  useEffect(()=>{
+    setFilter("all");
+    if(yearTab==="2026"){ fetchData(); }
+    else if(yearTab==="2027"){ setIpos(IPOS_2027); setSource("curated"); setLoading(false); }
+    else{ setIpos(IPOS_2028); setSource("curated"); setLoading(false); }
+  },[yearTab]);
 
   const rows = ipos.filter(ipo => filter==="all" || ipo.status===filter);
-  const counts = {all:ipos.length, upcoming:ipos.filter(x=>x.status==="upcoming").length, priced:ipos.filter(x=>x.status==="priced").length, trading:ipos.filter(x=>x.status==="trading").length};
+  const counts = {
+    all:ipos.length,
+    upcoming:ipos.filter(x=>x.status==="upcoming").length,
+    priced:ipos.filter(x=>x.status==="priced").length,
+    trading:ipos.filter(x=>x.status==="trading").length,
+    expected:ipos.filter(x=>x.status==="expected").length,
+    rumored:ipos.filter(x=>x.status==="rumored").length,
+  };
+
+  const YEAR_TABS=[
+    {k:"2026", label:"2026", sub:"Live", color:C.accent},
+    {k:"2027", label:"2027", sub:"Esperados", color:"#F59E0B"},
+    {k:"2028+",label:"2028+",sub:"Rumores",   color:"#94A3B8"},
+  ];
+
+  const filterBtns = yearTab==="2026"
+    ? [{k:"all",l:`Todos (${counts.all})`},{k:"upcoming",l:`🔜 Upcoming (${counts.upcoming})`},{k:"priced",l:`💜 Priced (${counts.priced})`},{k:"trading",l:`✅ Trading (${counts.trading})`}]
+    : yearTab==="2027"
+      ? [{k:"all",l:`Todos (${counts.all})`},{k:"expected",l:`⭐ Esperado (${counts.expected})`}]
+      : [{k:"all",l:`Todos (${counts.all})`},{k:"rumored",l:`💭 Rumor (${counts.rumored})`}];
 
   return(
     <div style={{maxWidth:920,margin:"0 auto"}}>
@@ -9991,26 +10087,42 @@ function IpoCalendarPage() {
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
           <div style={{flex:1}}>
             <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-              <div style={{fontSize:20,fontWeight:800,color:C.text}}>🚀 IPO Calendar {new Date().getFullYear()}</div>
-              {source==="live"
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>🚀 IPO Calendar</div>
+              {yearTab==="2026" && (source==="live"
                 ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● LIVE</span>
                 : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>CURATED</span>
-              }
-              <span style={{fontSize:11,color:C.muted2}}>{total} IPOs</span>
-              {lastUp && <span style={{fontSize:10,color:C.muted2}}>· Updated {lastUp}</span>}
+              )}
+              {yearTab!=="2026" && <span style={{fontSize:10,fontWeight:700,color:"#F59E0B",background:"rgba(245,158,11,0.1)",borderRadius:10,padding:"2px 8px"}}>CURATED</span>}
+              <span style={{fontSize:11,color:C.muted2}}>{ipos.length} IPOs</span>
+              {lastUp && yearTab==="2026" && <span style={{fontSize:10,color:C.muted2}}>· Updated {lastUp}</span>}
             </div>
-            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Public offerings — prices, dates, sectors and real-time status</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Ofertas públicas — precios, fechas, sectores y estado en tiempo real</div>
           </div>
-          <button onClick={fetchData} disabled={loading}
-            style={{display:"flex",alignItems:"center",gap:6,padding:"7px 14px",borderRadius:10,border:`1.5px solid ${C.border}`,background:C.card2,color:C.accent,fontSize:12,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.6:1,transition:"all 0.15s"}}
-            onMouseEnter={e=>{if(!loading){e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.background=C.accentDim;}}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.background=C.card2;}}>
-            <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none"}}>⟳</span>
-            {loading?"Loading...":"Refresh"}
-          </button>
+          {yearTab==="2026" && (
+            <button onClick={fetchData} disabled={loading}
+              style={{display:"flex",alignItems:"center",gap:6,padding:"7px 14px",borderRadius:10,border:`1.5px solid ${C.border}`,background:C.card2,color:C.accent,fontSize:12,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.6:1,transition:"all 0.15s"}}
+              onMouseEnter={e=>{if(!loading){e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.background=C.accentDim;}}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.background=C.card2;}}>
+              <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none"}}>⟳</span>
+              {loading?"Loading...":"Refresh"}
+            </button>
+          )}
         </div>
+
+        {/* Year tabs */}
+        <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+          {YEAR_TABS.map(t=>(
+            <button key={t.k} onClick={()=>setYearTab(t.k)}
+              style={{padding:"6px 18px",borderRadius:20,border:`2px solid ${yearTab===t.k?t.color:C.border}`,background:yearTab===t.k?t.color+"18":"transparent",cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:5}}>
+              <span style={{fontSize:13,fontWeight:800,color:yearTab===t.k?t.color:C.muted}}>{t.label}</span>
+              <span style={{fontSize:10,color:yearTab===t.k?t.color:C.muted2,fontWeight:600}}>{t.sub}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Status filter */}
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          {[{k:"all",l:`All (${counts.all})`},{k:"upcoming",l:`🔜 Upcoming (${counts.upcoming})`},{k:"priced",l:`💜 Priced (${counts.priced})`},{k:"trading",l:`✅ Trading (${counts.trading})`}].map(({k,l})=>(
+          {filterBtns.map(({k,l})=>(
             <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?C.accent:"transparent",color:filter===k?"#fff":C.muted,border:`1.5px solid ${filter===k?C.accent:C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
@@ -10020,7 +10132,7 @@ function IpoCalendarPage() {
         {rows.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Sin IPOs con ese filtro.</div>}
         {rows.map((ipo,i)=>{
           const st = STATUS[ipo.status] || STATUS.upcoming;
-          const isFuture = ipo.date >= today;
+          const isFuture = !ipo.date || ipo.date >= today;
           return(
             <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 22px",boxShadow:C.shadow,display:"grid",gridTemplateColumns:"1fr auto",gap:16,alignItems:"center",transition:"box-shadow 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.boxShadow=C.shadowMd}
@@ -10028,19 +10140,20 @@ function IpoCalendarPage() {
               <div>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}>
                   <div style={{fontWeight:900,fontSize:15,color:C.text}}>{ipo.company}</div>
-                  {ipo.ticker && ipo.ticker!=="—" && <div style={{fontWeight:800,fontSize:11,color:C.accent,background:C.accentDim,borderRadius:8,padding:"2px 8px"}}>{ipo.ticker}</div>}
-                  {ipo.exchange && ipo.exchange!=="—" && <div style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"2px 8px",border:`1px solid ${C.border}`}}>{ipo.exchange}</div>}
+                  {ipo.ticker && ipo.ticker!=="—" && ipo.ticker!=="TBD" && <div style={{fontWeight:800,fontSize:11,color:C.accent,background:C.accentDim,borderRadius:8,padding:"2px 8px"}}>{ipo.ticker}</div>}
+                  {ipo.exchange && ipo.exchange!=="—" && ipo.exchange!=="TBD" && <div style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"2px 8px",border:`1px solid ${C.border}`}}>{ipo.exchange}</div>}
                   <span style={{fontSize:11,fontWeight:700,color:st.color,background:st.bg,borderRadius:10,padding:"2px 9px"}}>{st.label}</span>
                 </div>
                 {ipo.desc && <div style={{fontSize:12,color:C.muted,marginBottom:6,lineHeight:1.5}}>{ipo.desc}</div>}
                 <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
                   {ipo.sector && ipo.sector!=="Mercado" && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Sector:</b> {ipo.sector}</span>}
                   {ipo.raise  && ipo.raise!=="—"  && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Recaudación:</b> {ipo.raise}</span>}
+                  {ipo.valuation && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Valoración:</b> {ipo.valuation}</span>}
                   {ipo.shares && ipo.shares!=="—" && <span style={{fontSize:12,color:C.muted}}>{ipo.shares}</span>}
                 </div>
               </div>
-              <div style={{textAlign:"right",minWidth:120}}>
-                {ipo.range && ipo.range!=="Por definir" && (
+              <div style={{textAlign:"right",minWidth:110}}>
+                {ipo.range && ipo.range!=="Por definir" && ipo.range!=="TBD" && (
                   <>
                     <div style={{fontSize:20,fontWeight:900,color:C.text,marginBottom:2}}>{ipo.range}</div>
                     <div style={{fontSize:10,color:C.muted2,marginBottom:6}}>precio/acción</div>
@@ -10063,7 +10176,9 @@ function IpoCalendarPage() {
         })}
       </div>
       <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
-        {source==="live" ? "⚡ Datos en tiempo real via Financial Modeling Prep (FMP)" : "📋 Lista curada — agrega FMP_API_KEY en Vercel para tiempo real"}
+        {yearTab==="2026"
+          ? (source==="live" ? "⚡ Datos en tiempo real via FMP" : "📋 Lista curada — agrega FMP_API_KEY en Vercel para tiempo real")
+          : yearTab==="2027" ? "⭐ Empresas con alta probabilidad de IPO en 2027 según analistas" : "💭 Rumores y expectativas del mercado — sin fecha confirmada"}
         {" · "}Siempre verifica en SEC EDGAR antes de invertir
       </div>
     </div>
@@ -15192,6 +15307,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Name",           w:150, render:nm},
       {h:"Price",          w:110, render:pr},
       {h:"Change %",       w:90,  render:(tk,d,m)=><span style={{color:pctColor(d?.change??null),fontWeight:700,fontFamily:"monospace"}}>{d?.change!=null?(d.change>=0?"+":"")+d.change.toFixed(2)+"%":"—"}</span>},
+      {h:"Div. Yield",     w:100, render:(tk,d,m)=>m.div&&m.div>0
+        ? <span style={{fontFamily:"monospace",fontWeight:700,color:"#F59E0B",background:"rgba(245,158,11,0.1)",borderRadius:6,padding:"2px 6px"}}>{m.div.toFixed(2)}%</span>
+        : <span style={{color:"#475569",fontSize:11}}>—</span>},
       {h:"Day High",       w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#10B981"}}>{fmtPrice(d?.high??null,tk)}</span>},
       {h:"Day Low",        w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#EF4444"}}>{fmtPrice(d?.low??null,tk)}</span>},
       {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#1E293B"}}>{numFmt(m.beta)}</span>},
