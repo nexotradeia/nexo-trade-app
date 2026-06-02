@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 20:00:12
+// NEXO TRADE — build: 2026-06-01 20:01:40
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10825,7 +10825,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)",flex:1,minWidth:220}}>
                   <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Premium mínimo</span>
                   <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                    {[{l:"Todos",v:0},{l:"$500K",v:5e5},{l:"$1M",v:1e6},{l:"$2M",v:2e6},{l:"$5M",v:5e6},{l:"$6M",v:6e6},{l:"$8M",v:8e6},{l:"$10M+",v:1e7}].map(opt=>(
+                    {[{l:"Todos",v:0},{l:"$1M",v:1e6},{l:"$2M",v:2e6},{l:"$5M",v:5e6},{l:"$8M",v:8e6},{l:"$10M",v:1e7},{l:"$15M",v:1.5e7},{l:"$20M+",v:2e7}].map(opt=>(
                       <button key={opt.v} onClick={()=>setTgConfig(c=>({...c,minPrem:opt.v}))}
                         style={{background:tgConfig.minPrem===opt.v?"rgba(0,168,255,0.2)":"transparent",border:`1px solid ${tgConfig.minPrem===opt.v?"rgba(0,168,255,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 9px",fontSize:11,fontWeight:700,color:tgConfig.minPrem===opt.v?"#29B6F6":"#64748B",cursor:"pointer"}}>
                         {opt.l}
