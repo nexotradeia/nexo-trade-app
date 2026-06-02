@@ -1905,7 +1905,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
         }
         if(!authData?.user){ setError("Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return; }
         // Guardar sesión en supabase para que el cliente la use
-        try{ await supabase.auth.setSession({access_token:authData.access_token, refresh_token:authData.refresh_token}); }catch(_){}
+        try{ supabase.auth.setSession({access_token:authData.access_token, refresh_token:authData.refresh_token}).catch(()=>{}); }catch(_){}
         // Cargar perfil con fetch directo también
         let profile = null;
         try{
