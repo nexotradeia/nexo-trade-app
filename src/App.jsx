@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 04:46:35
+// NEXO TRADE — build: 2026-06-02 04:48:52
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10465,7 +10465,7 @@ function generateFlowItem(id, basePrice){
 }
 
 function FlowPage({isPremium,onNeedPremium}){
-  const [filter,setFilter]=useState("all");
+  const [filter,setFilter]=useState("gold");
   const [feed,setFeed]=useState(()=>{
     // Garantizamos al menos 3 Golden Sweeps en el feed inicial
     const items=Array.from({length:22},(_,i)=>generateFlowItem(i));
@@ -10594,7 +10594,6 @@ function FlowPage({isPremium,onNeedPremium}){
   const fmtSize=(v)=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1e3?`${(v/1e3).toFixed(0)}K`:`${v}`;
 
   const FILTERS=[
-    {k:"all",    l:"🌊 Todo"},
     {k:"call",   l:"📈 Calls"},
     {k:"put",    l:"📉 Puts"},
     {k:"dark",   l:"🌑 Dark Pool"},
