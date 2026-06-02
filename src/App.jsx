@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 18:49:01
+// NEXO TRADE — build: 2026-06-02 18:53:28
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1896,8 +1896,16 @@ function AuthModal({mode,onClose,onAuth,lang}){
           setError(err.message==="Invalid login credentials"?"Email o contraseña incorrectos":err.message);setLoading(false);return;
         }
         if(!data?.user){setError("Error al iniciar sesión. Inténtalo de nuevo.");setLoading(false);return;}
-        // Cargar perfil de la BD
-        const {data:profile}=await supabase.from("profiles").select("*").eq("id",data.user.id).single();
+        // Cargar perfil de la BD (con timeout para que no cuelgue si DB tiene errores)
+        let profile = null;
+        try{
+          const profileTimeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),4000));
+          const profileResult = await Promise.race([
+            supabase.from("profiles").select("*").eq("id",data.user.id).single(),
+            profileTimeout
+          ]);
+          profile = profileResult?.data || null;
+        }catch(_){ profile = null; }
         const uname = profile?.username || data.user.user_metadata?.username || email.split("@")[0];
         const userObj = {
           id:data.user.id,
