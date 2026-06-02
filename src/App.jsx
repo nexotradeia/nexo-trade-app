@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 20:16:19
+// NEXO TRADE — build: 2026-06-01 20:19:55
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10481,8 +10481,8 @@ function FlowPage({isPremium,onNeedPremium}){
   const [whaleErr,setWhaleErr]=useState(false);
   const [whaleTxs,setWhaleTxs]=useState([]); // simulated live feed
   const [whalePaused,setWhalePaused]=useState(false);
-  // Telegram alerted ref — must be BEFORE any early return (rules of hooks)
-  const alertedRef=useRef(new Set());
+  // Telegram alerted ref — persiste en sessionStorage para no reenviar al remontar
+  const alertedRef=useRef(new Set(JSON.parse(sessionStorage.getItem("nexo-flow-alerted")||"[]")));
   // Whale Alert popup
   const [whaleAlert,setWhaleAlert]=useState(null);
   const whaleAlertTimer=useRef(null);
@@ -10490,8 +10490,13 @@ function FlowPage({isPremium,onNeedPremium}){
   const [expandedId,setExpandedId]=useState(null);
   // ── Telegram Alert Config ──
   const [tgConfig,setTgConfig]=useState(()=>{
-    try{ return JSON.parse(localStorage.getItem("nexo-tg-config")||"null")||{enabled:true,minPrem:2e6,callsOnly:true,goldenOnly:false,minVol:0}; }
-    catch{ return {enabled:true,minPrem:2e6,callsOnly:true,goldenOnly:false,minVol:0}; }
+    try{
+      const saved=JSON.parse(localStorage.getItem("nexo-tg-config")||"null");
+      // Si el minPrem guardado era el antiguo default ($2M), actualizarlo a $20M
+      if(saved&&saved.minPrem<=2e6) saved.minPrem=2e7;
+      return saved||{enabled:true,minPrem:2e7,callsOnly:true,goldenOnly:false,minVol:0};
+    }
+    catch{ return {enabled:true,minPrem:2e7,callsOnly:true,goldenOnly:false,minVol:0}; }
   });
   const [showTgPanel,setShowTgPanel]=useState(false);
   useEffect(()=>{ try{localStorage.setItem("nexo-tg-config",JSON.stringify(tgConfig));}catch{} },[tgConfig]);
@@ -10626,6 +10631,7 @@ function FlowPage({isPremium,onNeedPremium}){
       if(tgConfig.goldenOnly&&!item.isGold) return;
       if(alertedRef.current.has(item.id)) return;
       alertedRef.current.add(item.id);
+      try{sessionStorage.setItem("nexo-flow-alerted",JSON.stringify([...alertedRef.current].slice(-300)));}catch{}
       const score=scoreItem(item);
       const typeLabel=item.isGold?"⭐ Golden Sweep":item.isDark?"🌑 Dark Pool":item.isCall?"📈 Call Sweep":"📉 Put Block";
       const premLabel=item.premium>=1e6?`$${(item.premium/1e6).toFixed(1)}M`:item.premium>=1e3?`$${(item.premium/1e3).toFixed(0)}K`:`$${item.premium}`;
