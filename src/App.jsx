@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 06:38:06
+// NEXO TRADE — build: 2026-06-02 06:46:25
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7201,7 +7201,7 @@ function Footer({ setPage, onAuth, lang="es" }){
       </div>
 
       {/* ── MAIN GRID ── */}
-      <div style={{maxWidth:1140,margin:"0 auto",padding:"36px 20px",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"24px 32px"}}>
+      <div className="nexo-sitemap-grid" style={{maxWidth:1140,margin:"0 auto",padding:"36px 20px",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"24px 32px"}}>
         {cols.map(col=>(
           <div key={col.title}>
             <div style={{fontSize:11,fontWeight:700,color:"rgba(139,92,246,0.7)",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>{col.title}</div>
@@ -8237,7 +8237,7 @@ function RiskRewardCalc(){
   );
 
   return(
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+    <div className="nexo-calc-rr" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
         <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>⚖️ Calculadora Riesgo/Recompensa</h3>
         {inp("Precio de entrada",entry,setEntry,"0.00")}
@@ -8308,7 +8308,7 @@ function SharpeCalc(){
   },[returns,rfRate]);
 
   return(
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+    <div className="nexo-calc-sharpe" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
         <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:8}}>📐 Calculadora Sharpe Ratio</h3>
         <p style={{color:"#64748B",fontSize:12,marginBottom:20,lineHeight:1.6}}>Mide el rendimiento ajustado al riesgo. Mayor = mejor. Ingresa tus retornos mensuales separados por comas.</p>
@@ -10075,7 +10075,7 @@ function ScreenerPage({isPremium, onNeedPremium}) {
         Filtra más de 10,000 acciones por momentum, valoración, dividendo y crecimiento.<br/>
         Descubre oportunidades antes que el mercado.
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:28,textAlign:"left"}}>
+      <div className="nexo-screener-preview" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:28,textAlign:"left"}}>
         {["📈 Top Ganadores del día","📉 Top Perdedores","🔥 Más Activas por volumen","💎 Acciones Subvaloradas","🚀 Tech de alto crecimiento","💰 Mejores dividendos"].map((f,i)=>(
           <div key={i} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px",fontSize:12,fontWeight:600,color:C.muted}}>{f}</div>
         ))}
@@ -10352,7 +10352,7 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
       </div>
 
       {/* Activity summary */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
+      <div className="nexo-guru-activity" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
         {[
           {l:"Total posiciones",v:guru.holdings.length,c:"#F1F5F9",icon:"📊"},
           {l:"Nuevas compras",  v:newBuys.length,       c:"#00D26A", icon:"📈"},
@@ -10586,7 +10586,7 @@ function FlowPage({isPremium,onNeedPremium}){
       <div style={{fontSize:14,color:C.muted,marginBottom:28,lineHeight:1.7,maxWidth:440,margin:"0 auto 28px"}}>
         Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps.
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:28,textAlign:"left"}}>
+      <div className="nexo-flow-preview" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:28,textAlign:"left"}}>
         {["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Sweeps urgentes","💰 Premium ≥ $1M","🎯 Sentimiento en vivo"].map((f,i)=>(
           <div key={i} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px",fontSize:12,fontWeight:600,color:C.muted}}>{f}</div>
         ))}
@@ -12432,7 +12432,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
 
           {/* Stats row */}
           {congress.length>0 && (
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
+            <div className="nexo-congress-detail-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
               {[
                 {l:"Total Trades",v:congress.length,c:C.accent},
                 {l:"Compras",v:congress.filter(t=>t.type==="buy").length,c:"#10B981"},
@@ -13134,7 +13134,7 @@ function IdeasPage({ isPremium, onNeedPremium }) {
             </div>
 
             {/* Price stats grid */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
+            <div className="nexo-idea-price-stats" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
               {[
                 {l:"PRECIO ACTUAL", v:`$${curPrice.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`, sub:`${isPos?"▲":"▼"} ${Math.abs(change).toFixed(2)}% hoy`, sc2:isPos?"#10B981":"#EF4444"},
                 {l:"PRECIO OBJETIVO", v:`$${idea.target}`, sub:`${upside >= 0?"+":""}${upside.toFixed(1)}% upside`, sc2:upside>=0?"#10B981":"#EF4444"},
@@ -13149,7 +13149,7 @@ function IdeasPage({ isPremium, onNeedPremium }) {
             </div>
 
             {/* More metadata */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:18}}>
+            <div className="nexo-idea-meta-stats" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:18}}>
               {[
                 {l:"ENTRADA SUGERIDA", v:`$${idea.entry}`},
                 {l:"HORIZONTE", v:idea.horizon},
@@ -13935,7 +13935,7 @@ function CryptoPerformancePage({ lang="es" }) {
 
         {/* Top Gainers / Losers */}
         {!loading && view === "heatmap" && (
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:20}}>
+          <div className="nexo-crypto-toplist" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:20}}>
             {[
               {title:isEN?"🚀 Top Gainers":"🚀 Mayores Subidas",dir:1},
               {title:isEN?"💀 Top Losers":"💀 Mayores Caídas",dir:-1},
@@ -15565,7 +15565,7 @@ function PortfolioIAScoreCard({ positions, livePrices, isEN, onShare }) {
       {/* Breakdown bars */}
       <div style={{marginTop:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:12,padding:"12px 14px"}}>
         <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.8,marginBottom:10,textTransform:"uppercase"}}>{isEN?"Score Breakdown":"Desglose del Score"}</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
+        <div className="nexo-score-breakdown" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
           {[
             {label:isEN?"Diversif.":"Diversif.",val:divScore,max:30},
             {label:isEN?"Concentr.":"Concentr.",val:concScore,max:25},
@@ -17309,7 +17309,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           </div>
           <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
             {/* Price + RSI */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
+            <div className="nexo-radar-detail-stats" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
               {[
                 {l:"Precio",v:`$${selectedRow.p?.toFixed(2)}`,c:C.text},
                 {l:"Cambio",v:`${selectedRow.chg>=0?"+":""}${selectedRow.chg?.toFixed(2)}%`,c:chgColor(selectedRow.chg)},
@@ -17326,7 +17326,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             {(()=>{const {ent,sl,tp}=calcSetup(selectedRow.p,selectedRow.chg);return(
               <div style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:12,padding:"14px",marginBottom:16}}>
                 <div style={{fontSize:11,fontWeight:700,color:"#A78BFA",letterSpacing:0.5,marginBottom:10}}>🤖 SETUP IA</div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+                <div className="nexo-radar-detail-stats2" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
                   {[{l:"ENT",v:`$${ent}`,c:"#F59E0B"},{l:"SL",v:`$${sl}`,c:"#EF4444"},{l:"TP",v:`$${tp}`,c:"#10B981"}].map((s,i)=>(
                     <div key={i} style={{textAlign:"center"}}>
                       <div style={{fontSize:10,color:C.muted,marginBottom:3}}>{s.l}</div>
@@ -17408,7 +17408,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       </div>
 
       {/* ── TOP MOVERS ── */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+      <div className="nexo-top-movers" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
         <div style={{background:C.card,border:"1px solid rgba(16,185,129,0.2)",borderRadius:14,padding:"12px 16px"}}>
           <div style={{fontSize:11,fontWeight:700,color:"#10B981",letterSpacing:0.5,marginBottom:8}}>🚀 TOP GAINERS</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -19540,6 +19540,40 @@ export default function App(){
         /* ── ADMIN DASHBOARD ── */
         .nexo-admin-overview { grid-template-columns: 1fr !important; }
         .nexo-admin-stats { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── VIP TOOLS — calculadoras 2-col → 1-col ── */
+        .nexo-calc-rr { grid-template-columns: 1fr !important; }
+        .nexo-calc-sharpe { grid-template-columns: 1fr !important; }
+
+        /* ── FOOTER SITEMAP — 4-col → 2-col ── */
+        .nexo-sitemap-grid { grid-template-columns: repeat(2,1fr) !important; gap: 20px 24px !important; }
+
+        /* ── PREMIUM PREVIEW GRIDS — 3-col → 2-col ── */
+        .nexo-screener-preview { grid-template-columns: repeat(2,1fr) !important; }
+        .nexo-flow-preview { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── GURU 13F — activity summary 3-col → 1-col ── */
+        .nexo-guru-activity { grid-template-columns: 1fr !important; gap: 8px !important; }
+
+        /* ── CONGRESS — detail stats 4-col → 2-col ── */
+        .nexo-congress-detail-stats { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── IDEAS DETAIL — price & meta stats → 1-col ── */
+        .nexo-idea-price-stats { grid-template-columns: 1fr !important; }
+        .nexo-idea-meta-stats { grid-template-columns: 1fr !important; }
+
+        /* ── CRYPTO HEATMAP — top list 2-col → 1-col ── */
+        .nexo-crypto-toplist { grid-template-columns: 1fr !important; }
+
+        /* ── PORTFOLIO — score breakdown 5-col → 3-col ── */
+        .nexo-score-breakdown { grid-template-columns: repeat(3,1fr) !important; }
+
+        /* ── RADAR GLOBAL — detail panel stats → 1-col ── */
+        .nexo-radar-detail-stats { grid-template-columns: repeat(3,1fr) !important; }
+        .nexo-radar-detail-stats2 { grid-template-columns: repeat(3,1fr) !important; }
+
+        /* ── TOP MOVERS — 2-col → 1-col ── */
+        .nexo-top-movers { grid-template-columns: 1fr !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
