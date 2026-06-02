@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 18:10:48
+// NEXO TRADE — build: 2026-06-02 18:13:52
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -600,6 +600,84 @@ const SEARCH_TICKERS = [
   "AEHR","SMTC","COHR","LITE","AAOI","MRVL","VIAV","NPKI","IIVI","FNSR",
   "GLW","OLED","MKSI","UCTT","ACLS","ONTO","WOLF","SWKS","QRVO","MTSI",
   "FORM","ALGM","DIOD","MPWR","SITM","AEIS","AMBA","CEVA","SLAB","POWI",
+  // ── ETFs Dividendos ───────────────────────────────────────────
+  "SCHD","VIG","VYM","JEPI","JEPQ","QYLD","RYLD","XYLD","DIVO","DGRO",
+  "NOBL","DVY","HDV","SDY","SPHD","FVD","RDIV","PEY","DHS","WDIV",
+  "SPYD","FDVV","IDVO","QDIV","IHDG","VYMI","VIGI","EFAV","SDOG","IDOG",
+  // ── ETFs Apalancados ──────────────────────────────────────────
+  "TQQQ","SQQQ","UPRO","SPXS","SPXU","SPXL","LABU","LABD","FNGU","FNGD",
+  "TMF","TBT","TBF","UGL","NUGT","JNUG","DUST","UVXY","SVXY","VIXY",
+  "NAIL","DRN","DRV","ERX","ERY","FAS","FAZ","UDOW","SDOW","URTY","SRTY",
+  "CURE","HIBL","HIBS","BULZ","BERZ","BNKU","BNKD","DPST","WEBL","WEBS",
+  // ── ETFs Internacionales ──────────────────────────────────────
+  "EWJ","EWZ","EWG","EWC","FXI","KWEB","EWA","EWU","EWH","EWT","EWY",
+  "EWS","EWI","EWP","EWQ","INDA","EIDO","THD","CQQQ","MCHI","ASHR","YINN",
+  "YANG","CHAU","VWO","IEMG","IEFA","IXUS","VXUS","ACWI","URTH","VWRA",
+  "EWM","EWW","EWL","EZA","EWD","EWN","GXC","FLCH","FLIN","FLMX","FLBR",
+  // ── ETFs Temáticos ────────────────────────────────────────────
+  "ICLN","QCLN","TAN","BLOK","BETZ","ESPO","HERO","NERD","ROBO","IRBO",
+  "AIQ","ARKQ","WCLD","CLOU","IGV","IGM","FDN","PNQI","LOUP","MOON",
+  "UFO","GFOF","BKCH","DEFI","BITI","BTFD","MSOS","MJ","POTX","YOLO",
+  "DRIV","IDRV","KARS","LIT","REMX","COPX","PICK","SLX","MOO","SOIL",
+  "HACK","BUG","IHAK","CIBR","SNSR","SKYY","IPAY","FINX","KOIN","LEGR",
+  // ── ETFs Commodities ──────────────────────────────────────────
+  "PDBC","DBC","GSG","CORN","WEAT","SOYB","UNG","BOIL","KOLD","CPER",
+  "PPLT","PALL","GDX","GDXJ","SIL","SILJ","GOAU","RING","GLDM","IAU",
+  "BAR","DGL","DBB","DBP","DBO","DJP","FTGC","PDBA","CMDY","BCI",
+  // ── ETFs REITs ───────────────────────────────────────────────
+  "VNQ","IYR","SCHH","ICF","RWR","USRT","REZ","MORT","REM","KBWY",
+  "HOMZ","INDS","SRVR","NETL","PFFO","RIET","ALPS","NURE","PPTY",
+  // ── ETFs Bonos avanzados ──────────────────────────────────────
+  "VCIT","VCSH","VGIT","VGLT","VGSH","BKLN","FLOT","MINT","SHV","SGOV",
+  "TIPS","VTIP","SCHP","STIP","TIP","TDTT","TDTF","CORP","USIG","LQDI",
+  "FALN","ANGL","HYDB","HYLB","SHYG","SJNK","JNK","BSJM","BSJO","BSJP",
+  // ── ETFs Vanguard completos ───────────────────────────────────
+  "VB","VO","VV","VGT","VHT","VFH","VPU","VAW","VCR","VIS","VDE","VOOG",
+  "VOOV","VONE","VTWO","VMOT","VFMO","VFMF","VFQY","VFLQ","VFVA",
+  // ── ETFs iShares completos ────────────────────────────────────
+  "IVV","IJR","IJH","IWB","IWD","IWF","IWN","IWO","IWP","IWR","IWS",
+  "IVE","IVW","IWC","ITOT","IUSG","IUSV","IUSS","ISCB","ISMD","ISLG",
+  "IAT","IAI","IHI","IHE","IHF","ITB","IAK","IAT","IEO","IEZ","IGE",
+  // ── ETFs SPDR/Invesco ─────────────────────────────────────────
+  "SPYG","SPYV","MDY","SLY","SLYG","SLYV","QQQM","RSP","SPHQ","SPHB",
+  "XMMO","XMHQ","XMVM","XMLV","XSHQ","XSLV","XSMO","XSVM","XMVM",
+  // ── Acciones Tech 2024-2026 ───────────────────────────────────
+  "APP","CELH","RDDT","HUBS","GTLB","ZI","ASTS","LUNR","RKLB","ASTR",
+  "PANW","FTNT","S","CYBR","RPM","IRTC","PODD","TNDM","INSP","NARI",
+  "AXNX","NVTS","AIOT","LAZR","INVZ","OUST","LIDR","MVIS","VLDR","SBOT",
+  "IONQ","RGTI","QBTS","QUBT","ARQQ","IQM","SPIR","BKSY","SAT","SSPK",
+  // ── Semiconductores completos ─────────────────────────────────
+  "TSM","ASML","AMAT","LRCX","KLAC","NXPI","ON","MCHP","MPWR","SITM",
+  "ACLS","ONTO","UCTT","FORM","ALGM","DIOD","AEIS","AMBA","CEVA","SLAB",
+  "POWI","SMTC","AEHR","COHR","LITE","AAOI","VIAV","OLED","MKSI","MTSI",
+  "WOLF","SWKS","QRVO","HIMX","VIA","UMC","PSEM","DIOD","IXYS","SEMI",
+  // ── Healthcare / MedTech ──────────────────────────────────────
+  "ISRG","EW","STE","HOLX","TFX","ITGR","EMED","NVCR","ACAD","AXSM",
+  "SAGE","ITCI","INVA","PTGX","THTX","TBPH","FOLD","LGND","NKTR","BLUE",
+  "FATE","SGEN","KYMR","MGNX","IMVT","PRGO","JAZZ","TEVA","AGN","ENDP",
+  "IONS","ALNY","SRPT","RARE","EXEL","HALO","INSM","KROS","RCKT","ARWR",
+  "BEAM","EDIT","NTLA","CRSP","NVAX","NBIS","RXRX","TMDX","PRCT","EXAI",
+  "RXRX","DNLI","NTLA","VERV","GRPH","SDGR","SCHR","HOOK","TWST","BIOA",
+  // ── Energía completa ──────────────────────────────────────────
+  "XOM","CVX","COP","EOG","DVN","HAL","SLB","MPC","VLO","PSX","OXY",
+  "APA","BKR","MRO","FANG","RRC","EQT","CNX","AR","SWN","CHK","SM",
+  "NOG","CDEV","CPE","MEG","BATL","SBOW","MTDR","ESTE","CIVI","GRNT",
+  "WES","ENLC","MPLX","EPD","ET","PAA","TRGP","KMI","OKE","WMB","LNG",
+  // ── Consumo y Retail ──────────────────────────────────────────
+  "AMZN","COST","WMT","TGT","HD","LOW","TJX","ROST","BURL","FIVE","OLLI",
+  "DLTR","DG","PRTY","BYND","BROS","CAVA","SHAK","NATH","CAKE","EAT",
+  "MCD","SBUX","CMG","YUM","QSR","DPZ","WEN","JACK","TXRH","DENN",
+  "NKE","LULU","PVH","RL","HBI","VFC","UA","UAA","CROX","DECK","SKX",
+  // ── Industriales y Defensa ────────────────────────────────────
+  "LMT","RTX","NOC","GD","BA","HII","TDG","TXT","LDOS","SAIC","CACI",
+  "AXON","KTOS","RCAT","AVAV","DFEN","VVUS","POWW","AMMO","SWBI","OLN",
+  "GE","HON","CAT","DE","EMR","ETN","PH","ROK","ITW","XYL","GNRC",
+  "AME","CARR","OTIS","TT","JCI","AOS","ALLE","ALLE","LYFT","UBER",
+  // ── Real Estate y REITs ───────────────────────────────────────
+  "AMT","CCI","SBAC","EQIX","DLR","CONE","IIPR","COLD","STAG","REXR",
+  "EGP","FR","PLD","DRE","LPT","TRNO","PLYM","ILPT","NXRT","VRE",
+  "MAA","UDR","EQR","AVB","ESS","CPT","NHI","OHI","WELL","PEAK","VTR",
+  "VICI","GLPI","MPW","DOC","HR","APLE","CLPR","BHR","XHR","PK","HST",
   // ── ADRs LatAm ────────────────────────────────────────────────
   "TV","VALE","PBR","ITUB","BBD","BBDO","GGB","SID","GGBR","CSNA","BRFS",
   "CIB","EC","ETSY","MELI","NU","STNE","PAGS","ARCO","VNET","DESP","IFS",
