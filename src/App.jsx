@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 20:24:18
+// NEXO TRADE — build: 2026-06-02 04:34:01
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -19420,14 +19420,14 @@ export default function App(){
         /* ── FEATURES landing → 1 col ── */
         .nexo-features-grid { grid-template-columns: 1fr !important; }
 
-        /* ── GENERAL: box-sizing global; NO max-width en * para no romper scroll ── */
-        * { box-sizing: border-box !important; }
-        img, video { max-width: 100% !important; height: auto !important; }
+        /* ── GENERAL: contenido no se sale de pantalla; scroll containers son excepción ── */
+        * { max-width: 100% !important; box-sizing: border-box !important; }
+        img, video { height: auto !important; }
 
-        /* ── SCROLL HORIZONTAL — contenedor + inner div escapan max-width ── */
+        /* ── SCROLL HORIZONTAL — inner div puede ser más ancho que la pantalla ── */
         .nexo-scroll-x { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; }
         .nexo-scroll-x::-webkit-scrollbar { display: none !important; }
-        .nexo-scroll-x > * { max-width: none !important; width: max-content !important; min-width: 100%; }
+        .nexo-scroll-x > * { max-width: none !important; }
 
         /* ── EARNINGS PAGE — layout stacked ── */
         .nexo-earnings-layout { grid-template-columns: 1fr !important; }
