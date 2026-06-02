@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 07:50:14
+// NEXO TRADE — build: 2026-06-02 08:04:19
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10458,9 +10458,10 @@ function generateFlowItem(id, basePrice){
   const now     = new Date();
   now.setSeconds(now.getSeconds()-Math.floor(Math.random()*180));
   const time    = now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  const aboveSMA200 = price > (sma200[ticker]||price*0.85);
-  // highVol: proxy — size >1K contratos o premium >$3M indica volumen inusual alto
-  const highVol = size>1000 || premium>3e6;
+  // aboveSMA200: ~70% arriba, ~30% abajo (variedad para que el filtro sea visible)
+  const aboveSMA200 = (price > (sma200[ticker]||price*0.85)) && Math.random()>0.3;
+  // highVol: ~55% alto volumen, ~45% bajo — rango equilibrado para demostrar el filtro
+  const highVol = size>1800 || premium>5e6;
   return {id,ticker,type,isCall,isDark,isGold,price,strike,premium,size,expiry,otm,time,sentiment:isCall?"bullish":"bearish",aboveSMA200,highVol};
 }
 
@@ -19775,7 +19776,7 @@ export default function App(){
               </button>
             );
           })}
-          <button onClick={()=>{setPage(8);setShowLanding(false);}}
+          <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
             style={{position:"absolute",right:8,flexShrink:0,background:page===8?"linear-gradient(135deg,#7C3AED,#9333EA)":"transparent",border:page===8?"none":"1px solid rgba(124,58,237,0.3)",borderRadius:14,padding:"4px 13px",cursor:"pointer",color:page===8?"#fff":"#A78BFA",fontSize:11,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:page===8?"0 0 14px rgba(124,58,237,0.3)":"none",transition:"all 0.2s"}}>
             ✦ Premium
           </button>
