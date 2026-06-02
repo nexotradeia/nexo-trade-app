@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 04:34:01
+// NEXO TRADE — build: 2026-06-02 04:46:35
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -5769,7 +5769,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         </div>
 
         {/* ── E*TRADE + FOREX.com ── */}
-        <div style={{marginTop:20,display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+        <div className="nexo-brokers-pair" style={{marginTop:20,display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
           {/* E*TRADE */}
           <div style={{background:"#fff",border:"1px solid rgba(15,23,42,0.08)",borderRadius:14,padding:"16px"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
@@ -5829,7 +5829,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         {/* How it works */}
         <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:24,marginBottom:20}}>
           <h3 style={{margin:"0 0 16px",color:"#fff",fontSize:15,fontWeight:800}}>¿Cómo funcionan las alertas?</h3>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+          <div className="nexo-alerts-steps" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
             {[
               {step:"1",icon:"⚙️",titulo:"Configuras",desc:"Elige el ticker, tipo de alerta y el valor que quieres monitorizar"},
               {step:"2",icon:"👀",titulo:"Monitorizamos",desc:"Nuestro sistema vigila el mercado 24/7 en tiempo real"},
@@ -5845,7 +5845,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         </div>
 
         {/* Alert types */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20}}>
+        <div className="nexo-alert-types-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20}}>
           {ALERT_TYPES.map((a,i)=>(
             <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 18px",boxShadow:C.shadow,display:"flex",gap:12,alignItems:"flex-start",opacity:isPremium||i<1?1:i<2?1:0.7}}>
               <span style={{fontSize:22,flexShrink:0}}>{a.icon}</span>
@@ -5861,7 +5861,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         </div>
 
         {/* Plan comparison for alerts */}
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow}}>
+        <div className="nexo-scroll-x" style={{borderRadius:16,boxShadow:C.shadow}}>
+        <div style={{minWidth:340,background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden"}}>
           <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
             <div style={{padding:"12px 18px",color:C.muted,fontSize:12,fontWeight:700}}></div>
             <div style={{padding:"12px 8px",textAlign:"center",color:C.muted,fontSize:12,fontWeight:700}}>GRATIS</div>
@@ -5885,6 +5886,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             </div>
           ))}
         </div>
+        </div>{/* /minWidth:340 */}
+        </div>{/* /nexo-scroll-x */}
 
         {!isPremium&&<div style={{marginTop:20,textAlign:"center"}}>
           <button onClick={()=>setActiveTab("planes")} style={{background:`linear-gradient(135deg,${C.accent},#00a87f)`,border:"none",borderRadius:14,padding:"13px 36px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 20px ${C.accent}44`}}>
@@ -7994,7 +7997,7 @@ function PaperTradingFullPage({ user, onBack }){
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div style={{display:"flex",flex:1,overflow:"hidden",minHeight:0}}>
+      <div className="nexo-paper-main" style={{display:"flex",flex:1,overflow:"hidden",minHeight:0}}>
 
         {/* ── IZQUIERDA: CHART ── */}
         <div style={{flex:"1 1 0",display:"flex",flexDirection:"column",minWidth:0,overflow:"hidden"}}>
@@ -8054,7 +8057,7 @@ function PaperTradingFullPage({ user, onBack }){
         </div>
 
         {/* ── DERECHA: PANEL DE ÓRDENES ── */}
-        <div style={{width:310,background:"#141722",borderLeft:"1px solid rgba(255,255,255,0.06)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
+        <div className="nexo-paper-panel" style={{width:310,background:"#141722",borderLeft:"1px solid rgba(255,255,255,0.06)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
           {/* Tabs */}
           <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
             {[["orden","💹 Orden"],["posiciones","📊 Posiciones"],["historial","📋 Historial"]].map(([k,l])=>(
@@ -8385,7 +8388,7 @@ function WinStreakTracker(){
   };
 
   return(
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+    <div className="nexo-winstreak-layout" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
         <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>🔥 Registrar Operación</h3>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
@@ -12115,7 +12118,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                   <div style={{fontSize:12,color:"#475569"}}>{g.fund}</div>
                 </div>
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+              <div className="nexo-guru-detail-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
                 {[["Período",g.period],["Fecha portafolio",g.portfolioDate],["N° de acciones",g.numStocks],["Valor portafolio",g.aum]].map(([l,v])=>(
                   <div key={l} style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 14px"}}>
                     <div style={{fontSize:10,color:"#475569",marginBottom:3}}>{l}</div>
@@ -12134,14 +12137,17 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               ))}
               <div style={{marginLeft:"auto",fontSize:11,color:C.muted2,alignSelf:"center"}}>Fuente: SEC 13F · {g.period} · Precios en vivo: Finnhub</div>
             </div>
+            {/* Table — scroll wrapper unificado */}
+            <div className="nexo-scroll-x" style={{borderRadius:12}}>
+            <div style={{minWidth:900}}>
             {/* Table header */}
-            <div style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 90px 90px 80px 80px",gap:6,padding:"8px 14px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`,overflowX:"auto"}}>
+            <div style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 90px 90px 80px 80px",gap:6,padding:"8px 14px",background:C.card2,borderRadius:"12px 12px 0 0",marginBottom:6,border:`1px solid ${C.border}`}}>
               {["ACCIÓN","EMPRESA","% PORT.","ACTIVIDAD","ACCIONES","PRECIO REP.","VALOR","PRECIO HOY","+/- REP.","52W RANGO"].map(h=>(
                 <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.5,whiteSpace:"nowrap"}}>{h}</div>
               ))}
             </div>
             {/* Rows */}
-            <div style={{overflowX:"auto"}}>
+            <div>
               {rows.map((h,i)=>{
                 const px   = livePx[h.t];
                 const curr = px?.price||null;
@@ -12172,6 +12178,8 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 );
               })}
             </div>
+            </div>{/* /minWidth:900 */}
+            </div>{/* /nexo-scroll-x */}
             <div style={{textAlign:"center",padding:"12px 0",fontSize:11,color:C.muted2}}>
               * Precio reportado = precio al cierre del trimestre · Precio actual en tiempo real vía Finnhub
             </div>
@@ -16285,7 +16293,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           return ep2>0?((curr2-ep2)/ep2*100):0;
         })():0;
         return(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+          <div className="nexo-portfolio-strip" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
             {[
               {label:isEN?"Total Value":"Valor Total",val:"$"+totalValue.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}),color:"#60A5FA",icon:"💼",accent:"rgba(96,165,250,0.1)"},
               {label:isEN?"Total Return":"Retorno Total",val:(totalPnlPct>=0?"+":"")+totalPnlPct.toFixed(2)+"%",color:totalPnlPct>=0?"#00D26A":"#FF4D6A",icon:totalPnlPct>=0?"📈":"📉",accent:totalPnlPct>=0?"rgba(0,210,106,0.08)":"rgba(255,77,106,0.08)"},
@@ -16367,7 +16375,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 ))}
               </div>
               {/* Table */}
-              <div style={{background:"rgba(15,23,42,0.85)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,overflow:"hidden"}}>
+              <div className="nexo-scroll-x" style={{borderRadius:16}}>
+              <div style={{minWidth:360,background:"rgba(15,23,42,0.85)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,overflow:"hidden"}}>
                 <div style={{display:"grid",gridTemplateColumns:"28px 72px 1fr 76px 76px 80px",gap:0,padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
                   {["#","Ticker","Sparkline","P&L %","P&L $","Value"].map(h=>(
                     <div key={h} style={{fontSize:9,color:"#334155",fontWeight:800,letterSpacing:0.6,textTransform:"uppercase",textAlign:h==="Sparkline"?"center":h==="Value"?"right":"left"}}>{h}</div>
@@ -16417,6 +16426,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                   );
                 })}
               </div>
+              </div>{/* /minWidth:360 */}
+              </div>{/* /nexo-scroll-x */}
             </div>
           );
         })()}
@@ -16802,7 +16813,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
       </div>
 
       {/* 🏆 Pelosi Tracker + Top Buyers */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+      <div className="nexo-congress-pair" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
         {/* Pelosi */}
         <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.08),rgba(0,168,255,0.05))",border:"1px solid rgba(124,58,237,0.2)",borderRadius:14,padding:"12px 16px"}}>
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
@@ -16836,7 +16847,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
       </div>
 
       {/* Stats */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
+      <div className="nexo-congress-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
         {[
           {l:isEN?"Total Trades":"Total Ops",v:trades.length,c:C.accent},
           {l:isEN?"Purchases":"Compras",v:stats.buys,c:"#10B981"},
@@ -18376,7 +18387,7 @@ function AdminDashboard(){
 
       {/* Overview */}
       {tab==="overview" && (
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,flexWrap:"wrap"}}>
+        <div className="nexo-admin-overview" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,flexWrap:"wrap"}}>
           <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
             <h3 style={{margin:"0 0 16px",color:C.text,fontSize:14,fontWeight:800}}>💰 Ingresos estimados</h3>
             {[
@@ -18412,7 +18423,7 @@ function AdminDashboard(){
       {tab==="usuarios" && (
         <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"20px"}}>
           <h3 style={{margin:"0 0 16px",color:C.text,fontSize:14,fontWeight:800}}>👥 Estadísticas de usuarios</h3>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
+          <div className="nexo-admin-stats" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
             {[
               {l:"Total registrados",v:stats.totalUsers,c:"#10b981"},
               {l:"Nuevos esta semana",v:stats.newWeek,c:"#3b82f6"},
@@ -19466,6 +19477,32 @@ export default function App(){
         /* ── Ticker strip más compacto ── */
         .nexo-ticker-strip { font-size: 11px !important; }
         .nexo-ticker-strip > div { padding: 0 12px !important; }
+
+        /* ── PAPER TRADING — layout stacked ── */
+        .nexo-paper-main { flex-direction: column !important; height: auto !important; overflow: visible !important; min-height: 0 !important; }
+        .nexo-paper-panel { width: 100% !important; max-width: 100% !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; max-height: 50vh !important; overflow-y: auto !important; }
+
+        /* ── GURUS 13F — detail stats 4-col → 2-col ── */
+        .nexo-guru-detail-stats { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── CONGRESS TRADES ── */
+        .nexo-congress-pair { grid-template-columns: 1fr !important; }
+        .nexo-congress-stats { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── PORTFOLIO TRACKER summary strip ── */
+        .nexo-portfolio-strip { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── WIN STREAK TRACKER — 2 col → 1 col ── */
+        .nexo-winstreak-layout { grid-template-columns: 1fr !important; }
+
+        /* ── PREMIUM — brokers pair, alert steps, alert types ── */
+        .nexo-brokers-pair { grid-template-columns: 1fr !important; }
+        .nexo-alerts-steps { grid-template-columns: 1fr !important; gap: 10px !important; }
+        .nexo-alert-types-grid { grid-template-columns: 1fr !important; }
+
+        /* ── ADMIN DASHBOARD ── */
+        .nexo-admin-overview { grid-template-columns: 1fr !important; }
+        .nexo-admin-stats { grid-template-columns: repeat(2,1fr) !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
