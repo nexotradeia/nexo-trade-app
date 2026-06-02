@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 04:55:54
+// NEXO TRADE — build: 2026-06-02 05:05:12
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10492,6 +10492,8 @@ function FlowPage({isPremium,onNeedPremium}){
   const alertedRef=useRef(new Set(JSON.parse(sessionStorage.getItem("nexo-flow-alerted")||"[]")));
   // Flag: en el primer render solo marcar items como vistos, NUNCA enviar
   const tgFirstRun=useRef(true);
+  // Cooldown: mínimo 30 min entre alertas de Telegram
+  const lastTgAlertTime=useRef(0);
   // Whale Alert popup
   const [whaleAlert,setWhaleAlert]=useState(null);
   const whaleAlertTimer=useRef(null);
@@ -10648,6 +10650,10 @@ function FlowPage({isPremium,onNeedPremium}){
       if(tgConfig.aboveSMA200&&!item.aboveSMA200) return;
       if(tgConfig.highVol&&!item.highVol) return;
       if(alertedRef.current.has(item.id)) return;
+      // Cooldown: máximo 1 alerta cada 30 minutos
+      const now30=Date.now();
+      if(now30-lastTgAlertTime.current<30*60*1000) return;
+      lastTgAlertTime.current=now30;
       alertedRef.current.add(item.id);
       try{sessionStorage.setItem("nexo-flow-alerted",JSON.stringify([...alertedRef.current].slice(-300)));}catch{}
       const score=scoreItem(item);
