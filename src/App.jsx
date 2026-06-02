@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 19:02:51
+// NEXO TRADE — build: 2026-06-02 19:07:42
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1867,53 +1867,65 @@ function AuthModal({mode,onClose,onAuth,lang}){
           bio: lang==="en"?"New on NexoTrade 🚀":"Nuevo en NexoTrade 🚀"
         }, true);
       }else{
-        // ── INTENTO SUPABASE con timeout de 8s ────────────────────────────
-        const loginTimeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),8000));
-        const loginResult = await Promise.race([supabase.auth.signInWithPassword({email,password:pass}),loginTimeout]).catch(e=>{
-          if(e.message==="timeout") return {data:null,error:{message:"timeout"}};
-          return {data:null,error:e};
-        });
-        const {data,error:err}=loginResult;
-        if(err){
-          if(err.message==="timeout"){
-            // ── FALLBACK: intentar login desde caché local ─────────────
+        // ── LOGIN DIRECTO via REST API (sin supabase-js que se cuelga) ────
+        let authData = null, authErr = null;
+        try{
+          const controller = new AbortController();
+          const tid = setTimeout(()=>controller.abort(), 8000);
+          const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+            method:"POST", signal:controller.signal,
+            headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`},
+            body:JSON.stringify({email, password:pass})
+          });
+          clearTimeout(tid);
+          const json = await r.json();
+          if(!r.ok || json.error || json.error_code){ authErr = json.msg || json.error_description || json.error || "Error"; }
+          else { authData = json; }
+        }catch(e){
+          if(e.name==="AbortError"){ authErr = "timeout"; }
+          else { authErr = e.message; }
+        }
+        if(authErr){
+          if(authErr==="timeout"){
             const cacheKey = "ntcache_"+btoa(email.toLowerCase().trim()).replace(/=/g,"");
             let cached = null;
             try{ cached = JSON.parse(localStorage.getItem(cacheKey)||"null"); }catch(_){}
             if(cached && cached.pwHash){
-              // Verificar password con hash simple
               const pwCheck = btoa(pass+"|nexotrade").slice(0,24);
-              if(cached.pwHash===pwCheck){
-                onAuth({...cached.profile, _offline:true});
-                onClose();
-                setLoading(false);
-                return;
-              }
+              if(cached.pwHash===pwCheck){ onAuth({...cached.profile,_offline:true}); onClose(); setLoading(false); return; }
             }
-            setError("Servidor no disponible. Si ya tenías cuenta, intenta de nuevo en unos minutos.");
-            setLoading(false);return;
+            setError("Servidor no disponible. Inténtalo de nuevo en unos minutos.");
+          } else if(authErr.toLowerCase().includes("invalid")||authErr.toLowerCase().includes("credentials")){
+            setError("Email o contraseña incorrectos");
+          } else {
+            setError(authErr);
           }
-          setError(err.message==="Invalid login credentials"?"Email o contraseña incorrectos":err.message);setLoading(false);return;
+          setLoading(false); return;
         }
-        if(!data?.user){setError("Error al iniciar sesión. Inténtalo de nuevo.");setLoading(false);return;}
-        // Cargar perfil de la BD (con timeout para que no cuelgue si DB tiene errores)
+        if(!authData?.user){ setError("Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return; }
+        // Guardar sesión en supabase para que el cliente la use
+        try{ await supabase.auth.setSession({access_token:authData.access_token, refresh_token:authData.refresh_token}); }catch(_){}
+        // Cargar perfil con fetch directo también
         let profile = null;
         try{
-          const profileTimeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),4000));
-          const profileResult = await Promise.race([
-            supabase.from("profiles").select("*").eq("id",data.user.id).single(),
-            profileTimeout
-          ]);
-          profile = profileResult?.data || null;
+          const controller2 = new AbortController();
+          const tid2 = setTimeout(()=>controller2.abort(), 4000);
+          const pr = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${authData.user.id}&select=*&limit=1`, {
+            signal:controller2.signal,
+            headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${authData.access_token}`,"Accept":"application/json"}
+          });
+          clearTimeout(tid2);
+          const pj = await pr.json();
+          profile = Array.isArray(pj) ? pj[0] : null;
         }catch(_){ profile = null; }
-        const uname = profile?.username || data.user.user_metadata?.username || email.split("@")[0];
+        const uname = profile?.username || authData.user?.user_metadata?.username || email.split("@")[0];
         const userObj = {
-          id:data.user.id,
-          email:data.user.email,
+          id:authData.user.id,
+          email:authData.user.email,
           name:uname,
           username:uname,
-          emoji:profile?.avatar_emoji||data.user.user_metadata?.avatar_emoji||avatar.emoji,
-          avatarColor:profile?.avatar_color||data.user.user_metadata?.avatar_color||C.accent,
+          emoji:profile?.avatar_emoji||authData.user?.user_metadata?.avatar_emoji||avatar.emoji,
+          avatarColor:profile?.avatar_color||authData.user?.user_metadata?.avatar_color||C.accent,
           followers:profile?.followers_count||0,
           following:profile?.following_count||0,
           posts:profile?.posts_count||0,
