@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 07:42:54
+// NEXO TRADE — build: 2026-06-02 07:50:14
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -5884,7 +5884,6 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               <div style={{padding:"11px 8px",textAlign:"center",color:C.bull,fontSize:13,fontWeight:600}}>{prem}</div>
             </div>
           ))}
-        </div>
         </div>{/* /minWidth:340 */}
         </div>{/* /nexo-scroll-x */}
 
@@ -9726,7 +9725,6 @@ function EconCalendarPage() {
             </div>
           );
         })}
-      </div>
       </div>{/* /nexo-scroll-x inner */}
       </div>{/* /nexo-scroll-x */}
       <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
@@ -16424,7 +16422,6 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                     </div>
                   );
                 })}
-              </div>
               </div>{/* /minWidth:360 */}
               </div>{/* /nexo-scroll-x */}
             </div>
