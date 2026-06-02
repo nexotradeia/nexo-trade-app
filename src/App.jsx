@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 09:13:08
+// NEXO TRADE — build: 2026-06-02 09:23:54
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10021,8 +10021,7 @@ function IpoCalendarPage() {
     return "trading";
   };
 
-  const fetchData = () => {
-    if(yearTab !== "2026"){ setLoading(false); return; }
+  const fetch2026 = () => {
     setLoading(true);
     const withAutoStatus = IPOS_2026.map(ipo => ({...ipo, status: autoStatus(ipo)}));
     setIpos(withAutoStatus);
@@ -10051,12 +10050,19 @@ function IpoCalendarPage() {
         setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
       });
   };
+  const fetchData = fetch2026; // alias para compatibilidad
 
   useEffect(()=>{
     setFilter("all");
-    if(yearTab==="2026"){ fetchData(); }
-    else if(yearTab==="2027"){ setIpos(IPOS_2027); setSource("curated"); setLoading(false); }
-    else{ setIpos(IPOS_2028); setSource("curated"); setLoading(false); }
+    if(yearTab==="2026"){
+      fetch2026();
+      const timer = setInterval(fetch2026, 5*60*1000); // auto-refresh cada 5 min
+      return ()=>clearInterval(timer);
+    } else if(yearTab==="2027"){
+      setIpos(IPOS_2027); setSource("curated"); setLoading(false);
+    } else {
+      setIpos(IPOS_2028); setSource("curated"); setLoading(false);
+    }
   },[yearTab]);
 
   const rows = ipos.filter(ipo => filter==="all" || ipo.status===filter);
@@ -10094,17 +10100,18 @@ function IpoCalendarPage() {
               )}
               {yearTab!=="2026" && <span style={{fontSize:10,fontWeight:700,color:"#F59E0B",background:"rgba(245,158,11,0.1)",borderRadius:10,padding:"2px 8px"}}>CURATED</span>}
               <span style={{fontSize:11,color:C.muted2}}>{ipos.length} IPOs</span>
-              {lastUp && yearTab==="2026" && <span style={{fontSize:10,color:C.muted2}}>· Updated {lastUp}</span>}
+              {lastUp && yearTab==="2026" && <span style={{fontSize:10,color:C.muted2}}>· {lastUp}</span>}
+              {yearTab==="2026" && <span style={{fontSize:10,fontWeight:700,color:"#10B981",background:"rgba(16,185,129,0.08)",borderRadius:10,padding:"2px 8px"}}>↻ Auto 5min</span>}
             </div>
             <div style={{fontSize:12,color:C.muted,marginTop:2}}>Ofertas públicas — precios, fechas, sectores y estado en tiempo real</div>
           </div>
           {yearTab==="2026" && (
-            <button onClick={fetchData} disabled={loading}
-              style={{display:"flex",alignItems:"center",gap:6,padding:"7px 14px",borderRadius:10,border:`1.5px solid ${C.border}`,background:C.card2,color:C.accent,fontSize:12,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.6:1,transition:"all 0.15s"}}
-              onMouseEnter={e=>{if(!loading){e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.background=C.accentDim;}}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.background=C.card2;}}>
-              <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none"}}>⟳</span>
-              {loading?"Loading...":"Refresh"}
+            <button onClick={fetch2026} disabled={loading}
+              style={{display:"flex",alignItems:"center",gap:8,padding:"10px 20px",borderRadius:12,border:`2px solid ${C.accent}`,background:loading?C.card2:C.accentDim,color:C.accent,fontSize:13,fontWeight:800,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",transition:"all 0.15s",flexShrink:0}}
+              onMouseEnter={e=>{if(!loading){e.currentTarget.style.background=C.accent;e.currentTarget.style.color="#fff";}}}
+              onMouseLeave={e=>{e.currentTarget.style.background=C.accentDim;e.currentTarget.style.color=C.accent;}}>
+              <span style={{fontSize:16,display:"inline-block",animation:loading?"spin 1s linear infinite":"none"}}>⟳</span>
+              {loading?"Actualizando...":"Refresh"}
             </button>
           )}
         </div>
@@ -17416,7 +17423,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   };
 
   return(
-    <div style={{maxWidth:960,margin:"0 auto",padding:"0 12px 60px"}}>
+    <div style={{maxWidth:1180,margin:"0 auto",padding:"0 12px 60px"}}>
 
       {/* Alert toasts */}
       {alerts.length>0&&(
@@ -17434,11 +17441,11 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       {/* ── MINI AI PANEL (slide-in) ── */}
       {selectedRow&&(
         <div style={{position:"fixed",top:0,right:0,bottom:0,width:340,zIndex:9980,background:C.card,borderLeft:`1px solid ${C.border}`,boxShadow:"-8px 0 40px rgba(0,0,0,0.4)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-          <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(99,102,241,0.08))",borderBottom:`1px solid ${C.border}`,padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{background:"linear-gradient(135deg,rgba(0,168,255,0.10),rgba(0,168,255,0.04))",borderBottom:`1px solid ${C.border}`,padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontFamily:"monospace",fontWeight:900,fontSize:20,color:"#FCD34D"}}>${selectedRow.s}</span>
-                <span style={{fontSize:11,background:"rgba(139,92,246,0.2)",color:"#FCD34D",borderRadius:6,padding:"2px 7px",fontWeight:700}}>
+                <span style={{fontSize:11,background:"rgba(0,168,255,0.14)",color:"#00A8FF",border:"1px solid rgba(0,168,255,0.3)",borderRadius:6,padding:"2px 7px",fontWeight:700}}>
                   {PATTERN_ICON[selectedRow.pattern]||"📊"} {selectedRow.pattern}
                 </span>
               </div>
@@ -17621,11 +17628,11 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
 
       {/* ── TABLE ── */}
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        <div style={{minWidth:960}}>
+        <div style={{minWidth:1100}}>
 
           {/* Stocks header */}
           {tab==="stocks"&&(
-            <div style={{display:"grid",gridTemplateColumns:"72px 90px 95px 75px 60px 85px 95px 115px 1fr 68px 80px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8,alignItems:"center"}}>
+            <div style={{display:"grid",gridTemplateColumns:"80px 100px 105px 85px 65px 95px 105px 130px 1fr 72px 88px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:10,alignItems:"center"}}>
               {[["s","Ticker"],["spark","Tendencia"],["p","Precio"],["chg","Chg%"],["rsi","RSI"],["vol","Volumen"],["mkt","Mkt Cap"],["pattern","Patrón"],["setup","Setup IA"],["score","Score"],["actions",""]].map(([col,lbl])=>(
                 col==="spark"||col==="setup"||col==="actions"
                   ? <span key={col} style={{fontSize:10,fontWeight:700,color:C.muted2,textTransform:"uppercase",letterSpacing:0.8}}>{lbl}</span>
@@ -17657,14 +17664,14 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             const isSelected=selectedRow?.s===r.s;
             return(
               <div key={i} style={{display:"grid",
-                gridTemplateColumns:tab==="stocks"?"72px 90px 95px 75px 60px 85px 95px 115px 1fr 68px 80px":
+                gridTemplateColumns:tab==="stocks"?"80px 100px 105px 85px 65px 95px 105px 130px 1fr 72px 88px":
                   tab==="options"?"70px 160px 90px 80px 70px 80px 80px 72px":
                   tab==="intraday"?"70px 160px 95px 78px 62px 68px 120px 100px 72px":
                   "70px 160px 95px 90px 88px 68px 140px 72px",
                 padding:"9px 14px",borderBottom:`1px solid ${C.border}`,gap:8,
-                transition:"background 0.25s",background:isSelected?"rgba(139,92,246,0.08)":rowBg,
+                transition:"background 0.25s",background:isSelected?"rgba(0,168,255,0.10)":rowBg,
                 cursor:"default",alignItems:"center"}}
-                onMouseEnter={e=>{if(!flash&&!isSelected)e.currentTarget.style.background="rgba(139,92,246,0.05)";}}
+                onMouseEnter={e=>{if(!flash&&!isSelected)e.currentTarget.style.background="rgba(0,168,255,0.05)";}}
                 onMouseLeave={e=>{if(!flash&&!isSelected)e.currentTarget.style.background=rowBg;}}>
 
                 {/* Ticker */}
@@ -17684,7 +17691,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   {/* Mkt */}
                   <span style={{fontSize:11,color:C.muted}}>{r.mkt}</span>
                   {/* Patrón */}
-                  <span style={{fontSize:11,background:"rgba(139,92,246,0.12)",color:"#FCD34D",border:"1px solid rgba(139,92,246,0.2)",borderRadius:6,padding:"2px 6px",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
+                  <span style={{fontSize:11,background:"rgba(0,168,255,0.14)",color:"#00A8FF",border:"1px solid rgba(0,168,255,0.3)",borderRadius:6,padding:"2px 6px",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
                     {PATTERN_ICON[r.pattern]||"📊"} {r.pattern}
                   </span>
                   {/* Setup IA */}
@@ -17710,7 +17717,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   <span style={{fontSize:12,fontWeight:800,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(2)}%</span>
                   <span style={{fontSize:11,color:C.muted}}>{r.atr}</span>
                   <span style={{fontSize:12,fontWeight:700,color:"#F59E0B"}}>{r.rvol}</span>
-                  <span style={{fontSize:11,background:"rgba(139,92,246,0.12)",color:"#FCD34D",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
+                  <span style={{fontSize:11,background:"rgba(0,168,255,0.14)",color:"#00A8FF",border:"1px solid rgba(0,168,255,0.3)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
                     {PATTERN_ICON[r.pattern]||"📊"} {r.pattern}
                   </span>
                   <span style={{fontSize:11,fontWeight:700,color:r.signal?.includes("Long")?"#10B981":"#EF4444"}}>{r.signal}</span>
@@ -17722,7 +17729,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   <span style={{fontSize:12,color:C.text}}>{r.spread}</span>
                   <span style={{fontSize:11,color:C.muted}}>{r.trades}</span>
                   <span style={{fontSize:12,fontWeight:700,color:C.accent}}>{r.tf}</span>
-                  <span style={{fontSize:11,background:"rgba(139,92,246,0.12)",color:"#FCD34D",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
+                  <span style={{fontSize:11,background:"rgba(0,168,255,0.14)",color:"#00A8FF",border:"1px solid rgba(0,168,255,0.3)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
                     {PATTERN_ICON[r.pattern]||"📊"} {r.pattern}
                   </span>
                 </>}
@@ -17736,7 +17743,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                 {tab==="stocks"&&(
                   <div style={{display:"flex",gap:4,justifyContent:"center"}}>
                     <button onClick={()=>setSelectedRow(isSelected?null:r)}
-                      style={{background:isSelected?"rgba(139,92,246,0.3)":"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",borderRadius:7,padding:"4px 8px",color:"#FCD34D",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                      style={{background:isSelected?"rgba(0,168,255,0.3)":"rgba(0,168,255,0.12)",border:"1px solid rgba(0,168,255,0.3)",borderRadius:7,padding:"4px 8px",color:isSelected?"#fff":"#00A8FF",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
                       👁 Ver
                     </button>
                     <button onClick={()=>{
