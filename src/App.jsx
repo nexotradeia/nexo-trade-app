@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 20:19:55
+// NEXO TRADE — build: 2026-06-01 20:24:18
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10483,6 +10483,8 @@ function FlowPage({isPremium,onNeedPremium}){
   const [whalePaused,setWhalePaused]=useState(false);
   // Telegram alerted ref — persiste en sessionStorage para no reenviar al remontar
   const alertedRef=useRef(new Set(JSON.parse(sessionStorage.getItem("nexo-flow-alerted")||"[]")));
+  // Flag: en el primer render solo marcar items como vistos, NUNCA enviar
+  const tgFirstRun=useRef(true);
   // Whale Alert popup
   const [whaleAlert,setWhaleAlert]=useState(null);
   const whaleAlertTimer=useRef(null);
@@ -10621,6 +10623,13 @@ function FlowPage({isPremium,onNeedPremium}){
 
   // ── Auto-Alerta Telegram (configurable) ──
   useEffect(()=>{
+    // Primera ejecución: solo marcar feed inicial como visto, NUNCA enviar
+    if(tgFirstRun.current){
+      feed.forEach(item=>alertedRef.current.add(item.id));
+      try{sessionStorage.setItem("nexo-flow-alerted",JSON.stringify([...alertedRef.current].slice(-300)));}catch{}
+      tgFirstRun.current=false;
+      return;
+    }
     if(!tgConfig.enabled) return;
     const TG_TOKEN="8931471851:AAFActqhqBuKO3oLq5Z7FQBkl9cTa8yDSbs";
     const TG_CHANNEL="799353199";
