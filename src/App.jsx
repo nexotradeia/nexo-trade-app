@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 06:46:25
+// NEXO TRADE — build: 2026-06-02 06:58:35
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7181,9 +7181,8 @@ function Footer({ setPage, onAuth, lang="es" }){
       {/* ── TOP STRIP — tagline IA ── */}
       <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)",padding:"22px 20px"}}>
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            {/* Logo */}
-            <img src="/logo_nexo.png" alt="NexoTrade" style={{height:38,width:"auto",objectFit:"contain"}}/>
+          <div className="nexo-footer-logo" style={{display:"flex",alignItems:"center",gap:10}}>
+            <img src="/logo_nexo.png" alt="NexoTrade" style={{height:32,width:"auto",objectFit:"contain",borderRadius:6}}/>
           </div>
           {/* Tagline */}
           <p style={{color:"#475569",fontSize:12,margin:0,lineHeight:1.6,maxWidth:420,textAlign:"center"}}>
@@ -10731,43 +10730,7 @@ function FlowPage({isPremium,onNeedPremium}){
   return(
     <div style={fullscreen?{position:"fixed",inset:0,zIndex:9985,background:C.bg,overflowY:"auto",overflowX:"hidden",padding:"16px 20px 32px"}:{maxWidth:1360,margin:"0 auto",background:C.bg,borderRadius:16,padding:"16px 20px 24px",minHeight:400}}>
 
-      {/* ── 🐋 WHALE ALERT POPUP ── */}
-      {whaleAlert&&(
-        <div style={{position:"fixed",top:20,right:20,zIndex:9990,animation:"whaleSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1)"}}
-          onClick={()=>setWhaleAlert(null)}>
-          <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.96))",border:`2px solid ${whaleAlert.isCall?"rgba(0,210,106,0.6)":"rgba(255,77,106,0.6)"}`,borderRadius:18,padding:"16px 20px",minWidth:300,maxWidth:360,boxShadow:`0 8px 40px ${whaleAlert.isCall?"rgba(0,210,106,0.3)":"rgba(255,77,106,0.3)"},0 0 0 1px rgba(255,255,255,0.05)`,cursor:"pointer",position:"relative",overflow:"hidden"}}>
-            {/* animated glow bg */}
-            <div style={{position:"absolute",inset:0,background:whaleAlert.isCall?"radial-gradient(ellipse at top right,rgba(0,210,106,0.08),transparent 70%)":"radial-gradient(ellipse at top right,rgba(255,77,106,0.08),transparent 70%)",pointerEvents:"none"}}/>
-            {/* countdown bar */}
-            <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:"rgba(255,255,255,0.06)",borderRadius:"0 0 18px 18px"}}>
-              <div style={{height:"100%",background:whaleAlert.isCall?"#00D26A":"#FF4D6A",borderRadius:"0 0 18px 18px",animation:"whaleCountdown 5s linear forwards"}}/>
-            </div>
-            <div style={{position:"relative"}}>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                <span style={{fontSize:28,animation:"whaleBounce 0.6s ease infinite alternate"}}>🐋</span>
-                <div>
-                  <div style={{fontWeight:900,fontSize:13,color:"#F1F5F9",letterSpacing:0.3}}>WHALE ALERT</div>
-                  <div style={{fontSize:10,color:whaleAlert.isCall?"#00D26A":"#FF4D6A",fontWeight:800,letterSpacing:1}}>{whaleAlert.isCall?"▲ CALL MASIVO":"▼ PUT MASIVO"}</div>
-                </div>
-                <div style={{marginLeft:"auto",fontWeight:900,fontSize:22,color:whaleAlert.isCall?"#00D26A":"#FF4D6A",fontFamily:"monospace"}}>{fmt$(whaleAlert.premium)}</div>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-                {[
-                  {l:"Ticker",v:whaleAlert.ticker,c:whaleAlert.isCall?"#00D26A":"#FF4D6A"},
-                  {l:"Strike",v:whaleAlert.strike?`$${whaleAlert.strike}`:"Dark Pool",c:"#F1F5F9"},
-                  {l:"Expiry",v:whaleAlert.expiry||"—",c:"#94A3B8"},
-                ].map(({l,v,c})=>(
-                  <div key={l} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 8px",textAlign:"center"}}>
-                    <div style={{fontSize:8,color:"#475569",fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:2}}>{l}</div>
-                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:c}}>{v}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{marginTop:8,fontSize:10,color:"#475569",textAlign:"center"}}>Click para cerrar · Auto-cierra en 5s</div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Whale Alert popup disabled — too intrusive on mobile */}
 
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
@@ -10987,29 +10950,29 @@ function FlowPage({isPremium,onNeedPremium}){
         const PAD_T=8; const PAD_B=28;
         const toY=(v)=>PAD_T+(H*(1-(v-minL)/rng));
         return(
-          <div style={{background:"rgba(3,6,16,0.97)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"14px 16px 10px",marginBottom:10}}>
+          <div style={{background:"#F8FAFC",border:"1px solid rgba(0,0,0,0.08)",borderRadius:14,padding:"14px 16px 10px",marginBottom:10}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-              <div style={{fontSize:10,fontWeight:800,color:"#475569",letterSpacing:1,textTransform:"uppercase"}}>📊 ACTIVIDAD DE FLUJO POR HORA</div>
-              <div style={{display:"flex",gap:14,fontSize:9,color:"#475569"}}>
-                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#00D26A",borderRadius:1,display:"inline-block",boxShadow:"0 0 4px #00D26A"}}/>Alcista</span>
-                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#FF4D6A",borderRadius:1,display:"inline-block",boxShadow:"0 0 4px #FF4D6A"}}/>Bajista</span>
+              <div style={{fontSize:10,fontWeight:800,color:"#334155",letterSpacing:1,textTransform:"uppercase"}}>📊 ACTIVIDAD DE FLUJO POR HORA</div>
+              <div style={{display:"flex",gap:14,fontSize:9,color:"#64748B"}}>
+                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#00D26A",borderRadius:1,display:"inline-block"}}/>Alcista</span>
+                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#FF4D6A",borderRadius:1,display:"inline-block"}}/>Bajista</span>
               </div>
             </div>
             <svg viewBox={`0 0 ${SLOTS*W} ${H+PAD_T+PAD_B}`} style={{width:"100%",height:150,display:"block"}} preserveAspectRatio="xMidYMid meet">
               <defs>
                 <filter id="glow-up" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feGaussianBlur stdDeviation="2" result="blur"/>
                   <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
                 <filter id="glow-dn" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feGaussianBlur stdDeviation="2" result="blur"/>
                   <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
               </defs>
               {/* Horizontal grid */}
               {[0,0.33,0.66,1].map((p,gi)=>(
                 <line key={gi} x1={0} y1={PAD_T+H*p} x2={SLOTS*W} y2={PAD_T+H*p}
-                  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="3,5"/>
+                  stroke="rgba(0,0,0,0.07)" strokeWidth="1" strokeDasharray="3,5"/>
               ))}
               {hourlyCandles.map((c,i)=>{
                 const cx=i*W+W/2;
@@ -19574,6 +19537,9 @@ export default function App(){
 
         /* ── TOP MOVERS — 2-col → 1-col ── */
         .nexo-top-movers { grid-template-columns: 1fr !important; }
+
+        /* ── FOOTER — hide logo on mobile (PNG has white bg) ── */
+        .nexo-footer-logo { display: none !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
@@ -19790,7 +19756,7 @@ export default function App(){
         </div>
         {/* ── ROW 2: VIP TABS ── */}
         <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"linear-gradient(90deg,rgba(245,158,11,0.02),rgba(245,158,11,0.05),rgba(245,158,11,0.02))",borderTop:"1px solid rgba(245,158,11,0.13)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
-          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:0.9,color:"#F59E0B",background:"linear-gradient(135deg,rgba(245,158,11,0.22),rgba(245,158,11,0.10))",border:"1.5px solid rgba(245,158,11,0.45)",borderRadius:7,padding:"3px 10px",margin:"0 18px 0 0",whiteSpace:"nowrap",boxShadow:"0 0 10px rgba(245,158,11,0.15)",cursor:"pointer",transition:"all 0.2s"}}>👑 PREMIUM</span>
+          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#F59E0B",background:"transparent",border:"none",padding:"0 14px",whiteSpace:"nowrap",cursor:"pointer",transition:"opacity 0.15s",opacity:0.85}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.85"}>⭐ PREMIUM</span>
           {[
             {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
             {label:lang==="en"?"🐋 Flujo PREMIUM":"🐋 Flujo PREMIUM",idx:20,locked:!effectivePremium},
@@ -20215,38 +20181,7 @@ export default function App(){
       {/* BANNER AFILIADOS MÓVIL — fijo al pie, solo en móvil */}
       <MobileAffiliateBanner/>
 
-      {/* LOGOUT MÓVIL — botón fijo en la esquina, solo en móvil */}
-      {user && (
-        <div className="nexo-logout-mobile" style={{
-          position:"fixed",bottom:24,right:16,zIndex:999,display:"none",
-          flexDirection:"column",alignItems:"flex-end",gap:8
-        }}>
-          <button
-            onClick={async()=>{
-              try{ await supabase.auth.signOut({scope:"local"}); }catch{}
-              try{ await supabase.auth.signOut({scope:"global"}); }catch{}
-              localStorage.clear();
-              sessionStorage.clear();
-              window.location.href="/";
-            }}
-            style={{
-              background:"#FF4D6A",
-              border:"none",
-              borderRadius:50,
-              padding:"12px 20px",
-              color:"#fff",
-              fontWeight:800,
-              fontSize:14,
-              cursor:"pointer",
-              boxShadow:"0 4px 20px rgba(255,77,106,0.5)",
-              display:"flex",
-              alignItems:"center",
-              gap:8,
-            }}>
-            🚪 {lang==="en"?"Sign out":"Cerrar sesión"}
-          </button>
-        </div>
-      )}
+      {/* Mobile logout removed — sign out available in top nav settings */}
 
       {/* VIP POP-UP */}
       {showVipPopup && !effectivePremium && (
