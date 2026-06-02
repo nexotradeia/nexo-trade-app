@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 17:17:38
+// NEXO TRADE — build: 2026-06-02 17:58:35
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -2890,13 +2890,13 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
           </div>}
           <textarea ref={taRef} value={text} onChange={handleTextChange}
             placeholder="¿Qué piensas del mercado? Usa $NVDA o @META · Enter para publicar"
-            style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:68,fontFamily:"inherit",lineHeight:1.55,boxSizing:"border-box",transition:"border-color 0.15s",minWidth:0}}
+            style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:96,fontFamily:"inherit",lineHeight:1.55,boxSizing:"border-box",transition:"border-color 0.15s",minWidth:0}}
             onFocus={e=>e.target.style.borderColor="rgba(0,168,255,0.4)"}
             onBlur={e=>{e.target.style.borderColor="var(--c-border)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
             onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}/>
           {/* @Mention autocomplete */}
           {mentionBox.open&&(
-            <div style={{position:"absolute",top:72,left:0,right:0,background:"var(--c-card)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.12)",zIndex:200,overflow:"hidden"}}>
+            <div style={{position:"absolute",top:100,left:0,right:0,background:"var(--c-card)",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.12)",zIndex:200,overflow:"auto",maxHeight:160}}>
               <div style={{padding:"5px 10px 4px",fontSize:10,color:C.accent,fontWeight:700,letterSpacing:0.8,borderBottom:"1px solid var(--c-border)"}}>MENCIONAR ACTIVO</div>
               {mentionBox.results.map(sym=>(
                 <div key={sym} onMouseDown={()=>insertMention(sym)}
