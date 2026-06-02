@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 08:27:34
+// NEXO TRADE — build: 2026-06-02 08:32:25
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10544,11 +10544,11 @@ function FlowPage({isPremium,onNeedPremium}){
   const [expandedId,setExpandedId]=useState(null);
   // ── Telegram Alert Config ──
   const [tgConfig,setTgConfig]=useState(()=>{
-    const DEFAULTS={enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true,_v:3};
+    const DEFAULTS={enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true,_v:4};
     try{
       const saved=JSON.parse(localStorage.getItem("nexo-tg-config")||"null");
-      // Si no tiene versión 3, descartar config vieja y usar nuevos defaults
-      if(!saved||!saved._v||saved._v<3) return DEFAULTS;
+      // Si no tiene versión 4, descartar config vieja y usar nuevos defaults
+      if(!saved||!saved._v||saved._v<4) return DEFAULTS;
       return saved;
     }
     catch{ return DEFAULTS; }
@@ -10906,26 +10906,32 @@ function FlowPage({isPremium,onNeedPremium}){
               </div>
               {/* Row 3 — SMA200 + HighVol */}
               <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+                {/* SMA200 */}
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
                   <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>📈 Sobre SMA200</span>
                   <div style={{display:"flex",gap:4}}>
-                    {[{l:"✅ Sí (recomendado)",v:true},{l:"❌ No filtrar",v:false}].map(opt=>(
-                      <button key={String(opt.v)} onClick={()=>setTgConfig(c=>({...c,aboveSMA200:opt.v}))}
-                        style={{background:tgConfig.aboveSMA200===opt.v?"rgba(16,185,129,0.15)":"transparent",border:`1px solid ${tgConfig.aboveSMA200===opt.v?"rgba(16,185,129,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.aboveSMA200===opt.v?"#10B981":"#64748B",cursor:"pointer"}}>
-                        {opt.l}
-                      </button>
-                    ))}
+                    <button type="button" key="sma-yes" onClick={()=>setTgConfig(c=>({...c,aboveSMA200:true}))}
+                      style={{background:tgConfig.aboveSMA200===true?"rgba(16,185,129,0.2)":"transparent",border:`1px solid ${tgConfig.aboveSMA200===true?"rgba(16,185,129,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.aboveSMA200===true?"#10B981":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
+                      ✅ Sí (recomendado)
+                    </button>
+                    <button type="button" key="sma-no" onClick={()=>setTgConfig(c=>({...c,aboveSMA200:false}))}
+                      style={{background:tgConfig.aboveSMA200===false?"rgba(239,68,68,0.15)":"transparent",border:`1px solid ${tgConfig.aboveSMA200===false?"rgba(239,68,68,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.aboveSMA200===false?"#EF4444":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
+                      ❌ No filtrar
+                    </button>
                   </div>
                 </div>
+                {/* Alta volatilidad */}
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
                   <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>⚡ Alta volatilidad</span>
                   <div style={{display:"flex",gap:4}}>
-                    {[{l:"✅ Sí (>1K contratos)",v:true},{l:"❌ No filtrar",v:false}].map(opt=>(
-                      <button key={String(opt.v)} onClick={()=>setTgConfig(c=>({...c,highVol:opt.v}))}
-                        style={{background:tgConfig.highVol===opt.v?"rgba(245,158,11,0.15)":"transparent",border:`1px solid ${tgConfig.highVol===opt.v?"rgba(245,158,11,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.highVol===opt.v?"#F59E0B":"#64748B",cursor:"pointer"}}>
-                        {opt.l}
-                      </button>
-                    ))}
+                    <button type="button" key="vol-yes" onClick={()=>setTgConfig(c=>({...c,highVol:true}))}
+                      style={{background:tgConfig.highVol===true?"rgba(245,158,11,0.2)":"transparent",border:`1px solid ${tgConfig.highVol===true?"rgba(245,158,11,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.highVol===true?"#F59E0B":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
+                      ✅ Sí (&gt;1K contratos)
+                    </button>
+                    <button type="button" key="vol-no" onClick={()=>setTgConfig(c=>({...c,highVol:false}))}
+                      style={{background:tgConfig.highVol===false?"rgba(239,68,68,0.15)":"transparent",border:`1px solid ${tgConfig.highVol===false?"rgba(239,68,68,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.highVol===false?"#EF4444":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
+                      ❌ No filtrar
+                    </button>
                   </div>
                 </div>
               </div>
