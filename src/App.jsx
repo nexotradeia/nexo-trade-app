@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-01 20:06:50
+// NEXO TRADE — build: 2026-06-01 20:13:59
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4252,10 +4252,10 @@ function EarningsPage({lang}){
 
   return(
     <div style={{background:C.bg,minHeight:"100vh"}}>
-      <div style={{maxWidth:1440,margin:"0 auto",padding:"16px",display:"grid",gridTemplateColumns:"260px 1fr",gap:16,alignItems:"start"}}>
+      <div className="nexo-earnings-layout" style={{maxWidth:1440,margin:"0 auto",padding:"16px",display:"grid",gridTemplateColumns:"260px 1fr",gap:16,alignItems:"start"}}>
 
         {/* ── LEFT SIDEBAR ── */}
-        <div style={{position:"sticky",top:72}}>
+        <div className="nexo-earnings-sidebar" style={{position:"sticky",top:72}}>
           {/* Calendar card */}
           <div style={{background:C.card,borderRadius:14,padding:"16px",border:`1px solid ${C.border}`,marginBottom:12}}>
             {/* Month nav */}
@@ -4356,7 +4356,7 @@ function EarningsPage({lang}){
           </div>
 
           {/* 4 Stat cards */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
+          <div className="nexo-earnings-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
             {[
               {icon:"📅",l:"REPORTAN HOY",v:selDayAll.length,c:C.text,mono:true},
               {icon:"🔴",l:"ALTO IMPACTO",v:highImpactCount,c:"#EF4444",mono:true},
@@ -4373,7 +4373,8 @@ function EarningsPage({lang}){
           </div>
 
           {/* Table */}
-          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
+          <div className="nexo-scroll-x" style={{borderRadius:14}}>
+          <div style={{minWidth:700,background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
             {/* Header */}
             <div style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
               {["","EMPRESA","HORA","EPS EST.","MKT CAP","IMPACTO","SENTIMIENTO",""].map(h=>(
@@ -4478,6 +4479,8 @@ function EarningsPage({lang}){
               </button>
             )}
           </div>
+          </div>{/* /nexo-scroll-x inner */}
+          </div>{/* /nexo-scroll-x */}
 
           <div style={{marginTop:10,fontSize:10,color:C.muted2,textAlign:"center"}}>
             📡 Datos: Finnhub API · Calendario en tiempo real · No es consejo financiero
@@ -9685,7 +9688,8 @@ function EconCalendarPage() {
         <span style={{fontSize:11,color:C.muted2}}>{rows.length} eventos</span>
       </div>
 
-      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+      <div className="nexo-scroll-x" style={{borderRadius:12}}>
+      <div style={{minWidth:440,display:"flex",flexDirection:"column",gap:8}}>
         {rows.length===0 && <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>Sin eventos con ese filtro.</div>}
         {rows.map((ev,i)=>{
           const past    = ev.date < today;
@@ -9722,6 +9726,8 @@ function EconCalendarPage() {
           );
         })}
       </div>
+      </div>{/* /nexo-scroll-x inner */}
+      </div>{/* /nexo-scroll-x */}
       <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
         {source==="live" ? "⚡ Datos en tiempo real via Financial Modeling Prep (FMP)" : "📋 Datos base — agrega FMP_API_KEY en Vercel para tiempo real"}
         {" · "}Fuentes: Federal Reserve, BLS, BEA
@@ -9827,7 +9833,8 @@ function DividendCalendarPage() {
         </div>
       </div>
 
-      <div style={{background:C.card,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
+      <div className="nexo-scroll-x" style={{borderRadius:16}}>
+      <div style={{minWidth:530,background:C.card,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
         <div style={{display:"grid",gridTemplateColumns:"90px 1fr 90px 90px 80px 80px",gap:0,background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px"}}>
           {["Ticker","Empresa","Ex-Fecha","Pago","Trimestral","Yield"].map(h=>(
             <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
@@ -9855,6 +9862,7 @@ function DividendCalendarPage() {
           );
         })}
       </div>
+      </div>{/* /nexo-scroll-x */}
       <div style={{textAlign:"center",padding:"14px 0",fontSize:11,color:C.muted2}}>Ex-fecha es el último día para comprar y recibir el dividendo · Datos orientativos</div>
     </div>
   );
@@ -10872,7 +10880,7 @@ function FlowPage({isPremium,onNeedPremium}){
 
       {/* ── STATS STRIP ── */}
       {filter!=="whales" && (
-        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginBottom:10}}>
+        <div className="nexo-flow-stats" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginBottom:10}}>
           {[
             {l:"FLUJO CALLS",v:fmt$(totalCallPrem),c:"#00D26A",icon:"📈"},
             {l:"FLUJO PUTS",v:fmt$(totalPutPrem),c:"#FF4D6A",icon:"📉"},
@@ -11000,7 +11008,7 @@ function FlowPage({isPremium,onNeedPremium}){
       </div>
 
       {/* Table — scrollable on mobile — hidden when whale tab is active */}
-      {filter!=="whales" && <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+      {filter!=="whales" && <div className="nexo-scroll-x" style={{marginBottom:4}}>
       <div style={{minWidth:680}}>
       {/* Table header */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
@@ -19397,9 +19405,22 @@ export default function App(){
         /* ── FEATURES landing → 1 col ── */
         .nexo-features-grid { grid-template-columns: 1fr !important; }
 
-        /* ── GENERAL: evitar overflow en cualquier container ── */
-        * { max-width: 100% !important; box-sizing: border-box !important; }
-        img { max-width: 100% !important; height: auto !important; }
+        /* ── GENERAL: box-sizing global; NO max-width en * para no romper scroll ── */
+        * { box-sizing: border-box !important; }
+        img, video { max-width: 100% !important; height: auto !important; }
+
+        /* ── SCROLL HORIZONTAL — contenedor + inner div escapan max-width ── */
+        .nexo-scroll-x { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; }
+        .nexo-scroll-x::-webkit-scrollbar { display: none !important; }
+        .nexo-scroll-x > * { max-width: none !important; width: max-content !important; min-width: 100%; }
+
+        /* ── EARNINGS PAGE — layout stacked ── */
+        .nexo-earnings-layout { grid-template-columns: 1fr !important; }
+        .nexo-earnings-sidebar { position: static !important; top: auto !important; }
+        .nexo-earnings-stats { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── FLOW PAGE stats strip ── */
+        .nexo-flow-stats { grid-template-columns: repeat(3,1fr) !important; }
 
         /* ── Padding/margin reducidos en móvil ── */
         .nexo-page-pad { padding: 12px 8px !important; }
