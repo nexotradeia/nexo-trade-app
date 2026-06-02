@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 09:33:27
+// NEXO TRADE — build: 2026-06-02 11:36:54
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -2641,7 +2641,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
   return(
     <div
       className={isNew ? "post-card-new" : ""}
-      style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:6,transition:"border-color 0.2s, box-shadow 0.2s, transform 0.2s",boxShadow:"var(--c-shadow)"}}
+      style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:6,transition:"border-color 0.2s, box-shadow 0.2s, transform 0.2s",boxShadow:"var(--c-shadow)",overflow:"hidden",maxWidth:"100%",boxSizing:"border-box"}}
       onMouseEnter={e=>{e.currentTarget.style.borderColor=isBull?"rgba(22,163,74,0.35)":"rgba(220,38,38,0.25)";e.currentTarget.style.boxShadow=isBull?"0 6px 24px rgba(22,163,74,0.1), 0 2px 8px rgba(0,0,0,0.08)":"0 6px 24px rgba(220,38,38,0.1), 0 2px 8px rgba(0,0,0,0.08)";e.currentTarget.style.transform="translateY(-3px)";}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="var(--c-shadow)";e.currentTarget.style.transform="translateY(0)";}}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
@@ -2709,7 +2709,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             {post.tags.map(tg=><span key={tg} style={{background:"rgba(0,168,255,0.07)",color:"#00A8FF",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:600,letterSpacing:0.2}}>#{tg}</span>)}
           </div>}
           {/* Action row */}
-          <div style={{display:"flex",gap:0,alignItems:"center",borderTop:"1px solid var(--c-border)",paddingTop:8,marginTop:4}}>
+          <div className="nexo-action-row" style={{display:"flex",gap:0,alignItems:"center",borderTop:"1px solid var(--c-border)",paddingTop:8,marginTop:4,flexWrap:"wrap"}}>
             {[
               {icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
               {icon:"💬",val:commentCount,active:showComments,col:"#3B82F6",fn:toggleComments},
@@ -7396,8 +7396,8 @@ function PredictionBanner({lang="es"}){
   return(
     <div style={{background:`linear-gradient(135deg,rgba(0,210,106,0.13),rgba(60,142,250,0.10))`,borderBottom:`1px solid rgba(0,210,106,0.28)`,padding:"8px 16px"}}>
       <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-        <span style={{background:C.gold+"22",color:C.gold,border:`1px solid ${C.gold}44`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0}}>🔥 {isEN?"PREDICTION OF THE DAY":"PREDICCIÓN DEL DÍA"}</span>
-        <span style={{color:"#fff",fontWeight:700,fontSize:12,flex:1}}>{isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}</span>
+        <span style={{background:C.gold+"22",color:C.gold,border:`1px solid ${C.gold}44`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0,whiteSpace:"nowrap"}}>🔥 {isEN?"PREDICTION OF THE DAY":"PREDICCIÓN DEL DÍA"}</span>
+        <span className="nexo-prediction-text" style={{color:"#fff",fontWeight:700,fontSize:12,flex:1,minWidth:0}}>{isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}</span>
         <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
           <button onClick={()=>vote("up")} style={{background:voted==="up"?`${C.bull}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="up"?C.bull:C.glassBorder}`,borderRadius:8,padding:"4px 12px",color:voted==="up"?C.bull:C.muted,cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▲ {isEN?"Up":"Sube"} {voted&&`(${Math.round(votes.up/total*100)}%)`}</button>
           <button onClick={()=>vote("down")} style={{background:voted==="down"?`${C.bear}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="down"?C.bear:C.glassBorder}`,borderRadius:8,padding:"4px 12px",color:voted==="down"?C.bear:C.muted,cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▼ {isEN?"Down":"Baja"} {voted&&`(${100-Math.round(votes.up/total*100)}%)`}</button>
@@ -19617,6 +19617,17 @@ export default function App(){
         /* ── GENERAL: contenido no se sale de pantalla; scroll containers son excepción ── */
         * { max-width: 100% !important; box-sizing: border-box !important; }
         img, video { height: auto !important; }
+
+        /* ── AdSense: no dejar espacio vacío si el ad no carga ── */
+        .adsbygoogle { min-height: 0 !important; }
+        ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+
+        /* ── PostCard text no desborda ── */
+        .nexo-action-row { flex-wrap: wrap !important; gap: 0 !important; overflow: hidden !important; }
+        .nexo-action-row button { padding: 4px 7px !important; font-size: 11px !important; }
+
+        /* ── Prediction banner texto ── */
+        .nexo-prediction-text { font-size: 13px !important; white-space: normal !important; }
 
         /* ── SCROLL HORIZONTAL — inner div puede ser más ancho que la pantalla ── */
         .nexo-scroll-x { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; }
