@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 11:57:46
+// NEXO TRADE — build: 2026-06-02 12:16:56
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -2997,18 +2997,40 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
 
 // ── GIF PICKER — fallback GIFs cuando la API no está disponible ──────────────
 const GIF_CLIENT_FALLBACK = [
-  {id:"cf1", title:"To the moon 🚀",   preview:"https://media.giphy.com/media/3oEjHFOscgNwdYnpxm/giphy.gif", full:"https://media.giphy.com/media/3oEjHFOscgNwdYnpxm/giphy.gif", src:"fallback"},
-  {id:"cf2", title:"Bull market 📈",   preview:"https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",  full:"https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",  src:"fallback"},
-  {id:"cf3", title:"Money rain 💸",    preview:"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif", full:"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif", src:"fallback"},
-  {id:"cf4", title:"Bear market 📉",   preview:"https://media.giphy.com/media/l0MYB9P2lWRCyMJTW/giphy.gif",  full:"https://media.giphy.com/media/l0MYB9P2lWRCyMJTW/giphy.gif",  src:"fallback"},
-  {id:"cf5", title:"Diamond hands 💎", preview:"https://media.giphy.com/media/h7kbFBm0vAajWfDKqR/giphy.gif", full:"https://media.giphy.com/media/h7kbFBm0vAajWfDKqR/giphy.gif", src:"fallback"},
-  {id:"cf6", title:"Stonks 📊",        preview:"https://media.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif", full:"https://media.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif", src:"fallback"},
-  {id:"cf7", title:"Crypto moon 🌙",   preview:"https://media.giphy.com/media/WraEeHVZcIGRuNPgaE/giphy.gif", full:"https://media.giphy.com/media/WraEeHVZcIGRuNPgaE/giphy.gif", src:"fallback"},
-  {id:"cf8", title:"Celebrate 🎉",     preview:"https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif",  full:"https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif",  src:"fallback"},
-  {id:"cf9", title:"Rocket 🚀",        preview:"https://media.giphy.com/media/xT0xeuOy2Fcl9vDGiA/giphy.gif", full:"https://media.giphy.com/media/xT0xeuOy2Fcl9vDGiA/giphy.gif", src:"fallback"},
-  {id:"cf10",title:"HODL 💪",          preview:"https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",  full:"https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",  src:"fallback"},
-  {id:"cf11",title:"Wait and see 👀",  preview:"https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif",  full:"https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif",  src:"fallback"},
-  {id:"cf12",title:"Panic sell 😱",    preview:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",   full:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",   src:"fallback"},
+  // Trading clásicos
+  {id:"cf1", title:"To the moon 🚀",      preview:"https://media.giphy.com/media/3oEjHFOscgNwdYnpxm/giphy.gif",  full:"https://media.giphy.com/media/3oEjHFOscgNwdYnpxm/giphy.gif",  src:"fallback"},
+  {id:"cf2", title:"Bull market 📈",      preview:"https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",   full:"https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",   src:"fallback"},
+  {id:"cf3", title:"Money rain 💸",       preview:"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif",  full:"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif",  src:"fallback"},
+  {id:"cf4", title:"Bear market 📉",      preview:"https://media.giphy.com/media/l0MYB9P2lWRCyMJTW/giphy.gif",   full:"https://media.giphy.com/media/l0MYB9P2lWRCyMJTW/giphy.gif",   src:"fallback"},
+  {id:"cf5", title:"Diamond hands 💎",    preview:"https://media.giphy.com/media/h7kbFBm0vAajWfDKqR/giphy.gif",  full:"https://media.giphy.com/media/h7kbFBm0vAajWfDKqR/giphy.gif",  src:"fallback"},
+  {id:"cf6", title:"Stonks 📊",           preview:"https://media.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif",  full:"https://media.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif",  src:"fallback"},
+  {id:"cf7", title:"Crypto moon 🌙",      preview:"https://media.giphy.com/media/WraEeHVZcIGRuNPgaE/giphy.gif",  full:"https://media.giphy.com/media/WraEeHVZcIGRuNPgaE/giphy.gif",  src:"fallback"},
+  {id:"cf8", title:"Celebrate 🎉",        preview:"https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif",   full:"https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif",   src:"fallback"},
+  {id:"cf9", title:"Rocket 🚀",           preview:"https://media.giphy.com/media/xT0xeuOy2Fcl9vDGiA/giphy.gif",  full:"https://media.giphy.com/media/xT0xeuOy2Fcl9vDGiA/giphy.gif",  src:"fallback"},
+  {id:"cf10",title:"HODL 💪",             preview:"https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",   full:"https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",   src:"fallback"},
+  {id:"cf11",title:"Wait and see 👀",     preview:"https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif",   full:"https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif",   src:"fallback"},
+  {id:"cf12",title:"Panic sell 😱",       preview:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",    full:"https://media.giphy.com/media/26ufcVAp3AiJJsrIs/giphy.gif",    src:"fallback"},
+  // Reacciones
+  {id:"cf13",title:"Mind blown 🤯",       preview:"https://media.giphy.com/media/xT0BKqB6N9cDZpLvNS/giphy.gif",  full:"https://media.giphy.com/media/xT0BKqB6N9cDZpLvNS/giphy.gif",  src:"fallback"},
+  {id:"cf14",title:"Thumbs up 👍",        preview:"https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif",  full:"https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif",  src:"fallback"},
+  {id:"cf15",title:"Facepalm 🤦",         preview:"https://media.giphy.com/media/14aUvmkMiljsqQ/giphy.gif",      full:"https://media.giphy.com/media/14aUvmkMiljsqQ/giphy.gif",      src:"fallback"},
+  {id:"cf16",title:"Deal with it 😎",     preview:"https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif",      full:"https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif",      src:"fallback"},
+  {id:"cf17",title:"Not bad 👌",          preview:"https://media.giphy.com/media/3oz8xAFtqoOUUrsh7W/giphy.gif",  full:"https://media.giphy.com/media/3oz8xAFtqoOUUrsh7W/giphy.gif",  src:"fallback"},
+  {id:"cf18",title:"Seriously? 🙄",       preview:"https://media.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif",  full:"https://media.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif",  src:"fallback"},
+  // Dinero y éxito
+  {id:"cf19",title:"Money bags 💰",       preview:"https://media.giphy.com/media/kFgzrTt798d2w/giphy.gif",       full:"https://media.giphy.com/media/kFgzrTt798d2w/giphy.gif",       src:"fallback"},
+  {id:"cf20",title:"Wolf of WallSt 🐺",   preview:"https://media.giphy.com/media/l2JhtKtDWYNKdRpoA/giphy.gif",  full:"https://media.giphy.com/media/l2JhtKtDWYNKdRpoA/giphy.gif",  src:"fallback"},
+  {id:"cf21",title:"Rich vibes 🤑",       preview:"https://media.giphy.com/media/l46CsysSZ38x6TGUK/giphy.gif",  full:"https://media.giphy.com/media/l46CsysSZ38x6TGUK/giphy.gif",  src:"fallback"},
+  {id:"cf22",title:"Winning 🏆",          preview:"https://media.giphy.com/media/26tPghhyGQNKEznFm/giphy.gif",  full:"https://media.giphy.com/media/26tPghhyGQNKEznFm/giphy.gif",  src:"fallback"},
+  // Emociones
+  {id:"cf23",title:"Let's go! ⚡",        preview:"https://media.giphy.com/media/5zkMiPBovAi42Y9Bgi/giphy.gif", full:"https://media.giphy.com/media/5zkMiPBovAi42Y9Bgi/giphy.gif", src:"fallback"},
+  {id:"cf24",title:"Clapping 👏",         preview:"https://media.giphy.com/media/artj92V8o75tu/giphy.gif",      full:"https://media.giphy.com/media/artj92V8o75tu/giphy.gif",      src:"fallback"},
+  {id:"cf25",title:"Dancing 🕺",          preview:"https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif",     full:"https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif",     src:"fallback"},
+  {id:"cf26",title:"Crying 😭",           preview:"https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif",     full:"https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif",     src:"fallback"},
+  {id:"cf27",title:"Fire 🔥",             preview:"https://media.giphy.com/media/3oEjI6a6UfRlzS3fGU/giphy.gif",full:"https://media.giphy.com/media/3oEjI6a6UfRlzS3fGU/giphy.gif",src:"fallback"},
+  {id:"cf28",title:"Laughing 😂",         preview:"https://media.giphy.com/media/l3vRhoxLFMdXAImhW/giphy.gif", full:"https://media.giphy.com/media/l3vRhoxLFMdXAImhW/giphy.gif", src:"fallback"},
+  {id:"cf29",title:"Big brain 🧠",        preview:"https://media.giphy.com/media/d3mlE7uhX8KFgEmY/giphy.gif",  full:"https://media.giphy.com/media/d3mlE7uhX8KFgEmY/giphy.gif",  src:"fallback"},
+  {id:"cf30",title:"Bye bye 👋",          preview:"https://media.giphy.com/media/m9eG1qVjvN56H0MXt8/giphy.gif",full:"https://media.giphy.com/media/m9eG1qVjvN56H0MXt8/giphy.gif",src:"fallback"},
 ];
 
 // ── MEDIA PICKER — GIFs + Emojis + Stickers + Reacciones ────────────────────
