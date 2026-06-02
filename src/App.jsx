@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 11:43:57
+// NEXO TRADE — build: 2026-06-02 11:53:48
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -18820,6 +18820,15 @@ export default function App(){
 
   // ── Guardar página actual en localStorage (restaura al refrescar) ────────
   useEffect(()=>{ try{ localStorage.setItem("nexo_page", String(page)); }catch{} },[page]);
+
+  // ── Vercel Analytics ─────────────────────────────────────────────────────
+  useEffect(()=>{
+    if(document.querySelector('script[src="/_vercel/insights/script.js"]')) return;
+    const s = document.createElement('script');
+    s.src = '/_vercel/insights/script.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  },[]);
 
   // ── Fetch contador real de comunidad desde Supabase ─────────────────────
   useEffect(()=>{
