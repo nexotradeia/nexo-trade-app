@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 04:51:34
+// NEXO TRADE — build: 2026-06-02 04:55:54
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -10499,16 +10499,14 @@ function FlowPage({isPremium,onNeedPremium}){
   const [expandedId,setExpandedId]=useState(null);
   // ── Telegram Alert Config ──
   const [tgConfig,setTgConfig]=useState(()=>{
+    const DEFAULTS={enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true,_v:3};
     try{
       const saved=JSON.parse(localStorage.getItem("nexo-tg-config")||"null");
-      // Subir minPrem a $50M si tenía valores viejos bajos
-      if(saved&&saved.minPrem<=2e7) saved.minPrem=5e7;
-      // Agregar nuevos filtros con defaults si no existen
-      if(saved&&saved.aboveSMA200===undefined) saved.aboveSMA200=true;
-      if(saved&&saved.highVol===undefined) saved.highVol=true;
-      return saved||{enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true};
+      // Si no tiene versión 3, descartar config vieja y usar nuevos defaults
+      if(!saved||!saved._v||saved._v<3) return DEFAULTS;
+      return saved;
     }
-    catch{ return {enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true}; }
+    catch{ return DEFAULTS; }
   });
   const [showTgPanel,setShowTgPanel]=useState(false);
   useEffect(()=>{ try{localStorage.setItem("nexo-tg-config",JSON.stringify(tgConfig));}catch{} },[tgConfig]);
