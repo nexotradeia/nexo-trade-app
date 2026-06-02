@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 18:42:09
+// NEXO TRADE — build: 2026-06-02 18:47:19
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1867,21 +1867,39 @@ function AuthModal({mode,onClose,onAuth,lang}){
           bio: lang==="en"?"New on NexoTrade 🚀":"Nuevo en NexoTrade 🚀"
         }, true);
       }else{
-        const loginTimeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),12000));
+        // ── INTENTO SUPABASE con timeout de 8s ────────────────────────────
+        const loginTimeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),8000));
         const loginResult = await Promise.race([supabase.auth.signInWithPassword({email,password:pass}),loginTimeout]).catch(e=>{
           if(e.message==="timeout") return {data:null,error:{message:"timeout"}};
           return {data:null,error:e};
         });
         const {data,error:err}=loginResult;
         if(err){
-          if(err.message==="timeout"){setError("Tiempo de espera agotado. Verifica tu conexión e inténtalo de nuevo.");setLoading(false);return;}
+          if(err.message==="timeout"){
+            // ── FALLBACK: intentar login desde caché local ─────────────
+            const cacheKey = "ntcache_"+btoa(email.toLowerCase().trim()).replace(/=/g,"");
+            let cached = null;
+            try{ cached = JSON.parse(localStorage.getItem(cacheKey)||"null"); }catch(_){}
+            if(cached && cached.pwHash){
+              // Verificar password con hash simple
+              const pwCheck = btoa(pass+"|nexotrade").slice(0,24);
+              if(cached.pwHash===pwCheck){
+                onAuth({...cached.profile, _offline:true});
+                onClose();
+                setLoading(false);
+                return;
+              }
+            }
+            setError("Servidor no disponible. Si ya tenías cuenta, intenta de nuevo en unos minutos.");
+            setLoading(false);return;
+          }
           setError(err.message==="Invalid login credentials"?"Email o contraseña incorrectos":err.message);setLoading(false);return;
         }
         if(!data?.user){setError("Error al iniciar sesión. Inténtalo de nuevo.");setLoading(false);return;}
         // Cargar perfil de la BD
         const {data:profile}=await supabase.from("profiles").select("*").eq("id",data.user.id).single();
         const uname = profile?.username || data.user.user_metadata?.username || email.split("@")[0];
-        onAuth({
+        const userObj = {
           id:data.user.id,
           email:data.user.email,
           name:uname,
@@ -1895,7 +1913,14 @@ function AuthModal({mode,onClose,onAuth,lang}){
           badges:profile?.badges||["early"],
           bio:profile?.bio||"",
           is_premium:profile?.is_premium||false,
-        });
+        };
+        // ── Guardar caché local para fallback offline ──────────────────
+        try{
+          const cacheKey = "ntcache_"+btoa(email.toLowerCase().trim()).replace(/=/g,"");
+          const pwHash = btoa(pass+"|nexotrade").slice(0,24);
+          localStorage.setItem(cacheKey, JSON.stringify({pwHash, profile:userObj, savedAt:Date.now()}));
+        }catch(_){}
+        onAuth(userObj);
       }
       onClose();
     }catch(e){
@@ -1958,6 +1983,15 @@ function AuthModal({mode,onClose,onAuth,lang}){
         <Btn onClick={submit} style={{width:"100%",padding:"12px",opacity:loading?0.7:1}}>
           {loading?"⏳ Un momento...":(tab==="login"?`${t.login} →`:`${t.join.replace("Únete a ","").replace("Join ","")} →`)}
         </Btn>
+        {tab==="login"&&<button onClick={()=>{
+          const guestId="guest_"+Math.random().toString(36).slice(2,8);
+          const GUEST_AVATARS=[{emoji:"👤",color:"#64748B"},{emoji:"🦁",color:"#F59E0B"},{emoji:"🐺",color:"#8B5CF6"},{emoji:"🦊",color:"#EF4444"},{emoji:"🐯",color:"#F97316"}];
+          const ga=GUEST_AVATARS[Math.floor(Math.random()*GUEST_AVATARS.length)];
+          onAuth({id:guestId,name:"Visitante",username:"visitante_"+guestId.slice(6),emoji:ga.emoji,avatarColor:ga.color,followers:0,following:0,posts:0,points:0,badges:[],bio:"",is_premium:false,_guest:true});
+          onClose();
+        }} style={{width:"100%",marginTop:10,padding:"10px",background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,color:C.muted,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+          Continuar como visitante →
+        </button>}
         {tab==="register"&&<p style={{margin:"14px 0 0",color:C.muted2,fontSize:11,textAlign:"center",lineHeight:1.6}}>
           🎁 Al registrarte recibes <strong style={{color:C.accentText}}>100 puntos de bienvenida</strong> y la insignia <strong>🚀 Early Adopter</strong>
         </p>}
