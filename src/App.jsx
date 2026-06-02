@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 18:22:12
+// NEXO TRADE — build: 2026-06-02 18:39:22
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1867,8 +1867,17 @@ function AuthModal({mode,onClose,onAuth,lang}){
           bio: lang==="en"?"New on NexoTrade 🚀":"Nuevo en NexoTrade 🚀"
         }, true);
       }else{
-        const {data,error:err}=await supabase.auth.signInWithPassword({email,password:pass});
-        if(err){setError(err.message==="Invalid login credentials"?"Email o contraseña incorrectos":err.message);setLoading(false);return;}
+        const loginTimeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),12000));
+        const loginResult = await Promise.race([supabase.auth.signInWithPassword({email,password:pass}),loginTimeout]).catch(e=>{
+          if(e.message==="timeout") return {data:null,error:{message:"timeout"}};
+          return {data:null,error:e};
+        });
+        const {data,error:err}=loginResult;
+        if(err){
+          if(err.message==="timeout"){setError("Tiempo de espera agotado. Verifica tu conexión e inténtalo de nuevo.");setLoading(false);return;}
+          setError(err.message==="Invalid login credentials"?"Email o contraseña incorrectos":err.message);setLoading(false);return;
+        }
+        if(!data?.user){setError("Error al iniciar sesión. Inténtalo de nuevo.");setLoading(false);return;}
         // Cargar perfil de la BD
         const {data:profile}=await supabase.from("profiles").select("*").eq("id",data.user.id).single();
         const uname = profile?.username || data.user.user_metadata?.username || email.split("@")[0];
