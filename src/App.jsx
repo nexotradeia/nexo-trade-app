@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-02 08:32:25
+// NEXO TRADE — build: 2026-06-02 08:42:43
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4189,10 +4189,17 @@ function EarningsPage({lang}){
             ir_url:mock.ir_url||null, yt_url:mock.yt_url||null, emoji:mock.emoji||"📊", sector:mock.sector||"",
           };
         });
-        if(all.length>0){
-          setEarnings(all);
-          setVotes(Object.fromEntries(all.map(e=>[e.ticker,e.bull_pct])));
-          const unknown=[...new Set(all.filter(e=>!MOCK_EARNINGS.find(m=>m.ticker===e.ticker)).map(e=>e.ticker))].slice(0,20);
+        // Deduplicar: un ticker por fecha (Finnhub a veces devuelve duplicados)
+        const _seen=new Set();
+        const deduped=all.filter(e=>{
+          const k=`${e.ticker}|${e.rawDate}`;
+          if(_seen.has(k)) return false;
+          _seen.add(k); return true;
+        });
+        if(deduped.length>0){
+          setEarnings(deduped);
+          setVotes(Object.fromEntries(deduped.map(e=>[e.ticker,e.bull_pct])));
+          const unknown=[...new Set(deduped.filter(e=>!MOCK_EARNINGS.find(m=>m.ticker===e.ticker)).map(e=>e.ticker))].slice(0,20);
           if(unknown.length>0){
             const results=await Promise.allSettled(unknown.map(sym=>fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FINNHUB_KEY}`).then(r=>r.json()).then(d=>({sym,name:d.name||sym})).catch(()=>({sym,name:sym}))));
             const nm={};
@@ -4213,7 +4220,9 @@ function EarningsPage({lang}){
   const allEarnings=earnings.map(e=>({...e,nombre:companyNames[e.ticker]||e.nombre}));
   const earningsByDate=allEarnings.reduce((acc,e)=>{(acc[e.rawDate]=acc[e.rawDate]||[]).push(e);return acc;},{});
   const selDayAll=allEarnings.filter(e=>e.rawDate===selDay);
-  const selFiltered=selDayAll.filter(e=>{
+  // Cuando hay búsqueda activa, buscar en TODOS los dates, no solo el día seleccionado
+  const searchPool=search.trim()?allEarnings:selDayAll;
+  const selFiltered=searchPool.filter(e=>{
     if(horaFilter==="bmo"&&e.horaRaw!=="bmo")return false;
     if(horaFilter==="amc"&&e.horaRaw!=="amc")return false;
     if(search&&!e.ticker.toLowerCase().includes(search.toLowerCase())&&!e.nombre.toLowerCase().includes(search.toLowerCase()))return false;
@@ -4432,7 +4441,7 @@ function EarningsPage({lang}){
                   </div>
                   {/* Hora badge */}
                   <div>
-                    <span style={{background:e.horaRaw==="bmo"?"rgba(0,168,255,0.08)":"rgba(167,139,250,0.1)",color:e.horaRaw==="bmo"?"#00A8FF":"#FCD34D",border:`1px solid ${e.horaRaw==="bmo"?"rgba(0,168,255,0.2)":"rgba(167,139,250,0.25)"}`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>
+                    <span style={{background:e.horaRaw==="bmo"?"rgba(0,168,255,0.12)":"rgba(217,119,6,0.14)",color:e.horaRaw==="bmo"?"#00A8FF":"#D97706",border:`1px solid ${e.horaRaw==="bmo"?"rgba(0,168,255,0.35)":"rgba(217,119,6,0.5)"}`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap"}}>
                       {e.hora}
                     </span>
                   </div>
@@ -17289,7 +17298,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   };
 
   return(
-    <div style={{maxWidth:1380,margin:"0 auto",padding:"0 4px 60px"}}>
+    <div style={{maxWidth:960,margin:"0 auto",padding:"0 12px 60px"}}>
 
       {/* Alert toasts */}
       {alerts.length>0&&(
@@ -17507,17 +17516,17 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             </div>
           )}
           {tab==="options"&&(
-            <div style={{display:"grid",gridTemplateColumns:"70px 1fr 90px 80px 70px 80px 80px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"70px 160px 90px 80px 70px 80px 80px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
               {[["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["iv","IV"],["vol","Vol"],["chg","Chg%"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
           {tab==="intraday"&&(
-            <div style={{display:"grid",gridTemplateColumns:"70px 1fr 95px 78px 62px 68px 120px 100px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"70px 160px 95px 78px 62px 68px 120px 100px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
               {[["s","Ticker"],["n","Nombre"],["p","Price"],["chg","Chg%"],["atr","ATR"],["rvol","RVol"],["pattern","Pattern"],["signal","Signal"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
           {tab==="scalping"&&(
-            <div style={{display:"grid",gridTemplateColumns:"70px 1fr 95px 90px 88px 68px 140px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"70px 160px 95px 90px 88px 68px 140px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
               {[["s","Ticker"],["n","Nombre"],["p","Price"],["spread","Spread"],["trades","Ops/hr"],["tf","TF"],["pattern","Setup"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
@@ -17531,9 +17540,9 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             return(
               <div key={i} style={{display:"grid",
                 gridTemplateColumns:tab==="stocks"?"72px 90px 95px 75px 60px 85px 95px 115px 1fr 68px 80px":
-                  tab==="options"?"70px 1fr 90px 80px 70px 80px 80px 72px":
-                  tab==="intraday"?"70px 1fr 95px 78px 62px 68px 120px 100px 72px":
-                  "70px 1fr 95px 90px 88px 68px 140px 72px",
+                  tab==="options"?"70px 160px 90px 80px 70px 80px 80px 72px":
+                  tab==="intraday"?"70px 160px 95px 78px 62px 68px 120px 100px 72px":
+                  "70px 160px 95px 90px 88px 68px 140px 72px",
                 padding:"9px 14px",borderBottom:`1px solid ${C.border}`,gap:8,
                 transition:"background 0.25s",background:isSelected?"rgba(139,92,246,0.08)":rowBg,
                 cursor:"default",alignItems:"center"}}
