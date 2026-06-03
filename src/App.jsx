@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 17:20:56
+// NEXO TRADE — build: 2026-06-03 17:25:50
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -3027,13 +3027,44 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
     if(!commentText.trim()||postingComment) return;
     setPostingComment(true);
     try{
-      const {data,error}=await supabase.from("post_comments").insert({post_id:post.id,user_id:user.id,text:commentText.trim()}).select().single();
-      if(!error&&data){
-        setComments(prev=>[...prev,{...data,username:user.username}]);
-        setCommentCount(c=>c+1);
-        setCommentText("");
+      // Verificar sesión activa
+      const { data:{ session } } = await supabase.auth.getSession();
+      if(!session){
+        const { data:rd } = await supabase.auth.refreshSession();
+        if(!rd?.session){
+          alert("Sesión expirada. Cierra sesión e inicia de nuevo para comentar.");
+          setPostingComment(false); return;
+        }
       }
-    }catch(e){}
+      // Mostrar comentario optimistamente primero
+      const tempId = "local-c-"+Date.now();
+      const tempComment = {id:tempId, post_id:post.id, user_id:user.id, text:commentText.trim(), created_at:new Date().toISOString(), username:user.username, emoji:user.emoji, avatarColor:user.avatarColor};
+      setComments(prev=>[...prev, tempComment]);
+      setCommentCount(c=>c+1);
+      const savedText = commentText.trim();
+      setCommentText("");
+      // Guardar en Supabase
+      const {data,error}=await supabase.from("post_comments").insert({post_id:post.id,user_id:user.id,text:savedText}).select().single();
+      if(error){
+        console.error("Comment error:", error?.code, error?.message);
+        // Si falla, quitar el temporal pero mantener el texto
+        setComments(prev=>prev.filter(c=>c.id!==tempId));
+        setCommentCount(c=>c-1);
+        setCommentText(savedText);
+        if(error.message?.toLowerCase().includes("confirm")){
+          alert("Tu email no está confirmado. Revisa tu bandeja de entrada y confirma tu cuenta.");
+        } else if(error.code==="42501"||error.message?.toLowerCase().includes("policy")||error.message?.toLowerCase().includes("rls")){
+          alert("Error de permisos (RLS). Cierra sesión, vuelve a entrar e intenta de nuevo.");
+        } else {
+          alert("No se pudo guardar el comentario: " + (error.message||error.code||"error desconocido"));
+        }
+      } else if(data){
+        setComments(prev=>prev.map(c=>c.id===tempId?{...tempComment,...data,username:user.username}:c));
+      }
+    }catch(e){
+      console.error("Comment exception:", e);
+      alert("Error de conexión al comentar. Inténtalo de nuevo.");
+    }
     setPostingComment(false);
   };
   // Convertir id a número de forma segura (soporta "local-123..." y números reales)
