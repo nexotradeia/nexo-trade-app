@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 16:21:44
+// NEXO TRADE — build: 2026-06-03 16:34:51
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -3182,7 +3182,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
               {mentionBox.results.map(sym=>(
                 <div key={sym} onMouseDown={()=>insertMention(sym)}
                   style={{display:"flex",alignItems:"center",gap:10,padding:"7px 12px",cursor:"pointer",transition:"background 0.1s"}}
-                  onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.06)"}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(26,95,173,0.06)"}
                   onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                   <span style={{background:"rgba(0,102,255,0.08)",color:C.accent,borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace"}}>@{sym}</span>
                   <span style={{color:"var(--c-muted)",fontSize:11}}>Mencionar {sym}</span>
@@ -15682,12 +15682,12 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   );
   // vip(value, suffix) → muestra dato si es premium, si no botón
   const vip = (val, suffix="", color=null) => isPremium
-    ? <span style={{fontFamily:"monospace",color:color||(val!=null&&typeof val==="number"&&suffix==="%"?pctColor(val):"#1E293B")}}>{val!=null?Number(val).toFixed(1)+suffix:"—"}</span>
+    ? <span style={{fontFamily:"monospace",color:color||(val!=null&&typeof val==="number"&&suffix==="%"?pctColor(val):"#0F172A")}}>{val!=null?Number(val).toFixed(1)+suffix:"—"}</span>
     : upgBtn;
 
   const TICKER_NAMES_W={AAPL:"Apple",MSFT:"Microsoft",NVDA:"NVIDIA",GOOGL:"Alphabet",AMZN:"Amazon",META:"Meta",TSLA:"Tesla",AMD:"AMD",PLTR:"Palantir",COIN:"Coinbase",NFLX:"Netflix",AVGO:"Broadcom",ORCL:"Oracle",CRM:"Salesforce",NOW:"ServiceNow",DDOG:"Datadog",CRWD:"CrowdStrike",SNOW:"Snowflake",UBER:"Uber",ABNB:"Airbnb",SHOP:"Shopify",MELI:"MercadoLibre",NU:"Nubank",BTC:"Bitcoin",ETH:"Ethereum",SOL:"Solana",SPY:"S&P 500 ETF",QQQ:"Nasdaq ETF",GLD:"Gold ETF",JPM:"JPMorgan",BAC:"Bank of America",GS:"Goldman Sachs",V:"Visa",MA:"Mastercard",PYPL:"PayPal",NBIS:"NeuroBo Pharma",GLW:"Corning",INTC:"Intel",MU:"Micron",QCOM:"Qualcomm",TXN:"Texas Instr.",SMCI:"Super Micro",ARM:"ARM Holdings",RIVN:"Rivian",NIO:"NIO",BABA:"Alibaba",JD:"JD.com",PDD:"PDD Holdings",VALE:"Vale",PBR:"Petrobras",ITUB:"Itaú",BBD:"Bradesco",GGB:"Gerdau"};
-  const nm = (tk,d,m) => <><div style={{fontWeight:900,fontSize:15,fontFamily:"monospace",color:"#F1F5F9",letterSpacing:0.5}}>{tk}</div><div style={{fontSize:10,color:"#64748B",marginTop:1}}>{TICKER_NAMES_W[tk]||tk}</div></>;
-  const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:800,fontSize:15,color:d?.price!=null?"#E2E8F0":"#475569"}}>{fmtPrice(d?.price??null,tk)}</span>;
+  const nm = (tk,d,m) => <><div style={{fontWeight:900,fontSize:15,fontFamily:"monospace",color:"#0F172A",letterSpacing:0.5}}>{tk}</div><div style={{fontSize:10,color:"#64748B",marginTop:1}}>{TICKER_NAMES_W[tk]||tk}</div></>;
+  const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:800,fontSize:15,color:d?.price!=null?"#0F172A":"#94A3B8"}}>{fmtPrice(d?.price??null,tk)}</span>;
   const COLS = {
     market:[
       {h:"Name",           w:150, render:nm},
@@ -15698,10 +15698,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         : <span style={{color:"#475569",fontSize:11}}>—</span>},
       {h:"Day High",       w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#10B981"}}>{fmtPrice(d?.high??null,tk)}</span>},
       {h:"Day Low",        w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#EF4444"}}>{fmtPrice(d?.low??null,tk)}</span>},
-      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{numFmt(m.beta)}</span>},
+      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{numFmt(m.beta)}</span>},
       {h:"Volatility %",   w:110, render:(tk,d,m)=>vip(m.vol,"%")},
-      {h:"Open",           w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#64748B"}}>{fmtPrice(d?.open??null,tk)}</span>},
-      {h:"Prev Close",     w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#64748B"}}>{fmtPrice(d?.prev??null,tk)}</span>},
+      {h:"Open",           w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{fmtPrice(d?.open??null,tk)}</span>},
+      {h:"Prev Close",     w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{fmtPrice(d?.prev??null,tk)}</span>},
     ],
     risk:[
       {h:"Name",           w:150, render:nm},
@@ -15728,7 +15728,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     efficiency:[
       {h:"Name",       w:150, render:nm},
       {h:"Price",      w:110, render:pr},
-      {h:"P/E Ratio",  w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{m.pe!=null?numFmt(m.pe):"—"}</span>},
+      {h:"P/E Ratio",  w:100, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{m.pe!=null?numFmt(m.pe):"—"}</span>},
       {h:"P/B Ratio",  w:100, render:(tk,d,m)=>vip(m.pb,"")},
       {h:"ROE %",      w:90,  render:(tk,d,m)=>vip(m.roe,"%")},
       {h:"ROA %",      w:90,  render:(tk,d,m)=>vip(m.roa,"%")},
@@ -15760,8 +15760,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const cols = COLS[activeView]||COLS.returns;
   const totalW = cols.reduce((s,c)=>s+c.w, 0);
 
-  const thStyle = {fontSize:10,fontWeight:700,color:"#64748B",padding:"10px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid rgba(255,255,255,0.07)",background:"#0F1623",userSelect:"none"};
-  const tdStyle = {padding:"11px 12px",borderBottom:"1px solid rgba(255,255,255,0.05)",verticalAlign:"middle",whiteSpace:"nowrap"};
+  const thStyle = {fontSize:10,fontWeight:700,color:"#1A5FAD",padding:"10px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid #DBEAFE",background:"#EBF3FF",userSelect:"none"};
+  const tdStyle = {padding:"11px 12px",borderBottom:"1px solid #DBEAFE",verticalAlign:"middle",whiteSpace:"nowrap"};
 
   // Export watchlist as CSV
   const exportCSV = () => {
@@ -15812,13 +15812,13 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
             </div>
             {/* Stats pills */}
             <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
-              <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.07)",borderRadius:20,padding:"4px 12px",border:"1px solid rgba(255,255,255,0.1)"}}>
-                <span style={{fontSize:11,color:"#94A3B8"}}>{tickers.length} tickers</span>
+              <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(26,95,173,0.08)",borderRadius:20,padding:"4px 12px",border:"1px solid #C5DEFF"}}>
+                <span style={{fontSize:11,color:"#1A5FAD"}}>{tickers.length} tickers</span>
               </div>
               {lastUpdated&&(
                 <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.07)",borderRadius:20,padding:"4px 12px",border:"1px solid rgba(255,255,255,0.1)"}}>
                   <span style={{width:6,height:6,borderRadius:"50%",background:"#10B981",display:"inline-block",animation:"pulse 2s infinite"}}/>
-                  <span style={{fontSize:11,color:"#94A3B8"}}>Act. {lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
+                  <span style={{fontSize:11,color:"#1A5FAD"}}>Act. {lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
                 </div>
               )}
             </div>
@@ -15899,22 +15899,22 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         <div style={{display:"flex",gap:2,marginTop:16,borderTop:"1px solid rgba(255,255,255,0.07)",paddingTop:14,flexWrap:"wrap"}}>
           {VIEWS.map(v=>(
             <button key={v.id} onClick={()=>setActiveView(v.id)}
-              style={{background:activeView===v.id?"rgba(99,102,241,0.2)":"transparent",border:"none",borderRadius:8,padding:"6px 16px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#818CF8":"#64748B",cursor:"pointer",whiteSpace:"nowrap",borderBottom:activeView===v.id?"2px solid #818CF8":"2px solid transparent",transition:"all 0.15s"}}>
+              style={{background:activeView===v.id?"rgba(26,95,173,0.12)":"transparent",border:"none",borderRadius:8,padding:"6px 16px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#1A5FAD":"#5B8DC7",cursor:"pointer",whiteSpace:"nowrap",borderBottom:activeView===v.id?"2px solid #1A5FAD":"2px solid transparent",transition:"all 0.15s"}}>
               {v.l}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── BODY (dark section) ── */}
-      <div style={{background:"#0A111E",borderRadius:16,padding:"16px 16px 8px",marginTop:12}}>
+      {/* ── BODY (light section) ── */}
+      <div style={{background:"#F4F9FF",borderRadius:16,padding:"16px 16px 8px",marginTop:12,border:"1px solid #DBEAFE"}}>
 
       {/* ── ADD TICKER ── */}
       <div style={{display:"flex",gap:8,padding:"0 4px 12px"}}>
         <input value={input} onChange={e=>setInput(e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,10))}
           onKeyDown={e=>e.key==="Enter"&&addTicker()}
           placeholder="+ Add ticker: AAPL, BTC, NVDA…"
-          style={{width:260,background:"#141C2E",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",color:"#F1F5F9",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
+          style={{width:260,background:"#fff",border:"1px solid #DBEAFE",borderRadius:8,padding:"8px 14px",color:"#0F172A",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
         <button onClick={addTicker} style={{background:"#0047C2",border:"none",borderRadius:8,padding:"8px 18px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>
           + {isEN?"Add":"Agregar"}
         </button>
@@ -15923,20 +15923,20 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
             {addFeedback==="added"?"✅ Agregado":addFeedback==="exists"?"⚠️ Ya existe":"🚫 Lista llena"}
           </span>
         )}
-        <span style={{fontSize:11,color:"#94A3B8",alignSelf:"center",marginLeft:"auto"}}>
+        <span style={{fontSize:11,color:"#5B8DC7",alignSelf:"center",marginLeft:"auto"}}>
           {lastUpdated?"Updated "+lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"Loading…"} · {tickers.length}/30 tickers
         </span>
       </div>
 
       {/* ── TABLE ── */}
       {tickers.length===0?(
-        <div style={{textAlign:"center",padding:"60px 20px",border:"2px dashed rgba(255,255,255,0.1)",borderRadius:16}}>
+        <div style={{textAlign:"center",padding:"60px 20px",border:"2px dashed #DBEAFE",borderRadius:16}}>
           <div style={{fontSize:40,marginBottom:12}}>👁</div>
-          <div style={{fontWeight:700,fontSize:16,color:"#F1F5F9",marginBottom:6}}>{isEN?"Watchlist vacía":"Your watchlist is empty"}</div>
+          <div style={{fontWeight:700,fontSize:16,color:"#0F172A",marginBottom:6}}>{isEN?"Watchlist vacía":"Your watchlist is empty"}</div>
           <div style={{color:"#64748B",fontSize:13}}>Agrega tickers arriba para comenzar</div>
         </div>
       ):(
-        <div style={{overflowX:"auto",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
+        <div style={{overflowX:"auto",border:"1px solid #DBEAFE",borderRadius:12,boxShadow:"0 4px 12px rgba(26,95,173,0.08)"}}>
           <table style={{borderCollapse:"collapse",width:"100%",minWidth:totalW}}>
             <thead>
               <tr>
@@ -15946,13 +15946,13 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                 <th style={{...thStyle,width:60}}>×</th>
               </tr>
               {/* Filter row */}
-              <tr style={{background:"#0F1623"}}>
+              <tr style={{background:"#EBF3FF"}}>
                 {cols.map((c,i)=>(
-                  <td key={i} style={{padding:"4px 12px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
-                    <span style={{fontSize:10,color:"#334155",fontFamily:"monospace"}}>&gt; #</span>
+                  <td key={i} style={{padding:"4px 12px",borderBottom:"1px solid #DBEAFE"}}>
+                    <span style={{fontSize:10,color:"#94A3B8",fontFamily:"monospace"}}>&gt; #</span>
                   </td>
                 ))}
-                <td style={{padding:"4px 12px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}/>
+                <td style={{padding:"4px 12px",borderBottom:"1px solid #DBEAFE"}}/>
               </tr>
             </thead>
             <tbody>
@@ -15960,15 +15960,15 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                 const d = prices[tk];
                 const m = getMock(tk);
                 return(
-                  <tr key={tk} style={{background:rowIdx%2===0?"#141C2E":"#0F1623",transition:"background 0.1s"}}
+                  <tr key={tk} style={{background:rowIdx%2===0?"#F4F9FF":"#EBF3FF",transition:"background 0.1s"}}
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.06)"}
-                    onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#141C2E":"#0F1623"}>
+                    onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#F4F9FF":"#EBF3FF"}>
                     {cols.map((c,i)=>(
                       <td key={i} style={tdStyle}>{c.render(tk,d,m)}</td>
                     ))}
                     <td style={tdStyle}>
                       <button onClick={()=>removeTicker(tk)}
-                        style={{background:"none",border:"none",color:"#CBD5E1",fontSize:16,cursor:"pointer",padding:"2px 6px",borderRadius:4}}
+                        style={{background:"none",border:"none",color:"#94A3B8",fontSize:16,cursor:"pointer",padding:"2px 6px",borderRadius:4}}
                         onMouseEnter={e=>e.currentTarget.style.color="#EF4444"}
                         onMouseLeave={e=>e.currentTarget.style.color="#CBD5E1"}>×</button>
                     </td>
@@ -15980,7 +15980,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </div>
       )}
 
-      <div style={{fontSize:11,color:"#475569",textAlign:"center",padding:"12px 0"}}>
+      <div style={{fontSize:11,color:"#5B8DC7",textAlign:"center",padding:"12px 0"}}>
         Precios: Finnhub · Delay ~15s · No es consejo financiero
       </div>
       </div>{/* end dark body */}
