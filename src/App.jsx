@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 18:13:40
+// NEXO TRADE — build: 2026-06-03 18:28:25
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -940,7 +940,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
           </div>
 
           {/* Soporte */}
-          <a href="mailto:mariagalarraga2013@gmail.com?subject=Soporte NexoTrade"
+          <a href="mailto:info@nexotradeia.com?subject=Soporte NexoTrade"
             style={{display:"flex",alignItems:"center",gap:10,background:"#0f172a",borderRadius:14,padding:"14px 18px",border:"1px solid #334155",color:"#94a3b8",fontSize:13,fontWeight:600,textDecoration:"none",marginBottom:4}}>
             <span style={{fontSize:18}}>📧</span>
             <span>Contactar soporte</span>
@@ -6036,7 +6036,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             {icon:"🔒",title:"Pago seguro",desc:"SSL + Stripe",   href:"https://stripe.com/es/payments/payment-links",tip:"Pagos 100% seguros con Stripe"},
             {icon:"↩️",title:"Cancela ya", desc:"Sin permanencia",href:STRIPE_PAYMENT_LINK,tip:"Cancela cuando quieras"},
             {icon:"📧",title:"Alertas email",desc:"Instantáneas", href:null, action:"alerts", tip:"Configura tus alertas"},
-            {icon:"🛟",title:"Soporte 24/7",desc:"Respuesta en 2h",href:"mailto:mariagalarraga2013@gmail.com?subject=Soporte NexoTrade",tip:"Escríbenos"},
+            {icon:"🛟",title:"Soporte 24/7",desc:"Respuesta en 2h",href:"mailto:info@nexotradeia.com?subject=Soporte NexoTrade",tip:"Escríbenos"},
           ].map(b=>(
             <div key={b.title}
               onClick={()=>{ if(b.action==="alerts"){setAlerts(true);} else if(b.href){window.open(b.href,"_blank");} }}
@@ -7796,7 +7796,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"Terms of Use":"Términos de Uso",   page:31},
         {label: isEN?"Privacy Policy":"Privacidad",      page:32},
         {label: isEN?"Risk Disclaimer":"Aviso de Riesgo",page:33},
-        {label: isEN?"Contact":"Contacto",               href:"mailto:mgtproia@gmail.com"},
+        {label: isEN?"Contact":"Contacto",               href:"mailto:info@nexotradeia.com"},
       ]
     },
   ];
@@ -9800,7 +9800,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
             <span key={t} style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:20,padding:"5px 14px",fontSize:12,color:"#FCD34D",fontWeight:600}}>{t}</span>
           ))}
         </div>
-        <a href="mailto:mgtproia@gmail.com?subject=Quiero saber cuando salgan los cursos de NexoTrade"
+        <a href="mailto:info@nexotradeia.com?subject=Quiero saber cuando salgan los cursos de NexoTrade"
           style={{display:"inline-block",background:"linear-gradient(135deg,#D97706,#B45309)",borderRadius:12,padding:"12px 28px",color:"#fff",fontSize:14,fontWeight:700,textDecoration:"none"}}>
           📬 Notifícame cuando estén listos
         </a>
@@ -9853,7 +9853,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
         <div style={{fontSize:36,marginBottom:10}}>🎓</div>
         <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Quieres enseñar en NexoTrade?</h3>
         <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Si eres trader con experiencia, escríbenos. Tú enseñas, nosotros ponemos la plataforma y los alumnos.</p>
-        <a href="mailto:mgtproia@gmail.com?subject=Quiero ser instructor en NexoTrade" style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#0047C2)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>Ser instructor →</a>
+        <a href="mailto:info@nexotradeia.com?subject=Quiero ser instructor en NexoTrade" style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#0047C2)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>Ser instructor →</a>
       </div>
     </div>
   );
@@ -10025,7 +10025,7 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
         <div style={{fontSize:36,marginBottom:10}}>📬</div>
         <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Quieres webinars propios de NexoTrade?</h3>
         <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Estamos organizando sesiones en vivo con traders reales. Déjanos tu correo para ser el primero en enterarte.</p>
-        <a href="mailto:mgtproia@gmail.com?subject=Quiero saber de los webinars de NexoTrade"
+        <a href="mailto:info@nexotradeia.com?subject=Quiero saber de los webinars de NexoTrade"
           style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#0047C2)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>
           📬 Notifícame →
         </a>
@@ -18942,7 +18942,7 @@ function AboutPage({onBack, lang}){
       </LegalSection>
       <LegalSection title={isEN?"Contact":"Contacto"}>
         <p>{isEN?"For inquiries, partnerships, or support:":"Para consultas, colaboraciones o soporte:"}</p>
-        <p>📧 <a href="mailto:mgtproia@gmail.com" style={{color:C.accent}}>mgtproia@gmail.com</a></p>
+        <p>📧 <a href="mailto:info@nexotradeia.com" style={{color:C.accent}}>info@nexotradeia.com</a></p>
         <p>🌐 <a href="https://nexotradeia.com" style={{color:C.accent}}>nexotradeia.com</a></p>
       </LegalSection>
     </LegalPage>
@@ -19029,8 +19029,8 @@ function PrivacyPage({onBack, lang}){
       </LegalSection>
       <LegalSection title={isEN?"Your Rights":"Tus Derechos"}>
         <p>{isEN
-          ?"You have the right to: access your data, correct inaccuracies, request deletion, and export your content. Contact us at mgtproia@gmail.com to exercise these rights."
-          :"Tienes derecho a: acceder a tus datos, corregir inexactitudes, solicitar eliminación y exportar tu contenido. Contáctanos en mgtproia@gmail.com para ejercer estos derechos."
+          ?"You have the right to: access your data, correct inaccuracies, request deletion, and export your content. Contact us at info@nexotradeia.com to exercise these rights."
+          :"Tienes derecho a: acceder a tus datos, corregir inexactitudes, solicitar eliminación y exportar tu contenido. Contáctanos en info@nexotradeia.com para ejercer estos derechos."
         }</p>
       </LegalSection>
       <LegalSection title={isEN?"Cookies":"Cookies"}>
@@ -19139,7 +19139,7 @@ function GuidelinesPage({onBack, lang}){
         <p style={{margin:0,fontSize:13,color:"var(--c-muted)"}}>{isEN
           ?"Violations may result in content removal, temporary suspension, or permanent ban. For questions or to report violations: "
           :"Las infracciones pueden resultar en eliminación de contenido, suspensión temporal o ban permanente. Para preguntas o para reportar infracciones: "
-        }<a href="mailto:mgtproia@gmail.com" style={{color:C.accent}}>mgtproia@gmail.com</a></p>
+        }<a href="mailto:info@nexotradeia.com" style={{color:C.accent}}>info@nexotradeia.com</a></p>
       </div>
     </LegalPage>
   );
