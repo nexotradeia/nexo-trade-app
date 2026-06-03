@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 14:12:25
+// NEXO TRADE — build: 2026-06-03 14:21:16
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -6289,50 +6289,50 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     <div style={{position:"sticky",top:96,display:"flex",flexDirection:"column",gap:10}}>
 
       {/* ── PROFILE CARD ── */}
-      <div style={{borderRadius:18,overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.18)",border:"1px solid rgba(139,92,246,0.18)"}}>
+      <div style={{borderRadius:18,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,0.08)",border:"1px solid rgba(0,0,0,0.07)"}}>
 
-        {/* ── COVER — dark premium ── */}
+        {/* ── COVER — azul elegante ── */}
         {(()=>{
           const ac = user?.avatarColor || "#F59E0B";
           const ac2 = ac==="rgba(0,102,255,0.09)"?"#F59E0B":ac;
           return(
-          <div style={{height:96,background:`linear-gradient(135deg,#0a0818 0%,#100c2a 50%,#0d1528 100%)`,position:"relative",overflow:"hidden"}}>
-            {/* Animated glow orbs basados en el color del avatar */}
-            <div style={{position:"absolute",top:-28,right:-18,width:130,height:130,borderRadius:"50%",background:`radial-gradient(circle,${ac2}55,transparent 68%)`,pointerEvents:"none",animation:"nexo-pulse 3s ease-in-out infinite"}}/>
-            <div style={{position:"absolute",bottom:-24,left:20,width:90,height:90,borderRadius:"50%",background:`radial-gradient(circle,${ac2}33,transparent 68%)`,pointerEvents:"none"}}/>
+          <div style={{height:96,background:`linear-gradient(135deg,#0055DD 0%,#0066FF 60%,#3385FF 100%)`,position:"relative",overflow:"hidden"}}>
+            {/* Subtle orb highlight */}
+            <div style={{position:"absolute",top:-28,right:-18,width:130,height:130,borderRadius:"50%",background:`radial-gradient(circle,rgba(255,255,255,0.18),transparent 68%)`,pointerEvents:"none"}}/>
+            <div style={{position:"absolute",bottom:-24,left:20,width:90,height:90,borderRadius:"50%",background:`radial-gradient(circle,rgba(255,255,255,0.10),transparent 68%)`,pointerEvents:"none"}}/>
             {/* Grid de puntos decorativos */}
-            <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.12,pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
+            <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.15,pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
               {[0,24,48,72,96,120,144,168,192,216,240].map(x=>
                 [0,16,32,48,64,80,96].map(y=>
-                  <circle key={`${x}-${y}`} cx={x} cy={y} r="1.2" fill={ac2}/>
+                  <circle key={`${x}-${y}`} cx={x} cy={y} r="1.2" fill="white"/>
                 )
               )}
             </svg>
-            {/* Chart SVG más pronunciado */}
-            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.35,pointerEvents:"none"}} height="48" viewBox="0 0 240 48" preserveAspectRatio="none">
+            {/* Chart SVG */}
+            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.3,pointerEvents:"none"}} height="48" viewBox="0 0 240 48" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="coverChartGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={ac2} stopOpacity="0.4"/>
-                  <stop offset="100%" stopColor={ac2} stopOpacity="0"/>
+                  <stop offset="0%" stopColor="white" stopOpacity="0.5"/>
+                  <stop offset="100%" stopColor="white" stopOpacity="0"/>
                 </linearGradient>
               </defs>
               <polygon points="0,48 0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10 240,48" fill="url(#coverChartGrad)"/>
-              <polyline points="0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10" fill="none" stroke={ac2} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             {/* Avatar — clickable to change */}
             <div style={{position:"absolute",bottom:-24,left:14}}>
               {user
                 ? <div onClick={()=>setShowAvatarPicker(v=>!v)} title={lang==="en"?"Change avatar":"Cambiar avatar"}
-                    style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid rgba(255,255,255,0.18)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:`0 4px 18px ${ac2}55`,cursor:"pointer",position:"relative"}}>
+                    style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:"0 2px 12px rgba(0,0,0,0.15)",cursor:"pointer",position:"relative"}}>
                     {user.emoji}
-                    <span style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,background:"#F59E0B",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #0f0c1d"}}>✎</span>
+                    <span style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,background:"#0066FF",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #fff",color:"#fff"}}>✎</span>
                   </div>
-                : <div style={{width:52,height:52,borderRadius:15,background:"rgba(139,92,246,0.2)",border:"2px solid rgba(139,92,246,0.35)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:23}}>👤</div>
+                : <div style={{width:52,height:52,borderRadius:15,background:"rgba(0,102,255,0.15)",border:"2px solid rgba(0,102,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:23}}>👤</div>
               }
             </div>
             {/* Level badge top-right */}
             {user && lvl && (
-              <div style={{position:"absolute",top:10,right:10,background:"rgba(0,0,0,0.55)",backdropFilter:"blur(10px)",border:`1px solid ${ac2}55`,borderRadius:20,padding:"3px 9px",fontSize:10,fontWeight:700,color:ac2,display:"flex",alignItems:"center",gap:4,boxShadow:`0 0 10px ${ac2}22`}}>
+              <div style={{position:"absolute",top:10,right:10,background:"rgba(255,255,255,0.2)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.35)",borderRadius:20,padding:"3px 9px",fontSize:10,fontWeight:600,color:"#fff",display:"flex",alignItems:"center",gap:4}}>
                 {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
               </div>
             )}
@@ -6341,7 +6341,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
         })()}
 
         {/* ── BODY ── */}
-        <div style={{background:"#0f0c1d",padding:"28px 14px 14px"}}>
+        <div style={{background:"#fff",padding:"28px 14px 14px"}}>
           {user ? <>
             {/* Nombre + @handle — editable */}
             <div style={{marginBottom:12}}>
@@ -6360,7 +6360,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                       }}
                       autoFocus
                       placeholder="nuevo_username"
-                      style={{flex:1,background:"rgba(139,92,246,0.12)",border:`1.5px solid ${nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#00e58f":"rgba(139,92,246,0.5)"}`,borderRadius:8,padding:"5px 9px",color:"#F1F5F9",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
+                      style={{flex:1,background:"rgba(0,102,255,0.06)",border:`1.5px solid ${nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#16A34A":"rgba(0,102,255,0.3)"}`,borderRadius:8,padding:"5px 9px",color:"#0F172A",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
                     />
                     <button onClick={async()=>{
                       const newName=editName.trim();
@@ -6400,16 +6400,16 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                   </div>
                   <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);setNameStatus(null);}}
                     title={lang==="en"?"Edit username":"Editar username"}
-                    style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:6,padding:"3px 6px",color:"rgba(139,92,246,0.7)",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>
+                    style={{background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"3px 6px",color:"#0066FF",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>
                 </div>
               )}
-              <div style={{fontSize:11,color:"rgba(139,92,246,0.7)",fontWeight:600,marginTop:2}}>
+              <div style={{fontSize:11,color:"#0066FF",fontWeight:600,marginTop:2}}>
                 @{(user.username||user.name||"trader").toLowerCase().replace(/[\s@.]/g,"").slice(0,20)}
               </div>
             </div>
 
-            {/* Stats — 3 columnas dark */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr 1px 1fr",background:"rgba(255,255,255,0.04)",borderRadius:10,overflow:"hidden",border:"1px solid rgba(255,255,255,0.07)",marginBottom:12}}>
+            {/* Stats — 3 columnas */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr 1px 1fr",background:"#F8FAFF",borderRadius:10,overflow:"hidden",border:"1px solid rgba(0,0,0,0.07)",marginBottom:12}}>
               {[
                 {v:user.followers||0, l:lang==="en"?"Followers":"Seguidores"},
                 null,
@@ -6417,29 +6417,29 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 null,
                 {v:user.points||0,   l:lang==="en"?"Points":"Puntos"},
               ].map((item,i)=> item===null
-                ? <div key={i} style={{background:"rgba(255,255,255,0.06)"}}/>
+                ? <div key={i} style={{background:"rgba(0,0,0,0.06)"}}/>
                 : <div key={i} style={{padding:"9px 4px",textAlign:"center"}}>
-                    <div style={{fontWeight:800,fontSize:15,color:"#F1F5F9",letterSpacing:-0.5}}>{item.v}</div>
-                    <div style={{fontSize:9,color:"rgba(148,163,184,0.7)",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
+                    <div style={{fontWeight:700,fontSize:15,color:i===4?"#0066FF":"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
+                    <div style={{fontSize:9,color:"#9CA3AF",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
                   </div>
               )}
             </div>
 
             {/* Ver perfil button */}
             <button onClick={()=>onProfile&&onProfile(user)}
-              style={{width:"100%",background:"linear-gradient(135deg,rgba(139,92,246,0.2),rgba(99,102,241,0.15))",border:"1px solid rgba(139,92,246,0.35)",borderRadius:10,padding:"8px",color:"#FCD34D",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s",letterSpacing:0.2}}
-              onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(139,92,246,0.32),rgba(99,102,241,0.28))";e.currentTarget.style.borderColor="rgba(139,92,246,0.6)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(139,92,246,0.2),rgba(99,102,241,0.15))";e.currentTarget.style.borderColor="rgba(139,92,246,0.35)";}}>
+              style={{width:"100%",background:"#0066FF",border:"none",borderRadius:10,padding:"9px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s",letterSpacing:0.2}}
+              onMouseEnter={e=>{e.currentTarget.style.background="#0055DD";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="#0066FF";}}>
               {lang==="en"?"View my profile →":"Ver mi perfil →"}
             </button>
           </> : <>
             {/* No logueado */}
-            <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14,marginBottom:4}}>{lang==="en"?"Join NexoTrade!":"¡Únete a NexoTrade!"}</div>
-            <div style={{fontSize:12,color:"rgba(148,163,184,0.7)",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading global investor community 🌎":"La comunidad global de inversores 🌎"}</div>
+            <div style={{fontWeight:700,color:"#0F172A",fontSize:14,marginBottom:4}}>{lang==="en"?"Join NexoTrade!":"¡Únete a NexoTrade!"}</div>
+            <div style={{fontSize:12,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading global investor community 🌎":"La comunidad global de inversores 🌎"}</div>
             <button onClick={onNeedAuth}
-              style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:800,fontSize:13,cursor:"pointer",boxShadow:"0 4px 16px rgba(139,92,246,0.4)",transition:"box-shadow 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.boxShadow="0 6px 22px rgba(139,92,246,0.55)"}
-              onMouseLeave={e=>e.currentTarget.style.boxShadow="0 4px 16px rgba(139,92,246,0.4)"}>
+              style={{width:"100%",background:"#0066FF",color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:700,fontSize:13,cursor:"pointer",transition:"background 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="#0055DD"}
+              onMouseLeave={e=>e.currentTarget.style.background="#0066FF"}>
               {lang==="en"?"Create free account →":"Crear cuenta gratis →"}
             </button>
           </>}
@@ -6448,10 +6448,10 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
 
       {/* ── AVATAR PICKER MODAL ── */}
       {showAvatarPicker && user && (
-        <div style={{background:"#0f0c1d",border:"1px solid rgba(139,92,246,0.3)",borderRadius:16,padding:"14px",boxShadow:"0 8px 32px rgba(0,0,0,0.5)",position:"relative",zIndex:10}}>
+        <div style={{background:"#fff",border:"1px solid rgba(0,0,0,0.08)",borderRadius:16,padding:"14px",boxShadow:"0 4px 20px rgba(0,0,0,0.1)",position:"relative",zIndex:10}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-            <span style={{fontSize:12,fontWeight:700,color:"#FCD34D"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
-            <button onClick={()=>setShowAvatarPicker(false)} style={{background:"none",border:"none",color:"#64748b",fontSize:14,cursor:"pointer"}}>✕</button>
+            <span style={{fontSize:12,fontWeight:700,color:"#0F172A"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
+            <button onClick={()=>setShowAvatarPicker(false)} style={{background:"none",border:"none",color:"#9CA3AF",fontSize:14,cursor:"pointer"}}>✕</button>
           </div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,maxHeight:140,overflowY:"auto"}}>
             {AVATAR_OPTIONS.map(av=>(
@@ -6471,14 +6471,14 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
               </button>
             ))}
           </div>
-          {savingAvatar && <div style={{textAlign:"center",fontSize:11,color:"#FCD34D",marginTop:8}}>Guardando...</div>}
+          {savingAvatar && <div style={{textAlign:"center",fontSize:11,color:"#0066FF",marginTop:8}}>Guardando...</div>}
         </div>
       )}
 
       {/* ── NAVEGACIÓN ── */}
       <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,0.07)",border:"1px solid rgba(0,0,0,0.06)"}}>
         <div style={{padding:"14px 14px 10px"}}>
-          <div style={{fontSize:10,fontWeight:700,color:"#CBD5E1",letterSpacing:1.2,marginBottom:10,paddingLeft:4}}>{isEN?"MENU":"MENÚ"}</div>
+          <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1.2,marginBottom:10,paddingLeft:4}}>{isEN?"MENU":"MENÚ"}</div>
           {navItems.map(({icon,label,idx,vip,premium,ai})=>{
             const isActive = activeNav===idx;
             return(
@@ -6486,20 +6486,20 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 style={{
                   display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,
                   cursor:"pointer",marginBottom:2,transition:"all 0.15s",
-                  background: isActive ? (premium?"linear-gradient(135deg,rgba(217,119,6,0.1),rgba(99,102,241,0.1))":vip?"rgba(14,165,233,0.08)":"rgba(14,165,233,0.08)") : "transparent",
-                  borderLeft: isActive ? `3px solid ${premium?"#D97706":"#0EA5E9"}` : "3px solid transparent",
+                  background: isActive ? (premium?"rgba(217,119,6,0.08)":"rgba(0,102,255,0.07)") : "transparent",
+                  borderLeft: isActive ? `3px solid ${premium?"#D97706":"#0066FF"}` : "3px solid transparent",
                 }}
-                onMouseEnter={e=>{ if(!isActive) e.currentTarget.style.background=premium?"rgba(217,119,6,0.06)":"rgba(14,165,233,0.05)"; }}
+                onMouseEnter={e=>{ if(!isActive) e.currentTarget.style.background=premium?"rgba(217,119,6,0.05)":"rgba(0,102,255,0.05)"; }}
                 onMouseLeave={e=>{ if(!isActive) e.currentTarget.style.background="transparent"; }}>
                 <span style={{fontSize:14,lineHeight:1,width:18,textAlign:"center"}}>{icon}</span>
                 <span style={{
                   fontSize:13,fontWeight:isActive?700:500,
-                  color: premium?"#D97706": isActive?"#0EA5E9":"#334155",
+                  color: premium?"#D97706": isActive?"#0066FF":"#334155",
                   flex:1
                 }}>{label}</span>
-                {premium && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PREMIUM</span>}
-                {vip && !premium && !ai && <span style={{fontSize:9,fontWeight:700,color:"#0EA5E9",background:"rgba(14,165,233,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
-                {ai && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#6366F1,#F59E0B)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>IA</span>}
+                {premium && <span style={{fontSize:9,fontWeight:700,background:"#D97706",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PREMIUM</span>}
+                {vip && !premium && !ai && <span style={{fontSize:9,fontWeight:700,color:"#0066FF",background:"rgba(0,102,255,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
+                {ai && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#0066FF,#F59E0B)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>IA</span>}
               </div>
             );
           })}
@@ -6522,12 +6522,12 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 const isActive=activeNav===idx;
                 return(
                   <div key={label} onClick={()=>{setActiveNav(idx);onNavigate&&onNavigate(idx);}}
-                    style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",borderRadius:9,cursor:"pointer",marginBottom:1,transition:"all 0.15s",background:isActive?"rgba(14,165,233,0.07)":"transparent",borderLeft:isActive?"3px solid #0EA5E9":"3px solid transparent"}}
-                    onMouseEnter={e=>{if(!isActive)e.currentTarget.style.background="rgba(14,165,233,0.04)";}}
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",borderRadius:9,cursor:"pointer",marginBottom:1,transition:"all 0.15s",background:isActive?"rgba(0,102,255,0.07)":"transparent",borderLeft:isActive?"3px solid #0066FF":"3px solid transparent"}}
+                    onMouseEnter={e=>{if(!isActive)e.currentTarget.style.background="rgba(0,102,255,0.04)";}}
                     onMouseLeave={e=>{if(!isActive)e.currentTarget.style.background="transparent";}}>
                     <span style={{fontSize:13,width:18,textAlign:"center"}}>{icon}</span>
-                    <span style={{fontSize:12,fontWeight:isActive?700:400,color:isActive?"#0EA5E9":"var(--c-muted)",flex:1}}>{label}</span>
-                    {vip && <span style={{fontSize:9,fontWeight:700,color:"#0EA5E9",background:"rgba(14,165,233,0.1)",borderRadius:20,padding:"2px 6px"}}>PRO</span>}
+                    <span style={{fontSize:12,fontWeight:isActive?700:400,color:isActive?"#0066FF":"var(--c-muted)",flex:1}}>{label}</span>
+                    {vip && <span style={{fontSize:9,fontWeight:700,color:"#0066FF",background:"rgba(0,102,255,0.1)",borderRadius:20,padding:"2px 6px"}}>PRO</span>}
                   </div>
                 );
               })}
