@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 17:15:14
+// NEXO TRADE — build: 2026-06-03 17:20:56
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1927,6 +1927,11 @@ function AuthModal({mode,onClose,onAuth,lang}){
           else { authErr = e.message; }
         }
         if(authErr){
+          // Detectar email no confirmado antes del fallback
+          if(authErr.toLowerCase().includes("confirm")){
+            setError("__email_not_confirmed__");
+            setLoading(false); return;
+          }
           if(authErr==="timeout"){
             const cacheKey = "ntcache_"+btoa(email.toLowerCase().trim()).replace(/=/g,"");
             let cached = null;
@@ -1936,35 +1941,53 @@ function AuthModal({mode,onClose,onAuth,lang}){
               if(cached.pwHash===pwCheck){ onAuth({...cached.profile,_offline:true}); onClose(); setLoading(false); return; }
             }
             setError("Servidor no disponible. Inténtalo de nuevo en unos minutos.");
-          } else if(authErr.toLowerCase().includes("invalid")||authErr.toLowerCase().includes("credentials")){
-            // Intentar login directo con SDK como fallback
+          } else {
+            // Intentar login directo con SDK como fallback para cualquier error
             try{
               const {data:sd, error:se} = await supabase.auth.signInWithPassword({email:email.trim(),password:pass});
               if(se){
-                setError("Email o contraseña incorrectos");
+                // Mostrar error real de Supabase
+                const rawMsg = se.message || authErr || "Error de acceso";
+                if(rawMsg.toLowerCase().includes("confirm")){
+                  setError("__email_not_confirmed__");
+                } else if(rawMsg.toLowerCase().includes("invalid")||rawMsg.toLowerCase().includes("credentials")||rawMsg.toLowerCase().includes("password")){
+                  setError("Email o contraseña incorrectos. Verifica tus datos.");
+                } else {
+                  setError(rawMsg);
+                }
                 setLoading(false); return;
               }
               authData = { access_token:sd.session?.access_token, refresh_token:sd.session?.refresh_token, user:sd.user };
               authErr = null;
             }catch(_){
-              setError("Email o contraseña incorrectos");
-              setLoading(false); return;
-            }
-          } else {
-            // Intentar login directo con SDK como fallback
-            try{
-              const {data:sd, error:se} = await supabase.auth.signInWithPassword({email:email.trim(),password:pass});
-              if(se){ setError(authErr); setLoading(false); return; }
-              authData = { access_token:sd.session?.access_token, refresh_token:sd.session?.refresh_token, user:sd.user };
-              authErr = null;
-            }catch(_){
-              setError(authErr);
+              setError(authErr||"Error de conexión");
               setLoading(false); return;
             }
           }
           if(authErr){ setLoading(false); return; }
         }
-        if(!authData?.user){ setError("Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return; }
+        if(!authData?.user){
+          // Si es email admin y login falló, intentar signup automático
+          const isAdminAttempt = ['mariangat26@gmail.com','mariagalarraga2013@gmail.com'].includes(email.trim().toLowerCase());
+          if(isAdminAttempt){
+            // Intentar crear la cuenta con los mismos datos
+            const {data:regD, error:regE} = await supabase.auth.signUp({
+              email: email.trim().toLowerCase(),
+              password: pass,
+              options:{ data:{ username:"nexoadmin", avatar_emoji:"🛡️", avatar_color:"#0066FF" } }
+            });
+            if(!regE && regD?.user){
+              // Cuenta creada — necesita confirmación de email
+              setError("__admin_registered__");
+              setLoading(false); return;
+            } else if(regE?.message?.toLowerCase().includes("already")||regE?.message?.toLowerCase().includes("registered")||regE?.status===422){
+              // Cuenta existe — problema de confirmación de email
+              setError("__email_not_confirmed__");
+              setLoading(false); return;
+            }
+          }
+          setError("Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return;
+        }
         // Guardar sesión en supabase para que el cliente la use
         try{ await supabase.auth.setSession({access_token:authData.access_token, refresh_token:authData.refresh_token}); }catch(_){}
         // Cargar perfil con fetch directo también
@@ -2061,7 +2084,38 @@ function AuthModal({mode,onClose,onAuth,lang}){
         <input value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••" type="password"
           onKeyDown={e=>e.key==="Enter"&&submit()}
           style={{...inputSt,marginBottom:error?12:24}}/>
-        {error&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.25)",borderRadius:9,padding:"9px 14px",marginBottom:16,fontSize:12.5,color:C.bear,lineHeight:1.5}}>{error}</div>}
+        {error&&error!=="__email_not_confirmed__"&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.25)",borderRadius:9,padding:"9px 14px",marginBottom:16,fontSize:12.5,color:C.bear,lineHeight:1.5}}>{error}</div>}
+        {error==="__admin_registered__"&&(
+          <div style={{background:"rgba(16,185,129,0.07)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:"14px",marginBottom:16}}>
+            <div style={{fontWeight:800,color:"#059669",marginBottom:6}}>✅ Cuenta admin creada</div>
+            <div style={{fontSize:12,color:"#065F46",lineHeight:1.6,marginBottom:10}}>
+              Te enviamos un email de confirmación a <strong>{email}</strong>.<br/>
+              Haz clic en el link del email y luego vuelve a iniciar sesión con tu contraseña.
+            </div>
+            <div style={{fontSize:11,color:"#6EE7B7"}}>¿No llegó? Revisa la carpeta de spam.</div>
+          </div>
+        )}
+        {error==="__email_not_confirmed__"&&(
+          <div style={{background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:10,padding:"12px 14px",marginBottom:16,fontSize:12.5,lineHeight:1.6}}>
+            <div style={{fontWeight:800,color:"#B45309",marginBottom:6}}>📧 Email no confirmado</div>
+            <div style={{color:"#92400E",marginBottom:10}}>
+              Cuando creaste tu cuenta, Supabase envió un email de verificación a <strong>{email}</strong>. Debes hacer clic en ese link para activar tu cuenta.
+            </div>
+            <button onClick={async()=>{
+              try{
+                await supabase.auth.resend({type:"signup",email:email.trim().toLowerCase()});
+                setError("resent");
+              }catch(e){ alert("No se pudo reenviar. Intenta desde el panel de Supabase."); }
+            }} style={{background:"#B45309",border:"none",borderRadius:8,padding:"7px 14px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer",width:"100%"}}>
+              📨 Reenviar email de confirmación
+            </button>
+          </div>
+        )}
+        {error==="resent"&&(
+          <div style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:16,fontSize:12.5,color:"#059669",lineHeight:1.5}}>
+            ✅ Email reenviado a <strong>{email}</strong>. Revisa tu bandeja de entrada y spam.
+          </div>
+        )}
         <Btn onClick={submit} style={{width:"100%",padding:"12px",opacity:loading?0.7:1}}>
           {loading?"⏳ Un momento...":(tab==="login"?`${t.login} →`:`${t.join.replace("Únete a ","").replace("Join ","")} →`)}
         </Btn>
