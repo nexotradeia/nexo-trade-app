@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 19:12:45
+// NEXO TRADE — build: 2026-06-03 19:40:14
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -6155,6 +6155,24 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             </div>
           ))}
         </div>
+
+        {/* SmartCredit afiliado */}
+        <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
+          style={{display:"flex",alignItems:"center",gap:16,background:"linear-gradient(135deg,rgba(0,102,255,0.08),rgba(16,185,129,0.05))",border:"1.5px solid rgba(0,102,255,0.22)",borderRadius:16,padding:"18px 22px",marginTop:20,textDecoration:"none",transition:"all 0.18s"}}
+          onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.14),rgba(16,185,129,0.09))";e.currentTarget.style.borderColor="rgba(0,102,255,0.45)";}}
+          onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.08),rgba(16,185,129,0.05))";e.currentTarget.style.borderColor="rgba(0,102,255,0.22)";}}>
+          <div style={{width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#0066FF,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>💳</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+              <span style={{fontWeight:900,fontSize:15,color:C.text}}>SmartCredit</span>
+              <span style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.22)",borderRadius:20,padding:"1px 9px",fontSize:9,color:"#0066FF",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
+            </div>
+            <div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas. Empieza gratis — sin tarjeta de crédito.</div>
+          </div>
+          <div style={{background:"linear-gradient(135deg,#0066FF,#10B981)",borderRadius:11,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap",boxShadow:"0 4px 16px rgba(0,102,255,0.35)"}}>
+            Empezar gratis →
+          </div>
+        </a>
       </>}
 
       {/* ── SEÑALES TAB ── */}
@@ -17717,6 +17735,26 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
       </div>{/* end content */}
 
+      {/* SmartCredit afiliado */}
+      <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
+        style={{display:"flex",alignItems:"center",gap:14,background:"linear-gradient(135deg,#0f172a,#1e3a5f)",border:"1.5px solid rgba(0,102,255,0.3)",borderRadius:16,padding:"16px 20px",margin:"16px 0",textDecoration:"none",transition:"all 0.18s"}}
+        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(0,102,255,0.6)"}
+        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(0,102,255,0.3)"}>
+        <div style={{width:48,height:48,borderRadius:13,background:"linear-gradient(135deg,#0066FF,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>💳</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+            <span style={{fontWeight:900,fontSize:14,color:"#F1F5F9"}}>SmartCredit</span>
+            <span style={{background:"rgba(0,102,255,0.2)",border:"1px solid rgba(0,102,255,0.35)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#60A5FA",fontWeight:700}}>Patrocinado</span>
+          </div>
+          <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.45}}>
+            {isEN?"Monitor your credit score, protect your identity and improve your finances — free to start.":"Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas — gratis para empezar."}
+          </div>
+        </div>
+        <div style={{background:"#0066FF",borderRadius:10,padding:"9px 16px",fontSize:12,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap"}}>
+          {isEN?"Get started →":"Empezar →"}
+        </div>
+      </a>
+
       <div style={{fontSize:11,color:"#334155",textAlign:"center",padding:"16px 0",marginTop:8,lineHeight:1.6}}>
         ⚠️ {isEN?"Prices from Finnhub. For educational use only. Not financial advice.":"Precios de Finnhub. Solo uso educativo. No es consejo financiero."}
       </div>
@@ -20532,6 +20570,23 @@ export default function App(){
             {/* Post patrocinado completo cada 5 posts */}
             {(i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
+            )}
+            {/* SmartCredit afiliado cada 8 posts */}
+            {(i+1)%8===0 && (
+              <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
+                style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,rgba(0,102,255,0.06),rgba(16,185,129,0.04))",border:"1.5px solid rgba(0,102,255,0.18)",borderRadius:14,padding:"13px 16px",margin:"6px 0",textDecoration:"none",transition:"all 0.18s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.11),rgba(16,185,129,0.07))";e.currentTarget.style.borderColor="rgba(0,102,255,0.38)";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.06),rgba(16,185,129,0.04))";e.currentTarget.style.borderColor="rgba(0,102,255,0.18)";}}>
+                <div style={{width:42,height:42,borderRadius:11,background:"linear-gradient(135deg,#0066FF,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>💳</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:2}}>
+                    <span style={{fontWeight:800,fontSize:13,color:C.text}}>SmartCredit</span>
+                    <span style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0066FF",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
+                  </div>
+                  <div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>Monitorea tu crédito, protege tus finanzas y mejora tu score — gratis para empezar.</div>
+                </div>
+                <span style={{fontSize:11,color:"#0066FF",fontWeight:800,flexShrink:0,whiteSpace:"nowrap"}}>Ver más →</span>
+              </a>
             )}
             {/* Bots ya inyectados directamente en displayFeed */}
             {/* AdSense banner cada 6 posts */}
