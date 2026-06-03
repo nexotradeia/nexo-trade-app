@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:54:35
+// NEXO TRADE — build: 2026-06-03 15:56:28
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4087,16 +4087,26 @@ function NoticiasPage({lang}){
 // CoinGecko IDs para los 4 crypto principales (API gratis, sin key)
 const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
 const TICKER_DATA_INIT = [
-  {s:"BTC",  n:"Bitcoin",    p:108500, c:+0.80,  col:"#f7931a", cg:"bitcoin"},
-  {s:"ETH",  n:"Ethereum",   p:2550,   c:+0.50,  col:"#627eea", cg:"ethereum"},
-  {s:"SOL",  n:"Solana",     p:172,    c:+1.20,  col:"#9945ff", cg:"solana"},
-  {s:"BNB",  n:"BNB",        p:648,    c:+0.30,  col:"#f3ba2f", cg:"binancecoin"},
-  {s:"NVDA", n:"NVIDIA",     p:135.4,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
-  {s:"AAPL", n:"Apple",      p:213.5,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
-  {s:"TSLA", n:"Tesla",      p:352.8,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
-  {s:"SPY",  n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0066FF", cg:null, fh:"SPY"},
-  {s:"MSFT", n:"Microsoft",  p:453.6,  c:+0.60,  col:"#00b4d8", cg:null, fh:"MSFT"},
-  {s:"GOLD", n:"Gold",       p:3315,   c:+0.25,  col:"#fbbf24", cg:null},
+  {s:"BTC",   n:"Bitcoin",    p:108500, c:+0.80,  col:"#f7931a", cg:"bitcoin"},
+  {s:"ETH",   n:"Ethereum",   p:2550,   c:+0.50,  col:"#627eea", cg:"ethereum"},
+  {s:"SOL",   n:"Solana",     p:172,    c:+1.20,  col:"#9945ff", cg:"solana"},
+  {s:"BNB",   n:"BNB",        p:648,    c:+0.30,  col:"#f3ba2f", cg:"binancecoin"},
+  {s:"XRP",   n:"XRP",        p:2.48,   c:+1.10,  col:"#346aa9", cg:"ripple"},
+  {s:"DOGE",  n:"Dogecoin",   p:0.182,  c:-0.80,  col:"#c2a633", cg:"dogecoin"},
+  {s:"NVDA",  n:"NVIDIA",     p:135.4,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
+  {s:"AAPL",  n:"Apple",      p:213.5,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
+  {s:"TSLA",  n:"Tesla",      p:352.8,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
+  {s:"MSFT",  n:"Microsoft",  p:453.6,  c:+0.60,  col:"#00b4d8", cg:null, fh:"MSFT"},
+  {s:"AMZN",  n:"Amazon",     p:224.3,  c:+0.40,  col:"#ff9900", cg:null, fh:"AMZN"},
+  {s:"META",  n:"Meta",       p:718.5,  c:+1.10,  col:"#0082fb", cg:null, fh:"META"},
+  {s:"GOOGL", n:"Alphabet",   p:196.8,  c:+0.30,  col:"#4285f4", cg:null, fh:"GOOGL"},
+  {s:"SPY",   n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0066FF", cg:null, fh:"SPY"},
+  {s:"QQQ",   n:"Nasdaq ETF", p:485.2,  c:+0.30,  col:"#6366f1", cg:null, fh:"QQQ"},
+  {s:"MELI",  n:"MercadoLibre",p:2240,  c:+0.90,  col:"#ffe600", cg:null, fh:"MELI"},
+  {s:"GOLD",  n:"Gold",       p:3315,   c:+0.25,  col:"#fbbf24", cg:null},
+  {s:"NFLX",  n:"Netflix",    p:1085,   c:+1.40,  col:"#e50914", cg:null, fh:"NFLX"},
+  {s:"WMT",   n:"Walmart",    p:96.4,   c:-0.20,  col:"#0071ce", cg:null, fh:"WMT"},
+  {s:"V",     n:"Visa",       p:318.9,  c:+0.70,  col:"#1a1f71", cg:null, fh:"V"},
 ];
 
 // Hook compartido para precios reales de CoinGecko
@@ -4189,7 +4199,7 @@ function MarketsMiniWidget({ lang="es" }){
   const lp = useContext(PriceCtx);
   const isLive = Object.keys(lp).length > 0;
 
-  const prices = TICKER_DATA_INIT.slice(0,8).map(t=>{
+  const prices = TICKER_DATA_INIT.map(t=>{
     const live = lp[t.s];
     return { ...t, p: live?.price ?? t.p, c: live?.change ?? t.c };
   });
@@ -4208,39 +4218,33 @@ function MarketsMiniWidget({ lang="es" }){
         ))}
       </div>
 
-      {/* Mercados — cards coloridos estilo moderno */}
+      {/* Mercados — cards estilo screenshot */}
       {tab==="mercados"&&(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,padding:"10px",overflowX:"auto",WebkitOverflowScrolling:"touch",minWidth:0}}
-          className="nexo-market-grid">
-          {prices.slice(0,8).map((t)=>{
+        <div className="nexo-scroll-x" style={{padding:"10px 10px 12px",display:"flex",gap:8,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+          {prices.map((t)=>{
             const up = t.c >= 0;
-            const bull = up ? "#16A34A" : "#DC2626";
-            const bullBg = up ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)";
-            // Mini sparkline sintético basado en el color del ticker
-            const spark = [0,1,0.6,1.2,0.8,1.5,1,up?2:0.3].map((v,i,a)=>
-              `${(i/(a.length-1))*44},${12-v*(up?4:3)}`).join(" ");
+            const borderCol = up ? "#22c55e" : "#ef4444";
+            const bgCol = up ? "rgba(220,252,231,0.55)" : "rgba(254,226,226,0.55)";
+            const fmtPrice = t.p>=1000
+              ? t.p.toLocaleString("en-US",{maximumFractionDigits:0})
+              : t.p<1 ? t.p.toFixed(4) : t.p.toFixed(2);
             return(
               <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
-                style={{display:"flex",flexDirection:"column",gap:3,padding:"8px",borderRadius:12,background:bullBg,border:`1px solid ${bull}22`,textDecoration:"none",transition:"all 0.18s",cursor:"pointer"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 20px ${bull}22`;}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
-                {/* Icono + ticker */}
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                  <div style={{width:22,height:22,borderRadius:7,background:t.col,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:"#fff",flexShrink:0,boxShadow:`0 2px 8px ${t.col}55`}}>
-                    {t.s.slice(0,1)}
-                  </div>
-                  <svg viewBox="0 0 44 14" style={{width:34,height:11}}>
-                    <polyline points={spark} fill="none" stroke={bull} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                style={{flexShrink:0,width:120,display:"flex",flexDirection:"column",gap:6,padding:"12px 10px",borderRadius:14,background:bgCol,border:`1.5px solid ${borderCol}55`,textDecoration:"none",transition:"all 0.18s",cursor:"pointer"}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 18px ${borderCol}30`;e.currentTarget.style.borderColor=borderCol;}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor=`${borderCol}55`;}}>
+                {/* Badge */}
+                <div style={{width:38,height:38,borderRadius:10,background:t.col,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:900,color:"#fff",flexShrink:0,boxShadow:`0 3px 10px ${t.col}55`}}>
+                  {t.s.slice(0,1)}
                 </div>
                 {/* Nombre */}
-                <div style={{fontSize:9,fontWeight:600,color:"var(--c-muted2)",letterSpacing:0.2,lineHeight:1}}>{t.n}</div>
+                <div style={{fontSize:10,color:"#64748b",fontWeight:500,lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.n}</div>
                 {/* Precio */}
-                <div style={{fontFamily:"monospace",fontSize:11,fontWeight:800,color:"var(--c-text)",letterSpacing:-0.3,lineHeight:1}}>
-                  {t.p>=1000 ? t.p.toLocaleString("en-US",{maximumFractionDigits:0}) : t.p.toFixed(2)}
+                <div style={{fontWeight:800,fontSize:14,color:"#0f172a",letterSpacing:-0.5,lineHeight:1,fontFamily:"monospace"}}>
+                  {fmtPrice}
                 </div>
                 {/* Cambio */}
-                <div style={{fontSize:9,fontWeight:700,color:bull,background:bullBg,borderRadius:20,padding:"1px 5px",display:"inline-flex",alignItems:"center",gap:2,width:"fit-content"}}>
+                <div style={{display:"inline-flex",alignItems:"center",gap:3,fontSize:11,fontWeight:700,color:up?"#16a34a":"#dc2626"}}>
                   {up?"▲":"▼"} {Math.abs(t.c).toFixed(2)}%
                 </div>
               </a>
