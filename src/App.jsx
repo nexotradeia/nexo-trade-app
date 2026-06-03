@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 18:10:05
+// NEXO TRADE — build: 2026-06-03 18:13:40
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -13758,15 +13758,6 @@ function BotPostCard({post,onTickerClick,lang}){
           <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.65}}>
             {renderBotText(post.text, onTickerClick)}
           </p>
-          {/* Chart SVG — solo en posts con showChart:true */}
-          {post.showChart&&(
-            <BotChart
-              ticker={post.ticker}
-              sentiment={post.sentiment}
-              chartType={post.chartType||"candle"}
-              seed={post.ticker.split("").reduce((a,c)=>a+c.charCodeAt(0),0)}
-            />
-          )}
           {post.tags?.length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>
               {post.tags.slice(0,4).map(t=>(
