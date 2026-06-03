@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 14:21:16
+// NEXO TRADE — build: 2026-06-03 14:53:26
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -18804,43 +18804,41 @@ function AdminDashboard(){
   const [search,setSearch] = useState("");
 
   useEffect(()=>{
+    const safe = async(query) => { try{ return await query; }catch{ return {}; } };
     const load = async()=>{
       setLoading(true);
-      try{
-        const hoy   = new Date(); hoy.setHours(0,0,0,0);
-        const mes   = new Date(); mes.setDate(1); mes.setHours(0,0,0,0);
-        const semana= new Date(); semana.setDate(semana.getDate()-7);
+      const hoy   = new Date(); hoy.setHours(0,0,0,0);
+      const semana= new Date(); semana.setDate(semana.getDate()-7);
 
-        const [{count:totalUsers},{count:newToday},{count:newWeek},{count:vipCount},
-               {count:postsHoy},{count:totalPosts},{data:subsData,count:totalSubs},
-               {data:recentPosts},{data:userList}] = await Promise.all([
-          supabase.from("profiles").select("*",{count:"exact",head:true}),
-          supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString()),
-          supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",semana.toISOString()),
-          supabase.from("profiles").select("*",{count:"exact",head:true}).eq("is_premium",true),
-          supabase.from("posts").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString()),
-          supabase.from("posts").select("*",{count:"exact",head:true}),
-          supabase.from("newsletter_subscribers").select("email,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(50),
-          supabase.from("posts").select("content,ticker,tipo,username,created_at,likes").order("created_at",{ascending:false}).limit(15),
-          supabase.from("profiles").select("id,username,avatar_emoji,avatar_color,is_premium,created_at,updated_at,points").order("updated_at",{ascending:false}).limit(50),
-        ]);
+      const [r1,r2,r3,r4,r5,r6,r7,r8,r9] = await Promise.all([
+        safe(supabase.from("profiles").select("*",{count:"exact",head:true})),
+        safe(supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString())),
+        safe(supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",semana.toISOString())),
+        safe(supabase.from("profiles").select("*",{count:"exact",head:true}).eq("is_premium",true)),
+        safe(supabase.from("posts").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString())),
+        safe(supabase.from("posts").select("*",{count:"exact",head:true})),
+        safe(supabase.from("newsletter_subscribers").select("email,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(50)),
+        safe(supabase.from("posts").select("content,ticker,tipo,username,created_at,likes").order("created_at",{ascending:false}).limit(15)),
+        safe(supabase.from("profiles").select("id,username,avatar_emoji,avatar_color,is_premium,created_at,updated_at,points").order("updated_at",{ascending:false}).limit(50)),
+      ]);
 
-        // Calcular logins estimados del mes por actividad (posts + puntos como proxy)
-        const enrichedUsers = (userList||[]).map(u=>{
-          const daysSince = Math.floor((Date.now()-new Date(u.updated_at||u.created_at).getTime())/86400000);
-          const lastAccess = daysSince===0?"Hoy":daysSince===1?"Hace 1d":`Hace ${daysSince}d`;
-          const logins = Math.max(1, Math.min(30, Math.floor((u.points||0)/50) + (u.is_premium?8:2)));
-          return {...u, lastAccess, logins};
-        }).sort((a,b)=>b.logins-a.logins);
+      const totalUsers=r1.count||0, newToday=r2.count||0, newWeek=r3.count||0,
+            vipCount=r4.count||0, postsHoy=r5.count||0, totalPosts=r6.count||0,
+            totalSubs=r7.count||0, subsData=r7.data||[], recentPosts=r8.data||[], userList=r9.data||[];
 
-        setStats({totalUsers:totalUsers||0,newToday:newToday||0,newWeek:newWeek||0,
-          vipCount:vipCount||0,postsHoy:postsHoy||0,totalPosts:totalPosts||0,totalSubs:totalSubs||0,
-          activosHoy:Math.max(newToday||0, Math.floor((totalUsers||0)*0.12)),
-          logins:Math.floor((totalUsers||0)*7.2)});
-        setUsers(enrichedUsers);
-        setSubs(subsData||[]);
-        setPosts(recentPosts||[]);
-      }catch(e){console.error(e);}
+      const enrichedUsers = userList.map(u=>{
+        const daysSince = Math.floor((Date.now()-new Date(u.updated_at||u.created_at).getTime())/86400000);
+        const lastAccess = daysSince===0?"Hoy":daysSince===1?"Hace 1d":`Hace ${daysSince}d`;
+        const logins = Math.max(1, Math.min(30, Math.floor((u.points||0)/50) + (u.is_premium?8:2)));
+        return {...u, lastAccess, logins};
+      }).sort((a,b)=>b.logins-a.logins);
+
+      setStats({totalUsers,newToday,newWeek,vipCount,postsHoy,totalPosts,totalSubs,
+        activosHoy:Math.max(newToday, Math.floor(totalUsers*0.12)),
+        logins:Math.floor(totalUsers*7.2)});
+      setUsers(enrichedUsers);
+      setSubs(subsData);
+      setPosts(recentPosts);
       setLoading(false);
     };
     load();
