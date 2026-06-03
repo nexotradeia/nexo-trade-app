@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:44:05
+// NEXO TRADE — build: 2026-06-03 15:46:43
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -6337,24 +6337,38 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
             {/* Orb highlights */}
             <div style={{position:"absolute",top:-28,right:-18,width:130,height:130,borderRadius:"50%",background:`radial-gradient(circle,rgba(0,102,255,0.10),transparent 68%)`,pointerEvents:"none"}}/>
             <div style={{position:"absolute",bottom:-24,left:20,width:90,height:90,borderRadius:"50%",background:`radial-gradient(circle,rgba(0,102,255,0.06),transparent 68%)`,pointerEvents:"none"}}/>
-            {/* Grid de puntos decorativos */}
-            <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.18,pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
-              {[0,24,48,72,96,120,144,168,192,216,240].map(x=>
-                [0,16,32,48,64,80,96].map(y=>
-                  <circle key={`${x}-${y}`} cx={x} cy={y} r="1.2" fill="#0066FF"/>
-                )
-              )}
-            </svg>
-            {/* Chart SVG */}
-            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.25,pointerEvents:"none"}} height="48" viewBox="0 0 240 48" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="coverChartGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0066FF" stopOpacity="0.4"/>
-                  <stop offset="100%" stopColor="#0066FF" stopOpacity="0"/>
-                </linearGradient>
-              </defs>
-              <polygon points="0,48 0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10 240,48" fill="url(#coverChartGrad)"/>
-              <polyline points="0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10" fill="none" stroke="#0066FF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            {/* Velas japonesas (candlestick chart) */}
+            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:"100%",pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
+              {/* Líneas de guía horizontales */}
+              {[20,40,60,80].map(y=><line key={y} x1="0" y1={y} x2="240" y2={y} stroke="#0066FF" strokeWidth="0.4" strokeOpacity="0.12"/>)}
+              {/* Velas: [x, open, close, high, low, bullish] */}
+              {[
+                [12, 72, 58, 55, 76, true],
+                [26, 58, 62, 54, 64, false],
+                [40, 62, 44, 40, 65, true],
+                [54, 44, 36, 33, 47, true],
+                [68, 36, 50, 34, 52, false],
+                [82, 50, 45, 42, 54, true],
+                [96, 45, 30, 27, 48, true],
+                [110,30, 38, 28, 40, false],
+                [124,38, 22, 19, 40, true],
+                [138,22, 28, 20, 30, false],
+                [152,28, 18, 15, 30, true],
+                [166,18, 24, 16, 26, false],
+                [180,24, 12, 10, 26, true],
+                [194,12, 16, 10, 18, false],
+                [208,16,  8,  6, 18, true],
+                [222, 8, 14,  6, 16, false],
+              ].map(([x,o,c,h,l,bull])=>{
+                const col = bull ? "#10B981" : "#EF4444";
+                const op = 0.55;
+                return(
+                  <g key={x}>
+                    <line x1={x} y1={h} x2={x} y2={l} stroke={col} strokeWidth="1" strokeOpacity={op}/>
+                    <rect x={x-4} y={Math.min(o,c)} width={8} height={Math.max(2,Math.abs(o-c))} fill={col} fillOpacity={op} rx="1"/>
+                  </g>
+                );
+              })}
             </svg>
             {/* Avatar — clickable to change */}
             <div style={{position:"absolute",bottom:-24,left:14}}>
