@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 17:48:39
+// NEXO TRADE — build: 2026-06-03 18:00:23
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -8005,17 +8005,17 @@ function PredictionBanner({lang="es"}){
     setVoted(dir);
   };
   return(
-    <div style={{background:`linear-gradient(135deg,rgba(0,210,106,0.13),rgba(60,142,250,0.10))`,borderBottom:`1px solid rgba(0,210,106,0.28)`,padding:"8px 16px"}}>
+    <div style={{background:"#FAFCFF",borderBottom:"1px solid #E8F0FB",padding:"7px 16px"}}>
       <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-        <span style={{background:C.gold+"22",color:C.gold,border:`1px solid ${C.gold}44`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0,whiteSpace:"nowrap"}}>🔥 {isEN?"PREDICTION OF THE DAY":"PREDICCIÓN DEL DÍA"}</span>
-        <span className="nexo-prediction-text" style={{color:"#fff",fontWeight:700,fontSize:12,flex:1,minWidth:0}}>{isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}</span>
+        <span style={{background:"#2196F3",color:"#fff",borderRadius:20,padding:"3px 11px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0,whiteSpace:"nowrap"}}>🔥 {isEN?"PREDICTION OF THE DAY":"PREDICCIÓN DEL DÍA"}</span>
+        <span className="nexo-prediction-text" style={{color:"#1E293B",fontWeight:600,fontSize:12.5,flex:1,minWidth:0}}>{isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}</span>
         <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
-          <button onClick={()=>vote("up")} style={{background:voted==="up"?`${C.bull}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="up"?C.bull:C.glassBorder}`,borderRadius:8,padding:"4px 12px",color:voted==="up"?C.bull:C.muted,cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▲ {isEN?"Up":"Sube"} {voted&&`(${Math.round(votes.up/total*100)}%)`}</button>
-          <button onClick={()=>vote("down")} style={{background:voted==="down"?`${C.bear}22`:"rgba(255,255,255,0.05)",border:`1px solid ${voted==="down"?C.bear:C.glassBorder}`,borderRadius:8,padding:"4px 12px",color:voted==="down"?C.bear:C.muted,cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▼ {isEN?"Down":"Baja"} {voted&&`(${100-Math.round(votes.up/total*100)}%)`}</button>
-          <span style={{color:C.muted2,fontSize:10,flexShrink:0}}>{(total).toLocaleString()} {isEN?"votes":"votos"}</span>
+          <button onClick={()=>vote("up")} style={{background:voted==="up"?"#F0FDF4":"#fff",border:`1.5px solid ${voted==="up"?"#16A34A":"#D1FAE5"}`,borderRadius:8,padding:"4px 12px",color:voted==="up"?"#16A34A":"#16A34A",cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▲ {isEN?"Up":"Sube"} {voted&&`(${Math.round(votes.up/total*100)}%)`}</button>
+          <button onClick={()=>vote("down")} style={{background:voted==="down"?"#FEF2F2":"#fff",border:`1.5px solid ${voted==="down"?"#DC2626":"#FECACA"}`,borderRadius:8,padding:"4px 12px",color:voted==="down"?"#DC2626":"#DC2626",cursor:voted?"default":"pointer",fontSize:11,fontWeight:700}}>▼ {isEN?"Down":"Baja"} {voted&&`(${100-Math.round(votes.up/total*100)}%)`}</button>
+          <span style={{color:"#94A3B8",fontSize:10,flexShrink:0}}>{(total).toLocaleString()} {isEN?"votes":"votos"}</span>
         </div>
-        {voted&&<div style={{width:"100%",height:3,background:C.card2,borderRadius:3,marginTop:4}}>
-          <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${C.bull},${C.blue})`,borderRadius:3,transition:"width 0.5s"}}/>
+        {voted&&<div style={{width:"100%",height:3,background:"#E8F0FB",borderRadius:3,marginTop:4}}>
+          <div style={{width:`${pct}%`,height:"100%",background:"linear-gradient(90deg,#16A34A,#2196F3)",borderRadius:3,transition:"width 0.5s"}}/>
         </div>}
       </div>
     </div>
@@ -20964,8 +20964,8 @@ export default function App(){
           </div>
         </div>
         {/* ── ROW 1: FREE TABS ── */}
-        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",borderTop:"1px solid var(--c-border)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:52}}>
-          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:1.4,color:"#0066FF",background:"linear-gradient(135deg,rgba(0,102,255,0.13),rgba(0,102,255,0.06))",border:"1.5px solid rgba(0,102,255,0.24)",borderRadius:7,padding:"3px 10px",margin:"0 20px 0 0",whiteSpace:"nowrap",boxShadow:"0 0 8px rgba(0,102,255,0.08)"}}>FREE</span>
+        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",background:"#FFFFFF",borderTop:"1px solid #EEF4FA",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:52}}>
+          <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:1.4,color:"#2196F3",background:"rgba(33,150,243,0.07)",border:"1.5px solid rgba(33,150,243,0.22)",borderRadius:7,padding:"3px 10px",margin:"0 20px 0 0",whiteSpace:"nowrap"}}>FREE</span>
           {[
             {label:t.feed,idx:0},
             {label:lang==="en"?"📈 Stock Pick IA":"📈 Stock Pick IA",idx:3,badge:"NEW"},
@@ -20977,17 +20977,17 @@ export default function App(){
             {label:lang==="en"?"💬 Messages":"💬 Mensajes",idx:22},
           ].map(n=>(
             <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-              style={{background:page===n.idx?"rgba(0,102,255,0.07)":"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#0066FF":"transparent"}`,padding:"0 19px",height:52,cursor:"pointer",color:page===n.idx?"#0066FF":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit",letterSpacing:page===n.idx?0.1:0}}
-              onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#0066FF";e.currentTarget.style.background="rgba(0,102,255,0.04)";}}}
+              style={{background:page===n.idx?"rgba(33,150,243,0.06)":"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#2196F3":"transparent"}`,padding:"0 19px",height:52,cursor:"pointer",color:page===n.idx?"#2196F3":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit",letterSpacing:page===n.idx?0.1:0}}
+              onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#2196F3";e.currentTarget.style.background="rgba(33,150,243,0.04)";}}}
               onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";e.currentTarget.style.background="transparent";}}}
             >
               {n.label}
-              {n.badge&&<span style={{fontSize:9,fontWeight:800,color:"#0066FF",background:"rgba(0,102,255,0.12)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:4,padding:"2px 5px",letterSpacing:0.5}}>{n.badge}</span>}
+              {n.badge&&<span style={{fontSize:9,fontWeight:800,color:"#2196F3",background:"rgba(33,150,243,0.11)",border:"1px solid rgba(33,150,243,0.28)",borderRadius:4,padding:"2px 5px",letterSpacing:0.5}}>{n.badge}</span>}
             </button>
           ))}
         </div>
         {/* ── ROW 2: VIP TABS ── */}
-        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"linear-gradient(90deg,rgba(245,158,11,0.02),rgba(245,158,11,0.05),rgba(245,158,11,0.02))",borderTop:"1px solid rgba(245,158,11,0.13)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
+        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#FAFCFF",borderTop:"1px solid #E8F0FB",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
           <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#F59E0B",background:"transparent",border:"none",padding:"0 14px",whiteSpace:"nowrap",cursor:"pointer",transition:"opacity 0.15s",opacity:0.85}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.85"}>⭐ PREMIUM</span>
           {[
             {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
