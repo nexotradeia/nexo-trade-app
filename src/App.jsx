@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 16:52:47
+// NEXO TRADE — build: 2026-06-03 17:07:50
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -6277,7 +6277,106 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 // ── LEFT SIDEBAR — Perfil + Stats estilo Socimo ───────────────────────────────
-function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, onUserUpdate}){
+// ── ONLINE USERS WIDGET ─────────────────────────────────────────────────────
+function OnlineUsersWidget({ onlineUsers = [] }) {
+  const [expanded, setExpanded] = useState(false);
+  const count = onlineUsers.length;
+  const shown = expanded ? onlineUsers : onlineUsers.slice(0, 5);
+
+  return (
+    <div style={{
+      borderRadius: 14,
+      overflow: "hidden",
+      background: "#fff",
+      border: "1px solid rgba(0,0,0,0.07)",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+      marginBottom: 0,
+    }}>
+      {/* Header */}
+      <div onClick={() => setExpanded(e => !e)} style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "10px 14px", cursor: "pointer",
+        background: "linear-gradient(90deg,#EBF3FF,#F4F9FF)",
+        borderBottom: count > 0 ? "1px solid #DBEAFE" : "none",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <span style={{ fontSize: 13 }}>👥</span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: "#1A5FAD" }}>
+            En línea ahora
+          </span>
+          {count > 0 && (
+            <span style={{
+              background: "#10B981", color: "#fff",
+              borderRadius: 20, padding: "1px 7px", fontSize: 10, fontWeight: 800,
+            }}>{count}</span>
+          )}
+        </div>
+        <span style={{ fontSize: 10, color: "#5B8DC7" }}>{expanded ? "▲" : "▼"}</span>
+      </div>
+
+      {/* User list */}
+      {count === 0 ? (
+        <div style={{ padding: "10px 14px", fontSize: 11, color: "#94A3B8", textAlign: "center" }}>
+          Solo tú en línea 🌙
+        </div>
+      ) : (
+        <div style={{ padding: "6px 0" }}>
+          {shown.map((u, i) => (
+            <div key={u.user_id || i} style={{
+              display: "flex", alignItems: "center", gap: 9,
+              padding: "6px 14px",
+              borderBottom: i < shown.length - 1 ? "1px solid #F1F5F9" : "none",
+            }}>
+              {/* Avatar */}
+              <div style={{
+                width: 30, height: 30, borderRadius: "50%",
+                background: u.avatarColor || "#0066FF",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 15, flexShrink: 0, position: "relative",
+              }}>
+                {u.emoji || "🦅"}
+                {/* green dot */}
+                <div style={{
+                  position: "absolute", bottom: 0, right: 0,
+                  width: 8, height: 8, borderRadius: "50%",
+                  background: "#10B981", border: "1.5px solid #fff",
+                }} />
+              </div>
+              {/* Name + sessions */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: 12, fontWeight: 700, color: "#0F172A",
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                }}>
+                  {u.username || "Trader"}
+                </div>
+                <div style={{ fontSize: 10, color: "#5B8DC7" }}>
+                  🔗 {u.loginCount || 1} {u.loginCount === 1 ? "sesión" : "sesiones"}
+                </div>
+              </div>
+              <div style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: "#10B981", flexShrink: 0,
+                boxShadow: "0 0 6px #10B981",
+                animation: "pulse 2s infinite",
+              }} />
+            </div>
+          ))}
+          {onlineUsers.length > 5 && (
+            <div onClick={() => setExpanded(e => !e)} style={{
+              padding: "6px 14px", fontSize: 11, color: "#1A5FAD",
+              fontWeight: 700, cursor: "pointer", textAlign: "center",
+            }}>
+              {expanded ? "Ver menos ▲" : `+${onlineUsers.length - 5} más ▼`}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, onUserUpdate, onlineUsers=[]}){
   const t=LANGS[lang];
   const lvl = user ? getLevel(user.points) : null;
   const [activeNav, setActiveNav] = useState(0);
@@ -6607,6 +6706,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
           <span style={{fontSize:13}}>←</span> {isEN?"Sign out":"Cerrar sesión"}
         </button>
       )}
+
+      <OnlineUsersWidget onlineUsers={onlineUsers} />
 
       <div style={{padding:"0 4px 4px",textAlign:"center"}}>
         <div style={{fontSize:10,color:"#CBD5E1",lineHeight:2}}>
@@ -19316,6 +19417,8 @@ export default function App(){
   const [isPro,setIsPro]= useState(
     _getAdminStatus() || (_getSavedUser()?.is_pro || false)
   );
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const presenceChRef = useRef(null);
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]           = useState(false);
   const [aiHidden,setAiHidden]       = useState(false);
@@ -19560,6 +19663,51 @@ export default function App(){
     return()=>subscription.unsubscribe();
   },[]);
 
+  // ── SUPABASE REALTIME PRESENCE — quién está en línea ──────────────────
+  useEffect(()=>{
+    // Limpiar canal anterior
+    if(presenceChRef.current){
+      presenceChRef.current.unsubscribe();
+      presenceChRef.current = null;
+    }
+    if(!user?.id) { setOnlineUsers([]); return; }
+
+    // Incrementar contador de sesiones en localStorage
+    const countKey = `nexo-lc-${user.id}`;
+    const loginCount = (parseInt(localStorage.getItem(countKey)||"0")) + 1;
+    localStorage.setItem(countKey, loginCount);
+
+    const ch = supabase.channel("nexo-presence", {
+      config: { presence: { key: user.id } }
+    });
+
+    ch.on("presence", { event: "sync" }, () => {
+      const state = ch.presenceState();
+      const users = Object.entries(state).map(([uid, arr]) => ({
+        user_id: uid,
+        ...(arr[0] || {}),
+        loginCount: parseInt(localStorage.getItem(`nexo-lc-${uid}`)||"1"),
+      }));
+      // Mostrar todos menos uno mismo al inicio, o todos si quieres
+      setOnlineUsers(users);
+    });
+
+    ch.subscribe(async (status) => {
+      if(status === "SUBSCRIBED"){
+        await ch.track({
+          user_id:    user.id,
+          username:   user.username || user.name || "Trader",
+          emoji:      user.emoji    || "🦅",
+          avatarColor:user.avatarColor || "#0066FF",
+          loginCount,
+        });
+      }
+    });
+
+    presenceChRef.current = ch;
+    return () => { ch.unsubscribe(); presenceChRef.current = null; };
+  }, [user?.id]);
+
   // ── SUPABASE: Cargar posts reales y suscripción realtime ──────────────────
   useEffect(()=>{
     let sub;
@@ -19705,7 +19853,14 @@ export default function App(){
     // 2. Guardar en Supabase (con 1 reintento automático si falla)
     if(user?.id && user.id!=="local"){
       const tryInsert = async () => {
-        // Solo escribimos a "content" — columna original y segura
+        // Verificar sesión activa antes de insertar
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          const { data: rd } = await supabase.auth.refreshSession();
+          if (!rd?.session) {
+            return { data: null, error: { message: "Sesión expirada — cierra sesión e inicia de nuevo", code: "session_expired" } };
+          }
+        }
         const payload = {
           user_id:   user.id,
           content:   text,
@@ -19745,6 +19900,10 @@ export default function App(){
           console.error("Post no guardado (2do intento):", error?.code, error?.message, error?.details);
           window.__lastPostError = error;
           const errMsg = error?.message || error?.code || "unknown";
+          // Alertar al admin con el error real para diagnóstico
+          if(ADMIN_EMAILS.includes(user?.email||"")) {
+            alert("⚠️ Error de post (admin):\n" + errMsg + "\n\nCódigo: " + (error?.code||"—") + "\n\nSi ves 'session_expired': cierra sesión y vuelve a entrar.\nSi ves 'violates row-level': el user_id no coincide con auth.uid(). Cierra sesión y vuelve a entrar.");
+          }
           setPosts(prev=>prev.map(p=>p.id===localId?{...p,_failed:true,_errMsg:errMsg}:p));
         }
       }catch(e){
@@ -20914,7 +21073,7 @@ export default function App(){
 
       {/* BODY — 3 columnas estilo Socimo */}
       <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onlineUsers={onlineUsers} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
