@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 17:25:50
+// NEXO TRADE — build: 2026-06-03 17:27:51
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -19122,8 +19122,9 @@ function AdminDashboard(){
   const [posts,setPosts]   = useState([]);
   const [subs,setSubs]     = useState([]);
   const [loading,setLoading] = useState(true);
-  const [tab,setTab]       = useState("dashboard");
-  const [search,setSearch] = useState("");
+  const [tab,setTab]         = useState("dashboard");
+  const [search,setSearch]   = useState("");
+  const [recentSignups,setRecentSignups] = useState([]);
   useEffect(()=>{ window.scrollTo({top:0,behavior:"instant"}); },[]);
 
   useEffect(()=>{
@@ -19158,6 +19159,15 @@ function AdminDashboard(){
       setStats(s=>({...s, totalUsers, vipCount,
         activosHoy:Math.floor(totalUsers*0.12),
         logins:Math.floor(totalUsers*7.2)}));
+
+      // Últimos registros (orden por created_at)
+      const rSignups = await withTimeout(
+        supabase.from("profiles")
+          .select("id,username,avatar_emoji,avatar_color,is_premium,created_at,points")
+          .order("created_at",{ascending:false})
+          .limit(30)
+      );
+      if(rSignups.data) setRecentSignups(rSignups.data);
 
       // Posts y subs en segundo plano
       const [r8, r7] = await Promise.all([
@@ -19201,6 +19211,19 @@ function AdminDashboard(){
   // Iniciales del username
   const initials = name => (name||"?").slice(0,2).toUpperCase();
   const fmtDate  = iso => { try{ const d=new Date(iso); return d.toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"}); }catch{return "—";} };
+  const fmtDateTime = iso => {
+    try{
+      const d=new Date(iso);
+      const date=d.toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"});
+      const time=d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+      const diff=Date.now()-d.getTime();
+      const mins=Math.floor(diff/60000);
+      const hrs=Math.floor(diff/3600000);
+      const days=Math.floor(diff/86400000);
+      const ago=mins<1?"Ahora mismo":mins<60?`Hace ${mins}m`:hrs<24?`Hace ${hrs}h`:days===1?"Ayer":`Hace ${days}d`;
+      return {date,time,ago};
+    }catch{return {date:"—",time:"—",ago:"—"};}
+  };
 
   return(
     <div style={{maxWidth:1200,margin:"0 auto",padding:"0 4px 40px"}}>
@@ -19355,6 +19378,52 @@ function AdminDashboard(){
           </div>
         </div>
       </>)}
+
+      {/* ── ÚLTIMOS REGISTROS (dashboard tab) ── */}
+      {tab==="dashboard" && recentSignups.length>0 && (
+        <div style={{background:"#fff",border:"1px solid #EBEBEB",borderRadius:16,padding:"22px 24px",marginBottom:20,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
+            <div>
+              <div style={{fontWeight:900,fontSize:16,color:"#111827"}}>🆕 Últimos Registros</div>
+              <div style={{fontSize:12,color:"#6B7280",marginTop:2}}>Usuarios que se unieron a NexoTrade</div>
+            </div>
+            <span style={{background:"#EBF3FF",color:"#1A5FAD",borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:700}}>{recentSignups.length} registros</span>
+          </div>
+          <div style={{display:"flex",flexDirection:"column"}}>
+            {recentSignups.map((u,i)=>{
+              const dt=fmtDateTime(u.created_at);
+              return(
+                <div key={u.id} style={{display:"flex",alignItems:"center",gap:14,padding:"11px 0",borderBottom:i<recentSignups.length-1?"1px solid #F1F5F9":"none"}}>
+                  {/* Número */}
+                  <div style={{width:26,height:26,borderRadius:"50%",background:i<3?"#EBF3FF":"#F9FAFB",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:i<3?"#1A5FAD":"#9CA3AF",flexShrink:0}}>
+                    {i+1}
+                  </div>
+                  {/* Avatar */}
+                  <div style={{width:40,height:40,borderRadius:"50%",background:u.avatar_color||"#0066FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,position:"relative"}}>
+                    {u.avatar_emoji||"🦅"}
+                    {u.is_premium&&<div style={{position:"absolute",bottom:-2,right:-2,background:"#D97706",borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #fff"}}>✦</div>}
+                  </div>
+                  {/* Info usuario */}
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
+                      <span style={{fontWeight:800,fontSize:14,color:"#111827"}}>@{u.username||"usuario"}</span>
+                      {u.is_premium&&<span style={{background:"linear-gradient(135deg,#D97706,#B45309)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800}}>✦ VIP</span>}
+                    </div>
+                    <div style={{fontSize:12,color:"#6B7280"}}>
+                      📅 {dt.date}&nbsp;&nbsp;🕐 {dt.time}&nbsp;&nbsp;<span style={{color:"#0066FF",fontWeight:600}}>{dt.ago}</span>
+                    </div>
+                  </div>
+                  {/* Puntos */}
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontSize:13,fontWeight:800,color:"#0066FF"}}>{u.points||0}</div>
+                    <div style={{fontSize:10,color:"#9CA3AF"}}>pts</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── USUARIOS TAB ── */}
       {tab==="usuarios" && (
