@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:08:48
+// NEXO TRADE — build: 2026-06-03 15:13:45
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -20871,8 +20871,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?"none":undefined}}>
+        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
