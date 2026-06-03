@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:36:41
+// NEXO TRADE — build: 2026-06-03 15:42:34
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -2624,13 +2624,26 @@ const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48
 
 // ── MINI POST CHART ───────────────────────────────────────────────────────────
 function MiniPostChart({ ticker, isBull, fallbackSpark }) {
-  const [pts, setPts]       = useState([]);
-  const [loaded, setLoaded] = useState(false);
+  // Generar sparkline determinístico basado en ticker (siempre disponible)
+  const deterministicSpark = useMemo(() => {
+    if (fallbackSpark?.length) return fallbackSpark;
+    const seed = (ticker||"X").split("").reduce((a,c)=>a+c.charCodeAt(0),0);
+    return Array.from({length:30},(_,i)=>{
+      const v = Math.abs(Math.sin(seed*0.07+i*0.8)*18 + Math.cos(i*1.3+seed*0.02)*8 + 100);
+      return v;
+    });
+  }, [ticker, fallbackSpark]);
+
+  const [pts, setPts] = useState(deterministicSpark);
+  const [loaded, setLoaded] = useState(true);
   const lp = useContext(PriceCtx);
 
   useEffect(() => {
     if (!ticker) return;
     let alive = true;
+    // Mostrar fallback inmediato, intentar Yahoo en background
+    setPts(deterministicSpark);
+    setLoaded(true);
     const parse = d => {
       const r = d?.chart?.result?.[0];
       if (!r) return null;
@@ -2640,14 +2653,15 @@ function MiniPostChart({ ticker, isBull, fallbackSpark }) {
     (async () => {
       for (const host of ["query1","query2"]) {
         try {
-          const r = await fetch(`https://${host}.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo&includePrePost=false`,{headers:{"Accept":"application/json"}});
+          const ctrl = new AbortController();
+          const timer = setTimeout(()=>ctrl.abort(), 4000);
+          const r = await fetch(`https://${host}.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo&includePrePost=false`,{signal:ctrl.signal});
+          clearTimeout(timer);
           const d = await r.json();
           const arr = parse(d);
-          if (arr?.length && alive) { setPts(arr); setLoaded(true); return; }
+          if (arr?.length >= 5 && alive) { setPts(arr); return; }
         } catch {}
       }
-      // fallback: usar sparkline determinístico
-      if (alive && fallbackSpark?.length) { setPts(fallbackSpark); setLoaded(true); }
     })();
     return () => { alive = false; };
   }, [ticker]);
@@ -4745,15 +4759,39 @@ function EarningsPage({lang}){
                     <div style={{width:7,height:7,borderRadius:"50%",background:impactColor(impact),flexShrink:0}}/>
                     <span style={{fontSize:11,fontWeight:700,color:impactColor(impact)}}>{impact}</span>
                   </div>
-                  {/* Sentimiento */}
+                  {/* Sentimiento + votos */}
                   <div>
-                    <div style={{display:"flex",height:6,borderRadius:4,overflow:"hidden",marginBottom:3}}>
-                      <div style={{width:`${bull}%`,background:"#10B981"}}/>
+                    <div style={{display:"flex",height:6,borderRadius:4,overflow:"hidden",marginBottom:4}}>
+                      <div style={{width:`${bull}%`,background:"#10B981",transition:"width 0.3s"}}/>
                       <div style={{flex:1,background:"#EF4444"}}/>
                     </div>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:9,fontWeight:700}}>
-                      <span style={{color:"#10B981"}}>▲ {bull}%</span>
-                      <span style={{color:"#EF4444"}}>{100-bull}% ▼</span>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:3}}>
+                      <button onClick={ev=>{ev.stopPropagation();vote(e.ticker,"bull");}}
+                        disabled={!!voted[e.ticker]}
+                        title={voted[e.ticker]?"Ya votaste":"Votar Alcista"}
+                        style={{
+                          display:"flex",alignItems:"center",gap:2,
+                          background:voted[e.ticker]==="bull"?"rgba(16,185,129,0.18)":"rgba(16,185,129,0.06)",
+                          border:`1px solid ${voted[e.ticker]==="bull"?"#10B981":"rgba(16,185,129,0.35)"}`,
+                          borderRadius:5,padding:"2px 6px",
+                          cursor:voted[e.ticker]?"default":"pointer",
+                          fontSize:9,fontWeight:800,color:"#10B981",
+                          transition:"all 0.2s",outline:"none",
+                          opacity:voted[e.ticker]&&voted[e.ticker]!=="bull"?0.45:1,
+                        }}>▲ {bull}%</button>
+                      <button onClick={ev=>{ev.stopPropagation();vote(e.ticker,"bear");}}
+                        disabled={!!voted[e.ticker]}
+                        title={voted[e.ticker]?"Ya votaste":"Votar Bajista"}
+                        style={{
+                          display:"flex",alignItems:"center",gap:2,
+                          background:voted[e.ticker]==="bear"?"rgba(239,68,68,0.18)":"rgba(239,68,68,0.06)",
+                          border:`1px solid ${voted[e.ticker]==="bear"?"#EF4444":"rgba(239,68,68,0.35)"}`,
+                          borderRadius:5,padding:"2px 6px",
+                          cursor:voted[e.ticker]?"default":"pointer",
+                          fontSize:9,fontWeight:800,color:"#EF4444",
+                          transition:"all 0.2s",outline:"none",
+                          opacity:voted[e.ticker]&&voted[e.ticker]!=="bear"?0.45:1,
+                        }}>{100-bull}% ▼</button>
                     </div>
                   </div>
                   {/* Alert Telegram */}
