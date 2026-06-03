@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 17:07:50
+// NEXO TRADE — build: 2026-06-03 17:15:14
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1846,6 +1846,8 @@ function AuthModal({mode,onClose,onAuth,lang}){
   const [avatar,setAvatar]=useState(AVATAR_OPTIONS[0]);
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState("");
+  const [resetSent,setResetSent]=useState(false);
+  const [forgotMode,setForgotMode]=useState(false);
 
   // Sanitize username: lowercase, no spaces, only letters/numbers/underscore, max 20
   const sanitizeUsername = (v) => v.toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,20);
@@ -1858,6 +1860,19 @@ function AuthModal({mode,onClose,onAuth,lang}){
       if(pass.length < 6){setError(lang==="en"?"Password must be at least 6 characters.":"La contraseña debe tener al menos 6 caracteres.");return;}
     } else {
       if(!email||!pass){setError(lang==="en"?"Please complete email and password.":"Por favor completa email y contraseña.");return;}
+    }
+    // Modo "olvidé contraseña" — enviar reset email
+    if(forgotMode){
+      if(!email){ setError("Ingresa tu email primero."); return; }
+      setLoading(true);
+      try{
+        await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+          redirectTo:"https://nexotradeia.com",
+        });
+        setResetSent(true);
+      }catch(e){ setError("No se pudo enviar el email. Inténtalo de nuevo."); }
+      setLoading(false);
+      return;
     }
     setLoading(true);setError("");
     try{
@@ -1922,11 +1937,32 @@ function AuthModal({mode,onClose,onAuth,lang}){
             }
             setError("Servidor no disponible. Inténtalo de nuevo en unos minutos.");
           } else if(authErr.toLowerCase().includes("invalid")||authErr.toLowerCase().includes("credentials")){
-            setError("Email o contraseña incorrectos");
+            // Intentar login directo con SDK como fallback
+            try{
+              const {data:sd, error:se} = await supabase.auth.signInWithPassword({email:email.trim(),password:pass});
+              if(se){
+                setError("Email o contraseña incorrectos");
+                setLoading(false); return;
+              }
+              authData = { access_token:sd.session?.access_token, refresh_token:sd.session?.refresh_token, user:sd.user };
+              authErr = null;
+            }catch(_){
+              setError("Email o contraseña incorrectos");
+              setLoading(false); return;
+            }
           } else {
-            setError(authErr);
+            // Intentar login directo con SDK como fallback
+            try{
+              const {data:sd, error:se} = await supabase.auth.signInWithPassword({email:email.trim(),password:pass});
+              if(se){ setError(authErr); setLoading(false); return; }
+              authData = { access_token:sd.session?.access_token, refresh_token:sd.session?.refresh_token, user:sd.user };
+              authErr = null;
+            }catch(_){
+              setError(authErr);
+              setLoading(false); return;
+            }
           }
-          setLoading(false); return;
+          if(authErr){ setLoading(false); return; }
         }
         if(!authData?.user){ setError("Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return; }
         // Guardar sesión en supabase para que el cliente la use
@@ -2029,7 +2065,48 @@ function AuthModal({mode,onClose,onAuth,lang}){
         <Btn onClick={submit} style={{width:"100%",padding:"12px",opacity:loading?0.7:1}}>
           {loading?"⏳ Un momento...":(tab==="login"?`${t.login} →`:`${t.join.replace("Únete a ","").replace("Join ","")} →`)}
         </Btn>
-        {tab==="login"&&<button onClick={()=>{
+        {tab==="login"&&!forgotMode&&(
+          <div style={{textAlign:"center",marginTop:8}}>
+            <button onClick={()=>{setForgotMode(true);setError("");setResetSent(false);}}
+              style={{background:"none",border:"none",color:C.accent,fontSize:12,cursor:"pointer",textDecoration:"underline",fontFamily:"inherit"}}>
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+        )}
+        {forgotMode&&!resetSent&&(
+          <div style={{marginTop:8,padding:"14px",background:"rgba(0,102,255,0.06)",borderRadius:12,border:"1px solid rgba(0,102,255,0.15)"}}>
+            <p style={{margin:"0 0 10px",fontSize:13,color:C.text,fontWeight:600}}>
+              🔐 Recuperar contraseña
+            </p>
+            <p style={{margin:"0 0 12px",fontSize:12,color:C.muted,lineHeight:1.5}}>
+              Ingresa tu email y te enviaremos un link para crear una nueva contraseña.
+            </p>
+            <Btn onClick={submit} style={{width:"100%",padding:"10px",fontSize:13,opacity:loading?0.7:1}}>
+              {loading?"⏳ Enviando...":"📧 Enviar link de recuperación"}
+            </Btn>
+            <button onClick={()=>{setForgotMode(false);setError("");}}
+              style={{display:"block",width:"100%",marginTop:8,background:"none",border:"none",color:C.muted,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>
+              ← Volver al login
+            </button>
+          </div>
+        )}
+        {forgotMode&&resetSent&&(
+          <div style={{marginTop:8,padding:"16px",background:"rgba(16,185,129,0.06)",borderRadius:12,border:"1px solid rgba(16,185,129,0.2)",textAlign:"center"}}>
+            <div style={{fontSize:28,marginBottom:8}}>📧</div>
+            <p style={{margin:"0 0 6px",fontWeight:800,color:"#10B981",fontSize:14}}>¡Email enviado!</p>
+            <p style={{margin:"0 0 12px",fontSize:12,color:C.muted,lineHeight:1.5}}>
+              Revisa tu bandeja de entrada en <strong>{email}</strong> y haz clic en el link para crear una nueva contraseña.
+            </p>
+            <p style={{margin:"0 0 12px",fontSize:11,color:C.muted2}}>
+              ¿No llegó? Revisa tu carpeta de spam.
+            </p>
+            <button onClick={()=>{setForgotMode(false);setResetSent(false);setError("");}}
+              style={{background:"none",border:"none",color:C.accent,fontSize:12,cursor:"pointer",textDecoration:"underline",fontFamily:"inherit"}}>
+              ← Volver al login
+            </button>
+          </div>
+        )}
+        {tab==="login"&&!forgotMode&&<button onClick={()=>{
           const guestId="guest_"+Math.random().toString(36).slice(2,8);
           const GUEST_AVATARS=[{emoji:"👤",color:"#64748B"},{emoji:"🦁",color:"#F59E0B"},{emoji:"🐺",color:"#8B5CF6"},{emoji:"🦊",color:"#EF4444"},{emoji:"🐯",color:"#F97316"}];
           const ga=GUEST_AVATARS[Math.floor(Math.random()*GUEST_AVATARS.length)];
