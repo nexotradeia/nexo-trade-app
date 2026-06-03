@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 18:00:23
+// NEXO TRADE — build: 2026-06-03 18:10:05
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -8005,7 +8005,7 @@ function PredictionBanner({lang="es"}){
     setVoted(dir);
   };
   return(
-    <div style={{background:"#FAFCFF",borderBottom:"1px solid #E8F0FB",padding:"7px 16px"}}>
+    <div style={{background:"#E8F4FF",borderBottom:"1px solid #BFDBFE",padding:"7px 16px"}}>
       <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
         <span style={{background:"#2196F3",color:"#fff",borderRadius:20,padding:"3px 11px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0,whiteSpace:"nowrap"}}>🔥 {isEN?"PREDICTION OF THE DAY":"PREDICCIÓN DEL DÍA"}</span>
         <span className="nexo-prediction-text" style={{color:"#1E293B",fontWeight:600,fontSize:12.5,flex:1,minWidth:0}}>{isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}</span>
@@ -20987,7 +20987,7 @@ export default function App(){
           ))}
         </div>
         {/* ── ROW 2: VIP TABS ── */}
-        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#FAFCFF",borderTop:"1px solid #E8F0FB",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
+        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#E8F4FF",borderTop:"1px solid #BFDBFE",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
           <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#F59E0B",background:"transparent",border:"none",padding:"0 14px",whiteSpace:"nowrap",cursor:"pointer",transition:"opacity 0.15s",opacity:0.85}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.85"}>⭐ PREMIUM</span>
           {[
             {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
