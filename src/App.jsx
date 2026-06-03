@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 16:15:40
+// NEXO TRADE — build: 2026-06-03 16:21:33
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7706,22 +7706,22 @@ function SocialProofBar({user, onRegister, lang="es"}){
 
   return(
     <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 6px"}}>
-      <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:10,padding:"6px 14px",border:"1px solid #1e293b",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
+      <div style={{background:"#EBF3FF",borderRadius:10,padding:"6px 14px",border:"1px solid #C5DEFF",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
         <div style={{display:"flex",gap:10,flexWrap:"wrap",flex:1}}>
           {items.map((s,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
               <span style={{fontSize:11}}>{s.icon}</span>
               <div>
-                <span style={{color:s.highlight?"#10b981":C.accent,fontWeight:800,fontSize:11}}>{s.value}</span>
-                <span style={{color:"#475569",fontSize:10,marginLeft:3}}>{s.label}</span>
+                <span style={{color:s.highlight?"#0C6B3E":"#1A5FAD",fontWeight:800,fontSize:11}}>{s.value}</span>
+                <span style={{color:"#5B8DC7",fontSize:10,marginLeft:3}}>{s.label}</span>
               </div>
-              {i<items.length-1&&<div style={{width:1,height:12,background:"#334155",marginLeft:8}}/>}
+              {i<items.length-1&&<div style={{width:1,height:12,background:"#C5DEFF",marginLeft:8}}/>}
             </div>
           ))}
         </div>
         {!user && (
           <button onClick={onRegister}
-            style={{background:`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
+            style={{background:"#1A5FAD",border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
             {isEN?"Join free →":"Únete gratis →"}
           </button>
         )}
