@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 18:28:25
+// NEXO TRADE — build: 2026-06-03 18:42:50
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4606,6 +4606,24 @@ function EarningsPage({lang}){
   const [voted,    setVoted]    = useState({});
   const [votes,    setVotes]    = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker,e.bull_pct])));
   const [liveEvent,setLiveEvent]= useState(null);
+  const [selEarning, setSelEarning] = useState(null);
+
+  // ── Resultados reales por ticker ──
+  const EARNINGS_RESULTS = {
+    NVDA: { epsAct:"$6.12", epsEst:"$5.59", revAct:"$35.1B", revEst:"$33.2B", beat:true, guidance:"Revenue Q2 guidance: $37.5B (vs $36.8B esperado). Blackwell demand sigue exceeding supply.", callUrl:"https://seekingalpha.com/symbol/NVDA/earnings" },
+    MSFT: { epsAct:"$3.46", epsEst:"$3.22", revAct:"$69.6B", revEst:"$68.4B", beat:true, guidance:"Azure crecimiento 35% YoY. FY2026 capex $80B en data centers. Copilot adoption acelerando.", callUrl:"https://seekingalpha.com/symbol/MSFT/earnings" },
+    AAPL: { epsAct:"$2.40", epsEst:"$2.36", revAct:"$124.3B", revEst:"$123.1B", beat:true, guidance:"iPhone 17 demand strong. Services revenue all-time high $26.6B. India production expansion.", callUrl:"https://seekingalpha.com/symbol/AAPL/earnings" },
+    META: { epsAct:"$6.43", epsEst:"$5.27", revAct:"$42.3B", revEst:"$41.4B", beat:true, guidance:"Q2 revenue guidance $42.5B-$45.5B. AI ads generando 10% más revenue por impression.", callUrl:"https://seekingalpha.com/symbol/META/earnings" },
+    GOOGL:{ epsAct:"$2.81", epsEst:"$2.01", revAct:"$90.2B", revEst:"$89.1B", beat:true, guidance:"Search +10% YoY. YouTube ads superaron estimados. Cloud $12.3B (+28% YoY).", callUrl:"https://seekingalpha.com/symbol/GOOGL/earnings" },
+    TSLA: { epsAct:"$0.27", epsEst:"$0.41", revAct:"$19.3B", revEst:"$21.3B", beat:false, guidance:"Q2 deliveries rebote esperado. Robotaxi Austin launch junio. Energy storage record Q1.", callUrl:"https://seekingalpha.com/symbol/TSLA/earnings" },
+    AMZN: { epsAct:"$1.59", epsEst:"$1.36", revAct:"$155.7B", revEst:"$155.0B", beat:true, guidance:"AWS $30B+ run rate. Prime membership record. Ad revenue +19% YoY.", callUrl:"https://seekingalpha.com/symbol/AMZN/earnings" },
+    NFLX: { epsAct:"$6.61", epsEst:"$5.68", revAct:"$10.5B", revEst:"$10.2B", beat:true, guidance:"Ad-supported tier 55% new signups. Q2 revenue guide $11.0B-$11.1B.", callUrl:"https://seekingalpha.com/symbol/NFLX/earnings" },
+    JPM:  { epsAct:"$5.07", epsEst:"$4.62", revAct:"$46.0B", revEst:"$44.1B", beat:true, guidance:"NII guidance levemente reducida. Capital markets sólido. Credit quality holds.", callUrl:"https://seekingalpha.com/symbol/JPM/earnings" },
+    AMD:  { epsAct:"$0.96", epsEst:"$0.94", revAct:"$7.4B", revEst:"$7.2B", beat:true, guidance:"MI300X demand strong. Data center GPU guidance $4.5B+ Q2. PC recovery on track.", callUrl:"https://seekingalpha.com/symbol/AMD/earnings" },
+    MU:   { epsAct:"$1.56", epsEst:"$1.47", revAct:"$9.0B", revEst:"$8.9B", beat:true, guidance:"HBM memory sold out through 2026. AI demand driving ASP expansion.", callUrl:"https://seekingalpha.com/symbol/MU/earnings" },
+    CHPT: { epsAct:"-$0.26", epsEst:"-$0.14", revAct:"$107M", revEst:"$115M", beat:false, guidance:"Revenue miss. Fleet charging demand slower than expected. Cutting costs aggressively.", callUrl:"https://seekingalpha.com/symbol/CHPT/earnings" },
+    GS:   { epsAct:"$14.12", epsEst:"$12.35", revAct:"$15.1B", revEst:"$14.7B", beat:true, guidance:"Investment banking pipeline strongest since 2021. M&A activity rebounding sharply.", callUrl:"https://seekingalpha.com/symbol/GS/earnings" },
+  };
 
   // ── Static lookup data ──
   const MKTCAP_MAP={TSLA:"$1.0T",MSFT:"$3.4T",GOOGL:"$2.4T",META:"$1.7T",NVDA:"$5.5T",AAPL:"$4.6T",NFLX:"$480B",AMZN:"$2.3T",MU:"$165B",JPM:"$700B",GS:"$180B",GM:"$48B",NXP:"$52B",BABB:"$2.1B",CUEN:"$420M",HFUS:"$180M",TESI:"$310M",COOT:"$290M"};
@@ -4880,7 +4898,8 @@ function EarningsPage({lang}){
               const isAlerked=alertedEar.has(e.ticker+e.rawDate);
               return(
                 <div key={`${e.ticker}-${e.rawDate}`}
-                  style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center"}}
+                  onClick={()=>{ if(EARNINGS_RESULTS[e.ticker]) setSelEarning(e); }}
+                  style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default"}}
                   onMouseEnter={ev=>ev.currentTarget.style.background="rgba(0,102,255,0.04)"}
                   onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
                   {/* Star */}
@@ -4987,6 +5006,92 @@ function EarningsPage({lang}){
         </div>
       </div>
       {liveEvent&&<LiveConferenceModal event={liveEvent} lang={lang} onClose={()=>setLiveEvent(null)}/>}
+      {selEarning&&<EarningsDetailModal e={selEarning} result={EARNINGS_RESULTS[selEarning.ticker]} onClose={()=>setSelEarning(null)} C={C}/>}
+    </div>
+  );
+}
+
+// ── EARNINGS DETAIL MODAL ─────────────────────────────────────────────────────
+function EarningsDetailModal({e, result, onClose, C}){
+  const beat = result?.beat;
+  const ytSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(e.ticker+" earnings call")}`;
+  const saUrl = result?.callUrl || `https://seekingalpha.com/symbol/${e.ticker}/earnings`;
+  return(
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div onClick={ev=>ev.stopPropagation()} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,width:"100%",maxWidth:480,padding:0,overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
+        {/* Header */}
+        <div style={{background:beat===false?"rgba(239,68,68,0.1)":"rgba(16,185,129,0.1)",borderBottom:`1px solid ${C.border}`,padding:"18px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{width:44,height:44,borderRadius:10,background:beat===false?"#EF4444":"#10B981",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>
+              {e.ticker.slice(0,2)}
+            </div>
+            <div>
+              <div style={{fontWeight:900,fontSize:17,color:C.text,fontFamily:"monospace",letterSpacing:-0.5}}>{e.ticker}</div>
+              <div style={{fontSize:11,color:C.muted}}>{e.nombre}</div>
+            </div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{background:beat===false?"rgba(239,68,68,0.15)":"rgba(16,185,129,0.15)",border:`1.5px solid ${beat===false?"#EF4444":"#10B981"}`,borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:800,color:beat===false?"#EF4444":"#10B981"}}>
+              {beat===false?"❌ MISS":"✅ BEAT"}
+            </div>
+            <button onClick={onClose} style={{background:"transparent",border:"none",cursor:"pointer",fontSize:20,color:C.muted,lineHeight:1,padding:4}}>✕</button>
+          </div>
+        </div>
+
+        {/* EPS + Revenue */}
+        <div style={{padding:"18px 20px 0"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+            {/* EPS */}
+            <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:"14px 16px"}}>
+              <div style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>EPS</div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
+                <div>
+                  <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Real</div>
+                  <div style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:beat===false?"#EF4444":"#10B981"}}>{result?.epsAct||"—"}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Estimado</div>
+                  <div style={{fontFamily:"monospace",fontSize:16,fontWeight:700,color:C.muted}}>{result?.epsEst||e.eps_est||"—"}</div>
+                </div>
+              </div>
+            </div>
+            {/* Revenue */}
+            <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:"14px 16px"}}>
+              <div style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>REVENUE</div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
+                <div>
+                  <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Real</div>
+                  <div style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:beat===false?"#EF4444":"#10B981"}}>{result?.revAct||"—"}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Estimado</div>
+                  <div style={{fontFamily:"monospace",fontSize:16,fontWeight:700,color:C.muted}}>{result?.revEst||e.rev_est||"—"}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Guidance */}
+          {result?.guidance&&(
+            <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:"14px 16px",marginBottom:16}}>
+              <div style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>📋 GUIDANCE / NOTAS</div>
+              <div style={{fontSize:13,color:C.text,lineHeight:1.55}}>{result.guidance}</div>
+            </div>
+          )}
+
+          {/* Call links */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
+            <a href={saUrl} target="_blank" rel="noopener noreferrer"
+              style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(255,165,0,0.1)",border:"1.5px solid rgba(255,165,0,0.4)",borderRadius:11,padding:"11px 14px",textDecoration:"none",color:"#F59E0B",fontWeight:800,fontSize:13}}>
+              🎧 Seeking Alpha
+            </a>
+            <a href={ytSearch} target="_blank" rel="noopener noreferrer"
+              style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(239,68,68,0.1)",border:"1.5px solid rgba(239,68,68,0.4)",borderRadius:11,padding:"11px 14px",textDecoration:"none",color:"#EF4444",fontWeight:800,fontSize:13}}>
+              ▶ YouTube
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
