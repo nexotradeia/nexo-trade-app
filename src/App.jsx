@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:03:25
+// NEXO TRADE — build: 2026-06-03 15:08:48
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -18804,27 +18804,25 @@ function AdminDashboard(){
   const [search,setSearch] = useState("");
 
   useEffect(()=>{
-    const safe = async(query) => { try{ return await query; }catch{ return {}; } };
-    const load = async()=>{
-      setLoading(true);
+    // Mostrar UI de inmediato con ceros
+    setStats({totalUsers:0,newToday:0,newWeek:0,vipCount:0,postsHoy:0,totalPosts:0,totalSubs:0,activosHoy:0,logins:0});
+    setLoading(false);
+
+    // Luego cargar datos reales en background con timeout de 8s por query
+    const withTimeout = (promise, ms=8000) => Promise.race([promise, new Promise(r=>setTimeout(()=>r({}),ms))]);
+
+    const loadData = async()=>{
       const hoy   = new Date(); hoy.setHours(0,0,0,0);
       const semana= new Date(); semana.setDate(semana.getDate()-7);
 
-      const [r1,r2,r3,r4,r5,r6,r7,r8,r9] = await Promise.all([
-        safe(supabase.from("profiles").select("*",{count:"exact",head:true})),
-        safe(supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString())),
-        safe(supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",semana.toISOString())),
-        safe(supabase.from("profiles").select("*",{count:"exact",head:true}).eq("is_premium",true)),
-        safe(supabase.from("posts").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString())),
-        safe(supabase.from("posts").select("*",{count:"exact",head:true})),
-        safe(supabase.from("newsletter_subscribers").select("email,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(50)),
-        safe(supabase.from("posts").select("content,ticker,tipo,username,created_at,likes").order("created_at",{ascending:false}).limit(15)),
-        safe(supabase.from("profiles").select("id,username,avatar_emoji,avatar_color,is_premium,created_at,updated_at,points").order("updated_at",{ascending:false}).limit(50)),
+      // Cargamos profiles primero (más importante)
+      const [r9, r4] = await Promise.all([
+        withTimeout(supabase.from("profiles").select("id,username,avatar_emoji,avatar_color,is_premium,created_at,updated_at,points").order("updated_at",{ascending:false}).limit(50)),
+        withTimeout(supabase.from("profiles").select("*",{count:"exact",head:true}).eq("is_premium",true)),
       ]);
-
-      const totalUsers=r1.count||0, newToday=r2.count||0, newWeek=r3.count||0,
-            vipCount=r4.count||0, postsHoy=r5.count||0, totalPosts=r6.count||0,
-            totalSubs=r7.count||0, subsData=r7.data||[], recentPosts=r8.data||[], userList=r9.data||[];
+      const userList = r9.data||[];
+      const vipCount = r4.count||0;
+      const totalUsers = userList.length;
 
       const enrichedUsers = userList.map(u=>{
         const daysSince = Math.floor((Date.now()-new Date(u.updated_at||u.created_at).getTime())/86400000);
@@ -18833,15 +18831,35 @@ function AdminDashboard(){
         return {...u, lastAccess, logins};
       }).sort((a,b)=>b.logins-a.logins);
 
-      setStats({totalUsers,newToday,newWeek,vipCount,postsHoy,totalPosts,totalSubs,
-        activosHoy:Math.max(newToday, Math.floor(totalUsers*0.12)),
-        logins:Math.floor(totalUsers*7.2)});
       setUsers(enrichedUsers);
-      setSubs(subsData);
-      setPosts(recentPosts);
-      setLoading(false);
+      setStats(s=>({...s, totalUsers, vipCount,
+        activosHoy:Math.floor(totalUsers*0.12),
+        logins:Math.floor(totalUsers*7.2)}));
+
+      // Posts y subs en segundo plano
+      const [r8, r7] = await Promise.all([
+        withTimeout(supabase.from("posts").select("content,ticker,tipo,username,created_at,likes").order("created_at",{ascending:false}).limit(15)),
+        withTimeout(supabase.from("newsletter_subscribers").select("email,created_at").order("created_at",{ascending:false}).limit(50)),
+      ]);
+      if(r8.data) setPosts(r8.data);
+      if(r7.data) setSubs(r7.data);
+
+      // Counts finales
+      const [r1,r2,r3,r5,r6] = await Promise.all([
+        withTimeout(supabase.from("profiles").select("*",{count:"exact",head:true})),
+        withTimeout(supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString())),
+        withTimeout(supabase.from("profiles").select("*",{count:"exact",head:true}).gte("created_at",semana.toISOString())),
+        withTimeout(supabase.from("posts").select("*",{count:"exact",head:true}).gte("created_at",hoy.toISOString())),
+        withTimeout(supabase.from("posts").select("*",{count:"exact",head:true})),
+      ]);
+      setStats(s=>({...s,
+        totalUsers:r1.count||totalUsers, newToday:r2.count||0, newWeek:r3.count||0,
+        postsHoy:r5.count||0, totalPosts:r6.count||0,
+        activosHoy:Math.max(r2.count||0, Math.floor((r1.count||totalUsers)*0.12)),
+        logins:Math.floor((r1.count||totalUsers)*7.2),
+      }));
     };
-    load();
+    loadData();
   },[]);
 
   if(loading) return(
