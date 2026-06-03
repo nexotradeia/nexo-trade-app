@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 17:27:51
+// NEXO TRADE — build: 2026-06-03 17:45:16
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -13581,26 +13581,26 @@ const BOT_TEXT_TEMPLATES = {
 
 // ── POSTS CASUALES de traders ficticios (reacciones de mercado) ──────────────
 const CASUAL_BOT_POSTS = [
-  {id:"c1", user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"BTC",  sentiment:"bull", showChart:true,  text:"$BTC breaking key resistance 💥 Who else is in this trade? I've been long since $95k — this is heading to $120k 📈", likes:143, comments:31, reposts:22, time:"2h ago", tags:["BTC","Crypto"]},
-  {id:"c2", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"NVDA", sentiment:"bull", showChart:false, text:"$NVDA just confirmed support at $128. Textbook setup. Those who entered yesterday are already up +4% 🙌 Next stop $145", image:"/api/finviz-chart?t=NVDA&p=d", likes:98,  comments:19, reposts:14, time:"4h ago", tags:["NVDA","AI"]},
-  {id:"c3", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"ETH",  sentiment:"bull", showChart:true,  text:"$ETH broke $2,800 on volume 🔥 The ETH ETF narrative is coming back. Adding on every pullback. Short-term target: $3,200 🎯", likes:211, comments:44, reposts:38, time:"1h ago", tags:["ETH","Crypto","ETF"]},
+  {id:"c1", user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"BTC",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$BTC breaking key resistance 💥 Who else is in this trade? I've been long since $95k — this is heading to $120k 📈", likes:143, comments:31, reposts:22, time:"2h ago", tags:["BTC","Crypto"]},
+  {id:"c2", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"NVDA", sentiment:"bull", showChart:false, text:"$NVDA just confirmed support at $128. Textbook setup. Those who entered yesterday are already up +4% 🙌 Next stop $145", likes:98,  comments:19, reposts:14, time:"4h ago", tags:["NVDA","AI"]},
+  {id:"c3", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"ETH",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$ETH broke $2,800 on volume 🔥 The ETH ETF narrative is coming back. Adding on every pullback. Short-term target: $3,200 🎯", likes:211, comments:44, reposts:38, time:"1h ago", tags:["ETH","Crypto","ETF"]},
   {id:"c4", user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"SPY",  sentiment:"bull", showChart:false, text:"$SPY closing near all-time highs. The market is ignoring every macro noise. Bulls in control 🐂 Don't fight the trend.", likes:77,  comments:12, reposts:9,  time:"6h ago", tags:["SPY","Market"]},
-  {id:"c5", user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"TSLA", sentiment:"bear", showChart:true,  text:"$TSLA selling off despite the broader market bounce. Bearish divergence. Not convinced by the long setup here 📉 Waiting for confirmation before adding.", likes:54,  comments:23, reposts:7,  time:"3h ago", tags:["TSLA","Analysis"]},
-  {id:"c6", user:"CarlosInvierte",   avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"NVDA", sentiment:"bull", showChart:true, text:"I've been tracking $NVDA since $120 and the setup is perfect. NVIDIA holds absolute dominance in AI GPUs with Blackwell architecture. Data center demand from hyperscalers shows zero deceleration. Microsoft, Google and Amazon are competing for every chip available. Gross margins just hit 78% — a new all-time record. My target: $185, stop at $102 🎯\n\nThis week is key: Computex presentation + US jobs data Friday. If NFP prints positive, $NVDA easily breaks $150.", image:"/api/finviz-chart?t=NVDA&p=w", likes:284, comments:67, reposts:52, time:"2026-05-15", tags:["NVDA","AI","Chips"]},
-  {id:"c7", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"META", sentiment:"bull", text:"Analysis thread: Why $META (Meta Platforms) is my largest position in 2026?\n\n1️⃣ Operating margin hit 42% — best-in-class across the entire S&P 500\n2️⃣ Llama 4 outperforms GPT-4o on reasoning benchmarks — open-source and free\n3️⃣ Reels monetizes at 2x the rate of Stories two years ago\n4️⃣ Reality Labs losing less money each quarter — the metaverse is maturing\n5️⃣ $50B share buyback this year\n\nI don't understand how anyone can be out of this position. 12-month target: $750 📊", image:"/api/finviz-chart?t=META&p=d", likes:342, comments:89, reposts:71, time:"2026-05-18", tags:["META","AI","Value"]},
-  {id:"c8", user:"AndresTradePro",   avatar:"🎯",   avatarColor:"#EF4444", badge:"Options",       ticker:"META", sentiment:"bull", text:"Bought $META June calls. The company is printing money with AI-powered ads. If $600 holds, this trade goes 3x 🚀", likes:167, comments:35, reposts:28, time:"5h ago", tags:["META","Options"]},
-  {id:"c9", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"BTC",  sentiment:"bull", showChart:true, text:"Full technical analysis of $BTC (Bitcoin) — current situation:\n\n📈 BTC closed above $100K for the 3rd consecutive week. This is psychologically huge. $100K is now support, not resistance.\n\nOn-chain: wallets holding 1+ BTC hit an all-time high this week. Paper hands are gone. Only conviction HODLers remain.\n\nUpcoming catalyst: US Congress votes on the Bitcoin Reserve Act in July. If it passes, states can hold BTC as reserve — massive institutional demand.\n\nMy position: Long from $92K. Immediate target $115K, then $135K by year-end. Stop at $94K 🔒", likes:521, comments:134, reposts:98, time:"2026-05-22", tags:["BTC","OnChain","Crypto"]},
-  {id:"c10",user:"RicardoInvest",    avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"SOL",  sentiment:"bull", text:"$SOL completed its pullback to support. Perfect buy zone between $155-$160. Swing target: $195 in 3-4 weeks ⚡ Risk/reward of 4:1", likes:201, comments:42, reposts:31, time:"1h ago", tags:["SOL","Crypto"]},
-  {id:"c11",user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"AMZN", sentiment:"bull", text:"$AMZN AWS just reported 21% growth QoQ. That's an ACCELERATION. The AI infrastructure buildout is just beginning. Buy the dip, always. 🚀", image:"/api/finviz-chart?t=AMZN&p=d", likes:189, comments:41, reposts:33, time:"3h ago", tags:["AMZN","AWS","Cloud"]},
-  {id:"c12",user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"QQQ",  sentiment:"bull", text:"$QQQ breaking all-time highs with low put/call ratio. The melt-up scenario is playing out. Don't overthink it — trend is your friend. 🐂", likes:93,  comments:18, reposts:12, time:"5h ago", tags:["QQQ","Nasdaq","Trend"]},
-  {id:"c13",user:"IsabelAnalysis",   avatar:"📊",   avatarColor:"#F59E0B", badge:"Quant",         ticker:"PLTR", sentiment:"bull", text:"Quant signal: $PLTR showing 92% bullish probability over 30 days. Government contract pipeline is unprecedented. Anyone else positioned? 📊", image:"/api/finviz-chart?t=PLTR&p=d", likes:147, comments:32, reposts:21, time:"2h ago", tags:["PLTR","Government","AI"]},
-  {id:"c14",user:"ValentinaFinance", avatar:"💎",   avatarColor:"#06B6D4", badge:"Value Investor", ticker:"MSFT", sentiment:"bull", showChart:true, text:"Deep dive on $MSFT (Microsoft) — why this is the safest AI bet in the market:\n\n🔷 Azure AI growing 35% YoY — and ACCELERATING\n🔷 Copilot deployed in 85% of Fortune 500 companies\n🔷 GitHub Copilot crossed 2M paid users (up from 1M six months ago)\n🔷 Operating margin: 46% — best-in-class for a company this size\n🔷 Free cash flow: $75B annually\n\nThe OpenAI partnership gives them a moat that nobody can replicate in under 5 years. While everyone chases NVDA, smart money is quietly accumulating MSFT.\n\nEntry: $452 | Target: $530 | Stop: $425 💼", image:"/api/finviz-chart?t=MSFT&p=w", likes:398, comments:87, reposts:64, time:"2026-05-20", tags:["MSFT","AI","Cloud"]},
-  {id:"c15",user:"NataliaTrader",    avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"COIN", sentiment:"bull", text:"Let me tell you why $COIN (Coinbase) is the most undervalued stock in crypto right now 🧵\n\nBitcoin hit $107K. Every $10K BTC moves = approximately +15-20% for COIN. Simple math.\n\nBut there's more:\n✅ Coinbase is the official custodian for 9 of 11 Bitcoin ETFs in the US\n✅ Base (their L2 network) just crossed 10M monthly active users\n✅ Institutional revenue now bigger than retail for first time ever\n✅ Regulatory clarity in the US finally happening in 2026\n\nStreet consensus target: $350. Current price: ~$262. That's 33% upside with Bitcoin as the macro tailwind.\n\nThis is not financial advice, but you get the idea 😉", likes:445, comments:112, reposts:83, time:"2026-05-25", tags:["COIN","BTC","Crypto"]},
-  {id:"c16",user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"GLD",  sentiment:"bull", text:"🧵 MACRO VIEW — Why gold ($GLD) is the most important trade of 2026:\n\nCentral banks bought more gold in Q1 2026 than any quarter in history. China (+60 tonnes), India (+34T), Poland (+18T).\n\nThe dollar weakens due to the structural fiscal deficit — $36 trillion in debt and rising. Every 1% drop in USD = ~1.5% rise in gold.\n\nGeopolitics: post-Ukraine sanctions taught countries that dollar reserves can be frozen. Gold can't.\n\nTechnical: $GLD confirmed weekly breakout. Short-term target: $345. 2026 target: $380.\n\nRecommended portfolio allocation: 5-10% in gold/GLD as a permanent hedge 🥇", likes:267, comments:58, reposts:44, time:"2026-05-28", tags:["GLD","Gold","Macro"]},
-  {id:"c17",user:"CarlosInvierte",  avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"PLTR", sentiment:"bull", text:"$PLTR (Palantir) is the trade of the decade in defense + AI. Just won a $480M contract with the US Army. Commercial US revenue +127% YoY. Peter Thiel remains the largest shareholder behind insiders.\n\nWhat I love: GUARANTEED government contracts. That doesn't disappear in a recession.\n\nPosition: long from $98. Added more this week at $125. Target: $165 before August 🔐", image:"/api/finviz-chart?t=PLTR&p=w", likes:312, comments:78, reposts:61, time:"2026-05-29", tags:["PLTR","Defense","AI"]},
-  {id:"c18",user:"IsabelAnalysis",  avatar:"📊",   avatarColor:"#F59E0B", badge:"Quant",         ticker:"AVGO", sentiment:"bull", text:"Quant screen caught $AVGO (Broadcom) at a key inflection point. Here's the data:\n\n📊 Custom AI chip revenue growing 220% YoY — hyperscalers are moving away from NVIDIA for some workloads\n📊 VMware integration adding $4B+ in annual FCF\n📊 Net margin: 51% — extraordinarily high for a hardware company\n📊 Management just raised guidance for the 4th consecutive quarter\n\nMy model gives 87% probability of outperforming S&P 500 over next 90 days. Entry zone: $185-$195. Target: $245 🎯", image:"/api/finviz-chart?t=AVGO&p=d", likes:234, comments:56, reposts:41, time:"2026-05-27", tags:["AVGO","Chips","AI"]},
-  {id:"c19",user:"RicardoInvest",   avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"AMD",  sentiment:"bull", text:"$AMD textbook setup 📈 Broke resistance at $165 on 3x average volume. Next level: $185-$190.\n\nFundamentals: MI300X selling out immediately. Data center clients who can't get NVIDIA are buying AMD. Lisa Su is the best CEO in semiconductors. Cheaper valuation than $NVDA playing the same market.\n\nTrade: Long $165, stop $154, target $190. Risk/reward 2.3:1 ⚡", image:"/api/finviz-chart?t=AMD&p=d", likes:189, comments:44, reposts:32, time:"2026-05-30", tags:["AMD","Chips","Semiconductors"]},
-  {id:"c20",user:"NataliaTrader",   avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"DDOG", sentiment:"bull", text:"$DDOG (Datadog) is the infrastructure monitoring play nobody is talking about 🧵\n\nEvery AI application needs observability. Every cloud workload needs monitoring. Datadog captures both.\n\nQ1 2026: Revenue +27% YoY, NRR 118%, 3,600+ customers spending $100K+/year.\n\nThe AI story: as companies build AI apps, they NEED Datadog to understand what's happening. This is a pick-and-shovel play on the AI boom without paying NVDA multiples.\n\nEntry: $135 | Target: $185 | Stop: $118. This one runs quietly while everyone watches the flashy names 💎", image:"/api/finviz-chart?t=DDOG&p=d", likes:378, comments:91, reposts:67, time:"2026-05-26", tags:["DDOG","Cloud","AI"]},
+  {id:"c5", user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"TSLA", sentiment:"bear", showChart:true,  chartType:"line",   text:"$TSLA selling off despite the broader market bounce. Bearish divergence. Not convinced by the long setup here 📉 Waiting for confirmation before adding.", likes:54,  comments:23, reposts:7,  time:"3h ago", tags:["TSLA","Analysis"]},
+  {id:"c6", user:"CarlosInvierte",   avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"NVDA", sentiment:"bull", showChart:true,  chartType:"candle", text:"I've been tracking $NVDA since $120 and the setup is perfect. NVIDIA holds absolute dominance in AI GPUs with Blackwell architecture. Data center demand from hyperscalers shows zero deceleration. Microsoft, Google and Amazon are competing for every chip available. Gross margins just hit 78% — a new all-time record. My target: $185, stop at $102 🎯\n\nThis week is key: Computex presentation + US jobs data Friday. If NFP prints positive, $NVDA easily breaks $150.", likes:284, comments:67, reposts:52, time:"2026-05-15", tags:["NVDA","AI","Chips"]},
+  {id:"c7", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"META", sentiment:"bull", showChart:true,  chartType:"line",   text:"Analysis thread: Why $META (Meta Platforms) is my largest position in 2026?\n\n1️⃣ Operating margin hit 42% — best-in-class across the entire S&P 500\n2️⃣ Llama 4 outperforms GPT-4o on reasoning benchmarks — open-source and free\n3️⃣ Reels monetizes at 2x the rate of Stories two years ago\n4️⃣ Reality Labs losing less money each quarter — the metaverse is maturing\n5️⃣ $50B share buyback this year\n\nI don't understand how anyone can be out of this position. 12-month target: $750 📊", likes:342, comments:89, reposts:71, time:"2026-05-18", tags:["META","AI","Value"]},
+  {id:"c8", user:"AndresTradePro",   avatar:"🎯",   avatarColor:"#EF4444", badge:"Options",       ticker:"META", sentiment:"bull", showChart:false, text:"Bought $META June calls. The company is printing money with AI-powered ads. If $600 holds, this trade goes 3x 🚀", likes:167, comments:35, reposts:28, time:"5h ago", tags:["META","Options"]},
+  {id:"c9", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"BTC",  sentiment:"bull", showChart:true,  chartType:"candle", text:"Full technical analysis of $BTC (Bitcoin) — current situation:\n\n📈 BTC closed above $100K for the 3rd consecutive week. This is psychologically huge. $100K is now support, not resistance.\n\nOn-chain: wallets holding 1+ BTC hit an all-time high this week. Paper hands are gone. Only conviction HODLers remain.\n\nUpcoming catalyst: US Congress votes on the Bitcoin Reserve Act in July. If it passes, states can hold BTC as reserve — massive institutional demand.\n\nMy position: Long from $92K. Immediate target $115K, then $135K by year-end. Stop at $94K 🔒", likes:521, comments:134, reposts:98, time:"2026-05-22", tags:["BTC","OnChain","Crypto"]},
+  {id:"c10",user:"RicardoInvest",    avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"SOL",  sentiment:"bull", showChart:false, text:"$SOL completed its pullback to support. Perfect buy zone between $155-$160. Swing target: $195 in 3-4 weeks ⚡ Risk/reward of 4:1", likes:201, comments:42, reposts:31, time:"1h ago", tags:["SOL","Crypto"]},
+  {id:"c11",user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"AMZN", sentiment:"bull", showChart:false, text:"$AMZN AWS just reported 21% growth QoQ. That's an ACCELERATION. The AI infrastructure buildout is just beginning. Buy the dip, always. 🚀", likes:189, comments:41, reposts:33, time:"3h ago", tags:["AMZN","AWS","Cloud"]},
+  {id:"c12",user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"QQQ",  sentiment:"bull", showChart:false, text:"$QQQ breaking all-time highs with low put/call ratio. The melt-up scenario is playing out. Don't overthink it — trend is your friend. 🐂", likes:93,  comments:18, reposts:12, time:"5h ago", tags:["QQQ","Nasdaq","Trend"]},
+  {id:"c13",user:"IsabelAnalysis",   avatar:"📊",   avatarColor:"#F59E0B", badge:"Quant",         ticker:"PLTR", sentiment:"bull", showChart:true,  chartType:"line",   text:"Quant signal: $PLTR showing 92% bullish probability over 30 days. Government contract pipeline is unprecedented. Anyone else positioned? 📊", likes:147, comments:32, reposts:21, time:"2h ago", tags:["PLTR","Government","AI"]},
+  {id:"c14",user:"ValentinaFinance", avatar:"💎",   avatarColor:"#06B6D4", badge:"Value Investor", ticker:"MSFT", sentiment:"bull", showChart:true,  chartType:"line",   text:"Deep dive on $MSFT (Microsoft) — why this is the safest AI bet in the market:\n\n🔷 Azure AI growing 35% YoY — and ACCELERATING\n🔷 Copilot deployed in 85% of Fortune 500 companies\n🔷 GitHub Copilot crossed 2M paid users (up from 1M six months ago)\n🔷 Operating margin: 46% — best-in-class for a company this size\n🔷 Free cash flow: $75B annually\n\nThe OpenAI partnership gives them a moat that nobody can replicate in under 5 years. While everyone chases NVDA, smart money is quietly accumulating MSFT.\n\nEntry: $452 | Target: $530 | Stop: $425 💼", likes:398, comments:87, reposts:64, time:"2026-05-20", tags:["MSFT","AI","Cloud"]},
+  {id:"c15",user:"NataliaTrader",    avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"COIN", sentiment:"bull", showChart:false, text:"Let me tell you why $COIN (Coinbase) is the most undervalued stock in crypto right now 🧵\n\nBitcoin hit $107K. Every $10K BTC moves = approximately +15-20% for COIN. Simple math.\n\nBut there's more:\n✅ Coinbase is the official custodian for 9 of 11 Bitcoin ETFs in the US\n✅ Base (their L2 network) just crossed 10M monthly active users\n✅ Institutional revenue now bigger than retail for first time ever\n✅ Regulatory clarity in the US finally happening in 2026\n\nStreet consensus target: $350. Current price: ~$262. That's 33% upside with Bitcoin as the macro tailwind.\n\nThis is not financial advice, but you get the idea 😉", likes:445, comments:112, reposts:83, time:"2026-05-25", tags:["COIN","BTC","Crypto"]},
+  {id:"c16",user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"GLD",  sentiment:"bull", showChart:false, text:"🧵 MACRO VIEW — Why gold ($GLD) is the most important trade of 2026:\n\nCentral banks bought more gold in Q1 2026 than any quarter in history. China (+60 tonnes), India (+34T), Poland (+18T).\n\nThe dollar weakens due to the structural fiscal deficit — $36 trillion in debt and rising. Every 1% drop in USD = ~1.5% rise in gold.\n\nGeopolitics: post-Ukraine sanctions taught countries that dollar reserves can be frozen. Gold can't.\n\nTechnical: $GLD confirmed weekly breakout. Short-term target: $345. 2026 target: $380.\n\nRecommended portfolio allocation: 5-10% in gold/GLD as a permanent hedge 🥇", likes:267, comments:58, reposts:44, time:"2026-05-28", tags:["GLD","Gold","Macro"]},
+  {id:"c17",user:"CarlosInvierte",  avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"PLTR", sentiment:"bull", showChart:true,  chartType:"candle", text:"$PLTR (Palantir) is the trade of the decade in defense + AI. Just won a $480M contract with the US Army. Commercial US revenue +127% YoY. Peter Thiel remains the largest shareholder behind insiders.\n\nWhat I love: GUARANTEED government contracts. That doesn't disappear in a recession.\n\nPosition: long from $98. Added more this week at $125. Target: $165 before August 🔐", likes:312, comments:78, reposts:61, time:"2026-05-29", tags:["PLTR","Defense","AI"]},
+  {id:"c18",user:"IsabelAnalysis",  avatar:"📊",   avatarColor:"#F59E0B", badge:"Quant",         ticker:"AVGO", sentiment:"bull", showChart:true,  chartType:"line",   text:"Quant screen caught $AVGO (Broadcom) at a key inflection point. Here's the data:\n\n📊 Custom AI chip revenue growing 220% YoY — hyperscalers are moving away from NVIDIA for some workloads\n📊 VMware integration adding $4B+ in annual FCF\n📊 Net margin: 51% — extraordinarily high for a hardware company\n📊 Management just raised guidance for the 4th consecutive quarter\n\nMy model gives 87% probability of outperforming S&P 500 over next 90 days. Entry zone: $185-$195. Target: $245 🎯", likes:234, comments:56, reposts:41, time:"2026-05-27", tags:["AVGO","Chips","AI"]},
+  {id:"c19",user:"RicardoInvest",   avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"AMD",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$AMD textbook setup 📈 Broke resistance at $165 on 3x average volume. Next level: $185-$190.\n\nFundamentals: MI300X selling out immediately. Data center clients who can't get NVIDIA are buying AMD. Lisa Su is the best CEO in semiconductors. Cheaper valuation than $NVDA playing the same market.\n\nTrade: Long $165, stop $154, target $190. Risk/reward 2.3:1 ⚡", likes:189, comments:44, reposts:32, time:"2026-05-30", tags:["AMD","Chips","Semiconductors"]},
+  {id:"c20",user:"NataliaTrader",   avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"DDOG", sentiment:"bull", showChart:false, text:"$DDOG (Datadog) is the infrastructure monitoring play nobody is talking about 🧵\n\nEvery AI application needs observability. Every cloud workload needs monitoring. Datadog captures both.\n\nQ1 2026: Revenue +27% YoY, NRR 118%, 3,600+ customers spending $100K+/year.\n\nThe AI story: as companies build AI apps, they NEED Datadog to understand what's happening. This is a pick-and-shovel play on the AI boom without paying NVDA multiples.\n\nEntry: $135 | Target: $185 | Stop: $118. This one runs quietly while everyone watches the flashy names 💎", likes:378, comments:91, reposts:67, time:"2026-05-26", tags:["DDOG","Cloud","AI"]},
 ];
 
 // ── BOT POSTS de NexoTrade Research (después de IDEAS_DATA para poder usarla) ─
@@ -13621,8 +13621,9 @@ const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
     reposts:  4 + (idea.id*3) % 22,
     time: idea.published,
     tags: idea.tags,
-    // Cada 2 bots muestran mini chart de precio (los de análisis técnico)
-    showChart: i % 2 === 0,
+    // Cada 3 bots muestran chart; alternan candle (i%3===0) y line (i%3===1)
+    showChart: i % 3 !== 2,
+    chartType: i % 2 === 0 ? "candle" : "line",
   };
 });
 
@@ -13660,6 +13661,68 @@ function renderBotText(text, onTickerClick){
   });
 }
 
+// ── BotChart: genera chart SVG inline (sin APIs externas) ──────────────────
+function BotChart({ticker="SPY", sentiment="bull", chartType="candle", seed=42}){
+  const W=300, H=130, padL=6, padR=6, padT=6, padB=22;
+  const cW=W-padL-padR, cH=H-padT-padB;
+  const N=22;
+  const hash=(n)=>{ let s=(seed+n)*2654435761+(ticker.charCodeAt(0)||65)*n; return((s>>>0)%1000)/1000; };
+  let price=100;
+  const data=[];
+  for(let i=0;i<N;i++){
+    const trend=sentiment==="bull"?0.009:sentiment==="bear"?-0.009:0.001;
+    const chg=trend+(hash(i*3)-0.5)*0.045;
+    const open=price; price=price*(1+chg); const close=price;
+    const hi=Math.max(open,close)*(1+(hash(i*7))*0.018);
+    const lo=Math.min(open,close)*(1-(hash(i*11))*0.018);
+    data.push({open,close,hi,lo,vol:0.3+hash(i*13)*0.7});
+  }
+  const allP=data.flatMap(d=>[d.hi,d.lo]);
+  const minP=Math.min(...allP)*0.994, maxP=Math.max(...allP)*1.006;
+  const toY=p=>padT+cH-((p-minP)/(maxP-minP))*cH;
+  const gap=cW/N;
+  const cw=gap*0.6;
+  const bullC="#16a34a", bearC="#dc2626";
+
+  if(chartType==="candle"){
+    return(
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{borderRadius:8,display:"block",background:"#0d1117",margin:"8px 0"}}>
+        {[0.25,0.5,0.75].map(t=><line key={t} x1={padL} x2={W-padR} y1={padT+cH*t} y2={padT+cH*t} stroke="#ffffff08" strokeWidth="0.5"/>)}
+        {data.map((d,i)=>{
+          const x=padL+i*gap+gap*0.2;
+          const up=d.close>=d.open;
+          const c=up?bullC:bearC;
+          const volH=d.vol*16;
+          const bTop=toY(Math.max(d.open,d.close));
+          const bH=Math.max(1.5,Math.abs(toY(d.open)-toY(d.close)));
+          const xm=x+cw/2;
+          return(
+            <g key={i}>
+              <rect x={x} y={H-padB-volH} width={cw} height={volH} fill={up?`${bullC}30`:`${bearC}30`} rx="0.5"/>
+              <line x1={xm} x2={xm} y1={toY(d.hi)} y2={toY(d.lo)} stroke={c} strokeWidth="0.8"/>
+              <rect x={x} y={bTop} width={cw} height={bH} fill={c} rx="0.5"/>
+            </g>
+          );
+        })}
+        <text x={padL+4} y={padT+11} fill="#ffffff45" fontSize="8.5" fontWeight="700" fontFamily="monospace">${ticker} · D</text>
+        <text x={W-padR-32} y={padT+11} fill={sentiment==="bull"?bullC:bearC} fontSize="8.5" fontWeight="700" fontFamily="monospace">{sentiment==="bull"?"▲ BUY":sentiment==="bear"?"▼ SELL":"◆ HOLD"}</text>
+      </svg>
+    );
+  }
+  // type="line"
+  const pts=data.map((d,i)=>`${padL+i*gap+gap/2},${toY((d.open+d.close)/2)}`).join(" ");
+  const fillPts=`${padL+gap/2},${toY((data[0].open+data[0].close)/2)} ${pts} ${padL+(N-1)*gap+gap/2},${H-padB} ${padL+gap/2},${H-padB}`;
+  return(
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{borderRadius:8,display:"block",background:"#f8faff",border:"1px solid #dbeafe",margin:"8px 0"}}>
+      {[0.25,0.5,0.75].map(t=><line key={t} x1={padL} x2={W-padR} y1={padT+cH*t} y2={padT+cH*t} stroke="#dbeafe" strokeWidth="0.5"/>)}
+      <polygon points={fillPts} fill="#2563eb14"/>
+      <polyline points={pts} fill="none" stroke="#2563eb" strokeWidth="2" strokeLinejoin="round"/>
+      <text x={padL+4} y={padT+11} fill="#94a3b8" fontSize="8.5" fontWeight="700" fontFamily="monospace">${ticker} · 1D</text>
+      <text x={W-padR-38} y={padT+11} fill={sentiment==="bull"?"#16a34a":"#dc2626"} fontSize="8.5" fontWeight="700" fontFamily="monospace">{sentiment==="bull"?"▲ +trend":"▼ -trend"}</text>
+    </svg>
+  );
+}
+
 function BotPostCard({post,onTickerClick,lang}){
   const isEN = lang==="en";
   const isBull = post.sentiment==="bull";
@@ -13695,6 +13758,15 @@ function BotPostCard({post,onTickerClick,lang}){
           <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.65}}>
             {renderBotText(post.text, onTickerClick)}
           </p>
+          {/* Chart SVG — solo en posts con showChart:true */}
+          {post.showChart&&(
+            <BotChart
+              ticker={post.ticker}
+              sentiment={post.sentiment}
+              chartType={post.chartType||"candle"}
+              seed={post.ticker.split("").reduce((a,c)=>a+c.charCodeAt(0),0)}
+            />
+          )}
           {post.tags?.length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>
               {post.tags.slice(0,4).map(t=>(
