@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:56:28
+// NEXO TRADE — build: 2026-06-03 16:15:40
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -987,6 +987,7 @@ const TAPE_TICKERS = [
   "SMCI","META","COIN","PLTR","AMD","GOOGL",
   "SOL","XRP","DOGE","BNB","NFLX","MELI",
   "QQQ","GLD","UBER","SHOP","V","ORCL","CRM","WMT","COST","ANET",
+  "NU","SQ","LLY","AVGO","IWM","TLT","SNOW","NOW","XOM","PYPL",
 ];
 const SIDEBAR_TICKERS = ["BTC","NVDA","TSLA","ETH","SOL","AAPL","SPY","QQQ"];
 const ALL_TRACK = [...new Set([...TAPE_TICKERS,...SIDEBAR_TICKERS])];
@@ -4087,12 +4088,8 @@ function NoticiasPage({lang}){
 // CoinGecko IDs para los 4 crypto principales (API gratis, sin key)
 const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
 const TICKER_DATA_INIT = [
-  {s:"BTC",   n:"Bitcoin",    p:108500, c:+0.80,  col:"#f7931a", cg:"bitcoin"},
-  {s:"ETH",   n:"Ethereum",   p:2550,   c:+0.50,  col:"#627eea", cg:"ethereum"},
-  {s:"SOL",   n:"Solana",     p:172,    c:+1.20,  col:"#9945ff", cg:"solana"},
-  {s:"BNB",   n:"BNB",        p:648,    c:+0.30,  col:"#f3ba2f", cg:"binancecoin"},
-  {s:"XRP",   n:"XRP",        p:2.48,   c:+1.10,  col:"#346aa9", cg:"ripple"},
-  {s:"DOGE",  n:"Dogecoin",   p:0.182,  c:-0.80,  col:"#c2a633", cg:"dogecoin"},
+  {s:"SPY",   n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0066FF", cg:null, fh:"SPY"},
+  {s:"QQQ",   n:"Nasdaq ETF", p:485.2,  c:+0.30,  col:"#6366f1", cg:null, fh:"QQQ"},
   {s:"NVDA",  n:"NVIDIA",     p:135.4,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
   {s:"AAPL",  n:"Apple",      p:213.5,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
   {s:"TSLA",  n:"Tesla",      p:352.8,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
@@ -4100,13 +4097,7 @@ const TICKER_DATA_INIT = [
   {s:"AMZN",  n:"Amazon",     p:224.3,  c:+0.40,  col:"#ff9900", cg:null, fh:"AMZN"},
   {s:"META",  n:"Meta",       p:718.5,  c:+1.10,  col:"#0082fb", cg:null, fh:"META"},
   {s:"GOOGL", n:"Alphabet",   p:196.8,  c:+0.30,  col:"#4285f4", cg:null, fh:"GOOGL"},
-  {s:"SPY",   n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0066FF", cg:null, fh:"SPY"},
-  {s:"QQQ",   n:"Nasdaq ETF", p:485.2,  c:+0.30,  col:"#6366f1", cg:null, fh:"QQQ"},
-  {s:"MELI",  n:"MercadoLibre",p:2240,  c:+0.90,  col:"#ffe600", cg:null, fh:"MELI"},
-  {s:"GOLD",  n:"Gold",       p:3315,   c:+0.25,  col:"#fbbf24", cg:null},
-  {s:"NFLX",  n:"Netflix",    p:1085,   c:+1.40,  col:"#e50914", cg:null, fh:"NFLX"},
-  {s:"WMT",   n:"Walmart",    p:96.4,   c:-0.20,  col:"#0071ce", cg:null, fh:"WMT"},
-  {s:"V",     n:"Visa",       p:318.9,  c:+0.70,  col:"#1a1f71", cg:null, fh:"V"},
+  {s:"AVGO",  n:"Broadcom",   p:248.6,  c:+0.55,  col:"#cc0000", cg:null, fh:"AVGO"},
 ];
 
 // Hook compartido para precios reales de CoinGecko
