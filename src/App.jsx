@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:42:34
+// NEXO TRADE — build: 2026-06-03 15:44:05
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -6333,34 +6333,34 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
           const ac = user?.avatarColor || "#F59E0B";
           const ac2 = ac==="rgba(0,102,255,0.09)"?"#F59E0B":ac;
           return(
-          <div style={{height:96,background:`linear-gradient(135deg,#0055DD 0%,#0066FF 60%,#3385FF 100%)`,position:"relative",overflow:"hidden"}}>
-            {/* Subtle orb highlight */}
-            <div style={{position:"absolute",top:-28,right:-18,width:130,height:130,borderRadius:"50%",background:`radial-gradient(circle,rgba(255,255,255,0.18),transparent 68%)`,pointerEvents:"none"}}/>
-            <div style={{position:"absolute",bottom:-24,left:20,width:90,height:90,borderRadius:"50%",background:`radial-gradient(circle,rgba(255,255,255,0.10),transparent 68%)`,pointerEvents:"none"}}/>
+          <div style={{height:96,background:`linear-gradient(160deg,#fff 0%,#DDEEFF 100%)`,position:"relative",overflow:"hidden",borderBottom:"1px solid rgba(0,102,255,0.12)"}}>
+            {/* Orb highlights */}
+            <div style={{position:"absolute",top:-28,right:-18,width:130,height:130,borderRadius:"50%",background:`radial-gradient(circle,rgba(0,102,255,0.10),transparent 68%)`,pointerEvents:"none"}}/>
+            <div style={{position:"absolute",bottom:-24,left:20,width:90,height:90,borderRadius:"50%",background:`radial-gradient(circle,rgba(0,102,255,0.06),transparent 68%)`,pointerEvents:"none"}}/>
             {/* Grid de puntos decorativos */}
-            <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.15,pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
+            <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.18,pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
               {[0,24,48,72,96,120,144,168,192,216,240].map(x=>
                 [0,16,32,48,64,80,96].map(y=>
-                  <circle key={`${x}-${y}`} cx={x} cy={y} r="1.2" fill="white"/>
+                  <circle key={`${x}-${y}`} cx={x} cy={y} r="1.2" fill="#0066FF"/>
                 )
               )}
             </svg>
             {/* Chart SVG */}
-            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.3,pointerEvents:"none"}} height="48" viewBox="0 0 240 48" preserveAspectRatio="none">
+            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",opacity:0.25,pointerEvents:"none"}} height="48" viewBox="0 0 240 48" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="coverChartGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="white" stopOpacity="0.5"/>
-                  <stop offset="100%" stopColor="white" stopOpacity="0"/>
+                  <stop offset="0%" stopColor="#0066FF" stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor="#0066FF" stopOpacity="0"/>
                 </linearGradient>
               </defs>
               <polygon points="0,48 0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10 240,48" fill="url(#coverChartGrad)"/>
-              <polyline points="0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="0,40 24,30 48,34 72,16 96,24 120,8 144,14 168,6 192,10 216,4 240,10" fill="none" stroke="#0066FF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             {/* Avatar — clickable to change */}
             <div style={{position:"absolute",bottom:-24,left:14}}>
               {user
                 ? <div onClick={()=>setShowAvatarPicker(v=>!v)} title={lang==="en"?"Change avatar":"Cambiar avatar"}
-                    style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:"0 2px 12px rgba(0,0,0,0.15)",cursor:"pointer",position:"relative"}}>
+                    style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:"0 2px 12px rgba(0,102,255,0.18)",cursor:"pointer",position:"relative"}}>
                     {user.emoji}
                     <span style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,background:"#0066FF",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #fff",color:"#fff"}}>✎</span>
                   </div>
@@ -6369,7 +6369,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
             </div>
             {/* Level badge top-right */}
             {user && lvl && (
-              <div style={{position:"absolute",top:10,right:10,background:"rgba(255,255,255,0.2)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.35)",borderRadius:20,padding:"3px 9px",fontSize:10,fontWeight:600,color:"#fff",display:"flex",alignItems:"center",gap:4}}>
+              <div style={{position:"absolute",top:10,right:10,background:"rgba(0,102,255,0.1)",backdropFilter:"blur(8px)",border:"1px solid rgba(0,102,255,0.25)",borderRadius:20,padding:"3px 9px",fontSize:10,fontWeight:700,color:"#0066FF",display:"flex",alignItems:"center",gap:4}}>
                 {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
               </div>
             )}
@@ -6432,7 +6432,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 </div>
               ) : (
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <div style={{fontWeight:800,color:"#F1F5F9",fontSize:15,letterSpacing:-0.3,lineHeight:1.2,flex:1}}>
+                  <div style={{fontWeight:800,color:"#0F172A",fontSize:15,letterSpacing:-0.3,lineHeight:1.2,flex:1}}>
                     {user.username || user.name || (user.email?.includes("@") ? user.email.split("@")[0] : "Trader")}
                   </div>
                   <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);setNameStatus(null);}}
