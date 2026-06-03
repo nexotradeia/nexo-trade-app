@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:13:45
+// NEXO TRADE — build: 2026-06-03 15:36:41
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -2117,17 +2117,21 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
         {/* ── X CLOSE — fuera del overflow:hidden para que siempre funcione ── */}
         <button onClick={onClose}
           style={{position:"sticky",top:12,float:"right",marginRight:12,marginTop:12,zIndex:999,
-            background:"rgba(15,23,42,0.85)",backdropFilter:"blur(8px)",
-            border:"1px solid rgba(255,255,255,0.18)",borderRadius:10,
-            width:34,height:34,cursor:"pointer",color:"#fff",fontSize:16,
+            background:"rgba(255,255,255,0.85)",backdropFilter:"blur(8px)",
+            border:"1px solid rgba(0,0,0,0.1)",borderRadius:10,
+            width:34,height:34,cursor:"pointer",color:"#374151",fontSize:16,
             display:"flex",alignItems:"center",justifyContent:"center",
-            boxShadow:"0 2px 12px rgba(0,0,0,0.5)",flexShrink:0}}>✕</button>
+            boxShadow:"0 2px 8px rgba(0,0,0,0.1)",flexShrink:0}}>✕</button>
 
         {/* ── COVER + HEADER INTEGRADO ── */}
-        <div style={{background:`linear-gradient(135deg,${accent}dd 0%,${accent}66 50%,#0f172a 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
-          {/* Performance chart — deterministic from user points */}
+        <div style={{background:`linear-gradient(160deg,#ffffff 0%,#DDEEFF 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
+          {/* Dot grid */}
+          <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.12,pointerEvents:"none"}} viewBox="0 0 560 120" preserveAspectRatio="xMidYMid slice">
+            <defs><pattern id="pdots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#0066FF"/></pattern></defs>
+            <rect width="560" height="120" fill="url(#pdots)"/>
+          </svg>
+          {/* Chart line azul */}
           {(() => {
-            // Generate a unique but consistent sparkline from user stats
             const seed = (user.points || 100) + (user.followers || 10);
             const pts = Array.from({length:12}, (_,i) => {
               const v = Math.abs(Math.sin(seed * 0.01 + i * 1.618) * 40 + Math.cos(i * 0.9 + seed * 0.003) * 15);
@@ -2136,28 +2140,23 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             const w = 560;
             const step = w / (pts.length - 1);
             const d = pts.map((y,i) => `${i===0?"M":"L"}${(i*step).toFixed(1)},${y.toFixed(1)}`).join(" ");
-            const fill = pts.map((y,i) => `${(i*step).toFixed(1)},${y.toFixed(1)}`).join(" ");
-            const trend = pts[pts.length-1] < pts[0]; // going up = lower y value
-            const trendColor = trend ? "#10B981" : "#EF4444";
+            const trend = pts[pts.length-1] < pts[0];
             return (
               <svg style={{position:"absolute",bottom:0,left:0,width:"100%",pointerEvents:"none"}} height="62" viewBox={`0 0 ${w} 62`} preserveAspectRatio="none">
-                {/* Area fill */}
-                <path d={`${d} L${w},62 L0,62 Z`} fill={`url(#sparkGrad_${user.id?.slice(0,6)||"x"})`} opacity="0.12"/>
                 <defs>
                   <linearGradient id={`sparkGrad_${user.id?.slice(0,6)||"x"}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={trendColor} stopOpacity="0.6"/>
-                    <stop offset="100%" stopColor={trendColor} stopOpacity="0"/>
+                    <stop offset="0%" stopColor="#0066FF" stopOpacity="0.2"/>
+                    <stop offset="100%" stopColor="#0066FF" stopOpacity="0"/>
                   </linearGradient>
                 </defs>
-                {/* Line */}
-                <path d={d} fill="none" stroke={trendColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
-                {/* Last point dot */}
-                <circle cx={(pts.length-1)*step} cy={pts[pts.length-1]} r="4" fill={trendColor} opacity="0.85"/>
+                <path d={`${d} L${w},62 L0,62 Z`} fill={`url(#sparkGrad_${user.id?.slice(0,6)||"x"})`}/>
+                <path d={d} fill="none" stroke="#0066FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
+                <circle cx={(pts.length-1)*step} cy={pts[pts.length-1]} r="4" fill="#0066FF" opacity="0.9"/>
               </svg>
             );
           })()}
-          {/* Glow orb */}
-          <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,background:`radial-gradient(circle,${accent}40,transparent 65%)`,pointerEvents:"none"}}/>
+          {/* Subtle orb */}
+          <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,background:`radial-gradient(circle,rgba(0,102,255,0.12),transparent 65%)`,pointerEvents:"none"}}/>
 
           {/* Close button moved outside overflow:hidden — see above */}
 
@@ -2166,13 +2165,13 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             {/* Avatar — clickable to edit if own profile */}
             <div style={{position:"relative",flexShrink:0}}>
               <div onClick={isOwn?()=>setShowAvatarEdit(v=>!v):undefined}
-                style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 2px rgba(255,255,255,0.15),0 0 24px ${accent}55`,cursor:isOwn?"pointer":"default",position:"relative"}}>
-                <div style={{width:"100%",height:"100%",borderRadius:17,background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>
+                style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 3px #fff,0 4px 16px rgba(0,102,255,0.2)`,cursor:isOwn?"pointer":"default",position:"relative"}}>
+                <div style={{width:"100%",height:"100%",borderRadius:17,background:"#EBF3FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>
                   {user.emoji}
                 </div>
-                {isOwn && <div style={{position:"absolute",bottom:-2,right:-2,width:20,height:20,borderRadius:6,background:"#F59E0B",border:"2px solid #0f172a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff"}}>✎</div>}
+                {isOwn && <div style={{position:"absolute",bottom:-2,right:-2,width:20,height:20,borderRadius:6,background:"#0066FF",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff"}}>✎</div>}
               </div>
-              {!isOwn && <div style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,borderRadius:6,background:"#10B981",border:"2px solid #0f172a",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {!isOwn && <div style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,borderRadius:6,background:"#10B981",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <div style={{width:6,height:6,borderRadius:"50%",background:"#fff"}}/>
               </div>}
               {/* Avatar picker dropdown */}
@@ -2248,45 +2247,45 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                   </div>
                 ) : (
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>{user.name}</span>
+                    <span style={{fontSize:20,fontWeight:900,color:"#0F172A",letterSpacing:-0.5}}>{user.name}</span>
                     {isOwn && <button onClick={e=>{e.stopPropagation();const dL=getCooldownDaysLeft();setNewNick(user.username||user.name||"");setNickStatus(dL>0?"cooldown":null);setEditingNick(true);}}
                       title={lang==="en"?"Edit username":"Editar nickname"}
-                      style={{background:"rgba(255,255,255,0.12)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:6,padding:"3px 7px",color:"rgba(255,255,255,0.7)",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>}
+                      style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"3px 7px",color:"#0066FF",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>}
                   </div>
                 )}
-                {user.badges?.includes("verified")&&<span style={{background:"rgba(0,102,255,0.25)",border:"1px solid rgba(0,102,255,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#93c5fd"}}>✓ Verificado</span>}
-                {user.badges?.includes("vip")&&<span style={{background:"linear-gradient(90deg,rgba(245,158,11,0.35),rgba(217,119,6,0.35))",border:"1px solid rgba(245,158,11,0.4)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#fcd34d"}}>PREMIUM ✦</span>}
+                {user.badges?.includes("verified")&&<span style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.25)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#0066FF"}}>✓ Verificado</span>}
+                {user.badges?.includes("vip")&&<span style={{background:"rgba(217,119,6,0.1)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#D97706"}}>PREMIUM ✦</span>}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-                <span style={{background:"rgba(0,0,0,0.3)",border:`1px solid ${accent}55`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#fff",display:"flex",alignItems:"center",gap:4}}>
+                <span style={{background:"rgba(0,102,255,0.1)",border:`1px solid rgba(0,102,255,0.2)`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#0066FF",display:"flex",alignItems:"center",gap:4}}>
                   {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
                 </span>
-                <span style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>{tradeStyle}</span>
-                <span style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>Desde {joinYear}</span>
+                <span style={{fontSize:11,color:"#6B7280"}}>{tradeStyle}</span>
+                <span style={{fontSize:11,color:"#9CA3AF"}}>Desde {joinYear}</span>
               </div>
             </div>
             {/* Follow button */}
             {currentUser&&currentUser.id!==user.id&&(
               <button onClick={()=>onFollow(user.id)}
-                style={{flexShrink:0,background:isFollowing?"rgba(0,0,0,0.3)":"rgba(255,255,255,0.15)",backdropFilter:"blur(8px)",border:`1.5px solid ${isFollowing?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.35)"}`,borderRadius:10,padding:"8px 18px",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800,transition:"all 0.15s",whiteSpace:"nowrap"}}
-                onMouseEnter={e=>{ if(!isFollowing){e.currentTarget.style.background="rgba(255,255,255,0.25)";} }}
-                onMouseLeave={e=>{ if(!isFollowing){e.currentTarget.style.background="rgba(255,255,255,0.15)";} }}>
+                style={{flexShrink:0,background:isFollowing?"rgba(0,102,255,0.1)":"#0066FF",border:`1.5px solid ${isFollowing?"rgba(0,102,255,0.3)":"#0066FF"}`,borderRadius:10,padding:"8px 18px",cursor:"pointer",color:isFollowing?"#0066FF":"#fff",fontSize:13,fontWeight:700,transition:"all 0.15s",whiteSpace:"nowrap"}}
+                onMouseEnter={e=>{ e.currentTarget.style.opacity="0.85"; }}
+                onMouseLeave={e=>{ e.currentTarget.style.opacity="1"; }}>
                 {isFollowing?(lang==="en"?"✓ Following":"✓ Siguiendo"):(lang==="en"?"+ Follow":"+ Seguir")}
               </button>
             )}
           </div>
 
           {/* ── QUICK STATS BAR ── */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(0,0,0,0.2)",borderRadius:"14px 14px 0 0",overflow:"hidden",position:"relative",zIndex:2}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(0,102,255,0.08)",borderRadius:"14px 14px 0 0",overflow:"hidden",position:"relative",zIndex:2}}>
             {[
-              {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), color:accent},
-              {label:lang==="en"?"Following":"Siguiendo",  value:fmtNum(displayStats.following),  color:"#94a3b8"},
-              {label:"Posts",                              value:fmtNum(displayStats.posts),       color:"#10B981"},
-              {label:"XP",                                 value:fmtNum(displayStats.points),      color:"#F59E0B"},
+              {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), color:"#0066FF"},
+              {label:lang==="en"?"Following":"Siguiendo",  value:fmtNum(displayStats.following),  color:"#6B7280"},
+              {label:"Posts",                              value:fmtNum(displayStats.posts),       color:"#16A34A"},
+              {label:"XP",                                 value:fmtNum(displayStats.points),      color:"#D97706"},
             ].map((s,i)=>(
-              <div key={i} style={{padding:"10px 6px",textAlign:"center",background:"rgba(0,0,0,0.15)"}}>
-                <div style={{fontWeight:900,color:s.color,fontSize:16,letterSpacing:"-0.5px"}}>{s.value}</div>
-                <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginTop:1,textTransform:"uppercase",letterSpacing:"0.08em"}}>{s.label}</div>
+              <div key={i} style={{padding:"10px 6px",textAlign:"center",background:"rgba(255,255,255,0.5)"}}>
+                <div style={{fontWeight:800,color:s.color,fontSize:16,letterSpacing:"-0.5px"}}>{s.value}</div>
+                <div style={{fontSize:10,color:"#9CA3AF",marginTop:1,textTransform:"uppercase",letterSpacing:"0.08em"}}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -2301,9 +2300,9 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             const winRate = Math.round((bars.filter(b=>b>0).length / bars.length) * 100);
             const totalReturn = bars.reduce((a,b)=>a+b,0).toFixed(1);
             return (
-              <div style={{background:"rgba(0,0,0,0.25)",padding:"10px 16px 12px",borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+              <div style={{background:"rgba(0,102,255,0.04)",padding:"10px 16px 12px",borderTop:"1px solid rgba(0,102,255,0.08)"}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-                  <span style={{fontSize:10,fontWeight:700,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:"0.08em"}}>
+                  <span style={{fontSize:10,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:"0.08em"}}>
                     {lang==="en"?"Pick Performance (8w)":"Rendimiento de picks (8 sem)"}
                   </span>
                   <div style={{display:"flex",gap:12}}>
@@ -18802,6 +18801,7 @@ function AdminDashboard(){
   const [loading,setLoading] = useState(true);
   const [tab,setTab]       = useState("dashboard");
   const [search,setSearch] = useState("");
+  useEffect(()=>{ window.scrollTo({top:0,behavior:"instant"}); },[]);
 
   useEffect(()=>{
     // Mostrar UI de inmediato con ceros
@@ -20377,7 +20377,7 @@ export default function App(){
   sessionStorage.clear();
   try{ await supabase.auth.signOut(); }catch(e){}
   window.location.replace("/");
-}} onProfile={setProfUser} onAlerts={()=>{setPage(39);setShowLanding(false);}} onAdmin={()=>setPage(99)} lang={lang}/>
+}} onProfile={setProfUser} onAlerts={()=>{setPage(39);setShowLanding(false);}} onAdmin={()=>{setPage(99);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} lang={lang}/>
               : <div className="nexo-auth-btns"><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></div>
             }
           </div>
@@ -20840,21 +20840,21 @@ export default function App(){
 
 
       {/* PREDICCIÓN DEL DÍA */}
-      {page===0 && !showLanding && <PredictionBanner lang={lang}/>}
+      {page===0 && !showLanding && page!==99 && <PredictionBanner lang={lang}/>}
 
       {/* SOCIAL PROOF STATS BAR — visible a todos */}
-      {page===0 && !showLanding && <SocialProofBar user={user} onRegister={()=>setAuth("register")} lang={lang}/>}
+      {page===0 && !showLanding && page!==99 && <SocialProofBar user={user} onRegister={()=>setAuth("register")} lang={lang}/>}
 
       {/* MARKETS MINI WIDGET — Mercados / Predicciones / Tendencias */}
-      {page===0 && !showLanding && (
+      {page===0 && !showLanding && page!==99 && (
         <div style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
           <MarketsMiniWidget lang={lang}/>
         </div>
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
