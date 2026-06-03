@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 17:45:16
+// NEXO TRADE — build: 2026-06-03 17:48:39
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -19197,7 +19197,26 @@ function AdminDashboard(){
   const [tab,setTab]         = useState("dashboard");
   const [search,setSearch]   = useState("");
   const [recentSignups,setRecentSignups] = useState([]);
+  const [onlineNow,setOnlineNow]         = useState([]);
+  const adminChRef = useRef(null);
   useEffect(()=>{ window.scrollTo({top:0,behavior:"instant"}); },[]);
+
+  // ── Presence: ver quién está conectado en tiempo real ──
+  useEffect(()=>{
+    const ch = supabase.channel("nexo-presence");
+    ch.on("presence",{event:"sync"},()=>{
+      const state = ch.presenceState();
+      const list = Object.entries(state).flatMap(([uid,arr])=>
+        arr.map(a=>({user_id:uid, username:a.username||"Trader", emoji:a.emoji||"🦅", avatarColor:a.avatarColor||"#0066FF", since:a.since||Date.now()}))
+      );
+      setOnlineNow(list);
+    });
+    ch.subscribe(async(status)=>{
+      if(status==="SUBSCRIBED") await ch.track({username:"Admin",emoji:"🛡️",avatarColor:"#0066FF",since:Date.now()});
+    });
+    adminChRef.current=ch;
+    return()=>{ ch.unsubscribe(); adminChRef.current=null; };
+  },[]);
 
   useEffect(()=>{
     // Mostrar UI de inmediato con ceros
@@ -19450,6 +19469,46 @@ function AdminDashboard(){
           </div>
         </div>
       </>)}
+
+      {/* ── CONECTADOS AHORA (dashboard tab) ── */}
+      {tab==="dashboard" && (
+        <div style={{background:"#fff",border:"1px solid #EBEBEB",borderRadius:16,padding:"22px 24px",marginBottom:20,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+            <div>
+              <div style={{fontWeight:900,fontSize:16,color:"#111827"}}>🟢 Conectados ahora</div>
+              <div style={{fontSize:12,color:"#6B7280",marginTop:2}}>Usuarios con sesión activa en este momento</div>
+            </div>
+            <span style={{background:"#ECFDF5",color:"#16A34A",borderRadius:20,padding:"3px 12px",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
+              <span style={{width:7,height:7,borderRadius:"50%",background:"#16A34A",display:"inline-block",animation:"nexo-pulse 1.5s ease-in-out infinite"}}/>
+              {onlineNow.length} en línea
+            </span>
+          </div>
+          {onlineNow.length===0?(
+            <div style={{textAlign:"center",padding:"24px 0",color:"#9CA3AF",fontSize:13}}>
+              Nadie conectado aún — actualiza en unos segundos
+            </div>
+          ):(
+            <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
+              {onlineNow.map((u,i)=>{
+                const sinceMin=Math.floor((Date.now()-u.since)/60000);
+                const sinceLabel=sinceMin<1?"Ahora mismo":sinceMin<60?`${sinceMin}m`:sinceMin<1440?`${Math.floor(sinceMin/60)}h`:`${Math.floor(sinceMin/1440)}d`;
+                return(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"#F0FDF4",border:"1px solid #BBF7D0",borderRadius:12,padding:"10px 14px",minWidth:180,flex:"1 1 180px"}}>
+                    <div style={{position:"relative",flexShrink:0}}>
+                      <div style={{width:38,height:38,borderRadius:"50%",background:u.avatarColor,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{u.emoji}</div>
+                      <span style={{position:"absolute",bottom:0,right:0,width:10,height:10,borderRadius:"50%",background:"#16A34A",border:"2px solid #fff"}}/>
+                    </div>
+                    <div style={{minWidth:0}}>
+                      <div style={{fontWeight:800,fontSize:13,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>@{u.username}</div>
+                      <div style={{fontSize:11,color:"#16A34A",fontWeight:600}}>Conectado hace {sinceLabel}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── ÚLTIMOS REGISTROS (dashboard tab) ── */}
       {tab==="dashboard" && recentSignups.length>0 && (
