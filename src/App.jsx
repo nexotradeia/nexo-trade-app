@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 04:02:32
+// NEXO TRADE — build: 2026-06-03 04:17:11
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -2596,8 +2596,96 @@ function CopyLinkBtn({postId, ticker}){
 
 // ── POST CARD ─────────────────────────────────────────────────────────────────
 const CONF_LEVELS=[{min:80,label:"Alta",col:"#00E58F"},{min:60,label:"Media",col:"#F59E0B"},{min:0,label:"Baja",col:"#64748B"}];
-// Mini sparkline data per post
+// Mini sparkline data per post (fallback si no hay datos reales)
 const SPARKLINES=[[40,42,38,45,50,48,55,60,58,65],[70,68,72,65,60,62,58,55,52,48],[30,35,33,40,42,45,50,48,55,60],[55,52,58,60,65,63,70,68,75,80]];
+
+// ── MINI POST CHART ───────────────────────────────────────────────────────────
+function MiniPostChart({ ticker, isBull, fallbackSpark }) {
+  const [pts, setPts]       = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const lp = useContext(PriceCtx);
+
+  useEffect(() => {
+    if (!ticker) return;
+    let alive = true;
+    const parse = d => {
+      const r = d?.chart?.result?.[0];
+      if (!r) return null;
+      const closes = r.indicators?.quote?.[0]?.close || [];
+      return closes.filter(Boolean);
+    };
+    (async () => {
+      for (const host of ["query1","query2"]) {
+        try {
+          const r = await fetch(`https://${host}.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo&includePrePost=false`,{headers:{"Accept":"application/json"}});
+          const d = await r.json();
+          const arr = parse(d);
+          if (arr?.length && alive) { setPts(arr); setLoaded(true); return; }
+        } catch {}
+      }
+      // fallback: usar sparkline determinístico
+      if (alive && fallbackSpark?.length) { setPts(fallbackSpark); setLoaded(true); }
+    })();
+    return () => { alive = false; };
+  }, [ticker]);
+
+  if (!ticker) return null;
+
+  const live = lp[ticker];
+  const price = live?.price;
+  const W = 300, H = 56;
+  const minV = pts.length ? Math.min(...pts) : 0;
+  const maxV = pts.length ? Math.max(...pts) : 1;
+  const range = maxV - minV || 1;
+  const xS = i => (i / (pts.length - 1 || 1)) * W;
+  const yS = v => H - 4 - ((v - minV) / range) * (H - 8);
+  const linePath = pts.map((v,i) => `${i===0?"M":"L"}${xS(i).toFixed(1)},${yS(v).toFixed(1)}`).join(" ");
+  const areaPath = pts.length
+    ? `${linePath} L${W},${H} L0,${H} Z`
+    : "";
+  const pct = pts.length >= 2 ? ((pts[pts.length-1] - pts[0]) / pts[0] * 100) : null;
+  const isUp = pct !== null ? pct >= 0 : isBull;
+  const col  = isUp ? "#16A34A" : "#DC2626";
+  const gradId = `pcg-${ticker}-${Math.abs(String(ticker).split("").reduce((a,c)=>a+c.charCodeAt(0),0))}`;
+
+  return (
+    <div style={{borderRadius:12,overflow:"hidden",border:"1px solid var(--c-border)",marginBottom:10,background:"var(--c-card2)"}}>
+      {/* Cabecera precio */}
+      <div style={{padding:"7px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid var(--c-border)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:7}}>
+          <span style={{fontWeight:800,fontSize:13,color:"var(--c-text)",fontFamily:"monospace"}}>
+            {price ? fmtLivePrice(ticker, price) : "—"}
+          </span>
+          <span style={{fontSize:10,color:"var(--c-muted2)",fontWeight:600}}>30d</span>
+        </div>
+        {pct !== null && (
+          <span style={{fontSize:11,fontWeight:800,color:col,background:isUp?"rgba(22,163,74,0.09)":"rgba(220,38,38,0.09)",padding:"2px 8px",borderRadius:6,fontFamily:"monospace"}}>
+            {isUp?"+":""}{pct.toFixed(2)}%
+          </span>
+        )}
+      </div>
+      {/* Gráfico SVG */}
+      {loaded ? (
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:"100%",height:56,display:"block"}}>
+          <defs>
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={col} stopOpacity="0.20"/>
+              <stop offset="100%" stopColor={col} stopOpacity="0.01"/>
+            </linearGradient>
+          </defs>
+          <path d={areaPath} fill={`url(#${gradId})`}/>
+          <path d={linePath} fill="none" stroke={col} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          {/* Dot en el último punto */}
+          {pts.length > 0 && (
+            <circle cx={xS(pts.length-1).toFixed(1)} cy={yS(pts[pts.length-1]).toFixed(1)} r="3" fill={col} stroke="white" strokeWidth="1.5"/>
+          )}
+        </svg>
+      ) : (
+        <div style={{height:56,background:"linear-gradient(90deg,var(--c-border) 25%,var(--c-card2) 50%,var(--c-border) 75%)",backgroundSize:"200% 100%",animation:"shimmer 1.4s infinite"}}/>
+      )}
+    </div>
+  );
+}
 
 function LinkPreviewCard({url}){
   const [meta, setMeta] = useState(null);
@@ -2833,6 +2921,10 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           )}
           {/* Post text */}
           <p style={{margin:"0 0 10px",color:"var(--c-text)",fontSize:14,lineHeight:1.65,fontWeight:400,opacity:0.88}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
+          {/* Mini chart — solo cuando el post lo pide (bots de análisis) */}
+          {post.showChart && post.ticker && (
+            <MiniPostChart ticker={post.ticker} isBull={isBull} fallbackSpark={spark}/>
+          )}
           {/* Imagen / GIF */}
           {post.image&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
           {/* Link preview card */}
@@ -13115,20 +13207,20 @@ const BOT_TEXT_TEMPLATES = {
 
 // ── POSTS CASUALES de traders ficticios (reacciones de mercado) ──────────────
 const CASUAL_BOT_POSTS = [
-  {id:"c1", user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"BTC",  sentiment:"bull", text:"$BTC breaking key resistance 💥 Who else is in this trade? I've been long since $95k — this is heading to $120k 📈", likes:143, comments:31, reposts:22, time:"2h ago", tags:["BTC","Crypto"]},
-  {id:"c2", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"NVDA", sentiment:"bull", text:"$NVDA just confirmed support at $128. Textbook setup. Those who entered yesterday are already up +4% 🙌 Next stop $145", image:"/api/finviz-chart?t=NVDA&p=d", likes:98,  comments:19, reposts:14, time:"4h ago", tags:["NVDA","AI"]},
-  {id:"c3", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"ETH",  sentiment:"bull", text:"$ETH broke $2,800 on volume 🔥 The ETH ETF narrative is coming back. Adding on every pullback. Short-term target: $3,200 🎯", likes:211, comments:44, reposts:38, time:"1h ago", tags:["ETH","Crypto","ETF"]},
-  {id:"c4", user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"SPY",  sentiment:"bull", text:"$SPY closing near all-time highs. The market is ignoring every macro noise. Bulls in control 🐂 Don't fight the trend.", likes:77,  comments:12, reposts:9,  time:"6h ago", tags:["SPY","Market"]},
-  {id:"c5", user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"TSLA", sentiment:"bear", text:"$TSLA selling off despite the broader market bounce. Bearish divergence. Not convinced by the long setup here 📉 Waiting for confirmation before adding.", likes:54,  comments:23, reposts:7,  time:"3h ago", tags:["TSLA","Analysis"]},
-  {id:"c6", user:"CarlosInvierte",   avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"NVDA", sentiment:"bull", text:"I've been tracking $NVDA since $120 and the setup is perfect. NVIDIA holds absolute dominance in AI GPUs with Blackwell architecture. Data center demand from hyperscalers shows zero deceleration. Microsoft, Google and Amazon are competing for every chip available. Gross margins just hit 78% — a new all-time record. My target: $185, stop at $102 🎯\n\nThis week is key: Computex presentation + US jobs data Friday. If NFP prints positive, $NVDA easily breaks $150.", image:"/api/finviz-chart?t=NVDA&p=w", likes:284, comments:67, reposts:52, time:"2026-05-15", tags:["NVDA","AI","Chips"]},
+  {id:"c1", user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"BTC",  sentiment:"bull", showChart:true,  text:"$BTC breaking key resistance 💥 Who else is in this trade? I've been long since $95k — this is heading to $120k 📈", likes:143, comments:31, reposts:22, time:"2h ago", tags:["BTC","Crypto"]},
+  {id:"c2", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"NVDA", sentiment:"bull", showChart:false, text:"$NVDA just confirmed support at $128. Textbook setup. Those who entered yesterday are already up +4% 🙌 Next stop $145", image:"/api/finviz-chart?t=NVDA&p=d", likes:98,  comments:19, reposts:14, time:"4h ago", tags:["NVDA","AI"]},
+  {id:"c3", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"ETH",  sentiment:"bull", showChart:true,  text:"$ETH broke $2,800 on volume 🔥 The ETH ETF narrative is coming back. Adding on every pullback. Short-term target: $3,200 🎯", likes:211, comments:44, reposts:38, time:"1h ago", tags:["ETH","Crypto","ETF"]},
+  {id:"c4", user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"SPY",  sentiment:"bull", showChart:false, text:"$SPY closing near all-time highs. The market is ignoring every macro noise. Bulls in control 🐂 Don't fight the trend.", likes:77,  comments:12, reposts:9,  time:"6h ago", tags:["SPY","Market"]},
+  {id:"c5", user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"TSLA", sentiment:"bear", showChart:true,  text:"$TSLA selling off despite the broader market bounce. Bearish divergence. Not convinced by the long setup here 📉 Waiting for confirmation before adding.", likes:54,  comments:23, reposts:7,  time:"3h ago", tags:["TSLA","Analysis"]},
+  {id:"c6", user:"CarlosInvierte",   avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"NVDA", sentiment:"bull", showChart:true, text:"I've been tracking $NVDA since $120 and the setup is perfect. NVIDIA holds absolute dominance in AI GPUs with Blackwell architecture. Data center demand from hyperscalers shows zero deceleration. Microsoft, Google and Amazon are competing for every chip available. Gross margins just hit 78% — a new all-time record. My target: $185, stop at $102 🎯\n\nThis week is key: Computex presentation + US jobs data Friday. If NFP prints positive, $NVDA easily breaks $150.", image:"/api/finviz-chart?t=NVDA&p=w", likes:284, comments:67, reposts:52, time:"2026-05-15", tags:["NVDA","AI","Chips"]},
   {id:"c7", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"META", sentiment:"bull", text:"Analysis thread: Why $META (Meta Platforms) is my largest position in 2026?\n\n1️⃣ Operating margin hit 42% — best-in-class across the entire S&P 500\n2️⃣ Llama 4 outperforms GPT-4o on reasoning benchmarks — open-source and free\n3️⃣ Reels monetizes at 2x the rate of Stories two years ago\n4️⃣ Reality Labs losing less money each quarter — the metaverse is maturing\n5️⃣ $50B share buyback this year\n\nI don't understand how anyone can be out of this position. 12-month target: $750 📊", image:"/api/finviz-chart?t=META&p=d", likes:342, comments:89, reposts:71, time:"2026-05-18", tags:["META","AI","Value"]},
   {id:"c8", user:"AndresTradePro",   avatar:"🎯",   avatarColor:"#EF4444", badge:"Options",       ticker:"META", sentiment:"bull", text:"Bought $META June calls. The company is printing money with AI-powered ads. If $600 holds, this trade goes 3x 🚀", likes:167, comments:35, reposts:28, time:"5h ago", tags:["META","Options"]},
-  {id:"c9", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"BTC",  sentiment:"bull", text:"Full technical analysis of $BTC (Bitcoin) — current situation:\n\n📈 BTC closed above $100K for the 3rd consecutive week. This is psychologically huge. $100K is now support, not resistance.\n\nOn-chain: wallets holding 1+ BTC hit an all-time high this week. Paper hands are gone. Only conviction HODLers remain.\n\nUpcoming catalyst: US Congress votes on the Bitcoin Reserve Act in July. If it passes, states can hold BTC as reserve — massive institutional demand.\n\nMy position: Long from $92K. Immediate target $115K, then $135K by year-end. Stop at $94K 🔒", likes:521, comments:134, reposts:98, time:"2026-05-22", tags:["BTC","OnChain","Crypto"]},
+  {id:"c9", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"BTC",  sentiment:"bull", showChart:true, text:"Full technical analysis of $BTC (Bitcoin) — current situation:\n\n📈 BTC closed above $100K for the 3rd consecutive week. This is psychologically huge. $100K is now support, not resistance.\n\nOn-chain: wallets holding 1+ BTC hit an all-time high this week. Paper hands are gone. Only conviction HODLers remain.\n\nUpcoming catalyst: US Congress votes on the Bitcoin Reserve Act in July. If it passes, states can hold BTC as reserve — massive institutional demand.\n\nMy position: Long from $92K. Immediate target $115K, then $135K by year-end. Stop at $94K 🔒", likes:521, comments:134, reposts:98, time:"2026-05-22", tags:["BTC","OnChain","Crypto"]},
   {id:"c10",user:"RicardoInvest",    avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"SOL",  sentiment:"bull", text:"$SOL completed its pullback to support. Perfect buy zone between $155-$160. Swing target: $195 in 3-4 weeks ⚡ Risk/reward of 4:1", likes:201, comments:42, reposts:31, time:"1h ago", tags:["SOL","Crypto"]},
   {id:"c11",user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"AMZN", sentiment:"bull", text:"$AMZN AWS just reported 21% growth QoQ. That's an ACCELERATION. The AI infrastructure buildout is just beginning. Buy the dip, always. 🚀", image:"/api/finviz-chart?t=AMZN&p=d", likes:189, comments:41, reposts:33, time:"3h ago", tags:["AMZN","AWS","Cloud"]},
   {id:"c12",user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"QQQ",  sentiment:"bull", text:"$QQQ breaking all-time highs with low put/call ratio. The melt-up scenario is playing out. Don't overthink it — trend is your friend. 🐂", likes:93,  comments:18, reposts:12, time:"5h ago", tags:["QQQ","Nasdaq","Trend"]},
   {id:"c13",user:"IsabelAnalysis",   avatar:"📊",   avatarColor:"#F59E0B", badge:"Quant",         ticker:"PLTR", sentiment:"bull", text:"Quant signal: $PLTR showing 92% bullish probability over 30 days. Government contract pipeline is unprecedented. Anyone else positioned? 📊", image:"/api/finviz-chart?t=PLTR&p=d", likes:147, comments:32, reposts:21, time:"2h ago", tags:["PLTR","Government","AI"]},
-  {id:"c14",user:"ValentinaFinance", avatar:"💎",   avatarColor:"#06B6D4", badge:"Value Investor", ticker:"MSFT", sentiment:"bull", text:"Deep dive on $MSFT (Microsoft) — why this is the safest AI bet in the market:\n\n🔷 Azure AI growing 35% YoY — and ACCELERATING\n🔷 Copilot deployed in 85% of Fortune 500 companies\n🔷 GitHub Copilot crossed 2M paid users (up from 1M six months ago)\n🔷 Operating margin: 46% — best-in-class for a company this size\n🔷 Free cash flow: $75B annually\n\nThe OpenAI partnership gives them a moat that nobody can replicate in under 5 years. While everyone chases NVDA, smart money is quietly accumulating MSFT.\n\nEntry: $452 | Target: $530 | Stop: $425 💼", image:"/api/finviz-chart?t=MSFT&p=w", likes:398, comments:87, reposts:64, time:"2026-05-20", tags:["MSFT","AI","Cloud"]},
+  {id:"c14",user:"ValentinaFinance", avatar:"💎",   avatarColor:"#06B6D4", badge:"Value Investor", ticker:"MSFT", sentiment:"bull", showChart:true, text:"Deep dive on $MSFT (Microsoft) — why this is the safest AI bet in the market:\n\n🔷 Azure AI growing 35% YoY — and ACCELERATING\n🔷 Copilot deployed in 85% of Fortune 500 companies\n🔷 GitHub Copilot crossed 2M paid users (up from 1M six months ago)\n🔷 Operating margin: 46% — best-in-class for a company this size\n🔷 Free cash flow: $75B annually\n\nThe OpenAI partnership gives them a moat that nobody can replicate in under 5 years. While everyone chases NVDA, smart money is quietly accumulating MSFT.\n\nEntry: $452 | Target: $530 | Stop: $425 💼", image:"/api/finviz-chart?t=MSFT&p=w", likes:398, comments:87, reposts:64, time:"2026-05-20", tags:["MSFT","AI","Cloud"]},
   {id:"c15",user:"NataliaTrader",    avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"COIN", sentiment:"bull", text:"Let me tell you why $COIN (Coinbase) is the most undervalued stock in crypto right now 🧵\n\nBitcoin hit $107K. Every $10K BTC moves = approximately +15-20% for COIN. Simple math.\n\nBut there's more:\n✅ Coinbase is the official custodian for 9 of 11 Bitcoin ETFs in the US\n✅ Base (their L2 network) just crossed 10M monthly active users\n✅ Institutional revenue now bigger than retail for first time ever\n✅ Regulatory clarity in the US finally happening in 2026\n\nStreet consensus target: $350. Current price: ~$262. That's 33% upside with Bitcoin as the macro tailwind.\n\nThis is not financial advice, but you get the idea 😉", likes:445, comments:112, reposts:83, time:"2026-05-25", tags:["COIN","BTC","Crypto"]},
   {id:"c16",user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"GLD",  sentiment:"bull", text:"🧵 MACRO VIEW — Why gold ($GLD) is the most important trade of 2026:\n\nCentral banks bought more gold in Q1 2026 than any quarter in history. China (+60 tonnes), India (+34T), Poland (+18T).\n\nThe dollar weakens due to the structural fiscal deficit — $36 trillion in debt and rising. Every 1% drop in USD = ~1.5% rise in gold.\n\nGeopolitics: post-Ukraine sanctions taught countries that dollar reserves can be frozen. Gold can't.\n\nTechnical: $GLD confirmed weekly breakout. Short-term target: $345. 2026 target: $380.\n\nRecommended portfolio allocation: 5-10% in gold/GLD as a permanent hedge 🥇", likes:267, comments:58, reposts:44, time:"2026-05-28", tags:["GLD","Gold","Macro"]},
   {id:"c17",user:"CarlosInvierte",  avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"PLTR", sentiment:"bull", text:"$PLTR (Palantir) is the trade of the decade in defense + AI. Just won a $480M contract with the US Army. Commercial US revenue +127% YoY. Peter Thiel remains the largest shareholder behind insiders.\n\nWhat I love: GUARANTEED government contracts. That doesn't disappear in a recession.\n\nPosition: long from $98. Added more this week at $125. Target: $165 before August 🔐", image:"/api/finviz-chart?t=PLTR&p=w", likes:312, comments:78, reposts:61, time:"2026-05-29", tags:["PLTR","Defense","AI"]},
@@ -13155,6 +13247,8 @@ const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
     reposts:  4 + (idea.id*3) % 22,
     time: idea.published,
     tags: idea.tags,
+    // Cada 2 bots muestran mini chart de precio (los de análisis técnico)
+    showChart: i % 2 === 0,
   };
 });
 
@@ -18649,11 +18743,13 @@ const _getSavedUser = () => {
    ADMIN DASHBOARD — solo visible para emails admin
 ═══════════════════════════════════════════════════════════════ */
 function AdminDashboard(){
-  const [stats,setStats] = useState(null);
-  const [posts,setPosts] = useState([]);
-  const [subs,setSubs]   = useState([]);
+  const [stats,setStats]   = useState(null);
+  const [users,setUsers]   = useState([]);
+  const [posts,setPosts]   = useState([]);
+  const [subs,setSubs]     = useState([]);
   const [loading,setLoading] = useState(true);
-  const [tab,setTab] = useState("overview");
+  const [tab,setTab]       = useState("dashboard");
+  const [search,setSearch] = useState("");
 
   useEffect(()=>{
     const load = async()=>{
