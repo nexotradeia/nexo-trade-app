@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 15:46:43
+// NEXO TRADE — build: 2026-06-03 15:54:35
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -6328,173 +6328,186 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
       {/* ── PROFILE CARD ── */}
       <div style={{borderRadius:18,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,0.08)",border:"1px solid rgba(0,0,0,0.07)"}}>
 
-        {/* ── COVER — azul elegante ── */}
+        {/* ── COVER + BODY — dark navy + candlestick ── */}
         {(()=>{
           const ac = user?.avatarColor || "#F59E0B";
           const ac2 = ac==="rgba(0,102,255,0.09)"?"#F59E0B":ac;
-          return(
-          <div style={{height:96,background:`linear-gradient(160deg,#fff 0%,#DDEEFF 100%)`,position:"relative",overflow:"hidden",borderBottom:"1px solid rgba(0,102,255,0.12)"}}>
-            {/* Orb highlights */}
-            <div style={{position:"absolute",top:-28,right:-18,width:130,height:130,borderRadius:"50%",background:`radial-gradient(circle,rgba(0,102,255,0.10),transparent 68%)`,pointerEvents:"none"}}/>
-            <div style={{position:"absolute",bottom:-24,left:20,width:90,height:90,borderRadius:"50%",background:`radial-gradient(circle,rgba(0,102,255,0.06),transparent 68%)`,pointerEvents:"none"}}/>
-            {/* Velas japonesas (candlestick chart) */}
-            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:"100%",pointerEvents:"none"}} viewBox="0 0 240 96" preserveAspectRatio="xMidYMid slice">
-              {/* Líneas de guía horizontales */}
-              {[20,40,60,80].map(y=><line key={y} x1="0" y1={y} x2="240" y2={y} stroke="#0066FF" strokeWidth="0.4" strokeOpacity="0.12"/>)}
-              {/* Velas: [x, open, close, high, low, bullish] */}
+          const joinDate = user?.created_at ? new Date(user.created_at).toLocaleDateString("es-ES",{month:"short",year:"numeric"}) : null;
+          const progressToNext = lvl ? LEVELS.find(l=>l.min>(user?.points||0)) : null;
+          const progressPct = lvl && progressToNext ? Math.round(((user?.points||0)-lvl.min)/(progressToNext.min-lvl.min)*100) : (lvl ? 100 : 0);
+          return(<>
+          <div style={{height:110,background:"linear-gradient(135deg,#0A1628 0%,#0D1F3C 60%,#0B1A35 100%)",position:"relative",overflow:"hidden"}}>
+            {/* Grid lines */}
+            {[28,55,82].map(y=><div key={y} style={{position:"absolute",left:0,right:0,top:y,height:1,background:"rgba(255,255,255,0.04)",pointerEvents:"none"}}/>)}
+            {/* Candlestick SVG */}
+            <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:"100%",pointerEvents:"none"}} viewBox="0 0 240 110" preserveAspectRatio="xMidYMid slice">
               {[
-                [12, 72, 58, 55, 76, true],
-                [26, 58, 62, 54, 64, false],
-                [40, 62, 44, 40, 65, true],
-                [54, 44, 36, 33, 47, true],
-                [68, 36, 50, 34, 52, false],
-                [82, 50, 45, 42, 54, true],
-                [96, 45, 30, 27, 48, true],
-                [110,30, 38, 28, 40, false],
-                [124,38, 22, 19, 40, true],
-                [138,22, 28, 20, 30, false],
-                [152,28, 18, 15, 30, true],
-                [166,18, 24, 16, 26, false],
-                [180,24, 12, 10, 26, true],
-                [194,12, 16, 10, 18, false],
-                [208,16,  8,  6, 18, true],
-                [222, 8, 14,  6, 16, false],
-              ].map(([x,o,c,h,l,bull])=>{
-                const col = bull ? "#10B981" : "#EF4444";
-                const op = 0.55;
+                [14, 90, 74, 70, 94, false],
+                [28, 74, 80, 72, 82, true],
+                [42, 80, 60, 56, 84, true],
+                [56, 60, 68, 58, 70, false],
+                [70, 68, 48, 44, 72, true],
+                [84, 48, 56, 46, 58, false],
+                [98, 56, 36, 32, 60, true],
+                [112,36, 44, 34, 46, false],
+                [126,44, 26, 22, 48, true],
+                [140,26, 32, 24, 34, false],
+                [154,32, 18, 14, 36, true],
+                [168,18, 24, 16, 26, false],
+                [182,24, 10,  7, 28, true],
+                [196,10, 16,  8, 18, false],
+                [210,16,  6,  4, 20, true],
+                [224, 6, 12,  4, 14, false],
+              ].map(([x,o,c,h,l,bear],i)=>{
+                const t=i/15;
+                const col=bear?`hsl(${220+t*15},70%,${42+t*8}%)`:`hsl(${195+t*25},85%,${55+t*10}%)`;
                 return(
                   <g key={x}>
-                    <line x1={x} y1={h} x2={x} y2={l} stroke={col} strokeWidth="1" strokeOpacity={op}/>
-                    <rect x={x-4} y={Math.min(o,c)} width={8} height={Math.max(2,Math.abs(o-c))} fill={col} fillOpacity={op} rx="1"/>
+                    <line x1={x} y1={h} x2={x} y2={l} stroke={col} strokeWidth="1.2" strokeOpacity="0.9"/>
+                    <rect x={x-5} y={Math.min(o,c)} width={10} height={Math.max(2,Math.abs(o-c))} fill={col} fillOpacity="0.95" rx="1.5"/>
                   </g>
                 );
               })}
             </svg>
-            {/* Avatar — clickable to change */}
-            <div style={{position:"absolute",bottom:-24,left:14}}>
+            {/* Avatar */}
+            <div style={{position:"absolute",bottom:-26,left:14}}>
               {user
-                ? <div onClick={()=>setShowAvatarPicker(v=>!v)} title={lang==="en"?"Change avatar":"Cambiar avatar"}
-                    style={{width:52,height:52,borderRadius:15,background:`linear-gradient(135deg,${ac2},${ac2}88)`,border:"2.5px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:"0 2px 12px rgba(0,102,255,0.18)",cursor:"pointer",position:"relative"}}>
+                ? <div onClick={()=>setShowAvatarPicker(v=>!v)} title="Cambiar avatar"
+                    style={{width:56,height:56,borderRadius:16,background:"#fff",border:"3px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,boxShadow:"0 4px 16px rgba(0,0,0,0.3)",cursor:"pointer",position:"relative"}}>
                     {user.emoji}
-                    <span style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,background:"#0066FF",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #fff",color:"#fff"}}>✎</span>
+                    <span style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,background:"#0066FF",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"2px solid #fff",color:"#fff"}}>&#x270E;</span>
                   </div>
-                : <div style={{width:52,height:52,borderRadius:15,background:"rgba(0,102,255,0.15)",border:"2px solid rgba(0,102,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:23}}>👤</div>
+                : <div style={{width:56,height:56,borderRadius:16,background:"#1e3a5f",border:"3px solid rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>&#x1F464;</div>
               }
             </div>
             {/* Level badge top-right */}
             {user && lvl && (
-              <div style={{position:"absolute",top:10,right:10,background:"rgba(0,102,255,0.1)",backdropFilter:"blur(8px)",border:"1px solid rgba(0,102,255,0.25)",borderRadius:20,padding:"3px 9px",fontSize:10,fontWeight:700,color:"#0066FF",display:"flex",alignItems:"center",gap:4}}>
+              <div style={{position:"absolute",top:10,right:10,background:"rgba(255,255,255,0.95)",borderRadius:20,padding:"4px 10px",fontSize:10,fontWeight:700,color:"#1e293b",display:"flex",alignItems:"center",gap:4,boxShadow:"0 2px 8px rgba(0,0,0,0.2)"}}>
                 {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
               </div>
             )}
-          </div>
-          );
-        })()}
-
-        {/* ── BODY ── */}
-        <div style={{background:"#fff",padding:"28px 14px 14px"}}>
-          {user ? <>
-            {/* Nombre + @handle — editable */}
-            <div style={{marginBottom:12}}>
-              {editingName ? (
-                <div style={{marginBottom:4}}>
-                  <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                    <input
-                      value={editName}
-                      onChange={async e=>{
-                        const v=e.target.value.replace(/[^a-zA-Z0-9_]/g,"").slice(0,20);
-                        setEditName(v);
-                        if(v.length<3){setNameStatus(null);return;}
-                        setNameStatus("checking");
-                        const {data}=await supabase.from("profiles").select("id").eq("username",v).neq("id",user.id).limit(1);
-                        setNameStatus(data&&data.length>0?"taken":"available");
-                      }}
-                      autoFocus
-                      placeholder="nuevo_username"
-                      style={{flex:1,background:"rgba(0,102,255,0.06)",border:`1.5px solid ${nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#16A34A":"rgba(0,102,255,0.3)"}`,borderRadius:8,padding:"5px 9px",color:"#0F172A",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
-                    />
-                    <button onClick={async()=>{
-                      const newName=editName.trim();
-                      if(newName.length<3||nameStatus==="taken")return;
-                      setNameStatus("checking");
-                      // Doble verificación
-                      const{data:chk}=await supabase.from("profiles").select("id").eq("username",newName).neq("id",user.id).limit(1);
-                      if(chk&&chk.length>0){setNameStatus("taken");return;}
-                      // Solo actualizar username (columna garantizada en profiles)
-                      const{error:upErr}=await supabase.from("profiles").update({username:newName}).eq("id",user.id);
-                      if(upErr){setNameStatus("error");return;}
-                      // También actualizar user_metadata de Supabase auth para máxima persistencia
-                      await supabase.auth.updateUser({data:{username:newName}}).catch(()=>{});
-                      const updated={...user,username:newName,name:newName,user_name:newName};
-                      onUserUpdate&&onUserUpdate(updated);
-                      setNameStatus("saved");
-                      setTimeout(()=>{setEditingName(false);setNameStatus(null);},1500);
-                    }} disabled={nameStatus==="taken"||nameStatus==="checking"||editName.length<3}
-                      style={{background:nameStatus==="taken"||editName.length<3?"#334155":"#F59E0B",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",opacity:nameStatus==="taken"||editName.length<3?0.5:1}}>✓</button>
-                    <button onClick={()=>{setEditingName(false);setNameStatus(null);}}
-                      style={{background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:11,cursor:"pointer"}}>✕</button>
-                  </div>
-                  {/* Status indicator */}
-                  {nameStatus&&<div style={{fontSize:11,marginTop:4,fontWeight:600,color:nameStatus==="taken"||nameStatus==="error"?"#ef4444":nameStatus==="available"?"#00e58f":nameStatus==="saved"?"#00e58f":"#94a3b8"}}>
-                    {nameStatus==="checking"?"🔍 Verificando..."
-                    :nameStatus==="taken"?"✗ Username ya en uso"
-                    :nameStatus==="error"?"✗ Error al guardar — intenta de nuevo"
-                    :nameStatus==="available"?"✓ Disponible"
-                    :nameStatus==="saved"?"✅ ¡Guardado!":""}
-                  </div>}
-                  <div style={{fontSize:10,color:"rgba(148,163,184,0.5)",marginTop:3}}>Solo letras, números y _ · Mín. 3 caracteres</div>
-                </div>
-              ) : (
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <div style={{fontWeight:800,color:"#0F172A",fontSize:15,letterSpacing:-0.3,lineHeight:1.2,flex:1}}>
-                    {user.username || user.name || (user.email?.includes("@") ? user.email.split("@")[0] : "Trader")}
-                  </div>
-                  <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);setNameStatus(null);}}
-                    title={lang==="en"?"Edit username":"Editar username"}
-                    style={{background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"3px 6px",color:"#0066FF",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>
-                </div>
-              )}
-              <div style={{fontSize:11,color:"#0066FF",fontWeight:600,marginTop:2}}>
-                @{(user.username||user.name||"trader").toLowerCase().replace(/[\s@.]/g,"").slice(0,20)}
+            {/* Join date bottom-right */}
+            {joinDate && (
+              <div style={{position:"absolute",bottom:8,right:10,fontSize:10,color:"rgba(255,255,255,0.5)",fontWeight:600,display:"flex",alignItems:"center",gap:3}}>
+                &#x1F4C5; {joinDate}
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Stats — 3 columnas */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr 1px 1fr",background:"#F8FAFF",borderRadius:10,overflow:"hidden",border:"1px solid rgba(0,0,0,0.07)",marginBottom:12}}>
-              {[
-                {v:user.followers||0, l:lang==="en"?"Followers":"Seguidores"},
-                null,
-                {v:user.following||0, l:lang==="en"?"Following":"Siguiendo"},
-                null,
-                {v:user.points||0,   l:lang==="en"?"Points":"Puntos"},
-              ].map((item,i)=> item===null
-                ? <div key={i} style={{background:"rgba(0,0,0,0.06)"}}/>
-                : <div key={i} style={{padding:"9px 4px",textAlign:"center"}}>
-                    <div style={{fontWeight:700,fontSize:15,color:i===4?"#0066FF":"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
-                    <div style={{fontSize:9,color:"#9CA3AF",fontWeight:600,letterSpacing:0.5,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
+          {/* BODY */}
+          <div style={{background:"#fff",padding:"32px 14px 14px"}}>
+            {user ? <>
+              {/* Nombre + @handle editable */}
+              <div style={{marginBottom:10}}>
+                {editingName ? (
+                  <div style={{marginBottom:4}}>
+                    <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                      <input value={editName}
+                        onChange={async e=>{
+                          const v=e.target.value.replace(/[^a-zA-Z0-9_]/g,"").slice(0,20);
+                          setEditName(v);
+                          if(v.length<3){setNameStatus(null);return;}
+                          setNameStatus("checking");
+                          const {data}=await supabase.from("profiles").select("id").eq("username",v).neq("id",user.id).limit(1);
+                          setNameStatus(data&&data.length>0?"taken":"available");
+                        }}
+                        autoFocus placeholder="nuevo_username"
+                        style={{flex:1,background:"rgba(0,102,255,0.06)",border:`1.5px solid ${nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#16A34A":"rgba(0,102,255,0.3)"}`,borderRadius:8,padding:"5px 9px",color:"#0F172A",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
+                      />
+                      <button onClick={async()=>{
+                        const newName=editName.trim();
+                        if(newName.length<3||nameStatus==="taken")return;
+                        setNameStatus("checking");
+                        const{data:chk}=await supabase.from("profiles").select("id").eq("username",newName).neq("id",user.id).limit(1);
+                        if(chk&&chk.length>0){setNameStatus("taken");return;}
+                        const{error:upErr}=await supabase.from("profiles").update({username:newName}).eq("id",user.id);
+                        if(upErr){setNameStatus("error");return;}
+                        await supabase.auth.updateUser({data:{username:newName}}).catch(()=>{});
+                        const updated={...user,username:newName,name:newName,user_name:newName};
+                        onUserUpdate&&onUserUpdate(updated);
+                        setNameStatus("saved");
+                        setTimeout(()=>{setEditingName(false);setNameStatus(null);},1500);
+                      }} disabled={nameStatus==="taken"||nameStatus==="checking"||editName.length<3}
+                        style={{background:nameStatus==="taken"||editName.length<3?"#334155":"#0066FF",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",opacity:nameStatus==="taken"||editName.length<3?0.5:1}}>&#x2713;</button>
+                      <button onClick={()=>{setEditingName(false);setNameStatus(null);}}
+                        style={{background:"transparent",border:"1px solid #e2e8f0",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:11,cursor:"pointer"}}>&#x2715;</button>
+                    </div>
+                    {nameStatus&&<div style={{fontSize:11,marginTop:4,fontWeight:600,color:nameStatus==="taken"||nameStatus==="error"?"#ef4444":nameStatus==="available"?"#16A34A":nameStatus==="saved"?"#16A34A":"#94a3b8"}}>
+                      {nameStatus==="checking"?"&#x1F50D; Verificando...":nameStatus==="taken"?"&#x2717; Ya en uso":nameStatus==="error"?"&#x2717; Error":nameStatus==="available"?"&#x2713; Disponible":"&#x2705; &#xA1;Guardado!"}
+                    </div>}
+                    <div style={{fontSize:10,color:"#CBD5E1",marginTop:3}}>Solo letras, n&#xFA;meros y _ &#xB7; M&#xED;n. 3</div>
                   </div>
-              )}
-            </div>
+                ) : (
+                  <div>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                      <div style={{fontWeight:900,color:"#0F172A",fontSize:17,letterSpacing:-0.5,lineHeight:1.15,borderBottom:"2.5px solid #22D3EE",paddingBottom:1,flex:1}}>
+                        {user.username || user.name || (user.email?.includes("@")?user.email.split("@")[0]:"Trader")}
+                      </div>
+                      <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);setNameStatus(null);}}
+                        title="Editar username"
+                        style={{background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.18)",borderRadius:6,padding:"3px 7px",color:"#0066FF",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>&#x270E;</button>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:"#64748B",fontWeight:500}}>
+                      <span>@{(user.username||user.name||"trader").toLowerCase().replace(/[\s@.]/g,"").slice(0,20)}</span>
+                      <span>&#xB7;</span>
+                      <span style={{display:"flex",alignItems:"center",gap:3}}>
+                        <span style={{width:7,height:7,borderRadius:"50%",background:"#22C55E",display:"inline-block",boxShadow:"0 0 6px #22C55E"}}/>
+                        <span style={{color:"#22C55E",fontWeight:600}}>{lang==="en"?"Online":"En l&#xED;nea"}</span>
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-            {/* Ver perfil button */}
-            <button onClick={()=>onProfile&&onProfile(user)}
-              style={{width:"100%",background:"#0066FF",border:"none",borderRadius:10,padding:"9px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s",letterSpacing:0.2}}
-              onMouseEnter={e=>{e.currentTarget.style.background="#0055DD";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="#0066FF";}}>
-              {lang==="en"?"View my profile →":"Ver mi perfil →"}
-            </button>
-          </> : <>
-            {/* No logueado */}
-            <div style={{fontWeight:700,color:"#0F172A",fontSize:14,marginBottom:4}}>{lang==="en"?"Join NexoTrade!":"¡Únete a NexoTrade!"}</div>
-            <div style={{fontSize:12,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading global investor community 🌎":"La comunidad global de inversores 🌎"}</div>
-            <button onClick={onNeedAuth}
-              style={{width:"100%",background:"#0066FF",color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:700,fontSize:13,cursor:"pointer",transition:"background 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="#0055DD"}
-              onMouseLeave={e=>e.currentTarget.style.background="#0066FF"}>
-              {lang==="en"?"Create free account →":"Crear cuenta gratis →"}
-            </button>
-          </>}
-        </div>
+              {/* Level progress bar */}
+              {lvl && (
+                <div style={{background:"#F1F5F9",borderRadius:10,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:14,flexShrink:0}}>{lvl.emoji}</span>
+                  <span style={{fontWeight:700,fontSize:11,color:"#0F172A",whiteSpace:"nowrap"}}>{lang==="en"?lvl.nameEn:lvl.name}</span>
+                  <div style={{flex:1,height:5,background:"#E2E8F0",borderRadius:99,overflow:"hidden"}}>
+                    <div style={{width:`${Math.min(100,progressPct)}%`,height:"100%",background:"linear-gradient(90deg,#3B82F6,#22D3EE)",borderRadius:99,transition:"width 0.5s"}}/>
+                  </div>
+                  <span style={{fontSize:10,color:"#94A3B8",fontWeight:600,whiteSpace:"nowrap"}}>{user.points||0}/{progressToNext?progressToNext.min:lvl.max}</span>
+                </div>
+              )}
+
+              {/* Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr 1px 1fr",background:"#F8FAFF",borderRadius:10,overflow:"hidden",border:"1px solid rgba(0,0,0,0.06)",marginBottom:12}}>
+                {[
+                  {v:user.followers||0, l:"Followers"},
+                  null,
+                  {v:user.following||0, l:"Following"},
+                  null,
+                  {v:user.points||0,   l:"Points"},
+                ].map((item,i)=> item===null
+                  ? <div key={i} style={{background:"rgba(0,0,0,0.05)"}}/>
+                  : <div key={i} style={{padding:"9px 4px",textAlign:"center"}}>
+                      <div style={{fontWeight:800,fontSize:16,color:i===4?"#0066FF":"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
+                      <div style={{fontSize:8,color:"#94A3B8",fontWeight:700,letterSpacing:0.7,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
+                    </div>
+                )}
+              </div>
+
+              {/* Ver perfil — dark button */}
+              <button onClick={()=>onProfile&&onProfile(user)}
+                style={{width:"100%",background:"#0F172A",border:"none",borderRadius:12,padding:"10px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",transition:"all 0.15s",letterSpacing:0.3}}
+                onMouseEnter={e=>e.currentTarget.style.background="#1e293b"}
+                onMouseLeave={e=>e.currentTarget.style.background="#0F172A"}>
+                {lang==="en"?"View my profile →":"Ver mi perfil →"}
+              </button>
+            </> : <>
+              <div style={{fontWeight:700,color:"#0F172A",fontSize:14,marginBottom:4}}>{lang==="en"?"Join NexoTrade!":"¡Únjoms a NexoTrade!"}</div>
+              <div style={{fontSize:12,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading global investor community 🌎":"La comunidad global de inversores 🌎"}</div>
+              <button onClick={onNeedAuth}
+                style={{width:"100%",background:"#0F172A",color:"#fff",border:"none",borderRadius:12,padding:"10px",fontWeight:700,fontSize:13,cursor:"pointer"}}
+                onMouseEnter={e=>e.currentTarget.style.background="#1e293b"}
+                onMouseLeave={e=>e.currentTarget.style.background="#0F172A"}>
+                {lang==="en"?"Create free account →":"Crear cuenta gratis →"}
+              </button>
+            </>}
+          </div>
+          </>);
+        })()}
       </div>
 
       {/* ── AVATAR PICKER MODAL ── */}
