@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-04 14:05:44
+// NEXO TRADE — build: 2026-06-04 14:23:25
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -19351,7 +19351,7 @@ function AdminDashboard(){
 
   useEffect(()=>{
     // Mostrar UI de inmediato con ceros
-    setStats({totalUsers:0,newToday:0,newWeek:0,vipCount:0,postsHoy:0,totalPosts:0,totalSubs:0,activosHoy:0,logins:0});
+    setStats({totalUsers:0,newToday:0,newWeek:0,vipCount:0,postsHoy:0,totalPosts:0,totalSubs:0,activosHoy:0,logins:0,visitasMes:0,visitasAnon:0,visitantesUnicos:0});
     setLoading(false);
 
     // Luego cargar datos reales en background con timeout de 8s por query
@@ -19412,6 +19412,19 @@ function AdminDashboard(){
         postsHoy:r5.count||0, totalPosts:r6.count||0,
         activosHoy:Math.max(r2.count||0, Math.floor((r1.count||totalUsers)*0.12)),
         logins:Math.floor((r1.count||totalUsers)*7.2),
+      }));
+
+      // ── VISITAS ÚLTIMO MES (tabla site_visits — migración 012, Sesión 11) ──
+      const mes30 = new Date(); mes30.setDate(mes30.getDate()-30);
+      const [v1,v2,v3] = await Promise.all([
+        withTimeout(supabase.from("site_visits").select("*",{count:"exact",head:true}).gte("created_at",mes30.toISOString())),
+        withTimeout(supabase.from("site_visits").select("*",{count:"exact",head:true}).gte("created_at",mes30.toISOString()).eq("is_registered",false)),
+        withTimeout(supabase.from("site_visits").select("visitor_id").gte("created_at",mes30.toISOString()).limit(10000)),
+      ]);
+      setStats(s=>({...s,
+        visitasMes: v1.count||0,
+        visitasAnon: v2.count||0,
+        visitantesUnicos: new Set((v3.data||[]).map(x=>x.visitor_id)).size,
       }));
     };
     loadData();
@@ -19476,7 +19489,7 @@ function AdminDashboard(){
             {label:"TOTAL USUARIOS",   value:stats.totalUsers.toLocaleString(), badge:`↑ ${stats.newWeek}%`, badgeUp:true,  sub:"vs mes anterior"},
             {label:"ACTIVOS HOY",      value:stats.activosHoy.toLocaleString(), badge:`↑ ${Math.round(stats.activosHoy/Math.max(stats.totalUsers,1)*100)}%`, badgeUp:true, sub:"últimas 24h"},
             {label:"USUARIOS VIP",     value:stats.vipCount.toLocaleString(),   badge:`↓ ${stats.totalUsers>0?((stats.vipCount/stats.totalUsers)*100).toFixed(0):0}%`, badgeUp:false, sub:"17% del total"},
-            {label:"LOGINS ESTE MES",  value:stats.logins.toLocaleString(),     badge:`↑ 21%`, badgeUp:true, sub:"plataforma total"},
+            {label:"VISITAS ÚLTIMO MES", value:(stats.visitasMes||0).toLocaleString(), badge:`${(stats.visitasAnon||0).toLocaleString()} sin registro`, badgeUp:true, sub:`${(stats.visitantesUnicos||0).toLocaleString()} visitantes únicos · 30 días`},
           ].map((k,i)=>(
             <div key={i} style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:14,padding:"20px 22px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
               <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,marginBottom:10,textTransform:"uppercase"}}>{k.label}</div>
@@ -20032,6 +20045,30 @@ export default function App(){
   );
 
   const t = LANGS[lang];
+
+  // ── TRACKING DE VISITAS (Sesión 11): registra cada visita en site_visits ────
+  // Cuenta TODOS los visitantes (registrados y anónimos), 1 vez por sesión.
+  // El panel admin muestra el total del último mes. Requiere migración 012.
+  useEffect(()=>{
+    try{
+      if(sessionStorage.getItem("nexo-visit-logged")) return;
+      sessionStorage.setItem("nexo-visit-logged","1");
+      let vid = localStorage.getItem("nexo-visitor-id");
+      if(!vid){
+        vid = "v_"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+        localStorage.setItem("nexo-visitor-id", vid);
+      }
+      const isReg  = !!_getSavedUser();
+      const device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "mobile" : "desktop";
+      supabase.from("site_visits").insert({
+        visitor_id: vid,
+        is_registered: isReg,
+        path: window.location.pathname || "/",
+        referrer: (document.referrer||"").slice(0,300) || null,
+        device,
+      }).then(()=>{},()=>{}); // fire-and-forget — si la tabla no existe aún, no pasa nada
+    }catch(_){}
+  },[]);
 
   // ── BACK BUTTON: evitar que la flecha del navegador salga del sitio ──────────
   useEffect(()=>{
