@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-04 04:19:05
+// NEXO TRADE — build: 2026-06-04 14:05:44
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -6,12 +6,18 @@ import * as THREE from 'three';
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
 const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
 const SUPABASE_KEY  = "sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl";
+// FIX CRÍTICO (Sesión 11): supabase-js usa navigator.locks ("lock:nexotrade-session")
+// para serializar la auth. Si una operación (p.ej. setSession fire-and-forget) nunca
+// resuelve, el lock queda tomado PARA SIEMPRE y TODAS las queries (posts, perfiles,
+// mensajes…) se quedan colgadas sin error. Lock custom sin deadlock: ejecuta directo.
+const _noDeadlockLock = async (_name, _acquireTimeout, fn) => await fn();
 const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storageKey: 'nexotrade-session',
+    lock: _noDeadlockLock,
   }
 });
 
@@ -1012,7 +1018,7 @@ function PriceProvider({children}){
   useEffect(() => {
     const delay = (ms) => new Promise(r => setTimeout(r, ms));
     const fetchQuote = async (ticker, i) => {
-      await delay(i * 250); // escalonar para no superar límite de rate
+      await delay(i * 1100); // FIX Sesión 11: 250ms = 240 req/min → TODO devolvía 429 (límite Finnhub free: 60/min). 1100ms ≈ 55/min y el WebSocket actualiza en vivo después.
       try {
         const r = await fetch(
           `https://finnhub.io/api/v1/quote?symbol=${FH_SYM[ticker]||ticker}&token=${FINNHUB_KEY}`
@@ -11808,7 +11814,7 @@ function FlowPage({isPremium,onNeedPremium}){
           {[
             {l:"FLUJO CALLS",v:fmt$(totalCallPrem),c:"#00D26A",icon:"📈"},
             {l:"FLUJO PUTS",v:fmt$(totalPutPrem),c:"#FF4D6A",icon:"📉"},
-            {l:"RATIO CALL/PUT",v:`${ratio}x`,c:parseFloat(ratio)>=2?"#00D26A":parseFloat(ratio)>=1?"#F59E0B":"#FF4D6A",icon:"⚖️",sub:parseFloat(ratio)>=2?"Muy alcista 🔥":parseFloat(ratio)>=1?"Neutral":"Bajista"},
+            {l:"RATIO CALL/PUT",v:`${ratio}x`,c:(ratio==="∞"||parseFloat(ratio)>=2)?"#00D26A":parseFloat(ratio)>=1?"#F59E0B":"#FF4D6A",icon:"⚖️",sub:(ratio==="∞"||parseFloat(ratio)>=2)?"Muy alcista 🔥":parseFloat(ratio)>=1?"Neutral":"Bajista"},
             {l:"ORDEN MÁS GRANDE",v:bigItem?fmt$(bigItem.premium):"—",c:"#F59E0B",icon:"👑",sub:bigItem?`${bigItem.ticker} ${bigItem.isCall?"CALL":"PUT"}`:""},
             {l:"ÓRDENES TOTALES",v:visible.length,c:"#60A5FA",icon:"📊",sub:"Actualizado ahora"},
           ].map(s=>(
@@ -20814,13 +20820,24 @@ export default function App(){
         .nexo-scroll-x::-webkit-scrollbar { display: none !important; }
         .nexo-scroll-x > * { max-width: none !important; }
 
+        /* ── FIX Sesión 11: la página NO se desplaza horizontal en móvil.
+              overflow-x:clip NO crea scroll container → el nav sticky sigue funcionando.
+              Las tablas anchas siguen scrolleando DENTRO de .nexo-scroll-x ── */
+        html, body { overflow-x: clip !important; }
+
+        /* ── FIX Sesión 11: tabs centradas + overflow recortaba los tabs de la
+              izquierda (⭐PREMIUM / Ideas / Flujo quedaban inalcanzables) ── */
+        .nexo-tabs { justify-content: flex-start !important; }
+
         /* ── EARNINGS PAGE — layout stacked ── */
         .nexo-earnings-layout { grid-template-columns: 1fr !important; }
         .nexo-earnings-sidebar { position: static !important; top: auto !important; }
-        .nexo-earnings-stats { grid-template-columns: repeat(2,1fr) !important; }
+        .nexo-earnings-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
 
-        /* ── FLOW PAGE stats strip ── */
-        .nexo-flow-stats { grid-template-columns: repeat(3,1fr) !important; }
+        /* ── FLOW PAGE stats strip — minmax(0,1fr) evita que el min-content
+              del texto ensanche el grid y desborde la página (FIX Sesión 11) ── */
+        .nexo-flow-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+        .nexo-flow-stats > div { min-width: 0 !important; }
 
         /* ── Padding/margin reducidos en móvil ── */
         .nexo-page-pad { padding: 12px 8px !important; }
