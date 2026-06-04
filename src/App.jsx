@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 19:56:28
+// NEXO TRADE — build: 2026-06-03 20:15:43
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1907,64 +1907,55 @@ function AuthModal({mode,onClose,onAuth,lang}){
           bio: lang==="en"?"New on NexoTrade 🚀":"Nuevo en NexoTrade 🚀"
         }, true);
       }else{
-        // ── LOGIN DIRECTO via REST API (sin supabase-js que se cuelga) ────
+        // ── LOGIN DIRECTO — intenta SDK primero, luego proxy ────
         let authData = null, authErr = null;
+        // Intento 1: Supabase SDK con timeout de 10s
         try{
-          const controller = new AbortController();
-          const tid = setTimeout(()=>controller.abort(), 8000);
-          // Usar proxy del servidor (evita problemas de red móvil con Supabase)
-          const r = await fetch(`/api/auth`, {
-            method:"POST", signal:controller.signal,
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({email, password:pass})
-          });
-          clearTimeout(tid);
-          const json = await r.json();
-          if(!r.ok){ authErr = json.error || "Error al iniciar sesión"; }
-          else { authData = json; }
-        }catch(e){
-          if(e.name==="AbortError"){ authErr = "timeout"; }
-          else { authErr = e.message; }
+          const sdkResult = await Promise.race([
+            supabase.auth.signInWithPassword({email:email.trim(),password:pass}),
+            new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),10000))
+          ]);
+          if(sdkResult.error){
+            authErr = sdkResult.error.message;
+          } else if(sdkResult.data?.session){
+            authData = {
+              access_token: sdkResult.data.session.access_token,
+              refresh_token: sdkResult.data.session.refresh_token,
+              user: sdkResult.data.user,
+            };
+          }
+        }catch(e){ authErr = e.message||"timeout"; }
+        // Intento 2: proxy /api/auth si el SDK falló por timeout
+        if(!authData && authErr==="timeout"){
+          try{
+            const controller = new AbortController();
+            const tid = setTimeout(()=>controller.abort(), 8000);
+            const r = await fetch(`/api/auth`, {
+              method:"POST", signal:controller.signal,
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({email, password:pass})
+            });
+            clearTimeout(tid);
+            const json = await r.json();
+            if(!r.ok){ authErr = json.error || "Error al iniciar sesión"; }
+            else { authData = json; authErr = null; }
+          }catch(e){
+            if(e.name==="AbortError"){ authErr = "timeout"; }
+            else { authErr = e.message; }
+          }
         }
         if(authErr){
-          // Detectar email no confirmado antes del fallback
+          // Mostrar error claro al usuario
           if(authErr.toLowerCase().includes("confirm")){
             setError("__email_not_confirmed__");
-            setLoading(false); return;
-          }
-          if(authErr==="timeout"){
-            const cacheKey = "ntcache_"+btoa(email.toLowerCase().trim()).replace(/=/g,"");
-            let cached = null;
-            try{ cached = JSON.parse(localStorage.getItem(cacheKey)||"null"); }catch(_){}
-            if(cached && cached.pwHash){
-              const pwCheck = btoa(pass+"|nexotrade").slice(0,24);
-              if(cached.pwHash===pwCheck){ onAuth({...cached.profile,_offline:true}); onClose(); setLoading(false); return; }
-            }
+          } else if(authErr==="timeout"){
             setError("Servidor no disponible. Inténtalo de nuevo en unos minutos.");
+          } else if(authErr.toLowerCase().includes("invalid")||authErr.toLowerCase().includes("credentials")||authErr.toLowerCase().includes("password")){
+            setError("Email o contraseña incorrectos. Verifica tus datos.");
           } else {
-            // Intentar login directo con SDK como fallback para cualquier error
-            try{
-              const {data:sd, error:se} = await supabase.auth.signInWithPassword({email:email.trim(),password:pass});
-              if(se){
-                // Mostrar error real de Supabase
-                const rawMsg = se.message || authErr || "Error de acceso";
-                if(rawMsg.toLowerCase().includes("confirm")){
-                  setError("__email_not_confirmed__");
-                } else if(rawMsg.toLowerCase().includes("invalid")||rawMsg.toLowerCase().includes("credentials")||rawMsg.toLowerCase().includes("password")){
-                  setError("Email o contraseña incorrectos. Verifica tus datos.");
-                } else {
-                  setError(rawMsg);
-                }
-                setLoading(false); return;
-              }
-              authData = { access_token:sd.session?.access_token, refresh_token:sd.session?.refresh_token, user:sd.user };
-              authErr = null;
-            }catch(_){
-              setError(authErr||"Error de conexión");
-              setLoading(false); return;
-            }
+            setError(authErr||"Error al iniciar sesión. Inténtalo de nuevo.");
           }
-          if(authErr){ setLoading(false); return; }
+          setLoading(false); return;
         }
         if(!authData?.user){
           // Si es email admin y login falló, intentar signup automático
@@ -1988,8 +1979,8 @@ function AuthModal({mode,onClose,onAuth,lang}){
           }
           setError("Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return;
         }
-        // Guardar sesión en supabase para que el cliente la use
-        try{ await supabase.auth.setSession({access_token:authData.access_token, refresh_token:authData.refresh_token}); }catch(_){}
+        // Guardar sesión en supabase (fire-and-forget — no bloquea el flujo)
+        supabase.auth.setSession({access_token:authData.access_token, refresh_token:authData.refresh_token}).catch(()=>{});
         // Cargar perfil con fetch directo también
         let profile = null;
         try{
