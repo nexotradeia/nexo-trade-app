@@ -18248,7 +18248,23 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     {id:"scalping",l:"⚡ Scalping"},
   ];
 
-  const mergedData=(tab==="options"?buildLiveOptions(livePrices):(SCREENER_DATA[tab]||[])).map(r=>{
+  // ---- Contratos REALES de opciones (api/options -> Yahoo, ~15 min retraso) ----
+  const [realOpts,setRealOpts]=useState(null);
+  useEffect(()=>{
+    if(tab!=="options"||realOpts) return;
+    let cancel=false;
+    const TKS=["NVDA","TSLA","SPY","META","AAPL","QQQ","AMZN","PLTR"];
+    Promise.all(TKS.map(t=>fetch(`/api/options?ticker=${t}`).then(r=>r.json()).catch(()=>null)))
+      .then(res=>{
+        if(cancel) return;
+        const rows=[];
+        res.forEach(j=>{ if(j&&Array.isArray(j.contracts)) rows.push(...j.contracts); });
+        if(rows.length>0) setRealOpts(rows.sort((a,b)=>b.score-a.score));
+      });
+    return()=>{cancel=true;};
+  },[tab]);
+
+  const mergedData=(tab==="options"?(realOpts||buildLiveOptions(livePrices)):(SCREENER_DATA[tab]||[])).map(r=>{
     const live=livePrices[r.s];
     return{...r, p:live?.price??r.p, chg:live?.change??r.chg, liveHigh:live?.high, liveLow:live?.low};
   });
@@ -18528,8 +18544,8 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             </div>
           )}
           {tab==="options"&&(
-            <div style={{display:"grid",gridTemplateColumns:"70px 160px 90px 80px 70px 80px 80px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
-              {[["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["iv","IV"],["vol","Vol"],["chg","Chg%"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
+            <div style={{display:"grid",gridTemplateColumns:"66px 140px 84px 66px 76px 60px 64px 64px 70px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
+              {[["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["price","Precio"],["iv","IV"],["vol","Vol"],["oi","OI"],["prob","Prob ITM"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
           {tab==="intraday"&&(
@@ -18552,7 +18568,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             return(
               <div key={i} style={{display:"grid",
                 gridTemplateColumns:tab==="stocks"?"80px 100px 105px 85px 65px 95px 105px 130px 1fr 72px 88px":
-                  tab==="options"?"70px 160px 90px 80px 70px 80px 80px 72px":
+                  tab==="options"?"66px 140px 84px 66px 76px 60px 64px 64px 70px 72px":
                   tab==="intraday"?"70px 160px 95px 78px 62px 68px 120px 100px 72px":
                   "70px 160px 95px 90px 88px 68px 140px 72px",
                 padding:"9px 14px",borderBottom:`1px solid ${C.border}`,gap:8,
@@ -18590,12 +18606,14 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                 </>}
 
                 {tab==="options"&&<>
-                  <span style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
-                  <span style={{fontSize:12,fontWeight:700,color:C.text,fontFamily:"monospace"}}>{r.strike}</span>
+                  <span style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i===0&&"⭐ "}{r.n}</span>
+                  <span style={{fontSize:12,fontWeight:700,color:r.type==="put"?"#EF4444":"#10B981",fontFamily:"monospace"}}>{r.strike}</span>
                   <span style={{fontSize:11,color:C.muted}}>{r.exp}</span>
+                  <span style={{fontSize:12,fontWeight:800,color:C.text,fontFamily:"monospace"}}>{r.price||"—"}</span>
                   <span style={{fontSize:12,color:"#F59E0B",fontWeight:800}}>{r.iv}</span>
                   <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
-                  <span style={{fontSize:12,fontWeight:800,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(2)}%</span>
+                  <span style={{fontSize:11,color:C.muted}}>{r.oi||"—"}</span>
+                  <span style={{fontSize:12,fontWeight:800,color:parseInt(r.prob)>=50?"#10B981":parseInt(r.prob)>=30?"#F59E0B":"#EF4444"}}>{r.prob||"—"}</span>
                 </>}
 
                 {tab==="intraday"&&<>
