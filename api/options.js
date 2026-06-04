@@ -25,22 +25,35 @@ function probITM(S, K, ivDec, days, isCall) {
 
 const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(n || 0);
 
-// Score 0-100 (prioridades del usuario): PROBABILIDAD primero + mas barato +
-// mas volumen + MAS TIEMPO (menos riesgo de expirar) + liquidez
+// Pago potencial: cuantas veces multiplica la prima si la accion hace su
+// movimiento esperado de 1 sigma (S * IV * sqrt(T)) al vencimiento
+function payMult(o, S, days) {
+  const lp = o.last || ((o.bid || 0) + (o.ask || 0)) / 2;
+  if (!lp || !o.iv || o.iv <= 0) return 0;
+  const move = S * o.iv * Math.sqrt(days / 365);
+  const target = o.isCall ? S + move : S - move;
+  const intrinsic = o.isCall ? Math.max(0, target - o.strike) : Math.max(0, o.strike - target);
+  return intrinsic / lp;
+}
+
+// Score 0-100 (prioridades del usuario): VOLUMEN + PAGO POTENCIAL + probabilidad
+// + mas barato + MAS TIEMPO + liquidez
 function feasScore(o, S, days, prob) {
   let sc = 0;
-  if (prob != null) sc += prob >= 60 ? 25 : prob >= 50 ? 20 : prob >= 40 ? 14 : prob >= 30 ? 8 : 2;
-  sc += Math.min(20, Math.log10((o.vol || 0) + 1) * 6.5);
-  sc += Math.min(10, Math.log10((o.oi || 0) + 1) * 2.8);
+  sc += Math.min(25, Math.log10((o.vol || 0) + 1) * 8);                            // volumen (lo que mas pesa)
+  const pm = payMult(o, S, days);
+  sc += pm >= 3 ? 15 : pm >= 2 ? 12 : pm >= 1.5 ? 8 : pm >= 1 ? 5 : 1;             // paga mas dinero
+  if (prob != null) sc += prob >= 60 ? 20 : prob >= 50 ? 16 : prob >= 40 ? 11 : prob >= 30 ? 6 : 2;
   const lp = o.last || ((o.bid || 0) + (o.ask || 0)) / 2;
-  sc += lp > 0 && lp <= 1 ? 15 : lp <= 3 ? 12 : lp <= 5 ? 8 : lp <= 10 ? 4 : 1;
-  sc += days >= 30 ? 15 : days >= 21 ? 12 : days >= 14 ? 8 : days >= 7 ? 5 : 2;
+  sc += lp > 0 && lp <= 1 ? 10 : lp <= 3 ? 8 : lp <= 5 ? 5 : lp <= 10 ? 2 : 0;     // mas economico
+  sc += days >= 30 ? 12 : days >= 21 ? 9 : days >= 14 ? 6 : days >= 7 ? 4 : 1;     // mas tiempo
+  sc += Math.min(7, Math.log10((o.oi || 0) + 1) * 2);
   if (o.bid > 0 && o.ask > 0) {
     const spr = (o.ask - o.bid) / ((o.ask + o.bid) / 2);
-    sc += spr < 0.05 ? 10 : spr < 0.10 ? 7 : spr < 0.20 ? 3 : 0;
+    sc += spr < 0.05 ? 7 : spr < 0.10 ? 5 : spr < 0.20 ? 2 : 0;
   }
   const dist = Math.abs(o.strike - S) / S;
-  sc += dist < 0.02 ? 5 : dist < 0.05 ? 4 : dist < 0.08 ? 2 : 0;
+  sc += dist < 0.02 ? 3 : dist < 0.05 ? 2 : 0;
   return Math.min(99, Math.round(sc));
 }
 
@@ -56,6 +69,7 @@ function shapeRow(t, o, S, days, expStr) {
     iv: o.iv > 0 ? `${Math.round(o.iv * 100)}%` : "—",
     vol: fmtK(o.vol || 0),
     oi: fmtK(o.oi || 0),
+    pay: payMult(o, S, days) > 0 ? `${payMult(o, S, days).toFixed(1)}x` : "—",
     prob: prob != null ? `${prob}%` : "—",
     type: o.isCall ? "call" : "put",
     chg: o.chg || 0,

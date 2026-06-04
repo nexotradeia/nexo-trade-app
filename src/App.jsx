@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-04 18:22:26
+// NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -18545,7 +18545,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           )}
           {tab==="options"&&(
             <div style={{display:"grid",gridTemplateColumns:"66px 140px 84px 66px 76px 60px 64px 64px 70px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
-              {[["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["price","Precio"],["iv","IV"],["vol","Vol"],["oi","OI"],["prob","Prob ITM"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
+              {[["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["price","Precio"],["iv","IV"],["vol","Vol"],["pay","Pago pot."],["prob","Prob ITM"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
           {tab==="intraday"&&(
@@ -18612,7 +18612,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   <span style={{fontSize:12,fontWeight:800,color:C.text,fontFamily:"monospace"}}>{r.price||"—"}</span>
                   <span style={{fontSize:12,color:"#F59E0B",fontWeight:800}}>{r.iv}</span>
                   <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
-                  <span style={{fontSize:11,color:C.muted}}>{r.oi||"—"}</span>
+                  <span style={{fontSize:12,fontWeight:800,color:parseFloat(r.pay)>=2?"#10B981":parseFloat(r.pay)>=1?"#F59E0B":C.muted}}>{r.pay||"—"}</span>
                   <span style={{fontSize:12,fontWeight:800,color:parseInt(r.prob)>=50?"#10B981":parseInt(r.prob)>=30?"#F59E0B":"#EF4444"}}>{r.prob||"—"}</span>
                 </>}
 
