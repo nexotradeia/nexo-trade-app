@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 20:52:33
+// NEXO TRADE — build: 2026-06-03 20:55:01
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -4299,7 +4299,7 @@ function TickerStrip(){
     <div style={{background:"#060e1c",borderBottom:"1px solid rgba(255,255,255,0.07)",overflow:"hidden",height:34,position:"relative",zIndex:99}}>
       <style>{`
         @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-        .ticker-track { display:flex; gap:0; animation:tickerScroll 42s linear infinite; width:max-content; }
+        .ticker-track { display:flex; gap:0; animation:tickerScroll 80s linear infinite; width:max-content; }
         .ticker-track:hover { animation-play-state:paused; }
       `}</style>
       {/* Indicador live */}
