@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 20:55:42
+// NEXO TRADE — build: 2026-06-03 20:58:58
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -19328,7 +19328,7 @@ function AdminDashboard(){
 
   // ── Presence: ver quién está conectado en tiempo real ──
   useEffect(()=>{
-    const ch = supabase.channel("nexo-presence");
+    const ch = supabase.channel("nexo-admin-presence-"+Date.now());
     ch.on("presence",{event:"sync"},()=>{
       const state = ch.presenceState();
       const list = Object.entries(state).flatMap(([uid,arr])=>
@@ -19340,7 +19340,7 @@ function AdminDashboard(){
       if(status==="SUBSCRIBED") await ch.track({username:"Admin",emoji:"🛡️",avatarColor:"#0066FF",since:Date.now()});
     });
     adminChRef.current=ch;
-    return()=>{ ch.unsubscribe(); adminChRef.current=null; };
+    return()=>{ try{ ch.unsubscribe(); }catch(_){} adminChRef.current=null; };
   },[]);
 
   useEffect(()=>{
