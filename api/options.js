@@ -135,7 +135,7 @@ export default async function handler(req, res) {
     try {
       const { S, rows, days, expStr } = await fn(ticker);
       const contracts = rows.map(o => shapeRow(ticker, o, S, days, expStr))
-        .sort((a, b) => b.score - a.score).slice(0, 3);
+        .sort((a, b) => b.score - a.score); // TODOS los contratos que pasan filtros de calidad
       res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=120");
       return res.status(200).json({ ticker, spot: S, expiry: expStr, days, contracts, source: name });
     } catch (e) { if (!err1) err1 = e.message; else err1 += " / " + e.message; }
