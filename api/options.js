@@ -25,21 +25,22 @@ function probITM(S, K, ivDec, days, isCall) {
 
 const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(n || 0);
 
-// Score 0-100: liquidez + spread justo + prima economica + cerca del dinero + tiempo sano
-function feasScore(o, S, days) {
+// Score 0-100 (prioridades del usuario): PROBABILIDAD primero + mas barato +
+// mas volumen + MAS TIEMPO (menos riesgo de expirar) + liquidez
+function feasScore(o, S, days, prob) {
   let sc = 0;
-  sc += Math.min(25, Math.log10((o.vol || 0) + 1) * 8);
-  sc += Math.min(20, Math.log10((o.oi || 0) + 1) * 5);
+  if (prob != null) sc += prob >= 60 ? 25 : prob >= 50 ? 20 : prob >= 40 ? 14 : prob >= 30 ? 8 : 2;
+  sc += Math.min(20, Math.log10((o.vol || 0) + 1) * 6.5);
+  sc += Math.min(10, Math.log10((o.oi || 0) + 1) * 2.8);
+  const lp = o.last || ((o.bid || 0) + (o.ask || 0)) / 2;
+  sc += lp > 0 && lp <= 1 ? 15 : lp <= 3 ? 12 : lp <= 5 ? 8 : lp <= 10 ? 4 : 1;
+  sc += days >= 30 ? 15 : days >= 21 ? 12 : days >= 14 ? 8 : days >= 7 ? 5 : 2;
   if (o.bid > 0 && o.ask > 0) {
     const spr = (o.ask - o.bid) / ((o.ask + o.bid) / 2);
-    sc += spr < 0.05 ? 20 : spr < 0.10 ? 14 : spr < 0.20 ? 7 : 0;
+    sc += spr < 0.05 ? 10 : spr < 0.10 ? 7 : spr < 0.20 ? 3 : 0;
   }
   const dist = Math.abs(o.strike - S) / S;
-  sc += dist < 0.02 ? 12 : dist < 0.05 ? 10 : dist < 0.08 ? 6 : 2;
-  sc += days >= 7 && days <= 45 ? 10 : days < 7 ? 4 : 6;
-  sc += o.iv > 0.15 && o.iv < 1.2 ? 3 : 0;
-  const lp = o.last || ((o.bid || 0) + (o.ask || 0)) / 2;
-  sc += lp > 0 && lp <= 1 ? 10 : lp <= 3 ? 8 : lp <= 5 ? 5 : lp <= 10 ? 2 : 0;
+  sc += dist < 0.02 ? 5 : dist < 0.05 ? 4 : dist < 0.08 ? 2 : 0;
   return Math.min(99, Math.round(sc));
 }
 
@@ -58,7 +59,7 @@ function shapeRow(t, o, S, days, expStr) {
     prob: prob != null ? `${prob}%` : "—",
     type: o.isCall ? "call" : "put",
     chg: o.chg || 0,
-    score: feasScore(o, S, days),
+    score: feasScore(o, S, days, prob),
     spot: S, days,
   };
 }
@@ -94,7 +95,10 @@ async function fetchCboe(ticker) {
   // usar el vencimiento mas comun dentro del rango
   const byExp = {};
   parsed.forEach(p => { const k = p.exp.toISOString().slice(0, 10); (byExp[k] = byExp[k] || []).push(p); });
-  const best = Object.values(byExp).sort((a, b) => b.length - a.length)[0];
+  // preferir el vencimiento MAS LEJANO con suficientes contratos (mas tiempo = menos riesgo de expirar)
+  const groups = Object.values(byExp).filter(g => g.length >= 8);
+  const pool = groups.length ? groups : Object.values(byExp);
+  const best = pool.sort((a, b) => b[0].days - a[0].days)[0];
   const days = best[0].days;
   const expStr = best[0].exp.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   return { S, rows: best, days, expStr };
