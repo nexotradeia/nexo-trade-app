@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
+// NEXO TRADE — build: 2026-06-04 18:22:26
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';

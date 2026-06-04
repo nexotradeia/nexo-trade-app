@@ -81,16 +81,17 @@ async function fetchCboe(ticker) {
     if (!m) continue;
     const exp = new Date(Date.UTC(2000 + +m[2].slice(0, 2), +m[2].slice(2, 4) - 1, +m[2].slice(4, 6)));
     const days = Math.round((exp - now) / 86400000);
-    if (days < 7 || days > 40) continue;
+    if (days < 7 || days > 40) continue;                       // sweet spot 7-40 dias
     const strike = +m[4] / 1000;
-    if (Math.abs(strike - S) / S > 0.10) continue;
+    if (Math.abs(strike - S) / S > 0.10) continue;              // cerca del dinero ±10%
     let iv = o.iv ?? o.implied_volatility ?? 0;
-    if (iv > 3) iv = iv / 100;
+    if (iv > 3) iv = iv / 100;                                  // algunos vienen en %
     const vol = o.volume || 0, oi = o.open_interest ?? o.openInterest ?? 0;
-    if (vol + oi <= 50) continue;
+    if (vol + oi <= 50) continue;                               // liquidez minima
     parsed.push({ isCall: m[3] === "C", strike, iv, vol, oi, bid: o.bid || 0, ask: o.ask || 0, last: o.last_trade_price ?? o.last ?? 0, days, exp, chg });
   }
   if (parsed.length === 0) throw new Error("CBOE sin contratos en rango");
+  // usar el vencimiento mas comun dentro del rango
   const byExp = {};
   parsed.forEach(p => { const k = p.exp.toISOString().slice(0, 10); (byExp[k] = byExp[k] || []).push(p); });
   const best = Object.values(byExp).sort((a, b) => b.length - a.length)[0];
@@ -135,11 +136,11 @@ export default async function handler(req, res) {
     try {
       const { S, rows, days, expStr } = await fn(ticker);
       const contracts = rows.map(o => shapeRow(ticker, o, S, days, expStr))
-        .sort((a, b) => b.score - a.score); // TODOS los contratos que pasan filtros de calidad
-      res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=120");
+        .sort((a, b) => b.score - a.score); // TODOS los contratos que pasan filtros de calidad // top 3 por ticker
+      res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=120"); // refresca cada 1 min (origen ~15 min retraso OPRA)
       return res.status(200).json({ ticker, spot: S, expiry: expStr, days, contracts, source: name });
     } catch (e) { if (!err1) err1 = e.message; else err1 += " / " + e.message; }
   }
-  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Cache-Control", "no-store"); // nunca cachear errores
   return res.status(200).json({ ticker, contracts: [], source: "error", error: err1 });
 }
