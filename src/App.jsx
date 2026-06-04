@@ -18022,6 +18022,45 @@ const SCREENER_DATA = {
   ],
 };
 
+// ---- OPCIONES DINAMICAS (Sesion 11) ----
+// Antes strike/expiry estaban hardcodeados (ej. "Jun 20" - ni siquiera era viernes)
+// y no coincidian con el broker. Ahora: expiraciones = viernes REALES proximos
+// (las opciones US expiran los viernes) y strikes calculados sobre el precio live.
+const _nextFridays = (n=5) => {
+  const out=[]; const d=new Date();
+  const add=((5 - d.getDay() + 7) % 7) || 7; // proximo viernes (si hoy es viernes, el siguiente)
+  d.setDate(d.getDate()+add);
+  for(let i=0;i<n;i++){ out.push(new Date(d)); d.setDate(d.getDate()+7); }
+  return out;
+};
+const _strikeStep = p => p>=500?10:p>=250?5:p>=100?2.5:p>=50?1:0.5;
+const _fmtExp = d => d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const buildLiveOptions = (lp) => {
+  const fri=_nextFridays(5);
+  // fallback de precio si Finnhub aun no cargo (se actualiza con el precio live al llegar)
+  const base={NVDA:220,TSLA:420,SPY:757,META:622,AAPL:311,QQQ:485,AMZN:250,PLTR:141};
+  const defs=[
+    {s:"PLTR",type:"call",otm:0.05, iv:"88%",vol:"44K", oi:"188K",chg:+31.2,score:97,fi:1},
+    {s:"NVDA",type:"call",otm:0.03, iv:"62%",vol:"28K", oi:"145K",chg:+18.4,score:95,fi:1},
+    {s:"META",type:"call",otm:0.03, iv:"44%",vol:"8.4K",oi:"42K", chg:+12.8,score:91,fi:4},
+    {s:"TSLA",type:"put", otm:0.04, iv:"78%",vol:"22K", oi:"98K", chg:+24.1,score:88,fi:1},
+    {s:"AMZN",type:"call",otm:0.03, iv:"32%",vol:"11K", oi:"68K", chg:+9.7, score:84,fi:4},
+    {s:"SPY", type:"call",otm:0.01, iv:"14%",vol:"185K",oi:"820K",chg:+5.2, score:82,fi:0},
+    {s:"AAPL",type:"call",otm:0.025,iv:"28%",vol:"32K", oi:"210K",chg:+8.3, score:79,fi:2},
+    {s:"QQQ", type:"put", otm:0.015,iv:"18%",vol:"62K", oi:"340K",chg:+6.1, score:76,fi:0},
+  ];
+  return defs.map(d=>{
+    const p=lp?.[d.s]?.price||base[d.s];
+    const step=_strikeStep(p);
+    const raw=d.type==="call"?p*(1+d.otm):p*(1-d.otm);
+    const k=Math.round(raw/step)*step;
+    const kStr=Number.isInteger(k)?String(k):k.toFixed(1);
+    return {s:d.s, n:`${d.s} ${d.type==="call"?"Calls":"Puts"}`,
+      strike:`$${kStr}${d.type==="call"?"C":"P"}`, exp:_fmtExp(fri[d.fi]),
+      iv:d.iv, vol:d.vol, oi:d.oi, type:d.type, chg:d.chg, score:d.score, p};
+  });
+};
+
 // Pattern icons mapping
 const PATTERN_ICON = {
   "Breakout":"🚀","Trend Up":"📈","Momentum":"⚡","Reversal":"🔄",
@@ -18209,7 +18248,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     {id:"scalping",l:"⚡ Scalping"},
   ];
 
-  const mergedData=(SCREENER_DATA[tab]||[]).map(r=>{
+  const mergedData=(tab==="options"?buildLiveOptions(livePrices):(SCREENER_DATA[tab]||[])).map(r=>{
     const live=livePrices[r.s];
     return{...r, p:live?.price??r.p, chg:live?.change??r.chg, liveHigh:live?.high, liveLow:live?.low};
   });
