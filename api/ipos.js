@@ -61,6 +61,8 @@ function mapAndRespond(res, raw, source) {
     if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
     return (a.date || "9999").localeCompare(b.date || "9999");
   });
+  // Cache solo en éxito — los errores NO se cachean (fix Sesión 11)
+  res.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
   return res.status(200).json({ ipos, source, total: ipos.length });
 }
 
@@ -73,9 +75,15 @@ async function fetchFMP(year) {
   return raw;
 }
 
-async function fetchFinnhub(year) {
+async function fetchFinnhub(year, attempt = 1) {
   const url = `https://finnhub.io/api/v1/calendar/ipo?from=${year}-01-01&to=${year}-12-31&token=${FH_KEY}`;
-  const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  let r;
+  try {
+    r = await fetch(url, { signal: AbortSignal.timeout(4500) });
+  } catch (e) {
+    if (attempt < 2) return fetchFinnhub(year, attempt + 1); // 1 reintento (cold start)
+    throw e;
+  }
   if (!r.ok) throw new Error(`Finnhub HTTP ${r.status}`);
   const j = await r.json();
   const list = (j.ipoCalendar || [])
@@ -98,8 +106,6 @@ async function fetchFinnhub(year) {
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  // Cache 6 horas — IPOs no cambian frecuentemente, ahorra cuota
-  res.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const year = new Date().getFullYear();
@@ -117,6 +123,7 @@ export default async function handler(req, res) {
     return mapAndRespond(res, raw, "finnhub");
   } catch (e2) {
     console.error("[ipos] fmp:", fmpErr, "| finnhub:", e2.message);
+    res.setHeader("Cache-Control", "no-store"); // nunca cachear errores
     return res.status(200).json({ ipos: [], source: "error", error: `${fmpErr} / ${e2.message}` });
   }
 }
