@@ -994,6 +994,8 @@ const TAPE_TICKERS = [
   "SOL","XRP","DOGE","BNB","NFLX","MELI",
   "QQQ","GLD","UBER","SHOP","V","ORCL","CRM","WMT","COST","ANET",
   "NU","SQ","LLY","AVGO","IWM","TLT","SNOW","NOW","XOM","PYPL",
+  // Sesión 11: más stocks + SPCX (SpaceX — IPO 11 jun 2026; muestra precio automático al cotizar)
+  "SPCX","JPM","BAC","GS","DIS","INTC","MU","BABA","HOOD","ABNB","GME","RIVN","MARA",
 ];
 const SIDEBAR_TICKERS = ["BTC","NVDA","TSLA","ETH","SOL","AAPL","SPY","QQQ"];
 const ALL_TRACK = [...new Set([...TAPE_TICKERS,...SIDEBAR_TICKERS])];
@@ -4702,7 +4704,7 @@ function EarningsPage({lang}){
     if(search&&!e.ticker.toLowerCase().includes(search.toLowerCase())&&!e.nombre.toLowerCase().includes(search.toLowerCase()))return false;
     return true;
   });
-  const displayed=showAll?selFiltered:selFiltered.slice(0,8);
+  const displayed=showAll?selFiltered:selFiltered.slice(0,30);
   const highImpactCount=selDayAll.filter(e=>getImpact(e.ticker)==="Alto").length;
   const avgBull=selDayAll.length?Math.round(selDayAll.reduce((s,e)=>s+(votes[e.ticker]||50),0)/selDayAll.length):0;
   const nextCall=selDayAll.find(e=>e.horaRaw==="amc")||selDayAll[0];
@@ -4988,10 +4990,10 @@ function EarningsPage({lang}){
             })}
 
             {/* Ver más */}
-            {!showAll&&selFiltered.length>8&&(
+            {!showAll&&selFiltered.length>30&&(
               <button onClick={()=>setShowAll(true)}
                 style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:`1px solid ${C.border}`,cursor:"pointer",color:"#0066FF",fontSize:12,fontWeight:700}}>
-                + Ver {selFiltered.length-8} empresas más de este día
+                + Ver {selFiltered.length-30} empresas más de este día
               </button>
             )}
           </div>
@@ -7928,7 +7930,7 @@ function Footer({ setPage, onAuth, lang="es" }){
       <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)",padding:"22px 20px"}}>
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
           <div className="nexo-footer-logo" style={{display:"flex",alignItems:"center",gap:10}}>
-            <img src="/logo_nexo.png" alt="NexoTrade" style={{height:32,width:"auto",objectFit:"contain",borderRadius:6}}/>
+            <img src="/logo_nexo_dark.svg" alt="NexoTrade" style={{height:36,width:"auto",objectFit:"contain"}}/>
           </div>
           {/* Tagline */}
           <p style={{color:"#475569",fontSize:12,margin:0,lineHeight:1.6,maxWidth:420,textAlign:"center"}}>
@@ -10697,6 +10699,7 @@ const IPOS_2026 = [
   {company:"CoreWeave Inc",        ticker:"CRWV",  exchange:"NASDAQ",  date:"2026-03-28",range:"$40",     raise:"$1.5B",  sector:"Cloud/AI",    status:"trading",   desc:"GPU cloud provider for AI workloads, OpenAI's primary infrastructure partner. Up ~140% since IPO."},
   {company:"Venture Global LNG",   ticker:"VG",    exchange:"NYSE",    date:"2026-01-24",range:"$25",     raise:"$1.75B", sector:"Energy",      status:"trading",   desc:"Major U.S. LNG exporter. One of the biggest IPOs of the year by capital raised."},
   {company:"eToro Group Ltd",      ticker:"ETOR",  exchange:"NASDAQ",  date:"2026-05-14",range:"$52",     raise:"$620M",  sector:"Fintech",     status:"trading",   desc:"Social trading platform with 35M registered users worldwide. Debuted above range."},
+  {company:"SpaceX",               ticker:"SPCX",  exchange:"NASDAQ",  date:"2026-06-11",range:"TBD",     raise:"TBD",    sector:"Aerospace",   status:"upcoming",  desc:"La empresa aeroespacial de Elon Musk sale a bolsa. Starlink + lanzamientos. El IPO más esperado de la década — cotiza la semana del 11 de junio."},
   {company:"Klarna Bank AB",       ticker:"KLAR",  exchange:"NYSE",    date:"2026-07-01",range:"$68–$72", raise:"$1.0B",  sector:"Fintech",     status:"upcoming",  desc:"Europe's leading BNPL platform with 85M users across 45 countries. Highly anticipated."},
   {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2026-07-08",range:"$22–$26", raise:"$600M",  sector:"Neobank",     status:"upcoming",  desc:"U.S. neobank with 22M active accounts. No overdraft fees model disrupting traditional banking."},
   {company:"SHEIN Group Ltd",      ticker:"SHEI",  exchange:"NYSE",    date:"2026-07-22",range:"$60–$70", raise:"$5.0B",  sector:"Retail",      status:"upcoming",  desc:"Ultra-fast fashion e-commerce giant. Est. valuation $65B. Highly controversial ESG profile."},
@@ -10721,7 +10724,6 @@ const IPOS_2028 = [
   {company:"OpenAI",               ticker:"TBD",   exchange:"TBD",     date:"2028+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"rumored",   valuation:"$300B+", desc:"Creador de ChatGPT. El IPO más anticipado de la historia. Sin fecha confirmada — posible 2028 o posterior."},
   {company:"Anthropic",            ticker:"ANTH",  exchange:"NASDAQ",  date:"2028+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"rumored",   valuation:"$61B",   desc:"Empresa de IA fundada por ex-OpenAI. Creadora de Claude. Respaldada por Google y Amazon."},
   {company:"xAI (Elon Musk)",      ticker:"XAI",   exchange:"NASDAQ",  date:"2028+",     range:"TBD",     raise:"TBD",    sector:"AI",          status:"rumored",   valuation:"$50B",   desc:"Empresa de IA de Elon Musk, creadora de Grok. Integración con X (Twitter) y Tesla esperada."},
-  {company:"SpaceX",               ticker:"SPCE2", exchange:"TBD",     date:"2028+",     range:"TBD",     raise:"TBD",    sector:"Aerospace",   status:"rumored",   valuation:"$180B",  desc:"La empresa privada más valiosa del mundo. Musk ha dicho repetidamente que no planea hacerla pública pronto."},
   {company:"Figma Inc",            ticker:"FGMA",  exchange:"NASDAQ",  date:"2028+",     range:"TBD",     raise:"TBD",    sector:"SaaS/Design", status:"rumored",   valuation:"$12.5B", desc:"Plataforma de diseño colaborativo líder. Acuerdo con Adobe bloqueado por reguladores — IPO independiente esperado."},
   {company:"Databricks Inc",       ticker:"DBRK",  exchange:"NASDAQ",  date:"2027–2028", range:"TBD",     raise:"$2.0B+", sector:"Cloud/AI",    status:"rumored",   valuation:"$62B",   desc:"Plataforma de datos e IA. Valorada en $62B en última ronda privada. Una de las más esperadas en cloud."},
 ];
@@ -21081,7 +21083,7 @@ export default function App(){
 
           {/* Logo — integrado al navbar */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
-            <img src="/logo_nexo.png" alt="NexoTrade" className="nexo-logo-img" style={{height:44,width:"auto",objectFit:"contain"}}/>
+            <img src="/logo_nexo.svg" alt="NexoTrade" className="nexo-logo-img" style={{height:44,width:"auto",objectFit:"contain"}}/>
           </div>
 
           {/* Market status */}
