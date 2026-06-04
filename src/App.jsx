@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-03 20:15:43
+// NEXO TRADE — build: 2026-06-03 20:35:47
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7838,7 +7838,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
             <div style={{color:C.muted2,fontSize:11,marginBottom:4}}>{lang==="en"?"Your points":"Tus puntos"}</div>
             <LevelBadge points={user.points} lang={lang}/>
           </div>
-          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},...(ADMIN_EMAILS_CONST.includes(user?.email||"")?[{label:"🛡️ Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}]:[]),{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
+          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},...(ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase())?[{label:"🛡️ Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}]:[]),{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
             <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:item.admin?"linear-gradient(135deg,#D9770622,#4c1d9511)":"none",border:item.admin?"1px solid #D9770644":"none",cursor:"pointer",color:item.red?C.bear:item.admin?"#a78bfa":C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s",marginBottom:item.admin?4:0}}
               onMouseEnter={e=>e.currentTarget.style.background=C.card2}
               onMouseLeave={e=>e.currentTarget.style.background="none"}>
@@ -20461,7 +20461,7 @@ export default function App(){
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===33) return <RiskPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===34) return <GuidelinesPage onBack={()=>setPage(0)} lang={lang}/>;
-    if(page===99) return ADMIN_EMAILS_CONST.includes(user?.email||"") ? <AdminDashboard/> : null;
+    if(page===99) return (ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase()) || _getAdminStatus()) ? <AdminDashboard/> : null;
     return(
       <>
         {/* Feed tabs */}
