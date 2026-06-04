@@ -1,13 +1,13 @@
 // NexoTrade - Cadenas de opciones REALES (Sesion 11)
-// GET /api/options?ticker=NVDA -> contratos reales via Yahoo Finance (~15 min retraso)
-// Devuelve los mejores contratos cerca del dinero con:
-//   precio real del contrato, volumen, open interest, IV real,
-//   probabilidad ITM (Black-Scholes N(d2)) y score de factibilidad 0-100.
+// GET /api/options?ticker=NVDA
+// Fuente 1: CBOE delayed quotes (oficial de la bolsa de opciones, gratis, ~15 min retraso)
+// Fuente 2 (fallback): Yahoo Finance
+// Devuelve top contratos cerca del dinero: precio real, volumen, OI, IV,
+// probabilidad ITM (Black-Scholes N(d2)) y score de factibilidad 0-100.
 // Educativo - no es consejo financiero.
 
 const UA = { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36", "Accept": "application/json" };
 
-// CDF normal estandar (aprox. Abramowitz-Stegun)
 function normCdf(x) {
   const t = 1 / (1 + 0.2316419 * Math.abs(x));
   const d = 0.3989423 * Math.exp(-x * x / 2);
@@ -15,11 +15,9 @@ function normCdf(x) {
   return x > 0 ? 1 - p : p;
 }
 
-// Probabilidad de terminar ITM al vencimiento (N(d2) para calls, N(-d2) para puts)
 function probITM(S, K, ivDec, days, isCall) {
   if (!S || !K || !ivDec || ivDec <= 0 || days <= 0) return null;
-  const T = days / 365;
-  const r = 0.04;
+  const T = days / 365, r = 0.04;
   const d2 = (Math.log(S / K) + (r - (ivDec * ivDec) / 2) * T) / (ivDec * Math.sqrt(T));
   const p = isCall ? normCdf(d2) : normCdf(-d2);
   return Math.round(p * 100);
@@ -27,31 +25,104 @@ function probITM(S, K, ivDec, days, isCall) {
 
 const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(n || 0);
 
-// Score de factibilidad 0-100: liquidez + spread justo + moneyness sana + tiempo razonable
-function feasScore(c, S, days) {
+// Score 0-100: liquidez + spread justo + prima economica + cerca del dinero + tiempo sano
+function feasScore(o, S, days) {
   let sc = 0;
-  const vol = c.volume || 0, oi = c.openInterest || 0;
-  sc += Math.min(25, Math.log10(vol + 1) * 8);          // volumen (demanda hoy)
-  sc += Math.min(20, Math.log10(oi + 1) * 5);            // open interest (interes abierto)
-  const bid = c.bid || 0, ask = c.ask || 0;
-  if (bid > 0 && ask > 0) {
-    const spr = (ask - bid) / ((ask + bid) / 2);
-    sc += spr < 0.05 ? 20 : spr < 0.10 ? 14 : spr < 0.20 ? 7 : 0;  // spread apretado = facil entrar/salir
+  sc += Math.min(25, Math.log10((o.vol || 0) + 1) * 8);
+  sc += Math.min(20, Math.log10((o.oi || 0) + 1) * 5);
+  if (o.bid > 0 && o.ask > 0) {
+    const spr = (o.ask - o.bid) / ((o.ask + o.bid) / 2);
+    sc += spr < 0.05 ? 20 : spr < 0.10 ? 14 : spr < 0.20 ? 7 : 0;
   }
-  const dist = Math.abs(c.strike - S) / S;
-  sc += dist < 0.02 ? 12 : dist < 0.05 ? 10 : dist < 0.08 ? 6 : 2; // cerca del dinero
-  sc += days >= 7 && days <= 45 ? 10 : days < 7 ? 4 : 6;           // ni 0DTE ni demasiado lejos
-  const iv = c.impliedVolatility || 0;
-  sc += iv > 0.15 && iv < 1.2 ? 3 : 0;                              // IV en rango sano
-  const lp = c.lastPrice || ((c.bid || 0) + (c.ask || 0)) / 2;      // prima economica = accesible
+  const dist = Math.abs(o.strike - S) / S;
+  sc += dist < 0.02 ? 12 : dist < 0.05 ? 10 : dist < 0.08 ? 6 : 2;
+  sc += days >= 7 && days <= 45 ? 10 : days < 7 ? 4 : 6;
+  sc += o.iv > 0.15 && o.iv < 1.2 ? 3 : 0;
+  const lp = o.last || ((o.bid || 0) + (o.ask || 0)) / 2;
   sc += lp > 0 && lp <= 1 ? 10 : lp <= 3 ? 8 : lp <= 5 ? 5 : lp <= 10 ? 2 : 0;
   return Math.min(99, Math.round(sc));
 }
 
-async function yget(url) {
-  const r = await fetch(url, { headers: UA, signal: AbortSignal.timeout(6000) });
-  if (!r.ok) throw new Error(`Yahoo HTTP ${r.status}`);
-  return r.json();
+function shapeRow(t, o, S, days, expStr) {
+  const prob = probITM(S, o.strike, o.iv, days, o.isCall);
+  const kStr = Number.isInteger(o.strike) ? String(o.strike) : o.strike.toFixed(1);
+  return {
+    s: t,
+    n: `${t} $${kStr}${o.isCall ? "C" : "P"}`,
+    strike: `$${kStr}${o.isCall ? "C" : "P"}`,
+    exp: expStr,
+    price: o.last > 0 ? `$${o.last.toFixed(2)}` : (o.bid > 0 || o.ask > 0) ? `$${(((o.bid || 0) + (o.ask || 0)) / 2).toFixed(2)}` : "—",
+    iv: o.iv > 0 ? `${Math.round(o.iv * 100)}%` : "—",
+    vol: fmtK(o.vol || 0),
+    oi: fmtK(o.oi || 0),
+    prob: prob != null ? `${prob}%` : "—",
+    type: o.isCall ? "call" : "put",
+    chg: o.chg || 0,
+    score: feasScore(o, S, days),
+    spot: S, days,
+  };
+}
+
+// ---- Fuente 1: CBOE (cdn.cboe.com, sin key) ----
+async function fetchCboe(ticker) {
+  const r = await fetch(`https://cdn.cboe.com/api/global/delayed_quotes/options/${ticker}.json`, { headers: UA, signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(`CBOE HTTP ${r.status}`);
+  const j = await r.json();
+  const d = j?.data;
+  const S = d?.current_price || d?.close;
+  const chg = d?.percent_change || 0;
+  const raw = d?.options || [];
+  if (!S || raw.length === 0) throw new Error("CBOE sin datos");
+
+  const now = new Date();
+  const parsed = [];
+  for (const o of raw) {
+    const m = /^([A-Z.]+)(\d{6})([CP])(\d{8})$/.exec(o.option || "");
+    if (!m) continue;
+    const exp = new Date(Date.UTC(2000 + +m[2].slice(0, 2), +m[2].slice(2, 4) - 1, +m[2].slice(4, 6)));
+    const days = Math.round((exp - now) / 86400000);
+    if (days < 7 || days > 40) continue;
+    const strike = +m[4] / 1000;
+    if (Math.abs(strike - S) / S > 0.10) continue;
+    let iv = o.iv ?? o.implied_volatility ?? 0;
+    if (iv > 3) iv = iv / 100;
+    const vol = o.volume || 0, oi = o.open_interest ?? o.openInterest ?? 0;
+    if (vol + oi <= 50) continue;
+    parsed.push({ isCall: m[3] === "C", strike, iv, vol, oi, bid: o.bid || 0, ask: o.ask || 0, last: o.last_trade_price ?? o.last ?? 0, days, exp, chg });
+  }
+  if (parsed.length === 0) throw new Error("CBOE sin contratos en rango");
+  const byExp = {};
+  parsed.forEach(p => { const k = p.exp.toISOString().slice(0, 10); (byExp[k] = byExp[k] || []).push(p); });
+  const best = Object.values(byExp).sort((a, b) => b.length - a.length)[0];
+  const days = best[0].days;
+  const expStr = best[0].exp.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  return { S, rows: best, days, expStr };
+}
+
+// ---- Fuente 2: Yahoo Finance (fallback) ----
+async function fetchYahoo(ticker) {
+  const yget = async u => { const r = await fetch(u, { headers: UA, signal: AbortSignal.timeout(6000) }); if (!r.ok) throw new Error(`Yahoo HTTP ${r.status}`); return r.json(); };
+  const base = await yget(`https://query2.finance.yahoo.com/v7/finance/options/${ticker}`);
+  const r0 = base?.optionChain?.result?.[0];
+  const S = r0?.quote?.regularMarketPrice;
+  const chg = r0?.quote?.regularMarketChangePercent || 0;
+  const now = Math.floor(Date.now() / 1000);
+  const exps = (r0?.expirationDates || []).filter(e => e > now);
+  if (!S || exps.length === 0) throw new Error("Yahoo sin datos");
+  const target = exps.find(e => (e - now) / 86400 >= 7 && (e - now) / 86400 <= 40) || exps[0];
+  let chain = r0.options?.[0];
+  if (!chain || chain.expirationDate !== target) {
+    const full = await yget(`https://query2.finance.yahoo.com/v7/finance/options/${ticker}?date=${target}`);
+    chain = full?.optionChain?.result?.[0]?.options?.[0];
+  }
+  if (!chain) throw new Error("Yahoo sin chain");
+  const days = Math.max(1, Math.round((target - now) / 86400));
+  const expStr = new Date(target * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  const conv = (c, isCall) => ({ isCall, strike: c.strike, iv: c.impliedVolatility || 0, vol: c.volume || 0, oi: c.openInterest || 0, bid: c.bid || 0, ask: c.ask || 0, last: c.lastPrice || 0, days, chg });
+  const near = c => Math.abs(c.strike - S) / S <= 0.10 && (c.volume || 0) + (c.openInterest || 0) > 50;
+  const rows = [...(chain.calls || []).filter(near).map(c => conv(c, true)), ...(chain.puts || []).filter(near).map(c => conv(c, false))];
+  if (rows.length === 0) throw new Error("Yahoo sin contratos");
+  return { S, rows, days, expStr };
 }
 
 export default async function handler(req, res) {
@@ -59,60 +130,16 @@ export default async function handler(req, res) {
   const ticker = String(req.query.ticker || "").toUpperCase().replace(/[^A-Z.]/g, "");
   if (!ticker) { res.setHeader("Cache-Control", "no-store"); return res.status(400).json({ error: "ticker requerido" }); }
 
-  try {
-    // 1) chain base -> lista de vencimientos + precio spot
-    const base = await yget(`https://query2.finance.yahoo.com/v7/finance/options/${ticker}`);
-    const r0 = base?.optionChain?.result?.[0];
-    if (!r0) throw new Error("sin datos");
-    const S = r0.quote?.regularMarketPrice;
-    const chgPct = r0.quote?.regularMarketChangePercent || 0;
-    const now = Math.floor(Date.now() / 1000);
-    const exps = (r0.expirationDates || []).filter(e => e > now);
-    if (!S || exps.length === 0) throw new Error("sin vencimientos");
-
-    // 2) elegir vencimiento 7-40 dias (el sweet spot del screener); si no, el mas cercano
-    const target = exps.find(e => (e - now) / 86400 >= 7 && (e - now) / 86400 <= 40) || exps[0];
-    let chain = r0.options?.[0];
-    if (!chain || chain.expirationDate !== target) {
-      const full = await yget(`https://query2.finance.yahoo.com/v7/finance/options/${ticker}?date=${target}`);
-      chain = full?.optionChain?.result?.[0]?.options?.[0];
-    }
-    if (!chain) throw new Error("sin chain");
-
-    const days = Math.max(1, Math.round((target - now) / 86400));
-    const expStr = new Date(target * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-
-    // 3) contratos cerca del dinero (±10%) con liquidez minima
-    const near = c => Math.abs(c.strike - S) / S <= 0.10 && (c.volume || 0) + (c.openInterest || 0) > 50;
-    const shape = (c, isCall) => {
-      const prob = probITM(S, c.strike, c.impliedVolatility, days, isCall);
-      return {
-        s: ticker,
-        n: `${ticker} $${Number.isInteger(c.strike) ? c.strike : c.strike.toFixed(1)}${isCall ? "C" : "P"}`,
-        strike: `$${Number.isInteger(c.strike) ? c.strike : c.strike.toFixed(1)}${isCall ? "C" : "P"}`,
-        exp: expStr,
-        price: c.lastPrice != null ? `$${c.lastPrice.toFixed(2)}` : "—",
-        iv: c.impliedVolatility ? `${Math.round(c.impliedVolatility * 100)}%` : "—",
-        vol: fmtK(c.volume || 0),
-        oi: fmtK(c.openInterest || 0),
-        prob: prob != null ? `${prob}%` : "—",
-        type: isCall ? "call" : "put",
-        chg: chgPct,
-        score: feasScore(c, S, days),
-        spot: S, days,
-      };
-    };
-    const all = [
-      ...(chain.calls || []).filter(near).map(c => shape(c, true)),
-      ...(chain.puts  || []).filter(near).map(c => shape(c, false)),
-    ].sort((a, b) => b.score - a.score).slice(0, 3); // top 3 por ticker
-
-    if (all.length === 0) throw new Error("sin contratos liquidos");
-
-    res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=120"); // refresca cada 1 min (el dato de origen ya trae ~15 min de retraso de OPRA)
-    return res.status(200).json({ ticker, spot: S, expiry: expStr, days, contracts: all, source: "yahoo" });
-  } catch (e) {
-    res.setHeader("Cache-Control", "no-store"); // nunca cachear errores
-    return res.status(200).json({ ticker, contracts: [], source: "error", error: e.message });
+  let err1 = "";
+  for (const [name, fn] of [["cboe", fetchCboe], ["yahoo", fetchYahoo]]) {
+    try {
+      const { S, rows, days, expStr } = await fn(ticker);
+      const contracts = rows.map(o => shapeRow(ticker, o, S, days, expStr))
+        .sort((a, b) => b.score - a.score).slice(0, 3);
+      res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=120");
+      return res.status(200).json({ ticker, spot: S, expiry: expStr, days, contracts, source: name });
+    } catch (e) { if (!err1) err1 = e.message; else err1 += " / " + e.message; }
   }
+  res.setHeader("Cache-Control", "no-store");
+  return res.status(200).json({ ticker, contracts: [], source: "error", error: err1 });
 }
