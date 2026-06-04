@@ -118,6 +118,53 @@ async function fetchCboe(ticker) {
   return { S, rows: best, days, expStr };
 }
 
+// ---- MODO FLOW: actividad inusual REAL (volumen del dia >> open interest) ----
+// vol/OI alto = dinero institucional entrando HOY. Es la misma senal que venden
+// los servicios de pago de "unusual options activity".
+async function fetchCboeFlow(ticker) {
+  const r = await fetch(`https://cdn.cboe.com/api/global/delayed_quotes/options/${ticker}.json`, { headers: UA, signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(`CBOE HTTP ${r.status}`);
+  const j = await r.json();
+  const d = j?.data;
+  const S = d?.current_price || d?.close;
+  const raw = d?.options || [];
+  if (!S || raw.length === 0) throw new Error("CBOE sin datos");
+  const now = new Date();
+  const out = [];
+  for (const o of raw) {
+    const m = /^([A-Z.]+)(\d{6})([CP])(\d{8})$/.exec(o.option || "");
+    if (!m) continue;
+    const exp = new Date(Date.UTC(2000 + +m[2].slice(0, 2), +m[2].slice(2, 4) - 1, +m[2].slice(4, 6)));
+    const days = Math.round((exp - now) / 86400000);
+    if (days < 1 || days > 60) continue;
+    const strike = +m[4] / 1000;
+    if (Math.abs(strike - S) / S > 0.15) continue;
+    const vol = o.volume || 0;
+    const oi = o.open_interest ?? 0;
+    if (vol < 200) continue;
+    const ratio = vol / Math.max(oi, 1);
+    if (ratio < 1.5) continue;                                   // inusual: hoy se negocia 1.5x+ su OI
+    const last = o.last_trade_price ?? ((o.bid || 0) + (o.ask || 0)) / 2;
+    if (!last || last <= 0) continue;
+    const premium = Math.round(last * vol * 100);                 // $ movidos hoy en este contrato
+    if (premium < 200000) continue;                               // minimo $200K
+    const isCall = m[3] === "C";
+    const isGold = ratio >= 3 && premium >= 1e6;                  // muy inusual + premium grande
+    const otm = Math.abs(((strike - S) / S) * 100).toFixed(1);
+    out.push({
+      ticker, type: isGold ? "Golden Sweep" : isCall ? "Call Sweep" : "Put Sweep",
+      isCall, isDark: false, isGold,
+      price: S, strike, premium, size: vol,
+      expiry: exp.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit", timeZone: "UTC" }),
+      otm, ratio: +ratio.toFixed(1),
+      sentiment: isCall ? "bullish" : "bearish",
+      aboveSMA200: true, highVol: ratio >= 3,
+    });
+  }
+  out.sort((a, b) => b.premium - a.premium);
+  return out.slice(0, 12);
+}
+
 // ---- Fuente 2: Yahoo Finance (fallback) ----
 async function fetchYahoo(ticker) {
   const yget = async u => { const r = await fetch(u, { headers: UA, signal: AbortSignal.timeout(6000) }); if (!r.ok) throw new Error(`Yahoo HTTP ${r.status}`); return r.json(); };
@@ -148,6 +195,18 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   const ticker = String(req.query.ticker || "").toUpperCase().replace(/[^A-Z.]/g, "");
   if (!ticker) { res.setHeader("Cache-Control", "no-store"); return res.status(400).json({ error: "ticker requerido" }); }
+
+  // MODO FLOW: contratos con actividad inusual real (vol >> OI)
+  if (req.query.mode === "flow") {
+    try {
+      const items = await fetchCboeFlow(ticker);
+      res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=240");
+      return res.status(200).json({ ticker, items, source: "cboe" });
+    } catch (e) {
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(200).json({ ticker, items: [], source: "error", error: e.message });
+    }
+  }
 
   let err1 = "";
   for (const [name, fn] of [["cboe", fetchCboe], ["yahoo", fetchYahoo]]) {

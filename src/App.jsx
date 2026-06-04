@@ -11390,6 +11390,28 @@ function FlowPage({isPremium,onNeedPremium}){
   const [highlight,setHighlight]=useState(null);
   const [minPrem,setMinPrem]=useState(0);
   const [fullscreen,setFullscreen]=useState(false);
+  // ---- FLUJO REAL (Sesion 11): actividad inusual detectada con vol/OI de CBOE ----
+  const [realFlow,setRealFlow]=useState(false);
+  useEffect(()=>{
+    let cancel=false;
+    const cargar=()=>{
+      const TKS=["NVDA","TSLA","SPY","META","AAPL","QQQ","AMZN","PLTR","AMD","COIN"];
+      Promise.all(TKS.map(t=>fetch(`/api/options?mode=flow&ticker=${t}`).then(r=>r.json()).catch(()=>null)))
+        .then(res=>{
+          if(cancel) return;
+          const rows=[];
+          res.forEach(j=>{ if(j&&Array.isArray(j.items)) rows.push(...j.items); });
+          if(rows.length>=6){
+            rows.sort((a,b)=>b.premium-a.premium);
+            setFeed(rows.slice(0,50).map((r,i)=>({...r,id:`real_${i}_${r.ticker}_${r.strike}`,time:"Hoy"})));
+            setRealFlow(true);
+          }
+        });
+    };
+    cargar();
+    const iv=setInterval(cargar, 5*60*1000); // refresca cada 5 min
+    return()=>{cancel=true;clearInterval(iv);};
+  },[]);
   // Whale tracker state
   const [whaleData,setWhaleData]=useState(null);
   const [whaleLoad,setWhaleLoad]=useState(false);
@@ -11471,7 +11493,7 @@ function FlowPage({isPremium,onNeedPremium}){
   },[filter,whalePaused,whaleData]);
 
   useEffect(()=>{
-    if(paused||!isPremium) return;
+    if(paused||!isPremium||realFlow) return; // con datos reales NO se inyectan items simulados
     const iv=setInterval(()=>{
       const item=generateFlowItem(Date.now());
       setHighlight(item.id);
@@ -11485,7 +11507,7 @@ function FlowPage({isPremium,onNeedPremium}){
       }
     },3500);
     return()=>clearInterval(iv);
-  },[paused,isPremium]);
+  },[paused,isPremium,realFlow]);
 
   if(!isPremium) return(
     <div style={{maxWidth:600,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
