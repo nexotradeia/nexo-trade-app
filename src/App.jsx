@@ -4897,7 +4897,7 @@ function EarningsPage({lang}){
               const isAlerked=alertedEar.has(e.ticker+e.rawDate);
               return(
                 <div key={`${e.ticker}-${e.rawDate}`}
-                  onClick={()=>{ if(EARNINGS_RESULTS[e.ticker]) setSelEarning(e); }}
+                  onClick={()=>setSelEarning(e)}
                   style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default"}}
                   onMouseEnter={ev=>ev.currentTarget.style.background="rgba(0,102,255,0.04)"}
                   onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
@@ -5013,15 +5013,16 @@ function EarningsPage({lang}){
 // ── EARNINGS DETAIL MODAL ─────────────────────────────────────────────────────
 function EarningsDetailModal({e, result, onClose, C}){
   const beat = result?.beat;
+  const pend = !result; // Sesión 11: reportes ilimitados — sin resultados aún muestra estimados
   const ytSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(e.ticker+" earnings call")}`;
   const saUrl = result?.callUrl || `https://seekingalpha.com/symbol/${e.ticker}/earnings`;
   return(
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div onClick={ev=>ev.stopPropagation()} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,width:"100%",maxWidth:480,padding:0,overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
         {/* Header */}
-        <div style={{background:beat===false?"rgba(239,68,68,0.1)":"rgba(16,185,129,0.1)",borderBottom:`1px solid ${C.border}`,padding:"18px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{background:pend?"rgba(148,163,184,0.08)":beat===false?"rgba(239,68,68,0.1)":"rgba(16,185,129,0.1)",borderBottom:`1px solid ${C.border}`,padding:"18px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{width:44,height:44,borderRadius:10,background:beat===false?"#EF4444":"#10B981",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>
+            <div style={{width:44,height:44,borderRadius:10,background:pend?"#475569":beat===false?"#EF4444":"#10B981",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>
               {e.ticker.slice(0,2)}
             </div>
             <div>
@@ -5030,8 +5031,8 @@ function EarningsDetailModal({e, result, onClose, C}){
             </div>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{background:beat===false?"rgba(239,68,68,0.15)":"rgba(16,185,129,0.15)",border:`1.5px solid ${beat===false?"#EF4444":"#10B981"}`,borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:800,color:beat===false?"#EF4444":"#10B981"}}>
-              {beat===false?"❌ MISS":"✅ BEAT"}
+            <div style={{background:pend?"rgba(245,158,11,0.12)":beat===false?"rgba(239,68,68,0.15)":"rgba(16,185,129,0.15)",border:`1.5px solid ${pend?"#F59E0B":beat===false?"#EF4444":"#10B981"}`,borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:800,color:pend?"#F59E0B":beat===false?"#EF4444":"#10B981"}}>
+              {pend?"⏳ ESTIMADOS":beat===false?"❌ MISS":"✅ BEAT"}
             </div>
             <button onClick={onClose} style={{background:"transparent",border:"none",cursor:"pointer",fontSize:20,color:C.muted,lineHeight:1,padding:4}}>✕</button>
           </div>
@@ -5046,7 +5047,7 @@ function EarningsDetailModal({e, result, onClose, C}){
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
                 <div>
                   <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Real</div>
-                  <div style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:beat===false?"#EF4444":"#10B981"}}>{result?.epsAct||"—"}</div>
+                  <div style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:pend?C.muted:beat===false?"#EF4444":"#10B981"}}>{result?.epsAct||"—"}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Estimado</div>
@@ -5060,7 +5061,7 @@ function EarningsDetailModal({e, result, onClose, C}){
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
                 <div>
                   <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Real</div>
-                  <div style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:beat===false?"#EF4444":"#10B981"}}>{result?.revAct||"—"}</div>
+                  <div style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:pend?C.muted:beat===false?"#EF4444":"#10B981"}}>{result?.revAct||"—"}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:9,color:C.muted,marginBottom:2}}>Estimado</div>

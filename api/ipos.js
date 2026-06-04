@@ -1,11 +1,14 @@
-// NexoTrade — IPO Calendar proxy (Financial Modeling Prep)
-// GET /api/ipos   →  IPOs del año en tiempo real
-// Requiere env var: FMP_API_KEY  (gratis en financialmodelingprep.com, 250 req/día)
+// NexoTrade — IPO Calendar proxy
+// GET /api/ipos  →  IPOs del año en tiempo real
+// Fuente 1: Financial Modeling Prep (si hay FMP_API_KEY)
+// Fuente 2 (fallback Sesión 11): Finnhub IPO calendar — key gratuita ya activa
 
 const FMP_KEY = process.env.FMP_API_KEY || "";
+const FH_KEY  = process.env.FINNHUB_API_KEY || "d86clthr01qgiu44rtmgd86clthr01qgiu44rtn0";
 
 // Enriquecimiento manual: descripción y sector para tickers conocidos
 const ENRICH = {
+  SPCX:{ sector:"Aerospace",      desc:"SpaceX — la empresa aeroespacial de Elon Musk. Starlink + lanzamientos. El IPO más esperado de la década." },
   CRWV:{ sector:"Cloud/AI",       desc:"GPU cloud provider for AI workloads, OpenAI's primary infrastructure partner." },
   VG:  { sector:"Energy",         desc:"Major U.S. LNG exporter. One of the biggest IPOs of the year by capital raised." },
   ETOR:{ sector:"Fintech",        desc:"Social trading platform with 35M registered users worldwide." },
@@ -27,14 +30,69 @@ function fmtRaise(totalSharesValue) {
   return `$${totalSharesValue.toLocaleString()}`;
 }
 
-function mapStatus(fmpStatus, dateStr) {
-  const s = (fmpStatus || "").toLowerCase();
-  if (s === "priced")            return "priced";
+function mapStatus(rawStatus, dateStr) {
+  const s = (rawStatus || "").toLowerCase();
+  if (s === "priced")                    return "priced";
   if (s === "trading" || s === "listed") return "trading";
-  // Auto-detect by date si FMP no envía status
   const today = new Date().toISOString().split("T")[0];
   if (dateStr && dateStr <= today) return "trading";
   return "upcoming";
+}
+
+function mapAndRespond(res, raw, source) {
+  const ipos = raw.map(ipo => {
+    const enriched = ENRICH[ipo.symbol] || {};
+    return {
+      company:  ipo.company  || "—",
+      ticker:   ipo.symbol   || "—",
+      exchange: ipo.exchange || "—",
+      date:     ipo.date     || "—",
+      range:    ipo.offerPrice ? `$${parseFloat(ipo.offerPrice).toFixed(2)}` : "Por definir",
+      raise:    fmtRaise(ipo.totalSharesValue),
+      shares:   ipo.shares ? `${(ipo.shares / 1e6).toFixed(1)}M acciones` : "—",
+      sector:   enriched.sector || "Mercado",
+      status:   mapStatus(ipo.status, ipo.date),
+      desc:     enriched.desc || "",
+      url:      ipo.url || null,
+    };
+  });
+  ipos.sort((a, b) => {
+    const order = { upcoming: 0, priced: 1, trading: 2 };
+    if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+    return (a.date || "9999").localeCompare(b.date || "9999");
+  });
+  return res.status(200).json({ ipos, source, total: ipos.length });
+}
+
+async function fetchFMP(year) {
+  const url = `https://financialmodelingprep.com/api/v3/ipo_calendar?from=${year}-01-01&to=${year}-12-31&apikey=${FMP_KEY}`;
+  const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(`FMP HTTP ${r.status}`);
+  const raw = await r.json();
+  if (!Array.isArray(raw) || raw.length === 0) throw new Error("FMP empty");
+  return raw;
+}
+
+async function fetchFinnhub(year) {
+  const url = `https://finnhub.io/api/v1/calendar/ipo?from=${year}-01-01&to=${year}-12-31&token=${FH_KEY}`;
+  const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(`Finnhub HTTP ${r.status}`);
+  const j = await r.json();
+  const list = (j.ipoCalendar || [])
+    .filter(i => i.symbol && (i.status || "").toLowerCase() !== "withdrawn")
+    .map(i => ({
+      company: i.name || i.symbol,
+      symbol:  i.symbol,
+      exchange:i.exchange || "—",
+      date:    i.date,
+      offerPrice: i.price || null,
+      totalSharesValue: i.totalSharesValue || null,
+      shares:  i.numberOfShares || null,
+      status:  i.status || null,
+      url:     null,
+    }));
+  if (list.length === 0) throw new Error("Finnhub empty");
+  return list;
 }
 
 export default async function handler(req, res) {
@@ -44,55 +102,21 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  if (!FMP_KEY) {
-    return res.status(200).json({
-      ipos: [],
-      source: "no-key",
-      message: "Agrega FMP_API_KEY en Vercel → Settings → Environment Variables"
-    });
+  const year = new Date().getFullYear();
+  let fmpErr = "sin FMP_API_KEY";
+
+  if (FMP_KEY) {
+    try {
+      const raw = await fetchFMP(year);
+      return mapAndRespond(res, raw, "fmp");
+    } catch (e) { fmpErr = e.message; }
   }
 
   try {
-    const year = new Date().getFullYear();
-    const from = `${year}-01-01`;
-    const to   = `${year}-12-31`;
-    const url  = `https://financialmodelingprep.com/api/v3/ipo_calendar?from=${from}&to=${to}&apikey=${FMP_KEY}`;
-
-    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (!r.ok) throw new Error(`FMP HTTP ${r.status}`);
-    const raw = await r.json();
-
-    if (!Array.isArray(raw) || raw.length === 0) throw new Error("empty");
-
-    const ipos = raw.map(ipo => {
-      const enriched = ENRICH[ipo.symbol] || {};
-      return {
-        company:  ipo.company  || "—",
-        ticker:   ipo.symbol   || "—",
-        exchange: ipo.exchange || "—",
-        date:     ipo.date     || "—",
-        range:    ipo.offerPrice ? `$${parseFloat(ipo.offerPrice).toFixed(2)}` : "Por definir",
-        raise:    fmtRaise(ipo.totalSharesValue),
-        shares:   ipo.shares ? `${(ipo.shares / 1e6).toFixed(1)}M acciones` : "—",
-        sector:   enriched.sector || "Mercado",
-        status:   mapStatus(ipo.status, ipo.date),
-        desc:     enriched.desc || "",
-        url:      ipo.url || null,
-      };
-    });
-
-    // upcoming primero, luego por fecha asc
-    ipos.sort((a, b) => {
-      const order = { upcoming: 0, priced: 1, trading: 2 };
-      if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
-      return (a.date || "9999").localeCompare(b.date || "9999");
-    });
-
-    return res.status(200).json({ ipos, source: "fmp", total: ipos.length });
-
-  } catch (e) {
-    console.error("[ipos]", e.message);
-    // Fallback graceful — frontend usa datos curados estáticos
-    return res.status(200).json({ ipos: [], source: "error", error: e.message });
+    const raw = await fetchFinnhub(year);
+    return mapAndRespond(res, raw, "finnhub");
+  } catch (e2) {
+    console.error("[ipos] fmp:", fmpErr, "| finnhub:", e2.message);
+    return res.status(200).json({ ipos: [], source: "error", error: `${fmpErr} / ${e2.message}` });
   }
 }
