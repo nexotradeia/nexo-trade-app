@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
+// ── Flags de visibilidad — reactivar cuando haya 30+ usuarios ──
+const SHOW_TOP_TRADERS = false;
+
 const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
 const SUPABASE_KEY  = "sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl";
 // FIX CRÍTICO (Sesión 11): supabase-js usa navigator.locks ("lock:nexotrade-session")
@@ -7780,8 +7783,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         </div>
       )}
 
-      {/* ── 🏆 TOP TRADERS ── */}
-      {(()=>{
+      {/* ── 🏆 TOP TRADERS (oculto vía SHOW_TOP_TRADERS hasta 30+ usuarios) ── */}
+      {SHOW_TOP_TRADERS && (()=>{
         const countMap={};
         posts.forEach(p=>{
           if(!p.user)return;
@@ -21050,7 +21053,7 @@ export default function App(){
               : <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))}/>
             }
             {/* 🏆 Top Traders del mes — visible en el feed tras el 2º post */}
-            {i===1 && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={()=>{setPage(8);setShowLanding(false);}}/>}
+            {i===1 && SHOW_TOP_TRADERS && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={()=>{setPage(8);setShowLanding(false);}}/>}
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
