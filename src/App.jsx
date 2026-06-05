@@ -1277,7 +1277,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
                   onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                   onClick={()=>{setQ("");setFoc(false);if(onPostNav)onPostNav(p);}}>
                   <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-                    <span style={{fontSize:18,flexShrink:0}}>{p.avatar||"🦅"}</span>
+                    <InitialsAvatar name={p.user} color={p.avatarColor||"#0066FF"} size={26}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:2}}>
                         <span style={{fontWeight:700,color:"#0F172A",fontSize:12}}>{p.user}</span>
@@ -1303,7 +1303,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.04)"}
                     onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                     onClick={()=>{setQ("");setFoc(false);if(onUserNav)onUserNav(u);}}>
-                    <AvatarBubble emoji={u.emoji} color={u.avatarColor||C.accent} size={34}/>
+                    <AvatarBubble name={u.name||u.username} emoji={u.emoji} color={u.avatarColor||C.accent} size={34}/>
                     <div style={{flex:1}}>
                       <div style={{fontWeight:700,color:"#0F172A",fontSize:13}}>{u.name}</div>
                       <div style={{fontSize:10,color:lvl.color,fontWeight:600}}>{lvl.emoji} {lvl.name} · {fmtNum(u.followers)} seguidores</div>
@@ -1391,7 +1391,25 @@ function Btn({children,variant="primary",onClick,style={},small=false}){
   return <button onClick={onClick} style={{...v[variant],borderRadius:10,cursor:"pointer",fontWeight:700,fontSize:fs,padding:pad,fontFamily:"inherit",transition:"opacity 0.15s",...style}} onMouseEnter={e=>e.currentTarget.style.opacity="0.85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>{children}</button>;
 }
 
-function AvatarBubble({emoji,color,avatarId,avatarStyle,size=40,online=false,level=null}){
+// Iniciales estilo Robinhood/Bloomberg: "SofiaWallSt"→"SW", "Carlos M."→"CM", "tokyo"→"TO"
+const nexoInitials=(name)=>{
+  const s=String(name||"").replace(/^@/,"").trim();
+  if(!s) return "?";
+  const caps=s.match(/[A-ZÁÉÍÓÚÑ]/g)||[];
+  if(caps.length>=2) return caps[0]+caps[1];
+  const parts=s.split(/[\s_.\-]+/).filter(Boolean);
+  if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
+  return s.slice(0,2).toUpperCase();
+};
+// Círculo de color con iniciales — avatar profesional
+function InitialsAvatar({name,color="#0066FF",size=40}){
+  return(
+    <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(135deg,${color},${color}99)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 2px 8px ${color}33`}}>
+      <span style={{color:"#fff",fontWeight:800,fontSize:Math.max(10,Math.round(size*0.36)),letterSpacing:0.5}}>{nexoInitials(name)}</span>
+    </div>
+  );
+}
+function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=false,level=null}){
   const lvl=level?getLevel(level):null;
   // Find avatar data if avatarId provided
   const avData = avatarId ? AVATAR_OPTIONS.find(a=>a.id===avatarId) : null;
@@ -1401,8 +1419,12 @@ function AvatarBubble({emoji,color,avatarId,avatarStyle,size=40,online=false,lev
   const svgContent = generateAvatarSVG(avatarId||"def", finalEmoji, finalColor, finalStyle, size);
   return(
     <div style={{position:"relative",flexShrink:0}}>
-      <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`2.5px solid ${finalColor}66`,display:"flex",alignItems:"center",justifyContent:"center",background:finalColor+"11"}}
-        dangerouslySetInnerHTML={{__html:svgContent}}/>
+      {name
+        ? <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(135deg,${finalColor||"#0066FF"},${(finalColor||"#0066FF")}99)`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 2px 8px ${(finalColor||"#0066FF")}33`}}>
+            <span style={{color:"#fff",fontWeight:800,fontSize:Math.max(10,Math.round(size*0.36)),letterSpacing:0.5}}>{nexoInitials(name)}</span>
+          </div>
+        : <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`2.5px solid ${finalColor}66`,display:"flex",alignItems:"center",justifyContent:"center",background:finalColor+"11"}}
+            dangerouslySetInnerHTML={{__html:svgContent}}/>}
       {online&&<span style={{position:"absolute",bottom:1,right:1,width:Math.max(7,size*0.2),height:Math.max(7,size*0.2),borderRadius:"50%",background:C.bull,border:"2px solid white",zIndex:2}}/>}
       {lvl&&<span style={{position:"absolute",top:-5,right:-5,background:lvl.color,color:"#fff",borderRadius:20,padding:"1px 5px",fontSize:8,fontWeight:800,border:"1.5px solid white",whiteSpace:"nowrap",zIndex:3}}>{lvl.emoji}</span>}
     </div>
@@ -3156,7 +3178,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
       onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="var(--c-shadow)";e.currentTarget.style.transform="translateY(0)";}}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
         <div style={{cursor:"pointer",flexShrink:0}} onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>
-          <AvatarBubble emoji={post.avatar} color={post.avatarColor||C.accent} online={post.id%2===0}/>
+          <AvatarBubble name={post.user} emoji={post.avatar} color={post.avatarColor||C.accent} online={post.id%2===0}/>
         </div>
         <div style={{flex:1,minWidth:0}}>
           {/* Header row */}
@@ -3398,7 +3420,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
     <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:10,boxShadow:"var(--c-shadow)",boxSizing:"border-box",width:"100%",overflow:"hidden"}}>
       {modMsg&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:12,color:"#EF4444"}}>{modMsg}</div>}
       <div style={{display:"flex",gap:10}}>
-        {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:36,height:36,borderRadius:"50%",background:"var(--c-border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
+        {user?<AvatarBubble name={user.name||user.username} emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:36,height:36,borderRadius:"50%",background:"var(--c-border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
         <div style={{flex:1,position:"relative",minWidth:0,overflow:"hidden"}}>
           {!user&&<div style={{fontSize:13,color:"var(--c-muted)",marginBottom:8}}>
             <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}} onClick={onNeedAuth}>{t.login}</span> {isEN?"to share your analysis":"para compartir tu análisis"}
@@ -4180,7 +4202,7 @@ function TopsPage({posts=[]}){
                   onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
                   onMouseLeave={e=>{e.currentTarget.style.borderColor=i===0?"rgba(217,119,6,0.25)":C.border;e.currentTarget.style.boxShadow="none";}}>
                   <span style={{fontWeight:900,fontSize:i<3?22:15,width:28,textAlign:"center",flexShrink:0}}>{medals[i]||<span style={{color:C.muted2}}>{i+1}</span>}</span>
-                  <div style={{width:38,height:38,borderRadius:"50%",background:`linear-gradient(135deg,${u.color},${u.color}88)`,border:`2px solid ${u.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{u.avatar}</div>
+                  <InitialsAvatar name={u.user} color={u.color} size={38}/>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
                       <span style={{fontWeight:800,fontSize:14,color:C.text}}>{u.user}</span>
@@ -5322,7 +5344,7 @@ function LiveConferenceModal({event, lang, onClose}){
             <div style={{flex:1,overflowY:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:10}}>
               {chatLog.map((c,i)=>(
                 <div key={i} style={{display:"flex",gap:8}}>
-                  <span style={{fontSize:18,flexShrink:0}}>{c.avatar}</span>
+                  <InitialsAvatar name={c.user} color={"#0066FF"} size={24}/>
                   <div>
                     <div style={{display:"flex",alignItems:"baseline",gap:6}}>
                       <span style={{color:"#00c49a",fontSize:11,fontWeight:700}}>{c.user}</span>
@@ -6639,7 +6661,7 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
             onMouseLeave={e=>e.currentTarget.style.background="transparent"}
             onClick={()=>onProfile(u)}>
             <span style={{width:22,textAlign:"center",fontSize:i<3?17:13,color:i<3?C.gold:C.muted2,fontWeight:800}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</span>
-            <AvatarBubble emoji={u.emoji} color={u.color} size={34} level={u.points}/>
+            <AvatarBubble name={u.name||u.username} emoji={u.emoji} color={u.color} size={34} level={u.points}/>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontWeight:700,color:C.text,fontSize:13,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.name}</div>
               <div style={{color:lvl.color,fontSize:10,fontWeight:700}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</div>
@@ -7438,8 +7460,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             {/* Header con color del trader */}
             <div style={{background:`linear-gradient(135deg,${bd.color},${bd.color}99)`,padding:"24px 20px 16px",position:"relative"}}>
               <button onClick={()=>setMiniProfile(null)} style={{position:"absolute",top:10,right:12,background:"rgba(255,255,255,0.2)",border:"none",borderRadius:"50%",width:26,height:26,cursor:"pointer",color:"#fff",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-              <div style={{width:64,height:64,borderRadius:18,background:"rgba(255,255,255,0.2)",border:"3px solid rgba(255,255,255,0.5)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,marginBottom:10}}>
-                {bd.avatar}
+              <div style={{width:64,height:64,borderRadius:18,background:"rgba(255,255,255,0.25)",border:"3px solid rgba(255,255,255,0.5)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
+                <span style={{color:"#fff",fontWeight:900,fontSize:24,letterSpacing:0.5}}>{nexoInitials(name)}</span>
               </div>
               <div style={{fontWeight:900,color:"#fff",fontSize:18,lineHeight:1.2}}>@{name}</div>
               <div style={{fontSize:11,color:"rgba(255,255,255,0.75)",marginTop:3}}>{bd.badge} · {lvl}</div>
@@ -7730,7 +7752,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
                 onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.04)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 <div style={{width:20,height:20,borderRadius:6,background:`${rankColors[i]}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:rankColors[i],flexShrink:0}}>#{i+1}</div>
-                <AvatarBubble emoji={info.avatar||"🦅"} color={info.color||C.accent} size={28}/>
+                <AvatarBubble name={name} emoji={info.avatar||"🦅"} color={info.color||C.accent} size={28}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"#0F172A",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name}</div>
                   <div style={{fontSize:10,color:"#94A3B8"}}>{info.count} {lang==="en"?"posts today":"posts hoy"}</div>
@@ -7777,7 +7799,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             <div style={{fontSize:12,fontWeight:800,color:"var(--c-text)",marginBottom:12,letterSpacing:-0.2}}>{t.whofollow}</div>
             {realUsers.map((u,i)=>(
               <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<realUsers.length-1?"1px solid var(--c-border)":"none"}}>
-                <AvatarBubble emoji={u.avatar_emoji||"🦅"} color={u.avatar_color||"#0066FF"} size={30}/>
+                <AvatarBubble name={u.username} emoji={u.avatar_emoji||"🦅"} color={u.avatar_color||"#0066FF"} size={30}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"var(--c-text)",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     {u.username||"Usuario"}
@@ -7979,7 +8001,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
   return(
     <div style={{position:"relative"}}>
       <div className="nexo-usermenu-trigger" style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",padding:"5px 8px",borderRadius:12,border:`1px solid ${C.border}`,background:C.card2}} onClick={()=>setOpen(!open)}>
-        <AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} size={28} online/>
+        <AvatarBubble name={user.name||user.username} emoji={user.emoji} color={user.avatarColor||C.accent} size={28} online/>
         <div className="nexo-logo-text">
           <div style={{color:C.text,fontSize:13,fontWeight:700,lineHeight:1}}>{user.name}</div>
           <div style={{color:lvl.color,fontSize:9,fontWeight:700}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</div>
@@ -8344,7 +8366,7 @@ function TopTradersFeedCard({lang="es", isPremium, onLeaderboard, onPremium}){
         {TOPS.map((t,i)=>(
           <div key={t.name} style={{flex:"1 0 150px",minWidth:150,background:"var(--c-card)",border:`1px solid ${i===0?"rgba(245,158,11,0.4)":"var(--c-border)"}`,borderRadius:12,padding:"10px 12px",display:"flex",alignItems:"center",gap:8}}>
             <div style={{width:18,height:18,borderRadius:5,background:`${rankColors[i]}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:rankColors[i],flexShrink:0}}>#{i+1}</div>
-            <div style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.color},${t.color}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{t.avatar}</div>
+            <InitialsAvatar name={t.name} color={t.color} size={30}/>
             <div style={{minWidth:0}}>
               <div style={{fontWeight:800,fontSize:11.5,color:"var(--c-text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>@{t.name}</div>
               <div style={{fontSize:11,fontWeight:900,color:"#10B981"}}>+{t.ret}% <span style={{fontSize:9,fontWeight:600,color:"var(--c-muted2)"}}>· {t.picks} picks</span></div>
@@ -14146,9 +14168,7 @@ function BotPostCard({post,onTickerClick,lang}){
       onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
         {/* Avatar */}
-        <div style={{width:40,height:40,borderRadius:12,background:`${post.avatarColor}18`,border:`1.5px solid ${post.avatarColor}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,cursor:"default"}}>
-          {post.avatar}
-        </div>
+        <InitialsAvatar name={post.user} color={post.avatarColor} size={40}/>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,flexWrap:"wrap"}}>
             <span style={{fontWeight:800,color:C.text,fontSize:14}}>@{post.user}</span>
@@ -14755,8 +14775,8 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
                   onMouseEnter={e=>{ if(!isSelected){e.currentTarget.style.background="rgba(255,255,255,0.04)";} }}
                   onMouseLeave={e=>{ if(!isSelected){e.currentTarget.style.background="transparent";} }}>
                   {/* Avatar */}
-                  <div style={{width:40,height:40,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,border:isSelected?"2px solid rgba(33,150,243,0.5)":"2px solid transparent",transition:"border 0.15s"}}>
-                    {prof.avatar_emoji||"👤"}
+                  <div style={{flexShrink:0,border:isSelected?"2px solid rgba(33,150,243,0.5)":"2px solid transparent",borderRadius:"50%",transition:"border 0.15s"}}>
+                    <InitialsAvatar name={prof.username} color={prof.avatar_color||C.accent} size={40}/>
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontWeight:700,color:isSelected?"#FCD34D":C.text,fontSize:13,marginBottom:2}}>{prof.username}</div>
@@ -14790,7 +14810,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
                     style={{display:"flex",gap:12,alignItems:"center",padding:"12px 16px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(33,150,243,0.15)",borderRadius:14,cursor:"pointer",transition:"all 0.15s"}}
                     onMouseEnter={e=>{e.currentTarget.style.background="rgba(33,150,243,0.08)";e.currentTarget.style.borderColor="rgba(33,150,243,0.3)";}}
                     onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.03)";e.currentTarget.style.borderColor="rgba(33,150,243,0.15)";}}>
-                    <div style={{width:44,height:44,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{prof.avatar_emoji||"👤"}</div>
+                    <InitialsAvatar name={prof.username} color={prof.avatar_color||C.accent} size={44}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontWeight:700,color:C.text,fontSize:14}}>{prof.username}</div>
                       <div style={{fontSize:11,color:"#10B981",marginTop:2}}>✓ Seguidor mutuo — Puedes enviarle mensajes</div>
@@ -14808,7 +14828,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
               {/* Chat header */}
               <div style={{padding:"12px 18px",borderBottom:"1px solid rgba(33,150,243,0.15)",display:"flex",alignItems:"center",gap:12,background:"rgba(33,150,243,0.05)"}}>
                 <div style={{position:"relative"}}>
-                  <div style={{width:38,height:38,borderRadius:"50%",background:selConv.avatarColor||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19}}>{selConv.avatar||"👤"}</div>
+                  <InitialsAvatar name={selConv.username} color={selConv.avatarColor||C.accent} size={38}/>
                   <div style={{position:"absolute",bottom:0,right:0,width:10,height:10,borderRadius:"50%",background:"#10B981",border:"2px solid #0a0e1a"}}/>
                 </div>
                 <div>
@@ -16013,9 +16033,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
                 : <span style={{fontWeight:900,color:"#475569",fontSize:14}}>#{i+1}</span>}
               </div>
               {/* Avatar */}
-              <div style={{width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${p.avatar_color||"#F59E0B"},${p.avatar_color||"#F59E0B"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,boxShadow:`0 2px 12px ${p.avatar_color||"#F59E0B"}44`}}>
-                {p.emoji||"👤"}
-              </div>
+              <InitialsAvatar name={p.username} color={p.avatar_color||"#F59E0B"} size={44}/>
               {/* Info */}
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
@@ -16085,9 +16103,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
             <div style={{width:28,textAlign:"center",flexShrink:0}}>
               {i<3?<span style={{fontSize:18}}>{MEDALS[i]}</span>:<span style={{fontWeight:900,color:"#475569",fontSize:13}}>#{i+1}</span>}
             </div>
-            <div style={{width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${profile?.avatar_color||"#00D26A"},${profile?.avatar_color||"#00D26A"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>
-              {profile?.emoji||"🌱"}
-            </div>
+            <InitialsAvatar name={profile?.username} color={profile?.avatar_color||"#00D26A"} size={44}/>
             <div style={{flex:1}}>
               <div style={{fontWeight:800,color:"var(--c-text)",fontSize:14,marginBottom:2}}>{profile?.username||"Trader"}</div>
               <div style={{fontSize:11,color:"#475569"}}>{isEN?`${count} posts this week`:  `${count} posts esta semana`}</div>
@@ -20011,7 +20027,7 @@ function AdminDashboard(){
                 return(
                   <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"#F0FDF4",border:"1px solid #BBF7D0",borderRadius:12,padding:"10px 14px",minWidth:180,flex:"1 1 180px"}}>
                     <div style={{position:"relative",flexShrink:0}}>
-                      <div style={{width:38,height:38,borderRadius:"50%",background:u.avatarColor,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{u.emoji}</div>
+                      <InitialsAvatar name={u.username||u.name} color={u.avatarColor} size={38}/>
                       <span style={{position:"absolute",bottom:0,right:0,width:10,height:10,borderRadius:"50%",background:"#16A34A",border:"2px solid #fff"}}/>
                     </div>
                     <div style={{minWidth:0}}>
