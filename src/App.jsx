@@ -11416,7 +11416,7 @@ function FlowPage({isPremium,onNeedPremium}){
   const [whaleData,setWhaleData]=useState(null);
   const [whaleLoad,setWhaleLoad]=useState(false);
   const [whaleErr,setWhaleErr]=useState(false);
-  const [whaleTxs,setWhaleTxs]=useState([]); // simulated live feed
+  const [whaleTxs,setWhaleTxs]=useState([]); // TXs reales on-chain (Blockchair vía /api/chart)
   const [whalePaused,setWhalePaused]=useState(false);
   // Telegram alerted ref — persiste en sessionStorage para no reenviar al remontar
   const alertedRef=useRef(new Set(JSON.parse(sessionStorage.getItem("nexo-flow-alerted")||"[]")));
@@ -11457,40 +11457,29 @@ function FlowPage({isPremium,onNeedPremium}){
     });
   });
 
-  const fetchWhales=async()=>{
-    setWhaleLoad(true); setWhaleErr(false);
+  const fetchWhales=async(silent)=>{
+    if(!silent){ setWhaleLoad(true); } setWhaleErr(false);
     try{
       const r=await fetch("/api/chart?type=whales");
       if(!r.ok) throw new Error("err");
       const d=await r.json();
       setWhaleData(d);
-    }catch{ setWhaleErr(true); }
-    setWhaleLoad(false);
+      if(Array.isArray(d.whaleTxs)) setWhaleTxs(prev=>{
+        const prevTop=prev[0]?.hash;
+        return d.whaleTxs.map((t,i)=>({...t,isNew:prevTop&&t.hash!==prevTop&&i===0}));
+      });
+    }catch{ if(!silent) setWhaleErr(true); }
+    if(!silent) setWhaleLoad(false);
   };
 
   useEffect(()=>{ if(filter==="whales") fetchWhales(); },[filter]);
 
-  // Simulated live BTC whale tx feed (actualizado cada 8s)
+  // Refresco del feed real de TXs ballena cada 60s (Blockchair, datos on-chain)
   useEffect(()=>{
     if(filter!=="whales"||whalePaused) return;
-    const WALLETS=["Binance Hot Wallet","Coinbase Custody","Kraken Exchange","Unknown Whale","MicroStrategy","OKX","Bitfinex","Unknown Wallet","BlackRock IBIT","Fidelity FBTC"];
-    const genTx=()=>({
-      id:Date.now()+Math.random(),
-      from:WALLETS[Math.floor(Math.random()*WALLETS.length)],
-      to:WALLETS[Math.floor(Math.random()*WALLETS.length)],
-      btc:+(Math.random()*2000+100).toFixed(2),
-      usd:null, // calculado abajo
-      type:Math.random()>0.5?"exchange_in":"exchange_out",
-      ts:new Date(),
-      isNew:true,
-    });
-    const iv=setInterval(()=>{
-      const tx=genTx();
-      if(whaleData?.btcPrice?.price) tx.usd=+(tx.btc*whaleData.btcPrice.price).toFixed(0);
-      setWhaleTxs(prev=>[tx,...prev.slice(0,29)].map((t,i)=>({...t,isNew:i===0})));
-    },8000);
+    const iv=setInterval(()=>fetchWhales(true),60000);
     return()=>clearInterval(iv);
-  },[filter,whalePaused,whaleData]);
+  },[filter,whalePaused]);
 
   useEffect(()=>{
     if(paused||!isPremium||realFlow) return; // con datos reales NO se inyectan items simulados
@@ -12071,7 +12060,9 @@ function FlowPage({isPremium,onNeedPremium}){
 
       {filter!=="whales" && (
         <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
-          ⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero
+          {realFlow
+            ? "📡 Datos reales de opciones — CBOE (retraso ~15 min) · No es consejo financiero"
+            : "⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero"}
         </div>
       )}
 
@@ -12185,24 +12176,28 @@ function FlowPage({isPremium,onNeedPremium}){
                     <div style={{maxHeight:340,overflowY:"auto",padding:"6px 0"}}>
                       {whaleTxs.length===0 && (
                         <div style={{padding:"30px",textAlign:"center",color:C.muted,fontSize:12}}>
-                          Esperando primera transacción…<br/>
-                          <span style={{fontSize:10,color:"#1E293B",marginTop:4,display:"block"}}>Se actualiza cada ~8 segundos</span>
+                          Sin transacciones grandes recientes…<br/>
+                          <span style={{fontSize:10,color:"#1E293B",marginTop:4,display:"block"}}>Datos on-chain reales · Se actualiza cada 60s</span>
                         </div>
                       )}
                       {whaleTxs.map((tx,i)=>{
-                        const isIn=tx.type==="exchange_in";
-                        const usdStr=tx.usd?`$${(tx.usd/1e6).toFixed(1)}M`:`${tx.btc.toFixed(0)} BTC`;
+                        const usdVal=tx.usd||(btcPrice?.price?tx.btc*btcPrice.price:null);
+                        const usdStr=usdVal?(usdVal>=1e6?`$${(usdVal/1e6).toFixed(1)}M`:`$${(usdVal/1e3).toFixed(0)}K`):null;
+                        const mins=Math.max(0,Math.round((Date.now()-Date.parse(tx.time.replace(" ","T")+"Z"))/60000));
+                        const ago=mins<1?"ahora":mins<60?`hace ${mins}m`:`hace ${Math.floor(mins/60)}h ${mins%60}m`;
                         return(
-                          <div key={tx.id} style={{padding:"8px 14px",borderBottom:`1px solid ${C.border}`,transition:"background 0.3s",background:tx.isNew?"rgba(247,147,26,0.06)":"transparent",animation:tx.isNew?"fadeInRow 0.4s ease-out":undefined}}>
+                          <div key={tx.hash} style={{padding:"8px 14px",borderBottom:`1px solid ${C.border}`,transition:"background 0.3s",background:tx.isNew?"rgba(247,147,26,0.06)":"transparent",animation:tx.isNew?"fadeInRow 0.4s ease-out":undefined}}>
                             <div style={{display:"flex",alignItems:"center",gap:8}}>
-                              <span style={{fontSize:18,flexShrink:0}}>{isIn?"📥":"📤"}</span>
+                              <span style={{fontSize:18,flexShrink:0}}>🐋</span>
                               <div style={{flex:1,minWidth:0}}>
                                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                                  <span style={{fontSize:11,fontWeight:800,color:"#F7931A"}}>{tx.btc.toFixed(0)} ₿</span>
-                                  <span style={{fontSize:11,fontWeight:700,color:isIn?"#EF4444":"#10B981",background:isIn?"rgba(239,68,68,0.1)":"rgba(16,185,129,0.1)",borderRadius:5,padding:"1px 6px"}}>{isIn?"→ Exchange":"← Salida"}</span>
+                                  <span style={{fontSize:11,fontWeight:800,color:"#F7931A"}}>{tx.btc.toLocaleString("en-US",{maximumFractionDigits:0})} ₿</span>
+                                  {usdStr&&<span style={{fontSize:11,fontWeight:700,color:"#10B981",background:"rgba(16,185,129,0.1)",borderRadius:5,padding:"1px 6px"}}>{usdStr}</span>}
                                 </div>
                                 <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:2}}>
-                                  {tx.from} → {tx.to}
+                                  <a href={`https://mempool.space/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" style={{color:C.muted,textDecoration:"none"}}>
+                                    {tx.hash.slice(0,10)}…{tx.hash.slice(-6)} ↗
+                                  </a> · {ago}{tx.block?` · bloque ${tx.block.toLocaleString("en-US")}`:""}
                                 </div>
                               </div>
                             </div>
@@ -12211,7 +12206,7 @@ function FlowPage({isPremium,onNeedPremium}){
                       })}
                     </div>
                     <div style={{padding:"8px 14px",borderTop:`1px solid ${C.border}`,fontSize:10,color:"#1E293B",textAlign:"center"}}>
-                      Fuente: Blockchain simulado · <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener" style={{color:C.accent}}>BitInfoCharts ↗</a>
+                      Fuente: Blockchair · Datos on-chain reales · TXs &gt;100 BTC · <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener" style={{color:C.accent}}>BitInfoCharts ↗</a>
                     </div>
                   </div>
 
@@ -12306,7 +12301,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 )}
 
                 <div style={{textAlign:"center",fontSize:10,color:"#1E293B",padding:"4px 0"}}>
-                  Fuentes: alternative.me · Binance · Farside Investors · BitInfoCharts · Blockchain.info · No es consejo financiero
+                  Fuentes: alternative.me · Binance · Blockchair · Farside Investors · BitInfoCharts · No es consejo financiero
                 </div>
               </div>
             );
@@ -18157,6 +18152,16 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const [refreshing,   setRefreshing]  = useState(false);
   const [selectedRow,  setSelectedRow] = useState(null); // mini AI panel
   const [savedFilters, setSavedFilters]= useState(null);
+  const [fullScreen,   setFullScreen]  = useState(false);
+
+  // Salir de pantalla completa con tecla Escape
+  useEffect(()=>{
+    if(!fullScreen) return;
+    const onKey=e=>{ if(e.key==="Escape") setFullScreen(false); };
+    window.addEventListener("keydown",onKey);
+    document.body.style.overflow="hidden";
+    return()=>{ window.removeEventListener("keydown",onKey); document.body.style.overflow=""; };
+  },[fullScreen]);
   const prevPrices     = useRef({});
   const alertedTickers = useRef({});
   const wsRef          = useRef(null);
@@ -18348,7 +18353,9 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   };
 
   return(
-    <div style={{maxWidth:1180,margin:"0 auto",padding:"0 12px 60px"}}>
+    <div style={fullScreen
+      ?{position:"fixed",inset:0,zIndex:9960,background:C.bg,overflowY:"auto",padding:"16px 16px 60px"}
+      :{maxWidth:1180,margin:"0 auto",padding:"0 12px 60px"}}>
 
       {/* Alert toasts */}
       {alerts.length>0&&(
@@ -18473,6 +18480,10 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             <button onClick={async()=>{setRefreshing(true);await fetchPricesREST();setRefreshing(false);}} disabled={refreshing}
               style={{background:refreshing?"rgba(139,92,246,0.25)":"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",color:"#FCD34D",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,opacity:refreshing?0.7:1}}>
               {refreshing?"⏳":"↻"} {refreshing?(isEN?"Updating...":"Actualizando..."):(isEN?"Refresh":"Actualizar")}
+            </button>
+            <button onClick={()=>setFullScreen(f=>!f)} title={fullScreen?"Esc":""}
+              style={{background:fullScreen?"rgba(239,68,68,0.12)":"rgba(0,102,255,0.12)",border:`1px solid ${fullScreen?"rgba(239,68,68,0.3)":"rgba(0,102,255,0.3)"}`,color:fullScreen?"#EF4444":"#3B82F6",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+              {fullScreen?"✕":"⛶"} {fullScreen?(isEN?"Exit":"Salir"):(isEN?"Full screen":"Pantalla completa")}
             </button>
           </div>
         </div>

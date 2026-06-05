@@ -45,18 +45,52 @@ export default async function handler(req, res) {
     ]};
     let onChain = { hashRate:8.2e20, difficulty:1.1e14, totalBTC:"19700000", txPerHour:1800, mempoolSize:45000, avgFee:"12" };
 
-    // Fetch solo Binance y F&G con timeout agresivo de 3s cada uno
+    // Fetch Binance, F&G y TXs reales de ballenas con timeout agresivo
+    let whaleTxs = [];
     try {
-      const t3 = ms => new Promise(r => setTimeout(() => r(null), ms));
-      const safeGet = (url) => Promise.race([
+      const t3 = (ms) => new Promise(r => setTimeout(() => r(null), ms));
+      const safeGet = (url, ms = 3000) => Promise.race([
         fetch(url).then(r => r.ok ? r.json() : null).catch(() => null),
-        t3(3000),
+        t3(ms),
       ]);
 
-      const [binance, fngData] = await Promise.all([
+      const [binance, fngData, blockchair] = await Promise.all([
         safeGet("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT"),
         safeGet("https://api.alternative.me/fng/?limit=7&format=json"),
+        // Blockchair: TXs reales on-chain con output > 100 BTC (1e10 satoshis), más recientes primero
+        safeGet("https://api.blockchair.com/bitcoin/transactions?q=output_total(10000000000..)&s=id(desc)&limit=30", 6000),
       ]);
+
+      if (Array.isArray(blockchair?.data) && blockchair.data.length) {
+        whaleTxs = blockchair.data.map(tx => ({
+          hash: tx.hash,
+          btc:  +(tx.output_total / 1e8).toFixed(2),
+          usd:  tx.output_total_usd ? Math.round(tx.output_total_usd) : null,
+          time: tx.time,                          // UTC "YYYY-MM-DD HH:MM:SS"
+          block: tx.block_id,
+        }));
+      } else {
+        // Fallback: último bloque de blockchain.info → filtrar TXs > 100 BTC
+        const latest = await safeGet("https://blockchain.info/latestblock", 4000);
+        if (latest?.hash) {
+          const block = await safeGet(`https://blockchain.info/rawblock/${latest.hash}`, 8000);
+          if (Array.isArray(block?.tx)) {
+            const fmtUTC = (unix) => new Date(unix * 1000).toISOString().slice(0, 19).replace("T", " ");
+            whaleTxs = block.tx
+              .map(tx => ({ tx, sats: (tx.out || []).reduce((s, o) => s + (o.value || 0), 0) }))
+              .filter(x => x.sats >= 1e10)        // > 100 BTC
+              .sort((a, b) => b.sats - a.sats)
+              .slice(0, 30)
+              .map(({ tx, sats }) => ({
+                hash: tx.hash,
+                btc:  +(sats / 1e8).toFixed(2),
+                usd:  null,                        // se calcula en el cliente con btcPrice
+                time: fmtUTC(tx.time || latest.time),
+                block: latest.height,
+              }));
+          }
+        }
+      }
 
       if (binance?.lastPrice) {
         btcPrice = {
@@ -92,13 +126,13 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       btcPrice, fng,
-      whaleAlertTxs: null,
+      whaleTxs,                      // TXs reales on-chain (Blockchair) — [] si la API falló
+      realTxs: whaleTxs.length > 0,
       etfFlows: ETF_FLOWS,
       totalEtfFlow7d,
       onChain,
       bigHolders: BIG_HOLDERS,
       signals,
-      hasWhaleAlert: false,
       updatedAt: new Date().toISOString(),
     });
   }
