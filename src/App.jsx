@@ -16271,10 +16271,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
           {/* Left: Title + subtitle */}
           <div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
-              <span style={{fontSize:28}}>📊</span>
+              <span style={{fontSize:28}}>👁</span>
               <div>
                 <div style={{fontSize:22,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5,lineHeight:1}}>
-                  {"Portafolio Oracle IA"}
+                  {"Watchlist"}
                 </div>
                 <div style={{fontSize:12,color:"rgba(148,163,184,0.8)",marginTop:2}}>
                   {isEN?"Real-time prices · 24h · Finnhub":"Precios en tiempo real · 24h · Finnhub"}
