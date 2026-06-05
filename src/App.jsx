@@ -7734,8 +7734,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       <AdBannerSidebar/>
       <MediaNetBannerSidebar/>
 
-      {/* ── FEAR & GREED ── */}
-      <div style={{...card,padding:"7px 12px"}}>
+      {/* ── FEAR & GREED (OCULTO por petición; quitar false&& para reactivar) ── */}
+      {false && <div style={{...card,padding:"7px 12px"}}>
         <div style={{fontSize:10,fontWeight:800,color:"#0F172A",marginBottom:6}}>Fear & Greed Index</div>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{position:"relative",width:36,height:36,flexShrink:0}}>
@@ -7761,7 +7761,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           <span style={{fontSize:8,color:"#EF4444",fontWeight:600}}>Miedo</span>
           <span style={{fontSize:8,color:"#22C55E",fontWeight:600}}>Codicia</span>
         </div>
-      </div>
+      </div>}
 
       {/* ── CTA VIP (solo si no logueado) ── */}
       {!user && (
