@@ -7306,7 +7306,7 @@ function AffiliateBanner(){
   );
 }
 
-// ── MOBILE AFFILIATE BANNER (fixed bottom, solo móvil) ───────────────────────
+// ── MOBILE AFFILIATE BANNER (fixed bottom, solo móvil) — compacto 1 línea ────
 function MobileAffiliateBanner(){
   const [idx, setIdx] = useState(0);
   const [closed, setClosed] = useState(false);
@@ -7325,42 +7325,28 @@ function MobileAffiliateBanner(){
       zIndex:1200,
       background: aff.bg,
       borderTop:`2px solid ${aff.color}44`,
-      padding:"10px 14px 14px",
+      padding:"8px 10px",
       display:"none", // CSS media query activa en móvil
-      flexDirection:"column",
-      gap:8,
+      alignItems:"center",
+      gap:10,
       boxShadow:"0 -4px 20px rgba(0,0,0,0.35)",
     }}>
-      {/* Header: badge + patrocinado + cerrar */}
-      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-        <span style={{fontSize:9,fontWeight:700,color:aff.badgeColor,background:`${aff.badgeColor}22`,borderRadius:20,padding:"2px 8px",letterSpacing:0.8}}>{aff.badge}</span>
-        <span style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:0.5}}>Patrocinado</span>
-        <button onClick={()=>setClosed(true)} style={{background:"transparent",border:"none",color:"rgba(255,255,255,0.4)",fontSize:16,cursor:"pointer",padding:"0 4px",lineHeight:1}}>✕</button>
+      <div onClick={()=>window.open(aff.url,"_blank","noopener")} role="button"
+        style={{width:34,height:34,borderRadius:9,background:`${aff.color}22`,border:`1px solid ${aff.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0,cursor:"pointer"}}>
+        {aff.logo}
       </div>
-
-      {/* Contenido: logo + texto + CTA */}
-      <div style={{display:"flex", alignItems:"center", gap:12}}
-        onClick={()=>window.open(aff.url,"_blank","noopener")} role="button">
-        <div style={{width:40,height:40,borderRadius:10,background:`${aff.color}22`,border:`1px solid ${aff.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>
-          {aff.logo}
+      <div onClick={()=>window.open(aff.url,"_blank","noopener")} role="button" style={{flex:1,minWidth:0,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontWeight:800,color:"#fff",fontSize:12.5}}>{aff.name}</span>
+          <span style={{fontSize:8,color:"rgba(255,255,255,0.35)",letterSpacing:0.5}}>Patrocinado</span>
         </div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontWeight:800,color:"#fff",fontSize:14}}>{aff.name}</div>
-          <div style={{fontSize:11,color:aff.color,fontWeight:600}}>{aff.tagline}</div>
-          <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2}}>{aff.sub}</div>
-        </div>
-        <div style={{background:aff.color,borderRadius:9,padding:"9px 12px",color:"#fff",fontWeight:800,fontSize:11,whiteSpace:"nowrap",boxShadow:`0 3px 12px ${aff.color}55`,cursor:"pointer"}}>
-          {aff.cta}
-        </div>
+        <div style={{fontSize:10.5,color:aff.color,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{aff.tagline}</div>
       </div>
-
-      {/* Indicadores */}
-      <div style={{display:"flex",justifyContent:"center",gap:5}}>
-        {AFFILIATES.map((_,i)=>(
-          <div key={i} onClick={()=>setIdx(i)}
-            style={{width:i===idx?18:6,height:5,borderRadius:3,background:i===idx?aff.color:"rgba(255,255,255,0.2)",transition:"all 0.3s",cursor:"pointer"}}/>
-        ))}
+      <div onClick={()=>window.open(aff.url,"_blank","noopener")} role="button"
+        style={{background:aff.color,borderRadius:8,padding:"7px 10px",color:"#fff",fontWeight:800,fontSize:10.5,whiteSpace:"nowrap",boxShadow:`0 3px 12px ${aff.color}55`,cursor:"pointer",flexShrink:0}}>
+        {aff.cta}
       </div>
+      <button onClick={()=>setClosed(true)} style={{background:"transparent",border:"none",color:"rgba(255,255,255,0.45)",fontSize:15,cursor:"pointer",padding:"0 2px",lineHeight:1,flexShrink:0}}>✕</button>
     </div>
   );
 }
@@ -11951,9 +11937,9 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
 
       {/* ── TOP PICK BANNER ── */}
       {topPick && filter!=="whales" && (
-        <div style={{background:"linear-gradient(135deg,rgba(255,96,0,0.18),rgba(255,140,0,0.10),rgba(255,96,0,0.06))",border:"2px solid rgba(255,140,0,0.6)",borderRadius:16,padding:"14px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:14,boxShadow:"0 0 32px rgba(255,140,0,0.20),inset 0 1px 0 rgba(255,255,255,0.05)",animation:"topPickGlow 3s ease-in-out infinite"}}>
+        <div style={{background:"linear-gradient(135deg,rgba(255,96,0,0.18),rgba(255,140,0,0.10),rgba(255,96,0,0.06))",border:"2px solid rgba(255,140,0,0.6)",borderRadius:16,padding:"14px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",boxShadow:"0 0 32px rgba(255,140,0,0.20),inset 0 1px 0 rgba(255,255,255,0.05)",animation:"topPickGlow 3s ease-in-out infinite"}}>
           <span style={{fontSize:32,filter:"drop-shadow(0 0 8px rgba(255,140,0,0.8))"}}>🔥</span>
-          <div style={{flex:1,minWidth:0}}>
+          <div style={{flex:"1 1 200px",minWidth:0}}>
             <div style={{fontWeight:900,fontSize:17,color:"#FF8C00",letterSpacing:-0.3,textShadow:"0 0 20px rgba(255,140,0,0.5)"}}>
               TOP PICK: {topPick.ticker} — ${(topPick.premium/1e6).toFixed(2)}M
             </div>
@@ -21141,11 +21127,11 @@ export default function App(){
         .nexo-sidebar { display: none !important; }
         .nexo-left-sidebar { display: none !important; }
         .nexo-mobile-affiliate-banner { display: flex !important; }
-        body { padding-bottom: 130px; }
+        body { padding-bottom: 84px; }
         .nexo-body-grid {
           padding: 6px 8px !important;
           gap: 8px !important;
-          grid-template-columns: 1fr !important;
+          grid-template-columns: minmax(0,1fr) !important;
         }
 
         /* ── NAVBAR ── */
@@ -21576,7 +21562,7 @@ export default function App(){
         </div>
         {/* ── ROW 2: VIP TABS ── */}
         <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#E8F4FF",borderTop:"1px solid #BFDBFE",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
-          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#F59E0B",background:"transparent",border:"none",padding:"0 14px",whiteSpace:"nowrap",cursor:"pointer",transition:"opacity 0.15s",opacity:0.85}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.85"}>⭐ PREMIUM</span>
+          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#fff",background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 10px rgba(217,119,6,0.4)",display:"inline-flex",alignItems:"center",gap:4}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 16px rgba(217,119,6,0.6)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(217,119,6,0.4)"}>⭐ PREMIUM</span>
           {[
             {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
             {label:lang==="en"?"🐋 Whale Flow PREMIUM":"🐋 Flujo PREMIUM",idx:20,locked:!effectivePremium},
