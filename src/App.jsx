@@ -7161,8 +7161,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
         </div>
       </div>
 
-      {/* ── 🏅 TUS PUNTOS — para qué sirven ── */}
-      {user && <PointsBenefitsCard user={user} lang={isEN?"en":"es"}/>}
+      {/* ── 🏅 TUS PUNTOS — oculto para ahorrar espacio (reactivar quitando false&&) ── */}
+      {false && user && <PointsBenefitsCard user={user} lang={isEN?"en":"es"}/>}
 
       {/* ── PROGRAMA DE REFERIDOS ── */}
       {user && <ReferralSection user={user}/>}
@@ -7177,7 +7177,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
         </button>
       )}
 
-      <OnlineUsersWidget onlineUsers={onlineUsers} />
+      {ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase()) && <OnlineUsersWidget onlineUsers={onlineUsers} />}
 
       <div style={{padding:"0 4px 4px",textAlign:"center"}}>
         <div style={{fontSize:10,color:"#CBD5E1",lineHeight:2}}>
