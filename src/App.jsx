@@ -1401,16 +1401,22 @@ const nexoInitials=(name)=>{
   if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
   return s.slice(0,2).toUpperCase();
 };
-// Círculo de color con iniciales — avatar profesional
-function InitialsAvatar({name,color="#0066FF",size=40}){
+// Círculo de color con iniciales — avatar profesional (con soporte de foto real)
+function InitialsAvatar({name,color="#0066FF",size=40,photo=null}){
   const ring=Math.max(2,Math.round(size*0.07));
+  const [imgErr,setImgErr]=useState(false);
+  if(photo&&!imgErr) return(
+    <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`${ring}px solid ${color}55`,boxSizing:"border-box",flexShrink:0,boxShadow:`0 3px 10px ${color}40`,background:"#EBF3FF"}}>
+      <img src={photo} alt={name||"avatar"} onError={()=>setImgErr(true)} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+    </div>
+  );
   return(
     <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(140deg,${color} 0%,${color}DD 55%,${color}99 100%)`,border:`${ring}px solid ${color}55`,boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 3px 10px ${color}40`}}>
       <span style={{color:"#fff",fontWeight:900,fontSize:Math.max(10,Math.round(size*0.36)),letterSpacing:1,fontFamily:"'Inter',-apple-system,sans-serif",textShadow:"0 1px 2px rgba(0,0,0,0.18)",userSelect:"none"}}>{nexoInitials(name)}</span>
     </div>
   );
 }
-function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=false,level=null}){
+function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=false,level=null,photo=null}){
   const lvl=level?getLevel(level):null;
   // Find avatar data if avatarId provided
   const avData = avatarId ? AVATAR_OPTIONS.find(a=>a.id===avatarId) : null;
@@ -1421,7 +1427,7 @@ function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=fals
   return(
     <div style={{position:"relative",flexShrink:0}}>
       {name
-        ? <InitialsAvatar name={name} color={finalColor||"#0066FF"} size={size}/>
+        ? <InitialsAvatar name={name} color={finalColor||"#0066FF"} size={size} photo={photo}/>
         : <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`2.5px solid ${finalColor}66`,display:"flex",alignItems:"center",justifyContent:"center",background:finalColor+"11"}}
             dangerouslySetInnerHTML={{__html:svgContent}}/>}
       {online&&<span style={{position:"absolute",bottom:1,right:1,width:Math.max(7,size*0.2),height:Math.max(7,size*0.2),borderRadius:"50%",background:C.bull,border:"2px solid white",zIndex:2}}/>}
@@ -2101,6 +2107,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
           username:uname,
           emoji:profile?.avatar_emoji||authData.user?.user_metadata?.avatar_emoji||avatar.emoji,
           avatarColor:profile?.avatar_color||authData.user?.user_metadata?.avatar_color||C.accent,
+          avatarUrl:profile?.avatar_url||null,
           followers:profile?.followers_count||0,
           following:profile?.following_count||0,
           posts:profile?.posts_count||0,
@@ -2388,8 +2395,10 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             <div style={{position:"relative",flexShrink:0}}>
               <div onClick={isOwn?()=>setShowAvatarEdit(v=>!v):undefined}
                 style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 3px #fff,0 4px 16px rgba(0,102,255,0.2)`,cursor:isOwn?"pointer":"default",position:"relative"}}>
-                <div style={{width:"100%",height:"100%",borderRadius:17,background:"#EBF3FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>
-                  {user.emoji}
+                <div style={{width:"100%",height:"100%",borderRadius:17,background:"#EBF3FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,overflow:"hidden"}}>
+                  {user.avatarUrl
+                    ? <img src={user.avatarUrl} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                    : user.emoji}
                 </div>
                 {isOwn && <div style={{position:"absolute",bottom:-2,right:-2,width:20,height:20,borderRadius:6,background:"#0066FF",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff"}}>✎</div>}
               </div>
@@ -2403,13 +2412,62 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                     <span style={{fontSize:11,fontWeight:700,color:"#FCD34D"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
                     <button onClick={()=>setShowAvatarEdit(false)} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:14}}>✕</button>
                   </div>
+                  {/* ── Subir foto real (Supabase Storage) ── */}
+                  <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(0,102,255,0.18)",border:"1.5px dashed rgba(96,165,250,0.6)",borderRadius:9,padding:"8px 4px",cursor:"pointer",color:"#93C5FD",fontSize:12,fontWeight:700,marginBottom:8}}>
+                    📷 {lang==="en"?"Upload photo":"Subir foto"}
+                    <input type="file" accept="image/jpeg,image/png,image/webp" style={{display:"none"}}
+                      onChange={async e=>{
+                        const f=e.target.files?.[0];
+                        e.target.value="";
+                        if(!f||savingAvatar) return;
+                        setSavingAvatar(true);
+                        try{
+                          // Recorte cuadrado + redimensión a 256px (jpeg)
+                          const objUrl=URL.createObjectURL(f);
+                          const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=objUrl;});
+                          const S=256,c=document.createElement("canvas");c.width=S;c.height=S;
+                          const ctx=c.getContext("2d");
+                          const m=Math.min(img.width,img.height);
+                          ctx.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,S,S);
+                          URL.revokeObjectURL(objUrl);
+                          const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",0.85));
+                          if(!blob) throw new Error("No se pudo procesar la imagen");
+                          const path=`${user.id}/avatar.jpg`;
+                          const{error:upErr}=await supabase.storage.from("avatars").upload(path,blob,{upsert:true,contentType:"image/jpeg"});
+                          if(upErr) throw upErr;
+                          const{data:pub}=supabase.storage.from("avatars").getPublicUrl(path);
+                          const url=`${pub.publicUrl}?v=${Date.now()}`;
+                          const{error:dbErr}=await supabase.from("profiles").update({avatar_url:url}).eq("id",user.id);
+                          if(dbErr) throw dbErr;
+                          onUserUpdate&&onUserUpdate({...user,avatarUrl:url});
+                          setShowAvatarEdit(false);
+                        }catch(err){
+                          alert((lang==="en"?"Error uploading photo: ":"Error al subir la foto: ")+(err?.message||err));
+                        }
+                        setSavingAvatar(false);
+                      }}/>
+                  </label>
+                  {user.avatarUrl&&(
+                    <button onClick={async()=>{
+                      if(savingAvatar) return;
+                      setSavingAvatar(true);
+                      try{
+                        await supabase.storage.from("avatars").remove([`${user.id}/avatar.jpg`]).catch(()=>{});
+                        await supabase.from("profiles").update({avatar_url:null}).eq("id",user.id);
+                        onUserUpdate&&onUserUpdate({...user,avatarUrl:null});
+                      }catch(e){}
+                      setSavingAvatar(false);
+                    }} style={{width:"100%",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:9,padding:"6px 4px",color:"#FCA5A5",fontSize:11,fontWeight:700,cursor:"pointer",marginBottom:8}}>
+                      🗑 {lang==="en"?"Remove photo":"Quitar foto"}
+                    </button>
+                  )}
                   <div style={{display:"flex",flexWrap:"wrap",gap:5,maxHeight:150,overflowY:"auto"}}>
                     {AVATAR_OPTIONS.map(av=>(
                       <button key={av.emoji} onClick={async()=>{
                         if(savingAvatar) return;
                         setSavingAvatar(true);
-                        try{ await supabase.from("profiles").update({avatar_emoji:av.emoji,avatar_color:av.color}).eq("id",user.id);
-                          onUserUpdate&&onUserUpdate({...user,emoji:av.emoji,avatarColor:av.color}); }catch(e){}
+                        try{ await supabase.from("profiles").update({avatar_emoji:av.emoji,avatar_color:av.color,avatar_url:null}).eq("id",user.id);
+                          onUserUpdate&&onUserUpdate({...user,emoji:av.emoji,avatarColor:av.color,avatarUrl:null}); }catch(e){}
                         setSavingAvatar(false); setShowAvatarEdit(false);
                       }} style={{width:36,height:36,borderRadius:9,background:user.emoji===av.emoji?`${av.color}44`:"rgba(255,255,255,0.05)",border:`2px solid ${user.emoji===av.emoji?av.color:"rgba(255,255,255,0.08)"}`,cursor:"pointer",fontSize:19,display:"flex",alignItems:"center",justifyContent:"center"}}>
                         {av.emoji}
@@ -7023,8 +7081,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 if(savingAvatar) return;
                 setSavingAvatar(true);
                 try{
-                  await supabase.from("profiles").update({avatar_emoji:av.emoji,avatar_color:av.color}).eq("id",user.id);
-                  onUserUpdate&&onUserUpdate({...user,emoji:av.emoji,avatarColor:av.color});
+                  await supabase.from("profiles").update({avatar_emoji:av.emoji,avatar_color:av.color,avatar_url:null}).eq("id",user.id);
+                  onUserUpdate&&onUserUpdate({...user,emoji:av.emoji,avatarColor:av.color,avatarUrl:null});
                 }catch(e){}
                 setSavingAvatar(false);
                 setShowAvatarPicker(false);
@@ -7770,7 +7828,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         useEffect(()=>{
           // Cargar usuarios reales de Supabase ordenados por puntos
           supabase.from("profiles")
-            .select("id,username,avatar_emoji,avatar_color,points,followers_count")
+            .select("id,username,avatar_emoji,avatar_color,avatar_url,points,followers_count")
             .order("points",{ascending:false})
             .limit(10)
             .then(({data})=>{
@@ -7798,7 +7856,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             <div style={{fontSize:12,fontWeight:800,color:"var(--c-text)",marginBottom:12,letterSpacing:-0.2}}>{t.whofollow}</div>
             {realUsers.map((u,i)=>(
               <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<realUsers.length-1?"1px solid var(--c-border)":"none"}}>
-                <AvatarBubble name={u.username} emoji={u.avatar_emoji||"🦅"} color={u.avatar_color||"#0066FF"} size={30}/>
+                <AvatarBubble name={u.username} emoji={u.avatar_emoji||"🦅"} color={u.avatar_color||"#0066FF"} size={30} photo={u.avatar_url||null}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"var(--c-text)",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     {u.username||"Usuario"}
@@ -14167,7 +14225,7 @@ function BotPostCard({post,onTickerClick,lang}){
       onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
         {/* Avatar */}
-        <InitialsAvatar name={post.user} color={post.avatarColor} size={40}/>
+        <InitialsAvatar name={post.user} color={post.avatarColor} size={40} photo={post.photo||null}/>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,flexWrap:"wrap"}}>
             <span style={{fontWeight:800,color:C.text,fontSize:14}}>@{post.user}</span>
@@ -14622,7 +14680,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
         // Obtener perfiles de mutuos
         if (mutualIds.length > 0) {
           const { data: profiles } = await sb.from("profiles")
-            .select("id,username,avatar_emoji,avatar_color")
+            .select("id,username,avatar_emoji,avatar_color,avatar_url")
             .in("id", mutualIds);
           setAllFollowers(profiles || []);
         }
@@ -14769,13 +14827,13 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
               const conv = conversations.find(c => c.userId === prof.id);
               const isSelected = selConv?.id === prof.id;
               return (
-                <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
+                <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent,photo:prof.avatar_url||null});setNewDM(false);}}
                   style={{display:"flex",gap:10,alignItems:"center",padding:"11px 14px",cursor:"pointer",background:isSelected?"rgba(33,150,243,0.13)":"transparent",borderLeft:`3px solid ${isSelected?"#F59E0B":"transparent"}`,transition:"all 0.15s",position:"relative"}}
                   onMouseEnter={e=>{ if(!isSelected){e.currentTarget.style.background="rgba(255,255,255,0.04)";} }}
                   onMouseLeave={e=>{ if(!isSelected){e.currentTarget.style.background="transparent";} }}>
                   {/* Avatar */}
                   <div style={{flexShrink:0,border:isSelected?"2px solid rgba(33,150,243,0.5)":"2px solid transparent",borderRadius:"50%",transition:"border 0.15s"}}>
-                    <InitialsAvatar name={prof.username} color={prof.avatar_color||C.accent} size={40}/>
+                    <InitialsAvatar name={prof.username} color={prof.avatar_color||C.accent} size={40} photo={prof.avatar_url||null}/>
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontWeight:700,color:isSelected?"#FCD34D":C.text,fontSize:13,marginBottom:2}}>{prof.username}</div>
@@ -14805,11 +14863,11 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
               )}
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 {filteredMutualsForNew.map(prof => (
-                  <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
+                  <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent,photo:prof.avatar_url||null});setNewDM(false);}}
                     style={{display:"flex",gap:12,alignItems:"center",padding:"12px 16px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(33,150,243,0.15)",borderRadius:14,cursor:"pointer",transition:"all 0.15s"}}
                     onMouseEnter={e=>{e.currentTarget.style.background="rgba(33,150,243,0.08)";e.currentTarget.style.borderColor="rgba(33,150,243,0.3)";}}
                     onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.03)";e.currentTarget.style.borderColor="rgba(33,150,243,0.15)";}}>
-                    <InitialsAvatar name={prof.username} color={prof.avatar_color||C.accent} size={44}/>
+                    <InitialsAvatar name={prof.username} color={prof.avatar_color||C.accent} size={44} photo={prof.avatar_url||null}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontWeight:700,color:C.text,fontSize:14}}>{prof.username}</div>
                       <div style={{fontSize:11,color:"#10B981",marginTop:2}}>✓ Seguidor mutuo — Puedes enviarle mensajes</div>
@@ -14827,7 +14885,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
               {/* Chat header */}
               <div style={{padding:"12px 18px",borderBottom:"1px solid rgba(33,150,243,0.15)",display:"flex",alignItems:"center",gap:12,background:"rgba(33,150,243,0.05)"}}>
                 <div style={{position:"relative"}}>
-                  <InitialsAvatar name={selConv.username} color={selConv.avatarColor||C.accent} size={38}/>
+                  <InitialsAvatar name={selConv.username} color={selConv.avatarColor||C.accent} size={38} photo={selConv.photo||null}/>
                   <div style={{position:"absolute",bottom:0,right:0,width:10,height:10,borderRadius:"50%",background:"#10B981",border:"2px solid #0a0e1a"}}/>
                 </div>
                 <div>
@@ -15946,7 +16004,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
   ];
 
   useEffect(()=>{
-    supabase.from("profiles").select("id,username,emoji,avatar_color,points,created_at")
+    supabase.from("profiles").select("id,username,emoji,avatar_color,avatar_url,points,created_at")
       .order("points",{ascending:false}).limit(50)
       .then(({data})=>{
         // Mezclar perfiles reales con bots, ordenar por puntos
@@ -16032,7 +16090,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
                 : <span style={{fontWeight:900,color:"#475569",fontSize:14}}>#{i+1}</span>}
               </div>
               {/* Avatar */}
-              <InitialsAvatar name={p.username} color={p.avatar_color||"#F59E0B"} size={44}/>
+              <InitialsAvatar name={p.username} color={p.avatar_color||"#F59E0B"} size={44} photo={p.avatar_url||null}/>
               {/* Info */}
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
@@ -16102,7 +16160,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
             <div style={{width:28,textAlign:"center",flexShrink:0}}>
               {i<3?<span style={{fontSize:18}}>{MEDALS[i]}</span>:<span style={{fontWeight:900,color:"#475569",fontSize:13}}>#{i+1}</span>}
             </div>
-            <InitialsAvatar name={profile?.username} color={profile?.avatar_color||"#00D26A"} size={44}/>
+            <InitialsAvatar name={profile?.username} color={profile?.avatar_color||"#00D26A"} size={44} photo={profile?.avatar_url||null}/>
             <div style={{flex:1}}>
               <div style={{fontWeight:800,color:"var(--c-text)",fontSize:14,marginBottom:2}}>{profile?.username||"Trader"}</div>
               <div style={{fontSize:11,color:"#475569"}}>{isEN?`${count} posts this week`:  `${count} posts esta semana`}</div>
@@ -20657,7 +20715,7 @@ export default function App(){
         // Primero intenta con join a profiles
         let { data, error } = await supabase
           .from("posts")
-          .select(`*, profiles!posts_user_id_fkey(username,avatar_emoji,avatar_color,points)`)
+          .select(`*, profiles!posts_user_id_fkey(username,avatar_emoji,avatar_color,points,avatar_url)`)
           .order("created_at", {ascending:false})
           .limit(100);
 
@@ -20689,6 +20747,7 @@ export default function App(){
             user:       p.profiles?.username || p.user_name || p.username || "Trader",
             avatar:     p.profiles?.avatar_emoji || p.avatar_emoji || "🦅",
             avatarColor:p.profiles?.avatar_color || p.avatar_color || C.accent,
+            photo:      p.profiles?.avatar_url || null,
             time:       fmtTimeAgo(p.created_at),
             ticker:     p.ticker||"GENERAL",
             sentiment:  p.sentiment||"bull",
