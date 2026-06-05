@@ -1403,9 +1403,10 @@ const nexoInitials=(name)=>{
 };
 // Círculo de color con iniciales — avatar profesional
 function InitialsAvatar({name,color="#0066FF",size=40}){
+  const ring=Math.max(2,Math.round(size*0.07));
   return(
-    <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(135deg,${color},${color}99)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 2px 8px ${color}33`}}>
-      <span style={{color:"#fff",fontWeight:800,fontSize:Math.max(10,Math.round(size*0.36)),letterSpacing:0.5}}>{nexoInitials(name)}</span>
+    <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(140deg,${color} 0%,${color}DD 55%,${color}99 100%)`,border:`${ring}px solid ${color}55`,boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 3px 10px ${color}40`}}>
+      <span style={{color:"#fff",fontWeight:900,fontSize:Math.max(10,Math.round(size*0.36)),letterSpacing:1,fontFamily:"'Inter',-apple-system,sans-serif",textShadow:"0 1px 2px rgba(0,0,0,0.18)",userSelect:"none"}}>{nexoInitials(name)}</span>
     </div>
   );
 }
@@ -1420,9 +1421,7 @@ function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=fals
   return(
     <div style={{position:"relative",flexShrink:0}}>
       {name
-        ? <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(135deg,${finalColor||"#0066FF"},${(finalColor||"#0066FF")}99)`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 2px 8px ${(finalColor||"#0066FF")}33`}}>
-            <span style={{color:"#fff",fontWeight:800,fontSize:Math.max(10,Math.round(size*0.36)),letterSpacing:0.5}}>{nexoInitials(name)}</span>
-          </div>
+        ? <InitialsAvatar name={name} color={finalColor||"#0066FF"} size={size}/>
         : <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`2.5px solid ${finalColor}66`,display:"flex",alignItems:"center",justifyContent:"center",background:finalColor+"11"}}
             dangerouslySetInnerHTML={{__html:svgContent}}/>}
       {online&&<span style={{position:"absolute",bottom:1,right:1,width:Math.max(7,size*0.2),height:Math.max(7,size*0.2),borderRadius:"50%",background:C.bull,border:"2px solid white",zIndex:2}}/>}
