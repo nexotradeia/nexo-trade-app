@@ -4487,6 +4487,54 @@ const TICKER_DATA_INIT = [
   {s:"AVGO",  n:"Broadcom",   p:248.6,  c:+0.55,  col:"#cc0000", cg:null, fh:"AVGO"},
 ];
 
+// ── Mapa ticker → dominio para logos oficiales (Clearbit). Índices/ETF sin logo → letra ──
+const LOGO_DOMAIN = {
+  NVDA:"nvidia.com", AAPL:"apple.com", TSLA:"tesla.com", MSFT:"microsoft.com",
+  META:"meta.com", AMZN:"amazon.com", GOOGL:"abc.xyz", GOOG:"abc.xyz",
+  AMD:"amd.com", PLTR:"palantir.com", COIN:"coinbase.com", SMCI:"supermicro.com",
+  AVGO:"broadcom.com", NFLX:"netflix.com", UBER:"uber.com", SHOP:"shopify.com",
+  PYPL:"paypal.com", V:"visa.com", MA:"mastercard.com", ORCL:"oracle.com",
+  CRM:"salesforce.com", SNOW:"snowflake.com", NOW:"servicenow.com", XOM:"exxonmobil.com",
+  WMT:"walmart.com", COST:"costco.com", ANET:"arista.com", NU:"nubank.com.br",
+  SQ:"block.xyz", LLY:"lilly.com", MELI:"mercadolibre.com", JPM:"jpmorganchase.com",
+  BAC:"bankofamerica.com", GS:"goldmansachs.com", DIS:"disney.com", INTC:"intel.com",
+  MU:"micron.com", BABA:"alibaba.com", HOOD:"robinhood.com", ABNB:"airbnb.com",
+  GME:"gamestop.com", RIVN:"rivian.com", NKE:"nike.com", KO:"coca-cola.com",
+  PEP:"pepsico.com", MCD:"mcdonalds.com", BA:"boeing.com", GE:"ge.com",
+  F:"ford.com", GM:"gm.com", T:"att.com", VZ:"verizon.com", PFE:"pfizer.com",
+  JNJ:"jnj.com", CVX:"chevron.com", ADBE:"adobe.com", CSCO:"cisco.com",
+  QCOM:"qualcomm.com", TXN:"ti.com", IBM:"ibm.com", PYPL2:"paypal.com",
+};
+// Logos cripto (CDN público spothq). Cae a letra si no carga.
+const CRYPTO_LOGO = {
+  BTC:"btc", ETH:"eth", SOL:"sol", BNB:"bnb", XRP:"xrp", ADA:"ada",
+  DOGE:"doge", AVAX:"avax", MATIC:"matic", LTC:"ltc", LINK:"link", DOT:"dot",
+};
+const logoUrlFor = (sym) => {
+  const s=(sym||"").toUpperCase();
+  if(CRYPTO_LOGO[s]) return `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${CRYPTO_LOGO[s]}.png`;
+  if(LOGO_DOMAIN[s]) return `https://logo.clearbit.com/${LOGO_DOMAIN[s]}`;
+  return null;
+};
+// Badge con logo oficial; si no hay/falla → cuadrito de color con la inicial
+function LogoBadge({sym, col="#0F4C81", size=38, radius=10}){
+  const [err,setErr]=useState(false);
+  const url=logoUrlFor(sym);
+  if(url && !err){
+    return(
+      <div style={{width:size,height:size,borderRadius:radius,background:"#fff",border:"1px solid #EEF2F7",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0,boxShadow:`0 2px 8px ${col}22`}}>
+        <img src={url} alt={sym} onError={()=>setErr(true)} loading="lazy"
+          style={{width:"78%",height:"78%",objectFit:"contain",display:"block"}}/>
+      </div>
+    );
+  }
+  return(
+    <div style={{width:size,height:size,borderRadius:radius,background:col,display:"flex",alignItems:"center",justifyContent:"center",fontSize:Math.round(size*0.42),fontWeight:900,color:"#fff",flexShrink:0,boxShadow:`0 3px 10px ${col}55`}}>
+      {(sym||"?").slice(0,1)}
+    </div>
+  );
+}
+
 // Hook compartido para precios reales de CoinGecko
 function useCryptoPrices(){
   const [cryptoPrices, setCryptoPrices] = useState({});
@@ -4611,10 +4659,8 @@ function MarketsMiniWidget({ lang="es" }){
                 style={{flexShrink:0,width:120,display:"flex",flexDirection:"column",gap:6,padding:"12px 10px",borderRadius:14,background:bgCol,border:`1.5px solid ${borderCol}55`,textDecoration:"none",transition:"all 0.18s",cursor:"pointer"}}
                 onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 18px ${borderCol}30`;e.currentTarget.style.borderColor=borderCol;}}
                 onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor=`${borderCol}55`;}}>
-                {/* Badge */}
-                <div style={{width:38,height:38,borderRadius:10,background:t.col,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:900,color:"#fff",flexShrink:0,boxShadow:`0 3px 10px ${t.col}55`}}>
-                  {t.s.slice(0,1)}
-                </div>
+                {/* Badge — logo oficial con respaldo a la inicial */}
+                <LogoBadge sym={t.s} col={t.col} size={38}/>
                 {/* Nombre */}
                 <div style={{fontSize:10,color:"#64748b",fontWeight:500,lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.n}</div>
                 {/* Precio */}
