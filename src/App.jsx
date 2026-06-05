@@ -1096,12 +1096,14 @@ function PriceProvider({children}){
     }
   }, []);
 
-  // REST — carga inicial de los tickers base
+  // REST — carga inicial; primero los tickers VISIBLES (cards de mercado) para que no se vean stale
   useEffect(() => {
     const delay = (ms) => new Promise(r => setTimeout(r, ms));
+    const PRIORITY = ["SPY","QQQ","NVDA","AAPL","TSLA","MSFT","AMZN","META","GOOGL","AVGO","BTC","ETH"];
     (async () => {
-      const base = [...trackedRef.current];
-      for(let i=0;i<base.length;i++){ await delay(1100); restFetch(base[i]); } // 1100ms ≈ 55/min (límite free 60/min)
+      const all=[...trackedRef.current];
+      const ordered=[...PRIORITY.filter(t=>all.includes(t)), ...all.filter(t=>!PRIORITY.includes(t))];
+      for(let i=0;i<ordered.length;i++){ await delay(1050); restFetch(ordered[i]); } // 1050ms ≈ 57/min (límite free 60/min)
     })();
   }, []);
 
@@ -4442,15 +4444,16 @@ function NoticiasPage({lang}){
 // ── TICKER STRIP — barra de precios animada ───────────────────────────────────
 // CoinGecko IDs para los 4 crypto principales (API gratis, sin key)
 const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
+// Semillas (fallback hasta que llega el precio en vivo via WebSocket/REST Finnhub)
 const TICKER_DATA_INIT = [
   {s:"SPY",   n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0F4C81", cg:null, fh:"SPY"},
-  {s:"QQQ",   n:"Nasdaq ETF", p:485.2,  c:+0.30,  col:"#0F5E68", cg:null, fh:"QQQ"},
-  {s:"NVDA",  n:"NVIDIA",     p:135.4,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
-  {s:"AAPL",  n:"Apple",      p:213.5,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
-  {s:"TSLA",  n:"Tesla",      p:352.8,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
-  {s:"MSFT",  n:"Microsoft",  p:453.6,  c:+0.60,  col:"#00b4d8", cg:null, fh:"MSFT"},
+  {s:"QQQ",   n:"Nasdaq ETF", p:525.0,  c:+0.30,  col:"#0F5E68", cg:null, fh:"QQQ"},
+  {s:"NVDA",  n:"NVIDIA",     p:205.1,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
+  {s:"AAPL",  n:"Apple",      p:307.3,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
+  {s:"TSLA",  n:"Tesla",      p:391.0,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
+  {s:"MSFT",  n:"Microsoft",  p:416.7,  c:+0.60,  col:"#00b4d8", cg:null, fh:"MSFT"},
   {s:"AMZN",  n:"Amazon",     p:224.3,  c:+0.40,  col:"#ff9900", cg:null, fh:"AMZN"},
-  {s:"META",  n:"Meta",       p:718.5,  c:+1.10,  col:"#0082fb", cg:null, fh:"META"},
+  {s:"META",  n:"Meta",       p:512.8,  c:+1.10,  col:"#0082fb", cg:null, fh:"META"},
   {s:"GOOGL", n:"Alphabet",   p:196.8,  c:+0.30,  col:"#4285f4", cg:null, fh:"GOOGL"},
   {s:"AVGO",  n:"Broadcom",   p:248.6,  c:+0.55,  col:"#cc0000", cg:null, fh:"AVGO"},
 ];
