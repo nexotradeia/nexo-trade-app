@@ -90,13 +90,13 @@ function NexoLogoIcon({size=40}){
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display:"block",flexShrink:0}}>
       <defs>
         <linearGradient id="nlGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#6366F1"/>
-          <stop offset="60%" stopColor="#0066FF"/>
+          <stop offset="0%" stopColor="#0F5E68"/>
+          <stop offset="60%" stopColor="#0F4C81"/>
           <stop offset="100%" stopColor="#00C8A0"/>
         </linearGradient>
         <linearGradient id="nlGlow" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#818CF8" stopOpacity="0.3"/>
-          <stop offset="100%" stopColor="#0066FF" stopOpacity="0"/>
+          <stop offset="100%" stopColor="#0F4C81" stopOpacity="0"/>
         </linearGradient>
       </defs>
       {/* Background */}
@@ -135,9 +135,9 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
       // @Mención — chip azul, abre vista del ticker
       const sym = part.slice(1);
       return <span key={i} onClick={()=>onMentionClick&&onMentionClick(sym)}
-        style={{color:"#0066FF",fontWeight:700,cursor:"pointer",background:"rgba(0,102,255,0.1)",borderRadius:6,padding:"2px 8px",border:"1px solid rgba(0,102,255,0.3)",fontSize:"0.88em",letterSpacing:0.2,fontFamily:"monospace",display:"inline-block",transition:"all 0.15s"}}
-        onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,102,255,0.2)";e.currentTarget.style.borderColor="rgba(0,102,255,0.55)";e.currentTarget.style.color="#60A5FA";e.currentTarget.style.boxShadow="0 0 8px rgba(0,102,255,0.2)";}}
-        onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,102,255,0.1)";e.currentTarget.style.borderColor="rgba(0,102,255,0.3)";e.currentTarget.style.color="#0066FF";e.currentTarget.style.boxShadow="none";}}
+        style={{color:"#0F4C81",fontWeight:700,cursor:"pointer",background:"rgba(15,76,129,0.1)",borderRadius:6,padding:"2px 8px",border:"1px solid rgba(15,76,129,0.3)",fontSize:"0.88em",letterSpacing:0.2,fontFamily:"monospace",display:"inline-block",transition:"all 0.15s"}}
+        onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.2)";e.currentTarget.style.borderColor="rgba(15,76,129,0.55)";e.currentTarget.style.color="#60A5FA";e.currentTarget.style.boxShadow="0 0 8px rgba(15,76,129,0.2)";}}
+        onMouseLeave={e=>{e.currentTarget.style.background="rgba(15,76,129,0.1)";e.currentTarget.style.borderColor="rgba(15,76,129,0.3)";e.currentTarget.style.color="#0F4C81";e.currentTarget.style.boxShadow="none";}}
       >{part}</span>;
     }
     return part;
@@ -147,16 +147,16 @@ function renderWithCashtags(text, onTickerClick, onMentionClick){
 // ── THEME — Dark Luxury Fintech ───────────────────────────────────────────────
 const C = {
   bg:"var(--c-bg)", surface:"var(--c-surface)", card:"var(--c-card)", card2:"var(--c-card2)",
-  border:"var(--c-border)", borderHover:"rgba(0,102,255,0.3)",
-  accent:"#0066FF", accentDim:"rgba(0,102,255,0.08)", accentText:"#0055DD",
+  border:"var(--c-border)", borderHover:"rgba(15,76,129,0.3)",
+  accent:"#0F4C81", accentDim:"rgba(15,76,129,0.08)", accentText:"#0C3D68",
   bull:"#16A34A", bullBg:"rgba(22,163,74,0.09)", bear:"#DC2626", bearBg:"rgba(220,38,38,0.09)",
-  gold:"#D97706", goldBg:"rgba(217,119,6,0.1)", purple:"#D97706", purpleBg:"rgba(217,119,6,0.08)",
-  blue:"#0066FF", blueBg:"rgba(0,102,255,0.08)", orange:"#EA580C", orangeBg:"rgba(234,88,12,0.08)",
+  gold:"#0F5E68", goldBg:"rgba(15,94,104,0.1)", purple:"#0F5E68", purpleBg:"rgba(15,94,104,0.08)",
+  blue:"#0F4C81", blueBg:"rgba(15,76,129,0.08)", orange:"#0F5E68", orangeBg:"rgba(15,94,104,0.08)",
   text:"var(--c-text)", muted:"var(--c-muted)", muted2:"var(--c-muted2)",
   shadow:"var(--c-shadow)", shadowMd:"var(--c-shadowMd)",
-  shadowGlow:"0 0 20px rgba(0,102,255,0.10)", shadowGlowBlue:"0 0 20px rgba(0,102,255,0.08)",
+  shadowGlow:"0 0 20px rgba(15,76,129,0.10)", shadowGlowBlue:"0 0 20px rgba(15,76,129,0.08)",
   glass:"var(--c-glass)", glassBorder:"var(--c-glassBorder)",
-  vip:"#D97706", vipGlow:"rgba(217,119,6,0.2)",
+  vip:"#0F5E68", vipGlow:"rgba(15,94,104,0.2)",
   nav:"var(--c-nav)",
 };
 
@@ -345,7 +345,7 @@ const LANGS = {
 // ── GAMIFICATION ──────────────────────────────────────────────────────────────
 const LEVELS = [
   { min:0,     max:499,   name:"Novato",      nameEn:"Rookie",    emoji:"🌱", color:"#94a3b8" },
-  { min:500,   max:1499,  name:"Analista",    nameEn:"Analyst",   emoji:"📊", color:"#0066ff" },
+  { min:500,   max:1499,  name:"Analista",    nameEn:"Analyst",   emoji:"📊", color:"#0F4C81" },
   { min:1500,  max:3999,  name:"Trader",      nameEn:"Trader",    emoji:"📈", color:"#8b5cf6" },
   { min:4000,  max:9999,  name:"Experto",     nameEn:"Expert",    emoji:"⚡", color:"#f59e0b" },
   { min:10000, max:99999, name:"Leyenda",     nameEn:"Legend",    emoji:"🏆", color:"#ef4444" },
@@ -412,7 +412,7 @@ const TAPE_ITEMS = [
 const MOCK_USERS = [
   {id:1,name:"NvidiaChad",    emoji:"🟢",color:"#22c55e",bio:"Tech & AI stocks. NVDA maxi.",followers:3420,following:210,posts:892,points:9840,badges:["early","verified","100likes","top5"]},
   {id:2,name:"CryptoWolf",   emoji:"🐺",color:"#8b5cf6",bio:"Bitcoin & DeFi. HODL forever.",followers:2180,following:156,posts:1240,points:7620,badges:["early","bull_10","100likes"]},
-  {id:3,name:"ETHmaxi",      emoji:"💎",color:"#0066ff",bio:"Ethereum bull. Diamond hands.",followers:1890,following:88, posts:654, points:6180,badges:["early","verified"]},
+  {id:3,name:"ETHmaxi",      emoji:"💎",color:"#0F4C81",bio:"Ethereum bull. Diamond hands.",followers:1890,following:88, posts:654, points:6180,badges:["early","verified"]},
   {id:4,name:"TeslaInvestor",emoji:"⚡",color:"#f59e0b",bio:"EV sector. Swing trader.",       followers:1340,following:320,posts:445, points:4950,badges:["first_post","bull_10"]},
   {id:5,name:"SPY_Trader",   emoji:"📊",color:"#ef4444",bio:"Macro & opciones. 10y exp.",     followers:980, following:412,posts:1100,points:3720,badges:["early","first_post"]},
 ];
@@ -420,7 +420,7 @@ const MOCK_POSTS = [
   {id:1,userId:1,user:"NvidiaChad",    avatar:"🟢",avatarColor:"#22c55e",time:"3m ago",  ticker:"NVDA",sentiment:"bull",text:"NVDA holding perfect support at the 50-day MA. AI chip demand shows no signs of slowing. Adding more here. Target: $175 💚",likes:289,comments:71,reposts:54,tags:["NVDA","AI"]},
   {id:2,userId:2,user:"CryptoWolf",   avatar:"🐺",avatarColor:"#8b5cf6",time:"11m ago", ticker:"BTC", sentiment:"bull",text:"Bitcoin breaking resistance at $105k. Target $115k. On-chain data shows whales accumulating hard 🚀",likes:142,comments:38,reposts:21,tags:["BTC","Crypto"]},
   {id:3,userId:4,user:"TeslaInvestor",avatar:"⚡",avatarColor:"#f59e0b",time:"24m ago", ticker:"TSLA",sentiment:"bear",text:"TSLA reports this week. Q1 deliveries disappointed. Going short before earnings. Bearish target $220 📉",likes:67, comments:45,reposts:8, tags:["TSLA","Earnings"]},
-  {id:4,userId:3,user:"ETHmaxi",      avatar:"💎",avatarColor:"#0066ff",time:"45m ago", ticker:"ETH", sentiment:"bull",text:"ETH accumulating while everyone watches BTC. ETH/BTC ratio at historical lows. Patience pays 💎🙌",likes:198,comments:29,reposts:43,tags:["ETH","Crypto"]},
+  {id:4,userId:3,user:"ETHmaxi",      avatar:"💎",avatarColor:"#0F4C81",time:"45m ago", ticker:"ETH", sentiment:"bull",text:"ETH accumulating while everyone watches BTC. ETH/BTC ratio at historical lows. Patience pays 💎🙌",likes:198,comments:29,reposts:43,tags:["ETH","Crypto"]},
   {id:5,userId:5,user:"SPY_Trader",   avatar:"📊",avatarColor:"#ef4444",time:"1h ago",  ticker:"SPY", sentiment:"bear",text:"SPY double top at resistance. Fed staying hawkish. Going defensive. Cash is king for now.",likes:112,comments:56,reposts:17,tags:["SPY","Macro"]},
 ];
 const MOCK_NOTICIAS = [
@@ -465,17 +465,17 @@ const AVATAR_LEVELS = [
     ]
   },
   {
-    level: 1, levelName:"Analista", levelNameEn:"Analyst", color:"#0066ff",
+    level: 1, levelName:"Analista", levelNameEn:"Analyst", color:"#0F4C81",
     desc:"Desbloqueado con 500 pts — Avatares tech y datos",
     descEn:"Unlocked at 500 pts — Tech & data avatars",
     locked: true, minPts: 500,
     avatars:[
-      {id:"a1", svg:"analista_1", emoji:"📊", color:"#0066ff", name:"Data",       style:"tech"},
-      {id:"a2", svg:"analista_2", emoji:"🤖", color:"#6366f1", name:"Cyborg",     style:"ai"},
+      {id:"a1", svg:"analista_1", emoji:"📊", color:"#0F4C81", name:"Data",       style:"tech"},
+      {id:"a2", svg:"analista_2", emoji:"🤖", color:"#0F5E68", name:"Cyborg",     style:"ai"},
       {id:"a3", svg:"analista_3", emoji:"🧠", color:"#8b5cf6", name:"Mente",      style:"neural"},
       {id:"a4", svg:"analista_4", emoji:"💻", color:"#0ea5e9", name:"Coder",      style:"digital"},
       {id:"a5", svg:"analista_5", emoji:"🔬", color:"#06b6d4", name:"Científico", style:"precise"},
-      {id:"a6", svg:"analista_6", emoji:"📡", color:"#0066ff", name:"Radar",      style:"signal"},
+      {id:"a6", svg:"analista_6", emoji:"📡", color:"#0F4C81", name:"Radar",      style:"signal"},
     ]
   },
   {
@@ -499,7 +499,7 @@ const AVATAR_LEVELS = [
     locked: true, minPts: 4000,
     avatars:[
       {id:"e1", svg:"experto_1", emoji:"👑", color:"#f59e0b", name:"Corona",    style:"royal"},
-      {id:"e2", svg:"experto_2", emoji:"🦁", color:"#d97706", name:"León",      style:"king"},
+      {id:"e2", svg:"experto_2", emoji:"🦁", color:"#0F5E68", name:"León",      style:"king"},
       {id:"e3", svg:"experto_3", emoji:"💎", color:"#0ea5e9", name:"Diamante",  style:"rare"},
       {id:"e4", svg:"experto_4", emoji:"🌠", color:"#f59e0b", name:"Meteoro",   style:"golden"},
       {id:"e5", svg:"experto_5", emoji:"🔱", color:"#ca8a04", name:"Tridente",  style:"power"},
@@ -873,7 +873,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
               onClick={() => setDarkMode(!darkMode)}
               style={{
                 width:48,height:26,borderRadius:13,border:"none",cursor:"pointer",position:"relative",
-                background:darkMode ? "#0066FF" : "#334155",
+                background:darkMode ? "#0F4C81" : "#334155",
                 transition:"background 0.2s",flexShrink:0
               }}>
               <span style={{
@@ -889,9 +889,9 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
             <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
               {LANG_META.map(l => (
                 <button key={l.code} onClick={() => { setLang(l.code); try{localStorage.setItem("nexo-lang",l.code);}catch{} }}
-                  style={{display:"flex",alignItems:"center",gap:6,border:`1px solid ${lang===l.code?"#0066FF":"#334155"}`,
-                    background:lang===l.code?"rgba(0,102,255,0.12)":"transparent",borderRadius:10,
-                    padding:"7px 12px",cursor:"pointer",color:lang===l.code?"#0066FF":"#94a3b8",fontSize:12,fontWeight:lang===l.code?800:500}}>
+                  style={{display:"flex",alignItems:"center",gap:6,border:`1px solid ${lang===l.code?"#0F4C81":"#334155"}`,
+                    background:lang===l.code?"rgba(15,76,129,0.12)":"transparent",borderRadius:10,
+                    padding:"7px 12px",cursor:"pointer",color:lang===l.code?"#0F4C81":"#94a3b8",fontSize:12,fontWeight:lang===l.code?800:500}}>
                   <span style={{fontSize:16}}>{l.flag}</span>
                   <span>{l.label}</span>
                   {lang===l.code && <span>✓</span>}
@@ -912,7 +912,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
               </div>
               {notifStatus !== "granted" && notifStatus !== "denied" && notifStatus !== "unsupported" && (
                 <button onClick={requestPush}
-                  style={{background:"linear-gradient(135deg,#0066FF,#0055DD)",border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                  style={{background:"linear-gradient(135deg,#0F4C81,#0C3D68)",border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
                   Activar
                 </button>
               )}
@@ -936,7 +936,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
                   disabled={saving}
                   style={{
                     width:48,height:26,borderRadius:13,border:"none",cursor:"pointer",position:"relative",
-                    background:hideLeaderboard ? "#0066FF" : "#334155",
+                    background:hideLeaderboard ? "#0F4C81" : "#334155",
                     transition:"background 0.2s",flexShrink:0,opacity:saving?0.6:1
                   }}>
                   <span style={{
@@ -961,7 +961,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
           <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8}}>
             {user ? (
               <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <div style={{width:38,height:38,borderRadius:"50%",background:"linear-gradient(135deg,#0066FF,#D97706)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
+                <div style={{width:38,height:38,borderRadius:"50%",background:"linear-gradient(135deg,#0F4C81,#0F5E68)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
                   {(user.name||user.email||"?")[0].toUpperCase()}
                 </div>
                 <div>
@@ -1158,7 +1158,7 @@ function TickerTape({lang="es", onPremium}) {
       <div className="tape" style={{alignItems:"center",height:36}}>
         {doubled.map((item,i)=>item.promo?(
           <div key={i} onClick={onPremium}
-            style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap",cursor:"pointer",background:"linear-gradient(90deg,rgba(245,158,11,0.12),rgba(217,119,6,0.06))"}}>
+            style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap",cursor:"pointer",background:"linear-gradient(90deg,rgba(245,158,11,0.12),rgba(15,94,104,0.06))"}}>
             <span style={{color:"#FCD34D",fontSize:11,fontWeight:800,letterSpacing:0.2}}>{item.promo}</span>
           </div>
         ):(
@@ -1207,7 +1207,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
 
   return(
     <div ref={ref} style={{position:"relative",width:"100%",maxWidth:420}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,background:"#F9FAFB",border:`1px solid ${foc?"rgba(0,102,255,0.45)":"rgba(0,0,0,0.09)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(0,102,255,0.1)":"none"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,background:"#F9FAFB",border:`1px solid ${foc?"rgba(15,76,129,0.45)":"rgba(0,0,0,0.09)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(15,76,129,0.1)":"none"}}>
         <span style={{fontSize:13,color:"#475569"}}>⌕</span>
         <input value={q} onChange={e=>{setQ(e.target.value);setSelected(null);}} onFocus={()=>setFoc(true)} placeholder={t.search}
           onKeyDown={e=>{
@@ -1227,7 +1227,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
           <div style={{display:"flex",borderBottom:"1px solid rgba(0,0,0,0.06)",background:"#fafafa"}}>
             {[["tickers","📊 Tickers"],["posts","✍️ Posts"],["users","👤 Traders"]].map(([k,l])=>(
               <button key={k} onClick={()=>setSearchTab(k)}
-                style={{flex:1,padding:"8px 4px",border:"none",borderBottom:`2px solid ${searchTab===k?"#0066FF":"transparent"}`,background:"transparent",fontSize:11,fontWeight:searchTab===k?700:500,color:searchTab===k?"#0066FF":"#64748B",cursor:"pointer"}}>
+                style={{flex:1,padding:"8px 4px",border:"none",borderBottom:`2px solid ${searchTab===k?"#0F4C81":"transparent"}`,background:"transparent",fontSize:11,fontWeight:searchTab===k?700:500,color:searchTab===k?"#0F4C81":"#64748B",cursor:"pointer"}}>
                 {l}
               </button>
             ))}
@@ -1239,7 +1239,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
             const isUp=tp&&tp.change>=0;
             return(
               <div key={ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",cursor:"pointer",borderBottom:"1px solid rgba(0,0,0,0.06)",transition:"background 0.12s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.04)"}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.04)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                 onClick={()=>handleSelect(ticker)}>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -1263,7 +1263,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
             <div style={{padding:"14px 16px",textAlign:"center"}}>
               <div style={{color:"#94A3B8",fontSize:12,marginBottom:10}}>"{q.replace(/[@$\s]/g,"").toUpperCase()}" no está en nuestra lista</div>
               <button onClick={()=>{const tk=q.replace(/[@$\s]/g,"").toUpperCase();if(tk&&onTickerNav){setQ("");setRes([]);setFoc(false);onTickerNav(tk);}}}
-                style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:8,padding:"7px 18px",color:"#0066FF",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:8,padding:"7px 18px",color:"#0F4C81",fontSize:12,fontWeight:700,cursor:"pointer"}}>
                 🔍 Buscar ${q.replace(/[@$\s]/g,"").toUpperCase()} de todas formas →
               </button>
             </div>
@@ -1276,15 +1276,15 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
               ? <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>No hay posts con "{q}"</div>
               : matchPosts.map(p=>(
                 <div key={p.id} style={{padding:"10px 14px",borderBottom:"1px solid rgba(0,0,0,0.05)",cursor:"pointer",transition:"background 0.12s"}}
-                  onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.04)"}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.04)"}
                   onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                   onClick={()=>{setQ("");setFoc(false);if(onPostNav)onPostNav(p);}}>
                   <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-                    <InitialsAvatar name={p.user} color={p.avatarColor||"#0066FF"} size={26}/>
+                    <InitialsAvatar name={p.user} color={p.avatarColor||"#0F4C81"} size={26}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:2}}>
                         <span style={{fontWeight:700,color:"#0F172A",fontSize:12}}>{p.user}</span>
-                        {p.ticker&&<span style={{background:"rgba(0,102,255,0.08)",color:"#0066FF",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700,fontFamily:"monospace"}}>${p.ticker}</span>}
+                        {p.ticker&&<span style={{background:"rgba(15,76,129,0.08)",color:"#0F4C81",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700,fontFamily:"monospace"}}>${p.ticker}</span>}
                         <span style={{color:p.sentiment==="bull"?"#16A34A":"#DC2626",fontSize:10,fontWeight:700}}>{p.sentiment==="bull"?"▲":"▼"}</span>
                       </div>
                       <div style={{color:"#475569",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.text}</div>
@@ -1303,7 +1303,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
                 const lvl=getLevel(u.points);
                 return(
                   <div key={u.id} style={{padding:"10px 14px",borderBottom:"1px solid rgba(0,0,0,0.05)",cursor:"pointer",display:"flex",alignItems:"center",gap:10,transition:"background 0.12s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.04)"}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.04)"}
                     onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                     onClick={()=>{setQ("");setFoc(false);if(onUserNav)onUserNav(u);}}>
                     <AvatarBubble name={u.name||u.username} emoji={u.emoji} color={u.avatarColor||C.accent} size={34}/>
@@ -1327,12 +1327,12 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
       {selected&&tape&&(
         <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#FFFFFF",border:"1px solid rgba(0,0,0,0.08)",borderRadius:14,boxShadow:"0 12px 40px rgba(0,0,0,0.15)",zIndex:200,padding:0,overflow:"hidden"}}>
           {/* Header */}
-          <div style={{background:tape.change>=0?"linear-gradient(135deg,rgba(0,229,143,0.08),rgba(0,102,255,0.05))":"linear-gradient(135deg,rgba(255,77,106,0.08),rgba(255,140,0,0.05))",padding:"14px 16px",borderBottom:"1px solid rgba(0,0,0,0.06)"}}>
+          <div style={{background:tape.change>=0?"linear-gradient(135deg,rgba(0,229,143,0.08),rgba(15,76,129,0.05))":"linear-gradient(135deg,rgba(255,77,106,0.08),rgba(255,140,0,0.05))",padding:"14px 16px",borderBottom:"1px solid rgba(0,0,0,0.06)"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <div>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <span style={{background:tape.change>=0?"rgba(0,229,143,0.15)":"rgba(255,77,106,0.15)",color:tape.change>=0?C.bull:C.bear,borderRadius:7,padding:"3px 10px",fontSize:13,fontWeight:900,fontFamily:"monospace"}}>${selected}</span>
-                  {tape.earning&&<span style={{background:"rgba(245,158,11,0.12)",color:"#D97706",border:"1px solid rgba(245,158,11,0.25)",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700}}>📅 EARNINGS PROX.</span>}
+                  {tape.earning&&<span style={{background:"rgba(245,158,11,0.12)",color:"#0F5E68",border:"1px solid rgba(245,158,11,0.25)",borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700}}>📅 EARNINGS PROX.</span>}
                 </div>
                 <div style={{fontSize:12,color:"#475569",marginTop:4,fontWeight:500}}>{NAMES[selected]||selected}</div>
               </div>
@@ -1358,7 +1358,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0,padding:"0"}}>
             {[
               {label:"Tendencia",value:tape.change>=0?"📈 Alcista":"📉 Bajista",col:tape.change>=0?C.bull:C.bear},
-              {label:"Volumen",value:"Alto",col:"#0066FF"},
+              {label:"Volumen",value:"Alto",col:"#0F4C81"},
               {label:"Señal",value:tape.change>=1.5?"🔥 Fuerte":tape.change>=0?"✅ Normal":"⚠️ Débil",col:"#F59E0B"},
             ].map(({label,value,col},i)=>(
               <div key={i} style={{padding:"10px 14px",borderRight:i<2?"1px solid rgba(0,0,0,0.06)":"none",borderTop:"1px solid rgba(0,0,0,0.06)"}}>
@@ -1367,7 +1367,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
               </div>
             ))}
           </div>
-          <div style={{padding:"10px 16px",background:"rgba(0,102,255,0.03)",borderTop:"1px solid rgba(0,0,0,0.06)",fontSize:10.5,color:"#64748B",textAlign:"center"}}>
+          <div style={{padding:"10px 16px",background:"rgba(15,76,129,0.03)",borderTop:"1px solid rgba(0,0,0,0.06)",fontSize:10.5,color:"#64748B",textAlign:"center"}}>
             Regístrate gratis para ver análisis completo · <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}}>Unirme →</span>
           </div>
         </div>
@@ -1405,7 +1405,7 @@ const nexoInitials=(name)=>{
   return s.slice(0,2).toUpperCase();
 };
 // Círculo de color con iniciales — avatar profesional (con soporte de foto real)
-function InitialsAvatar({name,color="#0066FF",size=40,photo=null}){
+function InitialsAvatar({name,color="#0F4C81",size=40,photo=null}){
   const ring=Math.max(2,Math.round(size*0.07));
   const [imgErr,setImgErr]=useState(false);
   if(photo&&!imgErr) return(
@@ -1430,7 +1430,7 @@ function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=fals
   return(
     <div style={{position:"relative",flexShrink:0}}>
       {name
-        ? <InitialsAvatar name={name} color={finalColor||"#0066FF"} size={size} photo={photo}/>
+        ? <InitialsAvatar name={name} color={finalColor||"#0F4C81"} size={size} photo={photo}/>
         : <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`2.5px solid ${finalColor}66`,display:"flex",alignItems:"center",justifyContent:"center",background:finalColor+"11"}}
             dangerouslySetInnerHTML={{__html:svgContent}}/>}
       {online&&<span style={{position:"absolute",bottom:1,right:1,width:Math.max(7,size*0.2),height:Math.max(7,size*0.2),borderRadius:"50%",background:C.bull,border:"2px solid white",zIndex:2}}/>}
@@ -1546,13 +1546,13 @@ function PolymarketWidget(){
     <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:18,overflow:"hidden",marginBottom:20}}>
       {/* Header */}
       <div style={{padding:"16px 18px 12px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}>
-        <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🎯</div>
+        <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#0F5E68,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🎯</div>
         <div>
           <div style={{color:C.text,fontWeight:800,fontSize:14}}>Polymarket — Predicciones</div>
           <div style={{color:C.muted2,fontSize:11}}>Mercados de predicción en vivo · powered by Polymarket</div>
         </div>
         <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer"
-          style={{marginLeft:"auto",color:"#6366f1",fontSize:11,fontWeight:700,textDecoration:"none",background:"rgba(99,102,241,0.1)",padding:"4px 10px",borderRadius:8,border:"1px solid rgba(99,102,241,0.3)"}}>
+          style={{marginLeft:"auto",color:"#0F5E68",fontSize:11,fontWeight:700,textDecoration:"none",background:"rgba(15,94,104,0.1)",padding:"4px 10px",borderRadius:8,border:"1px solid rgba(15,94,104,0.3)"}}>
           Ver más →
         </a>
       </div>
@@ -1595,7 +1595,7 @@ function MercadosEnVivoWidget(){
     {s:"NVDA", n:"NVIDIA",  color:"#76b900", fhSym:"NVDA"},
     {s:"AAPL", n:"Apple",   color:"#555555", fhSym:"AAPL"},
     {s:"TSLA", n:"Tesla",   color:"#e31937", fhSym:"TSLA"},
-    {s:"SPY",  n:"S&P 500", color:"#0066FF", fhSym:"SPY"},
+    {s:"SPY",  n:"S&P 500", color:"#0F4C81", fhSym:"SPY"},
   ];
 
   const fetchPrices = async () => {
@@ -1640,7 +1640,7 @@ function MercadosEnVivoWidget(){
       <div style={{padding:"16px 18px 0",borderBottom:`1px solid ${C.border}`}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#0066FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📈</div>
+            <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#0F4C81,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📈</div>
             <div>
               <div style={{color:C.text,fontWeight:800,fontSize:14}}>Live Markets</div>
               <div style={{color:C.muted2,fontSize:11}}>{lastUpdate ? `Updated ${lastUpdate}` : "Loading..."}</div>
@@ -1651,7 +1651,7 @@ function MercadosEnVivoWidget(){
         <div style={{display:"flex",gap:0,marginBottom:-1}}>
           {[{k:"crypto",l:"🔷 Crypto"},{k:"stocks",l:"📊 Stocks"}].map(({k,l})=>(
             <button key={k} onClick={()=>setTab(k)}
-              style={{flex:1,padding:"7px",border:"none",borderBottom:`2px solid ${tab===k?"#0066FF":"transparent"}`,background:"transparent",color:tab===k?"#0066FF":C.muted2,fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
+              style={{flex:1,padding:"7px",border:"none",borderBottom:`2px solid ${tab===k?"#0F4C81":"transparent"}`,background:"transparent",color:tab===k?"#0F4C81":C.muted2,fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
               {l}
             </button>
           ))}
@@ -1680,9 +1680,9 @@ function MercadosEnVivoWidget(){
             </a>
           );
         })}
-        <div style={{marginTop:12,padding:"8px",background:"rgba(0,102,255,0.05)",borderRadius:8,textAlign:"center"}}>
+        <div style={{marginTop:12,padding:"8px",background:"rgba(15,76,129,0.05)",borderRadius:8,textAlign:"center"}}>
           <a href="https://www.tradingview.com/pricing/?aff_id=167149&aff_sub=nexotrade&source=nexotrade" target="_blank" rel="noopener noreferrer"
-            style={{color:"#0066FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>
+            style={{color:"#0F4C81",fontSize:11,fontWeight:600,textDecoration:"none"}}>
             📊 Full charts on TradingView →
           </a>
         </div>
@@ -1783,7 +1783,7 @@ function AIAssistant({lang,onClose}){
         @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
         @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         .nexo-ai-msg{animation:fadeInUp 0.25s ease-out}
-        .nexo-ai-cat:hover{background:rgba(99,102,241,0.18)!important;border-color:rgba(99,102,241,0.4)!important;color:#A5B4FC!important;transform:translateY(-2px)}
+        .nexo-ai-cat:hover{background:rgba(15,94,104,0.18)!important;border-color:rgba(15,94,104,0.4)!important;color:#A5B4FC!important;transform:translateY(-2px)}
         .nexo-ai-send:hover{opacity:0.85}
         .nexo-ai-hist:hover{background:rgba(255,255,255,0.06)!important}
       `}</style>
@@ -1791,9 +1791,9 @@ function AIAssistant({lang,onClose}){
       {/* ── TOP NAV ── */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.07)",background:"rgba(6,11,26,0.95)",backdropFilter:"blur(12px)",flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#6366F1,#0066FF)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🤖</div>
+          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#0F5E68,#0F4C81)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🤖</div>
           <div>
-            <div style={{fontWeight:900,color:"#F1F5F9",fontSize:16,letterSpacing:-0.3}}>NexoTrade <span style={{background:"linear-gradient(135deg,#6366F1,#0066FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>AI</span></div>
+            <div style={{fontWeight:900,color:"#F1F5F9",fontSize:16,letterSpacing:-0.3}}>NexoTrade <span style={{background:"linear-gradient(135deg,#0F5E68,#0F4C81)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>AI</span></div>
             <div style={{fontSize:10,color:"#10B981",display:"flex",alignItems:"center",gap:4}}>
               <span style={{width:5,height:5,borderRadius:"50%",background:"#10B981",display:"inline-block",animation:"pulse 2s infinite"}}/>
               {lang==="en"?"Online · Powered by NexoTrade":"Online · Inteligencia NexoTrade"}
@@ -1844,14 +1844,14 @@ function AIAssistant({lang,onClose}){
           {isStartScreen ? (
             <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 20px",gap:32,overflowY:"auto"}}>
               {/* Banner top */}
-              <div style={{background:"linear-gradient(135deg,rgba(99,102,241,0.12),rgba(0,102,255,0.08))",border:"1px solid rgba(99,102,241,0.2)",borderRadius:12,padding:"8px 18px",fontSize:12,fontWeight:600,color:"#818CF8"}}>
+              <div style={{background:"linear-gradient(135deg,rgba(15,94,104,0.12),rgba(15,76,129,0.08))",border:"1px solid rgba(15,94,104,0.2)",borderRadius:12,padding:"8px 18px",fontSize:12,fontWeight:600,color:"#818CF8"}}>
                 🧠 {lang==="en"?"AI analyzed 15K+ companies · Powered by NexoTrade Intelligence":"IA analizó 15K+ empresas · NexoTrade Intelligence"}
               </div>
               {/* Title */}
               <div style={{textAlign:"center"}}>
                 <div style={{fontSize:38,fontWeight:900,color:"#F1F5F9",letterSpacing:-1,lineHeight:1.1,marginBottom:10}}>
                   {lang==="en"?"Doing investment":"¿Analizando el"}<br/>
-                  <span style={{background:"linear-gradient(135deg,#6366F1,#0066FF,#10B981)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+                  <span style={{background:"linear-gradient(135deg,#0F5E68,#0F4C81,#10B981)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
                     {lang==="en"?"research?":"mercado?"}
                   </span>
                 </div>
@@ -1865,11 +1865,11 @@ function AIAssistant({lang,onClose}){
               <div style={{width:"100%",maxWidth:680,position:"relative"}}>
                 <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send(input)}
                   placeholder={lang==="en"?"Ask NexoAI anything about markets…":"Pregunta sobre acciones, cripto, opciones…"}
-                  style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"2px solid rgba(0,102,255,0.3)",borderRadius:16,padding:"18px 60px 18px 22px",fontSize:15,color:"#F1F5F9",outline:"none",fontFamily:"inherit",boxSizing:"border-box",boxShadow:"0 0 0 0 rgba(99,102,241,0)",transition:"border-color 0.2s, box-shadow 0.2s"}}
-                  onFocus={e=>{e.target.style.borderColor="rgba(0,102,255,0.6)";e.target.style.boxShadow="0 0 0 4px rgba(99,102,241,0.1)";}}
-                  onBlur={e=>{e.target.style.borderColor="rgba(0,102,255,0.3)";e.target.style.boxShadow="none";}}/>
+                  style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"2px solid rgba(15,76,129,0.3)",borderRadius:16,padding:"18px 60px 18px 22px",fontSize:15,color:"#F1F5F9",outline:"none",fontFamily:"inherit",boxSizing:"border-box",boxShadow:"0 0 0 0 rgba(15,94,104,0)",transition:"border-color 0.2s, box-shadow 0.2s"}}
+                  onFocus={e=>{e.target.style.borderColor="rgba(15,76,129,0.6)";e.target.style.boxShadow="0 0 0 4px rgba(15,94,104,0.1)";}}
+                  onBlur={e=>{e.target.style.borderColor="rgba(15,76,129,0.3)";e.target.style.boxShadow="none";}}/>
                 <button onClick={()=>send(input)} className="nexo-ai-send"
-                  style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,#6366F1,#4F46E5)",border:"none",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"opacity 0.15s"}}>
+                  style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,#0F5E68,#4F46E5)",border:"none",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"opacity 0.15s"}}>
                   ➤
                 </button>
               </div>
@@ -1889,9 +1889,9 @@ function AIAssistant({lang,onClose}){
               {msgs.map((m,i)=>(
                 <div key={i} className="nexo-ai-msg" style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10,alignItems:"flex-start"}}>
                   {m.role==="ai"&&(
-                    <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#6366F1,#0066FF)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0,marginTop:2}}>🤖</div>
+                    <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#0F5E68,#0F4C81)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0,marginTop:2}}>🤖</div>
                   )}
-                  <div style={{maxWidth:"78%",background:m.role==="user"?"linear-gradient(135deg,#6366F1,#4F46E5)":"rgba(255,255,255,0.05)",color:"#F1F5F9",borderRadius:m.role==="user"?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"12px 16px",fontSize:14,lineHeight:1.65,border:m.role==="ai"?"1px solid rgba(255,255,255,0.08)":"none",boxShadow:m.role==="user"?"0 4px 16px rgba(99,102,241,0.25)":"none"}}>
+                  <div style={{maxWidth:"78%",background:m.role==="user"?"linear-gradient(135deg,#0F5E68,#4F46E5)":"rgba(255,255,255,0.05)",color:"#F1F5F9",borderRadius:m.role==="user"?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"12px 16px",fontSize:14,lineHeight:1.65,border:m.role==="ai"?"1px solid rgba(255,255,255,0.08)":"none",boxShadow:m.role==="user"?"0 4px 16px rgba(15,94,104,0.25)":"none"}}>
                     {m.text}
                   </div>
                   {m.role==="user"&&(
@@ -1901,9 +1901,9 @@ function AIAssistant({lang,onClose}){
               ))}
               {loading&&(
                 <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
-                  <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#6366F1,#0066FF)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>🤖</div>
+                  <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#0F5E68,#0F4C81)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>🤖</div>
                   <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"18px 18px 18px 4px",padding:"14px 18px",display:"flex",gap:5,alignItems:"center"}}>
-                    {[0,0.18,0.36].map((d,i)=><span key={i} style={{width:8,height:8,borderRadius:"50%",background:"#6366F1",display:"inline-block",animation:`bounce 1.4s ease-in-out ${d}s infinite`}}/>)}
+                    {[0,0.18,0.36].map((d,i)=><span key={i} style={{width:8,height:8,borderRadius:"50%",background:"#0F5E68",display:"inline-block",animation:`bounce 1.4s ease-in-out ${d}s infinite`}}/>)}
                   </div>
                 </div>
               )}
@@ -1918,9 +1918,9 @@ function AIAssistant({lang,onClose}){
               <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
                 {t.aiQuick.map(q=>(
                   <button key={q} onClick={()=>send(q)}
-                    style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:16,padding:"4px 12px",fontSize:11,color:"#818CF8",fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.2)"}
-                    onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.1)"}>
+                    style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.25)",borderRadius:16,padding:"4px 12px",fontSize:11,color:"#818CF8",fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(15,94,104,0.2)"}
+                    onMouseLeave={e=>e.currentTarget.style.background="rgba(15,94,104,0.1)"}>
                     {q}
                   </button>
                 ))}
@@ -1928,11 +1928,11 @@ function AIAssistant({lang,onClose}){
               <div style={{position:"relative",maxWidth:780,margin:"0 auto"}}>
                 <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send(input)}
                   placeholder={lang==="en"?"Ask a follow-up…":"Continúa la consulta…"}
-                  style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1.5px solid rgba(99,102,241,0.3)",borderRadius:13,padding:"13px 56px 13px 18px",fontSize:14,color:"#F1F5F9",outline:"none",fontFamily:"inherit",boxSizing:"border-box",transition:"border-color 0.2s"}}
-                  onFocus={e=>e.target.style.borderColor="rgba(0,102,255,0.55)"}
-                  onBlur={e=>e.target.style.borderColor="rgba(99,102,241,0.3)"}/>
+                  style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1.5px solid rgba(15,94,104,0.3)",borderRadius:13,padding:"13px 56px 13px 18px",fontSize:14,color:"#F1F5F9",outline:"none",fontFamily:"inherit",boxSizing:"border-box",transition:"border-color 0.2s"}}
+                  onFocus={e=>e.target.style.borderColor="rgba(15,76,129,0.55)"}
+                  onBlur={e=>e.target.style.borderColor="rgba(15,94,104,0.3)"}/>
                 <button onClick={()=>send(input)}
-                  style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",width:36,height:36,borderRadius:9,background:"linear-gradient(135deg,#6366F1,#4F46E5)",border:"none",color:"#fff",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"opacity 0.15s"}}
+                  style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",width:36,height:36,borderRadius:9,background:"linear-gradient(135deg,#0F5E68,#4F46E5)",border:"none",color:"#fff",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"opacity 0.15s"}}
                   onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
                   onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
                   ➤
@@ -2073,7 +2073,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
             const {data:regD, error:regE} = await supabase.auth.signUp({
               email: email.trim().toLowerCase(),
               password: pass,
-              options:{ data:{ username:"nexoadmin", avatar_emoji:"🛡️", avatar_color:"#0066FF" } }
+              options:{ data:{ username:"nexoadmin", avatar_emoji:"🛡️", avatar_color:"#0F4C81" } }
             });
             if(!regE && regD?.user){
               // Cuenta creada — necesita confirmación de email
@@ -2228,7 +2228,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
           </div>
         )}
         {forgotMode&&!resetSent&&(
-          <div style={{marginTop:8,padding:"14px",background:"rgba(0,102,255,0.06)",borderRadius:12,border:"1px solid rgba(0,102,255,0.15)"}}>
+          <div style={{marginTop:8,padding:"14px",background:"rgba(15,76,129,0.06)",borderRadius:12,border:"1px solid rgba(15,76,129,0.15)"}}>
             <p style={{margin:"0 0 10px",fontSize:13,color:C.text,fontWeight:600}}>
               🔐 {isEN?"Recover password":"Recuperar contraseña"}
             </p>
@@ -2359,7 +2359,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
         <div style={{background:`linear-gradient(160deg,#ffffff 0%,#DDEEFF 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
           {/* Dot grid */}
           <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.12,pointerEvents:"none"}} viewBox="0 0 560 120" preserveAspectRatio="xMidYMid slice">
-            <defs><pattern id="pdots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#0066FF"/></pattern></defs>
+            <defs><pattern id="pdots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#0F4C81"/></pattern></defs>
             <rect width="560" height="120" fill="url(#pdots)"/>
           </svg>
           {/* Chart line azul */}
@@ -2377,18 +2377,18 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
               <svg style={{position:"absolute",bottom:0,left:0,width:"100%",pointerEvents:"none"}} height="62" viewBox={`0 0 ${w} 62`} preserveAspectRatio="none">
                 <defs>
                   <linearGradient id={`sparkGrad_${user.id?.slice(0,6)||"x"}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0066FF" stopOpacity="0.2"/>
-                    <stop offset="100%" stopColor="#0066FF" stopOpacity="0"/>
+                    <stop offset="0%" stopColor="#0F4C81" stopOpacity="0.2"/>
+                    <stop offset="100%" stopColor="#0F4C81" stopOpacity="0"/>
                   </linearGradient>
                 </defs>
                 <path d={`${d} L${w},62 L0,62 Z`} fill={`url(#sparkGrad_${user.id?.slice(0,6)||"x"})`}/>
-                <path d={d} fill="none" stroke="#0066FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
-                <circle cx={(pts.length-1)*step} cy={pts[pts.length-1]} r="4" fill="#0066FF" opacity="0.9"/>
+                <path d={d} fill="none" stroke="#0F4C81" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
+                <circle cx={(pts.length-1)*step} cy={pts[pts.length-1]} r="4" fill="#0F4C81" opacity="0.9"/>
               </svg>
             );
           })()}
           {/* Subtle orb */}
-          <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,background:`radial-gradient(circle,rgba(0,102,255,0.12),transparent 65%)`,pointerEvents:"none"}}/>
+          <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,background:`radial-gradient(circle,rgba(15,76,129,0.12),transparent 65%)`,pointerEvents:"none"}}/>
 
           {/* Close button moved outside overflow:hidden — see above */}
 
@@ -2397,13 +2397,13 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             {/* Avatar — clickable to edit if own profile */}
             <div style={{position:"relative",flexShrink:0}}>
               <div onClick={isOwn?()=>setShowAvatarEdit(v=>!v):undefined}
-                style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 3px #fff,0 4px 16px rgba(0,102,255,0.2)`,cursor:isOwn?"pointer":"default",position:"relative"}}>
+                style={{width:72,height:72,borderRadius:20,background:`linear-gradient(135deg,${accent},${accent}77)`,padding:3,boxShadow:`0 0 0 3px #fff,0 4px 16px rgba(15,76,129,0.2)`,cursor:isOwn?"pointer":"default",position:"relative"}}>
                 <div style={{width:"100%",height:"100%",borderRadius:17,background:"#EBF3FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,overflow:"hidden"}}>
                   {user.avatarUrl
                     ? <img src={user.avatarUrl} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
                     : user.emoji}
                 </div>
-                {isOwn && <div style={{position:"absolute",bottom:-2,right:-2,width:20,height:20,borderRadius:6,background:"#0066FF",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff"}}>✎</div>}
+                {isOwn && <div style={{position:"absolute",bottom:-2,right:-2,width:20,height:20,borderRadius:6,background:"#0F4C81",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff"}}>✎</div>}
               </div>
               {!isOwn && <div style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,borderRadius:6,background:"#10B981",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <div style={{width:6,height:6,borderRadius:"50%",background:"#fff"}}/>
@@ -2416,7 +2416,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                     <button onClick={()=>setShowAvatarEdit(false)} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:14}}>✕</button>
                   </div>
                   {/* ── Subir foto real (Supabase Storage) ── */}
-                  <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(0,102,255,0.18)",border:"1.5px dashed rgba(96,165,250,0.6)",borderRadius:9,padding:"8px 4px",cursor:"pointer",color:"#93C5FD",fontSize:12,fontWeight:700,marginBottom:8}}>
+                  <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(15,76,129,0.18)",border:"1.5px dashed rgba(96,165,250,0.6)",borderRadius:9,padding:"8px 4px",cursor:"pointer",color:"#93C5FD",fontSize:12,fontWeight:700,marginBottom:8}}>
                     📷 {lang==="en"?"Upload photo":"Subir foto"}
                     <input type="file" accept="image/jpeg,image/png,image/webp" style={{display:"none"}}
                       onChange={async e=>{
@@ -2533,14 +2533,14 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                     <span style={{fontSize:20,fontWeight:900,color:"#0F172A",letterSpacing:-0.5}}>{user.name}</span>
                     {isOwn && <button onClick={e=>{e.stopPropagation();const dL=getCooldownDaysLeft();setNewNick(user.username||user.name||"");setNickStatus(dL>0?"cooldown":null);setEditingNick(true);}}
                       title={lang==="en"?"Edit username":"Editar nickname"}
-                      style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"3px 7px",color:"#0066FF",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>}
+                      style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:6,padding:"3px 7px",color:"#0F4C81",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>✎</button>}
                   </div>
                 )}
-                {user.badges?.includes("verified")&&<span style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.25)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#0066FF"}}>✓ Verificado</span>}
-                {user.badges?.includes("vip")&&<span style={{background:"rgba(217,119,6,0.1)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#D97706"}}>PREMIUM ✦</span>}
+                {user.badges?.includes("verified")&&<span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.25)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#0F4C81"}}>✓ Verificado</span>}
+                {user.badges?.includes("vip")&&<span style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#0F5E68"}}>PREMIUM ✦</span>}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-                <span style={{background:"rgba(0,102,255,0.1)",border:`1px solid rgba(0,102,255,0.2)`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#0066FF",display:"flex",alignItems:"center",gap:4}}>
+                <span style={{background:"rgba(15,76,129,0.1)",border:`1px solid rgba(15,76,129,0.2)`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#0F4C81",display:"flex",alignItems:"center",gap:4}}>
                   {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
                 </span>
                 <span style={{fontSize:11,color:"#6B7280"}}>{tradeStyle}</span>
@@ -2550,7 +2550,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             {/* Follow button */}
             {currentUser&&currentUser.id!==user.id&&(
               <button onClick={()=>onFollow(user.id)}
-                style={{flexShrink:0,background:isFollowing?"rgba(0,102,255,0.1)":"#0066FF",border:`1.5px solid ${isFollowing?"rgba(0,102,255,0.3)":"#0066FF"}`,borderRadius:10,padding:"8px 18px",cursor:"pointer",color:isFollowing?"#0066FF":"#fff",fontSize:13,fontWeight:700,transition:"all 0.15s",whiteSpace:"nowrap"}}
+                style={{flexShrink:0,background:isFollowing?"rgba(15,76,129,0.1)":"#0F4C81",border:`1.5px solid ${isFollowing?"rgba(15,76,129,0.3)":"#0F4C81"}`,borderRadius:10,padding:"8px 18px",cursor:"pointer",color:isFollowing?"#0F4C81":"#fff",fontSize:13,fontWeight:700,transition:"all 0.15s",whiteSpace:"nowrap"}}
                 onMouseEnter={e=>{ e.currentTarget.style.opacity="0.85"; }}
                 onMouseLeave={e=>{ e.currentTarget.style.opacity="1"; }}>
                 {isFollowing?(lang==="en"?"✓ Following":"✓ Siguiendo"):(lang==="en"?"+ Follow":"+ Seguir")}
@@ -2559,12 +2559,12 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
           </div>
 
           {/* ── QUICK STATS BAR ── */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(0,102,255,0.08)",borderRadius:"14px 14px 0 0",overflow:"hidden",position:"relative",zIndex:2}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(15,76,129,0.08)",borderRadius:"14px 14px 0 0",overflow:"hidden",position:"relative",zIndex:2}}>
             {[
-              {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), color:"#0066FF"},
+              {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), color:"#0F4C81"},
               {label:lang==="en"?"Following":"Siguiendo",  value:fmtNum(displayStats.following),  color:"#6B7280"},
               {label:"Posts",                              value:fmtNum(displayStats.posts),       color:"#16A34A"},
-              {label:"XP",                                 value:fmtNum(displayStats.points),      color:"#D97706"},
+              {label:"XP",                                 value:fmtNum(displayStats.points),      color:"#0F5E68"},
             ].map((s,i)=>(
               <div key={i} style={{padding:"10px 6px",textAlign:"center",background:"rgba(255,255,255,0.5)"}}>
                 <div style={{fontWeight:800,color:s.color,fontSize:16,letterSpacing:"-0.5px"}}>{s.value}</div>
@@ -2583,7 +2583,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             const winRate = Math.round((bars.filter(b=>b>0).length / bars.length) * 100);
             const totalReturn = bars.reduce((a,b)=>a+b,0).toFixed(1);
             return (
-              <div style={{background:"rgba(0,102,255,0.04)",padding:"10px 16px 12px",borderTop:"1px solid rgba(0,102,255,0.08)"}}>
+              <div style={{background:"rgba(15,76,129,0.04)",padding:"10px 16px 12px",borderTop:"1px solid rgba(15,76,129,0.08)"}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
                   <span style={{fontSize:10,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:"0.08em"}}>
                     {lang==="en"?"Pick Performance (8w)":"Rendimiento de picks (8 sem)"}
@@ -2893,9 +2893,9 @@ function CopyLinkBtn({postId, ticker}){
   };
   return(
     <button onClick={copy} title="Copiar enlace"
-      style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:3,color:copied?"#0066FF":"#94A3B8",fontSize:11,fontWeight:600,padding:"4px 8px",borderRadius:7,transition:"all 0.15s"}}
-      onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,102,255,0.07)";e.currentTarget.style.color="#0066FF";}}
-      onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=copied?"#0066FF":"#94A3B8";}}>
+      style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:3,color:copied?"#0F4C81":"#94A3B8",fontSize:11,fontWeight:600,padding:"4px 8px",borderRadius:7,transition:"all 0.15s"}}
+      onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.07)";e.currentTarget.style.color="#0F4C81";}}
+      onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=copied?"#0F4C81":"#94A3B8";}}>
       {copied ? "✓" : "🔗"}
     </button>
   );
@@ -3078,7 +3078,7 @@ function LinkPreviewCard({url}){
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
       style={{display:"block",border:"1px solid var(--c-border)",borderRadius:14,overflow:"hidden",marginBottom:10,textDecoration:"none",background:"var(--c-card2)",transition:"border-color 0.18s, box-shadow 0.18s",boxSizing:"border-box",width:"100%"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(0,102,255,0.4)";e.currentTarget.style.boxShadow="0 4px 16px rgba(0,102,255,0.1)";}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(15,76,129,0.4)";e.currentTarget.style.boxShadow="0 4px 16px rgba(15,76,129,0.1)";}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="none";}}>
 
       {/* Imagen del artículo */}
@@ -3245,12 +3245,12 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6,flexWrap:"wrap"}}>
             <span style={{fontWeight:700,color:"var(--c-text)",fontSize:14,cursor:"pointer",letterSpacing:-0.3}}
               onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
-            {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#000",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
-            {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#D97706,#B45309)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦ PREMIUM</span>}
+            {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",color:"#000",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
+            {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#0F5E68,#B45309)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦ PREMIUM</span>}
             {/* Botón + Seguir (solo si es otro usuario) */}
             {isOtherUser && onFollow && (
               <button onClick={e=>{e.stopPropagation();if(!user){onNeedAuth&&onNeedAuth();return;}onFollow(postUserId||post.user);}}
-                style={{background:isFollowing?"rgba(22,163,74,0.1)":"rgba(0,102,255,0.08)",border:`1px solid ${isFollowing?"rgba(22,163,74,0.3)":"rgba(0,102,255,0.25)"}`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:700,color:isFollowing?"#16A34A":"#0066FF",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+                style={{background:isFollowing?"rgba(22,163,74,0.1)":"rgba(15,76,129,0.08)",border:`1px solid ${isFollowing?"rgba(22,163,74,0.3)":"rgba(15,76,129,0.25)"}`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:700,color:isFollowing?"#16A34A":"#0F4C81",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
                 {isFollowing?"✓ Siguiendo":"+ Seguir"}
               </button>
             )}
@@ -3296,23 +3296,23 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             <svg viewBox="0 0 80 20" style={{width:44,height:13,flexShrink:0}}>
               <polyline points={sparkPts} fill="none" stroke={isBull?"#16A34A":"#DC2626"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.14)",borderRadius:8,padding:"3px 8px"}}>
-              <span style={{fontSize:10,fontWeight:700,color:"#0066FF"}}>🧠 {aiPct}%</span>
+            <div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.14)",borderRadius:8,padding:"3px 8px"}}>
+              <span style={{fontSize:10,fontWeight:700,color:"#0F4C81"}}>🧠 {aiPct}%</span>
             </div>
           </div>
           {/* Tags */}
           {post.tags?.length>0&&<div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
-            {post.tags.map(tg=><span key={tg} style={{background:"rgba(0,102,255,0.07)",color:"#0066FF",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:600,letterSpacing:0.2}}>#{tg}</span>)}
+            {post.tags.map(tg=><span key={tg} style={{background:"rgba(15,76,129,0.07)",color:"#0F4C81",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:600,letterSpacing:0.2}}>#{tg}</span>)}
           </div>}
           {/* Action row */}
           <div className="nexo-action-row" style={{display:"flex",gap:0,alignItems:"center",borderTop:"1px solid var(--c-border)",paddingTop:8,marginTop:4,flexWrap:"wrap"}}>
             {[
               {icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
-              {icon:"💬",val:commentCount,active:showComments,col:"#0066FF",fn:toggleComments},
+              {icon:"💬",val:commentCount,active:showComments,col:"#0F4C81",fn:toggleComments},
             ].map(({icon,val,active,col,fn},i)=>(
               <button key={i} onClick={fn}
                 style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:active?col:"var(--c-muted2)",fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:8,transition:"all 0.15s",fontFamily:"inherit"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,102,255,0.06)";e.currentTarget.style.color=col;}}
+                onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.06)";e.currentTarget.style.color=col;}}
                 onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=active?col:"var(--c-muted2)";}}>
                 <span style={{fontSize:14}}>{icon}</span><span style={{fontVariantNumeric:"tabular-nums"}}>{val}</span>
               </button>
@@ -3488,19 +3488,19 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
           <textarea ref={taRef} value={text} onChange={handleTextChange}
             placeholder={isEN?"What do you think of the market? Use $NVDA or @META · Enter to post":"¿Qué piensas del mercado? Usa $NVDA o @META · Enter para publicar"}
             style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:96,fontFamily:"inherit",lineHeight:1.55,boxSizing:"border-box",transition:"border-color 0.15s",minWidth:0}}
-            onFocus={e=>e.target.style.borderColor="rgba(0,102,255,0.4)"}
+            onFocus={e=>e.target.style.borderColor="rgba(15,76,129,0.4)"}
             onBlur={e=>{e.target.style.borderColor="var(--c-border)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
             onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}/>
           {/* @Mention autocomplete */}
           {mentionBox.open&&(
-            <div style={{position:"absolute",top:100,left:0,right:0,background:"var(--c-card)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.12)",zIndex:200,overflow:"auto",maxHeight:160}}>
+            <div style={{position:"absolute",top:100,left:0,right:0,background:"var(--c-card)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.12)",zIndex:200,overflow:"auto",maxHeight:160}}>
               <div style={{padding:"5px 10px 4px",fontSize:10,color:C.accent,fontWeight:700,letterSpacing:0.8,borderBottom:"1px solid var(--c-border)"}}>MENCIONAR ACTIVO</div>
               {mentionBox.results.map(sym=>(
                 <div key={sym} onMouseDown={()=>insertMention(sym)}
                   style={{display:"flex",alignItems:"center",gap:10,padding:"7px 12px",cursor:"pointer",transition:"background 0.1s"}}
                   onMouseEnter={e=>e.currentTarget.style.background="rgba(26,95,173,0.06)"}
                   onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                  <span style={{background:"rgba(0,102,255,0.08)",color:C.accent,borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace"}}>@{sym}</span>
+                  <span style={{background:"rgba(15,76,129,0.08)",color:C.accent,borderRadius:5,padding:"2px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace"}}>@{sym}</span>
                   <span style={{color:"var(--c-muted)",fontSize:11}}>Mencionar {sym}</span>
                 </div>
               ))}
@@ -3525,9 +3525,9 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
                   onChange={e=>setLink(e.target.value)}
                   placeholder="https://..."
                   autoFocus
-                  style={{flex:1,background:"var(--c-card2)",border:"1px solid rgba(0,102,255,0.25)",borderRadius:8,padding:"7px 11px",fontSize:13,color:"var(--c-text)",outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}
-                  onFocus={e=>e.target.style.borderColor="rgba(0,102,255,0.5)"}
-                  onBlur={e=>e.target.style.borderColor="rgba(0,102,255,0.25)"}
+                  style={{flex:1,background:"var(--c-card2)",border:"1px solid rgba(15,76,129,0.25)",borderRadius:8,padding:"7px 11px",fontSize:13,color:"var(--c-text)",outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}
+                  onFocus={e=>e.target.style.borderColor="rgba(15,76,129,0.5)"}
+                  onBlur={e=>e.target.style.borderColor="rgba(15,76,129,0.25)"}
                 />
                 {link&&<button onClick={()=>setLink("")} style={{background:"none",border:"none",color:"var(--c-muted2)",cursor:"pointer",fontSize:14,padding:"2px 4px",borderRadius:4,flexShrink:0}}>✕</button>}
               </div>
@@ -3552,23 +3552,23 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
                 onMouseLeave={e=>e.currentTarget.style.color="var(--c-muted2)"}>📷</button>
               {/* Media */}
               <button onClick={()=>setShowGif(v=>!v)} title="GIF · Emojis · Stickers"
-                style={{background:showGif?"rgba(217,119,6,0.12)":"none",border:showGif?"1px solid rgba(217,119,6,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#D97706":"var(--c-muted2)",padding:"4px 9px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0}}
-                onMouseEnter={e=>{e.currentTarget.style.color="#D97706";}}
-                onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#D97706":"var(--c-muted2)";}}>
+                style={{background:showGif?"rgba(15,94,104,0.12)":"none",border:showGif?"1px solid rgba(15,94,104,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showGif?"#0F5E68":"var(--c-muted2)",padding:"4px 9px",borderRadius:7,letterSpacing:0.5,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0}}
+                onMouseEnter={e=>{e.currentTarget.style.color="#0F5E68";}}
+                onMouseLeave={e=>{e.currentTarget.style.color=showGif?"#0F5E68":"var(--c-muted2)";}}>
                 <span>🎭</span><span>Media</span>
               </button>
               {/* Link */}
               <button onClick={()=>setShowLink(v=>!v)} title="Agregar enlace"
-                style={{background:showLink||isValidUrl(link)?"rgba(0,102,255,0.1)":"none",border:showLink||isValidUrl(link)?"1px solid rgba(0,102,255,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showLink||isValidUrl(link)?C.accent:"var(--c-muted2)",padding:"4px 9px",borderRadius:7,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0}}
+                style={{background:showLink||isValidUrl(link)?"rgba(15,76,129,0.1)":"none",border:showLink||isValidUrl(link)?"1px solid rgba(15,76,129,0.3)":"none",cursor:"pointer",fontSize:11,fontWeight:800,color:showLink||isValidUrl(link)?C.accent:"var(--c-muted2)",padding:"4px 9px",borderRadius:7,transition:"all 0.15s",display:"flex",alignItems:"center",gap:4,flexShrink:0}}
                 onMouseEnter={e=>{e.currentTarget.style.color=C.accent;}}
                 onMouseLeave={e=>{e.currentTarget.style.color=showLink||isValidUrl(link)?C.accent:"var(--c-muted2)";}}>
                 <span>🔗</span><span>Link</span>
               </button>
               {/* Ticker — input más pequeño en móvil */}
               <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
-                style={{background:"rgba(0,102,255,0.05)",border:"1px solid rgba(0,102,255,0.18)",borderRadius:7,color:C.accent,padding:"5px 7px",fontSize:11,outline:"none",width:64,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1,flexShrink:0}}
-                onFocus={e=>e.target.style.borderColor="rgba(0,102,255,0.45)"}
-                onBlur={e=>e.target.style.borderColor="rgba(0,102,255,0.18)"}/>
+                style={{background:"rgba(15,76,129,0.05)",border:"1px solid rgba(15,76,129,0.18)",borderRadius:7,color:C.accent,padding:"5px 7px",fontSize:11,outline:"none",width:64,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1,flexShrink:0}}
+                onFocus={e=>e.target.style.borderColor="rgba(15,76,129,0.45)"}
+                onBlur={e=>e.target.style.borderColor="rgba(15,76,129,0.18)"}/>
             </div>
             {/* Fila 2: sentimiento + publicar — siempre en su propia línea */}
             <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -3657,7 +3657,7 @@ const STICKERS = [
   {id:"s2", label:"Bearish 🐻",    emoji:"🐻", bg:"linear-gradient(135deg,#dc2626,#b91c1c)", text:"BEARISH"},
   {id:"s3", label:"Moon 🌙",       emoji:"🚀", bg:"linear-gradient(135deg,#7c3aed,#5b21b6)", text:"TO THE MOON"},
   {id:"s4", label:"HODL 💎",       emoji:"💎", bg:"linear-gradient(135deg,#0891b2,#0e7490)", text:"HODL"},
-  {id:"s5", label:"Buy the dip",   emoji:"📉", bg:"linear-gradient(135deg,#d97706,#b45309)", text:"BUY THE DIP"},
+  {id:"s5", label:"Buy the dip",   emoji:"📉", bg:"linear-gradient(135deg,#0F5E68,#b45309)", text:"BUY THE DIP"},
   {id:"s6", label:"Profits 💰",    emoji:"💰", bg:"linear-gradient(135deg,#059669,#047857)", text:"TAKING PROFITS"},
   {id:"s7", label:"Rekt 😭",       emoji:"😭", bg:"linear-gradient(135deg,#9f1239,#881337)", text:"REKT"},
   {id:"s8", label:"LFG! ⚡",       emoji:"⚡", bg:"linear-gradient(135deg,#ea580c,#c2410c)", text:"LFG!"},
@@ -3714,7 +3714,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
           <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>
             {TAGS.map(tag=>{const w=tag.split(" ").pop();return(
               <button key={tag} onClick={()=>{setQ(w);search(w);}}
-                style={{background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:20,padding:"2px 9px",fontSize:10,cursor:"pointer",color:C.accentText,fontWeight:600}}>{tag}</button>
+                style={{background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"2px 9px",fontSize:10,cursor:"pointer",color:C.accentText,fontWeight:600}}>{tag}</button>
             );})}
           </div>
           {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ Buscando GIFs...</div>:(
@@ -3799,7 +3799,7 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
   return(
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden",marginBottom:20}}>
       {/* Header — clic para expandir/colapsar */}
-      <div onClick={()=>setOpen(o=>!o)} style={{padding:"13px 18px",background:"linear-gradient(135deg,rgba(217,119,6,0.07),rgba(0,102,255,0.04))",borderBottom:open?`1px solid ${C.border}`:"none",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",userSelect:"none"}}>
+      <div onClick={()=>setOpen(o=>!o)} style={{padding:"13px 18px",background:"linear-gradient(135deg,rgba(15,94,104,0.07),rgba(15,76,129,0.04))",borderBottom:open?`1px solid ${C.border}`:"none",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",userSelect:"none"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <span style={{fontSize:17}}>🧭</span>
           <div>
@@ -3809,8 +3809,8 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
         </div>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {isPremium
-            ? <span style={{background:"linear-gradient(135deg,#D97706,#B45309)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ PREMIUM</span>
-            : <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}}>✦ PREMIUM</button>
+            ? <span style={{background:"linear-gradient(135deg,#0F5E68,#B45309)",color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800}}>✦ PREMIUM</span>
+            : <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}}>✦ PREMIUM</button>
           }
           {/* Flecha animada */}
           <span style={{fontSize:16,color:C.muted,display:"inline-block",transition:"transform 0.25s",transform:open?"rotate(180deg)":"rotate(0deg)",lineHeight:1}}>▾</span>
@@ -3846,11 +3846,11 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
                   ):(
                     <>
                       {/* Bloqueado */}
-                      <div style={{background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:20,padding:"4px 14px",fontSize:11,fontWeight:800,color:"#D97706",flexShrink:0,display:"flex",alignItems:"center",gap:5}}>
+                      <div style={{background:"rgba(15,94,104,0.08)",border:"1px solid rgba(15,94,104,0.2)",borderRadius:20,padding:"4px 14px",fontSize:11,fontWeight:800,color:"#0F5E68",flexShrink:0,display:"flex",alignItems:"center",gap:5}}>
                         🔒 Premium
                       </div>
-                      <div style={{flex:1,height:8,background:`repeating-linear-gradient(90deg,rgba(217,119,6,0.1) 0px,rgba(217,119,6,0.1) 8px,transparent 8px,transparent 14px)`,borderRadius:20}}/>
-                      <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{fontSize:10,fontWeight:700,color:"#D97706",background:"transparent",border:"none",cursor:"pointer",whiteSpace:"nowrap",textDecoration:"underline"}}>Ver →</button>
+                      <div style={{flex:1,height:8,background:`repeating-linear-gradient(90deg,rgba(15,94,104,0.1) 0px,rgba(15,94,104,0.1) 8px,transparent 8px,transparent 14px)`,borderRadius:20}}/>
+                      <button onClick={e=>{e.stopPropagation();onNeedPremium();}} style={{fontSize:10,fontWeight:700,color:"#0F5E68",background:"transparent",border:"none",cursor:"pointer",whiteSpace:"nowrap",textDecoration:"underline"}}>Ver →</button>
                     </>
                   )}
                 </div>
@@ -3858,9 +3858,9 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
             })}
           </div>
           {!isPremium&&(
-            <div style={{padding:"12px 18px",background:"linear-gradient(135deg,rgba(217,119,6,0.06),rgba(245,158,11,0.04))",borderTop:`1px solid ${C.border}`,textAlign:"center"}}>
+            <div style={{padding:"12px 18px",background:"linear-gradient(135deg,rgba(15,94,104,0.06),rgba(245,158,11,0.04))",borderTop:`1px solid ${C.border}`,textAlign:"center"}}>
               <span style={{fontSize:12,color:C.muted}}>Desbloquea el sentimiento histórico completo con </span>
-              <span onClick={onNeedPremium} style={{fontSize:12,color:"#D97706",fontWeight:800,cursor:"pointer"}}>NexoTrade PREMIUM ✦</span>
+              <span onClick={onNeedPremium} style={{fontSize:12,color:"#0F5E68",fontWeight:800,cursor:"pointer"}}>NexoTrade PREMIUM ✦</span>
             </div>
           )}
         </>
@@ -3924,7 +3924,7 @@ function TVChart({ticker}){
 
   if(status==="loading") return(
     <div style={{height:260,display:"flex",alignItems:"center",justifyContent:"center",background:"#f8fafc",gap:10}}>
-      <div style={{width:20,height:20,border:"2.5px solid #e2e8f0",borderTopColor:"#0066FF",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
+      <div style={{width:20,height:20,border:"2.5px solid #e2e8f0",borderTopColor:"#0F4C81",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
       <span style={{color:"#94a3b8",fontSize:12}}>Cargando {ticker}...</span>
     </div>
   );
@@ -3934,7 +3934,7 @@ function TVChart({ticker}){
       <span style={{fontSize:36}}>📊</span>
       <span style={{color:"#64748b",fontSize:13,fontWeight:600}}>Sin datos para {ticker}</span>
       <a href={`https://finance.yahoo.com/quote/${ticker}`} target="_blank" rel="noopener noreferrer"
-        style={{color:"#0066FF",fontSize:12,fontWeight:700,textDecoration:"none",background:"rgba(0,102,255,0.08)",padding:"7px 18px",borderRadius:8,border:"1px solid rgba(0,102,255,0.2)"}}>
+        style={{color:"#0F4C81",fontSize:12,fontWeight:700,textDecoration:"none",background:"rgba(15,76,129,0.08)",padding:"7px 18px",borderRadius:8,border:"1px solid rgba(15,76,129,0.2)"}}>
         Ver en Yahoo Finance →
       </a>
     </div>
@@ -4072,9 +4072,9 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",borderBottom:showChart?`1px solid ${C.border}`:"none"}}>
           <span style={{fontWeight:700,fontSize:13,color:C.text}}>📊 Gráfico ${ticker}</span>
           <button onClick={()=>setShowChart(v=>!v)}
-            style={{background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:8,padding:"5px 14px",cursor:"pointer",color:"#0066FF",fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5,transition:"all 0.15s"}}
-            onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.15)"}
-            onMouseLeave={e=>e.currentTarget.style.background="rgba(0,102,255,0.08)"}>
+            style={{background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"5px 14px",cursor:"pointer",color:"#0F4C81",fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5,transition:"all 0.15s"}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.15)"}
+            onMouseLeave={e=>e.currentTarget.style.background="rgba(15,76,129,0.08)"}>
             {showChart ? "▲ Ocultar" : "▼ Mostrar"}
           </button>
         </div>
@@ -4258,9 +4258,9 @@ function TopsPage({posts=[]}){
               const lvl=getLevel(u.pts);
               const bullPct=u.bull+u.bear>0?Math.round(u.bull/(u.bull+u.bear)*100):50;
               return(
-                <div key={u.user} style={{background:i===0?`linear-gradient(135deg,rgba(217,119,6,0.06),rgba(245,158,11,0.03))`:C.surface,border:`1px solid ${i===0?"rgba(217,119,6,0.25)":C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:8,display:"flex",alignItems:"center",gap:12,transition:"all 0.15s"}}
+                <div key={u.user} style={{background:i===0?`linear-gradient(135deg,rgba(15,94,104,0.06),rgba(245,158,11,0.03))`:C.surface,border:`1px solid ${i===0?"rgba(15,94,104,0.25)":C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:8,display:"flex",alignItems:"center",gap:12,transition:"all 0.15s"}}
                   onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor=i===0?"rgba(217,119,6,0.25)":C.border;e.currentTarget.style.boxShadow="none";}}>
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor=i===0?"rgba(15,94,104,0.25)":C.border;e.currentTarget.style.boxShadow="none";}}>
                   <span style={{fontWeight:900,fontSize:i<3?22:15,width:28,textAlign:"center",flexShrink:0}}>{medals[i]||<span style={{color:C.muted2}}>{i+1}</span>}</span>
                   <InitialsAvatar name={u.user} color={u.color} size={38}/>
                   <div style={{flex:1,minWidth:0}}>
@@ -4385,7 +4385,7 @@ function NoticiasPage({lang}){
               {n.image&&<img src={n.image} alt="" style={{width:72,height:52,objectFit:"cover",borderRadius:8,flexShrink:0,background:"#F1F5F9"}} onError={e=>{e.target.style.display="none";}}/>}
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
-                  <span style={{background:cat==="crypto"?"rgba(245,158,11,0.1)":cat==="forex"?"rgba(22,163,74,0.1)":cat==="merger"?"rgba(217,119,6,0.08)":C.accentDim,color:cat==="crypto"?"#D97706":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accentText,borderRadius:5,padding:"2px 8px",fontSize:10.5,fontWeight:700}}>{n.source}</span>
+                  <span style={{background:cat==="crypto"?"rgba(245,158,11,0.1)":cat==="forex"?"rgba(22,163,74,0.1)":cat==="merger"?"rgba(15,94,104,0.08)":C.accentDim,color:cat==="crypto"?"#0F5E68":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accentText,borderRadius:5,padding:"2px 8px",fontSize:10.5,fontWeight:700}}>{n.source}</span>
                   {n.related&&n.related.trim()&&<span style={{background:"rgba(0,0,0,0.04)",color:C.muted,borderRadius:4,padding:"2px 6px",fontSize:10.5,fontFamily:"monospace",fontWeight:600}}>{n.related.split(",")[0]}</span>}
                   <span style={{color:C.muted2,fontSize:10.5,marginLeft:"auto"}}>{timeAgo(n.datetime)}</span>
                 </div>
@@ -4405,8 +4405,8 @@ function NoticiasPage({lang}){
 // CoinGecko IDs para los 4 crypto principales (API gratis, sin key)
 const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
 const TICKER_DATA_INIT = [
-  {s:"SPY",   n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0066FF", cg:null, fh:"SPY"},
-  {s:"QQQ",   n:"Nasdaq ETF", p:485.2,  c:+0.30,  col:"#6366f1", cg:null, fh:"QQQ"},
+  {s:"SPY",   n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0F4C81", cg:null, fh:"SPY"},
+  {s:"QQQ",   n:"Nasdaq ETF", p:485.2,  c:+0.30,  col:"#0F5E68", cg:null, fh:"QQQ"},
   {s:"NVDA",  n:"NVIDIA",     p:135.4,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
   {s:"AAPL",  n:"Apple",      p:213.5,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
   {s:"TSLA",  n:"Tesla",      p:352.8,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
@@ -4520,7 +4520,7 @@ function MarketsMiniWidget({ lang="es" }){
       <div style={{display:"flex",borderBottom:"1px solid var(--c-border)",padding:"0 8px"}}>
         {[["mercados", isEN?"📈 Markets":"📈 Mercados"],["predicciones", isEN?"🎯 Predictions":"🎯 Predicciones"],["tendencias","🔥 Trending"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
-            style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#0066FF":"transparent"}`,background:"transparent",color:tab===k?"#0066FF":"var(--c-muted)",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#0F4C81":"transparent"}`,background:"transparent",color:tab===k?"#0F4C81":"var(--c-muted)",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
             {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
           </button>
         ))}
@@ -4577,7 +4577,7 @@ function MarketsMiniWidget({ lang="es" }){
             </div>
           ))}
           <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer"
-            style={{textAlign:"center",color:"#6366f1",fontSize:10,fontWeight:700,textDecoration:"none",marginTop:2}}>
+            style={{textAlign:"center",color:"#0F5E68",fontSize:10,fontWeight:700,textDecoration:"none",marginTop:2}}>
             View all on Polymarket →
           </a>
         </div>
@@ -4589,7 +4589,7 @@ function MarketsMiniWidget({ lang="es" }){
           {MOCK_TRENDING.map((t,i)=>(
             <div key={t.ticker} style={{display:"flex",alignItems:"center",gap:8}}>
               <span style={{color:"#334155",fontWeight:800,fontSize:10,minWidth:14}}>{i+1}</span>
-              <span style={{fontFamily:"monospace",fontWeight:800,fontSize:10,color:"#0066FF",minWidth:42}}>${t.ticker}</span>
+              <span style={{fontFamily:"monospace",fontWeight:800,fontSize:10,color:"#0F4C81",minWidth:42}}>${t.ticker}</span>
               <div style={{flex:1,height:3,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
                 <div style={{height:"100%",width:`${t.sentiment}%`,background:t.change>=0?"#22c55e":"#ef4444",borderRadius:4}}/>
               </div>
@@ -4731,7 +4731,7 @@ function SidebarTickerWidget(){
       ))}
       <div style={{padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <a href="https://www.tradingview.com/pricing/?aff_id=167149&aff_sub=nexotrade&source=nexotrade" target="_blank" rel="noopener noreferrer"
-          style={{color:"#0066FF",fontSize:11,fontWeight:600,textDecoration:"none"}}>Ver gráficos →</a>
+          style={{color:"#0F4C81",fontSize:11,fontWeight:600,textDecoration:"none"}}>Ver gráficos →</a>
         {lastUpdate&&<span style={{color:"#334155",fontSize:9}}>
           {lastUpdate.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})}
         </span>}
@@ -4788,7 +4788,7 @@ function EarningsPage({lang}){
   const getImpact=(t)=>HIGH_IMPACT.has(t)?"Alto":MED_IMPACT.has(t)?"Medio":"Bajo";
   const impactColor=(imp)=>imp==="Alto"?"#EF4444":imp==="Medio"?"#F59E0B":"#94A3B8";
   const tickerBg=(t)=>{
-    const cols=["#1E3A5F","#7C2D12","#065F46","#4C1D95","#1E3A8A","#D97706","#B45309","#0047C2","#9D174D","#064E3B"];
+    const cols=["#1E3A5F","#7C2D12","#065F46","#4C1D95","#1E3A8A","#0F5E68","#B45309","#0047C2","#9D174D","#064E3B"];
     let h=0; for(const c of t) h=(h*31+c.charCodeAt(0))%cols.length;
     return cols[h];
   };
@@ -4931,17 +4931,17 @@ function EarningsPage({lang}){
                 const isSel=dStr===selDay;
                 return(
                   <div key={day} onClick={()=>{if(hasEar){setSelDay(dStr);setShowAll(false);}}}
-                    style={{textAlign:"center",padding:"4px 1px",borderRadius:7,cursor:hasEar?"pointer":"default",background:isSel?"#0066FF":isT?"rgba(0,102,255,0.12)":"transparent"}}
-                    onMouseEnter={e=>{if(!isSel&&hasEar)e.currentTarget.style.background="rgba(0,102,255,0.08)";}}
-                    onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isT?"rgba(0,102,255,0.12)":"transparent";}}>
-                    <div style={{fontSize:11,fontWeight:isSel||isT?800:400,color:isSel?"#fff":isT?"#0066FF":C.text,lineHeight:"18px"}}>{day}</div>
+                    style={{textAlign:"center",padding:"4px 1px",borderRadius:7,cursor:hasEar?"pointer":"default",background:isSel?"#0F4C81":isT?"rgba(15,76,129,0.12)":"transparent"}}
+                    onMouseEnter={e=>{if(!isSel&&hasEar)e.currentTarget.style.background="rgba(15,76,129,0.08)";}}
+                    onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isT?"rgba(15,76,129,0.12)":"transparent";}}>
+                    <div style={{fontSize:11,fontWeight:isSel||isT?800:400,color:isSel?"#fff":isT?"#0F4C81":C.text,lineHeight:"18px"}}>{day}</div>
                     {hasEar&&(
                       <div style={{display:"flex",justifyContent:"center",gap:"2px",marginTop:1}}>
                         {cnt>=3
                           ?[["#EF4444"],["#F59E0B"],["#10B981"]].map(([c],ci)=><div key={ci} style={{width:4,height:4,borderRadius:"50%",background:isSel?"rgba(255,255,255,0.8)":c}}/>)
                           :cnt===2
                           ?[["#EF4444"],["#F59E0B"]].map(([c],ci)=><div key={ci} style={{width:4,height:4,borderRadius:"50%",background:isSel?"rgba(255,255,255,0.8)":c}}/>)
-                          :<div style={{width:4,height:4,borderRadius:"50%",background:isSel?"rgba(255,255,255,0.8)":"#0066FF"}}/>}
+                          :<div style={{width:4,height:4,borderRadius:"50%",background:isSel?"rgba(255,255,255,0.8)":"#0F4C81"}}/>}
                       </div>
                     )}
                   </div>
@@ -4961,15 +4961,15 @@ function EarningsPage({lang}){
                   style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:idx<upcomingUniq.length-1?`1px solid ${C.border}`:"none",cursor:"pointer",transition:"opacity 0.15s"}}
                   onMouseEnter={ev=>ev.currentTarget.style.opacity="0.7"}
                   onMouseLeave={ev=>ev.currentTarget.style.opacity="1"}>
-                  <div style={{width:34,height:34,borderRadius:8,background:isT?"rgba(0,102,255,0.1)":C.card2,border:`1px solid ${C.border}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                    <div style={{fontSize:12,fontWeight:900,color:isT?"#0066FF":C.text,lineHeight:1}}>{d.getDate()}</div>
+                  <div style={{width:34,height:34,borderRadius:8,background:isT?"rgba(15,76,129,0.1)":C.card2,border:`1px solid ${C.border}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <div style={{fontSize:12,fontWeight:900,color:isT?"#0F4C81":C.text,lineHeight:1}}>{d.getDate()}</div>
                     <div style={{fontSize:8,color:C.muted,fontWeight:600}}>{MONTH_NAMES[d.getMonth()].slice(0,3)}</div>
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontWeight:800,fontSize:12,color:C.text,fontFamily:"monospace"}}>{e.ticker}</div>
                     <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
                   </div>
-                  <div style={{fontSize:9,color:e.horaRaw==="bmo"?"#0066FF":"#FCD34D",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>{e.horaRaw==="bmo"?"Before":"After"}</div>
+                  <div style={{fontSize:9,color:e.horaRaw==="bmo"?"#0F4C81":"#FCD34D",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>{e.horaRaw==="bmo"?"Before":"After"}</div>
                 </div>
               );
             })}
@@ -4988,7 +4988,7 @@ function EarningsPage({lang}){
               {/* Hora filter */}
               <div style={{display:"flex",background:C.card,border:`1px solid ${C.border}`,borderRadius:10,overflow:"hidden"}}>
                 {[{k:"all",l:"Todas"},{k:"bmo",l:"Before open"},{k:"amc",l:"After close"}].map(f=>(
-                  <button key={f.k} onClick={()=>setHoraFilter(f.k)} style={{padding:"7px 13px",fontSize:11,fontWeight:700,border:"none",cursor:"pointer",background:horaFilter===f.k?"#0066FF":"transparent",color:horaFilter===f.k?"#fff":C.muted,transition:"all 0.15s",whiteSpace:"nowrap"}}>{f.l}</button>
+                  <button key={f.k} onClick={()=>setHoraFilter(f.k)} style={{padding:"7px 13px",fontSize:11,fontWeight:700,border:"none",cursor:"pointer",background:horaFilter===f.k?"#0F4C81":"transparent",color:horaFilter===f.k?"#fff":C.muted,transition:"all 0.15s",whiteSpace:"nowrap"}}>{f.l}</button>
                 ))}
               </div>
               {/* Search */}
@@ -5010,7 +5010,7 @@ function EarningsPage({lang}){
               {icon:"📅",l:"REPORTAN HOY",v:selDayAll.length,c:C.text,mono:true},
               {icon:"🔴",l:"ALTO IMPACTO",v:highImpactCount,c:"#EF4444",mono:true},
               {icon:"📈",l:"CONSENSO ALCISTA",v:`${avgBull}%`,c:avgBull>=60?"#10B981":avgBull>=40?"#F59E0B":"#EF4444",mono:true},
-              {icon:"⏰",l:"PRÓXIMO CALL",v:nextCall?`${nextCall.ticker} · ${nextCall.horaRaw==="bmo"?"Pre-mkt":"4PM"}`:"—",c:"#0066FF",mono:false},
+              {icon:"⏰",l:"PRÓXIMO CALL",v:nextCall?`${nextCall.ticker} · ${nextCall.horaRaw==="bmo"?"Pre-mkt":"4PM"}`:"—",c:"#0F4C81",mono:false},
             ].map(s=>(
               <div key={s.l} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px"}}>
                 <div style={{fontSize:9,color:C.muted,fontWeight:700,letterSpacing:0.7,textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
@@ -5055,7 +5055,7 @@ function EarningsPage({lang}){
                 <div key={`${e.ticker}-${e.rawDate}`}
                   onClick={()=>setSelEarning(e)}
                   style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default"}}
-                  onMouseEnter={ev=>ev.currentTarget.style.background="rgba(0,102,255,0.04)"}
+                  onMouseEnter={ev=>ev.currentTarget.style.background="rgba(15,76,129,0.04)"}
                   onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
                   {/* Star */}
                   <div onClick={()=>setFavorites(f=>{const s=new Set(f);isFav?s.delete(e.ticker):s.add(e.ticker);return s;})}
@@ -5074,7 +5074,7 @@ function EarningsPage({lang}){
                   </div>
                   {/* Hora badge */}
                   <div>
-                    <span style={{background:e.horaRaw==="bmo"?"rgba(0,102,255,0.12)":"rgba(217,119,6,0.14)",color:e.horaRaw==="bmo"?"#0066FF":"#D97706",border:`1px solid ${e.horaRaw==="bmo"?"rgba(0,102,255,0.35)":"rgba(217,119,6,0.5)"}`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap"}}>
+                    <span style={{background:e.horaRaw==="bmo"?"rgba(15,76,129,0.12)":"rgba(15,94,104,0.14)",color:e.horaRaw==="bmo"?"#0F4C81":"#0F5E68",border:`1px solid ${e.horaRaw==="bmo"?"rgba(15,76,129,0.35)":"rgba(15,94,104,0.5)"}`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap"}}>
                       {e.hora}
                     </span>
                   </div>
@@ -5148,7 +5148,7 @@ function EarningsPage({lang}){
             {/* Ver más */}
             {!showAll&&selFiltered.length>30&&(
               <button onClick={()=>setShowAll(true)}
-                style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:`1px solid ${C.border}`,cursor:"pointer",color:"#0066FF",fontSize:12,fontWeight:700}}>
+                style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:`1px solid ${C.border}`,cursor:"pointer",color:"#0F4C81",fontSize:12,fontWeight:700}}>
                 + {isEN?`See ${selFiltered.length-30} more companies for this day`:`Ver ${selFiltered.length-30} empresas más de este día`}
               </button>
             )}
@@ -5370,7 +5370,7 @@ function LiveConferenceModal({event, lang, onClose}){
                       ▶ Ver en YouTube
                     </a>
                     <a href={event.ir_url} target="_blank" rel="noopener noreferrer"
-                      style={{display:"flex",alignItems:"center",gap:7,background:"rgba(0,102,255,0.12)",border:"1px solid rgba(0,102,255,0.4)",borderRadius:12,padding:"10px 20px",color:"#0066FF",fontWeight:800,fontSize:13,textDecoration:"none"}}>
+                      style={{display:"flex",alignItems:"center",gap:7,background:"rgba(15,76,129,0.12)",border:"1px solid rgba(15,76,129,0.4)",borderRadius:12,padding:"10px 20px",color:"#0F4C81",fontWeight:800,fontSize:13,textDecoration:"none"}}>
                       🏢 Investor Relations
                     </a>
                   </div>
@@ -5404,7 +5404,7 @@ function LiveConferenceModal({event, lang, onClose}){
             <div style={{flex:1,overflowY:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:10}}>
               {chatLog.map((c,i)=>(
                 <div key={i} style={{display:"flex",gap:8}}>
-                  <InitialsAvatar name={c.user} color={"#0066FF"} size={24}/>
+                  <InitialsAvatar name={c.user} color={"#0F4C81"} size={24}/>
                   <div>
                     <div style={{display:"flex",alignItems:"baseline",gap:6}}>
                       <span style={{color:"#00c49a",fontSize:11,fontWeight:700}}>{c.user}</span>
@@ -5563,7 +5563,7 @@ function NexoTermometro() {
 const ALL_MOVERS_POOL = [
   {ticker:"ORCL",name:"Oracle Corp.",sector:"Cloud/IA",bull:88,bear:12,why:"Earnings Q4 sorpresa positiva. Contratos cloud con OpenAI anunciados. Volumen 8x el promedio.",volX:8,volLabel:"18.4M",badge:"VIRAL",badgeColor:"#EF4444",badgeIcon:"🔥",flames:3,fallbackPrice:248.15,fallbackChg:9.91},
   {ticker:"NVDA",name:"NVIDIA Corp.",sector:"Semiconductores/IA",bull:82,bear:18,why:"Nuevo contrato con Microsoft Azure para chips H200. Golden Sweep $4.1M detectado. Demanda record de Blackwell.",volX:5,volLabel:"58M",badge:"GOLDEN",badgeColor:"#F59E0B",badgeIcon:"⭐",flames:2,fallbackPrice:224.36,fallbackChg:6.26},
-  {ticker:"TSLA",name:"Tesla Inc.",sector:"EV/Auto",bull:41,bear:59,why:"Volumen vendedor institucional. Preocupación por márgenes Q2. Analistas recortan precio objetivo a $190.",volX:4,volLabel:"92M",badge:"BAJISTA",badgeColor:"#6366F1",badgeIcon:"📉",flames:2,fallbackPrice:332.18,fallbackChg:-4.12},
+  {ticker:"TSLA",name:"Tesla Inc.",sector:"EV/Auto",bull:41,bear:59,why:"Volumen vendedor institucional. Preocupación por márgenes Q2. Analistas recortan precio objetivo a $190.",volX:4,volLabel:"92M",badge:"BAJISTA",badgeColor:"#0F5E68",badgeIcon:"📉",flames:2,fallbackPrice:332.18,fallbackChg:-4.12},
   {ticker:"AMZN",name:"Amazon.com",sector:"E-Commerce/Cloud",bull:76,bear:24,why:"AWS acelera crecimiento. Analistas elevan precio objetivo a $280. Flujo institucional alcista detectado.",volX:4,volLabel:"31M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:2,fallbackPrice:261.26,fallbackChg:3.47},
   {ticker:"AAPL",name:"Apple Inc.",sector:"Tech/Hardware",bull:52,bear:48,why:"Rumores de retraso en iPhone 18. Analistas reducen precio objetivo. Soporte clave en $300 en la mira.",volX:3,volLabel:"24M",badge:"ATENCIÓN",badgeColor:"#F59E0B",badgeIcon:"⚠️",flames:2,fallbackPrice:306.21,fallbackChg:-1.84},
   {ticker:"META",name:"Meta Platforms",sector:"Social/IA",bull:84,bear:16,why:"Llama 4 supera benchmarks. Ingresos publicitarios Q2 baten estimados. Institucionales compran agresivo.",volX:6,volLabel:"21M",badge:"VIRAL",badgeColor:"#EF4444",badgeIcon:"🔥",flames:3,fallbackPrice:712.45,fallbackChg:5.83},
@@ -5660,7 +5660,7 @@ function TrendingPage({posts=[]}){
         </span>
         {/* Refresh button */}
         <button onClick={()=>fetchQuotes(true)} disabled={refreshing||loading}
-          style={{display:"flex",alignItems:"center",gap:5,background:refreshing?"rgba(0,102,255,0.15)":"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:20,padding:"4px 13px",fontSize:11,fontWeight:700,color:"#0066FF",cursor:refreshing?"not-allowed":"pointer",transition:"all 0.2s"}}>
+          style={{display:"flex",alignItems:"center",gap:5,background:refreshing?"rgba(15,76,129,0.15)":"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:20,padding:"4px 13px",fontSize:11,fontWeight:700,color:"#0F4C81",cursor:refreshing?"not-allowed":"pointer",transition:"all 0.2s"}}>
           <span style={{display:"inline-block",animation:refreshing?"spin 0.7s linear infinite":"none",fontSize:12}}>🔄</span>
           {refreshing?"Actualizando…":"Refrescar"}
         </button>
@@ -5782,21 +5782,21 @@ function VipFeedCard({onGoVIP}){
   return(
     <div onClick={onGoVIP} style={{
       background:"linear-gradient(135deg,#0F0A2E,#1A0A3D,#0D1A3D)",
-      border:"1.5px solid rgba(217,119,6,0.5)",
+      border:"1.5px solid rgba(15,94,104,0.5)",
       borderRadius:18,
       padding:"18px 20px",
       margin:"8px 0",
       cursor:"pointer",
       position:"relative",
       overflow:"hidden",
-      boxShadow:"0 4px 24px rgba(217,119,6,0.2)",
+      boxShadow:"0 4px 24px rgba(15,94,104,0.2)",
     }}>
       {/* Fondo decorativo */}
-      <div style={{position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",background:"rgba(217,119,6,0.12)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",background:"rgba(15,94,104,0.12)",pointerEvents:"none"}}/>
 
       {/* Badge */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <span style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:0.8}}>✦ NEXO PREMIUM</span>
+        <span style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:0.8}}>✦ NEXO PREMIUM</span>
         <span style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>Oferta especial</span>
       </div>
 
@@ -5811,12 +5811,12 @@ function VipFeedCard({onGoVIP}){
       {/* Features */}
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {["📊 Picks PREMIUM","🔔 Alertas","💬 Sala privada","📅 Earnings"].map(f=>(
-          <span key={f} style={{background:"rgba(217,119,6,0.15)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"rgba(255,255,255,0.7)",fontWeight:600}}>{f}</span>
+          <span key={f} style={{background:"rgba(15,94,104,0.15)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"rgba(255,255,255,0.7)",fontWeight:600}}>{f}</span>
         ))}
       </div>
 
       {/* CTA */}
-      <div style={{background:"linear-gradient(135deg,#D97706,#6366F1)",borderRadius:12,padding:"11px 20px",textAlign:"center",color:"#fff",fontWeight:900,fontSize:14,boxShadow:"0 4px 16px rgba(217,119,6,0.5)"}}>
+      <div style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",borderRadius:12,padding:"11px 20px",textAlign:"center",color:"#fff",fontWeight:900,fontSize:14,boxShadow:"0 4px 16px rgba(15,94,104,0.5)"}}>
         ✦ Hazte PREMIUM — Solo $9.99/mes →
       </div>
     </div>
@@ -5874,9 +5874,9 @@ function SponsoredPostCard({sp}){
   return(
     <a href={sp.url} target="_blank" rel="noopener noreferrer"
       style={{display:"flex",alignItems:"center",gap:10,background:"#F9FAFB",border:"1px solid rgba(0,0,0,0.07)",borderRadius:12,padding:"10px 14px",margin:"6px 0",textDecoration:"none",transition:"all 0.15s",cursor:"pointer"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor=(sp.brandColor||"#0066FF")+"55";e.currentTarget.style.background=(sp.brandColor||"#0066FF")+"08";}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor=(sp.brandColor||"#0F4C81")+"55";e.currentTarget.style.background=(sp.brandColor||"#0F4C81")+"08";}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(0,0,0,0.07)";e.currentTarget.style.background="#F9FAFB";}}>
-      <div style={{width:34,height:34,borderRadius:9,background:(sp.brandColor||"#0066FF")+"18",border:`1px solid ${(sp.brandColor||"#0066FF")}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{sp.logo}</div>
+      <div style={{width:34,height:34,borderRadius:9,background:(sp.brandColor||"#0F4C81")+"18",border:`1px solid ${(sp.brandColor||"#0F4C81")}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{sp.logo}</div>
       <div style={{flex:1,minWidth:0}}>
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:1}}>
           <span style={{fontWeight:700,fontSize:12,color:"#0F172A"}}>{sp.brand}</span>
@@ -5884,7 +5884,7 @@ function SponsoredPostCard({sp}){
         </div>
         <div style={{fontSize:11,color:"#64748B",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{sp.text}</div>
       </div>
-      <span style={{fontSize:11,color:sp.brandColor||"#0066FF",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>{sp.cta} →</span>
+      <span style={{fontSize:11,color:sp.brandColor||"#0F4C81",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>{sp.cta} →</span>
       <button onClick={e=>{e.preventDefault();e.stopPropagation();setDismissed(true);}} style={{background:"none",border:"none",color:"#94A3B8",fontSize:16,cursor:"pointer",lineHeight:1,padding:"2px 4px",flexShrink:0}}>×</button>
     </a>
   );
@@ -5902,13 +5902,13 @@ function VipPopup({onClose, onGoVIP}){
     }} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{
         background:"linear-gradient(160deg,#0F0A2E,#1A0A3D,#0D1A3D)",
-        border:"1.5px solid rgba(217,119,6,0.5)",
+        border:"1.5px solid rgba(15,94,104,0.5)",
         borderRadius:24,
         padding:"28px 24px",
         maxWidth:380,
         width:"100%",
         position:"relative",
-        boxShadow:"0 8px 40px rgba(217,119,6,0.35)",
+        boxShadow:"0 8px 40px rgba(15,94,104,0.35)",
       }}>
         {/* Cerrar */}
         <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"transparent",border:"none",color:"rgba(255,255,255,0.4)",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
@@ -5948,10 +5948,10 @@ function VipPopup({onClose, onGoVIP}){
         </div>
 
         <div onClick={onGoVIP} style={{
-          background:"linear-gradient(135deg,#D97706,#6366F1)",
+          background:"linear-gradient(135deg,#0F5E68,#0F5E68)",
           borderRadius:14,padding:"14px 20px",textAlign:"center",
           color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",
-          boxShadow:"0 4px 20px rgba(217,119,6,0.5)",
+          boxShadow:"0 4px 20px rgba(15,94,104,0.5)",
           letterSpacing:0.2,
         }}>
           ✦ Empezar ahora →
@@ -6129,15 +6129,15 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <div style={{display:"inline-flex",background:"rgba(0,0,0,0.3)",borderRadius:14,padding:4,gap:4,marginBottom:16,border:"1px solid rgba(255,255,255,0.08)"}}>
                   <button onClick={()=>setBilling("monthly")}
                     style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:700,transition:"all 0.2s",
-                      background: billing==="monthly" ? "rgba(0,102,255,0.3)" : "transparent",
+                      background: billing==="monthly" ? "rgba(15,76,129,0.3)" : "transparent",
                       color: billing==="monthly" ? "#fff" : "#64748B"}}>
                     {lang==="en"?"Monthly":"Mensual"} <span style={{opacity:0.7}}>$9.99</span>
                   </button>
                   <button onClick={()=>setBilling("annual")}
                     style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:800,transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,
-                      background: billing==="annual" ? "linear-gradient(135deg,#D97706,#6366F1)" : "transparent",
+                      background: billing==="annual" ? "linear-gradient(135deg,#0F5E68,#0F5E68)" : "transparent",
                       color: billing==="annual" ? "#fff" : "#64748B",
-                      boxShadow: billing==="annual" ? "0 2px 12px rgba(217,119,6,0.4)" : "none"}}>
+                      boxShadow: billing==="annual" ? "0 2px 12px rgba(15,94,104,0.4)" : "none"}}>
                     {lang==="en"?"Annual":"Anual"} <span style={{opacity:0.9}}>$79</span>
                     <span style={{background:"#10B981",color:"#fff",fontSize:9,fontWeight:900,padding:"1px 6px",borderRadius:6}}>
                       -{savingsPct}%
@@ -6148,9 +6148,9 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 {/* CTA prominente en el hero */}
                 <div style={{marginBottom:12}}>
                   <button onClick={()=>handleSubscribe()}
-                    style={{background:"linear-gradient(135deg,#D97706,#6366F1)",border:"none",borderRadius:14,padding:"16px 36px",fontSize:16,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 32px rgba(217,119,6,0.6)",display:"inline-flex",alignItems:"center",gap:8,transition:"transform 0.15s, box-shadow 0.15s"}}
-                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 40px rgba(217,119,6,0.75)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 32px rgba(217,119,6,0.6)";}}>
+                    style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",border:"none",borderRadius:14,padding:"16px 36px",fontSize:16,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 32px rgba(15,94,104,0.6)",display:"inline-flex",alignItems:"center",gap:8,transition:"transform 0.15s, box-shadow 0.15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 40px rgba(15,94,104,0.75)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 32px rgba(15,94,104,0.6)";}}>
                     {billing==="annual"
                       ? (lang==="en" ? `✦ Get PREMIUM Annual — $79/year` : `✦ Obtener PREMIUM Anual — $79/año`)
                       : (lang==="en" ? `✦ Start free 7 days — $9.99/mo` : `✦ Empieza gratis 7 días — $9.99/mes`)
@@ -6189,31 +6189,31 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
           {/* FREE */}
           <div style={{background:"rgba(10,16,30,0.98)",padding:"28px 24px",borderRight:"1px solid rgba(255,255,255,0.06)",position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,width:180,height:180,background:"radial-gradient(circle,rgba(0,102,255,0.06),transparent 70%)",pointerEvents:"none"}}/>
+            <div style={{position:"absolute",top:0,left:0,width:180,height:180,background:"radial-gradient(circle,rgba(15,76,129,0.06),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#0066FF",letterSpacing:1.5,marginBottom:6}}>FREE</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#0F4C81",letterSpacing:1.5,marginBottom:6}}>FREE</div>
               <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:4}}>
                 <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>$0</span>
               </div>
               <div style={{fontSize:12,color:"#475569",marginBottom:14}}>Para siempre gratis</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
                 {FREE_FEATURES.map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(0,102,255,0.04)",borderRadius:7,border:"1px solid rgba(0,102,255,0.07)"}}>
-                    <span style={{fontSize:10,color:"#0066FF",flexShrink:0,marginTop:2}}>✓</span>
+                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(15,76,129,0.04)",borderRadius:7,border:"1px solid rgba(15,76,129,0.07)"}}>
+                    <span style={{fontSize:10,color:"#0F4C81",flexShrink:0,marginTop:2}}>✓</span>
                     <span style={{fontSize:11,color:"#94A3B8",lineHeight:1.35}}>{f}</span>
                   </div>
                 ))}
               </div>
-              <div style={{marginTop:24,padding:"12px",borderRadius:10,background:"rgba(0,102,255,0.04)",textAlign:"center",color:"#334155",fontSize:12,fontWeight:700,border:"1px solid rgba(0,102,255,0.1)"}}>
+              <div style={{marginTop:24,padding:"12px",borderRadius:10,background:"rgba(15,76,129,0.04)",textAlign:"center",color:"#334155",fontSize:12,fontWeight:700,border:"1px solid rgba(15,76,129,0.1)"}}>
                 Plan actual
               </div>
             </div>
           </div>
 
           {/* VIP */}
-          <div style={{background:"rgba(12,10,30,0.99)",padding:"28px 24px",position:"relative",overflow:"hidden",borderLeft:"2px solid #D97706"}}>
-            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ MÁS POPULAR</div>
-            <div style={{position:"absolute",top:0,left:0,width:220,height:220,background:"radial-gradient(circle,rgba(217,119,6,0.1),transparent 70%)",pointerEvents:"none"}}/>
+          <div style={{background:"rgba(12,10,30,0.99)",padding:"28px 24px",position:"relative",overflow:"hidden",borderLeft:"2px solid #0F5E68"}}>
+            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ MÁS POPULAR</div>
+            <div style={{position:"absolute",top:0,left:0,width:220,height:220,background:"radial-gradient(circle,rgba(15,94,104,0.1),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
               <div style={{fontSize:11,fontWeight:700,color:"#FCD34D",letterSpacing:1.5,marginBottom:10}}>✦ PREMIUM</div>
 
@@ -6221,15 +6221,15 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               <div style={{display:"flex",background:"rgba(0,0,0,0.3)",borderRadius:10,padding:3,gap:2,marginBottom:14,border:"1px solid rgba(255,255,255,0.07)"}}>
                 <button onClick={()=>setBilling("monthly")}
                   style={{flex:1,padding:"6px 0",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,transition:"all 0.2s",
-                    background:billing==="monthly"?"rgba(99,102,241,0.3)":"transparent",
+                    background:billing==="monthly"?"rgba(15,94,104,0.3)":"transparent",
                     color:billing==="monthly"?"#fff":"#475569"}}>
                   Mensual
                 </button>
                 <button onClick={()=>setBilling("annual")}
                   style={{flex:1,padding:"6px 0",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:800,transition:"all 0.2s",position:"relative",
-                    background:billing==="annual"?"linear-gradient(135deg,#D97706,#6366F1)":"transparent",
+                    background:billing==="annual"?"linear-gradient(135deg,#0F5E68,#0F5E68)":"transparent",
                     color:billing==="annual"?"#fff":"#475569",
-                    boxShadow:billing==="annual"?"0 2px 10px rgba(217,119,6,0.35)":"none"}}>
+                    boxShadow:billing==="annual"?"0 2px 10px rgba(15,94,104,0.35)":"none"}}>
                   Anual
                   {billing!=="annual"&&<span style={{position:"absolute",top:-7,right:2,background:"#10B981",color:"#fff",fontSize:8,fontWeight:900,padding:"1px 4px",borderRadius:4}}>-{savingsPct}%</span>}
                 </button>
@@ -6260,7 +6260,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
                 {PREMIUM_FEATURES.map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(217,119,6,0.06)",borderRadius:7,border:"1px solid rgba(217,119,6,0.1)"}}>
+                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(15,94,104,0.06)",borderRadius:7,border:"1px solid rgba(15,94,104,0.1)"}}>
                     <span style={{fontSize:10,color:"#FCD34D",flexShrink:0,marginTop:2}}>★</span>
                     <span style={{fontSize:11,color:"#CBD5E1",lineHeight:1.35}}>{f}</span>
                   </div>
@@ -6290,9 +6290,9 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                           <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>{isEN?"🎁 Cancel anytime · Just $9.99/mo":"🎁 Cancela cuando quieras · Solo $9.99/mes"}</span>
                         </div>
                         <button onClick={()=>handleSubscribe("monthly")}
-                          style={{width:"100%",background:"linear-gradient(135deg,#D97706,#6366F1)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(217,119,6,0.55)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
-                          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 36px rgba(217,119,6,0.7)";}}
-                          onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 28px rgba(217,119,6,0.55)";}}>
+                          style={{width:"100%",background:"linear-gradient(135deg,#0F5E68,#0F5E68)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(15,94,104,0.55)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
+                          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 36px rgba(15,94,104,0.7)";}}
+                          onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 28px rgba(15,94,104,0.55)";}}>
                           ✦ Comenzar prueba gratis →
                         </button>
                         <div style={{textAlign:"center",fontSize:11,color:"#475569",marginBottom:4}}>Sin tarjeta · Cancela cuando quieras · Acceso inmediato</div>
@@ -6340,18 +6340,18 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
         {/* SmartCredit afiliado */}
         <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
-          style={{display:"flex",alignItems:"center",gap:16,background:"linear-gradient(135deg,rgba(0,102,255,0.08),rgba(16,185,129,0.05))",border:"1.5px solid rgba(0,102,255,0.22)",borderRadius:16,padding:"18px 22px",marginTop:20,textDecoration:"none",transition:"all 0.18s"}}
-          onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.14),rgba(16,185,129,0.09))";e.currentTarget.style.borderColor="rgba(0,102,255,0.45)";}}
-          onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.08),rgba(16,185,129,0.05))";e.currentTarget.style.borderColor="rgba(0,102,255,0.22)";}}>
-          <div style={{width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#0066FF,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>💳</div>
+          style={{display:"flex",alignItems:"center",gap:16,background:"linear-gradient(135deg,rgba(15,76,129,0.08),rgba(16,185,129,0.05))",border:"1.5px solid rgba(15,76,129,0.22)",borderRadius:16,padding:"18px 22px",marginTop:20,textDecoration:"none",transition:"all 0.18s"}}
+          onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.14),rgba(16,185,129,0.09))";e.currentTarget.style.borderColor="rgba(15,76,129,0.45)";}}
+          onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.08),rgba(16,185,129,0.05))";e.currentTarget.style.borderColor="rgba(15,76,129,0.22)";}}>
+          <div style={{width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#0F4C81,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>💳</div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
               <span style={{fontWeight:900,fontSize:15,color:C.text}}>SmartCredit</span>
-              <span style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.22)",borderRadius:20,padding:"1px 9px",fontSize:9,color:"#0066FF",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
+              <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.22)",borderRadius:20,padding:"1px 9px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
             </div>
             <div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas. Empieza gratis — sin tarjeta de crédito.</div>
           </div>
-          <div style={{background:"linear-gradient(135deg,#0066FF,#10B981)",borderRadius:11,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap",boxShadow:"0 4px 16px rgba(0,102,255,0.35)"}}>
+          <div style={{background:"linear-gradient(135deg,#0F4C81,#10B981)",borderRadius:11,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap",boxShadow:"0 4px 16px rgba(15,76,129,0.35)"}}>
             Empezar gratis →
           </div>
         </a>
@@ -6421,7 +6421,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             <h2 style={{margin:"0 0 4px",color:C.text,fontSize:18,fontWeight:800}}>🎓 Webinars en Vivo</h2>
             <p style={{margin:0,color:C.muted,fontSize:13}}>{isEN?"Training with real traders · Recording included · Limited seats":"Formación con traders reales · Grabación incluida · Plazas limitadas"}</p>
           </div>
-          {isPremium && <div style={{background:"linear-gradient(135deg,#D9770622,#B4530911)",border:"1px solid #D9770644",borderRadius:10,padding:"6px 14px",fontSize:12,fontWeight:700,color:"#a78bfa"}}>✦ PREMIUM: 50% descuento aplicado</div>}
+          {isPremium && <div style={{background:"linear-gradient(135deg,#0F5E6822,#B4530911)",border:"1px solid #0F5E6844",borderRadius:10,padding:"6px 14px",fontSize:12,fontWeight:700,color:"#a78bfa"}}>✦ PREMIUM: 50% descuento aplicado</div>}
         </div>
 
         <div style={{display:"flex",flexDirection:"column",gap:16}}>
@@ -6501,7 +6501,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                         <button
                           onClick={handleBuyWebinar}
                           disabled={isSoldOut}
-                          style={{background:isSoldOut?"#374151":"linear-gradient(135deg,#1d4ed8,#D97706)",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",width:"100%",opacity:isSoldOut?0.5:1}}
+                          style={{background:isSoldOut?"#374151":"linear-gradient(135deg,#1d4ed8,#0F5E68)",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",width:"100%",opacity:isSoldOut?0.5:1}}
                         >{isSoldOut ? "Agotado" : "Comprar →"}</button>
                       </>
                     )}
@@ -6513,13 +6513,13 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         </div>
 
         {/* VIP upsell banner at bottom */}
-        {!isPremium && <div style={{marginTop:20,background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #D9770644",borderRadius:16,padding:20,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
+        {!isPremium && <div style={{marginTop:20,background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #0F5E6844",borderRadius:16,padding:20,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
           <span style={{fontSize:32}}>✦</span>
           <div style={{flex:1}}>
             <div style={{fontWeight:800,color:"#a78bfa",fontSize:15,marginBottom:4}}>Hazte PREMIUM y ahorra 50% en todos los webinars</div>
             <div style={{color:"#7c3aed",fontSize:13}}>{isEN?"For just $9.99/mo you get PREMIUM prices, weekly picks, signals and recordings of all the web":"Por solo $9.99/mes tienes acceso a precios PREMIUM, picks semanales, señales y grabaciones de todos los web"}inars anteriores.</div>
           </div>
-          <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#D97706,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver PREMIUM →</button>
+          <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#0F5E68,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver PREMIUM →</button>
         </div>}
 
         {/* ── IBKR CAMPUS — Webinars Gratuitos ── */}
@@ -6600,7 +6600,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           {/* FOREX.com */}
           <div style={{background:"#fff",border:"1px solid rgba(0,0,0,0.07)",borderRadius:14,padding:"16px"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-              <div style={{width:32,height:32,borderRadius:8,background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>💹</div>
+              <div style={{width:32,height:32,borderRadius:8,background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>💹</div>
               <div>
                 <div style={{fontWeight:800,color:"#0F172A",fontSize:13}}>FOREX.com Academy</div>
                 <div style={{fontSize:10,color:"#64748B"}}>Mercados en vivo · Q&A con expertos</div>
@@ -6611,12 +6611,12 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             </div>
             {["Weekly Market Outlook","EUR/USD Live Analysis","Gold & Oil Trading","Fed Minutes Breakdown"].map(t=>(
               <div key={t} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 0",borderBottom:"1px solid rgba(0,0,0,0.04)"}}>
-                <span style={{fontSize:10,color:"#0066ff"}}>▶</span>
+                <span style={{fontSize:10,color:"#0F4C81"}}>▶</span>
                 <span style={{fontSize:11,color:"#334155",fontWeight:500}}>{t}</span>
               </div>
             ))}
             <a href="https://www.forex.com/en/trading-academy/webinars/" target="_blank" rel="noopener noreferrer"
-              style={{display:"block",marginTop:12,textAlign:"center",background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:8,padding:"7px",fontSize:12,fontWeight:700,color:"#0066ff",textDecoration:"none"}}>
+              style={{display:"block",marginTop:12,textAlign:"center",background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"7px",fontSize:12,fontWeight:700,color:"#0F4C81",textDecoration:"none"}}>
               Ver en FOREX.com ↗
             </a>
           </div>
@@ -6797,7 +6797,7 @@ function OnlineUsersWidget({ onlineUsers = [] }) {
               {/* Avatar */}
               <div style={{
                 width: 30, height: 30, borderRadius: "50%",
-                background: u.avatarColor || "#0066FF",
+                background: u.avatarColor || "#0F4C81",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 15, flexShrink: 0, position: "relative",
               }}>
@@ -6892,7 +6892,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
         {/* ── COVER + BODY — dark navy + candlestick ── */}
         {(()=>{
           const ac = user?.avatarColor || "#F59E0B";
-          const ac2 = ac==="rgba(0,102,255,0.09)"?"#F59E0B":ac;
+          const ac2 = ac==="rgba(15,76,129,0.09)"?"#F59E0B":ac;
           const joinDate = user?.created_at ? new Date(user.created_at).toLocaleDateString("es-ES",{month:"short",year:"numeric"}) : null;
           const progressToNext = lvl ? LEVELS.find(l=>l.min>(user?.points||0)) : null;
           const progressPct = lvl && progressToNext ? Math.round(((user?.points||0)-lvl.min)/(progressToNext.min-lvl.min)*100) : (lvl ? 100 : 0);
@@ -6936,7 +6936,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 ? <div onClick={()=>setShowAvatarPicker(v=>!v)} title="Cambiar avatar"
                     style={{width:56,height:56,borderRadius:16,background:"#fff",border:"3px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,boxShadow:"0 4px 16px rgba(0,0,0,0.3)",cursor:"pointer",position:"relative",overflow:"hidden"}}>
                     {user.avatarUrl?<img src={user.avatarUrl} alt="" style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:13,display:"block"}}/>:user.emoji}
-                    <span style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,background:"#0066FF",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"2px solid #fff",color:"#fff"}}>&#x270E;</span>
+                    <span style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,background:"#0F4C81",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"2px solid #fff",color:"#fff"}}>&#x270E;</span>
                   </div>
                 : <div style={{width:56,height:56,borderRadius:16,background:"#1e3a5f",border:"3px solid rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>&#x1F464;</div>
               }
@@ -6973,7 +6973,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                           setNameStatus(data&&data.length>0?"taken":"available");
                         }}
                         autoFocus placeholder="nuevo_username"
-                        style={{flex:1,background:"rgba(0,102,255,0.06)",border:`1.5px solid ${nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#16A34A":"rgba(0,102,255,0.3)"}`,borderRadius:8,padding:"5px 9px",color:"#0F172A",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
+                        style={{flex:1,background:"rgba(15,76,129,0.06)",border:`1.5px solid ${nameStatus==="taken"?"#ef4444":nameStatus==="available"?"#16A34A":"rgba(15,76,129,0.3)"}`,borderRadius:8,padding:"5px 9px",color:"#0F172A",fontSize:13,fontWeight:700,fontFamily:"inherit",outline:"none"}}
                       />
                       <button onClick={async()=>{
                         const newName=editName.trim();
@@ -6989,7 +6989,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                         setNameStatus("saved");
                         setTimeout(()=>{setEditingName(false);setNameStatus(null);},1500);
                       }} disabled={nameStatus==="taken"||nameStatus==="checking"||editName.length<3}
-                        style={{background:nameStatus==="taken"||editName.length<3?"#334155":"#0066FF",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",opacity:nameStatus==="taken"||editName.length<3?0.5:1}}>&#x2713;</button>
+                        style={{background:nameStatus==="taken"||editName.length<3?"#334155":"#0F4C81",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",opacity:nameStatus==="taken"||editName.length<3?0.5:1}}>&#x2713;</button>
                       <button onClick={()=>{setEditingName(false);setNameStatus(null);}}
                         style={{background:"transparent",border:"1px solid #e2e8f0",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:11,cursor:"pointer"}}>&#x2715;</button>
                     </div>
@@ -7006,7 +7006,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                       </div>
                       <button onClick={()=>{setEditName(user.username||user.name||"");setEditingName(true);setNameStatus(null);}}
                         title="Editar username"
-                        style={{background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.18)",borderRadius:6,padding:"3px 7px",color:"#0066FF",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>&#x270E;</button>
+                        style={{background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.18)",borderRadius:6,padding:"3px 7px",color:"#0F4C81",fontSize:10,cursor:"pointer",lineHeight:1,flexShrink:0}}>&#x270E;</button>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:"#64748B",fontWeight:500}}>
                       <span>@{(user.username||user.name||"trader").toLowerCase().replace(/[\s@.]/g,"").slice(0,20)}</span>
@@ -7043,7 +7043,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 ].map((item,i)=> item===null
                   ? <div key={i} style={{background:"rgba(0,0,0,0.05)"}}/>
                   : <div key={i} style={{padding:"9px 4px",textAlign:"center"}}>
-                      <div style={{fontWeight:800,fontSize:16,color:i===4?"#0066FF":"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
+                      <div style={{fontWeight:800,fontSize:16,color:i===4?"#0F4C81":"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
                       <div style={{fontSize:8,color:"#94A3B8",fontWeight:700,letterSpacing:0.7,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
                     </div>
                 )}
@@ -7096,7 +7096,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
               </button>
             ))}
           </div>
-          {savingAvatar && <div style={{textAlign:"center",fontSize:11,color:"#0066FF",marginTop:8}}>Guardando...</div>}
+          {savingAvatar && <div style={{textAlign:"center",fontSize:11,color:"#0F4C81",marginTop:8}}>Guardando...</div>}
         </div>
       )}
 
@@ -7111,20 +7111,20 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 style={{
                   display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,
                   cursor:"pointer",marginBottom:2,transition:"all 0.15s",
-                  background: isActive ? (premium?"rgba(217,119,6,0.08)":"rgba(0,102,255,0.07)") : "transparent",
-                  borderLeft: isActive ? `3px solid ${premium?"#D97706":"#0066FF"}` : "3px solid transparent",
+                  background: isActive ? (premium?"rgba(15,94,104,0.08)":"rgba(15,76,129,0.07)") : "transparent",
+                  borderLeft: isActive ? `3px solid ${premium?"#0F5E68":"#0F4C81"}` : "3px solid transparent",
                 }}
-                onMouseEnter={e=>{ if(!isActive) e.currentTarget.style.background=premium?"rgba(217,119,6,0.05)":"rgba(0,102,255,0.05)"; }}
+                onMouseEnter={e=>{ if(!isActive) e.currentTarget.style.background=premium?"rgba(15,94,104,0.05)":"rgba(15,76,129,0.05)"; }}
                 onMouseLeave={e=>{ if(!isActive) e.currentTarget.style.background="transparent"; }}>
                 <span style={{fontSize:14,lineHeight:1,width:18,textAlign:"center"}}>{icon}</span>
                 <span style={{
                   fontSize:13,fontWeight:isActive?700:500,
-                  color: premium?"#D97706": isActive?"#0066FF":"#334155",
+                  color: premium?"#0F5E68": isActive?"#0F4C81":"#334155",
                   flex:1
                 }}>{label}</span>
-                {premium && <span style={{fontSize:9,fontWeight:700,background:"#D97706",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PREMIUM</span>}
-                {vip && !premium && !ai && <span style={{fontSize:9,fontWeight:700,color:"#0066FF",background:"rgba(0,102,255,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
-                {ai && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#0066FF,#F59E0B)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>IA</span>}
+                {premium && <span style={{fontSize:9,fontWeight:700,background:"#0F5E68",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PREMIUM</span>}
+                {vip && !premium && !ai && <span style={{fontSize:9,fontWeight:700,color:"#0F4C81",background:"rgba(15,76,129,0.1)",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>PRO</span>}
+                {ai && <span style={{fontSize:9,fontWeight:700,background:"linear-gradient(135deg,#0F4C81,#F59E0B)",color:"#fff",borderRadius:20,padding:"2px 6px",letterSpacing:0.5}}>IA</span>}
               </div>
             );
           })}
@@ -7147,12 +7147,12 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 const isActive=activeNav===idx;
                 return(
                   <div key={label} onClick={()=>{setActiveNav(idx);onNavigate&&onNavigate(idx);}}
-                    style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",borderRadius:9,cursor:"pointer",marginBottom:1,transition:"all 0.15s",background:isActive?"rgba(0,102,255,0.07)":"transparent",borderLeft:isActive?"3px solid #0066FF":"3px solid transparent"}}
-                    onMouseEnter={e=>{if(!isActive)e.currentTarget.style.background="rgba(0,102,255,0.04)";}}
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",borderRadius:9,cursor:"pointer",marginBottom:1,transition:"all 0.15s",background:isActive?"rgba(15,76,129,0.07)":"transparent",borderLeft:isActive?"3px solid #0F4C81":"3px solid transparent"}}
+                    onMouseEnter={e=>{if(!isActive)e.currentTarget.style.background="rgba(15,76,129,0.04)";}}
                     onMouseLeave={e=>{if(!isActive)e.currentTarget.style.background="transparent";}}>
                     <span style={{fontSize:13,width:18,textAlign:"center"}}>{icon}</span>
-                    <span style={{fontSize:12,fontWeight:isActive?700:400,color:isActive?"#0066FF":"var(--c-muted)",flex:1}}>{label}</span>
-                    {vip && <span style={{fontSize:9,fontWeight:700,color:"#0066FF",background:"rgba(0,102,255,0.1)",borderRadius:20,padding:"2px 6px"}}>PRO</span>}
+                    <span style={{fontSize:12,fontWeight:isActive?700:400,color:isActive?"#0F4C81":"var(--c-muted)",flex:1}}>{label}</span>
+                    {vip && <span style={{fontSize:9,fontWeight:700,color:"#0F4C81",background:"rgba(15,76,129,0.1)",borderRadius:20,padding:"2px 6px"}}>PRO</span>}
                   </div>
                 );
               })}
@@ -7322,13 +7322,13 @@ const AFFILIATES = [
     id:"topstep",
     logo:"🎯",
     name:"Topstep",
-    color:"#0066FF",
+    color:"#0F4C81",
     bg:"linear-gradient(135deg,#00091A,#001530)",
     tagline:"$50–$150 por cada trader que financies",
     sub:"Funded accounts · Futuros · Forex · Se paga vía PayPal",
     cta:"Referir traders a Topstep →",
     badge:"$150 POR REFERIDO",
-    badgeColor:"#0066FF",
+    badgeColor:"#0F4C81",
     url:"https://www.topstep.com/affiliates/",
     tickers:["ES","NQ","GC","CL","YM"],
   },
@@ -7493,7 +7493,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
   // Mini perfil popup
   const [miniProfile, setMiniProfile] = useState(null);
   const BOT_FULL_DATA = {
-    "CarlosInvierte": {avatar:"👨‍💼",color:"#D97706",badge:"Pro Trader",posts:312,followers:1840,points:4850,bio:"Trader técnico con 8 años de experiencia. Especialidad: setups de ruptura y análisis de volumen. 📈",specialty:"Análisis Técnico",location:"México 🇲🇽",joined:"Ene 2022",winRate:"73%"},
+    "CarlosInvierte": {avatar:"👨‍💼",color:"#0F5E68",badge:"Pro Trader",posts:312,followers:1840,points:4850,bio:"Trader técnico con 8 años de experiencia. Especialidad: setups de ruptura y análisis de volumen. 📈",specialty:"Análisis Técnico",location:"México 🇲🇽",joined:"Ene 2022",winRate:"73%"},
     "SofiaWallSt":    {avatar:"👩‍💻",color:"#EC4899",badge:"Analista",posts:278,followers:2310,points:4120,bio:"CFA charterholder. Ex-analista en Goldman. Ahora comparto mis mejores ideas de inversión con la comunidad. 💎",specialty:"Análisis Fundamental",location:"Argentina 🇦🇷",joined:"Mar 2022",winRate:"68%"},
     "MarcoBTC":       {avatar:"₿",  color:"#F7931A",badge:"Crypto Trader",posts:245,followers:3120,points:3780,bio:"Full-time crypto trader desde 2017. Sobreviví el bear de 2018 y 2022. DCA y paciencia son mis herramientas. ₿",specialty:"Cripto",location:"España 🇪🇸",joined:"Dic 2021",winRate:"71%"},
     "AlexTradingMX":  {avatar:"⚡", color:"#F59E0B",badge:"Day Trader",posts:201,followers:980,points:3210,bio:"Day trader de futuros y opciones. Opero principalmente momentum y noticias. Consistencia > homerun. ⚡",specialty:"Day Trading",location:"México 🇲🇽",joined:"Jun 2022",winRate:"65%"},
@@ -7501,7 +7501,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
     "ValentinaFinance":{avatar:"💎",color:"#06B6D4",badge:"Value Investor",posts:167,followers:1200,points:2650,bio:"Inversionista de valor al estilo Buffett. Busco empresas con moat y las tengo por años. Paciencia es rentabilidad. 💎",specialty:"Value Investing",location:"Colombia 🇨🇴",joined:"Ago 2022",winRate:"74%"},
     "AndresTradePro": {avatar:"🎯", color:"#EF4444",badge:"Opciones",posts:154,followers:2780,points:2380,bio:"Especialista en estrategias de opciones: iron condors, spreads, covered calls. Risk/reward siempre primero. 🎯",specialty:"Opciones",location:"Venezuela 🇻🇪",joined:"May 2022",winRate:"69%"},
     "IsabelAnalysis": {avatar:"📊", color:"#F59E0B",badge:"Quant",posts:143,followers:890,points:2100,bio:"Ingeniera en datos → trader cuantitativo. Modelos estadísticos para encontrar edge en el mercado. 📊",specialty:"Trading Cuantitativo",location:"Perú 🇵🇪",joined:"Sep 2022",winRate:"72%"},
-    "RicardoInvest":  {avatar:"🏆", color:"#D97706",badge:"Swing Trader",posts:128,followers:760,points:1870,bio:"Swing trader de acciones USA. Busco setups de 2-6 semanas con buen R/R. Gestión de riesgo estricta. 🏆",specialty:"Swing Trading",location:"Uruguay 🇺🇾",joined:"Nov 2022",winRate:"67%"},
+    "RicardoInvest":  {avatar:"🏆", color:"#0F5E68",badge:"Swing Trader",posts:128,followers:760,points:1870,bio:"Swing trader de acciones USA. Busco setups de 2-6 semanas con buen R/R. Gestión de riesgo estricta. 🏆",specialty:"Swing Trading",location:"Uruguay 🇺🇾",joined:"Nov 2022",winRate:"67%"},
     "NataliaTrader":  {avatar:"🌟", color:"#10B981",badge:"Growth",posts:115,followers:1560,points:1540,bio:"Inversionista growth. Me enfoco en empresas de alto crecimiento con ventajas competitivas reales. 🌟",specialty:"Growth Investing",location:"Bolivia 🇧🇴",joined:"Ene 2023",winRate:"66%"},
   };
 
@@ -7608,7 +7608,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
         {/* Header compacto */}
         <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:9}}>
-          <div style={{width:30,height:30,borderRadius:8,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"#fff",letterSpacing:0.3,flexShrink:0}}>AI</div>
+          <div style={{width:30,height:30,borderRadius:8,background:"#0F4C81",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"#fff",letterSpacing:0.3,flexShrink:0}}>AI</div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontWeight:800,color:"var(--c-text)",fontSize:12.5,letterSpacing:-0.2}}>AI Market Pulse</div>
             <div style={{display:"flex",alignItems:"center",gap:4,marginTop:1}}>
@@ -7644,7 +7644,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         {/* Riesgo — fila compacta */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(15,23,42,0.03)",border:"1px solid rgba(15,23,42,0.06)",borderRadius:8,padding:"5px 10px",marginBottom:8}}>
           <span style={{fontSize:10.5,color:"#94A3B8",fontWeight:600}}>Riesgo del mercado</span>
-          <span style={{fontSize:10.5,color:"#D97706",fontWeight:800}}>MEDIO ⚡</span>
+          <span style={{fontSize:10.5,color:"#0F5E68",fontWeight:800}}>MEDIO ⚡</span>
         </div>
 
         {/* CTA — sólido sobrio */}
@@ -7765,7 +7765,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
       {/* ── CTA VIP (solo si no logueado) ── */}
       {!user && (
-        <div style={{...card,background:"linear-gradient(145deg,#1E1B4B,#2D1B69)",border:"1px solid rgba(217,119,6,0.3)",textAlign:"center"}}>
+        <div style={{...card,background:"linear-gradient(145deg,#1E1B4B,#2D1B69)",border:"1px solid rgba(15,94,104,0.3)",textAlign:"center"}}>
           <div style={{fontSize:26,marginBottom:6}}>✦</div>
           <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>PREMIUM Member</div>
           <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>{lang==="en"?<>Exclusive signals, unlimited AI<br/>and access to all the data</>:<>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</>}</div>
@@ -7774,7 +7774,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             <span style={{fontSize:12,color:"rgba(255,255,255,0.4)",fontWeight:400}}>{lang==="en"?"/mo":"/mes"}</span>
           </div>
           <button onClick={()=>window.open(STRIPE_PAYMENT_LINK,"_blank")}
-            style={{width:"100%",padding:"10px",background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",boxShadow:"0 6px 20px rgba(217,119,6,0.4)",fontFamily:"inherit"}}>
+            style={{width:"100%",padding:"10px",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:10,color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",boxShadow:"0 6px 20px rgba(15,94,104,0.4)",fontFamily:"inherit"}}>
             ✦ {lang==="en"?"Start PREMIUM →":"Empezar PREMIUM →"}
           </button>
           <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:8}}>{lang==="en"?"Cancel anytime · No commitment":"Cancela cuando quieras · Sin compromiso"}</div>
@@ -7791,10 +7791,10 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         });
         // Inyectar traders ficticios para poblar el ranking
         const BOT_LB=[
-          {name:"CarlosInvierte", avatar:"👨‍💼", color:"#D97706", count:8},
+          {name:"CarlosInvierte", avatar:"👨‍💼", color:"#0F5E68", count:8},
           {name:"SofiaWallSt",    avatar:"👩‍💻", color:"#EC4899", count:7},
           {name:"MarcoBTC",       avatar:"₿",   color:"#F7931A", count:6},
-          {name:"RicardoInvest",  avatar:"🏆",  color:"#D97706", count:5},
+          {name:"RicardoInvest",  avatar:"🏆",  color:"#0F5E68", count:5},
           {name:"NataliaTrader",  avatar:"🌟",  color:"#10B981", count:4},
         ];
         BOT_LB.forEach(b=>{ if(!countMap[b.name]) countMap[b.name]={count:b.count,avatar:b.avatar,color:b.color}; });
@@ -7807,7 +7807,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             {topList.map(([name,info],i)=>(
               <div key={name} onClick={()=>setMiniProfile({name,info})}
                 style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<topList.length-1?"1px solid rgba(0,0,0,0.04)":"none",cursor:"pointer",borderRadius:8,transition:"background 0.15s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.04)"}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.04)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 <div style={{width:20,height:20,borderRadius:6,background:`${rankColors[i]}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:rankColors[i],flexShrink:0}}>#{i+1}</div>
                 <AvatarBubble name={name} emoji={info.avatar||"🦅"} color={info.color||C.accent} size={28}/>
@@ -7857,7 +7857,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             <div style={{fontSize:12,fontWeight:800,color:"var(--c-text)",marginBottom:12,letterSpacing:-0.2}}>{t.whofollow}</div>
             {realUsers.map((u,i)=>(
               <div key={u.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<realUsers.length-1?"1px solid var(--c-border)":"none"}}>
-                <AvatarBubble name={u.username} emoji={u.avatar_emoji||"🦅"} color={u.avatar_color||"#0066FF"} size={30} photo={u.avatar_url||null}/>
+                <AvatarBubble name={u.username} emoji={u.avatar_emoji||"🦅"} color={u.avatar_color||"#0F4C81"} size={30} photo={u.avatar_url||null}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"var(--c-text)",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     {u.username||"Usuario"}
@@ -7867,7 +7867,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
                   </div>
                 </div>
                 <button onClick={()=>handleFollow(u.id)}
-                  style={{background:followed[u.id]?"rgba(22,163,74,0.1)":"rgba(0,102,255,0.08)",border:`1.5px solid ${followed[u.id]?"#16A34A":"rgba(0,102,255,0.3)"}`,borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,color:followed[u.id]?"#16A34A":"#0066FF",cursor:followed[u.id]?"default":"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+                  style={{background:followed[u.id]?"rgba(22,163,74,0.1)":"rgba(15,76,129,0.08)",border:`1.5px solid ${followed[u.id]?"#16A34A":"rgba(15,76,129,0.3)"}`,borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,color:followed[u.id]?"#16A34A":"#0F4C81",cursor:followed[u.id]?"default":"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
                   {followed[u.id]?"✓ Siguiendo":t.follow}
                 </button>
               </div>
@@ -7919,7 +7919,7 @@ function PointsBenefitsCard({user, lang="es"}){
     ["🏆","Leyenda · 10,000 pts","1 mes Premium GRATIS"],
   ];
   return(
-    <div style={{background:"linear-gradient(135deg,rgba(33,150,243,0.05),rgba(0,102,255,0.05))",borderRadius:16,padding:"14px 16px",border:"1px solid rgba(33,150,243,0.18)"}}>
+    <div style={{background:"linear-gradient(135deg,rgba(33,150,243,0.05),rgba(15,76,129,0.05))",borderRadius:16,padding:"14px 16px",border:"1px solid rgba(33,150,243,0.18)"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
         <span style={{fontSize:18}}>{lvl.emoji}</span>
         <div style={{flex:1,minWidth:0}}>
@@ -7984,17 +7984,17 @@ function ReferralSection({ user }) {
   };
 
   return (
-    <div id="nexo-referral-section" style={{background:"linear-gradient(135deg,rgba(0,102,255,0.05),rgba(217,119,6,0.05))",borderRadius:16,padding:"16px",border:"1px solid rgba(0,102,255,0.15)"}}>
+    <div id="nexo-referral-section" style={{background:"linear-gradient(135deg,rgba(15,76,129,0.05),rgba(15,94,104,0.05))",borderRadius:16,padding:"16px",border:"1px solid rgba(15,76,129,0.15)"}}>
       {/* Header */}
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-        <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#0066FF22,#D9770622)",border:"1px solid rgba(0,102,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🔗</div>
+        <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#0F4C8122,#0F5E6822)",border:"1px solid rgba(15,76,129,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🔗</div>
         <div>
           <div style={{fontWeight:800,fontSize:13,color:"var(--c-text,#0F172A)"}}>Programa de Referidos</div>
           <div style={{fontSize:10,color:"#64748B"}}>Gana 1 mes PREMIUM gratis por cada amigo que se suscriba</div>
         </div>
         {refCount !== null && (
-          <div style={{marginLeft:"auto",textAlign:"center",background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:10,padding:"5px 10px"}}>
-            <div style={{fontSize:18,fontWeight:900,color:"#0066FF"}}>{refCount}</div>
+          <div style={{marginLeft:"auto",textAlign:"center",background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:10,padding:"5px 10px"}}>
+            <div style={{fontSize:18,fontWeight:900,color:"#0F4C81"}}>{refCount}</div>
             <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>referidos</div>
           </div>
         )}
@@ -8019,7 +8019,7 @@ function ReferralSection({ user }) {
       {refCode && (
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
           <div style={{fontSize:10,color:"#64748B",fontWeight:600,whiteSpace:"nowrap"}}>Tu código:</div>
-          <div style={{background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"4px 10px",fontSize:12,fontWeight:800,color:"#0066FF",fontFamily:"monospace",letterSpacing:1}}>{refCode}</div>
+          <div style={{background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:6,padding:"4px 10px",fontSize:12,fontWeight:800,color:"#0F4C81",fontFamily:"monospace",letterSpacing:1}}>{refCode}</div>
         </div>
       )}
 
@@ -8029,7 +8029,7 @@ function ReferralSection({ user }) {
           nexotradeia.com?ref={user.id?.slice(0,8)}
         </div>
         <button onClick={handleCopy}
-          style={{background:copied?"#10b981":"#0066FF",border:"none",borderRadius:7,padding:"7px 12px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap"}}>
+          style={{background:copied?"#10b981":"#0F4C81",border:"none",borderRadius:7,padding:"7px 12px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap"}}>
           {copied ? "✓ Copiado" : "Copiar link"}
         </button>
       </div>
@@ -8073,7 +8073,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
             <LevelBadge points={user.points} lang={lang}/>
           </div>
           {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},...(ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase())?[{label:"🛡️ Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}]:[]),{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
-            <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:item.admin?"linear-gradient(135deg,#D9770622,#4c1d9511)":"none",border:item.admin?"1px solid #D9770644":"none",cursor:"pointer",color:item.red?C.bear:item.admin?"#a78bfa":C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s",marginBottom:item.admin?4:0}}
+            <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:item.admin?"linear-gradient(135deg,#0F5E6822,#4c1d9511)":"none",border:item.admin?"1px solid #0F5E6844":"none",cursor:"pointer",color:item.red?C.bear:item.admin?"#a78bfa":C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s",marginBottom:item.admin?4:0}}
               onMouseEnter={e=>e.currentTarget.style.background=C.card2}
               onMouseLeave={e=>e.currentTarget.style.background="none"}>
               {item.label}
@@ -8387,7 +8387,7 @@ function PredictionBanner({lang="es", isPremium=false, onUpgrade}){
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
               <button onClick={onUpgrade}
-                style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:9,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",boxShadow:"0 2px 12px rgba(217,119,6,0.35)",whiteSpace:"nowrap"}}>
+                style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:9,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",boxShadow:"0 2px 12px rgba(15,94,104,0.35)",whiteSpace:"nowrap"}}>
                 {isEN?"See Pro analysis → $9.99/mo":"Ver análisis Pro → $9.99/mes"}
               </button>
               <button onClick={()=>setCtaOff(true)} style={{background:"none",border:"none",color:"#94A3B8",fontSize:15,cursor:"pointer",padding:2,lineHeight:1}}>×</button>
@@ -8404,19 +8404,19 @@ function TopTradersFeedCard({lang="es", isPremium, onLeaderboard, onPremium}){
   const isEN = lang==="en";
   // Ranking del mes — paper trading de la comunidad (nombres ES + EN)
   const TOPS = [
-    {name:"CarlosInvierte", avatar:"👨‍💼", color:"#D97706", ret:34.2, picks:12},
+    {name:"CarlosInvierte", avatar:"👨‍💼", color:"#0F5E68", ret:34.2, picks:12},
     {name:"EmmaGrowth",     avatar:"📈",  color:"#10B981", ret:28.7, picks:9},
     {name:"SofiaWallSt",    avatar:"👩‍💻", color:"#EC4899", ret:21.4, picks:11},
     {name:"MikeOptions",    avatar:"⚡",  color:"#3B82F6", ret:18.9, picks:7},
   ];
   const rankColors=["#F59E0B","#94A3B8","#CD7C3F","#64748B"];
   return(
-    <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.05),rgba(0,102,255,0.04))",border:"1px solid rgba(245,158,11,0.25)",borderRadius:16,padding:"14px 16px",margin:"6px 0"}}>
+    <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.05),rgba(15,76,129,0.04))",border:"1px solid rgba(245,158,11,0.25)",borderRadius:16,padding:"14px 16px",margin:"6px 0"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
         <span style={{fontSize:16}}>🏆</span>
         <span style={{fontWeight:900,fontSize:13.5,color:"var(--c-text)",letterSpacing:-0.2}}>{isEN?"Top Traders of the month":"Top Traders del mes"}</span>
         <span style={{fontSize:9.5,fontWeight:700,color:"#94A3B8",background:"rgba(148,163,184,0.12)",borderRadius:20,padding:"2px 8px"}}>{isEN?"Paper trading ranking":"Ranking paper trading"}</span>
-        <button onClick={onLeaderboard} style={{marginLeft:"auto",background:"none",border:"none",color:"#0066FF",fontSize:11.5,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+        <button onClick={onLeaderboard} style={{marginLeft:"auto",background:"none",border:"none",color:"#0F4C81",fontSize:11.5,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
           {isEN?"Full ranking →":"Ranking completo →"}
         </button>
       </div>
@@ -8434,7 +8434,7 @@ function TopTradersFeedCard({lang="es", isPremium, onLeaderboard, onPremium}){
       </div>
       {!isPremium && (
         <button onClick={onPremium}
-          style={{width:"100%",marginTop:10,background:"linear-gradient(135deg,rgba(217,119,6,0.12),rgba(245,158,11,0.08))",border:"1px solid rgba(245,158,11,0.35)",borderRadius:10,padding:"8px 14px",color:"#B45309",fontSize:12,fontWeight:800,cursor:"pointer"}}>
+          style={{width:"100%",marginTop:10,background:"linear-gradient(135deg,rgba(15,94,104,0.12),rgba(245,158,11,0.08))",border:"1px solid rgba(245,158,11,0.35)",borderRadius:10,padding:"8px 14px",color:"#B45309",fontSize:12,fontWeight:800,cursor:"pointer"}}>
           {isEN?"🔓 Follow their full ideas & picks → Premium $9.99/mo":"🔓 Sigue sus ideas y picks completos → Premium $9.99/mes"}
         </button>
       )}
@@ -8464,7 +8464,7 @@ function PremiumGate({lang="es", icon="🔒", title, desc, bullets=[], onPlans})
       <div aria-hidden style={{position:"absolute",inset:0,padding:"20px 24px",filter:"blur(6px)",opacity:0.55,userSelect:"none",pointerEvents:"none"}}>
         <div style={{display:"flex",gap:10,marginBottom:16}}>
           {[isEN?"Live Flow":"Flujo en Vivo",isEN?"AI Picks":"Picks IA","Dark Pool","Golden Sweeps"].map((t,i)=>(
-            <div key={i} style={{background:i===0?"rgba(0,102,255,0.2)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,color:"var(--c-text)"}}>{t}</div>
+            <div key={i} style={{background:i===0?"rgba(15,76,129,0.2)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,color:"var(--c-text)"}}>{t}</div>
           ))}
         </div>
         {FAKE.map((r,i)=>(
@@ -8495,7 +8495,7 @@ function PremiumGate({lang="es", icon="🔒", title, desc, bullets=[], onPlans})
           </div>
         )}
         <button onClick={onPlans}
-          style={{display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:14,padding:"16px 32px",color:"#fff",fontSize:16,fontWeight:900,cursor:"pointer",boxShadow:"0 8px 32px rgba(217,119,6,0.45)",marginBottom:10,animation:"nexoPremiumGlow 2.4s ease-in-out infinite"}}>
+          style={{display:"block",width:"100%",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"16px 32px",color:"#fff",fontSize:16,fontWeight:900,cursor:"pointer",boxShadow:"0 8px 32px rgba(15,94,104,0.45)",marginBottom:10,animation:"nexoPremiumGlow 2.4s ease-in-out infinite"}}>
           {isEN?"See plans → $9.99/mo":"Ver planes → $9.99/mes"}
         </button>
         <div style={{fontSize:11.5,color:"var(--c-muted2)",display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
@@ -8549,7 +8549,7 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:24}}>
         {TOOLS.map(tb=>(
           <button key={tb.k} onClick={()=>setTool(tb.k)}
-            style={{background:tool===tb.k?"linear-gradient(135deg,#F59E0B,#D97706)":"rgba(255,255,255,0.03)",border:`1.5px solid ${tool===tb.k?"#F59E0B":"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"8px 14px",cursor:"pointer",color:tool===tb.k?"#000":"#94A3B8",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
+            style={{background:tool===tb.k?"linear-gradient(135deg,#F59E0B,#0F5E68)":"rgba(255,255,255,0.03)",border:`1.5px solid ${tool===tb.k?"#F59E0B":"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"8px 14px",cursor:"pointer",color:tool===tb.k?"#000":"#94A3B8",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
             {tb.label}
           </button>
         ))}
@@ -8560,7 +8560,7 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
         <div>
           <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
             <button onClick={()=>onNavigate&&onNavigate(43)}
-              style={{background:"linear-gradient(135deg,#00E58F,#0066FF)",border:"none",borderRadius:10,padding:"9px 18px",fontWeight:800,fontSize:13,color:"#0B0E1A",cursor:"pointer",display:"flex",alignItems:"center",gap:7,boxShadow:"0 4px 16px rgba(0,229,143,0.3)"}}>
+              style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"9px 18px",fontWeight:800,fontSize:13,color:"#0B0E1A",cursor:"pointer",display:"flex",alignItems:"center",gap:7,boxShadow:"0 4px 16px rgba(0,229,143,0.3)"}}>
               ⛶ Abrir Terminal Completa
             </button>
           </div>
@@ -8719,7 +8719,7 @@ function PaperTrading({ user }){
       {msg&&<div style={{position:"fixed",top:70,right:20,zIndex:999,background:msg.ok?"#16A34A":"#DC2626",color:"#fff",padding:"10px 18px",borderRadius:10,fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",animation:"fadeIn 0.2s"}}>{msg.text}</div>}
 
       {/* ── Header cartera ── */}
-      <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",borderRadius:18,padding:"22px 24px",marginBottom:16,border:"1px solid rgba(0,102,255,0.15)"}}>
+      <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",borderRadius:18,padding:"22px 24px",marginBottom:16,border:"1px solid rgba(15,76,129,0.15)"}}>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
             <div style={{fontSize:11,color:"#64748B",fontWeight:700,letterSpacing:1,marginBottom:4}}>CARTERA TOTAL</div>
@@ -8732,9 +8732,9 @@ function PaperTrading({ user }){
             </div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end"}}>
-            <div style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:10,padding:"8px 14px",textAlign:"right"}}>
+            <div style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:10,padding:"8px 14px",textAlign:"right"}}>
               <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>EFECTIVO</div>
-              <div style={{fontSize:18,fontWeight:800,color:"#0066FF",fontFamily:"monospace"}}>{fmtUSD(pf.cash)}</div>
+              <div style={{fontSize:18,fontWeight:800,color:"#0F4C81",fontFamily:"monospace"}}>{fmtUSD(pf.cash)}</div>
             </div>
             <button onClick={resetPortfolio} style={{fontSize:10,color:"#64748B",background:"transparent",border:"1px solid rgba(255,255,255,0.08)",borderRadius:7,padding:"4px 10px",cursor:"pointer",fontWeight:600}}>↺ Reiniciar</button>
           </div>
@@ -8743,7 +8743,7 @@ function PaperTrading({ user }){
         <div style={{display:"flex",gap:12,marginTop:16,flexWrap:"wrap"}}>
           {[
             {label:"Capital inicial", val:fmtUSD(PAPER_INITIAL), col:"#64748B"},
-            {label:"Invertido",       val:fmtUSD(totalInvested),  col:"#0066FF"},
+            {label:"Invertido",       val:fmtUSD(totalInvested),  col:"#0F4C81"},
             {label:"Posiciones",      val:positions.length,        col:"#F59E0B"},
             {label:"Operaciones",     val:pf.trades.length,        col:"#FCD34D"},
           ].map(({label,val,col})=>(
@@ -8772,11 +8772,11 @@ function PaperTrading({ user }){
       {tab==="cartera"&&(
         <div>
           {positions.length===0?(
-            <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(0,102,255,0.03)",border:"1px dashed rgba(0,102,255,0.2)",borderRadius:14}}>
+            <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(15,76,129,0.03)",border:"1px dashed rgba(15,76,129,0.2)",borderRadius:14}}>
               <div style={{fontSize:36,marginBottom:12}}>📭</div>
               <div style={{fontWeight:700,color:"#0F172A",marginBottom:6}}>Cartera vacía</div>
               <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>Tienes {fmtUSD(pf.cash)} de efectivo virtual.<br/>Ve a "Operar" y compra tu primera acción.</div>
-              <button onClick={()=>setTab("operar")} style={{background:"linear-gradient(135deg,#00E58F,#0066FF)",border:"none",borderRadius:10,padding:"10px 24px",fontWeight:800,color:"#fff",cursor:"pointer",fontSize:14}}>💹 Ir a Operar</button>
+              <button onClick={()=>setTab("operar")} style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"10px 24px",fontWeight:800,color:"#fff",cursor:"pointer",fontSize:14}}>💹 Ir a Operar</button>
             </div>
           ):(
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -8831,7 +8831,7 @@ function PaperTrading({ user }){
                   </div>
                 </div>
               ))}
-              <button onClick={refreshPrices} style={{background:"transparent",border:"1px solid rgba(0,102,255,0.2)",borderRadius:8,padding:"8px",color:"#0066FF",fontSize:12,fontWeight:600,cursor:"pointer",marginTop:4}}>↻ Actualizar precios</button>
+              <button onClick={refreshPrices} style={{background:"transparent",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"8px",color:"#0F4C81",fontSize:12,fontWeight:600,cursor:"pointer",marginTop:4}}>↻ Actualizar precios</button>
             </div>
           )}
         </div>
@@ -8848,7 +8848,7 @@ function PaperTrading({ user }){
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {["BTC","ETH","SOL","XRP","DOGE","BNB","AAPL","NVDA","TSLA","MSFT","AMZN","META","GOOGL","SPY","QQQ","MELI","WMT","COST","UBER","SHOP"].map(t=>(
                   <button key={t} onClick={()=>{setTicker(t);setLiveQ(null);fetchQuote(t);}}
-                    style={{fontSize:11,fontWeight:700,padding:"4px 10px",borderRadius:7,border:"1px solid rgba(0,102,255,0.25)",background:ticker===t?"rgba(0,102,255,0.15)":"rgba(0,102,255,0.05)",color:"#0066FF",cursor:"pointer",fontFamily:"monospace"}}>
+                    style={{fontSize:11,fontWeight:700,padding:"4px 10px",borderRadius:7,border:"1px solid rgba(15,76,129,0.25)",background:ticker===t?"rgba(15,76,129,0.15)":"rgba(15,76,129,0.05)",color:"#0F4C81",cursor:"pointer",fontFamily:"monospace"}}>
                     {t}
                   </button>
                 ))}
@@ -8864,7 +8864,7 @@ function PaperTrading({ user }){
                   placeholder="Ej: AAPL, NVDA, BTC, ETH, SOL"
                   style={{flex:1,border:"1.5px solid rgba(0,0,0,0.09)",borderRadius:10,padding:"10px 14px",fontSize:14,fontFamily:"monospace",fontWeight:700,outline:"none",letterSpacing:1}}/>
                 <button onClick={()=>fetchQuote(ticker)}
-                  style={{background:"linear-gradient(135deg,#0066FF,#0055DD)",border:"none",borderRadius:10,padding:"10px 16px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer"}}>
+                  style={{background:"linear-gradient(135deg,#0F4C81,#0C3D68)",border:"none",borderRadius:10,padding:"10px 16px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer"}}>
                   {fetching?"⏳":"🔍"}
                 </button>
               </div>
@@ -8872,7 +8872,7 @@ function PaperTrading({ user }){
 
             {/* Cotización en vivo */}
             {liveQ&&(
-              <div style={{background:"linear-gradient(135deg,rgba(0,229,143,0.06),rgba(0,102,255,0.04))",border:"1.5px solid rgba(0,229,143,0.25)",borderRadius:12,padding:"14px 16px",display:"flex",gap:16,alignItems:"center"}}>
+              <div style={{background:"linear-gradient(135deg,rgba(0,229,143,0.06),rgba(15,76,129,0.04))",border:"1.5px solid rgba(0,229,143,0.25)",borderRadius:12,padding:"14px 16px",display:"flex",gap:16,alignItems:"center"}}>
                 <div>
                   <div style={{fontSize:11,color:"#64748B",fontWeight:600}}>PRECIO ACTUAL</div>
                   <div style={{fontSize:24,fontWeight:900,fontFamily:"monospace",color:"#0F172A"}}>{fmtUSD(liveQ.price)}</div>
@@ -8900,7 +8900,7 @@ function PaperTrading({ user }){
 
             {/* Resumen de compra */}
             {liveQ&&shares&&parseFloat(shares)>0&&(
-              <div style={{background:"rgba(0,102,255,0.04)",border:"1px solid rgba(0,102,255,0.15)",borderRadius:10,padding:"12px 14px"}}>
+              <div style={{background:"rgba(15,76,129,0.04)",border:"1px solid rgba(15,76,129,0.15)",borderRadius:10,padding:"12px 14px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                   <span style={{fontSize:12,color:"#64748B"}}>Costo total</span>
                   <span style={{fontWeight:800,fontFamily:"monospace",fontSize:14,color:"#0F172A"}}>{fmtUSD(liveQ.price*parseFloat(shares))}</span>
@@ -8917,7 +8917,7 @@ function PaperTrading({ user }){
             {/* Botón comprar */}
             <button onClick={buy}
               disabled={!liveQ||!shares||parseFloat(shares)<=0}
-              style={{background:liveQ&&shares?"linear-gradient(135deg,#00E58F,#0066FF)":"rgba(0,0,0,0.06)",border:"none",borderRadius:12,padding:"14px",fontWeight:900,fontSize:15,color:liveQ&&shares?"#fff":"#94A3B8",cursor:liveQ&&shares?"pointer":"not-allowed",transition:"all 0.15s",letterSpacing:0.3}}>
+              style={{background:liveQ&&shares?"linear-gradient(135deg,#00E58F,#0F4C81)":"rgba(0,0,0,0.06)",border:"none",borderRadius:12,padding:"14px",fontWeight:900,fontSize:15,color:liveQ&&shares?"#fff":"#94A3B8",cursor:liveQ&&shares?"pointer":"not-allowed",transition:"all 0.15s",letterSpacing:0.3}}>
               {liveQ&&shares?`▲ Comprar ${shares} × $${ticker} — ${fmtUSD(liveQ.price*parseFloat(shares||0))}`:"Busca un ticker y elige cantidad"}
             </button>
 
@@ -9100,7 +9100,7 @@ function PaperTradingFullPage({ user, onBack }){
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>EFECTIVO</div>
-            <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:"#0066FF"}}>{fmtUSD(pf.cash)}</div>
+            <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:"#0F4C81"}}>{fmtUSD(pf.cash)}</div>
           </div>
         </div>
       </div>
@@ -9119,7 +9119,7 @@ function PaperTradingFullPage({ user, onBack }){
                 placeholder="Ej: NVDA, BTC, TSLA"
                 style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 10px",fontSize:12,color:"#E2E8F0",outline:"none",width:130,fontFamily:"monospace",fontWeight:700}}/>
               <button onClick={()=>fetchQuote(ticker||chartTk)}
-                style={{background:"#0066FF",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>
+                style={{background:"#0F4C81",border:"none",borderRadius:8,padding:"6px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>
                 {fetching?"⏳":"🔍"}
               </button>
             </div>
@@ -9127,7 +9127,7 @@ function PaperTradingFullPage({ user, onBack }){
             <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {QUICK.map(t=>(
                 <button key={t} onClick={()=>{setChartTk(t);setTicker(t);fetchQuote(t);}}
-                  style={{fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:6,border:`1px solid ${chartTk===t?"#0066FF":"rgba(255,255,255,0.1)"}`,background:chartTk===t?"rgba(0,102,255,0.15)":"rgba(255,255,255,0.04)",color:chartTk===t?"#0066FF":"#94A3B8",cursor:"pointer",fontFamily:"monospace"}}>
+                  style={{fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:6,border:`1px solid ${chartTk===t?"#0F4C81":"rgba(255,255,255,0.1)"}`,background:chartTk===t?"rgba(15,76,129,0.15)":"rgba(255,255,255,0.04)",color:chartTk===t?"#0F4C81":"#94A3B8",cursor:"pointer",fontFamily:"monospace"}}>
                   {t}
                 </button>
               ))}
@@ -9136,7 +9136,7 @@ function PaperTradingFullPage({ user, onBack }){
             <div style={{marginLeft:"auto",display:"flex",gap:3}}>
               {INTERVALS.map(([v,l])=>(
                 <button key={v} onClick={()=>setInterval2(v)}
-                  style={{fontSize:10,fontWeight:700,padding:"3px 7px",borderRadius:5,border:"none",background:interval===v?"#0066FF":"rgba(255,255,255,0.05)",color:interval===v?"#fff":"#64748B",cursor:"pointer"}}>
+                  style={{fontSize:10,fontWeight:700,padding:"3px 7px",borderRadius:5,border:"none",background:interval===v?"#0F4C81":"rgba(255,255,255,0.05)",color:interval===v?"#fff":"#64748B",cursor:"pointer"}}>
                   {l}
                 </button>
               ))}
@@ -9145,7 +9145,7 @@ function PaperTradingFullPage({ user, onBack }){
 
           {/* Precio en vivo */}
           {liveQ&&(
-            <div style={{display:"flex",gap:16,alignItems:"center",padding:"6px 14px",background:"rgba(0,102,255,0.06)",borderBottom:"1px solid rgba(0,102,255,0.1)",flexShrink:0}}>
+            <div style={{display:"flex",gap:16,alignItems:"center",padding:"6px 14px",background:"rgba(15,76,129,0.06)",borderBottom:"1px solid rgba(15,76,129,0.1)",flexShrink:0}}>
               <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#E2E8F0"}}>{fmtUSD(liveQ.price)}</span>
               <span style={{fontWeight:800,fontSize:13,color:liveQ.change>=0?"#00E58F":"#FF4D6A"}}>{liveQ.change>=0?"+":""}{liveQ.change?.toFixed(2)}% hoy</span>
               <span style={{fontSize:11,color:"#00E58F",background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.2)",borderRadius:8,padding:"2px 8px",fontWeight:700}}>✓ En vivo — ${chartTk}</span>
@@ -9271,7 +9271,7 @@ function PaperTradingFullPage({ user, onBack }){
                       </div>
                     ))}
                     <button onClick={refreshPrices}
-                      style={{background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:8,padding:"7px",color:"#0066FF",fontSize:11,fontWeight:600,cursor:"pointer",marginTop:4}}>
+                      style={{background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"7px",color:"#0F4C81",fontSize:11,fontWeight:600,cursor:"pointer",marginTop:4}}>
                       ↻ Actualizar precios
                     </button>
                   </div>
@@ -9292,7 +9292,7 @@ function PaperTradingFullPage({ user, onBack }){
                           {t.action==="buy"?"▲":"▼"}
                         </div>
                         <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontWeight:700,fontSize:11,color:"#E2E8F0"}}>{t.action==="buy"?"COMPRA":"VENTA"} <span style={{fontFamily:"monospace",color:"#0066FF"}}>${t.ticker}</span></div>
+                          <div style={{fontWeight:700,fontSize:11,color:"#E2E8F0"}}>{t.action==="buy"?"COMPRA":"VENTA"} <span style={{fontFamily:"monospace",color:"#0F4C81"}}>${t.ticker}</span></div>
                           <div style={{fontSize:10,color:"#475569"}}>{fmtDate(t.date)}</div>
                         </div>
                         <div style={{textAlign:"right"}}>
@@ -9384,8 +9384,8 @@ function RiskRewardCalc(){
               <span style={{fontSize:14,fontWeight:700,color:r.color,fontFamily:"monospace"}}>{r.val}</span>
             </div>
           ))}
-          <div style={{marginTop:16,padding:"12px",background:"rgba(0,102,255,0.07)",borderRadius:10,border:"1px solid rgba(0,102,255,0.15)",fontSize:12,color:"#94A3B8",lineHeight:1.6}}>
-            💡 <strong style={{color:"#0066FF"}}>Regla de oro:</strong> Solo operar con R:R ≥ 2:1. Así puedes perder el 50% de tus operaciones y seguir siendo rentable.
+          <div style={{marginTop:16,padding:"12px",background:"rgba(15,76,129,0.07)",borderRadius:10,border:"1px solid rgba(15,76,129,0.15)",fontSize:12,color:"#94A3B8",lineHeight:1.6}}>
+            💡 <strong style={{color:"#0F4C81"}}>Regla de oro:</strong> Solo operar con R:R ≥ 2:1. Así puedes perder el 50% de tus operaciones y seguir siendo rentable.
           </div>
         </>) : (
           <div style={{textAlign:"center",padding:"40px 20px",color:"#475569"}}>
@@ -9412,7 +9412,7 @@ function SharpeCalc(){
     const annualMean=mean*12; const annualStd=std*Math.sqrt(12);
     const sharpe=(annualMean-rf)/annualStd;
     const label=sharpe>=2?"Excelente 🏆":sharpe>=1?"Bueno ✅":sharpe>=0.5?"Aceptable ⚠️":sharpe>=0?"Bajo 📉":"Negativo ❌";
-    const color=sharpe>=2?"#00E58F":sharpe>=1?"#0066FF":sharpe>=0.5?"#F59E0B":sharpe>=0?"#FF9F43":"#FF4D6A";
+    const color=sharpe>=2?"#00E58F":sharpe>=1?"#0F4C81":sharpe>=0.5?"#F59E0B":sharpe>=0?"#FF9F43":"#FF4D6A";
     return{sharpe,mean,std,annualMean,annualStd,count:vals.length,label,color};
   },[returns,rfRate]);
 
@@ -9441,7 +9441,7 @@ function SharpeCalc(){
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
         <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>📊 Resultado</h3>
         {result ? (<>
-          <div style={{textAlign:"center",marginBottom:20,padding:"24px",background:`rgba(${result.color==="#00E58F"?"0,229,143":result.color==="#0066FF"?"0,102,255":"245,158,11"},0.07)`,borderRadius:14}}>
+          <div style={{textAlign:"center",marginBottom:20,padding:"24px",background:`rgba(${result.color==="#00E58F"?"0,229,143":result.color==="#0F4C81"?"0,102,255":"245,158,11"},0.07)`,borderRadius:14}}>
             <div style={{fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:1}}>SHARPE RATIO</div>
             <div style={{fontSize:52,fontWeight:900,color:result.color,fontFamily:"monospace"}}>{result.sharpe.toFixed(3)}</div>
             <div style={{fontSize:15,color:result.color,fontWeight:700,marginTop:4}}>{result.label}</div>
@@ -9451,7 +9451,7 @@ function SharpeCalc(){
             {[{min:"< 0",label:"Negativo — peor que el libre de riesgo",color:"#FF4D6A"},
               {min:"0 – 0.5",label:"Bajo — rentable pero con mucho riesgo",color:"#FF9F43"},
               {min:"0.5 – 1",label:"Aceptable — rendimiento decente",color:"#F59E0B"},
-              {min:"1 – 2",label:"Bueno — portafolio eficiente",color:"#0066FF"},
+              {min:"1 – 2",label:"Bueno — portafolio eficiente",color:"#0F4C81"},
               {min:"> 2",label:"Excelente — clase de Warren Buffett",color:"#00E58F"},
             ].map(r=>(
               <div key={r.min} style={{display:"flex",gap:8,alignItems:"center",padding:"5px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
@@ -9520,7 +9520,7 @@ function WinStreakTracker(){
           <input value={newTrade.pnl} onChange={e=>setNewTrade(t=>({...t,pnl:e.target.value}))} placeholder="+250.00" type="number"
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:14,fontFamily:"monospace",outline:"none",boxSizing:"border-box"}}/>
         </div>
-        <button onClick={addTrade} style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:10,padding:"11px",fontSize:14,fontWeight:800,color:"#000",cursor:"pointer",marginBottom:16}}>+ Agregar Operación</button>
+        <button onClick={addTrade} style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:10,padding:"11px",fontSize:14,fontWeight:800,color:"#000",cursor:"pointer",marginBottom:16}}>+ Agregar Operación</button>
         {/* Historial */}
         <div style={{maxHeight:240,overflowY:"auto"}}>
           {[...trades].reverse().map(tr=>(
@@ -9564,7 +9564,7 @@ function WinStreakTracker(){
           <div style={{marginTop:4}}>
             <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#64748B",marginBottom:4}}><span>Win Rate</span><span>{stats.winRate.toFixed(1)}%</span></div>
             <div style={{height:8,background:"rgba(255,77,106,0.2)",borderRadius:20,overflow:"hidden"}}>
-              <div style={{width:`${stats.winRate}%`,height:"100%",background:"linear-gradient(90deg,#0066FF,#00E58F)",borderRadius:20,transition:"width 0.5s ease"}}/>
+              <div style={{width:`${stats.winRate}%`,height:"100%",background:"linear-gradient(90deg,#0F4C81,#00E58F)",borderRadius:20,transition:"width 0.5s ease"}}/>
             </div>
           </div>
         </>) : (
@@ -9648,7 +9648,7 @@ function PortfolioEvolution(){
           <input value={newVal} onChange={e=>setNewVal(e.target.value)} placeholder="12500" type="number"
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
         </div>
-        <button onClick={addEntry} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>+ Agregar</button>
+        <button onClick={addEntry} style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>+ Agregar</button>
       </div>
     </div>
   );
@@ -9700,7 +9700,7 @@ function PriceAlerts(){
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:14,fontFamily:"monospace",outline:"none",boxSizing:"border-box"}}/>
         </div>
         <div style={{display:"flex",alignItems:"flex-end"}}>
-          <button onClick={addAlert} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>+ Crear Alerta</button>
+          <button onClick={addAlert} style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>+ Crear Alerta</button>
         </div>
       </div>
       {/* List */}
@@ -9760,7 +9760,7 @@ function ExportData({posts=[],user}){
   };
 
   const options=[
-    {title:"📋 Todos los Posts del Feed",desc:`${posts.length} posts del feed principal`,fn:exportPosts,color:"#0066FF"},
+    {title:"📋 Todos los Posts del Feed",desc:`${posts.length} posts del feed principal`,fn:exportPosts,color:"#0F4C81"},
     {title:"✍️ Mis Posts",desc:`Solo tus publicaciones en NexoTrade`,fn:exportMisPosts,color:"#00E58F"},
     {title:"📊 Plantilla de Trading Journal",desc:"Hoja Excel preformateada para registrar tus operaciones",fn:()=>{
       const template=[{Fecha:"",Ticker:"",Entrada:"",SL:"",TP:"",Resultado:"",PnL:"",RR:"",Notas:""}];
@@ -9787,8 +9787,8 @@ function ExportData({posts=[],user}){
           </div>
         ))}
       </div>
-      <div style={{marginTop:20,padding:"14px 16px",background:"rgba(0,102,255,0.05)",borderRadius:10,border:"1px solid rgba(0,102,255,0.1)",fontSize:12,color:"#64748B",lineHeight:1.7}}>
-        💡 <strong style={{color:"#0066FF"}}>Cómo usar en Excel:</strong> Abre Excel → Archivo → Importar → selecciona el CSV → codificación UTF-8 → delimitado por comas. Listo.
+      <div style={{marginTop:20,padding:"14px 16px",background:"rgba(15,76,129,0.05)",borderRadius:10,border:"1px solid rgba(15,76,129,0.1)",fontSize:12,color:"#64748B",lineHeight:1.7}}>
+        💡 <strong style={{color:"#0F4C81"}}>Cómo usar en Excel:</strong> Abre Excel → Archivo → Importar → selecciona el CSV → codificación UTF-8 → delimitado por comas. Listo.
       </div>
     </div>
   );
@@ -9838,7 +9838,7 @@ function AdminPicksModal({onClose}){
         {/* Categoría */}
         <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
           {categorias.map(c=>(
-            <button key={c} onClick={()=>setCat(c)} style={{background:cat===c?"rgba(0,102,255,0.2)":"transparent",border:`1px solid ${cat===c?"#0066FF":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"6px 14px",color:cat===c?"#0066FF":"#64748B",cursor:"pointer",fontSize:12,fontWeight:700,textTransform:"capitalize"}}>
+            <button key={c} onClick={()=>setCat(c)} style={{background:cat===c?"rgba(15,76,129,0.2)":"transparent",border:`1px solid ${cat===c?"#0F4C81":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"6px 14px",color:cat===c?"#0F4C81":"#64748B",cursor:"pointer",fontSize:12,fontWeight:700,textTransform:"capitalize"}}>
               {c==="corto"?"⚡ Corto":c==="largo"?"🏦 Largo":c==="dividendos"?"💰 Dividendos":"₿ Crypto"}
             </button>
           ))}
@@ -9879,7 +9879,7 @@ function AdminPicksModal({onClose}){
         </>}
 
         <div style={{display:"flex",gap:10}}>
-          <button onClick={save} disabled={saving} style={{flex:1,background:ok?"#00D26A":"linear-gradient(135deg,#0066FF,#0055DD)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer"}}>
+          <button onClick={save} disabled={saving} style={{flex:1,background:ok?"#00D26A":"linear-gradient(135deg,#0F4C81,#0C3D68)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer"}}>
             {saving?"Guardando...":ok?"✅ Guardado!":"+ Agregar Pick"}
           </button>
           <button onClick={clearWeek} style={{background:"rgba(255,77,106,0.1)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:10,padding:"12px 16px",color:"#FF4D6A",fontSize:13,fontWeight:700,cursor:"pointer"}}>🗑️ Limpiar semana</button>
@@ -9990,7 +9990,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
                 <span style={{color:"#64748B"}}>Target <strong style={{color:"#00D26A"}}>{p.target}</strong></span>
                 <span style={{color:"#64748B"}}>Stop <strong style={{color:"#FF4D6A"}}>{p.stop_loss}</strong></span>
               </div>
-              <div style={{marginTop:8,background:"rgba(245,158,11,0.08)",borderRadius:8,height:6}}><div style={{width:`${p.confianza}%`,height:"100%",borderRadius:8,background:"linear-gradient(90deg,#F59E0B,#D97706)"}}/></div>
+              <div style={{marginTop:8,background:"rgba(245,158,11,0.08)",borderRadius:8,height:6}}><div style={{width:`${p.confianza}%`,height:"100%",borderRadius:8,background:"linear-gradient(90deg,#F59E0B,#0F5E68)"}}/></div>
             </div>
           ))}
         </div>
@@ -10002,7 +10002,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
           <div style={{fontSize:36,marginBottom:10}}>✦</div>
           <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Stock Pick IA PREMIUM</h2>
           <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>10 picks cada lunes — entrada, target, stop loss y análisis completo.</p>
-          <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(217,119,6,0.45)",width:"100%",marginBottom:10}}>
+          <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(15,94,104,0.45)",width:"100%",marginBottom:10}}>
             ✦ Hazte PREMIUM — $9.99/mes
           </button>
           <div style={{fontSize:11,color:"#475569"}}>✓ Cancela cuando quieras · ✓ Acceso inmediato</div>
@@ -10015,10 +10015,10 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
     {from:"#F59E0B",to:"#B45309",glow:"#F59E0B"},
     {from:"#06B6D4",to:"#0891B2",glow:"#06B6D4"},
     {from:"#10B981",to:"#059669",glow:"#10B981"},
-    {from:"#F59E0B",to:"#D97706",glow:"#F59E0B"},
+    {from:"#F59E0B",to:"#0F5E68",glow:"#F59E0B"},
     {from:"#EF4444",to:"#DC2626",glow:"#EF4444"},
     {from:"#EC4899",to:"#DB2777",glow:"#EC4899"},
-    {from:"#0066FF",to:"#0066FF",glow:"#0066FF"},
+    {from:"#0F4C81",to:"#0F4C81",glow:"#0F4C81"},
     {from:"#14B8A6",to:"#0D9488",glow:"#14B8A6"},
   ];
 
@@ -10169,10 +10169,10 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
           </div>
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
             <div style={{textAlign:"center",background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(180,83,9,0.1))",border:"1px solid rgba(139,92,246,0.25)",borderRadius:14,padding:"10px 18px"}}>
-              <div style={{fontWeight:900,background:"linear-gradient(135deg,#FCD34D,#D97706)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:32,lineHeight:1}}>{(data?.corto?.length||0)+(data?.largo?.length||0)+(data?.crypto?.length||0)+(data?.dividendos?.length||0)}</div>
+              <div style={{fontWeight:900,background:"linear-gradient(135deg,#FCD34D,#0F5E68)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontSize:32,lineHeight:1}}>{(data?.corto?.length||0)+(data?.largo?.length||0)+(data?.crypto?.length||0)+(data?.dividendos?.length||0)}</div>
               <div style={{fontSize:9,color:"#475569",fontWeight:700,letterSpacing:0.8}}>PICKS</div>
             </div>
-            {isAdmin && <button onClick={()=>setShowAdmin(true)} style={{background:"rgba(0,102,255,0.12)",border:"1px solid rgba(0,102,255,0.25)",borderRadius:8,padding:"6px 12px",color:"#38BDF8",fontSize:11,fontWeight:700,cursor:"pointer"}}>✏️ Admin</button>}
+            {isAdmin && <button onClick={()=>setShowAdmin(true)} style={{background:"rgba(15,76,129,0.12)",border:"1px solid rgba(15,76,129,0.25)",borderRadius:8,padding:"6px 12px",color:"#38BDF8",fontSize:11,fontWeight:700,cursor:"pointer"}}>✏️ Admin</button>}
           </div>
         </div>
       </div>
@@ -10186,7 +10186,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
             Nuestro equipo está analizando el mercado esta semana.<br/>
             <strong style={{color:"#FCD34D"}}>Los picks se publican cada lunes a las 9AM</strong> (hora EST).
           </div>
-          <div style={{background:"rgba(217,119,6,0.1)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:12,padding:"12px 20px",display:"inline-block"}}>
+          <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.2)",borderRadius:12,padding:"12px 20px",display:"inline-block"}}>
             <div style={{fontSize:12,color:"#FCD34D",fontWeight:700}}>Próxima publicación</div>
             <div style={{fontSize:16,color:"#F1F5F9",fontWeight:900,marginTop:4}}>
               {(()=>{const d=new Date();const day=d.getDay();const diff=day===0?1:8-day;d.setDate(d.getDate()+diff);return d.toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"});})()}
@@ -10270,7 +10270,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
       {!isPremium && <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
         <span style={{fontSize:24}}>✦</span>
         <div style={{flex:1,fontSize:13,color:"#1A5FAD"}}><strong style={{color:"#0C447C"}}>PREMIUM ($9.99/mes)</strong> {isEN?" — get up to 40% off all courses.":" — obtén hasta 40% de descuento en todos los cursos."}</div>
-        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{isEN?"See PREMIUM →":"Ver PREMIUM →"}</button>
+        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{isEN?"See PREMIUM →":"Ver PREMIUM →"}</button>
       </div>}
 
       {/* Cursos — Próximamente */}
@@ -10286,7 +10286,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
           ))}
         </div>
         <a href="mailto:info@nexotradeia.com?subject=Quiero saber cuando salgan los cursos de NexoTrade"
-          style={{display:"inline-block",background:"linear-gradient(135deg,#D97706,#B45309)",borderRadius:12,padding:"12px 28px",color:"#fff",fontSize:14,fontWeight:700,textDecoration:"none"}}>
+          style={{display:"inline-block",background:"linear-gradient(135deg,#0F5E68,#B45309)",borderRadius:12,padding:"12px 28px",color:"#fff",fontSize:14,fontWeight:700,textDecoration:"none"}}>
           📬 {isEN?"Notify me when they are ready":"Notifícame cuando estén listos"}
         </a>
       </div>
@@ -10562,7 +10562,7 @@ const ECON_2026 = [
 
 // ── COMMODITIES PAGE ──────────────────────────────────────────────────────────
 const COMMODITIES = [
-  {id:"GC=F", name:"Gold",         ticker:"XAU", color:"#d97706", cat:"Metals",      unit:"USD/oz"},
+  {id:"GC=F", name:"Gold",         ticker:"XAU", color:"#0F5E68", cat:"Metals",      unit:"USD/oz"},
   {id:"SI=F", name:"Silver",       ticker:"XAG", color:"#94a3b8", cat:"Metals",      unit:"USD/oz"},
   {id:"HG=F", name:"Copper",       ticker:"HG",  color:"#ea580c", cat:"Metals",      unit:"USD/lb"},
   {id:"PL=F", name:"Platinum",     ticker:"XPT", color:"#8b5cf6", cat:"Metals",      unit:"USD/oz"},
@@ -10662,14 +10662,14 @@ function CommoditiesPage(){
           </div>
           <div style={{color:"var(--c-muted2)",fontSize:12,marginTop:2}}>
             {lastUp?`Updated ${lastUp}`:"Loading..."}
-            <button onClick={fetchPrices} style={{marginLeft:8,background:"transparent",border:"none",color:"#0066FF",fontSize:12,cursor:"pointer",padding:0,fontFamily:"inherit"}}>⟳ Refresh</button>
+            <button onClick={fetchPrices} style={{marginLeft:8,background:"transparent",border:"none",color:"#0F4C81",fontSize:12,cursor:"pointer",padding:0,fontFamily:"inherit"}}>⟳ Refresh</button>
           </div>
         </div>
         {/* Filters */}
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {cats.map(c=>(
             <button key={c} onClick={()=>setCat(c)}
-              style={{padding:"6px 14px",borderRadius:20,border:`1.5px solid ${cat===c?"#0066FF":"var(--c-border)"}`,background:cat===c?"#0066FF":"var(--c-card)",color:cat===c?"#fff":"var(--c-muted2)",fontWeight:700,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>
+              style={{padding:"6px 14px",borderRadius:20,border:`1.5px solid ${cat===c?"#0F4C81":"var(--c-border)"}`,background:cat===c?"#0F4C81":"var(--c-card)",color:cat===c?"#fff":"var(--c-muted2)",fontWeight:700,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>
               {c==="All"?"All":c==="Metals"?"Metals":c==="Energy"?"Energy":"Agriculture"}
             </button>
           ))}
@@ -10841,7 +10841,7 @@ function EconCalendarPage({lang="es"}) {
           const imp     = IMP[ev.imp] || IMP.low;
           const hasActual = ev.actual && ev.actual !== "—" && ev.actual !== null;
           return(
-            <div key={i} style={{background:isToday?"rgba(0,102,255,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past&&!hasActual?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past&&!hasActual?0.55:1,display:"grid",gridTemplateColumns:"140px 1fr 150px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none",transition:"opacity 0.2s"}}>
+            <div key={i} style={{background:isToday?"rgba(15,76,129,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past&&!hasActual?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past&&!hasActual?0.55:1,display:"grid",gridTemplateColumns:"140px 1fr 150px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none",transition:"opacity 0.2s"}}>
               <div>
                 <div style={{fontSize:12,fontWeight:700,color:past?C.muted:C.text}}>{fmtDate(ev.date)}</div>
                 <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{ev.country} {ev.cat}</div>
@@ -10853,7 +10853,7 @@ function EconCalendarPage({lang="es"}) {
                   <span style={{fontSize:10,fontWeight:700,color:imp.color,background:imp.bg,borderRadius:10,padding:"2px 8px"}}>{imp.label}</span>
                   {isToday && <span style={{fontSize:10,fontWeight:700,color:C.accent,background:C.accentDim,borderRadius:10,padding:"2px 8px"}}>HOY</span>}
                   {hasActual && <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>✓ PUBLICADO</span>}
-                  {ev.cat==="Banco Central" && <span style={{fontSize:10,fontWeight:700,color:"#D97706",background:"rgba(217,119,6,0.09)",borderRadius:10,padding:"2px 8px"}}>🏦 FED</span>}
+                  {ev.cat==="Banco Central" && <span style={{fontSize:10,fontWeight:700,color:"#0F5E68",background:"rgba(15,94,104,0.09)",borderRadius:10,padding:"2px 8px"}}>🏦 FED</span>}
                 </div>
               </div>
               <div style={{textAlign:"right"}}>
@@ -11350,7 +11350,7 @@ function ScreenerPage({isPremium, onNeedPremium}) {
           <div style={{fontSize:36,marginBottom:10}}>🔬</div>
           <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Stock Screener PREMIUM</h2>
           <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>Filtra 10,000+ acciones por momentum, valoración, dividendo y crecimiento.</p>
-          <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(217,119,6,0.45)",width:"100%",marginBottom:10}}>
+          <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(15,94,104,0.45)",width:"100%",marginBottom:10}}>
             ✦ Activar PREMIUM — $9.99/mes
           </button>
           <div style={{fontSize:11,color:"#475569"}}>✓ Cancela cuando quieras · ✓ Acceso inmediato</div>
@@ -11376,7 +11376,7 @@ function ScreenerPage({isPremium, onNeedPremium}) {
         </div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           {SCREENER_PRESETS.map(({k,label})=>(
-            <button key={k} onClick={()=>setScreen(k)} style={{background:screen===k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",color:screen===k?"#fff":C.muted,border:`1.5px solid ${screen===k?"transparent":C.border}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s",boxShadow:screen===k?"0 4px 12px rgba(217,119,6,0.3)":"none"}}>{label}</button>
+            <button key={k} onClick={()=>setScreen(k)} style={{background:screen===k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",color:screen===k?"#fff":C.muted,border:`1.5px solid ${screen===k?"transparent":C.border}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s",boxShadow:screen===k?"0 4px 12px rgba(15,94,104,0.3)":"none"}}>{label}</button>
           ))}
         </div>
       </div>
@@ -11492,7 +11492,7 @@ const GURUS = [
   },
   {
     id:"dalio", name:"Ray Dalio", firm:"Bridgewater Associates", emoji:"🌊",
-    color:"#0066FF", aum:"$124B", updated:"Q1 2026", style:"All Weather · Macro global",
+    color:"#0F4C81", aum:"$124B", updated:"Q1 2026", style:"All Weather · Macro global",
     bio:"Fundador del mayor hedge fund del mundo. Creador de la estrategia 'All Weather' basada en equilibrio de riesgo entre activos.",
     holdings:[
       {ticker:"SPY",   name:"S&P 500 ETF",          pct:15.2, shares:"4.8M",   val:"$18.8B",chg:"HOLD",  chgDir:0},
@@ -11527,8 +11527,8 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
   if(view==="grid") return(
     <div style={{maxWidth:980,margin:"0 auto"}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(0,102,255,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:20,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(0,102,255,0.12) 0%,transparent 70%)"}}/>
+      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(15,76,129,0.12) 0%,transparent 70%)"}}/>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <span style={{fontSize:32}}>🏛️</span>
           <div>
@@ -12067,7 +12067,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
         <div style={{marginBottom:10}}>
           {/* Toggle button */}
           <button onClick={()=>setShowTgPanel(v=>!v)}
-            style={{display:"flex",alignItems:"center",gap:7,background:tgConfig.enabled?"rgba(0,102,255,0.08)":"rgba(255,255,255,0.04)",border:`1px solid ${tgConfig.enabled?"rgba(0,102,255,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:10,padding:"6px 14px",fontSize:11,fontWeight:700,color:tgConfig.enabled?"#29B6F6":"#64748B",cursor:"pointer",transition:"all 0.2s"}}>
+            style={{display:"flex",alignItems:"center",gap:7,background:tgConfig.enabled?"rgba(15,76,129,0.08)":"rgba(255,255,255,0.04)",border:`1px solid ${tgConfig.enabled?"rgba(15,76,129,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:10,padding:"6px 14px",fontSize:11,fontWeight:700,color:tgConfig.enabled?"#29B6F6":"#64748B",cursor:"pointer",transition:"all 0.2s"}}>
             <span style={{fontSize:14}}>✈️</span>
             <span>{isEN?"Telegram Alerts":"Alertas Telegram"}</span>
             <span style={{background:tgConfig.enabled?"#00D26A":"#64748B",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>{tgConfig.enabled?"ACTIVO":"OFF"}</span>
@@ -12075,7 +12075,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
           </button>
           {/* Config panel */}
           {showTgPanel&&(
-            <div style={{marginTop:8,background:"rgba(10,14,26,0.97)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:14,padding:"16px 18px",display:"flex",flexDirection:"column",gap:12}}>
+            <div style={{marginTop:8,background:"rgba(10,14,26,0.97)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:14,padding:"16px 18px",display:"flex",flexDirection:"column",gap:12}}>
               <div style={{fontSize:12,fontWeight:800,color:"#F1F5F9",letterSpacing:0.3,display:"flex",alignItems:"center",gap:8}}>
                 ⚙️ {isEN?"Configure automatic Telegram alerts":"Configurar alertas automáticas a Telegram"}
                 <span style={{fontSize:10,color:"#475569",fontWeight:500}}>— solo llegan las que cumplan todos los filtros</span>
@@ -12097,7 +12097,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                   <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                     {[{l:"$5M",v:5e6},{l:"$10M",v:1e7},{l:"$20M",v:2e7},{l:"$30M",v:3e7},{l:"$50M+",v:5e7},{l:"$100M+",v:1e8}].map(opt=>(
                       <button key={opt.v} onClick={()=>setTgConfig(c=>({...c,minPrem:opt.v}))}
-                        style={{background:tgConfig.minPrem===opt.v?"rgba(0,102,255,0.2)":"transparent",border:`1px solid ${tgConfig.minPrem===opt.v?"rgba(0,102,255,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 9px",fontSize:11,fontWeight:700,color:tgConfig.minPrem===opt.v?"#29B6F6":"#64748B",cursor:"pointer"}}>
+                        style={{background:tgConfig.minPrem===opt.v?"rgba(15,76,129,0.2)":"transparent",border:`1px solid ${tgConfig.minPrem===opt.v?"rgba(15,76,129,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 9px",fontSize:11,fontWeight:700,color:tgConfig.minPrem===opt.v?"#29B6F6":"#64748B",cursor:"pointer"}}>
                         {opt.l}
                       </button>
                     ))}
@@ -12290,7 +12290,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
         {FILTERS.map(f=>(
           <button key={f.k} onClick={()=>setFilter(f.k)}
-            style={{background:filter===f.k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",border:`1.5px solid ${filter===f.k?"transparent":C.border}`,borderRadius:20,padding:"7px 16px",fontSize:12,fontWeight:700,color:filter===f.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:filter===f.k?"0 4px 12px rgba(217,119,6,0.3)":"none"}}>
+            style={{background:filter===f.k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",border:`1.5px solid ${filter===f.k?"transparent":C.border}`,borderRadius:20,padding:"7px 16px",fontSize:12,fontWeight:700,color:filter===f.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:filter===f.k?"0 4px 12px rgba(15,94,104,0.3)":"none"}}>
             {f.l}
           </button>
         ))}
@@ -12577,7 +12577,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                         <tbody>
                           {etfFlows.map((e,i)=>(
                             <tr key={e.name} style={{borderBottom:`1px solid ${C.border}`,background:i%2===0?"transparent":"rgba(255,255,255,0.015)"}}
-                              onMouseEnter={ev=>ev.currentTarget.style.background="rgba(0,102,255,0.05)"}
+                              onMouseEnter={ev=>ev.currentTarget.style.background="rgba(15,76,129,0.05)"}
                               onMouseLeave={ev=>ev.currentTarget.style.background=i%2===0?"transparent":"rgba(255,255,255,0.015)"}>
                               <td style={{padding:"8px 12px"}}>
                                 <span style={{fontWeight:800,fontSize:13,color:C.text}}>{e.icon} {e.name}</span>
@@ -12610,7 +12610,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
                     <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>🏆 {isEN?"Smart Money — Largest BTC Holders":"Manos Fuertes — Mayores Tenedores BTC"}</div>
                     <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener noreferrer"
-                      style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"3px 10px",textDecoration:"none",display:"flex",alignItems:"center",gap:4}}>
+                      style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:6,padding:"3px 10px",textDecoration:"none",display:"flex",alignItems:"center",gap:4}}>
                       📊 BitInfoCharts ↗
                     </a>
                   </div>
@@ -12748,7 +12748,7 @@ const GURUS_13F = [
       {t:"BIDU", n:"Baidu Inc. ADR",       pct:9.4,  act:"Reduce", actPct:-6.0, shares:1100000,  rPrice:88.20,  val:97020000,   w52l:75.40, w52h:118.60},
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:6.5,  act:"Hold",   actPct:null, shares:490000,   rPrice:387.20, val:189728000,  w52l:337.00,w52h:418.00},
     ]},
-  { id:"nelson_peltz", name:"Nelson Peltz", fund:"Trian Fund Management", emoji:"⚔️", color:"#6366F1",
+  { id:"nelson_peltz", name:"Nelson Peltz", fund:"Trian Fund Management", emoji:"⚔️", color:"#0F5E68",
     aum:"$8.4B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:9,
     holdings:[
       {t:"DIS",  n:"Walt Disney Co.",      pct:24.5, act:"Add",    actPct:15.3, shares:6200000,  rPrice:100.40, val:622480000,  w52l:83.91, w52h:123.74},
@@ -12778,7 +12778,7 @@ const GURUS_13F = [
       {t:"SPOT", n:"Spotify Technology",   pct:7.1,  act:"New",    actPct:null, shares:1200000,  rPrice:618.40, val:742080000,  w52l:290.71,w52h:685.00},
       {t:"MA",   n:"Mastercard Inc.",       pct:6.4,  act:"Hold",   actPct:null, shares:1500000,  rPrice:538.20, val:807300000,  w52l:455.00,w52h:576.50},
     ]},
-  { id:"valueact", name:"ValueAct Capital", fund:"ValueAct Capital Management", emoji:"🎯", color:"#0066FF",
+  { id:"valueact", name:"ValueAct Capital", fund:"ValueAct Capital Management", emoji:"🎯", color:"#0F4C81",
     aum:"$7.1B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:11,
     holdings:[
       {t:"MSFT", n:"Microsoft Corp.",      pct:34.2, act:"Hold",   actPct:null, shares:5800000,  rPrice:448.30, val:2600140000, w52l:355.51,w52h:551.05},
@@ -13256,9 +13256,9 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
             {pxUpdated && <span style={{fontSize:10,color:"#334155"}}>Act. {pxUpdated}</span>}
             <button onClick={fetchLivePrices} disabled={pxLoading}
-              style={{display:"flex",alignItems:"center",gap:5,background:"rgba(99,102,241,0.15)",border:"1px solid rgba(99,102,241,0.3)",borderRadius:20,padding:"5px 14px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"all 0.2s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.25)"}
-              onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.15)"}>
+              style={{display:"flex",alignItems:"center",gap:5,background:"rgba(15,94,104,0.15)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"5px 14px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"all 0.2s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(15,94,104,0.25)"}
+              onMouseLeave={e=>e.currentTarget.style.background="rgba(15,94,104,0.15)"}>
               <span style={{display:"inline-block",animation:pxLoading?"spin 1s linear infinite":"none"}}>🔄</span>
               {pxLoading?"Actualizando…":"Refresh precios"}
             </button>
@@ -13274,7 +13274,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
         {TABS.map(t => (
           <button key={t.k} onClick={()=>{ if(t.vip&&!isPremium){onNeedPremium();return;} setTab(t.k); }}
-            style={{background:tab===t.k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",border:`1.5px solid ${tab===t.k?"transparent":C.border}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(217,119,6,0.3)":"none",display:"flex",alignItems:"center",gap:6}}>
+            style={{background:tab===t.k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",border:`1.5px solid ${tab===t.k?"transparent":C.border}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(15,94,104,0.3)":"none",display:"flex",alignItems:"center",gap:6}}>
             {t.l}
             {t.vip&&<span style={{fontSize:9,fontWeight:800,background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:0.5}}>PREMIUM</span>}
           </button>
@@ -13344,12 +13344,12 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                     {/* Lock overlay — solo en el 6to elemento */}
                     {isLocked && idx === FREE_LIMIT && (
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:2}}>
-                        <div style={{background:"rgba(12,10,30,0.96)",border:"1px solid rgba(217,119,6,0.4)",borderRadius:16,padding:"18px 22px",textAlign:"center",maxWidth:220,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
+                        <div style={{background:"rgba(12,10,30,0.96)",border:"1px solid rgba(15,94,104,0.4)",borderRadius:16,padding:"18px 22px",textAlign:"center",maxWidth:220,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
                           <div style={{fontSize:26,marginBottom:6}}>🔒</div>
                           <div style={{fontWeight:800,color:"#fff",fontSize:13,marginBottom:5}}>{GURUS_13F.length - FREE_LIMIT} {isEN?"more gurus locked":"gurús más bloqueados"}</div>
                           <div style={{fontSize:11,color:"#94a3b8",marginBottom:12}}>{isEN?"Unlock them all: Buffett, Ackman, Burry, ARK and more":"Desbloquea todos: Buffett, Ackman, Burry, ARK y más"}</div>
                           <button onClick={onNeedPremium}
-                            style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:800,cursor:"pointer",width:"100%"}}>
+                            style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:800,cursor:"pointer",width:"100%"}}>
                             ✦ Ver todos — $9.99/mes
                           </button>
                           <div style={{fontSize:10,color:"#475569",marginTop:5}}>{isEN?"$9.99/mo · Cancel anytime":"$9.99/mes · Cancela cuando quieras"}</div>
@@ -13362,11 +13362,11 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             </div>
             {/* Banner CTA si es free */}
             {!isPremium && (
-              <div style={{background:"linear-gradient(135deg,rgba(217,119,6,0.1),rgba(99,102,241,0.07))",border:"1px solid rgba(217,119,6,0.22)",borderRadius:16,padding:"18px 24px",marginTop:16,textAlign:"center"}}>
+              <div style={{background:"linear-gradient(135deg,rgba(15,94,104,0.1),rgba(15,94,104,0.07))",border:"1px solid rgba(15,94,104,0.22)",borderRadius:16,padding:"18px 24px",marginTop:16,textAlign:"center"}}>
                 <div style={{fontWeight:800,color:"#FCD34D",fontSize:14,marginBottom:4}}>🏛️ Accede a los {GURUS_13F.length} portafolios institucionales con PREMIUM</div>
                 <div style={{fontSize:12,color:"#64748b",marginBottom:12}}>Buffett · Ackman · Burry · ARK · Insiders SEC · Dark Pools</div>
                 <button onClick={onNeedPremium}
-                  style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(217,119,6,0.4)"}}>
+                  style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(15,94,104,0.4)"}}>
                   ✦ {isEN?"Go PREMIUM — $9.99/mo →":"Activar PREMIUM — $9.99/mes →"}
                 </button>
               </div>
@@ -13480,7 +13480,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               </button>
             ))}
             <button onClick={()=>{ setArkData(null); setArkLoad(true); setArkErr(false); fetch(`/api/ark?fund=${arkFund}`).then(r=>r.json()).then(d=>{if(d?.holdings?.length>0){setArkData(d);}else setArkErr(true);setArkLoad(false);}).catch(()=>{setArkErr(true);setArkLoad(false);}); }}
-              style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4,background:"rgba(99,102,241,0.1)",border:`1px solid rgba(99,102,241,0.25)`,borderRadius:16,padding:"4px 12px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer"}}>
+              style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4,background:"rgba(15,94,104,0.1)",border:`1px solid rgba(15,94,104,0.25)`,borderRadius:16,padding:"4px 12px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer"}}>
               🔄 Refresh
             </button>
             <span style={{fontSize:11,color:C.muted2}}>🚀 Cathie Wood · {arkData?.date||"Actualizado diariamente"}</span>
@@ -13560,9 +13560,9 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               <span style={{fontSize:11,color:"#334155"}}>Compras y ventas de ejecutivos · SEC EDGAR Form 4</span>
             </div>
             <button onClick={()=>{setInsLoad(true);fetch("/api/insiders").then(r=>r.json()).then(d=>{setInsiders(d);setInsLoad(false);}).catch(()=>setInsLoad(false));}}
-              style={{display:"flex",alignItems:"center",gap:5,background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"background 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.2)"}
-              onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.1)"}>
+              style={{display:"flex",alignItems:"center",gap:5,background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.25)",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"background 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(15,94,104,0.2)"}
+              onMouseLeave={e=>e.currentTarget.style.background="rgba(15,94,104,0.1)"}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
               Actualizar
             </button>
@@ -13570,7 +13570,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
 
           {insLoad ? (
             <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
-              <div style={{width:36,height:36,borderRadius:"50%",border:"3px solid rgba(99,102,241,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 12px"}}/>
+              <div style={{width:36,height:36,borderRadius:"50%",border:"3px solid rgba(15,94,104,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 12px"}}/>
               <div style={{fontSize:13}}>Cargando datos de SEC EDGAR...</div>
             </div>
           ) : (insiders?.transactions||[]).length === 0 ? (
@@ -13650,7 +13650,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <span style={{fontSize:12,color:C.muted}}>{isEN?"Stock trades under the STOCK Act · Public data":"Operaciones bursátiles bajo el STOCK Act · Datos públicos"}</span>
               <a href="https://www.capitoltrades.com/trades" target="_blank" rel="noopener noreferrer"
-                style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"2px 8px",textDecoration:"none"}}>
+                style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:6,padding:"2px 8px",textDecoration:"none"}}>
                 📡 Capitol Trades ↗
               </a>
             </div>
@@ -13663,12 +13663,12 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               ))}
               {["all","D","R"].map(v=>(
                 <button key={v} onClick={()=>setCongParty(v)}
-                  style={{padding:"5px 12px",borderRadius:8,border:`1px solid ${congParty===v?(v==="D"?"#0066FF":"#EF4444"):C.border}`,background:congParty===v?"rgba(0,102,255,0.07)":C.card,color:congParty===v?(v==="D"?"#0066FF":"#EF4444"):C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  style={{padding:"5px 12px",borderRadius:8,border:`1px solid ${congParty===v?(v==="D"?"#0F4C81":"#EF4444"):C.border}`,background:congParty===v?"rgba(15,76,129,0.07)":C.card,color:congParty===v?(v==="D"?"#0F4C81":"#EF4444"):C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>
                   {v==="all"?"Ambos":v==="D"?"🔵 Dem":"🔴 Rep"}
                 </button>
               ))}
               <button onClick={()=>{setCongLoad(true);fetch("/api/congress").then(r=>r.json()).then(d=>{setCongress(d.trades||[]);setCongLoad(false);}).catch(()=>setCongLoad(false));}}
-                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer"}}>
+                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.25)",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer"}}>
                 🔄 Actualizar
               </button>
             </div>
@@ -13836,7 +13836,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                     {t:"CAT",r:"$50K–$100K"},{t:"ADBE",r:"$50K–$100K"},{t:"AMAT",r:"$50K–$100K"},
                     {t:"BLK",r:"$50K–$100K"},{t:"CRM",r:"$50K–$100K"},{t:"HD",r:"$50K–$100K"},
                   ].map(({t,r})=>(
-                    <div key={t} style={{background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.18)",borderRadius:7,padding:"4px 9px",cursor:"pointer"}}
+                    <div key={t} style={{background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.18)",borderRadius:7,padding:"4px 9px",cursor:"pointer"}}
                       onClick={()=>{ if(typeof setTickerPage==="function") setTickerPage(t); }}>
                       <div style={{fontFamily:"monospace",fontWeight:800,fontSize:11,color:"#38BDF8"}}>{t}</div>
                       <div style={{fontSize:9,color:"#334155",marginTop:1}}>{r}</div>
@@ -13885,11 +13885,11 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             ).sort((a,b)=>b[1]-a[1]).slice(0,3);
             return(
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-                <div style={{background:"linear-gradient(135deg,rgba(217,119,6,0.08),rgba(0,102,255,0.05))",border:"1px solid rgba(217,119,6,0.2)",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{background:"linear-gradient(135deg,rgba(15,94,104,0.08),rgba(15,76,129,0.05))",border:"1px solid rgba(15,94,104,0.2)",borderRadius:12,padding:"12px 14px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
                     <span style={{fontSize:18}}>👑</span>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>Pelosi Tracker</span>
-                    <span style={{fontSize:10,color:"#FCD34D",background:"rgba(217,119,6,0.1)",borderRadius:6,padding:"1px 6px",marginLeft:"auto"}}>{pelosiTrades.length} trades</span>
+                    <span style={{fontSize:10,color:"#FCD34D",background:"rgba(15,94,104,0.1)",borderRadius:6,padding:"1px 6px",marginLeft:"auto"}}>{pelosiTrades.length} trades</span>
                   </div>
                   {pelosiTrades.slice(0,2).map((t,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5,padding:"5px 8px",background:"rgba(255,255,255,0.03)",borderRadius:7}}>
@@ -13900,7 +13900,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                   ))}
                   {pelosiTrades.length===0&&<div style={{fontSize:12,color:C.muted}}>Sin trades recientes</div>}
                 </div>
-                <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(0,102,255,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(15,76,129,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:"12px 14px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
                     <span style={{fontSize:16}}>🔥</span>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>{isEN?"Most Active":"Más Activos"}</span>
@@ -13920,7 +13920,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           {/* Table */}
           {congLoad ? (
             <div style={{textAlign:"center",padding:"50px",color:C.muted}}>
-              <div style={{width:32,height:32,borderRadius:"50%",border:"3px solid rgba(99,102,241,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 10px"}}/>
+              <div style={{width:32,height:32,borderRadius:"50%",border:"3px solid rgba(15,94,104,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 10px"}}/>
               <div style={{fontSize:13}}>Cargando datos del Congreso...</div>
             </div>
           ) : congress.length===0 ? (
@@ -13940,17 +13940,17 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 .filter(t=>congParty==="all"||t.party===congParty)
                 .map((t,i)=>(
                   <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(140px,1fr) 55px 80px minmax(120px,1fr) 90px 80px",gap:0,padding:"10px 14px",borderBottom:`1px solid ${C.border}`,background:i%2===0?C.card2:"transparent",transition:"background 0.1s",minWidth:540}}
-                    onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.05)"}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.05)"}
                     onMouseLeave={e=>e.currentTarget.style.background=i%2===0?C.card2:"transparent"}>
                     <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0}}>
                       <span style={{fontSize:12,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.name}</span>
                       <span style={{fontSize:10,color:C.muted}}>{t.house}{t.state?` · ${t.state}`:""}</span>
                     </div>
                     <div style={{display:"flex",alignItems:"center"}}>
-                      <span style={{fontSize:11,fontWeight:800,color:t.party==="D"?"#0066FF":t.party==="R"?"#EF4444":"#94A3B8",background:t.party==="D"?"rgba(0,102,255,0.15)":t.party==="R"?"rgba(239,68,68,0.15)":"rgba(148,163,184,0.1)",borderRadius:5,padding:"2px 6px"}}>{t.party||"?"}</span>
+                      <span style={{fontSize:11,fontWeight:800,color:t.party==="D"?"#0F4C81":t.party==="R"?"#EF4444":"#94A3B8",background:t.party==="D"?"rgba(15,76,129,0.15)":t.party==="R"?"rgba(239,68,68,0.15)":"rgba(148,163,184,0.1)",borderRadius:5,padding:"2px 6px"}}>{t.party||"?"}</span>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:5}}>
-                      <span style={{fontSize:11,fontWeight:800,background:"rgba(0,102,255,0.1)",color:C.accent,borderRadius:5,padding:"2px 6px",fontFamily:"monospace"}}>{t.ticker}</span>
+                      <span style={{fontSize:11,fontWeight:800,background:"rgba(15,76,129,0.1)",color:C.accent,borderRadius:5,padding:"2px 6px",fontFamily:"monospace"}}>{t.ticker}</span>
                       <span style={{fontSize:13,fontWeight:900,color:t.type==="buy"?"#10B981":"#EF4444"}}>{t.type==="buy"?"↑":"↓"}</span>
                     </div>
                     <div style={{display:"flex",alignItems:"center"}}>
@@ -14042,7 +14042,7 @@ const IDEAS_DATA = [
 
 // ── BOT PERSONAS — traders ficticios que postean análisis ────────────────────
 const BOT_PERSONAS = [
-  {user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    style:"technical"},
+  {user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#0F5E68", badge:"Pro Trader",    style:"technical"},
   {user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       style:"fundamental"},
   {user:"AlexTradingMX",    avatar:"⚡",  avatarColor:"#F59E0B", badge:"Day Trader",    style:"momentum"},
   {user:"LucasMercados",    avatar:"🦁",  avatarColor:"#16A34A", badge:"Macro",         style:"macro"},
@@ -14050,7 +14050,7 @@ const BOT_PERSONAS = [
   {user:"MarcoBTC",         avatar:"₿",  avatarColor:"#F7931A", badge:"Crypto Trader", style:"crypto"},
   {user:"AndresTradePro",   avatar:"🎯",  avatarColor:"#EF4444", badge:"Options",       style:"options"},
   {user:"IsabelAnalysis",   avatar:"📊",  avatarColor:"#F59E0B", badge:"Quant",         style:"quant"},
-  {user:"RicardoInvest",    avatar:"🏆",  avatarColor:"#D97706", badge:"Swing Trader",  style:"swing"},
+  {user:"RicardoInvest",    avatar:"🏆",  avatarColor:"#0F5E68", badge:"Swing Trader",  style:"swing"},
   {user:"NataliaTrader",    avatar:"🌟",  avatarColor:"#10B981", badge:"Growth",        style:"growth"},
 ];
 
@@ -14070,25 +14070,25 @@ const BOT_TEXT_TEMPLATES = {
 
 // ── POSTS CASUALES de traders ficticios (reacciones de mercado) ──────────────
 const CASUAL_BOT_POSTS = [
-  {id:"c1", user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"BTC",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$BTC breaking key resistance 💥 Who else is in this trade? I've been long since $95k — this is heading to $120k 📈", likes:143, comments:31, reposts:22, time:"2h ago", tags:["BTC","Crypto"]},
+  {id:"c1", user:"CarlosInvierte",    avatar:"👨‍💼", avatarColor:"#0F5E68", badge:"Pro Trader",    ticker:"BTC",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$BTC breaking key resistance 💥 Who else is in this trade? I've been long since $95k — this is heading to $120k 📈", likes:143, comments:31, reposts:22, time:"2h ago", tags:["BTC","Crypto"]},
   {id:"c2", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"NVDA", sentiment:"bull", showChart:false, text:"$NVDA just confirmed support at $128. Textbook setup. Those who entered yesterday are already up +4% 🙌 Next stop $145", likes:98,  comments:19, reposts:14, time:"4h ago", tags:["NVDA","AI"]},
   {id:"c3", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"ETH",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$ETH broke $2,800 on volume 🔥 The ETH ETF narrative is coming back. Adding on every pullback. Short-term target: $3,200 🎯", likes:211, comments:44, reposts:38, time:"1h ago", tags:["ETH","Crypto","ETF"]},
   {id:"c4", user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"SPY",  sentiment:"bull", showChart:false, text:"$SPY closing near all-time highs. The market is ignoring every macro noise. Bulls in control 🐂 Don't fight the trend.", likes:77,  comments:12, reposts:9,  time:"6h ago", tags:["SPY","Market"]},
   {id:"c5", user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"TSLA", sentiment:"bear", showChart:true,  chartType:"line",   text:"$TSLA selling off despite the broader market bounce. Bearish divergence. Not convinced by the long setup here 📉 Waiting for confirmation before adding.", likes:54,  comments:23, reposts:7,  time:"3h ago", tags:["TSLA","Analysis"]},
-  {id:"c6", user:"CarlosInvierte",   avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"NVDA", sentiment:"bull", showChart:true,  chartType:"candle", text:"I've been tracking $NVDA since $120 and the setup is perfect. NVIDIA holds absolute dominance in AI GPUs with Blackwell architecture. Data center demand from hyperscalers shows zero deceleration. Microsoft, Google and Amazon are competing for every chip available. Gross margins just hit 78% — a new all-time record. My target: $185, stop at $102 🎯\n\nThis week is key: Computex presentation + US jobs data Friday. If NFP prints positive, $NVDA easily breaks $150.", likes:284, comments:67, reposts:52, time:"2026-05-15", tags:["NVDA","AI","Chips"]},
+  {id:"c6", user:"CarlosInvierte",   avatar:"👨‍💼", avatarColor:"#0F5E68", badge:"Pro Trader",    ticker:"NVDA", sentiment:"bull", showChart:true,  chartType:"candle", text:"I've been tracking $NVDA since $120 and the setup is perfect. NVIDIA holds absolute dominance in AI GPUs with Blackwell architecture. Data center demand from hyperscalers shows zero deceleration. Microsoft, Google and Amazon are competing for every chip available. Gross margins just hit 78% — a new all-time record. My target: $185, stop at $102 🎯\n\nThis week is key: Computex presentation + US jobs data Friday. If NFP prints positive, $NVDA easily breaks $150.", likes:284, comments:67, reposts:52, time:"2026-05-15", tags:["NVDA","AI","Chips"]},
   {id:"c7", user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"META", sentiment:"bull", showChart:true,  chartType:"line",   text:"Analysis thread: Why $META (Meta Platforms) is my largest position in 2026?\n\n1️⃣ Operating margin hit 42% — best-in-class across the entire S&P 500\n2️⃣ Llama 4 outperforms GPT-4o on reasoning benchmarks — open-source and free\n3️⃣ Reels monetizes at 2x the rate of Stories two years ago\n4️⃣ Reality Labs losing less money each quarter — the metaverse is maturing\n5️⃣ $50B share buyback this year\n\nI don't understand how anyone can be out of this position. 12-month target: $750 📊", likes:342, comments:89, reposts:71, time:"2026-05-18", tags:["META","AI","Value"]},
   {id:"c8", user:"AndresTradePro",   avatar:"🎯",   avatarColor:"#EF4444", badge:"Options",       ticker:"META", sentiment:"bull", showChart:false, text:"Bought $META June calls. The company is printing money with AI-powered ads. If $600 holds, this trade goes 3x 🚀", likes:167, comments:35, reposts:28, time:"5h ago", tags:["META","Options"]},
   {id:"c9", user:"MarcoBTC",         avatar:"₿",   avatarColor:"#F7931A", badge:"Crypto Trader", ticker:"BTC",  sentiment:"bull", showChart:true,  chartType:"candle", text:"Full technical analysis of $BTC (Bitcoin) — current situation:\n\n📈 BTC closed above $100K for the 3rd consecutive week. This is psychologically huge. $100K is now support, not resistance.\n\nOn-chain: wallets holding 1+ BTC hit an all-time high this week. Paper hands are gone. Only conviction HODLers remain.\n\nUpcoming catalyst: US Congress votes on the Bitcoin Reserve Act in July. If it passes, states can hold BTC as reserve — massive institutional demand.\n\nMy position: Long from $92K. Immediate target $115K, then $135K by year-end. Stop at $94K 🔒", likes:521, comments:134, reposts:98, time:"2026-05-22", tags:["BTC","OnChain","Crypto"]},
-  {id:"c10",user:"RicardoInvest",    avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"SOL",  sentiment:"bull", showChart:false, text:"$SOL completed its pullback to support. Perfect buy zone between $155-$160. Swing target: $195 in 3-4 weeks ⚡ Risk/reward of 4:1", likes:201, comments:42, reposts:31, time:"1h ago", tags:["SOL","Crypto"]},
+  {id:"c10",user:"RicardoInvest",    avatar:"🏆",   avatarColor:"#0F5E68", badge:"Swing Trader",  ticker:"SOL",  sentiment:"bull", showChart:false, text:"$SOL completed its pullback to support. Perfect buy zone between $155-$160. Swing target: $195 in 3-4 weeks ⚡ Risk/reward of 4:1", likes:201, comments:42, reposts:31, time:"1h ago", tags:["SOL","Crypto"]},
   {id:"c11",user:"SofiaWallSt",      avatar:"👩‍💻", avatarColor:"#EC4899", badge:"Analyst",       ticker:"AMZN", sentiment:"bull", showChart:false, text:"$AMZN AWS just reported 21% growth QoQ. That's an ACCELERATION. The AI infrastructure buildout is just beginning. Buy the dip, always. 🚀", likes:189, comments:41, reposts:33, time:"3h ago", tags:["AMZN","AWS","Cloud"]},
   {id:"c12",user:"AlexTradingMX",    avatar:"⚡",   avatarColor:"#F59E0B", badge:"Day Trader",    ticker:"QQQ",  sentiment:"bull", showChart:false, text:"$QQQ breaking all-time highs with low put/call ratio. The melt-up scenario is playing out. Don't overthink it — trend is your friend. 🐂", likes:93,  comments:18, reposts:12, time:"5h ago", tags:["QQQ","Nasdaq","Trend"]},
   {id:"c13",user:"IsabelAnalysis",   avatar:"📊",   avatarColor:"#F59E0B", badge:"Quant",         ticker:"PLTR", sentiment:"bull", showChart:true,  chartType:"line",   text:"Quant signal: $PLTR showing 92% bullish probability over 30 days. Government contract pipeline is unprecedented. Anyone else positioned? 📊", likes:147, comments:32, reposts:21, time:"2h ago", tags:["PLTR","Government","AI"]},
   {id:"c14",user:"ValentinaFinance", avatar:"💎",   avatarColor:"#06B6D4", badge:"Value Investor", ticker:"MSFT", sentiment:"bull", showChart:true,  chartType:"line",   text:"Deep dive on $MSFT (Microsoft) — why this is the safest AI bet in the market:\n\n🔷 Azure AI growing 35% YoY — and ACCELERATING\n🔷 Copilot deployed in 85% of Fortune 500 companies\n🔷 GitHub Copilot crossed 2M paid users (up from 1M six months ago)\n🔷 Operating margin: 46% — best-in-class for a company this size\n🔷 Free cash flow: $75B annually\n\nThe OpenAI partnership gives them a moat that nobody can replicate in under 5 years. While everyone chases NVDA, smart money is quietly accumulating MSFT.\n\nEntry: $452 | Target: $530 | Stop: $425 💼", likes:398, comments:87, reposts:64, time:"2026-05-20", tags:["MSFT","AI","Cloud"]},
   {id:"c15",user:"NataliaTrader",    avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"COIN", sentiment:"bull", showChart:false, text:"Let me tell you why $COIN (Coinbase) is the most undervalued stock in crypto right now 🧵\n\nBitcoin hit $107K. Every $10K BTC moves = approximately +15-20% for COIN. Simple math.\n\nBut there's more:\n✅ Coinbase is the official custodian for 9 of 11 Bitcoin ETFs in the US\n✅ Base (their L2 network) just crossed 10M monthly active users\n✅ Institutional revenue now bigger than retail for first time ever\n✅ Regulatory clarity in the US finally happening in 2026\n\nStreet consensus target: $350. Current price: ~$262. That's 33% upside with Bitcoin as the macro tailwind.\n\nThis is not financial advice, but you get the idea 😉", likes:445, comments:112, reposts:83, time:"2026-05-25", tags:["COIN","BTC","Crypto"]},
   {id:"c16",user:"LucasMercados",    avatar:"🦁",   avatarColor:"#16A34A", badge:"Macro",         ticker:"GLD",  sentiment:"bull", showChart:false, text:"🧵 MACRO VIEW — Why gold ($GLD) is the most important trade of 2026:\n\nCentral banks bought more gold in Q1 2026 than any quarter in history. China (+60 tonnes), India (+34T), Poland (+18T).\n\nThe dollar weakens due to the structural fiscal deficit — $36 trillion in debt and rising. Every 1% drop in USD = ~1.5% rise in gold.\n\nGeopolitics: post-Ukraine sanctions taught countries that dollar reserves can be frozen. Gold can't.\n\nTechnical: $GLD confirmed weekly breakout. Short-term target: $345. 2026 target: $380.\n\nRecommended portfolio allocation: 5-10% in gold/GLD as a permanent hedge 🥇", likes:267, comments:58, reposts:44, time:"2026-05-28", tags:["GLD","Gold","Macro"]},
-  {id:"c17",user:"CarlosInvierte",  avatar:"👨‍💼", avatarColor:"#D97706", badge:"Pro Trader",    ticker:"PLTR", sentiment:"bull", showChart:true,  chartType:"candle", text:"$PLTR (Palantir) is the trade of the decade in defense + AI. Just won a $480M contract with the US Army. Commercial US revenue +127% YoY. Peter Thiel remains the largest shareholder behind insiders.\n\nWhat I love: GUARANTEED government contracts. That doesn't disappear in a recession.\n\nPosition: long from $98. Added more this week at $125. Target: $165 before August 🔐", likes:312, comments:78, reposts:61, time:"2026-05-29", tags:["PLTR","Defense","AI"]},
+  {id:"c17",user:"CarlosInvierte",  avatar:"👨‍💼", avatarColor:"#0F5E68", badge:"Pro Trader",    ticker:"PLTR", sentiment:"bull", showChart:true,  chartType:"candle", text:"$PLTR (Palantir) is the trade of the decade in defense + AI. Just won a $480M contract with the US Army. Commercial US revenue +127% YoY. Peter Thiel remains the largest shareholder behind insiders.\n\nWhat I love: GUARANTEED government contracts. That doesn't disappear in a recession.\n\nPosition: long from $98. Added more this week at $125. Target: $165 before August 🔐", likes:312, comments:78, reposts:61, time:"2026-05-29", tags:["PLTR","Defense","AI"]},
   {id:"c18",user:"IsabelAnalysis",  avatar:"📊",   avatarColor:"#F59E0B", badge:"Quant",         ticker:"AVGO", sentiment:"bull", showChart:true,  chartType:"line",   text:"Quant screen caught $AVGO (Broadcom) at a key inflection point. Here's the data:\n\n📊 Custom AI chip revenue growing 220% YoY — hyperscalers are moving away from NVIDIA for some workloads\n📊 VMware integration adding $4B+ in annual FCF\n📊 Net margin: 51% — extraordinarily high for a hardware company\n📊 Management just raised guidance for the 4th consecutive quarter\n\nMy model gives 87% probability of outperforming S&P 500 over next 90 days. Entry zone: $185-$195. Target: $245 🎯", likes:234, comments:56, reposts:41, time:"2026-05-27", tags:["AVGO","Chips","AI"]},
-  {id:"c19",user:"RicardoInvest",   avatar:"🏆",   avatarColor:"#D97706", badge:"Swing Trader",  ticker:"AMD",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$AMD textbook setup 📈 Broke resistance at $165 on 3x average volume. Next level: $185-$190.\n\nFundamentals: MI300X selling out immediately. Data center clients who can't get NVIDIA are buying AMD. Lisa Su is the best CEO in semiconductors. Cheaper valuation than $NVDA playing the same market.\n\nTrade: Long $165, stop $154, target $190. Risk/reward 2.3:1 ⚡", likes:189, comments:44, reposts:32, time:"2026-05-30", tags:["AMD","Chips","Semiconductors"]},
+  {id:"c19",user:"RicardoInvest",   avatar:"🏆",   avatarColor:"#0F5E68", badge:"Swing Trader",  ticker:"AMD",  sentiment:"bull", showChart:true,  chartType:"candle", text:"$AMD textbook setup 📈 Broke resistance at $165 on 3x average volume. Next level: $185-$190.\n\nFundamentals: MI300X selling out immediately. Data center clients who can't get NVIDIA are buying AMD. Lisa Su is the best CEO in semiconductors. Cheaper valuation than $NVDA playing the same market.\n\nTrade: Long $165, stop $154, target $190. Risk/reward 2.3:1 ⚡", likes:189, comments:44, reposts:32, time:"2026-05-30", tags:["AMD","Chips","Semiconductors"]},
   {id:"c20",user:"NataliaTrader",   avatar:"🌟",   avatarColor:"#10B981", badge:"Growth",        ticker:"DDOG", sentiment:"bull", showChart:false, text:"$DDOG (Datadog) is the infrastructure monitoring play nobody is talking about 🧵\n\nEvery AI application needs observability. Every cloud workload needs monitoring. Datadog captures both.\n\nQ1 2026: Revenue +27% YoY, NRR 118%, 3,600+ customers spending $100K+/year.\n\nThe AI story: as companies build AI apps, they NEED Datadog to understand what's happening. This is a pick-and-shovel play on the AI boom without paying NVDA multiples.\n\nEntry: $135 | Target: $185 | Stop: $118. This one runs quietly while everyone watches the flashy names 💎", likes:378, comments:91, reposts:67, time:"2026-05-26", tags:["DDOG","Cloud","AI"]},
 ];
 
@@ -14421,7 +14421,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
           {/* Bottom row: horizon + risk + days */}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:8}}>
             <div style={{display:"flex",gap:6}}>
-              <span style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.2)",borderRadius:5,padding:"2px 7px",fontSize:9,color:"#818CF8",fontWeight:700}}>⏱ {idea.horizon}</span>
+              <span style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.2)",borderRadius:5,padding:"2px 7px",fontSize:9,color:"#818CF8",fontWeight:700}}>⏱ {idea.horizon}</span>
               <span style={{background:`rgba(${RISK_COLOR[idea.riskN]==="#10B981"?"16,185,129":RISK_COLOR[idea.riskN]==="#F59E0B"?"245,158,11":"239,68,68"},0.1)`,borderRadius:5,padding:"2px 7px",fontSize:9,color:RISK_COLOR[idea.riskN],fontWeight:700}}>
                 ⚡ Riesgo {RISK_LABEL[idea.riskN]}
               </span>
@@ -14526,8 +14526,8 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
   return (
     <div style={{maxWidth:1100,margin:"0 auto"}}>
       {/* ── HEADER ── */}
-      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(99,102,241,0.2)",borderRadius:20,padding:"18px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:"radial-gradient(circle,rgba(99,102,241,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(15,94,104,0.2)",borderRadius:20,padding:"18px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:"radial-gradient(circle,rgba(15,94,104,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
           <span style={{fontSize:28}}>💡</span>
           <div>
@@ -14538,7 +14538,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
             {[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}].map(s=>(
               <div key={s.l} style={{background:s.bg,border:`1px solid ${s.c}30`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:800,color:s.c}}>{s.l}</div>
             ))}
-            {loading && <div style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.3)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8"}}>⟳ Cargando precios…</div>}
+            {loading && <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8"}}>⟳ Cargando precios…</div>}
           </div>
         </div>
       </div>
@@ -14549,7 +14549,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         <div style={{display:"flex",gap:4}}>
           {[["todos","🌐 Todos"],["compra","↑ Compras"],["venta","↓ Ventas"],["neutro","→ Neutro"]].map(([k,l])=>(
             <button key={k} onClick={()=>{setFilter(k);setPage(1);}}
-              style={{background:filter===k?"linear-gradient(135deg,#6366F1,#4F46E5)":"transparent",border:`1.5px solid ${filter===k?"transparent":C.border}`,borderRadius:20,padding:"6px 13px",fontSize:11,fontWeight:700,color:filter===k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
+              style={{background:filter===k?"linear-gradient(135deg,#0F5E68,#4F46E5)":"transparent",border:`1.5px solid ${filter===k?"transparent":C.border}`,borderRadius:20,padding:"6px 13px",fontSize:11,fontWeight:700,color:filter===k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
               {l}
             </button>
           ))}
@@ -14558,7 +14558,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         {/* Risk filter */}
         {[["todos","⚡ Todo riesgo"],["1","🟢 Bajo"],["2","🟡 Medio"],["3","🔴 Alto"]].map(([k,l])=>(
           <button key={k} onClick={()=>{setRiskF(k);setPage(1);}}
-            style={{background:riskF===k?"rgba(99,102,241,0.2)":"transparent",border:`1.5px solid ${riskF===k?"#6366F1":C.border}`,borderRadius:20,padding:"6px 12px",fontSize:11,fontWeight:700,color:riskF===k?"#A5B4FC":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
+            style={{background:riskF===k?"rgba(15,94,104,0.2)":"transparent",border:`1.5px solid ${riskF===k?"#0F5E68":C.border}`,borderRadius:20,padding:"6px 12px",fontSize:11,fontWeight:700,color:riskF===k?"#A5B4FC":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
             {l}
           </button>
         ))}
@@ -14585,12 +14585,12 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
                 </div>
                 {isLocked && idx === 3 && (
                   <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"rgba(10,14,26,0.3)",borderRadius:18,backdropFilter:"blur(2px)",zIndex:2}}>
-                    <div style={{background:"rgba(12,10,30,0.97)",border:"1px solid rgba(217,119,6,0.4)",borderRadius:16,padding:"20px 24px",textAlign:"center",maxWidth:240,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
+                    <div style={{background:"rgba(12,10,30,0.97)",border:"1px solid rgba(15,94,104,0.4)",borderRadius:16,padding:"20px 24px",textAlign:"center",maxWidth:240,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
                       <div style={{fontSize:28,marginBottom:8}}>🔒</div>
                       <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:6}}>+{filtered.length - 3} ideas bloqueadas</div>
                       <div style={{fontSize:12,color:"#94a3b8",marginBottom:14}}>{isEN?"Go PREMIUM to see all signals, theses and price targets":"Hazte PREMIUM para ver todas las señales, tesis y precios objetivo"}</div>
                       <button onClick={onNeedPremium}
-                        style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"10px 20px",fontSize:13,fontWeight:800,cursor:"pointer",width:"100%"}}>
+                        style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"10px 20px",fontSize:13,fontWeight:800,cursor:"pointer",width:"100%"}}>
                         ✦ Ver todas — $9.99/mes
                       </button>
                       <div style={{fontSize:10,color:"#475569",marginTop:6}}>{isEN?"$9.99/mo · Cancel anytime":"$9.99/mes · Cancela cuando quieras"}</div>
@@ -14603,11 +14603,11 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         </div>
         {/* Banner debajo si hay más páginas y es free */}
         {!isPremium && page === 1 && (
-          <div style={{background:"linear-gradient(135deg,rgba(217,119,6,0.12),rgba(99,102,241,0.08))",border:"1px solid rgba(217,119,6,0.25)",borderRadius:16,padding:"20px 24px",marginTop:4,marginBottom:20,textAlign:"center"}}>
+          <div style={{background:"linear-gradient(135deg,rgba(15,94,104,0.12),rgba(15,94,104,0.08))",border:"1px solid rgba(15,94,104,0.25)",borderRadius:16,padding:"20px 24px",marginTop:4,marginBottom:20,textAlign:"center"}}>
             <div style={{fontWeight:800,color:"#FCD34D",fontSize:15,marginBottom:6}}>✦ {isEN?`Unlock ${IDEAS_DATA.length - 3} more ideas with PREMIUM`:`Desbloquea ${IDEAS_DATA.length - 3} ideas más con PREMIUM`}</div>
             <div style={{fontSize:13,color:"#64748b",marginBottom:14}}>{isEN?"Buy/sell signals, full thesis, price target and stop loss updated":"Señales de compra/venta, tesis completa, precio objetivo y stop loss actualizados"}zado en tiempo real</div>
             <button onClick={onNeedPremium}
-              style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"12px 32px",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(217,119,6,0.4)"}}>
+              style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"12px 32px",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(15,94,104,0.4)"}}>
               ✦ {isEN?"Go PREMIUM — $9.99/mo →":"Activar PREMIUM — $9.99/mes →"}
             </button>
           </div>
@@ -14622,7 +14622,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:20}}>
           {Array.from({length:totalPages},(_,i)=>i+1).map(n=>(
             <button key={n} onClick={()=>setPage(n)}
-              style={{width:34,height:34,borderRadius:8,border:`1.5px solid ${page===n?"#6366F1":C.border}`,background:page===n?"linear-gradient(135deg,#6366F1,#4F46E5)":"transparent",color:page===n?"#fff":C.muted,fontWeight:700,fontSize:13,cursor:"pointer"}}>
+              style={{width:34,height:34,borderRadius:8,border:`1.5px solid ${page===n?"#0F5E68":C.border}`,background:page===n?"linear-gradient(135deg,#0F5E68,#4F46E5)":"transparent",color:page===n?"#fff":C.muted,fontWeight:700,fontSize:13,cursor:"pointer"}}>
               {n}
             </button>
           ))}
@@ -15098,7 +15098,7 @@ function CryptoPerformancePage({ lang="es" }) {
           <div style={{display:"flex",gap:2,background:"rgba(255,255,255,0.05)",borderRadius:9,padding:3}}>
             {PERIODS.map(p => (
               <button key={p.id} onClick={()=>setPeriod(p.id)}
-                style={{background:period===p.id?"#0066FF":"transparent",color:period===p.id?"#fff":"#64748b",border:"none",borderRadius:6,padding:"5px 14px",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
+                style={{background:period===p.id?"#0F4C81":"transparent",color:period===p.id?"#fff":"#64748b",border:"none",borderRadius:6,padding:"5px 14px",fontWeight:700,fontSize:12,cursor:"pointer",transition:"all 0.15s"}}>
                 {p.label}
               </button>
             ))}
@@ -15125,7 +15125,7 @@ function CryptoPerformancePage({ lang="es" }) {
               <div>{isEN?"Refreshes in":"Actualiza en"} {countdown}s</div>
             </div>}
             <button onClick={fetchAll} disabled={loading}
-              style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:8,color:"#0066FF",padding:"6px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:8,color:"#0F4C81",padding:"6px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
               {loading?"⏳":"🔄"} {isEN?"Refresh":"Actualizar"}
             </button>
           </div>
@@ -15225,7 +15225,7 @@ function CryptoPerformancePage({ lang="es" }) {
                     {label:isEN?"Volume 24H":"Vol. 24H", col:"total_volume", w:120},
                   ].map(h=>(
                     <th key={h.col} onClick={()=>{ if(sortCol===h.col) setSortAsc(!sortAsc); else{setSortCol(h.col);setSortAsc(false);} }}
-                      style={{textAlign:"left",padding:"8px 10px",fontSize:10,fontWeight:700,color:sortCol===h.col?"#0066FF":"#64748b",letterSpacing:0.5,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap",width:h.w}}>
+                      style={{textAlign:"left",padding:"8px 10px",fontSize:10,fontWeight:700,color:sortCol===h.col?"#0F4C81":"#64748b",letterSpacing:0.5,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap",width:h.w}}>
                       {h.label}{sortCol===h.col?(sortAsc?" ↑":" ↓"):""}
                     </th>
                   ))}
@@ -15244,7 +15244,7 @@ function CryptoPerformancePage({ lang="es" }) {
                   const rowBg  = i%2===0?"rgba(255,255,255,0.02)":"transparent";
                   return (
                     <tr key={coin.id} style={{background:rowBg,transition:"background 0.1s"}}
-                      onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.05)"}
+                      onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.05)"}
                       onMouseLeave={e=>e.currentTarget.style.background=rowBg}>
                       <td style={{padding:"9px 10px",color:"#475569",fontSize:11,fontFamily:"monospace"}}>{coin.market_cap_rank}</td>
                       <td style={{padding:"9px 10px"}}>
@@ -15485,9 +15485,9 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
       {/* ─ ALERT MODAL ─ */}
       {showAlertModal && (
         <div style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setShowAlertModal(false)}>
-          <div style={{background:"#0f172a",border:"1px solid rgba(0,102,255,0.3)",borderRadius:18,padding:28,width:320,boxShadow:"0 24px 64px rgba(0,0,0,0.8)"}} onClick={e=>e.stopPropagation()}>
+          <div style={{background:"#0f172a",border:"1px solid rgba(15,76,129,0.3)",borderRadius:18,padding:28,width:320,boxShadow:"0 24px 64px rgba(0,0,0,0.8)"}} onClick={e=>e.stopPropagation()}>
             <div style={{fontWeight:800,fontSize:16,color:"#f1f5f9",marginBottom:18}}>🔔 {isEN?"Set Price Alert":"Crear Alerta de Precio"}</div>
-            <div style={{fontSize:12,color:"#94a3b8",marginBottom:6}}>{isEN?"Asset":"Activo"}: <span style={{color:asset.color,fontWeight:700}}>{asset.emoji} {asset.sym}</span> · {isEN?"Current":"Actual"}: <span style={{color:"#0066FF",fontWeight:700}}>{fmtP(spot)}</span></div>
+            <div style={{fontSize:12,color:"#94a3b8",marginBottom:6}}>{isEN?"Asset":"Activo"}: <span style={{color:asset.color,fontWeight:700}}>{asset.emoji} {asset.sym}</span> · {isEN?"Current":"Actual"}: <span style={{color:"#0F4C81",fontWeight:700}}>{fmtP(spot)}</span></div>
             <select value={alertDir} onChange={e=>setAlertDir(e.target.value)}
               style={{width:"100%",background:"#1e293b",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#f1f5f9",padding:"9px 12px",fontSize:13,marginBottom:10,outline:"none"}}>
               <option value="above">{isEN?"Price goes ABOVE":"Precio sube SOBRE"}</option>
@@ -15511,7 +15511,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
               if(!alertPrice) return;
               setMyAlerts(p=>[...p,{dir:alertDir,price:parseFloat(alertPrice),asset:asset.sym}]);
               setAlertPrice(""); setShowAlertModal(false);
-            }} style={{width:"100%",background:"linear-gradient(135deg,#0066FF,#0070aa)",border:"none",borderRadius:10,color:"#fff",padding:"11px",fontWeight:700,fontSize:14,cursor:"pointer"}}>
+            }} style={{width:"100%",background:"linear-gradient(135deg,#0F4C81,#0070aa)",border:"none",borderRadius:10,color:"#fff",padding:"11px",fontWeight:700,fontSize:14,cursor:"pointer"}}>
               {isEN?"Set Alert":"Crear Alerta"}
             </button>
           </div>
@@ -15565,7 +15565,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
             )}
             {/* Refresh */}
             <button onClick={fetchData} disabled={loading}
-              style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:9,color:"#0066FF",padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+              style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:9,color:"#0F4C81",padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
               {loading?"⏳":"🔄"} {isEN?"Refresh":"Actualizar"}
             </button>
             {/* Alert */}
@@ -15619,14 +15619,14 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
             {id:"expiries",label:isEN?"📅 Expirations":"📅 Vencimientos"},
           ].map(t=>(
             <button key={t.id} onClick={()=>setTab(t.id)}
-              style={{background:"none",border:"none",borderBottom:`2px solid ${tab===t.id?"#0066FF":"transparent"}`,color:tab===t.id?"#0066FF":"#64748b",padding:"12px 18px",fontSize:12,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
+              style={{background:"none",border:"none",borderBottom:`2px solid ${tab===t.id?"#0F4C81":"transparent"}`,color:tab===t.id?"#0F4C81":"#64748b",padding:"12px 18px",fontSize:12,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
               {t.label}
             </button>
           ))}
           <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,padding:"8px 0"}}>
             <label style={{fontSize:11,color:"#64748b",fontWeight:600,display:"flex",alignItems:"center",gap:6,cursor:"pointer"}}>
               <input type="checkbox" checked={filterATM} onChange={e=>setFilterATM(e.target.checked)}
-                style={{accentColor:"#0066FF"}}/>
+                style={{accentColor:"#0F4C81"}}/>
               {isEN?"ATM ±30%":"ATM ±30%"}
             </label>
           </div>
@@ -15693,10 +15693,10 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
                     const isATM=spot&&Math.abs(strike-spot)/spot<0.01;
                     const isITMCall=spot&&strike<spot;
                     const isITMPut =spot&&strike>spot;
-                    const rowBg=isATM?"rgba(0,102,255,0.12)":isITMCall?"rgba(34,197,94,0.04)":isITMPut?"rgba(248,113,113,0.04)":"transparent";
+                    const rowBg=isATM?"rgba(15,76,129,0.12)":isITMCall?"rgba(34,197,94,0.04)":isITMPut?"rgba(248,113,113,0.04)":"transparent";
                     return (
                       <tr key={strike} style={{background:rowBg,transition:"background 0.15s"}}
-                        onMouseEnter={e=>e.currentTarget.style.background=isATM?"rgba(0,102,255,0.18)":"rgba(255,255,255,0.04)"}
+                        onMouseEnter={e=>e.currentTarget.style.background=isATM?"rgba(15,76,129,0.18)":"rgba(255,255,255,0.04)"}
                         onMouseLeave={e=>e.currentTarget.style.background=rowBg}>
                         <td style={{...tdSt,color:"#22c55e"}}>{call?fmtN(call.delta):"—"}</td>
                         <td style={{...tdSt,color:"#22c55e"}}>{call?fmtOI(call.oi):"—"}</td>
@@ -15705,9 +15705,9 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
                         <td style={{...tdSt,color:"rgba(34,197,94,0.7)"}}>{call&&call.bidUSD>0?`$${call.bidUSD.toFixed(0)}`:"—"}</td>
                         <td style={{...tdSt,color:"rgba(34,197,94,0.9)"}}>{call&&call.askUSD>0?`$${call.askUSD.toFixed(0)}`:"—"}</td>
                         <td style={{...tdSt,textAlign:"center",fontWeight:isATM?800:600,fontSize:isATM?13:11,
-                          color:isATM?"#0066FF":isITMCall?"rgba(34,197,94,0.9)":isITMPut?"rgba(248,113,113,0.9)":"#94a3b8",
+                          color:isATM?"#0F4C81":isITMCall?"rgba(34,197,94,0.9)":isITMPut?"rgba(248,113,113,0.9)":"#94a3b8",
                           background:"rgba(148,163,184,0.04)",borderLeft:"1px solid rgba(255,255,255,0.06)",borderRight:"1px solid rgba(255,255,255,0.06)"}}>
-                          {isATM && <span style={{display:"block",fontSize:8,color:"#0066FF",letterSpacing:0.5,marginBottom:1}}>◆ ATM</span>}
+                          {isATM && <span style={{display:"block",fontSize:8,color:"#0F4C81",letterSpacing:0.5,marginBottom:1}}>◆ ATM</span>}
                           {maxPain===strike && <span style={{display:"block",fontSize:8,color:"#a78bfa",letterSpacing:0.5,marginBottom:1}}>★ MAX PAIN</span>}
                           {fmtP(strike)}
                         </td>
@@ -15741,7 +15741,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
         {tab==="oi" && (
           <div>
             <div style={{marginBottom:16,display:"flex",alignItems:"center",gap:20}}>
-              <div style={{fontSize:13,color:"#94a3b8"}}>{isEN?"Open Interest by strike price for expiry":"Open Interest por strike — vencimiento"} <span style={{color:"#0066FF",fontWeight:700}}>{selExpiry?fmtExp(selExpiry):""}</span></div>
+              <div style={{fontSize:13,color:"#94a3b8"}}>{isEN?"Open Interest by strike price for expiry":"Open Interest por strike — vencimiento"} <span style={{color:"#0F4C81",fontWeight:700}}>{selExpiry?fmtExp(selExpiry):""}</span></div>
               <div style={{display:"flex",gap:16,marginLeft:"auto"}}>
                 <span style={{fontSize:11,fontWeight:700,color:"#22c55e"}}>■ Calls {fmtOI(callOI)} {asset.sym}</span>
                 <span style={{fontSize:11,fontWeight:700,color:"#f87171"}}>■ Puts {fmtOI(putOI)} {asset.sym}</span>
@@ -15763,7 +15763,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
                   return (
                     <div key={strike} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}>
                       <div style={{width:90,textAlign:"right",fontSize:11,fontWeight:isATM?800:isMP?700:500,
-                        color:isATM?"#0066FF":isMP?"#a78bfa":"#94a3b8",flexShrink:0}}>
+                        color:isATM?"#0F4C81":isMP?"#a78bfa":"#94a3b8",flexShrink:0}}>
                         {isATM?"◆ ":isMP?"★ ":""}{fmtP(strike)}
                       </div>
                       {/* Calls bar (right) */}
@@ -15837,12 +15837,12 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
                   return (
                     <div key={strike} style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,padding:"3px 0"}}>
                       <div style={{width:100,textAlign:"right",fontSize:11,fontWeight:isMP?800:isATM?700:400,
-                        color:isMP?"#a78bfa":isATM?"#0066FF":"#64748b",flexShrink:0}}>
+                        color:isMP?"#a78bfa":isATM?"#0F4C81":"#64748b",flexShrink:0}}>
                         {isMP?"★ ":isATM?"◆ ":""}{fmtP(strike)}
                       </div>
                       <div style={{flex:1,height:16,background:"rgba(255,255,255,0.04)",borderRadius:4,overflow:"hidden"}}>
                         <div style={{height:"100%",width:`${pain/maxPainVal*100}%`,
-                          background:isMP?"linear-gradient(90deg,#7c3aed,#a78bfa)":isATM?"linear-gradient(90deg,#0070aa,#0066FF)":"linear-gradient(90deg,#334155,#475569)",
+                          background:isMP?"linear-gradient(90deg,#7c3aed,#a78bfa)":isATM?"linear-gradient(90deg,#0070aa,#0F4C81)":"linear-gradient(90deg,#334155,#475569)",
                           borderRadius:4,transition:"width 0.4s"}}/>
                       </div>
                       <div style={{width:80,fontSize:10,color:isMP?"#a78bfa":"#475569",textAlign:"right",flexShrink:0,fontFamily:"monospace"}}>
@@ -15888,10 +15888,10 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
                     const isSel=exp===selExpiry;
                     return (
                       <tr key={exp} onClick={()=>{setSelExpiry(exp);setTab("chain");}}
-                        style={{cursor:"pointer",background:isSel?"rgba(0,102,255,0.08)":"transparent",transition:"background 0.1s"}}
-                        onMouseEnter={e=>e.currentTarget.style.background=isSel?"rgba(0,102,255,0.12)":"rgba(255,255,255,0.03)"}
-                        onMouseLeave={e=>e.currentTarget.style.background=isSel?"rgba(0,102,255,0.08)":"transparent"}>
-                        <td style={{...tdSt,textAlign:"left",fontWeight:isSel?700:400,color:isSel?"#0066FF":"#f1f5f9"}}>{fmtExp(exp)}{isSel?" ◆":""}</td>
+                        style={{cursor:"pointer",background:isSel?"rgba(15,76,129,0.08)":"transparent",transition:"background 0.1s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background=isSel?"rgba(15,76,129,0.12)":"rgba(255,255,255,0.03)"}
+                        onMouseLeave={e=>e.currentTarget.style.background=isSel?"rgba(15,76,129,0.08)":"transparent"}>
+                        <td style={{...tdSt,textAlign:"left",fontWeight:isSel?700:400,color:isSel?"#0F4C81":"#f1f5f9"}}>{fmtExp(exp)}{isSel?" ◆":""}</td>
                         <td style={{...tdSt,color:dte<=7?"#f59e0b":dte<=30?"#94a3b8":"#64748b"}}>{dte}d</td>
                         <td style={{...tdSt,color:"#22c55e"}}>{fmtOI(cOI)}</td>
                         <td style={{...tdSt,color:"#f87171"}}>{fmtOI(pOI)}</td>
@@ -15932,15 +15932,15 @@ function CryptoHubPage({ isPremium, onNeedPremium, lang="es", defaultSection="pe
   return (
     <div style={{background:"#090e1a",minHeight:"100vh",fontFamily:"system-ui,-apple-system,sans-serif"}}>
       {/* ── TOP SECTION SWITCHER ── */}
-      <div style={{background:"#0a0f1e",borderBottom:"2px solid rgba(0,102,255,0.18)",padding:"0 24px",display:"flex",gap:0}}>
+      <div style={{background:"#0a0f1e",borderBottom:"2px solid rgba(15,76,129,0.18)",padding:"0 24px",display:"flex",gap:0}}>
         {[
           {id:"performance", label:"₿ " + (isEN?"Crypto Performance":"Performance Crypto"), icon:"📊"},
           {id:"options",     label:"📈 " + (isEN?"Crypto Options":"Opciones Crypto"),        icon:"⚙️"},
         ].map(s=>(
           <button key={s.id} onClick={()=>setSection(s.id)}
             style={{background:"none",border:"none",
-              borderBottom:`3px solid ${section===s.id?"#0066FF":"transparent"}`,
-              color:section===s.id?"#0066FF":"#64748b",
+              borderBottom:`3px solid ${section===s.id?"#0F4C81":"transparent"}`,
+              color:section===s.id?"#0F4C81":"#64748b",
               padding:"14px 28px",fontSize:14,fontWeight:section===s.id?800:500,
               cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",letterSpacing:0.2}}>
             {s.label}
@@ -15992,7 +15992,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
 
   // Traders ficticios que siempre aparecen en el ranking
   const BOT_PROFILES = [
-    {id:"bot-carlos",  username:"CarlosInvierte",    emoji:"👨‍💼", avatar_color:"#D97706", points:4850, isBot:true},
+    {id:"bot-carlos",  username:"CarlosInvierte",    emoji:"👨‍💼", avatar_color:"#0F5E68", points:4850, isBot:true},
     {id:"bot-sofia",   username:"SofiaWallSt",        emoji:"👩‍💻", avatar_color:"#EC4899", points:4120, isBot:true},
     {id:"bot-marcos",  username:"MarcoBTC",            emoji:"₿",   avatar_color:"#F7931A", points:3780, isBot:true},
     {id:"bot-alex",    username:"AlexTradingMX",       emoji:"⚡",  avatar_color:"#F59E0B", points:3210, isBot:true},
@@ -16000,7 +16000,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
     {id:"bot-vale",    username:"ValentinaFinance",    emoji:"💎",  avatar_color:"#06B6D4", points:2650, isBot:true},
     {id:"bot-andres",  username:"AndresTradePro",      emoji:"🎯",  avatar_color:"#EF4444", points:2380, isBot:true},
     {id:"bot-isabel",  username:"IsabelAnalysis",      emoji:"📊",  avatar_color:"#F59E0B", points:2100, isBot:true},
-    {id:"bot-ricardo", username:"RicardoInvest",       emoji:"🏆",  avatar_color:"#D97706", points:1870, isBot:true},
+    {id:"bot-ricardo", username:"RicardoInvest",       emoji:"🏆",  avatar_color:"#0F5E68", points:1870, isBot:true},
     {id:"bot-natalia", username:"NataliaTrader",       emoji:"🌟",  avatar_color:"#10B981", points:1540, isBot:true},
   ];
 
@@ -16034,7 +16034,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
     if(pts>=5000) return {emoji:"💎",name:"Élite",color:"#06B6D4"};
     if(pts>=2000) return {emoji:"🏆",name:"Pro",color:"#F59E0B"};
     if(pts>=500)  return {emoji:"⭐",name:"Experto",color:"#F59E0B"};
-    if(pts>=100)  return {emoji:"📈",name:"Trader",color:"#0066FF"};
+    if(pts>=100)  return {emoji:"📈",name:"Trader",color:"#0F4C81"};
     return {emoji:"🌱",name:"Nuevo",color:"#64748B"};
   };
 
@@ -16132,8 +16132,8 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
             </div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,flexWrap:"wrap"}}>
-                <span style={{fontWeight:700,color:"#D97706",fontSize:12}}>@{p.author||p.authorName||"Trader"}</span>
-                {p.ticker&&<span style={{background:"rgba(0,102,255,0.1)",color:"#0066FF",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800,fontFamily:"monospace"}}>{p.ticker}</span>}
+                <span style={{fontWeight:700,color:"#0F5E68",fontSize:12}}>@{p.author||p.authorName||"Trader"}</span>
+                {p.ticker&&<span style={{background:"rgba(15,76,129,0.1)",color:"#0F4C81",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800,fontFamily:"monospace"}}>{p.ticker}</span>}
                 {p.sentiment&&<span style={{fontSize:11,color:p.sentiment==="bullish"?"#00D26A":"#FF4D6A"}}>{p.sentiment==="bullish"?"▲ ALCISTA":"▼ BAJISTA"}</span>}
               </div>
               <div style={{fontSize:13,color:"var(--c-muted)",lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>
@@ -16188,7 +16188,7 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
       <div style={{fontSize:56,marginBottom:16}}>🔔</div>
       <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,marginBottom:8}}>{isEN?"Notifications":"Notificaciones"}</h2>
       <p style={{color:"#64748B",fontSize:14,marginBottom:24}}>{isEN?"Log in to see your notifications.":"Inicia sesión para ver tus notificaciones."}</p>
-      <button onClick={onNeedAuth} style={{background:"linear-gradient(135deg,#0066FF,#0055DD)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
+      <button onClick={onNeedAuth} style={{background:"linear-gradient(135deg,#0F4C81,#0C3D68)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
         {isEN?"Sign In":"Entrar"}
       </button>
     </div>
@@ -16268,7 +16268,7 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
     return isEN?`${Math.floor(s/86400)}d ago`:`hace ${Math.floor(s/86400)}d`;
   };
 
-  const TYPE_COLOR = {like:"#FF4D6A",repost:"#00D26A",mention:"#0066FF",follow:"#F59E0B",system:"#F59E0B"};
+  const TYPE_COLOR = {like:"#FF4D6A",repost:"#00D26A",mention:"#0F4C81",follow:"#F59E0B",system:"#F59E0B"};
 
   return(
     <div style={{maxWidth:640,margin:"0 auto",padding:"0 4px"}}>
@@ -16479,15 +16479,15 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const numFmt  = v => v==null?"—":Number(v).toFixed(1);
   const upgBtn = (
     <button onClick={onNeedPremium} style={{
-      background:"linear-gradient(135deg,#D97706,#A855F7)",
+      background:"linear-gradient(135deg,#0F5E68,#A855F7)",
       border:"none",borderRadius:20,padding:"3px 10px",
       color:"#fff",fontSize:10,fontWeight:800,cursor:"pointer",
       letterSpacing:0.4,whiteSpace:"nowrap",
-      boxShadow:"0 2px 8px rgba(217,119,6,0.35)",
+      boxShadow:"0 2px 8px rgba(15,94,104,0.35)",
       transition:"all 0.15s",display:"inline-flex",alignItems:"center",gap:4
     }}
     onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,#B45309,#F59E0B)";e.currentTarget.style.transform="scale(1.05)";}}
-    onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,#D97706,#A855F7)";e.currentTarget.style.transform="scale(1)";}}>
+    onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,#0F5E68,#A855F7)";e.currentTarget.style.transform="scale(1)";}}>
       ✦ PREMIUM
     </button>
   );
@@ -16549,8 +16549,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     projections:[
       {h:"Name",           w:150, render:nm},
       {h:"Price",          w:110, render:pr},
-      {h:"Price Target",   w:120, render:(tk,d,m)=>vip(m.target,"","#6366F1")},
-      {h:"Analyst Rating", w:140, render:(tk,d,m)=>isPremium?<span style={{fontWeight:700,fontSize:11,color:m.rating==="Strong Buy"?"#10B981":m.rating==="Buy"?"#0066FF":m.rating==="Hold"?"#F59E0B":"#94A3B8"}}>{m.rating||"—"}</span>:upgBtn},
+      {h:"Price Target",   w:120, render:(tk,d,m)=>vip(m.target,"","#0F5E68")},
+      {h:"Analyst Rating", w:140, render:(tk,d,m)=>isPremium?<span style={{fontWeight:700,fontSize:11,color:m.rating==="Strong Buy"?"#10B981":m.rating==="Buy"?"#0F4C81":m.rating==="Hold"?"#F59E0B":"#94A3B8"}}>{m.rating||"—"}</span>:upgBtn},
       {h:"Upside %",       w:110, render:(tk,d,m)=>vip(m.upside,"%")},
       {h:"# Analysts",     w:110, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{m.analysts!=null?m.analysts:"—"}</span>:upgBtn},
       {h:"EPS Estimate",   w:120, render:(tk,d,m)=>vip(m.eps,"")},
@@ -16603,8 +16603,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         boxShadow:"0 8px 32px rgba(0,0,0,0.3)",
       }}>
         {/* Decorative circles */}
-        <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,0.18) 0%,transparent 70%)",pointerEvents:"none"}}/>
-        <div style={{position:"absolute",bottom:-30,left:120,width:140,height:140,borderRadius:"50%",background:"radial-gradient(circle,rgba(0,102,255,0.12) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,94,104,0.18) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{position:"absolute",bottom:-30,left:120,width:140,height:140,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,76,129,0.12) 0%,transparent 70%)",pointerEvents:"none"}}/>
         <div style={{position:"absolute",top:10,left:"40%",width:80,height:80,borderRadius:"50%",background:"radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
 
         <div style={{position:"relative",display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:14}}>
@@ -16654,9 +16654,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
             {/* Action buttons */}
             <div style={{display:"flex",gap:7,alignItems:"center"}}>
               <button onClick={fetchPrices} disabled={loading}
-                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(99,102,241,0.15)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:9,padding:"7px 14px",fontSize:12,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"all 0.15s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.28)"}
-                onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.15)"}>
+                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(15,94,104,0.15)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:9,padding:"7px 14px",fontSize:12,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"all 0.15s"}}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(15,94,104,0.28)"}
+                onMouseLeave={e=>e.currentTarget.style.background="rgba(15,94,104,0.15)"}>
                 <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none",fontSize:13}}>↻</span>
                 Refresh
               </button>
@@ -16671,7 +16671,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                   <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1E293B",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"6px",zIndex:100,minWidth:160,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
                     {VIEWS.map(v=>(
                       <button key={v.id} onClick={()=>{setActiveView(v.id);setAddViewOpen(false);}}
-                        style={{display:"block",width:"100%",textAlign:"left",background:activeView===v.id?"rgba(99,102,241,0.15)":"transparent",border:"none",borderRadius:7,padding:"8px 12px",fontSize:12,color:activeView===v.id?"#818CF8":"#94A3B8",cursor:"pointer",fontWeight:activeView===v.id?700:500}}>
+                        style={{display:"block",width:"100%",textAlign:"left",background:activeView===v.id?"rgba(15,94,104,0.15)":"transparent",border:"none",borderRadius:7,padding:"8px 12px",fontSize:12,color:activeView===v.id?"#818CF8":"#94A3B8",cursor:"pointer",fontWeight:activeView===v.id?700:500}}>
                         {v.l}
                       </button>
                     ))}
@@ -16680,7 +16680,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
               </div>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setExportOpen(p=>!p)}
-                  style={{background:"linear-gradient(135deg,#0047C2,#0066FF)",border:"none",borderRadius:9,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:5,boxShadow:"0 2px 12px rgba(0,102,255,0.3)"}}
+                  style={{background:"linear-gradient(135deg,#0047C2,#0F4C81)",border:"none",borderRadius:9,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:5,boxShadow:"0 2px 12px rgba(15,76,129,0.3)"}}
                   onMouseEnter={e=>e.currentTarget.style.opacity="0.9"}
                   onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
                   Export as… ▾
@@ -16772,7 +16772,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                 const m = getMock(tk);
                 return(
                   <tr key={tk} style={{background:rowIdx%2===0?"#F4F9FF":"#EBF3FF",transition:"background 0.1s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.06)"}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.06)"}
                     onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#F4F9FF":"#EBF3FF"}>
                     {cols.map((c,i)=>(
                       <td key={i} style={tdStyle}>{c.render(tk,d,m)}</td>
@@ -17400,7 +17400,7 @@ function OracleIA({ positions, livePrices, isPremium, onNeedPremium, isEN }) {
                 ))}
               </div>
               <button onClick={runOracle}
-                style={{background:"linear-gradient(135deg,#D97706,#B45309)",border:"none",borderRadius:14,padding:"13px 36px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(217,119,6,0.4)",letterSpacing:0.3}}>
+                style={{background:"linear-gradient(135deg,#0F5E68,#B45309)",border:"none",borderRadius:14,padding:"13px 36px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(15,94,104,0.4)",letterSpacing:0.3}}>
                 🔮 {isEN?"Activate Oracle":"Activar Oracle"}
               </button>
               {!isPremium && <div style={{marginTop:10,fontSize:11,color:"#475569"}}>{isEN?"PREMIUM exclusive · $9.99/month":"Exclusivo PREMIUM · $9.99/mes"}</div>}
@@ -17595,9 +17595,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       {/* Header — Portafolio Oracle IA */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
         <span style={{fontSize:20,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.4}}>💼 {isEN?"Portfolio Oracle AI":"Portafolio Oracle IA"}</span>
-        <span style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
+        <span style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
         <button onClick={()=>setPtFull(f=>!f)}
-          style={{marginLeft:"auto",background:ptFull?"rgba(239,68,68,0.12)":"rgba(0,102,255,0.12)",border:`1px solid ${ptFull?"rgba(239,68,68,0.3)":"rgba(0,102,255,0.3)"}`,color:ptFull?"#EF4444":"#3B82F6",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+          style={{marginLeft:"auto",background:ptFull?"rgba(239,68,68,0.12)":"rgba(15,76,129,0.12)",border:`1px solid ${ptFull?"rgba(239,68,68,0.3)":"rgba(15,76,129,0.3)"}`,color:ptFull?"#EF4444":"#3B82F6",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
           {ptFull?"✕":"⛶"} {ptFull?(isEN?"Exit":"Salir"):(isEN?"Full screen":"Pantalla completa")}
         </button>
       </div>
@@ -17614,7 +17614,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 {isEN?"Cancel":"Cancelar"}
               </button>
               <button onClick={()=>{onPost&&onPost({text:shareMsg,ticker:null,sentiment:"bullish"});setShareMsg(null);}}
-                style={{flex:2,background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"10px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
+                style={{flex:2,background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:10,padding:"10px",color:"#fff",fontWeight:800,cursor:"pointer"}}>
                 📤 {isEN?"Publish":"Publicar"}
               </button>
             </div>
@@ -17653,7 +17653,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"12px",color:"#64748B",fontWeight:700,cursor:"pointer"}}>
                 {isEN?"Cancel":"Cancelar"}
               </button>
-              <button onClick={addOrEdit} style={{flex:2,background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontWeight:800,cursor:"pointer",boxShadow:"0 0 20px rgba(217,119,6,0.35)"}}>
+              <button onClick={addOrEdit} style={{flex:2,background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontWeight:800,cursor:"pointer",boxShadow:"0 0 20px rgba(15,94,104,0.35)"}}>
                 {editId?(isEN?"Save Changes":"Guardar"):(isEN?"Add to Portfolio":"Agregar al Portfolio")}
               </button>
             </div>
@@ -17702,13 +17702,13 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {id:"health",label:"Health",icon:"🧬"},
         ].map(t=>(
           <button key={t.id} onClick={()=>setPtTab(t.id)}
-            style={{background:ptTab===t.id?"rgba(0,102,255,0.12)":"rgba(255,255,255,0.03)",border:`1px solid ${ptTab===t.id?"rgba(0,102,255,0.38)":"rgba(255,255,255,0.07)"}`,borderRadius:22,padding:"6px 13px",color:ptTab===t.id?"#5CC8FF":"#64748B",fontSize:12,fontWeight:ptTab===t.id?800:600,cursor:"pointer",whiteSpace:"nowrap"}}>
+            style={{background:ptTab===t.id?"rgba(15,76,129,0.12)":"rgba(255,255,255,0.03)",border:`1px solid ${ptTab===t.id?"rgba(15,76,129,0.38)":"rgba(255,255,255,0.07)"}`,borderRadius:22,padding:"6px 13px",color:ptTab===t.id?"#5CC8FF":"#64748B",fontSize:12,fontWeight:ptTab===t.id?800:600,cursor:"pointer",whiteSpace:"nowrap"}}>
             {t.icon} {t.label}
           </button>
         ))}
         <div style={{flex:1}}/>
         <button onClick={()=>{setShowAdd(true);setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""}); }}
-          style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:22,padding:"6px 16px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 0 16px rgba(217,119,6,0.3)"}}>
+          style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:22,padding:"6px 16px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 0 16px rgba(15,94,104,0.3)"}}>
           + {isEN?"Add":"Agregar"}
         </button>
         {loading && <span style={{fontSize:11,color:"#475569",fontWeight:600,animation:"spin 1s linear infinite"}}>⟳</span>}
@@ -17724,7 +17724,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{fontWeight:800,color:"#F1F5F9",fontSize:18,marginBottom:8}}>{isEN?"No positions yet":"No tienes posiciones aún"}</div>
             <div style={{color:"#64748B",fontSize:13,marginBottom:22,lineHeight:1.6}}>{isEN?"Add your first position to start tracking your portfolio.":"Agrega tu primera posición para empezar a seguir tu portfolio."}</div>
             <button onClick={()=>{setShowAdd(true);setForm({ticker:"",shares:"",entryPrice:"",note:""}); }}
-              style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontWeight:800,cursor:"pointer",boxShadow:"0 0 20px rgba(217,119,6,0.35)"}}>
+              style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:12,padding:"12px 28px",color:"#fff",fontWeight:800,cursor:"pointer",boxShadow:"0 0 20px rgba(15,94,104,0.35)"}}>
               + {isEN?"Add First Position":"Agregar Primera Posición"}
             </button>
           </div>
@@ -17737,7 +17737,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             if(pct>15) return {background:"rgba(0,210,106,0.16)",color:"#00B060"};
             if(pct>5)  return {background:"rgba(0,210,106,0.10)",color:"#00C870"};
             if(pct>0)  return {background:"rgba(0,210,106,0.06)",color:"#00D26A"};
-            if(pct>-5) return {background:"rgba(245,158,11,0.10)",color:"#D97706"};
+            if(pct>-5) return {background:"rgba(245,158,11,0.10)",color:"#0F5E68"};
             return {background:"rgba(255,77,106,0.10)",color:"#FF4D6A"};
           };
           return(
@@ -17822,7 +17822,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               const pnlPct=entry>0?((curr-entry)/entry*100):0;
               const marketVal=curr*shares;
               const isPos=pnlPct>=0;
-              const COLS=["#F59E0B","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#0066FF","#14B8A6"];
+              const COLS=["#F59E0B","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#0F4C81","#14B8A6"];
               const col=COLS[i%COLS.length];
               return(
                 <div key={pos.id} style={{position:"relative",background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
@@ -18064,7 +18064,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 const lp3=livePrices[p.ticker.toUpperCase()];
                 return s+(lp3?(parseFloat(p.shares)||0)*lp3.price:(parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0));
               },0)||1;
-              const COLS2=["#F59E0B","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#0066FF","#14B8A6","#FCD34D","#34D399"];
+              const COLS2=["#F59E0B","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#0F4C81","#14B8A6","#FCD34D","#34D399"];
               const slices=positions.map((p,i)=>{
                 const lp3=livePrices[p.ticker.toUpperCase()];
                 const mv=lp3?(parseFloat(p.shares)||0)*lp3.price:(parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0);
@@ -18103,20 +18103,20 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
       {/* SmartCredit afiliado */}
       <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
-        style={{display:"flex",alignItems:"center",gap:14,background:"linear-gradient(135deg,#0f172a,#1e3a5f)",border:"1.5px solid rgba(0,102,255,0.3)",borderRadius:16,padding:"16px 20px",margin:"16px 0",textDecoration:"none",transition:"all 0.18s"}}
-        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(0,102,255,0.6)"}
-        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(0,102,255,0.3)"}>
-        <div style={{width:48,height:48,borderRadius:13,background:"linear-gradient(135deg,#0066FF,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>💳</div>
+        style={{display:"flex",alignItems:"center",gap:14,background:"linear-gradient(135deg,#0f172a,#1e3a5f)",border:"1.5px solid rgba(15,76,129,0.3)",borderRadius:16,padding:"16px 20px",margin:"16px 0",textDecoration:"none",transition:"all 0.18s"}}
+        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(15,76,129,0.6)"}
+        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(15,76,129,0.3)"}>
+        <div style={{width:48,height:48,borderRadius:13,background:"linear-gradient(135deg,#0F4C81,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>💳</div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
             <span style={{fontWeight:900,fontSize:14,color:"#F1F5F9"}}>SmartCredit</span>
-            <span style={{background:"rgba(0,102,255,0.2)",border:"1px solid rgba(0,102,255,0.35)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#60A5FA",fontWeight:700}}>Patrocinado</span>
+            <span style={{background:"rgba(15,76,129,0.2)",border:"1px solid rgba(15,76,129,0.35)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#60A5FA",fontWeight:700}}>Patrocinado</span>
           </div>
           <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.45}}>
             {isEN?"Monitor your credit score, protect your identity and improve your finances — free to start.":"Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas — gratis para empezar."}
           </div>
         </div>
-        <div style={{background:"#0066FF",borderRadius:10,padding:"9px 16px",fontSize:12,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap"}}>
+        <div style={{background:"#0F4C81",borderRadius:10,padding:"9px 16px",fontSize:12,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap"}}>
           {isEN?"Get started →":"Empezar →"}
         </div>
       </a>
@@ -18152,7 +18152,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
       bullets={isEN?["🏛️ Senate & House trades","📄 Official STOCK Act filings","📈 Most traded tickers","🔔 New trades alerts"]:["🏛️ Trades de Senado y Cámara","📄 Reportes oficiales STOCK Act","📈 Tickers más operados","🔔 Alertas de nuevos trades"]}/>
   );
 
-  const partyColor = p => p === "D" ? "#0066FF" : p === "R" ? "#EF4444" : "#94A3B8";
+  const partyColor = p => p === "D" ? "#0F4C81" : p === "R" ? "#EF4444" : "#94A3B8";
   const typeColor  = t => t === "buy" ? "#10B981" : "#EF4444";
   const typeIcon   = t => t === "buy" ? "↑" : "↓";
 
@@ -18196,7 +18196,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
           </p>
         </div>
         <a href="https://www.capitoltrades.com/trades" target="_blank" rel="noopener noreferrer"
-          style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:700,color:C.accent,background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:8,padding:"6px 12px",textDecoration:"none",whiteSpace:"nowrap"}}>
+          style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:700,color:C.accent,background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"6px 12px",textDecoration:"none",whiteSpace:"nowrap"}}>
           📡 {isEN?"Source: Capitol Trades ↗":"Fuente: Capitol Trades ↗"}
         </a>
       </div>
@@ -18204,11 +18204,11 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
       {/* 🏆 Pelosi Tracker + Top Buyers */}
       <div className="nexo-congress-pair" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
         {/* Pelosi */}
-        <div style={{background:"linear-gradient(135deg,rgba(217,119,6,0.08),rgba(0,102,255,0.05))",border:"1px solid rgba(217,119,6,0.2)",borderRadius:14,padding:"12px 16px"}}>
+        <div style={{background:"linear-gradient(135deg,rgba(15,94,104,0.08),rgba(15,76,129,0.05))",border:"1px solid rgba(15,94,104,0.2)",borderRadius:14,padding:"12px 16px"}}>
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
             <span style={{fontSize:20}}>👸</span>
             <span style={{fontWeight:800,fontSize:13,color:C.text}}>Pelosi Tracker</span>
-            <span style={{fontSize:10,color:"#FCD34D",background:"rgba(217,119,6,0.1)",borderRadius:6,padding:"1px 6px",marginLeft:"auto"}}>{pelosiTrades.length} trades</span>
+            <span style={{fontSize:10,color:"#FCD34D",background:"rgba(15,94,104,0.1)",borderRadius:6,padding:"1px 6px",marginLeft:"auto"}}>{pelosiTrades.length} trades</span>
           </div>
           {pelosiTrades.slice(0,2).map((t,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,padding:"6px 8px",background:"rgba(255,255,255,0.03)",borderRadius:8}}>
@@ -18220,7 +18220,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
           {pelosiTrades.length===0&&<div style={{fontSize:12,color:C.muted}}>Sin trades recientes</div>}
         </div>
         {/* Top Buyers */}
-        <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(0,102,255,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:14,padding:"12px 16px"}}>
+        <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(15,76,129,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:14,padding:"12px 16px"}}>
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
             <span style={{fontSize:18}}>🔥</span>
             <span style={{fontWeight:800,fontSize:13,color:C.text}}>{isEN?"Most Active":"Más Activos"}</span>
@@ -18260,14 +18260,14 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
         {/* Type filter */}
         {["all","buy","sell"].map(v=>(
           <button key={v} onClick={()=>setFilter(v)}
-            style={{padding:"7px 14px",borderRadius:8,border:`1px solid ${filter===v?typeColor(v===v?v:"all"):C.border}`,background:filter===v?"rgba(0,102,255,0.08)":C.card,color:filter===v?C.accent:C.muted,fontSize:12,fontWeight:filter===v?700:500,cursor:"pointer",transition:"all 0.15s"}}>
+            style={{padding:"7px 14px",borderRadius:8,border:`1px solid ${filter===v?typeColor(v===v?v:"all"):C.border}`,background:filter===v?"rgba(15,76,129,0.08)":C.card,color:filter===v?C.accent:C.muted,fontSize:12,fontWeight:filter===v?700:500,cursor:"pointer",transition:"all 0.15s"}}>
             {v==="all"?(isEN?"All":"Todo"):v==="buy"?(isEN?"Buys ↑":"Compras ↑"):(isEN?"Sales ↓":"Ventas ↓")}
           </button>
         ))}
         {/* Party filter */}
         {["all","D","R"].map(v=>(
           <button key={v} onClick={()=>setParty(v)}
-            style={{padding:"7px 14px",borderRadius:8,border:`1px solid ${party===v?partyColor(v):C.border}`,background:party===v?"rgba(0,102,255,0.05)":C.card,color:party===v?partyColor(v):C.muted,fontSize:12,fontWeight:party===v?700:500,cursor:"pointer",transition:"all 0.15s"}}>
+            style={{padding:"7px 14px",borderRadius:8,border:`1px solid ${party===v?partyColor(v):C.border}`,background:party===v?"rgba(15,76,129,0.05)":C.card,color:party===v?partyColor(v):C.muted,fontSize:12,fontWeight:party===v?700:500,cursor:"pointer",transition:"all 0.15s"}}>
             {v==="all"?(isEN?"Both parties":"Ambos"):v==="D"?"🔵 Dem":"🔴 Rep"}
           </button>
         ))}
@@ -18289,7 +18289,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
           <div style={{padding:"40px",textAlign:"center",color:C.muted}}>{isEN?"No results":"Sin resultados"}</div>
         ) : filtered.map((t,i)=>(
           <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(130px,1fr) 55px 80px minmax(120px,1fr) 90px 80px",gap:0,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.1s",minWidth:560}}
-            onMouseEnter={e=>e.currentTarget.style.background="rgba(0,102,255,0.05)"}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.05)"}
             onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
             {/* Member */}
             <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0}}>
@@ -18302,7 +18302,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
             </div>
             {/* Ticker */}
             <div style={{display:"flex",alignItems:"center",gap:6}}>
-              <span style={{fontSize:11,fontWeight:800,background:"rgba(0,102,255,0.1)",color:C.accent,borderRadius:6,padding:"2px 7px",fontFamily:"monospace"}}>{t.ticker}</span>
+              <span style={{fontSize:11,fontWeight:800,background:"rgba(15,76,129,0.1)",color:C.accent,borderRadius:6,padding:"2px 7px",fontFamily:"monospace"}}>{t.ticker}</span>
               <span style={{fontSize:14,fontWeight:900,color:typeColor(t.type)}}>{typeIcon(t.type)}</span>
             </div>
             {/* Asset name */}
@@ -18665,7 +18665,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const topGainers=[...allRows].sort((a,b)=>b.chg-a.chg).slice(0,3);
   const topLosers =[...allRows].sort((a,b)=>a.chg-b.chg).slice(0,3);
 
-  const scoreColor=s=>s>=90?"#10B981":s>=75?"#0066FF":"#94A3B8";
+  const scoreColor=s=>s>=90?"#10B981":s>=75?"#0F4C81":"#94A3B8";
   const chgColor  =c=>c>=0?"#10B981":"#EF4444";
   const chgBg     =c=>c>=2?"rgba(16,185,129,0.12)":c<=-2?"rgba(239,68,68,0.12)":"transparent";
   const rsiColor  =r=>r>=70?"#EF4444":r<=30?"#10B981":"#94A3B8";
@@ -18708,11 +18708,11 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       {/* ── MINI AI PANEL (slide-in) ── */}
       {selectedRow&&(
         <div style={{position:"fixed",top:0,right:0,bottom:0,width:340,zIndex:9980,background:C.card,borderLeft:`1px solid ${C.border}`,boxShadow:"-8px 0 40px rgba(0,0,0,0.4)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-          <div style={{background:"linear-gradient(135deg,rgba(0,102,255,0.10),rgba(0,102,255,0.04))",borderBottom:`1px solid ${C.border}`,padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{background:"linear-gradient(135deg,rgba(15,76,129,0.10),rgba(15,76,129,0.04))",borderBottom:`1px solid ${C.border}`,padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontFamily:"monospace",fontWeight:900,fontSize:20,color:"#FCD34D"}}>${selectedRow.s}</span>
-                <span style={{fontSize:11,background:"rgba(0,102,255,0.14)",color:"#0066FF",border:"1px solid rgba(0,102,255,0.3)",borderRadius:6,padding:"2px 7px",fontWeight:700}}>
+                <span style={{fontSize:11,background:"rgba(15,76,129,0.14)",color:"#0F4C81",border:"1px solid rgba(15,76,129,0.3)",borderRadius:6,padding:"2px 7px",fontWeight:700}}>
                   {PATTERN_ICON[selectedRow.pattern]||"📊"} {selectedRow.pattern}
                 </span>
               </div>
@@ -18756,7 +18756,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
 
             {/* AI Analysis */}
             <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:"14px",marginBottom:16}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#0066FF",letterSpacing:0.5,marginBottom:8}}>🧠 ANÁLISIS IA</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#0F4C81",letterSpacing:0.5,marginBottom:8}}>🧠 ANÁLISIS IA</div>
               <p style={{fontSize:13,color:C.muted,lineHeight:1.6,margin:0}}>
                 {(AI_ANALYSIS[selectedRow.pattern]||((r)=>`$${r.s} muestra señal ${r.pattern}. RSI ${r.rsi||"N/A"}, volumen ${r.vol||"N/A"}. Score IA: ${r.score}/100.`))(selectedRow)}
               </p>
@@ -18786,13 +18786,13 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       )}
 
       {/* ── HEADER ── */}
-      <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.08),rgba(99,102,241,0.04))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:20,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#F59E0B,#6366F1,#00e58f)"}}/>
+      <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.08),rgba(15,94,104,0.04))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#F59E0B,#0F5E68,#00e58f)"}}/>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
               <span style={{fontSize:22,fontWeight:900,color:C.text,letterSpacing:"-0.5px"}}>🔬 {isEN?"Advanced Screener":"Screener Avanzado"}</span>
-              <span style={{background:"linear-gradient(135deg,#F59E0B,#6366F1)",color:"#fff",fontSize:10,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
+              <span style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",color:"#fff",fontSize:10,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
               <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:20,padding:"3px 10px"}}>
                 <div style={{width:7,height:7,borderRadius:"50%",background:wsStatus==="live"?"#10B981":"#F59E0B",animation:"pulse 1.5s infinite"}}/>
                 <span style={{fontSize:10,fontWeight:800,color:wsStatus==="live"?"#10B981":"#F59E0B",letterSpacing:0.5}}>{wsStatus==="live"?"LIVE":"AUTO"}</span>
@@ -18817,7 +18817,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
               {refreshing?"⏳":"↻"} {refreshing?(isEN?"Updating...":"Actualizando..."):(isEN?"Refresh":"Actualizar")}
             </button>
             <button onClick={()=>setFullScreen(f=>!f)} title={fullScreen?"Esc":""}
-              style={{background:fullScreen?"rgba(239,68,68,0.12)":"rgba(0,102,255,0.12)",border:`1px solid ${fullScreen?"rgba(239,68,68,0.3)":"rgba(0,102,255,0.3)"}`,color:fullScreen?"#EF4444":"#3B82F6",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+              style={{background:fullScreen?"rgba(239,68,68,0.12)":"rgba(15,76,129,0.12)",border:`1px solid ${fullScreen?"rgba(239,68,68,0.3)":"rgba(15,76,129,0.3)"}`,color:fullScreen?"#EF4444":"#3B82F6",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
               {fullScreen?"✕":"⛶"} {fullScreen?(isEN?"Exit":"Salir"):(isEN?"Full screen":"Pantalla completa")}
             </button>
           </div>
@@ -18854,7 +18854,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       <div style={{display:"flex",gap:0,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:4,marginBottom:14,width:"fit-content"}}>
         {tabs.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)}
-            style={{padding:"8px 18px",borderRadius:9,border:"none",background:tab===t.id?"linear-gradient(135deg,#F59E0B,#6366F1)":"transparent",color:tab===t.id?"#fff":C.muted,fontSize:13,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.2s"}}>
+            style={{padding:"8px 18px",borderRadius:9,border:"none",background:tab===t.id?"linear-gradient(135deg,#F59E0B,#0F5E68)":"transparent",color:tab===t.id?"#fff":C.muted,fontSize:13,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.2s"}}>
             {t.l}
           </button>
         ))}
@@ -18940,9 +18940,9 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   tab==="intraday"?"70px 160px 95px 78px 62px 68px 120px 100px 72px":
                   "70px 160px 95px 90px 88px 68px 140px 72px",
                 padding:"9px 14px",borderBottom:`1px solid ${C.border}`,gap:8,
-                transition:"background 0.25s",background:isSelected?"rgba(0,102,255,0.10)":rowBg,
+                transition:"background 0.25s",background:isSelected?"rgba(15,76,129,0.10)":rowBg,
                 cursor:"default",alignItems:"center"}}
-                onMouseEnter={e=>{if(!flash&&!isSelected)e.currentTarget.style.background="rgba(0,102,255,0.05)";}}
+                onMouseEnter={e=>{if(!flash&&!isSelected)e.currentTarget.style.background="rgba(15,76,129,0.05)";}}
                 onMouseLeave={e=>{if(!flash&&!isSelected)e.currentTarget.style.background=rowBg;}}>
 
                 {/* Ticker */}
@@ -18962,7 +18962,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   {/* Mkt */}
                   <span style={{fontSize:11,color:C.muted}}>{r.mkt}</span>
                   {/* Patrón */}
-                  <span style={{fontSize:11,background:"rgba(0,102,255,0.14)",color:"#0066FF",border:"1px solid rgba(0,102,255,0.3)",borderRadius:6,padding:"2px 6px",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
+                  <span style={{fontSize:11,background:"rgba(15,76,129,0.14)",color:"#0F4C81",border:"1px solid rgba(15,76,129,0.3)",borderRadius:6,padding:"2px 6px",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
                     {PATTERN_ICON[r.pattern]||"📊"} {r.pattern}
                   </span>
                   {/* Setup IA */}
@@ -18990,7 +18990,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   <span style={{fontSize:12,fontWeight:800,color:chgColor(r.chg)}}>{r.chg>=0?"+":""}{r.chg?.toFixed(2)}%</span>
                   <span style={{fontSize:11,color:C.muted}}>{r.atr}</span>
                   <span style={{fontSize:12,fontWeight:700,color:"#F59E0B"}}>{r.rvol}</span>
-                  <span style={{fontSize:11,background:"rgba(0,102,255,0.14)",color:"#0066FF",border:"1px solid rgba(0,102,255,0.3)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
+                  <span style={{fontSize:11,background:"rgba(15,76,129,0.14)",color:"#0F4C81",border:"1px solid rgba(15,76,129,0.3)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
                     {PATTERN_ICON[r.pattern]||"📊"} {r.pattern}
                   </span>
                   <span style={{fontSize:11,fontWeight:700,color:r.signal?.includes("Long")?"#10B981":"#EF4444"}}>{r.signal}</span>
@@ -19002,7 +19002,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   <span style={{fontSize:12,color:C.text}}>{r.spread}</span>
                   <span style={{fontSize:11,color:C.muted}}>{r.trades}</span>
                   <span style={{fontSize:12,fontWeight:700,color:C.accent}}>{r.tf}</span>
-                  <span style={{fontSize:11,background:"rgba(0,102,255,0.14)",color:"#0066FF",border:"1px solid rgba(0,102,255,0.3)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
+                  <span style={{fontSize:11,background:"rgba(15,76,129,0.14)",color:"#0F4C81",border:"1px solid rgba(15,76,129,0.3)",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
                     {PATTERN_ICON[r.pattern]||"📊"} {r.pattern}
                   </span>
                 </>}
@@ -19016,7 +19016,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                 {tab==="stocks"&&(
                   <div style={{display:"flex",gap:4,justifyContent:"center"}}>
                     <button onClick={()=>setSelectedRow(isSelected?null:r)}
-                      style={{background:isSelected?"rgba(0,102,255,0.3)":"rgba(0,102,255,0.12)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:7,padding:"4px 8px",color:isSelected?"#fff":"#0066FF",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                      style={{background:isSelected?"rgba(15,76,129,0.3)":"rgba(15,76,129,0.12)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:7,padding:"4px 8px",color:isSelected?"#fff":"#0F4C81",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
                       👁 Ver
                     </button>
                     <button onClick={()=>{
@@ -19217,7 +19217,7 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(0,102,255,0.12)", border: "1.5px solid rgba(0,102,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔔</div>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(15,76,129,0.12)", border: "1.5px solid rgba(15,76,129,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔔</div>
           <div>
             <div style={{ fontWeight: 900, fontSize: 22, color: C.text, letterSpacing: -0.5 }}>
               {isEN ? "Alert Center" : "Centro de Alertas"}
@@ -19262,7 +19262,7 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
 
       {/* ── Smart Portfolio Suggestions ───────────────────────────────────────── */}
       {suggestedTickers.length > 0 && (
-        <div style={{ background: C.card, border: `1px solid rgba(0,102,255,0.25)`, borderRadius: 16, padding: "16px 18px", marginBottom: 20 }}>
+        <div style={{ background: C.card, border: `1px solid rgba(15,76,129,0.25)`, borderRadius: 16, padding: "16px 18px", marginBottom: 20 }}>
           <div style={{ fontWeight: 800, fontSize: 14, color: C.text, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
             <span>💡</span>
             {isEN ? "Suggestions from your Portfolio" : "Sugerencias de tu Portafolio"}
@@ -19275,7 +19275,7 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
                   {isEN ? "You hold this — create a stop-loss alert?" : "Tienes esta posición — ¿crear alerta stop-loss?"}
                 </span>
                 <button onClick={() => { setTicker(sym); setDirection("below"); }}
-                  style={{ background: "rgba(0,102,255,0.10)", border: "1px solid rgba(0,102,255,0.25)", borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, color: C.accent, cursor: "pointer", whiteSpace: "nowrap" }}>
+                  style={{ background: "rgba(15,76,129,0.10)", border: "1px solid rgba(15,76,129,0.25)", borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, color: C.accent, cursor: "pointer", whiteSpace: "nowrap" }}>
                   {isEN ? "Set Alert" : "Crear alerta"}
                 </button>
               </div>
@@ -19703,7 +19703,7 @@ function GuidelinesPage({onBack, lang}){
           </div>
         ))}
       </div>
-      <div style={{marginTop:24,padding:"14px 18px",background:"rgba(0,102,255,0.06)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:12}}>
+      <div style={{marginTop:24,padding:"14px 18px",background:"rgba(15,76,129,0.06)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:12}}>
         <p style={{margin:0,fontSize:13,color:"var(--c-muted)"}}>{isEN
           ?"Violations may result in content removal, temporary suspension, or permanent ban. For questions or to report violations: "
           :"Las infracciones pueden resultar en eliminación de contenido, suspensión temporal o ban permanente. Para preguntas o para reportar infracciones: "
@@ -19766,12 +19766,12 @@ function AdminDashboard(){
     ch.on("presence",{event:"sync"},()=>{
       const state = ch.presenceState();
       const list = Object.entries(state).flatMap(([uid,arr])=>
-        arr.map(a=>({user_id:uid, username:a.username||"Trader", emoji:a.emoji||"🦅", avatarColor:a.avatarColor||"#0066FF", since:a.since||Date.now()}))
+        arr.map(a=>({user_id:uid, username:a.username||"Trader", emoji:a.emoji||"🦅", avatarColor:a.avatarColor||"#0F4C81", since:a.since||Date.now()}))
       );
       setOnlineNow(list);
     });
     ch.subscribe(async(status)=>{
-      if(status==="SUBSCRIBED") await ch.track({username:"Admin",emoji:"🛡️",avatarColor:"#0066FF",since:Date.now()});
+      if(status==="SUBSCRIBED") await ch.track({username:"Admin",emoji:"🛡️",avatarColor:"#0F4C81",since:Date.now()});
     });
     adminChRef.current=ch;
     return()=>{ try{ ch.unsubscribe(); }catch(_){} adminChRef.current=null; };
@@ -19860,7 +19860,7 @@ function AdminDashboard(){
 
   if(loading) return(
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:320,gap:12}}>
-      <div style={{width:22,height:22,border:"2.5px solid #EBEBEB",borderTopColor:"#0066FF",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
+      <div style={{width:22,height:22,border:"2.5px solid #EBEBEB",borderTopColor:"#0F4C81",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
       <span style={{color:C.muted,fontSize:14}}>Cargando dashboard...</span>
     </div>
   );
@@ -19894,11 +19894,11 @@ function AdminDashboard(){
       {/* ── NAVBAR ADMIN ── */}
       <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"0 24px",marginBottom:20,display:"flex",alignItems:"center",gap:0,height:60,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
         <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginRight:32,letterSpacing:-0.5}}>
-          <span style={{color:"#0066FF"}}>Nexo</span>Trade
+          <span style={{fontFamily:"'Space Grotesk',sans-serif",letterSpacing:-0.5}}><span style={{color:"#0F4C81"}}>Nexo</span>Trade</span>
         </div>
         <div style={{display:"flex",gap:2,flex:1}}>
           {TABS.map(t=>(
-            <button key={t.k} onClick={()=>setTab(t.k)} style={{padding:"6px 18px",borderRadius:8,border:"none",fontSize:13,fontWeight:tab===t.k?700:500,cursor:"pointer",background:tab===t.k?"#0066FF":"transparent",color:tab===t.k?"#fff":"#6B7280",transition:"all 0.15s"}}>
+            <button key={t.k} onClick={()=>setTab(t.k)} style={{padding:"6px 18px",borderRadius:8,border:"none",fontSize:13,fontWeight:tab===t.k?700:500,cursor:"pointer",background:tab===t.k?"#0F4C81":"transparent",color:tab===t.k?"#fff":"#6B7280",transition:"all 0.15s"}}>
               {t.l}
             </button>
           ))}
@@ -19918,10 +19918,10 @@ function AdminDashboard(){
             const d=await r.json();
             alert(r.ok?`📣 Push enviado: ${d.sent} ok · ${d.failed} fallidos · ${d.total} suscriptores`:`❌ Error: ${d.error}`);
           }catch(e){ alert("❌ Error: "+e.message); }
-        }} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"8px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6,marginRight:8}}>
+        }} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:10,padding:"8px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6,marginRight:8}}>
           📣 Push
         </button>
-        <button onClick={()=>window.location.reload()} style={{background:"#0066FF",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+        <button onClick={()=>window.location.reload()} style={{background:"#0F4C81",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
           + Nuevo
         </button>
       </div>
@@ -19980,7 +19980,7 @@ function AdminDashboard(){
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 {/* Avatar + nombre */}
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{width:34,height:34,borderRadius:"50%",background:u.avatar_color||"#0066FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"#fff",flexShrink:0}}>
+                  <div style={{width:34,height:34,borderRadius:"50%",background:u.avatar_color||"#0F4C81",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"#fff",flexShrink:0}}>
                     {u.avatar_emoji||initials(u.username)}
                   </div>
                   <div>
@@ -19991,18 +19991,18 @@ function AdminDashboard(){
                 {/* Plan badge */}
                 <div>
                   <span style={{fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:6,
-                    background:u.is_premium?"rgba(217,119,6,0.1)":"rgba(0,0,0,0.05)",
-                    color:u.is_premium?"#D97706":"#6B7280",
-                    border:`1px solid ${u.is_premium?"rgba(217,119,6,0.25)":"rgba(0,0,0,0.08)"}`}}>
+                    background:u.is_premium?"rgba(15,94,104,0.1)":"rgba(0,0,0,0.05)",
+                    color:u.is_premium?"#0F5E68":"#6B7280",
+                    border:`1px solid ${u.is_premium?"rgba(15,94,104,0.25)":"rgba(0,0,0,0.08)"}`}}>
                     {u.is_premium?"VIP":"Free"}
                   </span>
                 </div>
                 {/* Barra de logins */}
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <div style={{flex:1,height:4,background:"#F0F0F0",borderRadius:4,overflow:"hidden"}}>
-                    <div style={{width:`${(u.logins/maxLogins)*100}%`,height:"100%",background:"#0066FF",borderRadius:4}}/>
+                    <div style={{width:`${(u.logins/maxLogins)*100}%`,height:"100%",background:"#0F4C81",borderRadius:4}}/>
                   </div>
-                  <span style={{fontSize:12,fontWeight:700,color:"#0066FF",minWidth:20,textAlign:"right"}}>{u.logins}</span>
+                  <span style={{fontSize:12,fontWeight:700,color:"#0F4C81",minWidth:20,textAlign:"right"}}>{u.logins}</span>
                 </div>
                 {/* Último acceso */}
                 <div style={{fontSize:12,color:"#9CA3AF"}}>{u.lastAccess}</div>
@@ -20037,9 +20037,9 @@ function AdminDashboard(){
             <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"20px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
               <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:16}}>Actividad — último mes</div>
               {[
-                {label:"Posts publicados",value:stats.totalPosts,col:"#0066FF"},
+                {label:"Posts publicados",value:stats.totalPosts,col:"#0F4C81"},
                 {label:"Nuevos registros",value:stats.newWeek,col:"#16A34A"},
-                {label:"Usuarios VIP",value:stats.vipCount,col:"#D97706"},
+                {label:"Usuarios VIP",value:stats.vipCount,col:"#0F5E68"},
                 {label:"Newsletter",value:stats.totalSubs,col:"#EC4899"},
               ].map((r,i)=>(
                 <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:i<3?"1px solid #F5F5F5":"none"}}>
@@ -20050,9 +20050,9 @@ function AdminDashboard(){
                   <span style={{fontSize:13,fontWeight:700,color:"#111827"}}>{r.value}</span>
                 </div>
               ))}
-              <div style={{marginTop:14,padding:"10px 14px",background:"rgba(0,102,255,0.05)",borderRadius:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{marginTop:14,padding:"10px 14px",background:"rgba(15,76,129,0.05)",borderRadius:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <span style={{fontSize:12,color:"#6B7280",fontWeight:600}}>MRR estimado</span>
-                <span style={{fontSize:15,fontWeight:900,color:"#0066FF"}}>${mrr}</span>
+                <span style={{fontSize:15,fontWeight:900,color:"#0F4C81"}}>${mrr}</span>
               </div>
             </div>
 
@@ -20120,23 +20120,23 @@ function AdminDashboard(){
                     {i+1}
                   </div>
                   {/* Avatar */}
-                  <div style={{width:40,height:40,borderRadius:"50%",background:u.avatar_color||"#0066FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,position:"relative"}}>
+                  <div style={{width:40,height:40,borderRadius:"50%",background:u.avatar_color||"#0F4C81",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,position:"relative"}}>
                     {u.avatar_emoji||"🦅"}
-                    {u.is_premium&&<div style={{position:"absolute",bottom:-2,right:-2,background:"#D97706",borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #fff"}}>✦</div>}
+                    {u.is_premium&&<div style={{position:"absolute",bottom:-2,right:-2,background:"#0F5E68",borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"1.5px solid #fff"}}>✦</div>}
                   </div>
                   {/* Info usuario */}
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
                       <span style={{fontWeight:800,fontSize:14,color:"#111827"}}>@{u.username||"usuario"}</span>
-                      {u.is_premium&&<span style={{background:"linear-gradient(135deg,#D97706,#B45309)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800}}>✦ VIP</span>}
+                      {u.is_premium&&<span style={{background:"linear-gradient(135deg,#0F5E68,#B45309)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800}}>✦ VIP</span>}
                     </div>
                     <div style={{fontSize:12,color:"#6B7280"}}>
-                      📅 {dt.date}&nbsp;&nbsp;🕐 {dt.time}&nbsp;&nbsp;<span style={{color:"#0066FF",fontWeight:600}}>{dt.ago}</span>
+                      📅 {dt.date}&nbsp;&nbsp;🕐 {dt.time}&nbsp;&nbsp;<span style={{color:"#0F4C81",fontWeight:600}}>{dt.ago}</span>
                     </div>
                   </div>
                   {/* Puntos */}
                   <div style={{textAlign:"right",flexShrink:0}}>
-                    <div style={{fontSize:13,fontWeight:800,color:"#0066FF"}}>{u.points||0}</div>
+                    <div style={{fontSize:13,fontWeight:800,color:"#0F4C81"}}>{u.points||0}</div>
                     <div style={{fontSize:10,color:"#9CA3AF"}}>pts</div>
                   </div>
                 </div>
@@ -20152,9 +20152,9 @@ function AdminDashboard(){
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24}}>
             {[
               {l:"Total registrados",v:stats.totalUsers,c:"#16A34A"},
-              {l:"Nuevos esta semana",v:stats.newWeek,c:"#0066FF"},
+              {l:"Nuevos esta semana",v:stats.newWeek,c:"#0F4C81"},
               {l:"Nuevos hoy",v:stats.newToday,c:"#F59E0B"},
-              {l:"Miembros VIP activos",v:stats.vipCount,c:"#D97706"},
+              {l:"Miembros VIP activos",v:stats.vipCount,c:"#0F5E68"},
               {l:"Usuarios free",v:stats.totalUsers-stats.vipCount,c:"#6B7280"},
               {l:"Conversión VIP",v:`${stats.totalUsers>0?((stats.vipCount/stats.totalUsers)*100).toFixed(1):0}%`,c:"#EC4899"},
             ].map((s,i)=>(
@@ -20165,7 +20165,7 @@ function AdminDashboard(){
             ))}
           </div>
           <a href="https://supabase.com/dashboard/project/glvrzrtatekuuhwtzzhd/editor" target="_blank" rel="noopener noreferrer"
-            style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(0,102,255,0.06)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:10,padding:"8px 16px",color:"#0066FF",fontSize:13,fontWeight:700,textDecoration:"none"}}>
+            style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(15,76,129,0.06)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:10,padding:"8px 16px",color:"#0F4C81",fontSize:13,fontWeight:700,textDecoration:"none"}}>
             Ver base de datos completa en Supabase →
           </a>
         </div>
@@ -20201,7 +20201,7 @@ function AdminDashboard(){
           <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
             <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:16}}>💰 Ingresos estimados</div>
             {[
-              {l:"VIP $9.99/mes",v:`$${(stats.vipCount*9.99).toFixed(2)}`,c:"#D97706"},
+              {l:"VIP $9.99/mes",v:`$${(stats.vipCount*9.99).toFixed(2)}`,c:"#0F5E68"},
               {l:"Webinars",v:"Pendiente Stripe",c:"#9CA3AF"},
               {l:"Cursos",v:"Pendiente Stripe",c:"#9CA3AF"},
             ].map((r,i)=>(
@@ -20217,7 +20217,7 @@ function AdminDashboard(){
               <button onClick={()=>{
                 const csv="email,fecha\n"+subs.map(s=>`${s.email},${s.created_at}`).join("\n");
                 const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="newsletter_nexotrade.csv";a.click();
-              }} style={{background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:8,padding:"5px 12px",color:"#0066FF",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+              }} style={{background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"5px 12px",color:"#0F4C81",fontSize:11,fontWeight:700,cursor:"pointer"}}>
                 ⬇️ CSV
               </button>
             </div>
@@ -20274,7 +20274,7 @@ function WelcomeModal({name, onClose, onGoVip}){
         </div>
 
         {/* Bonus badge */}
-        <div style={{background:"linear-gradient(135deg,#f59e0b22,#d9770622)",border:"1px solid #f59e0b44",borderRadius:12,padding:"10px 16px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
+        <div style={{background:"linear-gradient(135deg,#f59e0b22,#0F5E6822)",border:"1px solid #f59e0b44",borderRadius:12,padding:"10px 16px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
           <span style={{fontSize:22}}>🎁</span>
           <div>
             <div style={{color:"#f59e0b",fontWeight:700,fontSize:13}}>+100 puntos de bienvenida añadidos</div>
@@ -20284,7 +20284,7 @@ function WelcomeModal({name, onClose, onGoVip}){
 
         {/* CTAs */}
         <div style={{display:"flex",gap:10,flexDirection:"column"}}>
-          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#D97706,#4c1d95)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",width:"100%"}}>✦ Ver plan PREMIUM — 50% en webinars</button>
+          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#0F5E68,#4c1d95)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",width:"100%"}}>✦ Ver plan PREMIUM — 50% en webinars</button>
           <button onClick={onClose} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:12,padding:"11px",color:C.muted,fontSize:13,fontWeight:600,cursor:"pointer",width:"100%"}}>Explorar el feed →</button>
         </div>
       </div>
@@ -20638,7 +20638,7 @@ export default function App(){
         if(!profile){
           const username = session.user.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g,"").slice(0,20);
           const avatars = ["🦅","🐺","🦁","🐯","🦊","🐻","🦈","🦅","🐉","⚡"];
-          const colors  = ["#0066FF","#D97706","#00D26A","#F59E0B","#EF4444","#EC4899"];
+          const colors  = ["#0F4C81","#0F5E68","#00D26A","#F59E0B","#EF4444","#EC4899"];
           const {data:newProfile} = await supabase.from("profiles").insert({
             id: session.user.id,
             username,
@@ -20699,7 +20699,7 @@ export default function App(){
           user_id:    user.id,
           username:   user.username || user.name || "Trader",
           emoji:      user.emoji    || "🦅",
-          avatarColor:user.avatarColor || "#0066FF",
+          avatarColor:user.avatarColor || "#0F4C81",
           loginCount,
         });
       }
@@ -20990,13 +20990,13 @@ export default function App(){
             {v:"viral", l:"🔥 Viral"},
           ].map(({v,l})=>(
             <button key={v} onClick={()=>setSent(v)}
-              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?"#0066FF":"transparent"}`,padding:"13px 14px",cursor:"pointer",color:sent===v?"#0066FF":"#64748B",fontSize:13,fontWeight:sent===v?700:500,transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0}}>
+              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?"#0F4C81":"transparent"}`,padding:"13px 14px",cursor:"pointer",color:sent===v?"#0F4C81":"#64748B",fontSize:13,fontWeight:sent===v?700:500,transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0}}>
               {l}
             </button>
           ))}
           {tickerFilter&&(
-            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.25)",borderRadius:20,padding:"4px 12px",flexShrink:0}}>
-              <span style={{color:"#0066FF",fontWeight:800,fontSize:12}}>${tickerFilter}</span>
+            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.25)",borderRadius:20,padding:"4px 12px",flexShrink:0}}>
+              <span style={{color:"#0F4C81",fontWeight:800,fontSize:12}}>${tickerFilter}</span>
               <button onClick={()=>setTickerFilter(null)} style={{background:"none",border:"none",color:"#94A3B8",cursor:"pointer",fontSize:13,lineHeight:1}}>✕</button>
             </div>
           )}
@@ -21082,18 +21082,18 @@ export default function App(){
             {/* SmartCredit afiliado cada 8 posts */}
             {(i+1)%8===0 && (
               <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
-                style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,rgba(0,102,255,0.06),rgba(16,185,129,0.04))",border:"1.5px solid rgba(0,102,255,0.18)",borderRadius:14,padding:"13px 16px",margin:"6px 0",textDecoration:"none",transition:"all 0.18s"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.11),rgba(16,185,129,0.07))";e.currentTarget.style.borderColor="rgba(0,102,255,0.38)";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(0,102,255,0.06),rgba(16,185,129,0.04))";e.currentTarget.style.borderColor="rgba(0,102,255,0.18)";}}>
-                <div style={{width:42,height:42,borderRadius:11,background:"linear-gradient(135deg,#0066FF,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>💳</div>
+                style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,rgba(15,76,129,0.06),rgba(16,185,129,0.04))",border:"1.5px solid rgba(15,76,129,0.18)",borderRadius:14,padding:"13px 16px",margin:"6px 0",textDecoration:"none",transition:"all 0.18s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.11),rgba(16,185,129,0.07))";e.currentTarget.style.borderColor="rgba(15,76,129,0.38)";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.06),rgba(16,185,129,0.04))";e.currentTarget.style.borderColor="rgba(15,76,129,0.18)";}}>
+                <div style={{width:42,height:42,borderRadius:11,background:"linear-gradient(135deg,#0F4C81,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>💳</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:2}}>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>SmartCredit</span>
-                    <span style={{background:"rgba(0,102,255,0.1)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0066FF",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
+                    <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
                   </div>
                   <div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>Monitorea tu crédito, protege tus finanzas y mejora tu score — gratis para empezar.</div>
                 </div>
-                <span style={{fontSize:11,color:"#0066FF",fontWeight:800,flexShrink:0,whiteSpace:"nowrap"}}>Ver más →</span>
+                <span style={{fontSize:11,color:"#0F4C81",fontWeight:800,flexShrink:0,whiteSpace:"nowrap"}}>Ver más →</span>
               </a>
             )}
             {/* Bots ya inyectados directamente en displayFeed */}
@@ -21182,7 +21182,7 @@ export default function App(){
         --c-navBorder:  rgba(0,0,0,0.06);
         --c-inputBg:    #F9FAFB;
         --c-inputBorder:rgba(0,0,0,0.09);
-        --c-accent:     #0066FF;
+        --c-accent:     #0F4C81;
       }
       /* ── DARK MODE ── */
       [data-dark="true"] {
@@ -21213,7 +21213,7 @@ export default function App(){
         color: var(--c-text) !important;
       }
       /* Scrollbar dark */
-      [data-dark="true"] ::-webkit-scrollbar-thumb { background: rgba(0,102,255,0.18); }
+      [data-dark="true"] ::-webkit-scrollbar-thumb { background: rgba(15,76,129,0.18); }
 
       @media (min-width: 1024px) {
         .nexo-body-grid { grid-template-columns: 240px minmax(0,1fr) 300px !important; }
@@ -21461,15 +21461,15 @@ export default function App(){
       * { -webkit-font-smoothing: antialiased; }
       ::-webkit-scrollbar { width: 4px; height: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: rgba(0,102,255,0.2); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb { background: rgba(15,76,129,0.2); border-radius: 4px; }
       @keyframes postSlideIn {
         from { opacity: 0; transform: translateY(12px); }
         to   { opacity: 1; transform: translateY(0); }
       }
       @keyframes postPulse {
-        0%   { box-shadow: 0 0 0 0 rgba(0,102,255,0.18); }
-        70%  { box-shadow: 0 0 0 8px rgba(0,102,255,0); }
-        100% { box-shadow: 0 0 0 0 rgba(0,102,255,0); }
+        0%   { box-shadow: 0 0 0 0 rgba(15,76,129,0.18); }
+        70%  { box-shadow: 0 0 0 8px rgba(15,76,129,0); }
+        100% { box-shadow: 0 0 0 0 rgba(15,76,129,0); }
       }
       .post-card-new {
         animation: postSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) both, postPulse 0.9s ease 0.35s;
@@ -21516,7 +21516,7 @@ export default function App(){
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
       {!user && showNewsletter && !newsletterDone && (
-        <div style={{background:"linear-gradient(90deg,#0F172A 0%,#1E293B 100%)",borderBottom:"1px solid rgba(0,102,255,0.2)",padding:"10px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
+        <div style={{background:"linear-gradient(90deg,#0F172A 0%,#1E293B 100%)",borderBottom:"1px solid rgba(15,76,129,0.2)",padding:"10px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
           <span style={{fontSize:16,flexShrink:0}}>📈</span>
           <span style={{color:"#E2E8F0",fontSize:13,fontWeight:600,flexShrink:0}}>Análisis de mercado gratis cada semana:</span>
           <div style={{display:"flex",gap:8,alignItems:"center",flex:"1 1 260px",maxWidth:400}}>
@@ -21525,7 +21525,7 @@ export default function App(){
               value={newsletterEmail}
               onChange={e=>setNewsletterEmail(e.target.value)}
               placeholder="tu@email.com"
-              style={{flex:1,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:8,padding:"7px 12px",color:"#F1F5F9",fontSize:13,outline:"none",minWidth:0}}
+              style={{flex:1,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:8,padding:"7px 12px",color:"#F1F5F9",fontSize:13,outline:"none",minWidth:0}}
               onKeyDown={e=>{if(e.key==="Enter"&&newsletterEmail.includes("@")){
                 supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).then(()=>{});
                 fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:newsletterEmail})}).catch(()=>{});
@@ -21539,7 +21539,7 @@ export default function App(){
                 fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:newsletterEmail})}).catch(()=>{});
                 setNewsletterDone(true);
               }}
-              style={{background:"#0066FF",border:"none",borderRadius:8,padding:"7px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+              style={{background:"#0F4C81",border:"none",borderRadius:8,padding:"7px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
               Suscribirme →
             </button>
           </div>
@@ -21574,27 +21574,27 @@ export default function App(){
             {/* Home */}
             <button onClick={()=>{setPage(0);setShowLanding(false);}}
               title="Inicio — Página principal"
-              style={{width:40,height:40,borderRadius:11,border:`2px solid ${page===0?"#0066FF":"rgba(0,102,255,0.25)"}`,background:page===0?"rgba(0,102,255,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0066FF",transition:"all 0.15s",boxShadow:page===0?"0 0 14px rgba(0,102,255,0.28)":"none"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,102,255,0.15)";e.currentTarget.style.boxShadow="0 0 14px rgba(0,102,255,0.25)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background=page===0?"rgba(0,102,255,0.15)":"transparent";e.currentTarget.style.boxShadow=page===0?"0 0 14px rgba(0,102,255,0.28)":"none";}}>
+              style={{width:40,height:40,borderRadius:11,border:`2px solid ${page===0?"#0F4C81":"rgba(15,76,129,0.25)"}`,background:page===0?"rgba(15,76,129,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",transition:"all 0.15s",boxShadow:page===0?"0 0 14px rgba(15,76,129,0.28)":"none"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.15)";e.currentTarget.style.boxShadow="0 0 14px rgba(15,76,129,0.25)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=page===0?"rgba(15,76,129,0.15)":"transparent";e.currentTarget.style.boxShadow=page===0?"0 0 14px rgba(15,76,129,0.28)":"none";}}>
               <IcoHome/>
             </button>
 
             {/* IA */}
             <button onClick={()=>setShowAI(true)}
               title="IA de NexoTrade"
-              style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(0,102,255,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0066FF",transition:"all 0.15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,102,255,0.12)";e.currentTarget.style.borderColor="rgba(0,102,255,0.5)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(0,102,255,0.25)";}}>
+              style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(15,76,129,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.12)";e.currentTarget.style.borderColor="rgba(15,76,129,0.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(15,76,129,0.25)";}}>
               <IcoBot/>
             </button>
 
             {/* Alertas */}
             <button className="nexo-btn-alerts" onClick={()=>setAlerts(true)}
               title="Alertas"
-              style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(0,102,255,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0066FF",position:"relative",transition:"all 0.15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,102,255,0.12)";e.currentTarget.style.borderColor="rgba(0,102,255,0.5)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(0,102,255,0.25)";}}>
+              style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(15,76,129,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",position:"relative",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.12)";e.currentTarget.style.borderColor="rgba(15,76,129,0.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(15,76,129,0.25)";}}>
               <IcoBell/>
               {alertCount>0&&<span style={{position:"absolute",top:-3,right:-3,minWidth:16,height:16,background:"#EF4444",borderRadius:"50%",border:"2px solid var(--c-nav,#fff)",fontSize:9,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 2px",animation:"nexo-pulse 2s infinite"}}>{alertCount}</span>}
             </button>
@@ -21611,9 +21611,9 @@ export default function App(){
             {/* Settings panel */}
             <button onClick={()=>setShowSettings(true)}
               title="Configuración"
-              style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${showSettings?"rgba(0,102,255,0.6)":"rgba(0,102,255,0.2)"}`,background:showSettings?"rgba(0,102,255,0.13)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0066FF",transition:"all 0.15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,102,255,0.12)";e.currentTarget.style.borderColor="rgba(0,102,255,0.5)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background=showSettings?"rgba(0,102,255,0.13)":"transparent";e.currentTarget.style.borderColor=showSettings?"rgba(0,102,255,0.6)":"rgba(0,102,255,0.2)";}}>
+              style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${showSettings?"rgba(15,76,129,0.6)":"rgba(15,76,129,0.2)"}`,background:showSettings?"rgba(15,76,129,0.13)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.12)";e.currentTarget.style.borderColor="rgba(15,76,129,0.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=showSettings?"rgba(15,76,129,0.13)":"transparent";e.currentTarget.style.borderColor=showSettings?"rgba(15,76,129,0.6)":"rgba(15,76,129,0.2)";}}>
               <IcoSettings/>
             </button>
 
@@ -21662,7 +21662,7 @@ export default function App(){
         </div>
         {/* ── ROW 2: VIP TABS ── */}
         <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#E8F4FF",borderTop:"1px solid #BFDBFE",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
-          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#fff",background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 10px rgba(217,119,6,0.4)",display:"inline-flex",alignItems:"center",gap:4}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 16px rgba(217,119,6,0.6)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(217,119,6,0.4)"}>⭐ PREMIUM</span>
+          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#fff",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 10px rgba(15,94,104,0.4)",display:"inline-flex",alignItems:"center",gap:4}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 16px rgba(15,94,104,0.6)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(15,94,104,0.4)"}>⭐ PREMIUM</span>
           {[
             {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
             {label:lang==="en"?"🐋 Whale Flow PREMIUM":"🐋 Flujo PREMIUM",idx:20,locked:!effectivePremium},
@@ -21686,7 +21686,7 @@ export default function App(){
             );
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{position:"absolute",right:8,flexShrink:0,background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#fff",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
+            style={{position:"absolute",right:8,flexShrink:0,background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#fff",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
             {effectivePremium ? "✦ Premium" : (lang==="en"?"✦ Join Premium — $9.99/mo":"✦ Únete a Premium — $9.99/mes")}
           </button>
         </div>
@@ -21697,7 +21697,7 @@ export default function App(){
         <div>
 
         {/* ── HERO ── */}
-        <div style={{background:`linear-gradient(135deg,#0B1A2E 0%,#0D2244 50%,#0B1A2E 100%)`,borderBottom:`1px solid rgba(0,102,255,0.15)`,padding:"64px 20px 56px",overflow:"hidden",position:"relative"}}>
+        <div style={{background:`linear-gradient(135deg,#0B1A2E 0%,#0D2244 50%,#0B1A2E 100%)`,borderBottom:`1px solid rgba(15,76,129,0.15)`,padding:"64px 20px 56px",overflow:"hidden",position:"relative"}}>
           <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 20% 50%,#00D26A08,transparent 50%),radial-gradient(circle at 80% 30%,#3B8EFA08,transparent 50%)",pointerEvents:"none"}}/>
           <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:48,flexWrap:"wrap",position:"relative"}}>
 
@@ -21765,7 +21765,7 @@ export default function App(){
                 </div>
                 {[
                   {u:"SPY_Trader",e:"🦅",c:"#00D26A",t:"NVDA rompiendo resistencia en $890. Target $950 en 2 semanas. Stop en $860. R:R 3:1 🚀",bull:true,likes:47},
-                  {u:"CryptoWolf",e:"🐺",c:"#D97706",t:"BTC acumulando en $67k. On-chain muestra manos fuertes comprando. Bullish largo plazo. ₿",bull:true,likes:82},
+                  {u:"CryptoWolf",e:"🐺",c:"#0F5E68",t:"BTC acumulando en $67k. On-chain muestra manos fuertes comprando. Bullish largo plazo. ₿",bull:true,likes:82},
                   {u:"NvidiaChad",e:"🦁",c:"#F59E0B",t:"TSLA reporta earnings la próxima semana. Cuidado con la volatilidad. Yo flat hasta el dato 📊",bull:false,likes:31},
                 ].map((p,i)=>(
                   <div key={i} style={{marginBottom:12,paddingBottom:12,borderBottom:i<2?"1px solid #1e293b":"none"}}>
@@ -21793,7 +21793,7 @@ export default function App(){
                 <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>NVDA</div>
                 <div style={{fontSize:18,fontWeight:900,color:"#10b981"}}>+2.8%</div>
               </div>
-              <div style={{position:"absolute",bottom:-12,left:-12,background:"rgba(15,23,42,0.97)",border:"1px solid #D9770644",borderRadius:12,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+              <div style={{position:"absolute",bottom:-12,left:-12,background:"rgba(15,23,42,0.97)",border:"1px solid #0F5E6844",borderRadius:12,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
                 <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>{lang==="en"?"PREMIUM this week":"PREMIUM esta semana"}</div>
                 <div style={{fontSize:13,fontWeight:800,color:"#a78bfa"}}>{lang==="en"?"✦ 10 picks ready":"✦ 10 picks listos"}</div>
               </div>
@@ -21802,14 +21802,14 @@ export default function App(){
         </div>
 
         {/* ── STATS TRUST BAR ── */}
-        <div style={{background:"#060c18",borderBottom:"1px solid rgba(0,102,255,0.1)",padding:"20px 20px"}}>
+        <div style={{background:"#060c18",borderBottom:"1px solid rgba(15,76,129,0.1)",padding:"20px 20px"}}>
           <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-around",flexWrap:"wrap",gap:"12px 0"}}>
             {[
               {val:lang==="en"?"8,400+":"8,400+", label:lang==="en"?"active traders":"traders activos", icon:"👥", c:"#00D26A"},
               {val:"40K+", label:lang==="en"?"ideas shared":"ideas compartidas", icon:"📊", c:"#3B8EFA"},
               {val:"4.9★", label:lang==="en"?"average rating":"calificación promedio", icon:"⭐", c:"#F59E0B"},
               {val:"92%", label:lang==="en"?"pick accuracy":"precisión en picks", icon:"🎯", c:"#a78bfa"},
-              {val:"#1", label:lang==="en"?"Global trading community":"comunidad trading global", icon:"🏆", c:"#0066FF"},
+              {val:"#1", label:lang==="en"?"Global trading community":"comunidad trading global", icon:"🏆", c:"#0F4C81"},
             ].map((s,i)=>(
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 20px",borderRight:i<4?"1px solid rgba(255,255,255,0.06)":"none"}}>
                 <span style={{fontSize:22}}>{s.icon}</span>
@@ -21823,7 +21823,7 @@ export default function App(){
         </div>
 
         {/* ── TELEGRAM ALERT BANNER ── */}
-        <div style={{background:"linear-gradient(135deg,#060d1a 0%,#0b1a2e 50%,#060d1a 100%)",borderBottom:"1px solid rgba(0,102,255,0.1)",padding:"36px 20px",position:"relative",overflow:"hidden"}}>
+        <div style={{background:"linear-gradient(135deg,#060d1a 0%,#0b1a2e 50%,#060d1a 100%)",borderBottom:"1px solid rgba(15,76,129,0.1)",padding:"36px 20px",position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",right:0,top:0,width:"40%",height:"100%",background:"radial-gradient(ellipse at 80% 50%,rgba(0,136,204,0.07),transparent 70%)",pointerEvents:"none"}}/>
           <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:32,flexWrap:"wrap"}}>
             {/* Mockup de notificación Telegram */}
@@ -21888,13 +21888,13 @@ export default function App(){
               {(lang==="en" ? [
                 {icon:"📊",t:"Traders Feed",d:"See real-time analyses and strategies from thousands of investors worldwide. Filter by bullish, bearish or trending.",c:"#10b981"},
                 {icon:"🎯",t:"Weekly PREMIUM Picks",d:"Every Monday 9AM: 10 stocks selected by our top-performing traders with proven track records.",c:"#a78bfa"},
-                {icon:"🤖",t:"Trading AI",d:"Chat with our market-specialized AI. Analyze tickers, strategies and risk management.",c:"#0066ff"},
+                {icon:"🤖",t:"Trading AI",d:"Chat with our market-specialized AI. Analyze tickers, strategies and risk management.",c:"#0F4C81"},
                 {icon:"🎮",t:"Paper Trading",d:"Practice with $100,000 virtual. Compete on the leaderboard and prove your strategy before risking real money.",c:"#f59e0b"},
                 {icon:"🎓",t:"Academy & Webinars",d:"Recorded courses ($39-$99) and live webinars ($29-$79). Learn technical analysis, crypto, options and more.",c:"#ef4444"},
               ] : [
                 {icon:"📊",t:"Feed de Traders",d:"Ve análisis y estrategias en tiempo real de miles de inversores del mundo. Filtra por alcistas, bajistas o trending.",c:"#10b981"},
                 {icon:"🎯",t:"Picks PREMIUM Semanales",d:"Cada lunes 9AM: 10 acciones seleccionadas por nuestros traders con mayor historial de aciertos.",c:"#a78bfa"},
-                {icon:"🤖",t:"IA de Trading",d:"Chatea con nuestra IA especializada en mercados. Analiza tickers, estrategias y gestión de riesgo.",c:"#0066ff"},
+                {icon:"🤖",t:"IA de Trading",d:"Chatea con nuestra IA especializada en mercados. Analiza tickers, estrategias y gestión de riesgo.",c:"#0F4C81"},
                 {icon:"🎮",t:"Paper Trading",d:"Practica con $100,000 virtuales. Compite en el leaderboard y demuestra tu estrategia antes de arriesgar.",c:"#f59e0b"},
                 {icon:"🎓",t:"Academia & Webinars",d:"Cursos grabados ($39-$99) y webinars en vivo ($29-$79). Aprende análisis técnico, crypto, opciones y más.",c:"#ef4444"},
               ]).map((f,i)=>(
@@ -21927,8 +21927,8 @@ export default function App(){
                 {n:"3",icon:"💰",t:"Empieza a ganar",d:"Aplica las estrategias. Hazte PREMIUM para los picks exclusivos."},
               ]).map((s,i)=>(
                 <div key={i} style={{flex:"1 1 220px",maxWidth:280,padding:"0 20px",position:"relative"}}>
-                  {i<2&&<div style={{position:"absolute",top:28,right:-10,width:20,height:2,background:"linear-gradient(90deg,#10b981,#0066ff)",display:"block"}} className="nexo-step-line"/>}
-                  <div style={{width:56,height:56,borderRadius:"50%",background:`linear-gradient(135deg,${C.accent},#0066ff)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px",boxShadow:`0 0 24px ${C.accent}44`}}>{s.icon}</div>
+                  {i<2&&<div style={{position:"absolute",top:28,right:-10,width:20,height:2,background:"linear-gradient(90deg,#10b981,#0F4C81)",display:"block"}} className="nexo-step-line"/>}
+                  <div style={{width:56,height:56,borderRadius:"50%",background:`linear-gradient(135deg,${C.accent},#0F4C81)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px",boxShadow:`0 0 24px ${C.accent}44`}}>{s.icon}</div>
                   <div style={{background:C.accent,color:"#000",borderRadius:"50%",width:20,height:20,fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",margin:"-68px auto 52px",marginLeft:"calc(50% + 12px)"}}>{s.n}</div>
                   <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:15,fontWeight:800}}>{s.t}</h3>
                   <p style={{margin:0,color:"#64748b",fontSize:13,lineHeight:1.5}}>{s.d}</p>
@@ -21949,9 +21949,9 @@ export default function App(){
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20}}>
               {[
                 {n:"María G.",loc:"México",e:"🦅",c:"#10b981",r:5,t:"Los picks PREMIUM son increíbles. En 3 meses duplicé mi portafolio siguiendo las señales. Antes no sabía ni qué era un stop loss."},
-                {n:"Carlos R.",loc:"Colombia",e:"🐺",c:"#D97706",r:5,t:"La comunidad es lo mejor. Antes invertía solo y cometía muchos errores. Aquí aprendí análisis técnico real de traders con historial probado."},
+                {n:"Carlos R.",loc:"Colombia",e:"🐺",c:"#0F5E68",r:5,t:"La comunidad es lo mejor. Antes invertía solo y cometía muchos errores. Aquí aprendí análisis técnico real de traders con historial probado."},
                 {n:"Ana T.",loc:"Argentina",e:"🦁",c:"#F59E0B",r:5,t:"El webinar de opciones me cambió la vida. Ahora genero ingresos extra con covered calls cada mes. Vale cada peso que pagué."},
-                {n:"Luis M.",loc:"España",e:"🐉",c:"#0066ff",r:5,t:"El bot de IA me ayuda a filtrar las mejores oportunidades. Le pregunto sobre cualquier ticker y me da análisis al nivel de un profesional."},
+                {n:"Luis M.",loc:"España",e:"🐉",c:"#0F4C81",r:5,t:"El bot de IA me ayuda a filtrar las mejores oportunidades. Le pregunto sobre cualquier ticker y me da análisis al nivel de un profesional."},
                 {n:"Patricia V.",loc:"Miami",e:"🦈",c:"#ef4444",r:5,t:"El Job Board me consiguió trabajo en una firma de trading en 2 semanas. La red de contactos en finanzas que hay aquí es única en el mundo."},
                 {n:"Diego F.",loc:"Chile",e:"🐻",c:"#06b6d4",r:5,t:"Empecé con paper trading y en 6 meses pasé a dinero real con confianza. El leaderboard me motivó a estudiar más y mejorar mi estrategia."},
               ].map((t,i)=>(
@@ -22006,7 +22006,7 @@ export default function App(){
                 {
                   plan:"PREMIUM ✦",badge:"⚡ MÁS POPULAR",
                   precio:"$9.99",periodo:"/mes · o $79.99/año",
-                  color:"#a78bfa",bg:"linear-gradient(135deg,#1a0f2e,#1e1040)",border:"#D97706",btnBg:"linear-gradient(135deg,#D97706,#4c1d95)",btnBorder:"#D97706",
+                  color:"#a78bfa",bg:"linear-gradient(135deg,#1a0f2e,#1e1040)",border:"#0F5E68",btnBg:"linear-gradient(135deg,#0F5E68,#4c1d95)",btnBorder:"#0F5E68",
                   featured:true,
                   features:[
                     {t:"Todo lo del plan Free",ok:true},
@@ -22023,7 +22023,7 @@ export default function App(){
                 {
                   plan:"PRO 🚀",badge:"Para traders serios",
                   precio:"$24.99",periodo:"/mes",
-                  color:"#0066FF",bg:"linear-gradient(135deg,#061828,#082038)",border:"#0066FF",btnBg:"linear-gradient(135deg,#0066FF,#0066CC)",btnBorder:"#0066FF",
+                  color:"#0F4C81",bg:"linear-gradient(135deg,#061828,#082038)",border:"#0F4C81",btnBg:"linear-gradient(135deg,#0F4C81,#0066CC)",btnBorder:"#0F4C81",
                   features:[
                     {t:"Todo lo del plan PREMIUM",ok:true},
                     {t:"Señales PRO con R:R detallado",ok:true},
@@ -22037,10 +22037,10 @@ export default function App(){
                   cta:"Empezar PRO",action:()=>setAuth("register")
                 },
               ].map((p,i)=>(
-                <div key={i} style={{background:p.bg,border:`2px solid ${p.border}`,borderRadius:22,padding:"30px 26px",position:"relative",boxShadow:p.featured?"0 0 50px #D9770622":p.color==="#0066FF"?"0 0 30px #0066FF11":"none",transition:"transform 0.2s"}}
+                <div key={i} style={{background:p.bg,border:`2px solid ${p.border}`,borderRadius:22,padding:"30px 26px",position:"relative",boxShadow:p.featured?"0 0 50px #0F5E6822":p.color==="#0F4C81"?"0 0 30px #0F4C8111":"none",transition:"transform 0.2s"}}
                   onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"}
                   onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                  {p.badge&&<div style={{position:"absolute",top:-13,left:"50%",transform:"translateX(-50%)",background:p.featured?"linear-gradient(135deg,#D97706,#4c1d95)":p.color==="#0066FF"?"linear-gradient(135deg,#0066FF,#0066CC)":"#1e293b",borderRadius:20,padding:"4px 18px",fontSize:11,fontWeight:700,color:"#fff",whiteSpace:"nowrap",border:`1px solid ${p.border}44`}}>{p.badge}</div>}
+                  {p.badge&&<div style={{position:"absolute",top:-13,left:"50%",transform:"translateX(-50%)",background:p.featured?"linear-gradient(135deg,#0F5E68,#4c1d95)":p.color==="#0F4C81"?"linear-gradient(135deg,#0F4C81,#0066CC)":"#1e293b",borderRadius:20,padding:"4px 18px",fontSize:11,fontWeight:700,color:"#fff",whiteSpace:"nowrap",border:`1px solid ${p.border}44`}}>{p.badge}</div>}
                   {/* Plan name + precio */}
                   <div style={{marginBottom:20,paddingBottom:16,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
                     <div style={{color:p.color,fontWeight:800,fontSize:15,marginBottom:8}}>{p.plan}</div>
@@ -22076,7 +22076,7 @@ export default function App(){
         </div>
 
         {/* ── FINAL CTA ── */}
-        <div style={{background:`linear-gradient(135deg,#0B1A2E,#0D2244)`,padding:"64px 20px",borderTop:"1px solid rgba(0,102,255,0.15)",textAlign:"center"}}>
+        <div style={{background:`linear-gradient(135deg,#0B1A2E,#0D2244)`,padding:"64px 20px",borderTop:"1px solid rgba(15,76,129,0.15)",textAlign:"center"}}>
           <div style={{maxWidth:600,margin:"0 auto"}}>
             <div style={{fontSize:48,marginBottom:16}}>🚀</div>
             <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4vw,40px)",fontWeight:900}}>{lang==="en"?"Ready to invest smarter?":"¿Listo para invertir mejor?"}</h2>
@@ -22174,10 +22174,10 @@ export default function App(){
       {/* ── SOCIAL PROOF TOAST (esquina inferior izquierda) ── */}
       {socialProofMsg && (
         <div style={{position:"fixed",bottom:28,left:20,zIndex:8800,background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 4px 24px rgba(0,0,0,0.3)",maxWidth:280,animation:"nexo-slidein 0.4s ease"}}>
-          <div style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#0066FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👤</div>
+          <div style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#0F4C81,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👤</div>
           <div>
             <div style={{color:C.text,fontWeight:700,fontSize:12}}>{socialProofMsg.name} <span style={{color:C.muted2,fontWeight:400}}>{lang==="en"?"from":"de"} {socialProofMsg.loc}</span></div>
-            <div style={{color:"#0066FF",fontSize:11,marginTop:2}}>{socialProofMsg.action}</div>
+            <div style={{color:"#0F4C81",fontSize:11,marginTop:2}}>{socialProofMsg.action}</div>
           </div>
         </div>
       )}
@@ -22185,10 +22185,10 @@ export default function App(){
       {/* ── POP-UP CAPTURA DE EMAIL ── */}
       {showEmailPopup && !user && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}}>
-          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:24,padding:"40px 36px",maxWidth:440,width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",position:"relative",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:24,padding:"40px 36px",maxWidth:440,width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",position:"relative",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
             <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",color:"#475569",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
             {/* Ícono */}
-            <div style={{width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#0066FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,margin:"0 auto 20px",boxShadow:"0 0 32px rgba(0,102,255,0.4)"}}>🎯</div>
+            <div style={{width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#0F4C81,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,margin:"0 auto 20px",boxShadow:"0 0 32px rgba(15,76,129,0.4)"}}>🎯</div>
             <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:22,fontWeight:900}}>Recibe el pick de la semana gratis</h3>
             <p style={{margin:"0 0 24px",color:"#64748b",fontSize:14,lineHeight:1.6}}>Cada lunes a las 9am te enviamos el pick <strong style={{color:"#fff"}}>más votado por la comunidad</strong> directo a tu email. Sin spam.</p>
             {!emailPopupSent ? (
@@ -22204,8 +22204,8 @@ export default function App(){
               }}>
                 <div style={{display:"flex",gap:8,marginBottom:12}}>
                   <input name="email" type="email" required placeholder="tu@email.com"
-                    style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(0,102,255,0.3)",borderRadius:10,padding:"12px 14px",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
-                  <button type="submit" style={{background:"linear-gradient(135deg,#0066FF,#0066CC)",border:"none",borderRadius:10,padding:"12px 18px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",whiteSpace:"nowrap"}}>Recibir →</button>
+                    style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:10,padding:"12px 14px",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
+                  <button type="submit" style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:10,padding:"12px 18px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",whiteSpace:"nowrap"}}>Recibir →</button>
                 </div>
                 <div style={{color:"#1e3a5f",fontSize:11}}>🔒 Sin spam. Cancela cuando quieras.</div>
               </form>
@@ -22237,17 +22237,17 @@ export default function App(){
           {!aiBubbleOff && (
             <div style={{
               background:"linear-gradient(135deg,#0B1A2E,#0D2244)",
-              border:"1px solid rgba(0,102,255,0.5)",
+              border:"1px solid rgba(15,76,129,0.5)",
               borderRadius:14, padding:"9px 12px 9px 14px",
               color:"#fff", fontSize:12, fontWeight:600,
-              boxShadow:"0 4px 24px rgba(0,102,255,0.25)",
+              boxShadow:"0 4px 24px rgba(15,76,129,0.25)",
               whiteSpace:"nowrap", backdropFilter:"blur(12px)",
               pointerEvents:"auto", cursor:"pointer",
               animation:"nexo-float 3s ease-in-out infinite",
               display:"flex", alignItems:"center", gap:10,
             }}>
               <span onClick={()=>setShowAI(true)}>
-                {lang==="en"?"Questions about the market?":"¿Tienes dudas sobre el mercado?"} <span style={{color:"#0066FF"}}>{lang==="en"?"Ask me →":"Pregúntame →"}</span>
+                {lang==="en"?"Questions about the market?":"¿Tienes dudas sobre el mercado?"} <span style={{color:"#0F4C81"}}>{lang==="en"?"Ask me →":"Pregúntame →"}</span>
               </span>
               <button onClick={e=>{e.stopPropagation();setAiBubbleOff(true);}}
                 style={{background:"rgba(255,255,255,0.1)",border:"none",borderRadius:"50%",
@@ -22276,11 +22276,11 @@ export default function App(){
             {/* Botón IA principal */}
             <button onClick={()=>setShowAI(true)} style={{
               width:58, height:58, borderRadius:"50%",
-              background:"linear-gradient(135deg,#0066FF,#0066CC)",
-              border:"3px solid rgba(0,102,255,0.4)",
+              background:"linear-gradient(135deg,#0F4C81,#0066CC)",
+              border:"3px solid rgba(15,76,129,0.4)",
               display:"flex", alignItems:"center", justifyContent:"center",
               fontSize:26, cursor:"pointer",
-              boxShadow:"0 4px 24px rgba(0,102,255,0.5)",
+              boxShadow:"0 4px 24px rgba(15,76,129,0.5)",
               animation:"nexo-pulse 2s infinite",
             }}>🤖</button>
 
@@ -22302,8 +22302,8 @@ export default function App(){
       {!showAI && aiHidden && (
         <button onClick={()=>setAiHidden(false)}
           style={{position:"fixed",bottom:16,right:16,zIndex:8900,
-            background:"rgba(15,23,42,0.95)",border:"1px solid rgba(0,102,255,0.35)",
-            borderRadius:20,padding:"6px 14px",color:"#0066FF",cursor:"pointer",
+            background:"rgba(15,23,42,0.95)",border:"1px solid rgba(15,76,129,0.35)",
+            borderRadius:20,padding:"6px 14px",color:"#0F4C81",cursor:"pointer",
             fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:6,
             boxShadow:"0 4px 16px rgba(0,0,0,0.4)"}}>
           🤖 IA
