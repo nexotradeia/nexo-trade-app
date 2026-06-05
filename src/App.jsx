@@ -4513,7 +4513,8 @@ const CRYPTO_LOGO = {
 const logoUrlFor = (sym) => {
   const s=(sym||"").toUpperCase();
   if(CRYPTO_LOGO[s]) return `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${CRYPTO_LOGO[s]}.png`;
-  if(LOGO_DOMAIN[s]) return `https://logo.clearbit.com/${LOGO_DOMAIN[s]}`;
+  // Logos de acciones por símbolo (repo nvstly en jsdelivr) — cubre miles de tickers; si no existe → letra
+  if(/^[A-Z.]{1,6}$/.test(s)) return `https://cdn.jsdelivr.net/gh/nvstly/icons/ticker_icons/${s}.png`;
   return null;
 };
 // Badge con logo oficial; si no hay/falla → cuadrito de color con la inicial
@@ -7769,7 +7770,8 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
             return(
               <div key={tk} onClick={openPaywall}
                 style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:"1px solid rgba(15,23,42,0.04)",cursor:"pointer",position:"relative"}}>
-                <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:54,flexShrink:0}}>{tk}</span>
+                <LogoBadge sym={tk} col="#0F4C81" size={22} radius={6}/>
+                <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:46,flexShrink:0}}>{tk}</span>
                 <span style={{flex:1,fontSize:12.5,fontWeight:700,color:"transparent",textShadow:"0 0 8px rgba(15,23,42,0.45)",userSelect:"none"}}>$ ███.██</span>
                 <span style={{display:"inline-flex",alignItems:"center",gap:4,background:`linear-gradient(135deg,${GOLD},${GOLD2})`,color:"#fff",fontSize:10,fontWeight:800,borderRadius:20,padding:"3px 10px",flexShrink:0,boxShadow:"0 2px 8px rgba(15,76,129,0.35)"}}>🔒 Premium</span>
               </div>
@@ -7780,7 +7782,8 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
               style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:"1px solid rgba(15,23,42,0.04)",position:"relative"}}
               onMouseEnter={e=>{const x=e.currentTarget.querySelector('.nx-del');if(x)x.style.opacity='1';}}
               onMouseLeave={e=>{const x=e.currentTarget.querySelector('.nx-del');if(x)x.style.opacity='0';}}>
-              <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:54,flexShrink:0}}>{tk}</span>
+              <LogoBadge sym={tk} col="#0F4C81" size={22} radius={6}/>
+              <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:46,flexShrink:0}}>{tk}</span>
               <span style={{fontSize:12.5,fontWeight:700,color:"#0F172A",minWidth:60,flexShrink:0}}>{live&&live.price!=null?fmtLivePrice(tk,live.price):<span style={{color:"#CBD5E1"}}>···</span>}</span>
               <span style={{fontSize:11,fontWeight:800,color:up?"#16A34A":"#DC2626",minWidth:50,flexShrink:0}}>
                 {live&&live.change!=null?`${up?"▲":"▼"}${Math.abs(live.change).toFixed(2)}%`:""}
