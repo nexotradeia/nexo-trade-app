@@ -1094,8 +1094,9 @@ const fmtLivePrice = (ticker, price) => {
   return `$${price.toFixed(2)}`;
 };
 
-function TickerTape() {
+function TickerTape({lang="es", onPremium}) {
   const lp = useContext(PriceCtx);
+  const isEN = lang==="en";
   const items = TAPE_TICKERS.map(ticker => {
     const live   = lp[ticker];
     const static_ = TAPE_ITEMS.find(t => t.ticker === ticker) || {};
@@ -1106,12 +1107,32 @@ function TickerTape() {
       change: live ? live.change : (static_.change ?? 0),
     };
   });
-  const doubled = [...items, ...items]; // duplicar para el loop infinito
+  // Mensajes Premium intercalados cada 8 tickers (lo primero que ve el usuario)
+  const PROMOS = isEN ? [
+    "🔥 Premium: real-time AI picks — $9.99/mo",
+    "🐋 See what hedge funds are buying → Premium",
+    "🎯 AI Screener + institutional flow → Join Premium",
+  ] : [
+    "🔥 Premium: picks de IA en tiempo real — $9.99/mes",
+    "🐋 Ve qué compran los hedge funds → Premium",
+    "🎯 Screener IA + flujo institucional → Únete a Premium",
+  ];
+  const merged = [];
+  items.forEach((it,i)=>{
+    merged.push(it);
+    if((i+1)%8===0) merged.push({promo:PROMOS[Math.floor((i+1)/8-1)%PROMOS.length]});
+  });
+  const doubled = [...merged, ...merged]; // duplicar para el loop infinito
   return (
     <div style={{background:"#0f172a",height:36,overflow:"hidden"}}>
       <style>{`@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}} .tape{display:flex;animation:tape 36s linear infinite;width:max-content;} .tape:hover{animation-play-state:paused}`}</style>
       <div className="tape" style={{alignItems:"center",height:36}}>
-        {doubled.map((item,i)=>(
+        {doubled.map((item,i)=>item.promo?(
+          <div key={i} onClick={onPremium}
+            style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap",cursor:"pointer",background:"linear-gradient(90deg,rgba(245,158,11,0.12),rgba(217,119,6,0.06))"}}>
+            <span style={{color:"#FCD34D",fontSize:11,fontWeight:800,letterSpacing:0.2}}>{item.promo}</span>
+          </div>
+        ):(
           <div key={i} style={{display:"flex",alignItems:"center",gap:7,padding:"0 16px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap"}}>
             <span style={{color:"#e2e8f0",fontWeight:700,fontSize:12,fontFamily:"monospace"}}>${item.ticker}</span>
             <span style={{color:"#94a3b8",fontSize:11,fontFamily:"monospace"}}>{item.price}</span>
@@ -6979,6 +7000,9 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
         </div>
       </div>
 
+      {/* ── 🏅 TUS PUNTOS — para qué sirven ── */}
+      {user && <PointsBenefitsCard user={user} lang={isEN?"en":"es"}/>}
+
       {/* ── PROGRAMA DE REFERIDOS ── */}
       {user && <ReferralSection user={user}/>}
 
@@ -7599,16 +7623,16 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         <div style={{...card,background:"linear-gradient(145deg,#1E1B4B,#2D1B69)",border:"1px solid rgba(217,119,6,0.3)",textAlign:"center"}}>
           <div style={{fontSize:26,marginBottom:6}}>✦</div>
           <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>PREMIUM Member</div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>{lang==="en"?<>Exclusive signals, unlimited AI<br/>and access to all the data</>:<>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</>}</div>
           <div style={{fontSize:22,fontWeight:900,color:"#fff",marginBottom:10}}>
             <span style={{color:"#FCD34D"}}>$9.99</span>
-            <span style={{fontSize:12,color:"rgba(255,255,255,0.4)",fontWeight:400}}>/mes</span>
+            <span style={{fontSize:12,color:"rgba(255,255,255,0.4)",fontWeight:400}}>{lang==="en"?"/mo":"/mes"}</span>
           </div>
           <button onClick={()=>window.open(STRIPE_PAYMENT_LINK,"_blank")}
             style={{width:"100%",padding:"10px",background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",boxShadow:"0 6px 20px rgba(217,119,6,0.4)",fontFamily:"inherit"}}>
-            ✦ Empezar PREMIUM →
+            ✦ {lang==="en"?"Start PREMIUM →":"Empezar PREMIUM →"}
           </button>
-          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:8}}>7 días gratis · Sin compromiso</div>
+          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:8}}>{lang==="en"?"Cancel anytime · No commitment":"Cancela cuando quieras · Sin compromiso"}</div>
         </div>
       )}
 
@@ -7644,7 +7668,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
                 <AvatarBubble emoji={info.avatar||"🦅"} color={info.color||C.accent} size={28}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,color:"#0F172A",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name}</div>
-                  <div style={{fontSize:10,color:"#94A3B8"}}>{info.count} posts hoy</div>
+                  <div style={{fontSize:10,color:"#94A3B8"}}>{info.count} {lang==="en"?"posts today":"posts hoy"}</div>
                 </div>
                 <span style={{fontSize:10,color:"#CBD5E1"}}>›</span>
               </div>
@@ -7725,6 +7749,62 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
         <strong>⚠️</strong> {t.disclaimer}
       </div>
+    </div>
+  );
+}
+
+// ── POINTS BENEFITS CARD — para qué sirven tus puntos ─────────────────────────
+function PointsBenefitsCard({user, lang="es"}){
+  const isEN = lang==="en";
+  const [open,setOpen]=useState(false);
+  if(!user) return null;
+  const pts = user.points||0;
+  const lvl = getLevel(pts);
+  const next = LEVELS.find(l=>l.min>pts);
+  const pct = next ? Math.min(100,Math.round((pts-lvl.min)/(next.min-lvl.min)*100)) : 100;
+  const PERKS = isEN ? [
+    ["📊","Analyst · 500 pts","Verified badge on your posts"],
+    ["📈","Trader · 1,500 pts","Featured in Top Traders ranking"],
+    ["⚡","Expert · 4,000 pts","Early access to new tools"],
+    ["🏆","Legend · 10,000 pts","1 month Premium FREE"],
+  ] : [
+    ["📊","Analista · 500 pts","Insignia verificada en tus posts"],
+    ["📈","Trader · 1,500 pts","Apareces en el ranking Top Traders"],
+    ["⚡","Experto · 4,000 pts","Acceso anticipado a herramientas"],
+    ["🏆","Leyenda · 10,000 pts","1 mes Premium GRATIS"],
+  ];
+  return(
+    <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.05),rgba(0,102,255,0.05))",borderRadius:16,padding:"14px 16px",border:"1px solid rgba(139,92,246,0.18)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+        <span style={{fontSize:18}}>{lvl.emoji}</span>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontWeight:800,fontSize:12.5,color:"var(--c-text,#0F172A)"}}>{pts.toLocaleString()} pts · {isEN?lvl.nameEn:lvl.name}</div>
+          <div style={{fontSize:10,color:"#64748B"}}>{next?(isEN?`${(next.min-pts).toLocaleString()} pts to ${next.nameEn}`:`${(next.min-pts).toLocaleString()} pts para ${next.name}`):(isEN?"Max level!":"¡Nivel máximo!")}</div>
+        </div>
+        <button onClick={()=>setOpen(o=>!o)} style={{background:"rgba(139,92,246,0.1)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:8,padding:"4px 10px",fontSize:10,fontWeight:700,color:"#8B5CF6",cursor:"pointer",whiteSpace:"nowrap"}}>
+          {open?"−":(isEN?"What for? →":"¿Para qué? →")}
+        </button>
+      </div>
+      {/* Barra de progreso al siguiente nivel */}
+      <div style={{height:6,background:"rgba(139,92,246,0.1)",borderRadius:6,overflow:"hidden",marginBottom:open?12:0}}>
+        <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${lvl.color},#8B5CF6)`,borderRadius:6,transition:"width 0.5s"}}/>
+      </div>
+      {open && (
+        <div>
+          {PERKS.map(([ico,t2,d],i)=>(
+            <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"6px 0",borderBottom:i<PERKS.length-1?"1px solid rgba(0,0,0,0.04)":"none"}}>
+              <span style={{fontSize:14,flexShrink:0}}>{ico}</span>
+              <div>
+                <div style={{fontSize:11,fontWeight:800,color:"var(--c-text,#0F172A)"}}>{t2}</div>
+                <div style={{fontSize:10,color:"#64748B"}}>{d}</div>
+              </div>
+            </div>
+          ))}
+          <div style={{marginTop:8,fontSize:10,color:"#64748B",lineHeight:1.6,background:"rgba(255,255,255,0.5)",borderRadius:8,padding:"7px 10px"}}>
+            {isEN?"Earn points: post analysis (+10), receive likes (+2), comment (+5), daily streak (+5)":"Gana puntos: publica análisis (+10), recibe likes (+2), comenta (+5), racha diaria (+5)"}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -7908,7 +7988,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"Live Webinars":"Webinars",         page:11},
         {label: isEN?"Academy":"Academia",               page:12},
         {label: isEN?"Messages":"Mensajes",              page:22},
-        {label: isEN?"PREMIUM $9.99/mes ✦":"PREMIUM $9.99/mes ✦",page:8},
+        {label: isEN?"💰 Plans & Pricing — $9.99/mo ✦":"💰 Planes y precios — $9.99/mes ✦",page:8},
         {label: isEN?"Join free →":"Únete gratis →",     action:"auth"},
       ]
     },
@@ -8116,9 +8196,10 @@ function SocialProofBar({user, onRegister, lang="es"}){
   );
 }
 
-function PredictionBanner({lang="es"}){
+function PredictionBanner({lang="es", isPremium=false, onUpgrade}){
   const [votes,setVotes]=useState({up:2847,down:912});
   const [voted,setVoted]=useState(null);
+  const [ctaOff,setCtaOff]=useState(false);
   const total=votes.up+votes.down;
   const pct=Math.round(votes.up/total*100);
   const isEN=lang==="en";
@@ -8127,6 +8208,10 @@ function PredictionBanner({lang="es"}){
     setVotes(v=>({...v,[dir]:v[dir]+1}));
     setVoted(dir);
   };
+  // Análisis Pro (preview borroso) — el usuario acaba de votar: momento de máximo interés
+  const PRO_PREVIEW = isEN
+    ? "NVDA holding above the 20-day MA with unusual CALL flow at $1,200 strike. Institutional sweeps detected at…"
+    : "NVDA aguanta sobre la media de 20 días con flujo CALL inusual en strike $1,200. Sweeps institucionales detectados en…";
   return(
     <div style={{background:"#E8F4FF",borderBottom:"1px solid #BFDBFE",padding:"7px 16px"}}>
       <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
@@ -8140,6 +8225,139 @@ function PredictionBanner({lang="es"}){
         {voted&&<div style={{width:"100%",height:3,background:"#E8F0FB",borderRadius:3,marginTop:4}}>
           <div style={{width:`${pct}%`,height:"100%",background:"linear-gradient(90deg,#16A34A,#2196F3)",borderRadius:3,transition:"width 0.5s"}}/>
         </div>}
+        {/* ── CTA POST-VOTO: el usuario está emocionalmente comprometido con $NVDA ── */}
+        {voted && !isPremium && !ctaOff && (
+          <div style={{width:"100%",marginTop:6,background:"linear-gradient(135deg,rgba(245,158,11,0.10),rgba(33,150,243,0.06))",border:"1px solid rgba(245,158,11,0.35)",borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",animation:"fadeInRow 0.4s ease-out"}}>
+            <div style={{flex:"1 1 260px",minWidth:0}}>
+              <div style={{fontSize:12,fontWeight:800,color:"#B45309",marginBottom:3}}>
+                {isEN?"✅ Vote registered! 4 Pro Traders analyzed $NVDA today:":"✅ ¡Voto registrado! 4 Pro Traders analizaron $NVDA hoy:"}
+              </div>
+              {/* Preview borroso del análisis Pro — FOMO */}
+              <div style={{position:"relative",overflow:"hidden",borderRadius:8}}>
+                <div style={{fontSize:11.5,color:"#475569",filter:"blur(3.5px)",userSelect:"none",pointerEvents:"none",lineHeight:1.5}}>{PRO_PREVIEW}</div>
+                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <span style={{fontSize:10,fontWeight:800,color:"#B45309",background:"rgba(255,255,255,0.85)",borderRadius:6,padding:"2px 8px"}}>🔒 {isEN?"Premium only":"Solo Premium"}</span>
+                </div>
+              </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+              <button onClick={onUpgrade}
+                style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:9,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",boxShadow:"0 2px 12px rgba(217,119,6,0.35)",whiteSpace:"nowrap"}}>
+                {isEN?"See Pro analysis → $9.99/mo":"Ver análisis Pro → $9.99/mes"}
+              </button>
+              <button onClick={()=>setCtaOff(true)} style={{background:"none",border:"none",color:"#94A3B8",fontSize:15,cursor:"pointer",padding:2,lineHeight:1}}>×</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── TOP TRADERS FEED CARD — ranking visible dentro del feed ──────────────────
+function TopTradersFeedCard({lang="es", isPremium, onLeaderboard, onPremium}){
+  const isEN = lang==="en";
+  // Ranking del mes — paper trading de la comunidad (nombres ES + EN)
+  const TOPS = [
+    {name:"CarlosInvierte", avatar:"👨‍💼", color:"#D97706", ret:34.2, picks:12},
+    {name:"EmmaGrowth",     avatar:"📈",  color:"#10B981", ret:28.7, picks:9},
+    {name:"SofiaWallSt",    avatar:"👩‍💻", color:"#EC4899", ret:21.4, picks:11},
+    {name:"MikeOptions",    avatar:"⚡",  color:"#3B82F6", ret:18.9, picks:7},
+  ];
+  const rankColors=["#F59E0B","#94A3B8","#CD7C3F","#64748B"];
+  return(
+    <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.05),rgba(0,102,255,0.04))",border:"1px solid rgba(245,158,11,0.25)",borderRadius:16,padding:"14px 16px",margin:"6px 0"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+        <span style={{fontSize:16}}>🏆</span>
+        <span style={{fontWeight:900,fontSize:13.5,color:"var(--c-text)",letterSpacing:-0.2}}>{isEN?"Top Traders of the month":"Top Traders del mes"}</span>
+        <span style={{fontSize:9.5,fontWeight:700,color:"#94A3B8",background:"rgba(148,163,184,0.12)",borderRadius:20,padding:"2px 8px"}}>{isEN?"Paper trading ranking":"Ranking paper trading"}</span>
+        <button onClick={onLeaderboard} style={{marginLeft:"auto",background:"none",border:"none",color:"#0066FF",fontSize:11.5,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+          {isEN?"Full ranking →":"Ranking completo →"}
+        </button>
+      </div>
+      <div className="nexo-scroll-x" style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2}}>
+        {TOPS.map((t,i)=>(
+          <div key={t.name} style={{flex:"1 0 150px",minWidth:150,background:"var(--c-card)",border:`1px solid ${i===0?"rgba(245,158,11,0.4)":"var(--c-border)"}`,borderRadius:12,padding:"10px 12px",display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:18,height:18,borderRadius:5,background:`${rankColors[i]}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:rankColors[i],flexShrink:0}}>#{i+1}</div>
+            <div style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.color},${t.color}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{t.avatar}</div>
+            <div style={{minWidth:0}}>
+              <div style={{fontWeight:800,fontSize:11.5,color:"var(--c-text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>@{t.name}</div>
+              <div style={{fontSize:11,fontWeight:900,color:"#10B981"}}>+{t.ret}% <span style={{fontSize:9,fontWeight:600,color:"var(--c-muted2)"}}>· {t.picks} picks</span></div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {!isPremium && (
+        <button onClick={onPremium}
+          style={{width:"100%",marginTop:10,background:"linear-gradient(135deg,rgba(217,119,6,0.12),rgba(245,158,11,0.08))",border:"1px solid rgba(245,158,11,0.35)",borderRadius:10,padding:"8px 14px",color:"#B45309",fontSize:12,fontWeight:800,cursor:"pointer"}}>
+          {isEN?"🔓 Follow their full ideas & picks → Premium $9.99/mo":"🔓 Sigue sus ideas y picks completos → Premium $9.99/mes"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── PREMIUM GATE — paywall con contenido borroso detrás ──────────────────────
+// El usuario VE que hay algo valioso pero no puede leerlo → FOMO → conversión
+function PremiumGate({lang="es", icon="🔒", title, desc, bullets=[], onPlans}){
+  const isEN = lang==="en";
+  const FAKE = [
+    ["NVDA","+4.2%","$1,184.20","🟢 CALL $1.2M","92"],
+    ["TSLA","-1.8%","$418.45","🔴 PUT $640K","78"],
+    ["AAPL","+0.9%","$311.23","🟢 CALL $890K","85"],
+    ["MSFT","+1.4%","$428.05","🟢 SWEEP $2.1M","88"],
+    ["META","+2.1%","$627.57","🟢 CALL $1.5M","90"],
+    ["AMD","-0.6%","$162.30","🔴 PUT $480K","71"],
+    ["COIN","+3.3%","$164.13","🟢 GOLDEN $3.2M","94"],
+    ["SPY","+0.4%","$757.09","🟢 DARK $5.8M","89"],
+    ["PLTR","+2.7%","$141.70","🟢 CALL $960K","87"],
+    ["AMZN","+1.5%","$253.79","🟢 SWEEP $1.8M","86"],
+  ];
+  return(
+    <div style={{position:"relative",borderRadius:20,overflow:"hidden",border:"1px solid var(--c-border)",minHeight:580,background:"var(--c-card)",maxWidth:980,margin:"20px auto"}}>
+      {/* Contenido real (simulado) borroso detrás */}
+      <div aria-hidden style={{position:"absolute",inset:0,padding:"20px 24px",filter:"blur(6px)",opacity:0.55,userSelect:"none",pointerEvents:"none"}}>
+        <div style={{display:"flex",gap:10,marginBottom:16}}>
+          {[isEN?"Live Flow":"Flujo en Vivo",isEN?"AI Picks":"Picks IA","Dark Pool","Golden Sweeps"].map((t,i)=>(
+            <div key={i} style={{background:i===0?"rgba(0,102,255,0.2)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,color:"var(--c-text)"}}>{t}</div>
+          ))}
+        </div>
+        {FAKE.map((r,i)=>(
+          <div key={i} style={{display:"grid",gridTemplateColumns:"70px 70px 100px 1fr 50px",gap:14,alignItems:"center",padding:"13px 10px",borderBottom:"1px solid var(--c-border)"}}>
+            <span style={{fontWeight:900,fontFamily:"monospace",color:"var(--c-text)",fontSize:14}}>{r[0]}</span>
+            <span style={{fontWeight:800,fontSize:13,color:r[1].startsWith("+")?"#10B981":"#EF4444"}}>{r[1]}</span>
+            <span style={{fontFamily:"monospace",fontSize:13,color:"var(--c-muted)"}}>{r[2]}</span>
+            <span style={{fontSize:12,fontWeight:700,color:"var(--c-text)"}}>{r[3]}</span>
+            <span style={{fontWeight:900,fontSize:13,color:"#F59E0B"}}>{r[4]}</span>
+          </div>
+        ))}
+      </div>
+      {/* Degradado para legibilidad */}
+      <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(0,0,0,0.05) 0%,var(--c-bg) 88%)"}}/>
+      {/* Overlay de conversión */}
+      <div style={{position:"relative",zIndex:2,maxWidth:500,margin:"0 auto",textAlign:"center",padding:"100px 20px 56px"}}>
+        <div style={{fontSize:54,marginBottom:12,filter:"drop-shadow(0 4px 14px rgba(245,158,11,0.4))"}}>{icon}</div>
+        <div style={{display:"inline-block",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"4px 14px",fontSize:10,fontWeight:900,color:"#F59E0B",letterSpacing:1.2,marginBottom:12}}>
+          {isEN?"🔒 PREMIUM SECTION":"🔒 SECCIÓN EXCLUSIVA PREMIUM"}
+        </div>
+        <h2 style={{color:"var(--c-text)",fontWeight:900,fontSize:25,margin:"0 0 10px",letterSpacing:-0.5}}>{title}</h2>
+        <p style={{color:"var(--c-muted)",fontSize:14,lineHeight:1.7,margin:"0 0 22px"}}>{desc}</p>
+        {bullets.length>0 && (
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:24,textAlign:"left"}}>
+            {bullets.map((b,i)=>(
+              <div key={i} style={{background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,padding:"9px 12px",fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>{b}</div>
+            ))}
+          </div>
+        )}
+        <button onClick={onPlans}
+          style={{display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:14,padding:"16px 32px",color:"#fff",fontSize:16,fontWeight:900,cursor:"pointer",boxShadow:"0 8px 32px rgba(217,119,6,0.45)",marginBottom:10,animation:"nexoPremiumGlow 2.4s ease-in-out infinite"}}>
+          {isEN?"See plans → $9.99/mo":"Ver planes → $9.99/mes"}
+        </button>
+        <div style={{fontSize:11.5,color:"var(--c-muted2)",display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+          <span>✓ {isEN?"Instant access":"Acceso inmediato"}</span>
+          <span>✓ {isEN?"Cancel anytime":"Cancela cuando quieras"}</span>
+          <span>✓ {isEN?"Secure payment (Stripe)":"Pago seguro (Stripe)"}</span>
+        </div>
       </div>
     </div>
   );
@@ -8152,12 +8370,10 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
 
   // ── GATE VIP ──
   if(!isPremium) return(
-    <div style={{textAlign:"center",padding:"60px 20px",background:"rgba(10,16,30,0.98)",borderRadius:20,border:"1px solid rgba(245,158,11,0.2)"}}>
-      <div style={{fontSize:52,marginBottom:16}}>🔒</div>
-      <h2 style={{color:"#F59E0B",fontWeight:900,marginBottom:8}}>{isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}</h2>
-      <p style={{color:"#94A3B8",fontSize:15,marginBottom:24,maxWidth:400,margin:"0 auto 24px"}}>{isEN?"Simulate trades with $100k virtual, Sharpe Ratio, win streak tracker, price alerts and more — PREMIUM only.":"Simula con $100k virtual, Sharpe Ratio, racha de ganancias, alertas de precio y más — solo PREMIUM."}</p>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#D97706)",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:800,color:"#000",cursor:"pointer"}}>✦ {isEN?"Go PREMIUM — $9.99/mo":"Hazte PREMIUM — $9.99/mes"}</button>
-    </div>
+    <PremiumGate lang={lang} icon="🎮" onPlans={onNeedPremium}
+      title={isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}
+      desc={isEN?"Simulate trades with $100k virtual, Sharpe Ratio, win streak tracker, price alerts and more.":"Simula con $100k virtual, Sharpe Ratio, racha de ganancias, alertas de precio y más."}
+      bullets={isEN?["🎮 $100k virtual portfolio","📐 Sharpe Ratio & metrics","🔥 Win streak tracker","🔔 Price alerts"]:["🎮 Portafolio virtual $100k","📐 Sharpe Ratio y métricas","🔥 Racha de ganancias","🔔 Alertas de precio"]}/>
   );
 
   const TOOLS = isEN ? [
@@ -11152,16 +11368,10 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
   const back     = ()=>{ setSelected(null); setView("grid"); };
 
   if(!isPremium) return(
-    <div style={{maxWidth:600,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
-      <div style={{fontSize:64,marginBottom:16}}>🏛️</div>
-      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Super Inversores</div>
-      <div style={{fontSize:14,color:C.muted,marginBottom:28,lineHeight:1.7}}>
-        Ve qué están comprando Warren Buffett, Cathie Wood, Michael Burry y más — actualizado con datos SEC 13F.
-      </div>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(217,119,6,0.35)"}}>
-        ✦ Activar PREMIUM — $9.99/mes
-      </button>
-    </div>
+    <PremiumGate icon="🏛️" onPlans={onNeedPremium}
+      title="Super Inversores"
+      desc="Ve qué están comprando Warren Buffett, Cathie Wood, Michael Burry y más — actualizado con datos SEC 13F."
+      bullets={["🏛️ 52 gurús de Wall Street","📄 Datos oficiales SEC 13F","📊 Posiciones y cambios","🔔 Nuevas compras detectadas"]}/>
   );
 
   /* ── GRID VIEW ── */
@@ -11499,21 +11709,10 @@ function FlowPage({isPremium,onNeedPremium}){
   },[paused,isPremium,realFlow]);
 
   if(!isPremium) return(
-    <div style={{maxWidth:600,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
-      <div style={{fontSize:64,marginBottom:16}}>🐋</div>
-      <div style={{fontSize:26,fontWeight:900,color:C.text,marginBottom:8}}>Flujo Institucional PREMIUM</div>
-      <div style={{fontSize:14,color:C.muted,marginBottom:28,lineHeight:1.7,maxWidth:440,margin:"0 auto 28px"}}>
-        Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps.
-      </div>
-      <div className="nexo-flow-preview" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:28,textAlign:"left"}}>
-        {["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Sweeps urgentes","💰 Premium ≥ $1M","🎯 Sentimiento en vivo"].map((f,i)=>(
-          <div key={i} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px",fontSize:12,fontWeight:600,color:C.muted}}>{f}</div>
-        ))}
-      </div>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 24px rgba(217,119,6,0.35)"}}>
-        ✦ Activar PREMIUM — $9.99/mes
-      </button>
-    </div>
+    <PremiumGate icon="🐋" onPlans={onNeedPremium}
+      title="Flujo Institucional PREMIUM"
+      desc="Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps con datos reales de CBOE."
+      bullets={["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Sweeps urgentes","💰 Premium ≥ $1M","🎯 Sentimiento en vivo"]}/>
   );
 
   const fmt$=(v)=>v>=1e9?`$${(v/1e9).toFixed(1)}B`:v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1e3?`$${(v/1e3).toFixed(0)}K`:`$${v}`;
@@ -17140,6 +17339,15 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [shareMsg, setShareMsg] = useState(null);
   const [sortBy, setSortBy] = useState("pnl"); // pnl | ticker | value
   const [ptTab, setPtTab] = useState("returns"); // returns | market | risk | efficiency | projections | health
+  const [ptFull, setPtFull] = useState(false); // pantalla completa
+
+  useEffect(()=>{
+    if(!ptFull) return;
+    const onKey=e=>{ if(e.key==="Escape") setPtFull(false); };
+    window.addEventListener("keydown",onKey);
+    document.body.style.overflow="hidden";
+    return()=>{ window.removeEventListener("keydown",onKey); document.body.style.overflow=""; };
+  },[ptFull]);
 
   // Persist to localStorage
   useEffect(()=>{
@@ -17227,31 +17435,26 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   });
 
   if(!isPremium) return(
-    <div style={{maxWidth:520,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
-      <div style={{fontSize:60,marginBottom:16}}>📊</div>
-      <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:24,marginBottom:8}}>Portafolio Oracle IA</h2>
-      <p style={{color:"#64748B",fontSize:15,lineHeight:1.7,marginBottom:28}}>
-        {isEN?"Track your positions, monitor P&L in real time and share your best trades with the community.":"Registra tus posiciones, monitorea tu P&L en tiempo real y comparte tus mejores trades con la comunidad."}
-      </p>
-      <div style={{background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:16,padding:"20px",marginBottom:28,textAlign:"left"}}>
-        {[isEN?"📈 Track stocks, ETFs and crypto":"📈 Acciones, ETFs y crypto",
-          isEN?"💰 Real-time P&L with live prices":"💰 P&L en tiempo real con precios live",
-          isEN?"📤 Share your positions to the feed":"📤 Comparte tus posiciones al feed",
-          isEN?"🔔 Set alerts on your positions":"🔔 Alertas en tus posiciones"].map(f=>(
-          <div key={f} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
-            <span style={{fontSize:14}}>{f.split(" ")[0]}</span>
-            <span style={{fontSize:13,color:"#CBD5E1"}}>{f.slice(f.indexOf(" ")+1)}</span>
-          </div>
-        ))}
-      </div>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:12,padding:"14px 36px",color:"#fff",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(217,119,6,0.4)"}}>
-        ✦ {isEN?"Go PREMIUM — $9.99/mo":"Hazte PREMIUM — $9.99/mes"}
-      </button>
-    </div>
+    <PremiumGate lang={isEN?"en":"es"} icon="💼" onPlans={onNeedPremium}
+      title={isEN?"Portfolio Oracle AI":"Portafolio Oracle IA"}
+      desc={isEN?"Track your positions, monitor P&L in real time and share your best trades with the community.":"Registra tus posiciones, monitorea tu P&L en tiempo real y comparte tus mejores trades con la comunidad."}
+      bullets={isEN?["📈 Stocks, ETFs and crypto","💰 Real-time P&L with live prices","🔮 AI projections & health score","📤 Share positions to the feed"]:["📈 Acciones, ETFs y crypto","💰 P&L en tiempo real con precios live","🔮 Proyecciones IA y health score","📤 Comparte posiciones al feed"]}/>
   );
 
   return(
-    <div style={{maxWidth:"100%",fontFamily:"inherit"}}>
+    <div style={ptFull
+      ?{position:"fixed",inset:0,zIndex:9960,background:"var(--c-bg)",overflowY:"auto",padding:"16px 18px 60px",fontFamily:"inherit"}
+      :{maxWidth:"100%",fontFamily:"inherit"}}>
+
+      {/* Header — Portafolio Oracle IA */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
+        <span style={{fontSize:20,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.4}}>💼 {isEN?"Portfolio Oracle AI":"Portafolio Oracle IA"}</span>
+        <span style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
+        <button onClick={()=>setPtFull(f=>!f)}
+          style={{marginLeft:"auto",background:ptFull?"rgba(239,68,68,0.12)":"rgba(0,102,255,0.12)",border:`1px solid ${ptFull?"rgba(239,68,68,0.3)":"rgba(0,102,255,0.3)"}`,color:ptFull?"#EF4444":"#3B82F6",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+          {ptFull?"✕":"⛶"} {ptFull?(isEN?"Exit":"Salir"):(isEN?"Full screen":"Pantalla completa")}
+        </button>
+      </div>
 
       {/* Share modal */}
       {shareMsg && (
@@ -17797,18 +18000,10 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
   }, []);
 
   if (!isPremium) return (
-    <div style={{maxWidth:700,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
-      <div style={{fontSize:56,marginBottom:12}}>🏛️</div>
-      <h2 style={{color:C.text,fontWeight:800,fontSize:22,marginBottom:8}}>{isEN?"Congress Trades":"Trades del Congreso"}</h2>
-      <p style={{color:C.muted,fontSize:15,marginBottom:24,lineHeight:1.6}}>
-        {isEN
-          ? "See what US Congress members are buying and selling in real time. PREMIUM exclusive."
-          : "Mira qué están comprando y vendiendo los congresistas de EE.UU. en tiempo real. Exclusivo PREMIUM."}
-      </p>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#f59e0b,#ef4444)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontWeight:800,fontSize:16,cursor:"pointer",boxShadow:"0 4px 20px rgba(245,158,11,0.4)"}}>
-        ✦ {isEN?"Unlock PREMIUM":"Desbloquear PREMIUM"}
-      </button>
-    </div>
+    <PremiumGate lang={isEN?"en":"es"} icon="🏛️" onPlans={onNeedPremium}
+      title={isEN?"Congress Trades":"Trades del Congreso"}
+      desc={isEN?"See what US Congress members are buying and selling in real time, with official disclosure data.":"Mira qué están comprando y vendiendo los congresistas de EE.UU. en tiempo real, con datos oficiales de divulgación."}
+      bullets={isEN?["🏛️ Senate & House trades","📄 Official STOCK Act filings","📈 Most traded tickers","🔔 New trades alerts"]:["🏛️ Trades de Senado y Cámara","📄 Reportes oficiales STOCK Act","📈 Tickers más operados","🔔 Alertas de nuevos trades"]}/>
   );
 
   const partyColor = p => p === "D" ? "#0066FF" : p === "R" ? "#EF4444" : "#94A3B8";
@@ -18256,16 +18451,10 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   },[isPremium]);
 
   if(!isPremium) return(
-    <div style={{maxWidth:700,margin:"60px auto",textAlign:"center",padding:"0 20px"}}>
-      <div style={{fontSize:56,marginBottom:12}}>🔬</div>
-      <h2 style={{color:C.text,fontWeight:800,fontSize:22,marginBottom:8}}>{isEN?"Advanced Screener":"Screener Avanzado"}</h2>
-      <p style={{color:C.muted,fontSize:15,marginBottom:24,lineHeight:1.6}}>
-        {isEN?"Scan stocks, options, intraday and scalping with AI signals. PREMIUM exclusive.":"Escanea acciones, opciones, intraday y scalping con señales IA. Exclusivo PREMIUM."}
-      </p>
-      <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#F59E0B,#6366F1)",color:"#fff",border:"none",borderRadius:12,padding:"14px 36px",fontWeight:800,fontSize:16,cursor:"pointer",boxShadow:"0 4px 20px rgba(139,92,246,0.4)"}}>
-        ✦ {isEN?"Unlock PREMIUM":"Desbloquear PREMIUM"}
-      </button>
-    </div>
+    <PremiumGate lang={isEN?"en":"es"} icon="🔬" onPlans={onNeedPremium}
+      title={isEN?"Advanced Screener":"Screener Avanzado"}
+      desc={isEN?"Scan stocks, options, intraday and scalping with AI signals, live prices and institutional-grade filters.":"Escanea acciones, opciones, intraday y scalping con señales IA, precios en vivo y filtros de grado institucional."}
+      bullets={isEN?["🔬 4 scanners: stocks/options/intraday/scalping","🤖 AI setup: entry, SL & TP","⚡ Real-time prices & alerts","⬇️ Export to CSV"]:["🔬 4 scanners: acciones/opciones/intraday/scalping","🤖 Setup IA: entrada, SL y TP","⚡ Precios en vivo y alertas","⬇️ Exportar a CSV"]}/>
   );
 
   const tabs=[
@@ -20021,6 +20210,22 @@ export default function App(){
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]           = useState(false);
   const [aiHidden,setAiHidden]       = useState(false);
+  // Ocultar bot flotante al scrollear hacia abajo (patrón Instagram/TikTok) — crítico en mobile
+  const [aiScrollHide,setAiScrollHide] = useState(false);
+  useEffect(()=>{
+    let lastY = window.scrollY, ticking = false;
+    const onScroll = ()=>{
+      if(ticking) return; ticking = true;
+      requestAnimationFrame(()=>{
+        const y = window.scrollY;
+        if(y > lastY + 10 && y > 120) setAiScrollHide(true);
+        else if(y < lastY - 10 || y < 80) setAiScrollHide(false);
+        lastY = y; ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, {passive:true});
+    return ()=>window.removeEventListener("scroll", onScroll);
+  },[]);
   const [aiSide,setAiSide]           = useState("right");
   const [aiBubbleOff,setAiBubbleOff] = useState(false);
   const [showAlerts,setAlerts]       = useState(false);
@@ -20672,6 +20877,8 @@ export default function App(){
               ? <BotPostCard post={p} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
               : <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))}/>
             }
+            {/* 🏆 Top Traders del mes — visible en el feed tras el 2º post */}
+            {i===1 && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={()=>{setPage(8);setShowLanding(false);}}/>}
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
@@ -21125,9 +21332,13 @@ export default function App(){
         from { transform:rotate(0deg); }
         to   { transform:rotate(360deg); }
       }
+      @keyframes nexoPremiumGlow {
+        0%,100% { box-shadow:0 0 10px rgba(245,158,11,0.35); transform:scale(1); }
+        50%     { box-shadow:0 0 26px rgba(245,158,11,0.75), 0 0 50px rgba(245,158,11,0.25); transform:scale(1.045); }
+      }
     `}</style>
     <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s",overflowX:"hidden"}}>
-      <TickerTape/>
+      <TickerTape lang={lang} onPremium={()=>{setPage(8);setShowLanding(false);}}/>
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
       {!user && showNewsletter && !newsletterDone && (
@@ -21280,10 +21491,10 @@ export default function App(){
           <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#F59E0B",background:"transparent",border:"none",padding:"0 14px",whiteSpace:"nowrap",cursor:"pointer",transition:"opacity 0.15s",opacity:0.85}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.85"}>⭐ PREMIUM</span>
           {[
             {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
-            {label:lang==="en"?"🐋 Flujo PREMIUM":"🐋 Flujo PREMIUM",idx:20,locked:!effectivePremium},
+            {label:lang==="en"?"🐋 Whale Flow PREMIUM":"🐋 Flujo PREMIUM",idx:20,locked:!effectivePremium},
             {label:"🏛️ Wall St. & Capitol",idx:19,locked:!effectivePremium},
             {label:lang==="en"?"🔬 Screener":"🔬 Screener",idx:36,locked:!effectivePremium},
-            {label:"💼 Portafolio",idx:37,locked:!effectivePremium},
+            {label:lang==="en"?"💼 Portfolio Oracle AI":"💼 Portafolio Oracle IA",idx:37,locked:!effectivePremium},
             {label:"👁 Watchlist",idx:38},
             {label:lang==="en"?"🚨 Alerts":"🚨 Alertas",idx:42},
             {label:lang==="en"?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,locked:!effectivePremium},
@@ -21301,8 +21512,8 @@ export default function App(){
             );
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{position:"absolute",right:8,flexShrink:0,background:page===8?"linear-gradient(135deg,#D97706,#F59E0B)":"transparent",border:page===8?"none":"1px solid rgba(217,119,6,0.3)",borderRadius:14,padding:"4px 13px",cursor:"pointer",color:page===8?"#fff":"#FCD34D",fontSize:11,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:page===8?"0 0 14px rgba(217,119,6,0.3)":"none",transition:"all 0.2s"}}>
-            ✦ Premium
+            style={{position:"absolute",right:8,flexShrink:0,background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#fff",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
+            {effectivePremium ? "✦ Premium" : (lang==="en"?"✦ Join Premium — $9.99/mo":"✦ Únete a Premium — $9.99/mes")}
           </button>
         </div>
       </nav>
@@ -21710,7 +21921,7 @@ export default function App(){
 
 
       {/* PREDICCIÓN DEL DÍA */}
-      {page===0 && !showLanding && page!==99 && <PredictionBanner lang={lang}/>}
+      {page===0 && !showLanding && page!==99 && <PredictionBanner lang={lang} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>}
 
       {/* SOCIAL PROOF STATS BAR — visible a todos */}
       {page===0 && !showLanding && page!==99 && <SocialProofBar user={user} onRegister={()=>setAuth("register")} lang={lang}/>}
@@ -21844,6 +22055,9 @@ export default function App(){
           flexDirection: aiSide==="right" ? "column" : "column",
           alignItems: aiSide==="right" ? "flex-end" : "flex-start",
           gap:8, pointerEvents:"none",
+          transition:"transform 0.32s ease, opacity 0.32s ease",
+          transform: aiScrollHide ? "translateY(150px)" : "none",
+          opacity: aiScrollHide ? 0 : 1,
         }}>
           {/* Bubble tooltip */}
           {!aiBubbleOff && (
@@ -21859,7 +22073,7 @@ export default function App(){
               display:"flex", alignItems:"center", gap:10,
             }}>
               <span onClick={()=>setShowAI(true)}>
-                ¿Tienes dudas sobre el mercado? <span style={{color:"#0066FF"}}>Pregúntame →</span>
+                {lang==="en"?"Questions about the market?":"¿Tienes dudas sobre el mercado?"} <span style={{color:"#0066FF"}}>{lang==="en"?"Ask me →":"Pregúntame →"}</span>
               </span>
               <button onClick={e=>{e.stopPropagation();setAiBubbleOff(true);}}
                 style={{background:"rgba(255,255,255,0.1)",border:"none",borderRadius:"50%",
