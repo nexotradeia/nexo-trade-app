@@ -11986,7 +11986,7 @@ function FlowPage({isPremium,onNeedPremium}){
           const isExpanded=expandedId===item.id;
           const ia=isExpanded?getIA(item):null;
           return(
-            <div key={item.id} style={{borderRadius:10,overflow:"hidden",marginBottom:0}}>
+            <div key={item.id} style={{borderRadius:10,overflow:"hidden",marginBottom:0,flexShrink:0}}>
             <div style={{
               display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",
               gap:6,padding:"10px 16px",
