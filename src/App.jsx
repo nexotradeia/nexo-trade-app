@@ -1030,11 +1030,29 @@ const SIDEBAR_TICKERS = ["BTC","NVDA","TSLA","ETH","SOL","AAPL","SPY","QQQ"];
 const ALL_TRACK = [...new Set([...TAPE_TICKERS,...SIDEBAR_TICKERS])];
 
 const PriceCtx = createContext({});
+// Registro dinámico de tickers para precios en vivo (watchlist ilimitada)
+const PriceRegisterCtx = createContext(()=>{});
+
+// Mapa cripto → símbolo Finnhub (para tickers que añade el usuario)
+const CRYPTO_SYM = {
+  BTC:"BINANCE:BTCUSDT", ETH:"BINANCE:ETHUSDT", SOL:"BINANCE:SOLUSDT",
+  BNB:"BINANCE:BNBUSDT", XRP:"BINANCE:XRPUSDT", ADA:"BINANCE:ADAUSDT",
+  DOGE:"BINANCE:DOGEUSDT", AVAX:"BINANCE:AVAXUSDT", MATIC:"BINANCE:MATICUSDT",
+  LTC:"BINANCE:LTCUSDT", LINK:"BINANCE:LINKUSDT", DOT:"BINANCE:DOTUSDT",
+  TRX:"BINANCE:TRXUSDT", SHIB:"BINANCE:SHIBUSDT", UNI:"BINANCE:UNIUSDT",
+  ATOM:"BINANCE:ATOMUSDT", NEAR:"BINANCE:NEARUSDT", APT:"BINANCE:APTUSDT",
+};
+const fhSymbolOf = (t) => FH_SYM[t] || CRYPTO_SYM[t] || t;
 
 function PriceProvider({children}){
   const [prices, setPrices] = useState({});
   const wsRef    = useRef(null);
   const prevCRef = useRef({});  // prev-close para calcular %
+  const trackedRef = useRef(new Set(ALL_TRACK));     // tickers suscritos
+  const symToTickerRef = useRef({});                 // símbolo Finnhub → ticker nuestro
+  if(Object.keys(symToTickerRef.current).length===0){
+    ALL_TRACK.forEach(t => { symToTickerRef.current[fhSymbolOf(t)] = t; });
+  }
 
   const updatePrice = (ticker, price) => {
     const pc = prevCRef.current[ticker];
@@ -1045,29 +1063,46 @@ function PriceProvider({children}){
     }));
   };
 
-  // REST — carga inicial de cotizaciones
+  // REST puntual para un ticker (carga inicial / al registrarse)
+  const restFetch = async (ticker) => {
+    try {
+      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSymbolOf(ticker)}&token=${FINNHUB_KEY}`);
+      const d = await r.json();
+      if (d && d.c > 0) {
+        prevCRef.current[ticker] = d.pc;
+        setPrices(p => ({ ...p, [ticker]: { price: d.c, change: d.dp != null ? parseFloat(d.dp.toFixed(2)) : 0 } }));
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  };
+
+  // Registrar tickers nuevos (watchlist del usuario) → REST inmediato + WS en vivo
+  const registerTickers = useCallback((list) => {
+    const toAdd = [];
+    (list||[]).forEach(raw => {
+      const t = (raw||"").toUpperCase().trim();
+      if(!t || trackedRef.current.has(t)) return;
+      trackedRef.current.add(t);
+      symToTickerRef.current[fhSymbolOf(t)] = t;
+      toAdd.push(t);
+    });
+    if(!toAdd.length) return;
+    // REST escalonado para no saturar Finnhub (≈55/min)
+    toAdd.forEach((t, i) => setTimeout(() => restFetch(t), i * 600));
+    // Suscribir al WebSocket si está abierto
+    if(wsRef.current && wsRef.current.readyState === 1){
+      toAdd.forEach(t => wsRef.current.send(JSON.stringify({ type:"subscribe", symbol: fhSymbolOf(t) })));
+    }
+  }, []);
+
+  // REST — carga inicial de los tickers base
   useEffect(() => {
     const delay = (ms) => new Promise(r => setTimeout(r, ms));
-    const fetchQuote = async (ticker, i) => {
-      await delay(i * 1100); // FIX Sesión 11: 250ms = 240 req/min → TODO devolvía 429 (límite Finnhub free: 60/min). 1100ms ≈ 55/min y el WebSocket actualiza en vivo después.
-      try {
-        const r = await fetch(
-          `https://finnhub.io/api/v1/quote?symbol=${FH_SYM[ticker]||ticker}&token=${FINNHUB_KEY}`
-        );
-        const d = await r.json();
-        if (d && d.c > 0) {
-          prevCRef.current[ticker] = d.pc;
-          setPrices(p => ({
-            ...p,
-            [ticker]: {
-              price: d.c,
-              change: d.dp != null ? parseFloat(d.dp.toFixed(2)) : 0
-            }
-          }));
-        }
-      } catch (_) {}
-    };
-    ALL_TRACK.forEach((t, i) => fetchQuote(t, i));
+    (async () => {
+      const base = [...trackedRef.current];
+      for(let i=0;i<base.length;i++){ await delay(1100); restFetch(base[i]); } // 1100ms ≈ 55/min (límite free 60/min)
+    })();
   }, []);
 
   // WebSocket — actualizaciones tick a tick en tiempo real
@@ -1080,8 +1115,9 @@ function PriceProvider({children}){
       wsRef.current = socket;
 
       socket.onopen = () => {
-        ALL_TRACK.forEach(ticker => {
-          socket.send(JSON.stringify({ type: "subscribe", symbol: FH_SYM[ticker] || ticker }));
+        // Suscribe TODOS los tickers rastreados (incluye los que añadió el usuario)
+        trackedRef.current.forEach(ticker => {
+          socket.send(JSON.stringify({ type: "subscribe", symbol: fhSymbolOf(ticker) }));
         });
       };
 
@@ -1090,18 +1126,14 @@ function PriceProvider({children}){
           const msg = JSON.parse(evt.data);
           if (msg.type === "trade" && msg.data) {
             msg.data.forEach(trade => {
-              // Encontrar nuestro ticker para este símbolo de Finnhub
-              const entry = Object.entries(FH_SYM).find(([, v]) => v === trade.s);
-              if (entry) updatePrice(entry[0], trade.p);
+              const ticker = symToTickerRef.current[trade.s];
+              if (ticker) updatePrice(ticker, trade.p);
             });
           }
         } catch (_) {}
       };
 
-      socket.onclose = () => {
-        // Reconectar automáticamente en 4 s
-        reconnectTimer = setTimeout(connect, 4000);
-      };
+      socket.onclose = () => { reconnectTimer = setTimeout(connect, 4000); };
       socket.onerror = () => socket.close();
     };
 
@@ -1112,7 +1144,13 @@ function PriceProvider({children}){
     };
   }, []);
 
-  return <PriceCtx.Provider value={prices}>{children}</PriceCtx.Provider>;
+  return (
+    <PriceCtx.Provider value={prices}>
+      <PriceRegisterCtx.Provider value={registerTickers}>
+        {children}
+      </PriceRegisterCtx.Provider>
+    </PriceCtx.Provider>
+  );
 }
 
 // Helper: formatear precio con el número de decimales correcto
@@ -7455,7 +7493,229 @@ function MobileAffiliateBanner(){
   );
 }
 
-function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[]}){
+// ── Mini sparkline determinista (verde si sube, rojo si baja) ─────────────────
+function MiniSpark({seed=1, up=true, width=48, height=20}){
+  const n=10;
+  const pts=Array.from({length:n},(_,i)=>{
+    const v=Math.sin(seed*0.7+i*0.9)*0.5+Math.cos(i*0.5+seed*0.3)*0.3;
+    return v;
+  });
+  // Inclinar la tendencia según up/down
+  const trended=pts.map((v,i)=>v+(up?1:-1)*(i/(n-1))*0.9);
+  const min=Math.min(...trended), max=Math.max(...trended), rng=(max-min)||1;
+  const col=up?"#16A34A":"#DC2626";
+  const d=trended.map((v,i)=>{
+    const x=(i/(n-1))*width;
+    const y=height-((v-min)/rng)*(height-3)-1.5;
+    return `${i===0?"M":"L"}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+  return(
+    <svg width={width} height={height} style={{flexShrink:0,display:"block"}}>
+      <path d={d} fill="none" stroke={col} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+// ── Modal Paywall — 7 días gratis + beneficios ───────────────────────────────
+function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"}){
+  if(!open) return null;
+  const isEN=lang==="en";
+  const benefits = isEN ? [
+    "Unlimited watchlist with real-time prices",
+    "Price & volatility alerts",
+    "Premium AI signals and ideas",
+    "Full institutional flow (whales)",
+    "Advanced screener & Portfolio Oracle",
+    "Ad-free experience",
+  ] : [
+    "Watchlist ilimitada con precios en tiempo real",
+    "Alertas de precio y volatilidad",
+    "Señales e ideas Premium de la IA",
+    "Flujo institucional completo (ballenas)",
+    "Screener avanzado y Portafolio Oráculo",
+    "Sin anuncios",
+  ];
+  return(
+    <div onClick={e=>e.target===e.currentTarget&&onClose()}
+      style={{position:"fixed",inset:0,background:"rgba(8,13,24,0.72)",backdropFilter:"blur(4px)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"#fff",borderRadius:22,width:380,maxWidth:"94vw",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.5)",position:"relative"}}>
+        <button onClick={onClose} style={{position:"absolute",top:14,right:14,background:"rgba(15,23,42,0.06)",border:"none",borderRadius:"50%",width:30,height:30,cursor:"pointer",color:"#475569",fontSize:15,zIndex:2}}>✕</button>
+        {/* Header */}
+        <div style={{background:"linear-gradient(150deg,#0F4C81 0%,#0F5E68 100%)",padding:"26px 22px 22px",borderRadius:"22px 22px 0 0",textAlign:"center"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.15)",borderRadius:20,padding:"4px 12px",marginBottom:12}}>
+            <span style={{fontSize:12,fontWeight:800,color:"#fff",letterSpacing:0.5}}>✦ PREMIUM</span>
+          </div>
+          <div style={{fontSize:21,fontWeight:900,color:"#fff",letterSpacing:-0.4,marginBottom:6,fontFamily:"'Space Grotesk',sans-serif"}}>
+            {isEN?"Unlock everything":"Desbloquea todo"}
+          </div>
+          <div style={{fontSize:13,color:"rgba(255,255,255,0.85)",lineHeight:1.5}}>
+            {isEN?"Start your 7-day free trial today":"Empieza tus 7 días gratis hoy"}
+          </div>
+        </div>
+        {/* Body */}
+        <div style={{padding:"18px 22px 22px"}}>
+          <div style={{display:"flex",flexDirection:"column",gap:9,marginBottom:18}}>
+            {benefits.map((b,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"flex-start",gap:9}}>
+                <span style={{width:18,height:18,borderRadius:"50%",background:"rgba(15,94,104,0.12)",color:"#0F5E68",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>✓</span>
+                <span style={{fontSize:12.5,color:"#334155",lineHeight:1.45}}>{b}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{textAlign:"center",marginBottom:14}}>
+            <span style={{fontSize:30,fontWeight:900,color:"#0F172A",letterSpacing:-1}}>$9.99</span>
+            <span style={{fontSize:13,color:"#94A3B8",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
+            <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:2}}>{isEN?"7 days free · cancel anytime":"7 días gratis · cancela cuando quieras"}</div>
+          </div>
+          <button onClick={onUpgrade}
+            style={{width:"100%",background:"linear-gradient(135deg,#0F4C81,#0F5E68)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontWeight:800,fontSize:14.5,cursor:"pointer",boxShadow:"0 6px 20px rgba(15,76,129,0.35)",fontFamily:"inherit"}}>
+            ✦ {isEN?"Start free trial →":"Empezar gratis →"}
+          </button>
+          <div style={{textAlign:"center",fontSize:10,color:"#94A3B8",marginTop:10}}>
+            {isEN?"You won't be charged during the trial":"No se te cobra durante la prueba"}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── WIDGET "MI WATCHLIST" — 5 activos gratis + bloqueados Premium + ilimitado ──
+function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
+  const isEN=lang==="en";
+  const lp=useContext(PriceCtx);
+  const register=useContext(PriceRegisterCtx);
+  const FREE_LIMIT=5;
+  const LS_KEY=`nexo_watchlist_${user?.id||"guest"}`;
+  const DEFAULT=["NVDA","AAPL","BTC","META","MSFT","TSLA","ETH","AMZN","AMD","SPY","COIN","PLTR","SMCI","GOOGL","SOL"];
+  const [tickers,setTickers]=useState(()=>{try{const s=JSON.parse(localStorage.getItem(LS_KEY)||"null");return (s&&s.length)?s:DEFAULT;}catch{return DEFAULT;}});
+  const [input,setInput]=useState("");
+  const [showPaywall,setShowPaywall]=useState(false);
+  const [feedback,setFeedback]=useState(null); // null|exists|invalid|added
+  const visibleCount=isPremium?tickers.length:FREE_LIMIT;
+
+  useEffect(()=>{try{localStorage.setItem(LS_KEY,JSON.stringify(tickers));}catch{}},[tickers,LS_KEY]);
+  // Registrar SOLO los visibles para precio en vivo (respeta límite Finnhub)
+  useEffect(()=>{ register&&register(tickers.slice(0,visibleCount)); },[tickers,visibleCount,register]);
+
+  const openPaywall=()=>setShowPaywall(true);
+  const addTicker=()=>{
+    const tk=input.trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
+    if(!tk){return;}
+    if(tickers.includes(tk)){setFeedback("exists");setTimeout(()=>setFeedback(null),2000);return;}
+    setTickers(prev=>[...prev,tk]); // ilimitado
+    setInput(""); setFeedback("added"); setTimeout(()=>setFeedback(null),1500);
+  };
+  const removeTicker=(tk)=>setTickers(prev=>prev.filter(t=>t!==tk));
+
+  const cardStyle = card || {background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.07)",borderRadius:16,padding:0,marginBottom:14,boxShadow:"0 1px 3px rgba(0,0,0,0.06)"};
+  const GOLD="#B7791F";
+
+  return(
+    <div style={{...cardStyle,padding:0,overflow:"hidden"}}>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderBottom:"1px solid rgba(15,23,42,0.06)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:7}}>
+          <span style={{width:7,height:7,borderRadius:"50%",background:GOLD,display:"inline-block"}}/>
+          <span style={{fontSize:13,fontWeight:800,color:"#0F172A",letterSpacing:-0.2,fontFamily:"'Space Grotesk',sans-serif"}}>{isEN?"My Watchlist":"Mi Watchlist"}</span>
+          <span style={{fontSize:10,fontWeight:700,color:"#64748B",background:"rgba(15,23,42,0.05)",borderRadius:8,padding:"1px 7px"}}>{tickers.length}</span>
+        </div>
+        <span onClick={isPremium?undefined:openPaywall} style={{fontSize:11,fontWeight:700,color:GOLD,cursor:"pointer"}}>{isEN?"See all →":"Ver todo →"}</span>
+      </div>
+
+      {/* Filas */}
+      <div>
+        {tickers.map((tk,i)=>{
+          const locked = !isPremium && i>=FREE_LIMIT;
+          const live=lp[tk];
+          const up=live? (live.change>=0) : (i%3!==1);
+          if(locked){
+            return(
+              <div key={tk} onClick={openPaywall}
+                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:"1px solid rgba(15,23,42,0.04)",cursor:"pointer",position:"relative"}}>
+                <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:54,flexShrink:0}}>{tk}</span>
+                <span style={{flex:1,fontSize:12.5,fontWeight:700,color:"transparent",textShadow:"0 0 8px rgba(15,23,42,0.45)",userSelect:"none"}}>$ ███.██</span>
+                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:`linear-gradient(135deg,${GOLD},#9C6516)`,color:"#fff",fontSize:10,fontWeight:800,borderRadius:20,padding:"3px 10px",flexShrink:0,boxShadow:"0 2px 8px rgba(183,121,31,0.35)"}}>🔒 Premium</span>
+              </div>
+            );
+          }
+          return(
+            <div key={tk}
+              style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:"1px solid rgba(15,23,42,0.04)",position:"relative"}}
+              onMouseEnter={e=>{const x=e.currentTarget.querySelector('.nx-del');if(x)x.style.opacity='1';}}
+              onMouseLeave={e=>{const x=e.currentTarget.querySelector('.nx-del');if(x)x.style.opacity='0';}}>
+              <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:54,flexShrink:0}}>{tk}</span>
+              <span style={{fontSize:12.5,fontWeight:700,color:"#0F172A",minWidth:60,flexShrink:0}}>{live&&live.price!=null?fmtLivePrice(tk,live.price):<span style={{color:"#CBD5E1"}}>···</span>}</span>
+              <span style={{fontSize:11,fontWeight:800,color:up?"#16A34A":"#DC2626",minWidth:50,flexShrink:0}}>
+                {live&&live.change!=null?`${up?"▲":"▼"}${Math.abs(live.change).toFixed(2)}%`:""}
+              </span>
+              <span style={{flex:1}}/>
+              <MiniSpark seed={tk.split("").reduce((a,c)=>a+c.charCodeAt(0),0)} up={up}/>
+              <button className="nx-del" onClick={()=>removeTicker(tk)} title="Quitar"
+                style={{opacity:0,transition:"opacity 0.15s",background:"none",border:"none",color:"#CBD5E1",cursor:"pointer",fontSize:13,padding:"0 0 0 4px",flexShrink:0}}>✕</button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Input añadir (ilimitado, gratis) */}
+      <div style={{display:"flex",gap:6,padding:"10px 14px",borderBottom:"1px solid rgba(15,23,42,0.06)"}}>
+        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addTicker()}
+          placeholder={isEN?"Add ticker (AAPL, BTC...)":"Añadir ticker (AAPL, BTC...)"}
+          style={{flex:1,minWidth:0,background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"7px 10px",fontSize:12,color:"#0F172A",outline:"none",fontFamily:"inherit"}}/>
+        <button onClick={addTicker} style={{background:"#0F4C81",border:"none",borderRadius:8,padding:"0 12px",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",flexShrink:0}}>+</button>
+      </div>
+      {feedback&&(
+        <div style={{fontSize:10,fontWeight:600,padding:"4px 14px",color:feedback==="exists"?"#D97706":"#16A34A"}}>
+          {feedback==="exists"?(isEN?"Already in your list":"Ya está en tu lista"):(isEN?"✓ Added":"✓ Añadido")}
+        </div>
+      )}
+
+      {/* Upgrade footer (solo si no premium) */}
+      {!isPremium&&(
+        <button onClick={openPaywall}
+          style={{width:"100%",background:`linear-gradient(135deg,${GOLD},#9C6516)`,border:"none",padding:"10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontFamily:"inherit"}}>
+          ✦ {isEN?`Unlock ${tickers.length-FREE_LIMIT}+ assets — Premium`:`Desbloquea ${tickers.length-FREE_LIMIT}+ activos — Premium`}
+        </button>
+      )}
+
+      <PaywallModal open={showPaywall} onClose={()=>setShowPaywall(false)} onUpgrade={()=>{setShowPaywall(false);onUpgrade&&onUpgrade();}} lang={lang}/>
+    </div>
+  );
+}
+
+// ── BANNER PREMIUM en el feed (entre posts, cerrable) ────────────────────────
+function WatchlistFeedBanner({user, isPremium=false, onUpgrade, lang="es"}){
+  const isEN=lang==="en";
+  const [closed,setClosed]=useState(()=>{try{return sessionStorage.getItem("nexo-wl-banner-closed")==="1";}catch{return false;}});
+  const [showPaywall,setShowPaywall]=useState(false);
+  if(isPremium||closed) return null;
+  let count=15;
+  try{const s=JSON.parse(localStorage.getItem(`nexo_watchlist_${user?.id||"guest"}`)||"null");if(s&&s.length)count=s.length;}catch{}
+  const GOLD="#B7791F";
+  return(
+    <div style={{background:"linear-gradient(135deg,#0F4C81 0%,#0F5E68 100%)",borderRadius:16,padding:"14px 16px",marginBottom:6,position:"relative",overflow:"hidden",display:"flex",alignItems:"center",gap:12}}>
+      <button onClick={()=>{setClosed(true);try{sessionStorage.setItem("nexo-wl-banner-closed","1");}catch{}}}
+        style={{position:"absolute",top:8,right:10,background:"rgba(255,255,255,0.18)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:11,display:"flex",alignItems:"center",justifyContent:"center",zIndex:2}}>✕</button>
+      <div style={{width:40,height:40,borderRadius:11,background:"rgba(255,255,255,0.14)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>👁</div>
+      <div style={{flex:1,minWidth:0,paddingRight:18}}>
+        <div style={{fontSize:13.5,fontWeight:800,color:"#fff",letterSpacing:-0.2,marginBottom:2}}>
+          {isEN?`You have ${count} assets in your watchlist`:`Tienes ${count} activos en tu watchlist`}
+        </div>
+        <div style={{fontSize:11.5,color:"rgba(255,255,255,0.82)",lineHeight:1.4}}>
+          {isEN?"Unlock all with real-time prices and alerts.":"Desbloquéalos todos con precios en vivo y alertas."}
+        </div>
+      </div>
+      <button onClick={()=>setShowPaywall(true)}
+        style={{background:`linear-gradient(135deg,${GOLD},#9C6516)`,border:"none",borderRadius:10,padding:"9px 14px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",flexShrink:0,boxShadow:"0 3px 12px rgba(183,121,31,0.4)",whiteSpace:"nowrap"}}>
+        ✦ {isEN?"Try free":"Probar gratis"}
+      </button>
+      <PaywallModal open={showPaywall} onClose={()=>setShowPaywall(false)} onUpgrade={()=>{setShowPaywall(false);onUpgrade&&onUpgrade();}} lang={lang}/>
+    </div>
+  );
+}
+
+function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[],isPremium=false,onUpgrade}){
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
   const SIDEBAR_STATIC=[
@@ -7507,6 +7767,9 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
   return(
     <div>
+
+      {/* ── 👁 MI WATCHLIST — precios en vivo, 5 gratis + Premium ── */}
+      <MiWatchlistWidget user={user} isPremium={isPremium} onUpgrade={onUpgrade} lang={lang} card={card}/>
 
       {/* ── MINI PERFIL POPUP ── */}
       {miniProfile&&(()=>{
@@ -21053,6 +21316,8 @@ export default function App(){
             }
             {/* 🏆 Top Traders del mes — visible en el feed tras el 2º post */}
             {i===1 && SHOW_TOP_TRADERS && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={()=>{setPage(8);setShowLanding(false);}}/>}
+            {/* 👁 Banner Watchlist Premium — entre posts (cerrable) */}
+            {i===2 && <WatchlistFeedBanner user={user} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}} lang={lang}/>}
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
@@ -22128,7 +22393,7 @@ export default function App(){
 /></div>
         <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
         <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===38||page===41||page===42||page===43||page===99)?"none":undefined}}>
-          <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts}/>
+          <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
             <SidebarTickerWidget/>
