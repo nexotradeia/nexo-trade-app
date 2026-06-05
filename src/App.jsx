@@ -7588,9 +7588,10 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
   const isEN=lang==="en";
   const lp=useContext(PriceCtx);
   const register=useContext(PriceRegisterCtx);
-  const FREE_LIMIT=5;
+  const FREE_LIMIT=5;        // visibles gratis (resto borroso)
+  const FREE_MAX=10;         // tope de activos para cuenta gratis; el 11º pide Premium
   const LS_KEY=`nexo_watchlist_${user?.id||"guest"}`;
-  const DEFAULT=["NVDA","AAPL","BTC","META","MSFT","TSLA","ETH","AMZN","AMD","SPY","COIN","PLTR","SMCI","GOOGL","SOL"];
+  const DEFAULT=["NVDA","AAPL","BTC","META","MSFT","TSLA","ETH","AMZN"];
   const [tickers,setTickers]=useState(()=>{try{const s=JSON.parse(localStorage.getItem(LS_KEY)||"null");return (s&&s.length)?s:DEFAULT;}catch{return DEFAULT;}});
   const [input,setInput]=useState("");
   const [focused,setFocused]=useState(false);
@@ -7622,7 +7623,9 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
     const tk=(raw||"").trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
     if(!tk){return;}
     if(tickers.includes(tk)){setFeedback("exists");setTimeout(()=>setFeedback(null),2000);setInput("");return;}
-    setTickers(prev=>[...prev,tk]); // ilimitado
+    // Cuenta gratis: al intentar superar FREE_MAX (el 11º), pide Premium
+    if(!isPremium && tickers.length>=FREE_MAX){ setInput(""); setFocused(false); openPaywall(); return; }
+    setTickers(prev=>[...prev,tk]);
     setInput(""); setFocused(false); setFeedback("added"); setTimeout(()=>setFeedback(null),1500);
   };
   const addTicker=()=>{ addSym(suggestions[0] && input.trim() ? suggestions[0] : input); };
