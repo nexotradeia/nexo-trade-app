@@ -20650,7 +20650,7 @@ export default function App(){
         // Primero intenta con join a profiles
         let { data, error } = await supabase
           .from("posts")
-          .select(`*, profiles(username,avatar_emoji,avatar_color,points)`)
+          .select(`*, profiles!posts_user_id_fkey(username,avatar_emoji,avatar_color,points)`)
           .order("created_at", {ascending:false})
           .limit(100);
 
