@@ -7617,7 +7617,6 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
   const isEN=lang==="en";
   const lp=useContext(PriceCtx);
   const register=useContext(PriceRegisterCtx);
-  const FREE_LIMIT=5;        // visibles gratis (resto borroso)
   const FREE_MAX=10;         // tope de activos para cuenta gratis; el 11º pide Premium
   const LS_KEY=`nexo_watchlist_${user?.id||"guest"}`;
   const DEFAULT=["NVDA","AAPL","BTC","META","MSFT","TSLA","ETH","AMZN"];
@@ -7626,7 +7625,8 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
   const [focused,setFocused]=useState(false);
   const [showPaywall,setShowPaywall]=useState(false);
   const [feedback,setFeedback]=useState(null); // null|exists|invalid|added
-  const visibleCount=isPremium?tickers.length:FREE_LIMIT;
+  // Gancho: cuenta gratis ve TODAS las filas en vivo menos la ÚLTIMA (esa con candado)
+  const visibleCount=isPremium?tickers.length:Math.max(0,tickers.length-1);
 
   useEffect(()=>{try{localStorage.setItem(LS_KEY,JSON.stringify(tickers));}catch{}},[tickers,LS_KEY]);
   // Registrar SOLO los visibles para precio en vivo (respeta límite Finnhub)
@@ -7716,7 +7716,7 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
       {/* Filas */}
       <div>
         {tickers.map((tk,i)=>{
-          const locked = !isPremium && i>=FREE_LIMIT;
+          const locked = !isPremium && i===tickers.length-1 && tickers.length>1;
           const live=lp[tk];
           const up=live? (live.change>=0) : (i%3!==1);
           if(locked){
@@ -7752,7 +7752,7 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
       {!isPremium&&(
         <button onClick={openPaywall}
           style={{width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD2})`,border:"none",padding:"10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontFamily:"inherit"}}>
-          ✦ {isEN?`Unlock ${tickers.length-FREE_LIMIT}+ assets — Premium`:`Desbloquea ${tickers.length-FREE_LIMIT}+ activos — Premium`}
+          ✦ {isEN?"Unlock unlimited + alerts — Premium":"Desbloquea ilimitado + alertas — Premium"}
         </button>
       )}
 
