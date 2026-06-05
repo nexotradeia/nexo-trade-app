@@ -15902,7 +15902,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
       </div>
 
       {/* Tabs */}
-      <div style={{display:"flex",gap:6,marginBottom:14,background:"rgba(255,255,255,0.03)",borderRadius:12,padding:4}}>
+      <div style={{display:"flex",gap:6,marginBottom:14,background:"var(--c-card2)",borderRadius:12,padding:4}}>
         {[["traders",isEN?"🏆 Top Traders":"🏆 Top Traders"],["posts",isEN?"🔥 Top Posts":"🔥 Top Posts"],["rising",isEN?"📈 Rising":"📈 En Alza"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
             style={{flex:1,background:tab===k?"rgba(245,158,11,0.15)":"transparent",border:`1px solid ${tab===k?"rgba(245,158,11,0.3)":"transparent"}`,borderRadius:9,padding:"9px 0",color:tab===k?"#F59E0B":"#64748B",fontSize:13,fontWeight:700,cursor:"pointer"}}>
@@ -15934,7 +15934,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
           const totalLikes = p.isBot ? (BOT_STATS[p.id]?.likes||999) : posts.filter(x=>(x.user_id||x.authorId)===p.id).reduce((s,x)=>s+(x.likes||0),0);
           const isMe = user?.id===p.id;
           return(
-            <div key={p.id} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",marginBottom:8,background:isMe?"rgba(245,158,11,0.06)":"rgba(255,255,255,0.02)",border:`1px solid ${isMe?"rgba(245,158,11,0.25)":"rgba(255,255,255,0.06)"}`,borderRadius:14}}>
+            <div key={p.id} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",marginBottom:8,background:isMe?"rgba(245,158,11,0.06)":"var(--c-card)",border:`1px solid ${isMe?"rgba(245,158,11,0.25)":"var(--c-border)"}`,borderRadius:14}}>
               {/* Rank */}
               <div style={{width:28,textAlign:"center",flexShrink:0}}>
                 {i<3 ? <span style={{fontSize:20}}>{MEDALS[i]}</span>
@@ -15947,7 +15947,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
               {/* Info */}
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
-                  <span style={{fontWeight:800,color:"#F1F5F9",fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  <span style={{fontWeight:800,color:"var(--c-text)",fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     {p.username||"Trader"}
                   </span>
                   {isMe&&<span style={{fontSize:9,background:"rgba(245,158,11,0.15)",color:"#F59E0B",border:"1px solid rgba(245,158,11,0.3)",borderRadius:6,padding:"1px 6px",fontWeight:700}}>{isEN?"YOU":"TÚ"}</span>}
@@ -15978,23 +15978,23 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
             <div>{isEN?"No posts yet":"Aún no hay posts"}</div>
           </div>
         ) : topPosts.map((p,i)=>(
-          <div key={p.id} style={{display:"flex",gap:12,padding:"14px 16px",marginBottom:8,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,alignItems:"flex-start"}}>
+          <div key={p.id} style={{display:"flex",gap:12,padding:"14px 16px",marginBottom:8,background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:14,alignItems:"flex-start"}}>
             <div style={{width:28,textAlign:"center",flexShrink:0,paddingTop:2}}>
               {i<3?<span style={{fontSize:18}}>{MEDALS[i]}</span>:<span style={{fontWeight:900,color:"#475569",fontSize:13}}>#{i+1}</span>}
             </div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,flexWrap:"wrap"}}>
-                <span style={{fontWeight:700,color:"#FCD34D",fontSize:12}}>@{p.author||p.authorName||"Trader"}</span>
+                <span style={{fontWeight:700,color:"#D97706",fontSize:12}}>@{p.author||p.authorName||"Trader"}</span>
                 {p.ticker&&<span style={{background:"rgba(0,102,255,0.1)",color:"#0066FF",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800,fontFamily:"monospace"}}>{p.ticker}</span>}
                 {p.sentiment&&<span style={{fontSize:11,color:p.sentiment==="bullish"?"#00D26A":"#FF4D6A"}}>{p.sentiment==="bullish"?"▲ ALCISTA":"▼ BAJISTA"}</span>}
               </div>
-              <div style={{fontSize:13,color:"#CBD5E1",lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>
+              <div style={{fontSize:13,color:"var(--c-muted)",lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>
                 {p.text}
               </div>
               <div style={{display:"flex",gap:14,marginTop:8,fontSize:12,color:"#475569"}}>
-                <span>❤️ <strong style={{color:"#F1F5F9"}}>{p.likes||0}</strong></span>
-                <span>🔁 <strong style={{color:"#F1F5F9"}}>{p.reposts_count||p.reposts||0}</strong></span>
-                <span>💬 <strong style={{color:"#F1F5F9"}}>{p.comments?.length||0}</strong></span>
+                <span>❤️ <strong style={{color:"var(--c-text)"}}>{p.likes||0}</strong></span>
+                <span>🔁 <strong style={{color:"var(--c-text)"}}>{p.reposts_count||p.reposts||0}</strong></span>
+                <span>💬 <strong style={{color:"var(--c-text)"}}>{p.comments?.length||0}</strong></span>
               </div>
             </div>
           </div>
@@ -16017,7 +16017,7 @@ function LeaderboardPage({ posts=[], user, lang="es" }) {
               {profile?.emoji||"🌱"}
             </div>
             <div style={{flex:1}}>
-              <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14,marginBottom:2}}>{profile?.username||"Trader"}</div>
+              <div style={{fontWeight:800,color:"var(--c-text)",fontSize:14,marginBottom:2}}>{profile?.username||"Trader"}</div>
               <div style={{fontSize:11,color:"#475569"}}>{isEN?`${count} posts this week`:  `${count} posts esta semana`}</div>
             </div>
             <div style={{background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:10,padding:"6px 12px",textAlign:"center"}}>
