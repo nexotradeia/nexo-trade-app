@@ -4605,7 +4605,7 @@ function MarketsMiniWidget({ lang="es" }){
           {polyData.map((m,i)=>(
             <div key={i}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3,gap:8}}>
-                <span style={{color:"#cbd5e1",fontSize:11,flex:1,lineHeight:1.3}}>{m.q}</span>
+                <span style={{color:"#0F172A",fontWeight:600,fontSize:11.5,flex:1,lineHeight:1.3}}>{m.q}</span>
                 <span style={{fontWeight:900,fontSize:13,color:barCol(m.p),flexShrink:0}}>{Math.round(m.p*100)}%</span>
               </div>
               <div style={{height:3,background:"rgba(255,255,255,0.06)",borderRadius:4,overflow:"hidden"}}>
@@ -21951,7 +21951,7 @@ export default function App(){
             );
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{position:"absolute",right:8,flexShrink:0,background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#fff",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
+            style={{flexShrink:0,margin:"0 10px 0 14px",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#fff",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
             {effectivePremium ? "✦ Premium" : (lang==="en"?"✦ Join Premium — $9.99/mo":"✦ Únete a Premium — $9.99/mes")}
           </button>
         </div>
