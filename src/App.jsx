@@ -781,6 +781,35 @@ const IcoSettings = () => (
   </svg>
 );
 
+// ── NAV ICONS — set de línea monocromático (hereda currentColor) ──────────────
+const NAV_ICOS = {
+  feed:        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>,
+  stockpick:   <><path d="M8 5v4M8 15v4"/><rect x="6" y="9" width="4" height="6" rx="1"/><path d="M16 3v5M16 16v5"/><rect x="14" y="8" width="4" height="8" rx="1"/></>,
+  news:        <><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="12" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="17" y2="16"/></>,
+  earnings:    <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
+  movers:      <><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/></>,
+  academy:     <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></>,
+  webinars:    <><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></>,
+  messages:    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/>,
+  ideas:       <><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></>,
+  whale:       <><path d="M2 8c2 0 2 2 4 2s2-2 4-2 2 2 4 2 2-2 4-2 2 2 4 2"/><path d="M2 14c2 0 2 2 4 2s2-2 4-2 2 2 4 2 2-2 4-2 2 2 4 2"/></>,
+  capitol:     <><line x1="3" y1="21" x2="21" y2="21"/><line x1="4" y1="10" x2="20" y2="10"/><polyline points="5 6 12 3 19 6"/><line x1="6" y1="10" x2="6" y2="21"/><line x1="10" y1="10" x2="10" y2="21"/><line x1="14" y1="10" x2="14" y2="21"/><line x1="18" y1="10" x2="18" y2="21"/></>,
+  screener:    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>,
+  oracle:      <><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>,
+  watchlist:   <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>,
+  alerts:      <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></>,
+  paper:       <><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><rect x="2" y="6" width="20" height="12" rx="2"/></>,
+  star:        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>,
+  lock:        <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
+};
+const NavIco = ({name, size=17}) => {
+  const inner = NAV_ICOS[name];
+  if(!inner) return null;
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>{inner}</svg>;
+};
+// Quita el emoji inicial de una etiqueta ("🔥 Feed" → "Feed")
+const stripEmoji = (s) => (s||"").replace(/^[^\p{L}\p{N}$]+/u, "").trim();
+
 // ── LANG SELECTOR ─────────────────────────────────────────────────────────────
 function LangSelector({lang, setLang}){
   const [open, setOpen] = useState(false);
@@ -21954,47 +21983,48 @@ export default function App(){
         <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",background:"#FFFFFF",borderTop:"1px solid #EEF4FA",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:52}}>
           <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:1.4,color:"#2196F3",background:"rgba(33,150,243,0.07)",border:"1.5px solid rgba(33,150,243,0.22)",borderRadius:7,padding:"3px 10px",margin:"0 20px 0 0",whiteSpace:"nowrap"}}>FREE</span>
           {[
-            {label:t.feed,idx:0},
-            {label:lang==="en"?"📈 Stock Pick IA":"📈 Stock Pick IA",idx:3,badge:"NEW"},
-            {label:t.noticias,idx:5},
-            {label:t.earnings,idx:6},
-            {label:t.trending,idx:7},
-            {label:lang==="en"?"📚 Academy":"📚 Academia",idx:12},
-            {label:"🎓 Webinars",idx:11},
-            {label:lang==="en"?"💬 Messages":"💬 Mensajes",idx:22},
+            {label:t.feed,idx:0,icon:"feed"},
+            {label:lang==="en"?"Stock Pick IA":"Stock Pick IA",idx:3,badge:"NEW",icon:"stockpick"},
+            {label:t.noticias,idx:5,icon:"news"},
+            {label:t.earnings,idx:6,icon:"earnings"},
+            {label:t.trending,idx:7,icon:"movers"},
+            {label:lang==="en"?"Academy":"Academia",idx:12,icon:"academy"},
+            {label:"Webinars",idx:11,icon:"webinars"},
+            {label:lang==="en"?"Messages":"Mensajes",idx:22,icon:"messages"},
           ].map(n=>(
             <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-              style={{background:page===n.idx?"rgba(33,150,243,0.06)":"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#2196F3":"transparent"}`,padding:"0 19px",height:52,cursor:"pointer",color:page===n.idx?"#2196F3":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit",letterSpacing:page===n.idx?0.1:0}}
+              style={{background:page===n.idx?"rgba(33,150,243,0.06)":"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#2196F3":"transparent"}`,padding:"0 18px",height:52,cursor:"pointer",color:page===n.idx?"#2196F3":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:7,flexShrink:0,fontFamily:"inherit",letterSpacing:page===n.idx?0.1:0}}
               onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#2196F3";e.currentTarget.style.background="rgba(33,150,243,0.04)";}}}
               onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";e.currentTarget.style.background="transparent";}}}
             >
-              {n.label}
+              <NavIco name={n.icon}/>
+              {stripEmoji(n.label)}
               {n.badge&&<span style={{fontSize:9,fontWeight:800,color:"#2196F3",background:"rgba(33,150,243,0.11)",border:"1px solid rgba(33,150,243,0.28)",borderRadius:4,padding:"2px 5px",letterSpacing:0.5}}>{n.badge}</span>}
             </button>
           ))}
         </div>
         {/* ── ROW 2: VIP TABS ── */}
         <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#E8F4FF",borderTop:"1px solid #BFDBFE",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
-          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#fff",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 10px rgba(15,94,104,0.4)",display:"inline-flex",alignItems:"center",gap:4}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 16px rgba(15,94,104,0.6)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(15,94,104,0.4)"}>⭐ PREMIUM</span>
+          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#fff",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 10px rgba(15,94,104,0.4)",display:"inline-flex",alignItems:"center",gap:5}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 16px rgba(15,94,104,0.6)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(15,94,104,0.4)"}><NavIco name="star" size={13}/> PREMIUM</span>
           {[
-            {label:lang==="en"?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,locked:!effectivePremium},
-            {label:lang==="en"?"🐋 Whale Flow PREMIUM":"🐋 Flujo PREMIUM",idx:20,locked:!effectivePremium},
-            {label:"🏛️ Wall St. & Capitol",idx:19,locked:!effectivePremium},
-            {label:lang==="en"?"🔬 Screener":"🔬 Screener",idx:36,locked:!effectivePremium},
-            {label:lang==="en"?"💼 Portfolio Oracle AI":"💼 Portafolio Oracle IA",idx:37,locked:!effectivePremium},
-            {label:"👁 Watchlist",idx:38},
-            {label:lang==="en"?"🚨 Alerts":"🚨 Alertas",idx:42},
-            {label:lang==="en"?"🎮 Paper Trading":"🎮 Paper Trading",idx:9,locked:!effectivePremium},
+            {label:lang==="en"?"Ideas Premium":"Ideas Premium",idx:21,locked:!effectivePremium,icon:"ideas"},
+            {label:lang==="en"?"Whale Flow":"Flujo Premium",idx:20,locked:!effectivePremium,icon:"whale"},
+            {label:"Wall St. & Capitol",idx:19,locked:!effectivePremium,icon:"capitol"},
+            {label:lang==="en"?"Screener":"Screener",idx:36,locked:!effectivePremium,icon:"screener"},
+            {label:lang==="en"?"Portfolio Oracle AI":"Portafolio Oracle IA",idx:37,locked:!effectivePremium,icon:"oracle"},
+            {label:"Watchlist",idx:38,icon:"watchlist"},
+            {label:lang==="en"?"Alerts":"Alertas",idx:42,icon:"alerts"},
+            {label:lang==="en"?"Paper Trading":"Paper Trading",idx:9,locked:!effectivePremium,icon:"paper"},
           ].map(n=>{
             const active=page===n.idx;
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:active?"rgba(245,158,11,0.09)":"transparent",border:"none",borderBottom:`2.5px solid ${active?"#F59E0B":"transparent"}`,padding:"0 16px",height:47,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:13.5,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:5,flexShrink:0,fontFamily:"inherit"}}
+                style={{background:active?"rgba(245,158,11,0.09)":"transparent",border:"none",borderBottom:`2.5px solid ${active?"#F59E0B":"transparent"}`,padding:"0 16px",height:47,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:13.5,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit"}}
                 onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#F59E0B";e.currentTarget.style.background="rgba(245,158,11,0.05)";}}}
                 onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)";e.currentTarget.style.background="transparent";}}}
               >
-                {n.locked&&<span style={{fontSize:10,opacity:0.65}}>🔒</span>}
-                {n.label}
+                {n.locked?<NavIco name="lock" size={13}/>:<NavIco name={n.icon}/>}
+                {stripEmoji(n.label)}
               </button>
             );
           })}
