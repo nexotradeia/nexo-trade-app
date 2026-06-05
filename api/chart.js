@@ -100,6 +100,19 @@ export default async function handler(req, res) {
           high24h:   parseFloat(binance.highPrice),
           low24h:    parseFloat(binance.lowPrice),
         };
+      } else {
+        // Fallback: CoinGecko (Binance a veces bloquea IPs de Vercel)
+        const cg = await safeGet("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true", 4000);
+        const b = cg?.bitcoin;
+        if (b?.usd) {
+          btcPrice = {
+            price:     b.usd,
+            change24h: +(b.usd_24h_change ?? 0).toFixed(2),
+            volume24h: b.usd_24h_vol ?? 38e9,
+            high24h:   Math.round(b.usd * 1.015),
+            low24h:    Math.round(b.usd * 0.985),
+          };
+        }
       }
 
       if (fngData?.data?.[0]) {

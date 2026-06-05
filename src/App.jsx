@@ -1671,6 +1671,28 @@ function AIAssistant({lang,onClose}){
 
   const respuestaLocal = (msg) => {
     const m = msg.toLowerCase();
+    const isEN = lang==="en";
+    if(isEN){
+      if(m.includes("p/e") || m.includes("pe ratio") || m.includes("price to earn"))
+        return "📊 The P/E ratio (Price-to-Earnings) shows how much investors pay per $1 of earnings. A low P/E may mean the stock is cheap; a high one implies high growth expectations. The S&P 500 historically trades at ~15-20x.\n\n⚠️ Not financial advice.";
+      if(m.includes("nvidia") || m.includes("nvda"))
+        return "📈 NVIDIA (NVDA) is the world leader in AI and data-center chips. Its H100/H200 GPUs are essential to train AI models. Growth depends on AI infrastructure demand. Watch quarterly earnings to see if momentum holds.\n\n⚠️ Not financial advice.";
+      if(m.includes("bitcoin") || m.includes("btc"))
+        return "₿ Bitcoin is the #1 crypto by market cap. Its price follows ~4-year cycles tied to the halving. Institutions like BlackRock and Fidelity have approved BTC ETFs. Many see it as a digital store of value.\n\n⚠️ Not financial advice.";
+      if(m.includes("ethereum") || m.includes("eth"))
+        return "🔷 Ethereum is the most-used blockchain for DeFi, NFTs and smart contracts. Since the 2022 merge to Proof of Stake, ETH has deflationary mechanics. Its value tracks usage of the dApp ecosystem.\n\n⚠️ Not financial advice.";
+      if(m.includes("dividendo") || m.includes("dividend"))
+        return "💰 Dividend stocks pay part of their profits to shareholders regularly. Popular examples: $KO (~3%), $JNJ (~3%), $AAPL (~0.5%). They are popular for long-term passive income.\n\n⚠️ Not financial advice.";
+      if(m.includes("sp500") || m.includes("s&p") || m.includes("nasdaq") || m.includes("index"))
+        return "📊 The S&P 500 tracks the 500 largest US companies and historically returns ~10%/yr. The NASDAQ is tech-heavier. ETFs like SPY or QQQ are the simplest way to get diversified US market exposure.\n\n⚠️ Not financial advice.";
+      if(m.includes("start") || m.includes("begin") || m.includes("beginner") || m.includes("how do i invest"))
+        return "🌱 To start: 1) Learn for free (YouTube, NexoTrade). 2) Define how much you can lose without stress. 3) Start with diversified ETFs (SPY, QQQ). 4) Practice with NexoTrade Paper Trading ($100k virtual). 5) Never invest money you need to live.\n\n⚠️ Not financial advice.";
+      if(m.includes("tesla") || m.includes("tsla"))
+        return "🚗 Tesla (TSLA) leads in EVs and energy storage. The stock is very volatile, moved by Elon Musk comments and quarterly deliveries. It also has solar energy and FSD software businesses.\n\n⚠️ Not financial advice.";
+      if(m.includes("apple") || m.includes("aapl"))
+        return "🍎 Apple (AAPL) is the most valuable company in the world. Revenue comes from iPhone (~50%), services (~25%) and Mac/iPad. It holds $165B+ in cash and buys back stock aggressively. Considered a quality defensive holding.\n\n⚠️ Not financial advice.";
+      return `🤖 Thanks for your question about "${msg.substring(0,40)}". On NexoTrade you can see community analysis in the live feed. For deeper analysis, check the weekly PREMIUM Picks or ask other traders in the feed.\n\n⚠️ Not financial advice. Consult an advisor before investing.`;
+    }
     if(m.includes("p/e") || m.includes("pe ratio") || m.includes("price to earn"))
       return "📊 El P/E ratio (Price-to-Earnings) indica cuánto pagan los inversores por cada $1 de ganancia. Un P/E bajo puede indicar que la acción está barata; uno alto que tiene altas expectativas de crecimiento. Por ejemplo, el S&P 500 tiene un P/E histórico de ~15-20x.\n\n⚠️ No es consejo financiero.";
     if(m.includes("nvidia") || m.includes("nvda"))
@@ -10126,7 +10148,8 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 ═══════════════════════════════════════════════════════════════ */
 const CURSOS = []; // cursos reales próximamente
 
-function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
+function AcademiaPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
+  const isEN = lang==="en";
   const [filtro, setFiltro] = useState("todos");
   const [expanded, setExpanded] = useState(null);
 
@@ -10146,8 +10169,8 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
         <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 25% 50%,#f59e0b10,transparent 55%),radial-gradient(circle at 75% 50%,#10b98115,transparent 55%)",pointerEvents:"none"}}/>
         <div style={{position:"relative"}}>
           <div style={{fontSize:44,marginBottom:10}}>🎓</div>
-          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>Academia NexoTrade</h1>
-          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:480,marginLeft:"auto",marginRight:"auto"}}>Cursos grabados. Aprende a tu ritmo. Acceso de por vida.</p>
+          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"NexoTrade Academy":"Academia NexoTrade"}</h1>
+          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:480,marginLeft:"auto",marginRight:"auto"}}>{isEN?"Recorded courses. Learn at your pace. Lifetime access.":"Cursos grabados. Aprende a tu ritmo. Acceso de por vida."}</p>
           <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
             {[
               {v:`${CURSOS.length} cursos`,l:"Disponibles"},
@@ -10166,25 +10189,25 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
       {/* VIP banner */}
       {!isPremium && <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
         <span style={{fontSize:24}}>✦</span>
-        <div style={{flex:1,fontSize:13,color:"#1A5FAD"}}><strong style={{color:"#0C447C"}}>PREMIUM ($9.99/mes)</strong> — obtén hasta 40% de descuento en todos los cursos.</div>
-        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver PREMIUM →</button>
+        <div style={{flex:1,fontSize:13,color:"#1A5FAD"}}><strong style={{color:"#0C447C"}}>PREMIUM ($9.99/mes)</strong> {isEN?" — get up to 40% off all courses.":" — obtén hasta 40% de descuento en todos los cursos."}</div>
+        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{isEN?"See PREMIUM →":"Ver PREMIUM →"}</button>
       </div>}
 
       {/* Cursos — Próximamente */}
       <div style={{background:"#E8F4FF",border:"1px dashed #BFDBFE",borderRadius:20,padding:"40px 24px",textAlign:"center",marginBottom:8}}>
         <div style={{fontSize:48,marginBottom:14}}>🎓</div>
-        <div style={{fontSize:20,fontWeight:900,color:"#0F172A",marginBottom:8}}>Cursos propios — Próximamente</div>
+        <div style={{fontSize:20,fontWeight:900,color:"#0F172A",marginBottom:8}}>{isEN?"Original courses — Coming soon":"Cursos propios — Próximamente"}</div>
         <div style={{fontSize:13,color:"#1A5FAD",maxWidth:420,margin:"0 auto 20px",lineHeight:1.7}}>
-          Estamos preparando cursos originales de análisis técnico, crypto y trading institucional. Déjanos tu correo y serás el primero en enterarte.
+          {isEN?"We are preparing original courses on technical analysis, crypto and institutional trading. Leave your email and be the first to know.":"Estamos preparando cursos originales de análisis técnico, crypto y trading institucional. Déjanos tu correo y serás el primero en enterarte."}
         </div>
         <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
-          {["📈 Análisis Técnico","₿ Crypto Trading","🛡️ Opciones","💰 Dividendos"].map(t=>(
+          {(isEN?["📈 Technical Analysis","₿ Crypto Trading","🛡️ Options","💰 Dividends"]:["📈 Análisis Técnico","₿ Crypto Trading","🛡️ Opciones","💰 Dividendos"]).map(t=>(
             <span key={t} style={{background:"#fff",border:"1px solid #BFDBFE",borderRadius:20,padding:"5px 14px",fontSize:12,color:"#1A5FAD",fontWeight:700}}>{t}</span>
           ))}
         </div>
         <a href="mailto:info@nexotradeia.com?subject=Quiero saber cuando salgan los cursos de NexoTrade"
           style={{display:"inline-block",background:"linear-gradient(135deg,#D97706,#B45309)",borderRadius:12,padding:"12px 28px",color:"#fff",fontSize:14,fontWeight:700,textDecoration:"none"}}>
-          📬 Notifícame cuando estén listos
+          📬 {isEN?"Notify me when they are ready":"Notifícame cuando estén listos"}
         </a>
       </div>
 
@@ -10193,8 +10216,8 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
           <span style={{fontSize:22}}>🌍</span>
           <div>
-            <div style={{fontSize:16,fontWeight:800,color:C.text}}>Academias y Prop Firms Recomendadas</div>
-            <div style={{fontSize:12,color:C.muted}}>Socios de confianza — NexoTrade recibe comisión si te unes</div>
+            <div style={{fontSize:16,fontWeight:800,color:C.text}}>{isEN?"Recommended Academies & Prop Firms":"Academias y Prop Firms Recomendadas"}</div>
+            <div style={{fontSize:12,color:C.muted}}>{isEN?"Trusted partners — NexoTrade earns a commission if you join":"Socios de confianza — NexoTrade recibe comisión si te unes"}</div>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
@@ -10209,22 +10232,22 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
                 <div style={{background:"#2962FF33",color:"#7EA8FF",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700,display:"inline-block"}}>AFILIADO ACTIVO</div>
               </div>
             </div>
-            <div style={{fontSize:13,fontWeight:700,color:"#F1F5F9"}}>La plataforma de gráficas #1 del mundo</div>
-            <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.5}}>Gráficas profesionales, screeners, alertas y señales. Más de 50 millones de traders lo usan. Tú ganas por cada usuario que se suscribe a premium.</div>
-            <div style={{fontSize:11,color:"#00D26A",fontWeight:600,background:"rgba(0,210,106,0.08)",borderRadius:8,padding:"6px 10px",border:"1px solid rgba(0,210,106,0.2)"}}>✅ Comisión activa: hasta $90 por suscripción referida</div>
+            <div style={{fontSize:13,fontWeight:700,color:"#F1F5F9"}}>{isEN?"The #1 charting platform in the world":"La plataforma de gráficas #1 del mundo"}</div>
+            <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.5}}>{isEN?"Professional charts, screeners, alerts and signals. 50M+ traders use it. You earn for every user who subscribes to premium.":"Gráficas profesionales, screeners, alertas y señales. Más de 50 millones de traders lo usan. Tú ganas por cada usuario que se suscribe a premium."}</div>
+            <div style={{fontSize:11,color:"#00D26A",fontWeight:600,background:"rgba(0,210,106,0.08)",borderRadius:8,padding:"6px 10px",border:"1px solid rgba(0,210,106,0.2)"}}>✅ {isEN?"Active commission: up to $90 per referred subscription":"Comisión activa: hasta $90 por suscripción referida"}</div>
             <a href="https://www.tradingview.com/?aff_id=167149" target="_blank" rel="noopener noreferrer"
               style={{display:"block",background:"linear-gradient(135deg,#2962FF,#2962FFcc)",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,textAlign:"center",textDecoration:"none",marginTop:"auto"}}>
-              Abrir TradingView →
+              {isEN?"Open TradingView →":"Abrir TradingView →"}
             </a>
           </div>
 
           {/* ── Próximamente x3 ── */}
-          {["🎓 Academia Global","💼 Prop Firm","📈 Plataforma de inversión"].map((label,i)=>(
+          {(isEN?["🎓 Global Academy","💼 Prop Firm","📈 Investment platform"]:["🎓 Academia Global","💼 Prop Firm","📈 Plataforma de inversión"]).map((label,i)=>(
             <div key={i} style={{background:C.surface,border:`1px dashed ${C.border}`,borderRadius:16,padding:"18px 20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,minHeight:220,textAlign:"center",opacity:0.7}}>
               <div style={{fontSize:36}}>🔜</div>
               <div style={{fontSize:13,fontWeight:800,color:C.muted}}>{label}</div>
-              <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:20,padding:"5px 16px",fontSize:11,fontWeight:700,color:"#1A5FAD",letterSpacing:0.5}}>PRÓXIMAMENTE</div>
-              <div style={{fontSize:11,color:C.muted2}}>Socio en proceso de negociación</div>
+              <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:20,padding:"5px 16px",fontSize:11,fontWeight:700,color:"#1A5FAD",letterSpacing:0.5}}>{isEN?"COMING SOON":"PRÓXIMAMENTE"}</div>
+              <div style={{fontSize:11,color:C.muted2}}>{isEN?"Partner in negotiation":"Socio en proceso de negociación"}</div>
             </div>
           ))}
         </div>
@@ -10233,9 +10256,9 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
       {/* Bottom CTA */}
       <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
         <div style={{fontSize:36,marginBottom:10}}>🎓</div>
-        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Quieres enseñar en NexoTrade?</h3>
-        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Si eres trader con experiencia, escríbenos. Tú enseñas, nosotros ponemos la plataforma y los alumnos.</p>
-        <a href="mailto:info@nexotradeia.com?subject=Quiero ser instructor en NexoTrade" style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#0047C2)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>Ser instructor →</a>
+        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>{isEN?"Want to teach on NexoTrade?":"¿Quieres enseñar en NexoTrade?"}</h3>
+        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>{isEN?"If you are an experienced trader, write to us. You teach, we provide the platform and the students.":"Si eres trader con experiencia, escríbenos. Tú enseñas, nosotros ponemos la plataforma y los alumnos."}</p>
+        <a href="mailto:info@nexotradeia.com?subject=Quiero ser instructor en NexoTrade" style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#0047C2)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>{isEN?"Become an instructor →":"Ser instructor →"}</a>
       </div>
     </div>
   );
@@ -10307,7 +10330,8 @@ const WEBINARS_LIST = [
   },
 ];
 
-function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
+function WebinarsPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
+  const isEN = lang==="en";
   const [filtroNivel, setFiltroNivel] = useState("todos");
   const niveles = ["todos","Principiante","Intermedio"];
   const filtered = filtroNivel==="todos" ? WEBINARS_LIST : WEBINARS_LIST.filter(w=>w.nivel===filtroNivel);
@@ -10320,7 +10344,7 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
         <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 30% 50%,#10b98115,transparent 60%),radial-gradient(circle at 70% 50%,#2962FF15,transparent 60%)",pointerEvents:"none"}}/>
         <div style={{position:"relative"}}>
           <div style={{fontSize:44,marginBottom:10}}>🎓</div>
-          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>Webinars & Educación Gratuita</h1>
+          <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"Webinars & Free Education":"Webinars & Educación Gratuita"}</h1>
           <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:500,marginLeft:"auto",marginRight:"auto"}}>Recursos educativos reales de las instituciones financieras más importantes del mundo. 100% gratuitos.</p>
           <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
             {[
@@ -10341,7 +10365,7 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
       <div style={{background:"linear-gradient(135deg,rgba(41,98,255,0.12),rgba(41,98,255,0.05))",border:"1px solid rgba(41,98,255,0.3)",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
         <span style={{fontSize:24}}>📊</span>
         <div style={{flex:1,fontSize:13,color:"#93c5fd"}}>
-          <strong>¿Quieres gráficas profesionales?</strong> — Abre TradingView gratis y accede a todos sus webinars, indicadores y alertas en tiempo real.
+          <strong>{isEN?"Want professional charts?":"¿Quieres gráficas profesionales?"}</strong> — Abre TradingView gratis y accede a todos sus webinars, indicadores y alertas en tiempo real.
         </div>
         <a href="https://www.tradingview.com/?aff_id=167149" target="_blank" rel="noopener noreferrer"
           style={{background:"linear-gradient(135deg,#2962FF,#1d4ed8)",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",textDecoration:"none",whiteSpace:"nowrap"}}>
@@ -10405,11 +10429,11 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip}){
       {/* Bottom CTA */}
       <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
         <div style={{fontSize:36,marginBottom:10}}>📬</div>
-        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>¿Quieres webinars propios de NexoTrade?</h3>
+        <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>{isEN?"Want NexoTrade original webinars?":"¿Quieres webinars propios de NexoTrade?"}</h3>
         <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Estamos organizando sesiones en vivo con traders reales. Déjanos tu correo para ser el primero en enterarte.</p>
         <a href="mailto:info@nexotradeia.com?subject=Quiero saber de los webinars de NexoTrade"
           style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#0047C2)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>
-          📬 Notifícame →
+          📬 {isEN?"Notify me →":"Notifícame →"}
         </a>
       </div>
     </div>
@@ -20850,8 +20874,8 @@ export default function App(){
     if(page===7) return <TrendingPage posts={posts}/>;
     if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
-    if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
-    if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
+    if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
+    if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===14) return <EconCalendarPage lang={lang}/>;
     if(page===18) return <CommoditiesPage/>;
     if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
@@ -22076,7 +22100,7 @@ export default function App(){
         <div style={{position:"fixed",bottom:28,left:20,zIndex:8800,background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 4px 24px rgba(0,0,0,0.3)",maxWidth:280,animation:"nexo-slidein 0.4s ease"}}>
           <div style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#0066FF,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👤</div>
           <div>
-            <div style={{color:C.text,fontWeight:700,fontSize:12}}>{socialProofMsg.name} <span style={{color:C.muted2,fontWeight:400}}>de {socialProofMsg.loc}</span></div>
+            <div style={{color:C.text,fontWeight:700,fontSize:12}}>{socialProofMsg.name} <span style={{color:C.muted2,fontWeight:400}}>{lang==="en"?"from":"de"} {socialProofMsg.loc}</span></div>
             <div style={{color:"#0066FF",fontSize:11,marginTop:2}}>{socialProofMsg.action}</div>
           </div>
         </div>
