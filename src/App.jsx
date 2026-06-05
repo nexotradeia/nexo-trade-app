@@ -7676,8 +7676,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         })}
       </div>
 
-      {/* ── COMUNIDAD vs IA — votación real ── */}
-      {(()=>{
+      {/* ── COMUNIDAD vs IA — votación real (OCULTO por petición; quitar false&& para reactivar) ── */}
+      {false && (()=>{
         const storageKey = "nexo-sentiment-vote";
         const [vote, setVote] = useState(()=>{try{return localStorage.getItem(storageKey)||null;}catch{return null;}});
         const [bullPct, setBullPct] = useState(()=>{try{return parseInt(localStorage.getItem("nexo-sent-pct")||"71");}catch{return 71;}});
