@@ -7590,6 +7590,7 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
   const DEFAULT=["NVDA","AAPL","BTC","META","MSFT","TSLA","ETH","AMZN","AMD","SPY","COIN","PLTR","SMCI","GOOGL","SOL"];
   const [tickers,setTickers]=useState(()=>{try{const s=JSON.parse(localStorage.getItem(LS_KEY)||"null");return (s&&s.length)?s:DEFAULT;}catch{return DEFAULT;}});
   const [input,setInput]=useState("");
+  const [focused,setFocused]=useState(false);
   const [showPaywall,setShowPaywall]=useState(false);
   const [feedback,setFeedback]=useState(null); // null|exists|invalid|added
   const visibleCount=isPremium?tickers.length:FREE_LIMIT;
@@ -7598,18 +7599,35 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
   // Registrar SOLO los visibles para precio en vivo (respeta límite Finnhub)
   useEffect(()=>{ register&&register(tickers.slice(0,visibleCount)); },[tickers,visibleCount,register]);
 
+  // Autocompletado: símbolos que empiezan/contienen lo escrito (con nombre de empresa)
+  const suggestions = useMemo(()=>{
+    const q=input.trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
+    if(!q) return [];
+    const pool = (typeof SEARCH_TICKERS_UNIQ!=="undefined" && SEARCH_TICKERS_UNIQ.length) ? SEARCH_TICKERS_UNIQ : Object.keys(TICKER_NAMES);
+    const starts=[], contains=[];
+    for(const sym of pool){
+      if(tickers.includes(sym)) continue;
+      if(sym.startsWith(q)) starts.push(sym);
+      else if(sym.includes(q)) contains.push(sym);
+      if(starts.length>=12) break;
+    }
+    return [...starts, ...contains].slice(0,8);
+  },[input,tickers]);
+
   const openPaywall=()=>setShowPaywall(true);
-  const addTicker=()=>{
-    const tk=input.trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
+  const addSym=(raw)=>{
+    const tk=(raw||"").trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
     if(!tk){return;}
-    if(tickers.includes(tk)){setFeedback("exists");setTimeout(()=>setFeedback(null),2000);return;}
+    if(tickers.includes(tk)){setFeedback("exists");setTimeout(()=>setFeedback(null),2000);setInput("");return;}
     setTickers(prev=>[...prev,tk]); // ilimitado
-    setInput(""); setFeedback("added"); setTimeout(()=>setFeedback(null),1500);
+    setInput(""); setFocused(false); setFeedback("added"); setTimeout(()=>setFeedback(null),1500);
   };
+  const addTicker=()=>{ addSym(suggestions[0] && input.trim() ? suggestions[0] : input); };
   const removeTicker=(tk)=>setTickers(prev=>prev.filter(t=>t!==tk));
 
   const cardStyle = card || {background:"#FFFFFF",border:"1px solid rgba(15,23,42,0.07)",borderRadius:16,padding:0,marginBottom:14,boxShadow:"0 1px 3px rgba(0,0,0,0.06)"};
-  const GOLD="#B7791F";
+  const GOLD="#0F4C81";       // azul acero para unificar con el resto de la app
+  const GOLD2="#0C3D68";
 
   return(
     <div style={{...cardStyle,padding:0,overflow:"hidden"}}>
@@ -7621,6 +7639,43 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
           <span style={{fontSize:10,fontWeight:700,color:"#64748B",background:"rgba(15,23,42,0.05)",borderRadius:8,padding:"1px 7px"}}>{tickers.length}</span>
         </div>
         <span onClick={isPremium?undefined:openPaywall} style={{fontSize:11,fontWeight:700,color:GOLD,cursor:"pointer"}}>{isEN?"See all →":"Ver todo →"}</span>
+      </div>
+
+      {/* 🔍 Buscador arriba con autocompletado (por si no recuerdan el símbolo) */}
+      <div style={{position:"relative",padding:"9px 12px",borderBottom:"1px solid rgba(15,23,42,0.06)"}}>
+        <div style={{display:"flex",gap:6}}>
+          <div style={{position:"relative",flex:1,minWidth:0}}>
+            <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",fontSize:12,color:"#94A3B8",pointerEvents:"none"}}>🔍</span>
+            <input value={input}
+              onChange={e=>{setInput(e.target.value);setFocused(true);}}
+              onFocus={()=>setFocused(true)}
+              onBlur={()=>setTimeout(()=>setFocused(false),150)}
+              onKeyDown={e=>e.key==="Enter"&&addTicker()}
+              placeholder={isEN?"Search to add (Apple, AAPL...)":"Busca para añadir (Apple, AAPL...)"}
+              style={{width:"100%",boxSizing:"border-box",background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"7px 10px 7px 28px",fontSize:12,color:"#0F172A",outline:"none",fontFamily:"inherit"}}/>
+          </div>
+          <button onClick={addTicker} style={{background:"#0F4C81",border:"none",borderRadius:8,padding:"0 12px",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",flexShrink:0}}>+</button>
+        </div>
+        {/* Dropdown de sugerencias */}
+        {focused && suggestions.length>0 && (
+          <div style={{position:"absolute",top:"calc(100% - 2px)",left:12,right:12,background:"#fff",border:"1px solid rgba(15,23,42,0.12)",borderRadius:10,boxShadow:"0 12px 32px rgba(15,23,42,0.14)",zIndex:60,overflow:"hidden",maxHeight:240,overflowY:"auto"}}>
+            {suggestions.map(sym=>(
+              <div key={sym} onMouseDown={e=>{e.preventDefault();addSym(sym);}}
+                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",cursor:"pointer",borderBottom:"1px solid rgba(15,23,42,0.04)"}}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.06)"}
+                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",minWidth:52}}>{sym}</span>
+                <span style={{fontSize:11.5,color:"#64748B",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{TICKER_NAMES[sym]||""}</span>
+                <span style={{fontSize:14,color:"#0F4C81",fontWeight:700,flexShrink:0}}>+</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {feedback&&(
+          <div style={{fontSize:10,fontWeight:600,marginTop:5,color:feedback==="exists"?"#D97706":"#16A34A"}}>
+            {feedback==="exists"?(isEN?"Already in your list":"Ya está en tu lista"):(isEN?"✓ Added":"✓ Añadido")}
+          </div>
+        )}
       </div>
 
       {/* Filas */}
@@ -7635,7 +7690,7 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
                 style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:"1px solid rgba(15,23,42,0.04)",cursor:"pointer",position:"relative"}}>
                 <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:54,flexShrink:0}}>{tk}</span>
                 <span style={{flex:1,fontSize:12.5,fontWeight:700,color:"transparent",textShadow:"0 0 8px rgba(15,23,42,0.45)",userSelect:"none"}}>$ ███.██</span>
-                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:`linear-gradient(135deg,${GOLD},#9C6516)`,color:"#fff",fontSize:10,fontWeight:800,borderRadius:20,padding:"3px 10px",flexShrink:0,boxShadow:"0 2px 8px rgba(183,121,31,0.35)"}}>🔒 Premium</span>
+                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:`linear-gradient(135deg,${GOLD},${GOLD2})`,color:"#fff",fontSize:10,fontWeight:800,borderRadius:20,padding:"3px 10px",flexShrink:0,boxShadow:"0 2px 8px rgba(15,76,129,0.35)"}}>🔒 Premium</span>
               </div>
             );
           }
@@ -7658,23 +7713,10 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
         })}
       </div>
 
-      {/* Input añadir (ilimitado, gratis) */}
-      <div style={{display:"flex",gap:6,padding:"10px 14px",borderBottom:"1px solid rgba(15,23,42,0.06)"}}>
-        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addTicker()}
-          placeholder={isEN?"Add ticker (AAPL, BTC...)":"Añadir ticker (AAPL, BTC...)"}
-          style={{flex:1,minWidth:0,background:"#F8FAFC",border:"1px solid rgba(15,23,42,0.1)",borderRadius:8,padding:"7px 10px",fontSize:12,color:"#0F172A",outline:"none",fontFamily:"inherit"}}/>
-        <button onClick={addTicker} style={{background:"#0F4C81",border:"none",borderRadius:8,padding:"0 12px",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",flexShrink:0}}>+</button>
-      </div>
-      {feedback&&(
-        <div style={{fontSize:10,fontWeight:600,padding:"4px 14px",color:feedback==="exists"?"#D97706":"#16A34A"}}>
-          {feedback==="exists"?(isEN?"Already in your list":"Ya está en tu lista"):(isEN?"✓ Added":"✓ Añadido")}
-        </div>
-      )}
-
       {/* Upgrade footer (solo si no premium) */}
       {!isPremium&&(
         <button onClick={openPaywall}
-          style={{width:"100%",background:`linear-gradient(135deg,${GOLD},#9C6516)`,border:"none",padding:"10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontFamily:"inherit"}}>
+          style={{width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD2})`,border:"none",padding:"10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontFamily:"inherit"}}>
           ✦ {isEN?`Unlock ${tickers.length-FREE_LIMIT}+ assets — Premium`:`Desbloquea ${tickers.length-FREE_LIMIT}+ activos — Premium`}
         </button>
       )}
@@ -7876,7 +7918,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             <div style={{fontWeight:800,color:"var(--c-text)",fontSize:12.5,letterSpacing:-0.2}}>AI Market Pulse</div>
             <div style={{display:"flex",alignItems:"center",gap:4,marginTop:1}}>
               <span style={{width:5,height:5,borderRadius:"50%",background:"#16A34A",display:"inline-block"}}/>
-              <span style={{fontSize:9,color:"#16A34A",fontWeight:700,letterSpacing:0.5}}>EN VIVO</span>
+              <span style={{fontSize:9,color:"#16A34A",fontWeight:700,letterSpacing:0.5}}>{lang==="en"?"LIVE":"EN VIVO"}</span>
             </div>
           </div>
         </div>
@@ -7884,7 +7926,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         {/* Sentimiento — fila única */}
         <div style={{marginBottom:8}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-            <span style={{fontSize:10.5,color:"#64748B",fontWeight:600}}>Sentimiento</span>
+            <span style={{fontSize:10.5,color:"#64748B",fontWeight:600}}>{lang==="en"?"Sentiment":"Sentimiento"}</span>
             <span style={{fontSize:10.5,color:"#16A34A",fontWeight:800}}>BULLISH 71%</span>
           </div>
           <div style={{height:5,background:"rgba(15,23,42,0.06)",borderRadius:5,overflow:"hidden"}}>
@@ -7906,13 +7948,13 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
         {/* Riesgo — fila compacta */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(15,23,42,0.03)",border:"1px solid rgba(15,23,42,0.06)",borderRadius:8,padding:"5px 10px",marginBottom:8}}>
-          <span style={{fontSize:10.5,color:"#94A3B8",fontWeight:600}}>Riesgo del mercado</span>
-          <span style={{fontSize:10.5,color:"#0F5E68",fontWeight:800}}>MEDIO ⚡</span>
+          <span style={{fontSize:10.5,color:"#94A3B8",fontWeight:600}}>{lang==="en"?"Market risk":"Riesgo del mercado"}</span>
+          <span style={{fontSize:10.5,color:"#0F5E68",fontWeight:800}}>{lang==="en"?"MEDIUM ⚡":"MEDIO ⚡"}</span>
         </div>
 
         {/* CTA — sólido sobrio */}
         <div style={{background:"#0F5E68",borderRadius:8,padding:"7px",textAlign:"center",color:"#fff",fontSize:11.5,fontWeight:700,letterSpacing:0.2}}>
-          💬 Preguntar a la IA →
+          💬 {lang==="en"?"Ask the AI →":"Preguntar a la IA →"}
         </div>
       </div>
 
