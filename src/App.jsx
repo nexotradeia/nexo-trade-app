@@ -21,6 +21,32 @@ const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY, {
   }
 });
 
+// ── WEB PUSH (Sesión 12) ──────────────────────────────────────────────────────
+const VAPID_PUBLIC_KEY = "BHEABdZbcAr7ka890b3KOA15ZwgKVBrMxMWxUw217-tE-BmDz11HFjzWzPbuoHmm7-Rbh6m9NPZD5zjevUCHtOY";
+const _urlB64ToUint8 = (s)=>{const p="=".repeat((4-s.length%4)%4);const b=(s+p).replace(/-/g,"+").replace(/_/g,"/");const r=atob(b);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)));};
+// Suscribe este navegador a Web Push y guarda la suscripción en Supabase
+async function subscribeWebPush(user){
+  try{
+    if(!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+    if(Notification.permission!=="granted") return false;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub){
+      sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:_urlB64ToUint8(VAPID_PUBLIC_KEY)});
+    }
+    const j = sub.toJSON();
+    if(!j?.endpoint || !j?.keys?.p256dh) return false;
+    await supabase.from("push_subscriptions").upsert({
+      user_id: user?.id || null,
+      endpoint: j.endpoint,
+      p256dh: j.keys.p256dh,
+      auth: j.keys.auth,
+      user_agent: (navigator.userAgent||"").slice(0,180),
+    },{onConflict:"endpoint"});
+    return true;
+  }catch(e){ return false; }
+}
+
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 // ✅ VIP $9.99/mes — link activo
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
@@ -1870,6 +1896,7 @@ function AIAssistant({lang,onClose}){
 
 // ── AUTH MODAL ────────────────────────────────────────────────────────────────
 function AuthModal({mode,onClose,onAuth,lang}){
+  const isEN = lang==="en";
   const t=LANGS[lang];
   const [tab,setTab]=useState(mode),[name,setName]=useState(""),[email,setEmail]=useState(""),[pass,setPass]=useState("");
   const [avatar,setAvatar]=useState(AVATAR_OPTIONS[0]);
@@ -1899,7 +1926,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
           redirectTo:"https://nexotradeia.com",
         });
         setResetSent(true);
-      }catch(e){ setError("No se pudo enviar el email. Inténtalo de nuevo."); }
+      }catch(e){ setError(isEN?"Could not send the email. Try again.":"No se pudo enviar el email. Inténtalo de nuevo."); }
       setLoading(false);
       return;
     }
@@ -1966,7 +1993,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
             });
             clearTimeout(tid);
             const json = await r.json();
-            if(!r.ok){ authErr = json.error || "Error al iniciar sesión"; }
+            if(!r.ok){ authErr = json.error || (isEN?"Sign-in error":"Error al iniciar sesión"); }
             else { authData = json; authErr = null; }
           }catch(e){
             if(e.name==="AbortError"){ authErr = "timeout"; }
@@ -1978,11 +2005,11 @@ function AuthModal({mode,onClose,onAuth,lang}){
           if(authErr.toLowerCase().includes("confirm")){
             setError("__email_not_confirmed__");
           } else if(authErr==="timeout"){
-            setError("Servidor no disponible. Inténtalo de nuevo en unos minutos.");
+            setError(isEN?"Server unavailable. Try again in a few minutes.":"Servidor no disponible. Inténtalo de nuevo en unos minutos.");
           } else if(authErr.toLowerCase().includes("invalid")||authErr.toLowerCase().includes("credentials")||authErr.toLowerCase().includes("password")){
-            setError("Email o contraseña incorrectos. Verifica tus datos.");
+            setError(isEN?"Wrong email or password. Check your details.":"Email o contraseña incorrectos. Verifica tus datos.");
           } else {
-            setError(authErr||"Error al iniciar sesión. Inténtalo de nuevo.");
+            setError(authErr||(isEN?"Sign-in error. Try again.":"Error al iniciar sesión. Inténtalo de nuevo."));
           }
           setLoading(false); return;
         }
@@ -2006,7 +2033,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
               setLoading(false); return;
             }
           }
-          setError("Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return;
+          setError(isEN?"Sign-in error. Try again.":"Error al iniciar sesión. Inténtalo de nuevo."); setLoading(false); return;
         }
         // Guardar sesión en supabase (fire-and-forget — no bloquea el flujo)
         supabase.auth.setSession({access_token:authData.access_token, refresh_token:authData.refresh_token}).catch(()=>{});
@@ -2049,7 +2076,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
       }
       onClose();
     }catch(e){
-      setError("Error de conexión. Inténtalo de nuevo.");
+      setError(isEN?"Connection error. Try again.":"Error de conexión. Inténtalo de nuevo.");
     }
     setLoading(false);
   };
@@ -2109,10 +2136,10 @@ function AuthModal({mode,onClose,onAuth,lang}){
           <div style={{background:"rgba(16,185,129,0.07)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:"14px",marginBottom:16}}>
             <div style={{fontWeight:800,color:"#059669",marginBottom:6}}>✅ Cuenta admin creada</div>
             <div style={{fontSize:12,color:"#065F46",lineHeight:1.6,marginBottom:10}}>
-              Te enviamos un email de confirmación a <strong>{email}</strong>.<br/>
-              Haz clic en el link del email y luego vuelve a iniciar sesión con tu contraseña.
+              {isEN?"We sent a confirmation email to ":"Te enviamos un email de confirmación a "}<strong>{email}</strong>.<br/>
+              {isEN?"Click the link in the email, then sign in again with your password.":"Haz clic en el link del email y luego vuelve a iniciar sesión con tu contraseña."}
             </div>
-            <div style={{fontSize:11,color:"#6EE7B7"}}>¿No llegó? Revisa la carpeta de spam.</div>
+            <div style={{fontSize:11,color:"#6EE7B7"}}>{isEN?"No email? Check your spam folder.":"¿No llegó? Revisa la carpeta de spam."}</div>
           </div>
         )}
         {error==="__email_not_confirmed__"&&(
@@ -2127,7 +2154,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
                 setError("resent");
               }catch(e){ alert("No se pudo reenviar. Intenta desde el panel de Supabase."); }
             }} style={{background:"#B45309",border:"none",borderRadius:8,padding:"7px 14px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer",width:"100%"}}>
-              📨 Reenviar email de confirmación
+              📨 {isEN?"Resend confirmation email":"Reenviar email de confirmación"}
             </button>
           </div>
         )}
@@ -2143,20 +2170,20 @@ function AuthModal({mode,onClose,onAuth,lang}){
           <div style={{textAlign:"center",marginTop:8}}>
             <button onClick={()=>{setForgotMode(true);setError("");setResetSent(false);}}
               style={{background:"none",border:"none",color:C.accent,fontSize:12,cursor:"pointer",textDecoration:"underline",fontFamily:"inherit"}}>
-              ¿Olvidaste tu contraseña?
+              {isEN?"Forgot your password?":"¿Olvidaste tu contraseña?"}
             </button>
           </div>
         )}
         {forgotMode&&!resetSent&&(
           <div style={{marginTop:8,padding:"14px",background:"rgba(0,102,255,0.06)",borderRadius:12,border:"1px solid rgba(0,102,255,0.15)"}}>
             <p style={{margin:"0 0 10px",fontSize:13,color:C.text,fontWeight:600}}>
-              🔐 Recuperar contraseña
+              🔐 {isEN?"Recover password":"Recuperar contraseña"}
             </p>
             <p style={{margin:"0 0 12px",fontSize:12,color:C.muted,lineHeight:1.5}}>
-              Ingresa tu email y te enviaremos un link para crear una nueva contraseña.
+              {isEN?"Enter your email and we will send you a link to create a new password.":"Ingresa tu email y te enviaremos un link para crear una nueva contraseña."}
             </p>
             <Btn onClick={submit} style={{width:"100%",padding:"10px",fontSize:13,opacity:loading?0.7:1}}>
-              {loading?"⏳ Enviando...":"📧 Enviar link de recuperación"}
+              {loading?(isEN?"⏳ Sending...":"⏳ Enviando..."):(isEN?"📧 Send recovery link":"📧 Enviar link de recuperación")}
             </Btn>
             <button onClick={()=>{setForgotMode(false);setError("");}}
               style={{display:"block",width:"100%",marginTop:8,background:"none",border:"none",color:C.muted,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>
@@ -2167,12 +2194,12 @@ function AuthModal({mode,onClose,onAuth,lang}){
         {forgotMode&&resetSent&&(
           <div style={{marginTop:8,padding:"16px",background:"rgba(16,185,129,0.06)",borderRadius:12,border:"1px solid rgba(16,185,129,0.2)",textAlign:"center"}}>
             <div style={{fontSize:28,marginBottom:8}}>📧</div>
-            <p style={{margin:"0 0 6px",fontWeight:800,color:"#10B981",fontSize:14}}>¡Email enviado!</p>
+            <p style={{margin:"0 0 6px",fontWeight:800,color:"#10B981",fontSize:14}}>{isEN?"Email sent!":"¡Email enviado!"}</p>
             <p style={{margin:"0 0 12px",fontSize:12,color:C.muted,lineHeight:1.5}}>
-              Revisa tu bandeja de entrada en <strong>{email}</strong> y haz clic en el link para crear una nueva contraseña.
+              {isEN?"Check your inbox at ":"Revisa tu bandeja de entrada en "}<strong>{email}</strong>{isEN?" and click the link to create a new password.":" y haz clic en el link para crear una nueva contraseña."}
             </p>
             <p style={{margin:"0 0 12px",fontSize:11,color:C.muted2}}>
-              ¿No llegó? Revisa tu carpeta de spam.
+              {isEN?"No email? Check your spam folder.":"¿No llegó? Revisa tu carpeta de spam."}
             </p>
             <button onClick={()=>{setForgotMode(false);setResetSent(false);setError("");}}
               style={{background:"none",border:"none",color:C.accent,fontSize:12,cursor:"pointer",textDecoration:"underline",fontFamily:"inherit"}}>
@@ -2594,6 +2621,7 @@ function playAlertSound(type="price"){
 }
 
 function AlertsPanel({lang,onClose,onAlertChange,user}){
+  const isEN = lang==="en";
   const [alerts,setAlerts]=useState(()=>{
     try{ return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]"); }
     catch(e){ return []; }
@@ -2614,9 +2642,9 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
 
   const testAlert=()=>{
     if(soundOn) playAlertSound("price");
-    setTriggered("✅ Alerta de prueba activada — sonido y notificación OK");
+    setTriggered(isEN?"✅ Test alert fired — sound and notification OK":"✅ Alerta de prueba activada — sonido y notificación OK");
     if(pushOn && "Notification" in window && Notification.permission==="granted"){
-      new Notification("🔔 NexoTrade Alerta",{body:"$AAPL superó $200 — alerta de prueba",icon:"/favicon.svg"});
+      new Notification(isEN?"🔔 NexoTrade Alert":"🔔 NexoTrade Alerta",{body:isEN?"$AAPL broke $200 — test alert":"$AAPL superó $200 — alerta de prueba",icon:"/favicon.svg"});
     }
     setTimeout(()=>setTriggered(null),3000);
   };
@@ -2628,7 +2656,7 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
       setPushOn(true);localStorage.setItem("nexo-alert-push","1");
       new Notification("🔔 NexoTrade",{body:"Notificaciones push activadas. Te avisaremos cuando se dispare una alerta.",icon:"/favicon.svg"});
     }else{
-      alert("Necesitas permitir notificaciones en tu navegador para activar esta función.");
+      alert(isEN?"You need to allow notifications in your browser to enable this feature.":"Necesitas permitir notificaciones en tu navegador para activar esta función.");
     }
   };
 
@@ -2667,8 +2695,8 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
             <div style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>
               <span style={{fontSize:22}}>📲</span>
               <div style={{flex:1}}>
-                <div style={{fontWeight:700,color:C.text,fontSize:13}}>Notificación en pantalla (push)</div>
-                <div style={{color:C.muted2,fontSize:11}}>Aparece aunque tengas otra pestaña abierta</div>
+                <div style={{fontWeight:700,color:C.text,fontSize:13}}>{isEN?"On-screen notification (push)":"Notificación en pantalla (push)"}</div>
+                <div style={{color:C.muted2,fontSize:11}}>{isEN?"Shows even if another tab is open":"Aparece aunque tengas otra pestaña abierta"}</div>
               </div>
               <button onClick={pushOn?()=>{setPushOn(false);localStorage.setItem("nexo-alert-push","0");}:requestPush}
                 style={{background:pushOn?C.bull+"22":"transparent",border:`1px solid ${pushOn?C.bull+"44":C.border}`,borderRadius:20,padding:"4px 14px",cursor:"pointer",color:pushOn?C.bull:C.muted2,fontSize:12,fontWeight:700}}>{pushOn?"ON":"Activar"}</button>
@@ -2698,7 +2726,7 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
         {/* Lista de alertas */}
         <div style={{padding:"16px 20px"}}>
           <div style={{fontSize:11,fontWeight:700,color:C.muted,marginBottom:12,letterSpacing:0.5}}>MIS ALERTAS ({alerts.length})</div>
-          {alerts.length===0 && <div style={{textAlign:"center",color:C.muted2,fontSize:13,padding:"20px 0"}}>No tienes alertas configuradas aún.<br/>Agrega una abajo 👇</div>}
+          {alerts.length===0 && <div style={{textAlign:"center",color:C.muted2,fontSize:13,padding:"20px 0"}}>{isEN?"You have no alerts configured yet.":"No tienes alertas configuradas aún."}<br/>Agrega una abajo 👇</div>}
           {alerts.map(a=>(
             <div key={a.id} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 13px",background:a.active?C.card2:"transparent",border:`1px solid ${a.active?C.border:"#e2e8f010"}`,borderRadius:12,marginBottom:8,opacity:a.active?1:0.55}}>
               <span style={{fontSize:18}}>{a.type==="earnings"?"📅":a.type==="price_above"?"📈":"📉"}</span>
@@ -2992,6 +3020,7 @@ function LinkPreviewCard({url}){
 }
 
 function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth,following=[],onFollow,onDM,onDelete}){
+  const isEN = lang==="en";
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes);
   const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch{return false;}});
   const [reposts,setReposts]=useState(post.reposts||0);
@@ -3052,7 +3081,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
       if(!session){
         const { data:rd } = await supabase.auth.refreshSession();
         if(!rd?.session){
-          alert("Sesión expirada. Cierra sesión e inicia de nuevo para comentar.");
+          alert(isEN?"Session expired. Sign out and back in to comment.":"Sesión expirada. Cierra sesión e inicia de nuevo para comentar.");
           setPostingComment(false); return;
         }
       }
@@ -3072,9 +3101,9 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
         setCommentCount(c=>c-1);
         setCommentText(savedText);
         if(error.message?.toLowerCase().includes("confirm")){
-          alert("Tu email no está confirmado. Revisa tu bandeja de entrada y confirma tu cuenta.");
+          alert(isEN?"Your email is not confirmed. Check your inbox and confirm your account.":"Tu email no está confirmado. Revisa tu bandeja de entrada y confirma tu cuenta.");
         } else if(error.code==="42501"||error.message?.toLowerCase().includes("policy")||error.message?.toLowerCase().includes("rls")){
-          alert("Error de permisos (RLS). Cierra sesión, vuelve a entrar e intenta de nuevo.");
+          alert(isEN?"Permissions error (RLS). Sign out, sign back in and try again.":"Error de permisos (RLS). Cierra sesión, vuelve a entrar e intenta de nuevo.");
         } else {
           alert("No se pudo guardar el comentario: " + (error.message||error.code||"error desconocido"));
         }
@@ -3083,7 +3112,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
       }
     }catch(e){
       console.error("Comment exception:", e);
-      alert("Error de conexión al comentar. Inténtalo de nuevo.");
+      alert(isEN?"Connection error while commenting. Try again.":"Error de conexión al comentar. Inténtalo de nuevo.");
     }
     setPostingComment(false);
   };
@@ -3136,7 +3165,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           {/* Aviso: post no guardado */}
           {post._failed && (
             <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:8,padding:"5px 10px",marginBottom:6,fontSize:11,color:"#EF4444",fontWeight:600}}>
-              ⚠️ No se guardó{post._errMsg ? ` — ${post._errMsg}` : " — abre consola del navegador (F12) para ver el error"}.
+              ⚠️ {isEN?"Not saved":"No se guardó"}{post._errMsg ? ` — ${post._errMsg}` : (isEN?" — open the browser console (F12) to see the error":" — abre consola del navegador (F12) para ver el error")}.
             </div>
           )}
           {/* Post text */}
@@ -3230,7 +3259,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             )}
             {isOwner && delConfirm && (
               <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:4}}>
-                <span style={{fontSize:11,color:"#EF4444",fontWeight:600}}>¿Borrar?</span>
+                <span style={{fontSize:11,color:"#EF4444",fontWeight:600}}>{isEN?"Delete?":"¿Borrar?"}</span>
                 <button onClick={handleDelete} style={{background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,color:"#EF4444",cursor:"pointer"}}>Sí</button>
                 <button onClick={()=>setDelConfirm(false)} style={{background:"rgba(255,255,255,0.05)",border:"1px solid var(--c-border)",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,color:"var(--c-muted)",cursor:"pointer"}}>No</button>
               </div>
@@ -3287,6 +3316,7 @@ const MENTION_TICKERS_FALLBACK = ["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","ME
 const getMentionTickers=()=>{try{return typeof SEARCH_TICKERS!=="undefined"&&SEARCH_TICKERS.length>0?SEARCH_TICKERS:MENTION_TICKERS_FALLBACK;}catch{return MENTION_TICKERS_FALLBACK;}};
 
 function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
+  const isEN = lang==="en";
   const t=LANGS[lang];
   const [text,setText]=useState(""),[ticker,setTicker]=useState(defaultTicker),[sent,setSent]=useState("bull"),[modMsg,setModMsg]=useState("");
   const [posting,setPosting]=useState(false);
@@ -3349,10 +3379,10 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
         {user?<AvatarBubble emoji={user.emoji} color={user.avatarColor||C.accent} online level={user.points}/>:<div style={{width:36,height:36,borderRadius:"50%",background:"var(--c-border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
         <div style={{flex:1,position:"relative",minWidth:0,overflow:"hidden"}}>
           {!user&&<div style={{fontSize:13,color:"var(--c-muted)",marginBottom:8}}>
-            <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}} onClick={onNeedAuth}>{t.login}</span> para compartir tu análisis
+            <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}} onClick={onNeedAuth}>{t.login}</span> {isEN?"to share your analysis":"para compartir tu análisis"}
           </div>}
           <textarea ref={taRef} value={text} onChange={handleTextChange}
-            placeholder="¿Qué piensas del mercado? Usa $NVDA o @META · Enter para publicar"
+            placeholder={isEN?"What do you think of the market? Use $NVDA or @META · Enter to post":"¿Qué piensas del mercado? Usa $NVDA o @META · Enter para publicar"}
             style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:96,fontFamily:"inherit",lineHeight:1.55,boxSizing:"border-box",transition:"border-color 0.15s",minWidth:0}}
             onFocus={e=>e.target.style.borderColor="rgba(0,102,255,0.4)"}
             onBlur={e=>{e.target.style.borderColor="var(--c-border)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
@@ -3507,15 +3537,15 @@ const QUICK_REACTIONS = [
   {label:"🚀 To the moon!",   text:"🚀 To the moon! "},
   {label:"💎 Diamond hands",  text:"💎 Diamond hands! "},
   {label:"📈 Alcista total",  text:"📈 Alcista total en este ticker! "},
-  {label:"📉 Cuidado",        text:"📉 Cuidado con esta posición! "},
-  {label:"🔥 En llamas",      text:"🔥 Este ticker está en llamas! "},
-  {label:"🤑 Profits!",       text:"🤑 Tomando profits aquí! "},
-  {label:"🛑 Stop loss",      text:"🛑 Activé stop loss. Gestión de riesgo primero. "},
-  {label:"💡 Mi tesis",       text:"💡 Mi tesis de inversión: "},
-  {label:"⚡ Breakout",       text:"⚡ Breakout confirmado! Volumen altísimo! "},
+  {label:isEN?"📉 Careful":"📉 Cuidado",        text:isEN?"📉 Careful with this position! ":"📉 Cuidado con esta posición! "},
+  {label:isEN?"🔥 On fire":"🔥 En llamas",      text:isEN?"🔥 This ticker is on fire! ":"🔥 Este ticker está en llamas! "},
+  {label:"🤑 Profits!",       text:isEN?"🤑 Taking profits here! ":"🤑 Tomando profits aquí! "},
+  {label:"🛑 Stop loss",      text:isEN?"🛑 Stop loss triggered. Risk management first. ":"🛑 Activé stop loss. Gestión de riesgo primero. "},
+  {label:isEN?"💡 My thesis":"💡 Mi tesis",       text:isEN?"💡 My investment thesis: ":"💡 Mi tesis de inversión: "},
+  {label:"⚡ Breakout",       text:isEN?"⚡ Breakout confirmed! Huge volume! ":"⚡ Breakout confirmado! Volumen altísimo! "},
   {label:"🧠 DYOR",           text:"🧠 Recuerden hacer su propio research (DYOR). "},
   {label:"🎯 Target hit",     text:"🎯 Target alcanzado! "},
-  {label:"😱 WTF market",     text:"😱 El mercado hoy está loco... "},
+  {label:"😱 WTF market",     text:isEN?"😱 The market is crazy today... ":"😱 El mercado hoy está loco... "},
 ];
 
 const STICKERS = [
@@ -4847,7 +4877,7 @@ function EarningsPage({lang}){
           <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:10}}>
             <div>
               <div style={{fontSize:20,fontWeight:900,color:C.text,letterSpacing:-0.5,textTransform:"capitalize"}}>{formatDay()}</div>
-              <div style={{fontSize:12,color:C.muted,marginTop:2}}>{selDayAll.length} empresas reportan {selDay===todayStr?"hoy":"ese día"}</div>
+              <div style={{fontSize:12,color:C.muted,marginTop:2}}>{selDayAll.length} {isEN?"companies report":"empresas reportan"} {selDay===todayStr?(isEN?"today":"hoy"):(isEN?"that day":"ese día")}</div>
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
               {/* Hora filter */}
@@ -4904,7 +4934,7 @@ function EarningsPage({lang}){
             {/* Empty state */}
             {!loadingEar&&displayed.length===0&&(
               <div style={{textAlign:"center",padding:"48px 20px",color:C.muted,fontSize:13}}>
-                {selDayAll.length===0?"No hay earnings reportados para este día":"Sin resultados para los filtros aplicados"}
+                {selDayAll.length===0?(isEN?"No earnings reported for this day":"No hay earnings reportados para este día"):(isEN?"No results for the applied filters":"Sin resultados para los filtros aplicados")}
               </div>
             )}
 
@@ -5014,7 +5044,7 @@ function EarningsPage({lang}){
             {!showAll&&selFiltered.length>30&&(
               <button onClick={()=>setShowAll(true)}
                 style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:`1px solid ${C.border}`,cursor:"pointer",color:"#0066FF",fontSize:12,fontWeight:700}}>
-                + Ver {selFiltered.length-30} empresas más de este día
+                + {isEN?`See ${selFiltered.length-30} more companies for this day`:`Ver ${selFiltered.length-30} empresas más de este día`}
               </button>
             )}
           </div>
@@ -5849,6 +5879,7 @@ function VipPopup({onClose, onGoVIP}){
 
 // ── PREMIUM PAGE ──────────────────────────────────────────────────────────────
 function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
+  const isEN = lang==="en";
   const [email, setEmail] = useState(user?.email||"");
   const [successMsg, setSuccessMsg] = useState("");
   const [activeTab, setActiveTab] = useState("planes");
@@ -5859,7 +5890,20 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   const savingsAnual = Math.round((price * 12 - priceAnual));
   const savingsPct = Math.round((1 - priceAnual / (price * 12)) * 100);
 
-  const FREE_FEATURES = [
+  const FREE_FEATURES = isEN ? [
+    "🔥 Social feed — post, comment and repost",
+    "💬 Private messages between traders",
+    "📰 Real-time market news",
+    "📅 Earnings calendar (report dates)",
+    "📈 Trending — most mentioned stocks & cryptos",
+    "🏆 Public traders leaderboard",
+    "🎮 Paper Trading with $100k virtual",
+    "🔔 Social activity notifications",
+    "📚 3 free Academy lessons",
+    "👁 Basic watchlist (up to 5 assets)",
+    "⭐ Points, levels and badges system",
+    "🤖 NEXO AI — 5 questions a day",
+  ] : [
     "🔥 Foro social — publicar, comentar y repostear",
     "💬 Mensajes privados entre traders",
     "📰 Noticias del mercado en tiempo real",
@@ -5874,7 +5918,30 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     "🤖 IA NEXO — 5 preguntas diarias",
   ];
 
-  const PREMIUM_FEATURES = [
+  const PREMIUM_FEATURES = isEN ? [
+    "✓ Everything in Free, without limits",
+    "🧠 AI Stock Picks — 10 weekly picks with full analysis",
+    "💡 30+ investment ideas with thesis, entry, target & stop",
+    "🏛️ 52 Guru 13F portfolios updated (Buffett, Ackman, Druckenmiller...)",
+    "🏛️ Congress Trades — congresspeople trades in real time",
+    "🐋 Institutional flow — dark pool & sweeps in real time",
+    "📊 Crypto Options — full BTC/ETH/SOL chain 24h",
+    "🔬 Advanced Screener — 20+ technical & fundamental filters",
+    "💼 Portfolio Oracle AI — track investments with real-time P&L",
+    "🔮 Oracle AI — statistical bullish/bearish scenario predictor",
+    "🌍 Global Radar — 3D Global Money Map with live capital flows",
+    "🎮 Full-screen Trading Terminal — crypto, stocks & options simulator",
+    "👁 Bloomberg-style Watchlist — 6 tabs with real-time data",
+    "📅 Real-time dividend calendar",
+    "📅 Upcoming IPOs calendar",
+    "📅 Real-time macro economic calendar",
+    "🏦 ARK Invest — daily updated holdings",
+    "🔍 SEC Insiders — Form 4 in real time",
+    "🤖 Unlimited NEXO trading AI",
+    "🔔 Custom price alerts by email",
+    "🎓 Full Academy — all PREMIUM courses & webinars",
+    "✦ Gold PREMIUM badge + early access to new features",
+  ] : [
     "✓ Todo lo del plan Free, sin límites",
     "🧠 Stock Pick IA — 10 picks semanales con análisis completo",
     "💡 30+ Ideas de inversión con tesis, entrada, target y stop",
@@ -5900,10 +5967,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   ];
 
   const SIGNALS = [
-    {ticker:"NVDA", tipo:"COMPRA", entrada:"$860", target:"$950", stop:"$830", conf:92, tiempo:"hace 2h", blur:!isPremium},
-    {ticker:"BTC",  tipo:"COMPRA", entrada:"$67,200", target:"$72,000", stop:"$65,000", conf:85, tiempo:"hace 4h", blur:!isPremium},
-    {ticker:"TSLA", tipo:"VENTA",  entrada:"$178", target:"$160", stop:"$185", conf:78, tiempo:"hace 6h", blur:!isPremium},
-    {ticker:"ETH",  tipo:"COMPRA", entrada:"$3,750", target:"$4,200", stop:"$3,500", conf:81, tiempo:"hace 8h", blur:!isPremium},
+    {ticker:"NVDA", tipo:"COMPRA", entrada:"$860", target:"$950", stop:"$830", conf:92, tiempo:isEN?"2h ago":"hace 2h", blur:!isPremium},
+    {ticker:"BTC",  tipo:"COMPRA", entrada:"$67,200", target:"$72,000", stop:"$65,000", conf:85, tiempo:isEN?"4h ago":"hace 4h", blur:!isPremium},
+    {ticker:"TSLA", tipo:"VENTA",  entrada:"$178", target:"$160", stop:"$185", conf:78, tiempo:isEN?"6h ago":"hace 6h", blur:!isPremium},
+    {ticker:"ETH",  tipo:"COMPRA", entrada:"$3,750", target:"$4,200", stop:"$3,500", conf:81, tiempo:isEN?"8h ago":"hace 8h", blur:!isPremium},
   ];
 
   const WEBINARS = [
@@ -5915,7 +5982,14 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:STRIPE_LINKS.webinar6, nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
   ];
 
-  const ALERT_TYPES = [
+  const ALERT_TYPES = isEN ? [
+    {icon:"📈", titulo:"Price rises above...", desc:"We alert you when a stock breaks your target price"},
+    {icon:"📉", titulo:"Price falls below...", desc:"Alert when a stock drops under your level"},
+    {icon:"📅", titulo:"Upcoming earnings", desc:"Email 24h before earnings of your favorite stocks"},
+    {icon:"🔥", titulo:"Trending alert",   desc:"When a stock explodes in community mentions"},
+    {icon:"📊", titulo:"Unusual volume",   desc:"We detect anomalous volume moves"},
+    {icon:"📰", titulo:"Breaking news",   desc:"Breaking news on your favorite tickers instantly"},
+  ] : [
     {icon:"📈", titulo:"Precio sube de...", desc:"Te avisamos cuando una acción supere tu precio objetivo"},
     {icon:"📉", titulo:"Precio baja de...", desc:"Alerta cuando una acción caiga por debajo de tu nivel"},
     {icon:"📅", titulo:"Earnings próximos", desc:"Email 24h antes del earnings de tus acciones favoritas"},
@@ -5933,10 +6007,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   };
 
   const TABS = [
-    {k:"planes",   l:"💎 Planes"},
-    {k:"senales",  l:"📡 Señales"},
+    {k:"planes",   l:isEN?"💎 Plans":"💎 Planes"},
+    {k:"senales",  l:isEN?"📡 Signals":"📡 Señales"},
     {k:"webinars", l:"🎓 Webinars"},
-    {k:"alertas",  l:"📧 Alertas Email"},
+    {k:"alertas",  l:isEN?"📧 Email Alerts":"📧 Alertas Email"},
   ];
 
   return(
@@ -5948,7 +6022,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           {isPremium
             ? <>
                 <div style={{fontSize:48,marginBottom:12}}>⭐</div>
-                <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>¡Eres miembro Premium!</h1>
+                <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"You are a Premium member!":"¡Eres miembro Premium!"}</h1>
                 <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>Tienes acceso completo a todas las funciones exclusivas.</p>
                 <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
                   {["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","🔍 Insiders SEC"].map(b=>(
@@ -6079,11 +6153,11 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <div style={{marginBottom:4}}>
                   <div style={{display:"flex",alignItems:"baseline",gap:4}}>
                     <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${priceAnual}</span>
-                    <span style={{fontSize:13,color:"#64748B"}}>/año</span>
+                    <span style={{fontSize:13,color:"#64748B"}}>{isEN?"/yr":"/año"}</span>
                     <span style={{fontSize:12,color:"#10B981",fontWeight:700,marginLeft:4}}>({lang==="en"?`$${(priceAnual/12).toFixed(2)}/mo`:`$${(priceAnual/12).toFixed(2)}/mes`})</span>
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                    <span style={{fontSize:12,color:"#475569",textDecoration:"line-through"}}>${(price*12).toFixed(0)}/año</span>
+                    <span style={{fontSize:12,color:"#475569",textDecoration:"line-through"}}>${(price*12).toFixed(0)}{isEN?"/yr":"/año"}</span>
                     <span style={{background:"rgba(16,185,129,0.15)",color:"#10B981",border:"1px solid rgba(16,185,129,0.3)",borderRadius:6,fontSize:11,fontWeight:800,padding:"1px 7px"}}>🎉 Ahorras ${savingsAnual}</span>
                   </div>
                 </div>
@@ -6094,7 +6168,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 </div>
               )}
               <div style={{fontSize:12,color:"#475569",marginBottom:16}}>
-                {billing==="annual" ? "Pago único anual · Sin renovación sorpresa" : "Cancela cuando quieras · Sin permanencia"}
+                {billing==="annual" ? (isEN?"One annual payment · No surprise renewals":"Pago único anual · Sin renovación sorpresa") : (isEN?"Cancel anytime · No commitment":"Cancela cuando quieras · Sin permanencia")}
               </div>
 
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
@@ -6116,17 +6190,17 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                           style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 24px rgba(16,185,129,0.45)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
                           onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,0.6)";}}
                           onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 24px rgba(16,185,129,0.45)";}}>
-                          🎉 Obtener PREMIUM Anual — $79/año →
+                          🎉 {isEN?"Get Annual PREMIUM — $79/yr →":"Obtener PREMIUM Anual — $79/año →"}
                         </button>
                         <div style={{textAlign:"center",fontSize:11,color:"#10B981",fontWeight:700,marginBottom:4}}>Ahorras ${savingsAnual} vs mensual · Acceso inmediato</div>
                         <div style={{textAlign:"center",fontSize:10,color:"#334155",cursor:"pointer",textDecoration:"underline"}} onClick={()=>setBilling("monthly")}>
-                          O continúa mensual por $9.99/mes →
+                          {isEN?"Or continue monthly at $9.99/mo →":"O continúa mensual por $9.99/mes →"}
                         </div>
                       </>
                     ) : (
                       <>
                         <div style={{background:"rgba(0,200,100,0.1)",border:"1px solid rgba(0,200,100,0.25)",borderRadius:10,padding:"8px 12px",marginBottom:10,textAlign:"center"}}>
-                          <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>🎁 7 días GRATIS · Luego solo $9.99/mes</span>
+                          <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>{isEN?"🎁 Cancel anytime · Just $9.99/mo":"🎁 Cancela cuando quieras · Solo $9.99/mes"}</span>
                         </div>
                         <button onClick={()=>handleSubscribe("monthly")}
                           style={{width:"100%",background:"linear-gradient(135deg,#D97706,#6366F1)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(217,119,6,0.55)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
@@ -6151,7 +6225,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         {successMsg&&<div style={{background:C.bullBg,border:`1px solid ${C.bull}44`,borderRadius:14,padding:"16px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center"}}>
           <span style={{fontSize:24}}>📧</span>
           <div>
-            <div style={{fontWeight:700,color:C.bull,marginBottom:2}}>¡Suscripción activada!</div>
+            <div style={{fontWeight:700,color:C.bull,marginBottom:2}}>{isEN?"Subscription activated!":"¡Suscripción activada!"}</div>
             <div style={{color:C.muted,fontSize:13}}>{successMsg}</div>
           </div>
         </div>}
@@ -6161,8 +6235,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           {[
             {icon:"🔒",title:"Pago seguro",desc:"SSL + Stripe",   href:"https://stripe.com/es/payments/payment-links",tip:"Pagos 100% seguros con Stripe"},
             {icon:"↩️",title:"Cancela ya", desc:"Sin permanencia",href:STRIPE_PAYMENT_LINK,tip:"Cancela cuando quieras"},
-            {icon:"📧",title:"Alertas email",desc:"Instantáneas", href:null, action:"alerts", tip:"Configura tus alertas"},
-            {icon:"🛟",title:"Soporte 24/7",desc:"Respuesta en 2h",href:"mailto:info@nexotradeia.com?subject=Soporte NexoTrade",tip:"Escríbenos"},
+            {icon:"📧",title:isEN?"Email alerts":"Alertas email",desc:isEN?"Instant":"Instantáneas", href:null, action:"alerts", tip:isEN?"Set up your alerts":"Configura tus alertas"},
+            {icon:"🛟",title:isEN?"24/7 Support":"Soporte 24/7",desc:isEN?"2h response":"Respuesta en 2h",href:"mailto:info@nexotradeia.com?subject=Soporte NexoTrade",tip:isEN?"Write to us":"Escríbenos"},
           ].map(b=>(
             <div key={b.title}
               onClick={()=>{ if(b.action==="alerts"){setAlerts(true);} else if(b.href){window.open(b.href,"_blank");} }}
@@ -6200,7 +6274,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
       {activeTab==="senales" && <>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:10}}>
           <div>
-            <h2 style={{margin:"0 0 4px",color:C.text,fontSize:18,fontWeight:800}}>📡 Señales de Trading</h2>
+            <h2 style={{margin:"0 0 4px",color:C.text,fontSize:18,fontWeight:800}}>{isEN?"📡 Trading Signals":"📡 Señales de Trading"}</h2>
             <p style={{margin:0,color:C.muted,fontSize:13}}>Generadas por nuestros traders Top 5 con IA</p>
           </div>
           {!isPremium&&<div style={{background:C.gold+"15",border:`1px solid ${C.gold}44`,borderRadius:12,padding:"8px 16px",display:"flex",alignItems:"center",gap:8}}>
@@ -6247,8 +6321,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         </div>
         {!isPremium&&<div style={{marginTop:20,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:16,padding:24,textAlign:"center"}}>
           <div style={{fontSize:32,marginBottom:10}}>📡</div>
-          <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:16,fontWeight:800}}>Desbloquea todas las señales</h3>
-          <p style={{margin:"0 0 16px",color:"#94a3b8",fontSize:13}}>Con Premium recibes señales en tiempo real con entrada exacta, target y stop loss.</p>
+          <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:16,fontWeight:800}}>{isEN?"Unlock all signals":"Desbloquea todas las señales"}</h3>
+          <p style={{margin:"0 0 16px",color:"#94a3b8",fontSize:13}}>{isEN?"With Premium you get real-time signals with exact entry, target and stop loss.":"Con Premium recibes señales en tiempo real con entrada exacta, target y stop loss."}</p>
           <button onClick={()=>setActiveTab("planes")} style={{background:`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:12,padding:"11px 28px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer"}}>⭐ Ver Premium →</button>
         </div>}
       </>}
@@ -6258,7 +6332,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         <div style={{marginBottom:20,display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
             <h2 style={{margin:"0 0 4px",color:C.text,fontSize:18,fontWeight:800}}>🎓 Webinars en Vivo</h2>
-            <p style={{margin:0,color:C.muted,fontSize:13}}>Formación con traders reales · Grabación incluida · Plazas limitadas</p>
+            <p style={{margin:0,color:C.muted,fontSize:13}}>{isEN?"Training with real traders · Recording included · Limited seats":"Formación con traders reales · Grabación incluida · Plazas limitadas"}</p>
           </div>
           {isPremium && <div style={{background:"linear-gradient(135deg,#D9770622,#B4530911)",border:"1px solid #D9770644",borderRadius:10,padding:"6px 14px",fontSize:12,fontWeight:700,color:"#a78bfa"}}>✦ PREMIUM: 50% descuento aplicado</div>}
         </div>
@@ -6309,7 +6383,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                     <div style={{marginBottom:4}}>
                       <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                         <span style={{fontSize:11,color: isUrgent ? "#ef4444" : C.muted, fontWeight: isUrgent ? 700 : 400}}>
-                          {isSoldOut ? "❌ Agotado" : isUrgent ? `🔥 ¡Solo ${w.spotsLeft} plazas!` : `👥 ${w.spotsLeft} de ${w.spots} plazas`}
+                          {isSoldOut ? (isEN?"❌ Sold out":"❌ Agotado") : isUrgent ? (isEN?`🔥 Only ${w.spotsLeft} seats!`:`🔥 ¡Solo ${w.spotsLeft} plazas!`) : (isEN?`👥 ${w.spotsLeft} of ${w.spots} seats`:`👥 ${w.spotsLeft} de ${w.spots} plazas`)}
                         </span>
                         <span style={{fontSize:11,color:C.muted2}}>{spotsPercent}% disponible</span>
                       </div>
@@ -6356,7 +6430,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           <span style={{fontSize:32}}>✦</span>
           <div style={{flex:1}}>
             <div style={{fontWeight:800,color:"#a78bfa",fontSize:15,marginBottom:4}}>Hazte PREMIUM y ahorra 50% en todos los webinars</div>
-            <div style={{color:"#7c3aed",fontSize:13}}>Por solo $9.99/mes tienes acceso a precios PREMIUM, picks semanales, señales y grabaciones de todos los webinars anteriores.</div>
+            <div style={{color:"#7c3aed",fontSize:13}}>{isEN?"For just $9.99/mo you get PREMIUM prices, weekly picks, signals and recordings of all the web":"Por solo $9.99/mes tienes acceso a precios PREMIUM, picks semanales, señales y grabaciones de todos los web"}inars anteriores.</div>
           </div>
           <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#D97706,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver PREMIUM →</button>
         </div>}
@@ -6471,7 +6545,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
         {/* How it works */}
         <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:24,marginBottom:20}}>
-          <h3 style={{margin:"0 0 16px",color:"#fff",fontSize:15,fontWeight:800}}>¿Cómo funcionan las alertas?</h3>
+          <h3 style={{margin:"0 0 16px",color:"#fff",fontSize:15,fontWeight:800}}>{isEN?"How do alerts work?":"¿Cómo funcionan las alertas?"}</h3>
           <div className="nexo-alerts-steps" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
             {[
               {step:"1",icon:"⚙️",titulo:"Configuras",desc:"Elige el ticker, tipo de alerta y el valor que quieres monitorizar"},
@@ -7548,7 +7622,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           <div style={{...card,padding:"10px 12px"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
               <span style={{fontSize:11,fontWeight:800,color:"var(--c-text)",letterSpacing:-0.2}}>📊 Sentimiento</span>
-              {!vote && <span style={{fontSize:9,color:"var(--c-muted2)",fontWeight:500}}>¿Alcista o bajista hoy?</span>}
+              {!vote && <span style={{fontSize:9,color:"var(--c-muted2)",fontWeight:500}}>{lang==="en"?"Bullish or bearish today?":"¿Alcista o bajista hoy?"}</span>}
               {vote && <span style={{fontSize:9,color:"#22C55E",fontWeight:700}}>✓ Votado</span>}
             </div>
             {/* Botones de voto */}
@@ -7774,20 +7848,20 @@ function PointsBenefitsCard({user, lang="es"}){
     ["🏆","Leyenda · 10,000 pts","1 mes Premium GRATIS"],
   ];
   return(
-    <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.05),rgba(0,102,255,0.05))",borderRadius:16,padding:"14px 16px",border:"1px solid rgba(139,92,246,0.18)"}}>
+    <div style={{background:"linear-gradient(135deg,rgba(33,150,243,0.05),rgba(0,102,255,0.05))",borderRadius:16,padding:"14px 16px",border:"1px solid rgba(33,150,243,0.18)"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
         <span style={{fontSize:18}}>{lvl.emoji}</span>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontWeight:800,fontSize:12.5,color:"var(--c-text,#0F172A)"}}>{pts.toLocaleString()} pts · {isEN?lvl.nameEn:lvl.name}</div>
           <div style={{fontSize:10,color:"#64748B"}}>{next?(isEN?`${(next.min-pts).toLocaleString()} pts to ${next.nameEn}`:`${(next.min-pts).toLocaleString()} pts para ${next.name}`):(isEN?"Max level!":"¡Nivel máximo!")}</div>
         </div>
-        <button onClick={()=>setOpen(o=>!o)} style={{background:"rgba(139,92,246,0.1)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:8,padding:"4px 10px",fontSize:10,fontWeight:700,color:"#8B5CF6",cursor:"pointer",whiteSpace:"nowrap"}}>
+        <button onClick={()=>setOpen(o=>!o)} style={{background:"rgba(33,150,243,0.1)",border:"1px solid rgba(33,150,243,0.25)",borderRadius:8,padding:"4px 10px",fontSize:10,fontWeight:700,color:"#2196F3",cursor:"pointer",whiteSpace:"nowrap"}}>
           {open?"−":(isEN?"What for? →":"¿Para qué? →")}
         </button>
       </div>
       {/* Barra de progreso al siguiente nivel */}
-      <div style={{height:6,background:"rgba(139,92,246,0.1)",borderRadius:6,overflow:"hidden",marginBottom:open?12:0}}>
-        <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${lvl.color},#8B5CF6)`,borderRadius:6,transition:"width 0.5s"}}/>
+      <div style={{height:6,background:"rgba(33,150,243,0.1)",borderRadius:6,overflow:"hidden",marginBottom:open?12:0}}>
+        <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${lvl.color},#2196F3)`,borderRadius:6,transition:"width 0.5s"}}/>
       </div>
       {open && (
         <div>
@@ -10121,22 +10195,22 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
       </div>
 
       {/* VIP banner */}
-      {!isPremium && <div style={{background:"linear-gradient(135deg,#4c1d9522,#1e40af22)",border:"1px solid #D9770644",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
+      {!isPremium && <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
         <span style={{fontSize:24}}>✦</span>
-        <div style={{flex:1,fontSize:13,color:"#a78bfa"}}><strong>PREMIUM ($9.99/mes)</strong> — obtén hasta 40% de descuento en todos los cursos.</div>
-        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#D97706,#4c1d95)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver PREMIUM →</button>
+        <div style={{flex:1,fontSize:13,color:"#1A5FAD"}}><strong style={{color:"#0C447C"}}>PREMIUM ($9.99/mes)</strong> — obtén hasta 40% de descuento en todos los cursos.</div>
+        <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver PREMIUM →</button>
       </div>}
 
       {/* Cursos — Próximamente */}
-      <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.08),rgba(99,102,241,0.05))",border:"1px dashed rgba(139,92,246,0.3)",borderRadius:20,padding:"40px 24px",textAlign:"center",marginBottom:8}}>
+      <div style={{background:"#E8F4FF",border:"1px dashed #BFDBFE",borderRadius:20,padding:"40px 24px",textAlign:"center",marginBottom:8}}>
         <div style={{fontSize:48,marginBottom:14}}>🎓</div>
-        <div style={{fontSize:20,fontWeight:900,color:C.text,marginBottom:8}}>Cursos propios — Próximamente</div>
-        <div style={{fontSize:13,color:C.muted,maxWidth:420,margin:"0 auto 20px",lineHeight:1.7}}>
+        <div style={{fontSize:20,fontWeight:900,color:"#0F172A",marginBottom:8}}>Cursos propios — Próximamente</div>
+        <div style={{fontSize:13,color:"#1A5FAD",maxWidth:420,margin:"0 auto 20px",lineHeight:1.7}}>
           Estamos preparando cursos originales de análisis técnico, crypto y trading institucional. Déjanos tu correo y serás el primero en enterarte.
         </div>
         <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
           {["📈 Análisis Técnico","₿ Crypto Trading","🛡️ Opciones","💰 Dividendos"].map(t=>(
-            <span key={t} style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:20,padding:"5px 14px",fontSize:12,color:"#FCD34D",fontWeight:600}}>{t}</span>
+            <span key={t} style={{background:"#fff",border:"1px solid #BFDBFE",borderRadius:20,padding:"5px 14px",fontSize:12,color:"#1A5FAD",fontWeight:700}}>{t}</span>
           ))}
         </div>
         <a href="mailto:info@nexotradeia.com?subject=Quiero saber cuando salgan los cursos de NexoTrade"
@@ -10162,12 +10236,12 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:44,height:44,borderRadius:12,background:"#2962FF22",border:"1px solid #2962FF44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>📊</div>
               <div>
-                <div style={{fontWeight:800,color:C.text,fontSize:14}}>TradingView</div>
-                <div style={{background:"#2962FF22",color:"#2962FF",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700,display:"inline-block"}}>AFILIADO ACTIVO</div>
+                <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14}}>TradingView</div>
+                <div style={{background:"#2962FF33",color:"#7EA8FF",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700,display:"inline-block"}}>AFILIADO ACTIVO</div>
               </div>
             </div>
-            <div style={{fontSize:13,fontWeight:700,color:C.text}}>La plataforma de gráficas #1 del mundo</div>
-            <div style={{fontSize:12,color:C.muted2,lineHeight:1.5}}>Gráficas profesionales, screeners, alertas y señales. Más de 50 millones de traders lo usan. Tú ganas por cada usuario que se suscribe a premium.</div>
+            <div style={{fontSize:13,fontWeight:700,color:"#F1F5F9"}}>La plataforma de gráficas #1 del mundo</div>
+            <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.5}}>Gráficas profesionales, screeners, alertas y señales. Más de 50 millones de traders lo usan. Tú ganas por cada usuario que se suscribe a premium.</div>
             <div style={{fontSize:11,color:"#00D26A",fontWeight:600,background:"rgba(0,210,106,0.08)",borderRadius:8,padding:"6px 10px",border:"1px solid rgba(0,210,106,0.2)"}}>✅ Comisión activa: hasta $90 por suscripción referida</div>
             <a href="https://www.tradingview.com/?aff_id=167149" target="_blank" rel="noopener noreferrer"
               style={{display:"block",background:"linear-gradient(135deg,#2962FF,#2962FFcc)",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,textAlign:"center",textDecoration:"none",marginTop:"auto"}}>
@@ -10180,7 +10254,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip}){
             <div key={i} style={{background:C.surface,border:`1px dashed ${C.border}`,borderRadius:16,padding:"18px 20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,minHeight:220,textAlign:"center",opacity:0.7}}>
               <div style={{fontSize:36}}>🔜</div>
               <div style={{fontSize:13,fontWeight:800,color:C.muted}}>{label}</div>
-              <div style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:20,padding:"5px 16px",fontSize:11,fontWeight:700,color:"#FCD34D",letterSpacing:0.5}}>PRÓXIMAMENTE</div>
+              <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:20,padding:"5px 16px",fontSize:11,fontWeight:700,color:"#1A5FAD",letterSpacing:0.5}}>PRÓXIMAMENTE</div>
               <div style={{fontSize:11,color:C.muted2}}>Socio en proceso de negociación</div>
             </div>
           ))}
@@ -10607,7 +10681,8 @@ function CommoditiesPage(){
 }
 // ── FIN COMMODITIES ───────────────────────────────────────────────────────────
 
-function EconCalendarPage() {
+function EconCalendarPage({lang="es"}) {
+  const isEN = lang==="en";
   const [filter,    setFilter]    = useState("upcoming");
   const [catFilter, setCatFilter] = useState("todas");
   const [events,    setEvents]    = useState(ECON_2026);
@@ -10648,7 +10723,7 @@ function EconCalendarPage() {
           <span style={{fontSize:30}}>📅</span>
           <div style={{flex:1}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario Económico</div>
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>{isEN?"Economic Calendar":"Calendario Económico"}</div>
               {source==="live"
                 ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● EN VIVO</span>
                 : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>MODO LOCAL</span>
@@ -10662,7 +10737,7 @@ function EconCalendarPage() {
           {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",border:`1px solid ${C.border}`}}>⏳ Cargando...</span>}
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          {[{k:"all",l:"Todos"},{k:"upcoming",l:"📌 Próximos"},{k:"past",l:"Pasados"}].map(({k,l})=>(
+          {[{k:"all",l:isEN?"All":"Todos"},{k:"upcoming",l:isEN?"📌 Upcoming":"📌 Próximos"},{k:"past",l:isEN?"Past":"Pasados"}].map(({k,l})=>(
             <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?C.accent:"transparent",color:filter===k?"#fff":C.muted,border:`1.5px solid ${filter===k?C.accent:C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
           <span style={{width:1,background:C.border,margin:"0 2px"}}/>
@@ -10791,7 +10866,8 @@ const DIV_FALLBACK = [
   {ticker:"FSK",   name:"FS KKR Capital",         price:18.8,   divRate:2.72,  yield:14.47, quarterly:"0.68",   exDate:"2026-09-12",payDate:"2026-09-30",sector:"BDC/Yield"},
 ];
 
-function DividendCalendarPage() {
+function DividendCalendarPage({lang="es"}) {
+  const isEN = lang==="en";
   const curYear = new Date().getFullYear();
   const [yearTab, setYearTab] = useState(String(curYear));
   const [divs,    setDivs]    = useState(DIV_FALLBACK);
@@ -10852,7 +10928,7 @@ function DividendCalendarPage() {
               {source==="projected" && <span style={{fontSize:10,fontWeight:700,color:"#F59E0B",background:"rgba(245,158,11,0.1)",borderRadius:10,padding:"2px 8px"}}>PROYECTADO</span>}
               {source==="local"     && <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>CURATED</span>}
             </div>
-            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Próximas fechas ex-dividendo y pagos de las principales empresas</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>{isEN?"Upcoming ex-dividend dates and payouts of major companies":"Próximas fechas ex-dividendo y pagos de las principales empresas"}</div>
           </div>
           {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px"}}>Actualizando...</span>}
         </div>
@@ -10904,7 +10980,7 @@ function DividendCalendarPage() {
       </div>
       </div>{/* /nexo-scroll-x */}
       <div style={{textAlign:"center",padding:"14px 0",fontSize:11,color:C.muted2}}>
-        {source==="live" ? "⚡ Datos via FMP en tiempo real" : source==="projected" ? `📅 Fechas proyectadas para ${yearTab} basadas en historial — pueden variar` : "📋 Lista curada · Ex-fecha es el último día para comprar y recibir el dividendo"}
+        {source==="live" ? (isEN?"⚡ Live data via FMP":"⚡ Datos via FMP en tiempo real") : source==="projected" ? (isEN?`📅 Projected dates for ${yearTab} based on history — may vary`:`📅 Fechas proyectadas para ${yearTab} basadas en historial — pueden variar`) : (isEN?"📋 Curated list · Ex-date is the last day to buy and receive the dividend":"📋 Lista curada · Ex-fecha es el último día para comprar y recibir el dividendo")}
       </div>
     </div>
   );
@@ -11586,7 +11662,8 @@ function generateFlowItem(id, basePrice){
   return {id,ticker,type,isCall,isDark,isGold,price,strike,premium,size,expiry,otm,time,sentiment:isCall?"bullish":"bearish",aboveSMA200,highVol};
 }
 
-function FlowPage({isPremium,onNeedPremium}){
+function FlowPage({isPremium,onNeedPremium,lang="es"}){
+  const isEN=lang==="en";
   const [filter,setFilter]=useState("gold");
   const [feed,setFeed]=useState(()=>{
     // Garantizamos al menos 3 Golden Sweeps en el feed inicial
@@ -11709,10 +11786,10 @@ function FlowPage({isPremium,onNeedPremium}){
   },[paused,isPremium,realFlow]);
 
   if(!isPremium) return(
-    <PremiumGate icon="🐋" onPlans={onNeedPremium}
-      title="Flujo Institucional PREMIUM"
-      desc="Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps con datos reales de CBOE."
-      bullets={["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Sweeps urgentes","💰 Premium ≥ $1M","🎯 Sentimiento en vivo"]}/>
+    <PremiumGate lang={lang} icon="🐋" onPlans={onNeedPremium}
+      title={isEN?"Institutional Flow PREMIUM":"Flujo Institucional PREMIUM"}
+      desc={isEN?"See in real time what hedge funds, institutions and whales are buying — options, dark pool and sweeps with real CBOE data.":"Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps con datos reales de CBOE."}
+      bullets={isEN?["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Urgent sweeps","💰 Premium ≥ $1M","🎯 Live sentiment"]:["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Sweeps urgentes","💰 Premium ≥ $1M","🎯 Sentimiento en vivo"]}/>
   );
 
   const fmt$=(v)=>v>=1e9?`$${(v/1e9).toFixed(1)}B`:v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1e3?`$${(v/1e3).toFixed(0)}K`:`$${v}`;
@@ -11811,19 +11888,19 @@ function FlowPage({isPremium,onNeedPremium}){
     const delta=item.isCall?(0.28+seed*0.004).toFixed(2):(-(0.28+seed*0.004)).toFixed(2);
     const oi=((seed*1237+4800)).toLocaleString("en-US");
     const score=scoreItem(item);
-    const tier=item.premium>=3e6?"muy alta":item.premium>=1e6?"alta":"moderada";
+    const tier=item.premium>=3e6?(isEN?"very high":"muy alta"):item.premium>=1e6?(isEN?"high":"alta"):(isEN?"moderate":"moderada");
     const bull=item.isCall;
     const prem=fmt$(item.premium);
     const ticker=item.ticker;
-    const expStr=item.expiry?` con expiry ${item.expiry}`:"";
-    const otmStr=item.otm?` a ${item.otm}% OTM`:"";
+    const expStr=item.expiry?(isEN?` expiring ${item.expiry}`:` con expiry ${item.expiry}`):"";
+    const otmStr=item.otm?(isEN?` at ${item.otm}% OTM`:` a ${item.otm}% OTM`):"";
     const analyses=[
       bull
-        ?`Institución acumula $${ticker} ${prem} en calls${otmStr}${expStr}. Convicción ${tier}. El tamaño implica posicionamiento direccional alcista o cobertura de short. Score: ${score}/100.`
-        :`Put block de ${prem} en $${ticker}${otmStr}${expStr}. Convicción ${tier}. Posible cobertura defensiva de cartera larga o apuesta bajista de mano fuerte. Score: ${score}/100.`,
+        ?(isEN?`Institution accumulating $${ticker} ${prem} in calls${otmStr}${expStr}. Conviction: ${tier}. Size implies bullish directional positioning or short covering. Score: ${score}/100.`:`Institución acumula $${ticker} ${prem} en calls${otmStr}${expStr}. Convicción ${tier}. El tamaño implica posicionamiento direccional alcista o cobertura de short. Score: ${score}/100.`)
+        :(isEN?`Put block of ${prem} on $${ticker}${otmStr}${expStr}. Conviction: ${tier}. Possible defensive hedge of a long book or a smart-money bearish bet. Score: ${score}/100.`:`Put block de ${prem} en $${ticker}${otmStr}${expStr}. Convicción ${tier}. Posible cobertura defensiva de cartera larga o apuesta bajista de mano fuerte. Score: ${score}/100.`),
       bull
-        ?`Call sweep agresivo en $${ticker} — ${prem}${otmStr}. La velocidad de ejecución y el tamaño sugieren información asimétrica. Monitorear catalizadores próximos${expStr}.`
-        :`Flujo de puts en $${ticker} inusualmente grande (${prem}). IV elevada (${iv}%) implica que el mercado está priceando volatilidad. Posible evento binario cercano.`,
+        ?(isEN?`Aggressive call sweep on $${ticker} — ${prem}${otmStr}. Execution speed and size suggest asymmetric information. Watch upcoming catalysts${expStr}.`:`Call sweep agresivo en $${ticker} — ${prem}${otmStr}. La velocidad de ejecución y el tamaño sugieren información asimétrica. Monitorear catalizadores próximos${expStr}.`)
+        :(isEN?`Unusually large put flow on $${ticker} (${prem}). Elevated IV (${iv}%) implies the market is pricing volatility. Possible binary event ahead.`:`Flujo de puts en $${ticker} inusualmente grande (${prem}). IV elevada (${iv}%) implica que el mercado está priceando volatilidad. Posible evento binario cercano.`),
     ];
     return{iv,delta,oi,score,analysis:analyses[seed%2]};
   };
@@ -11876,7 +11953,7 @@ function FlowPage({isPremium,onNeedPremium}){
             </div>
             <button onClick={()=>setPaused(v=>!v)}
               style={{background:paused?"rgba(245,158,11,0.15)":"rgba(0,210,106,0.1)",border:`1px solid ${paused?"rgba(245,158,11,0.3)":"rgba(0,210,106,0.2)"}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700,color:paused?"#F59E0B":"#00D26A",cursor:"pointer"}}>
-              {paused?"▶ Reanudar":"⏸ Pausar"}
+              {paused?(isEN?"▶ Resume":"▶ Reanudar"):(isEN?"⏸ Pause":"⏸ Pausar")}
             </button>
             {/* Full-screen toggle */}
             <button onClick={()=>setFullscreen(v=>!v)} title={fullscreen?"Salir de pantalla completa":"Pantalla completa"}
@@ -11902,12 +11979,12 @@ function FlowPage({isPremium,onNeedPremium}){
               {topPick.strike&&<span>Strike ${topPick.strike}</span>}
               {topPick.expiry&&<span>Expiry {topPick.expiry}</span>}
               {topPick.otm&&<span>{topPick.otm}% OTM</span>}
-              <span style={{color:"rgba(245,158,11,0.7)"}}>⭐ Golden Sweep · Señal institucional</span>
+              <span style={{color:"rgba(245,158,11,0.7)"}}>⭐ Golden Sweep · {isEN?"Institutional signal":"Señal institucional"}</span>
             </div>
           </div>
           <button onClick={()=>sendTopPickTelegram(topPick)}
             style={{background:"linear-gradient(135deg,rgba(0,136,204,0.25),rgba(0,136,204,0.15))",border:"1px solid rgba(0,136,204,0.5)",borderRadius:10,padding:"9px 16px",fontSize:12,fontWeight:800,color:"#29B6F6",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,boxShadow:"0 0 12px rgba(0,136,204,0.2)"}}>
-            ✈️ Enviar Telegram
+            ✈️ {isEN?"Send Telegram":"Enviar Telegram"}
           </button>
         </div>
       )}
@@ -11919,7 +11996,7 @@ function FlowPage({isPremium,onNeedPremium}){
           <button onClick={()=>setShowTgPanel(v=>!v)}
             style={{display:"flex",alignItems:"center",gap:7,background:tgConfig.enabled?"rgba(0,102,255,0.08)":"rgba(255,255,255,0.04)",border:`1px solid ${tgConfig.enabled?"rgba(0,102,255,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:10,padding:"6px 14px",fontSize:11,fontWeight:700,color:tgConfig.enabled?"#29B6F6":"#64748B",cursor:"pointer",transition:"all 0.2s"}}>
             <span style={{fontSize:14}}>✈️</span>
-            <span>Alertas Telegram</span>
+            <span>{isEN?"Telegram Alerts":"Alertas Telegram"}</span>
             <span style={{background:tgConfig.enabled?"#00D26A":"#64748B",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>{tgConfig.enabled?"ACTIVO":"OFF"}</span>
             <span style={{marginLeft:2,fontSize:10,color:"#475569"}}>{showTgPanel?"▲":"▼"}</span>
           </button>
@@ -11927,14 +12004,14 @@ function FlowPage({isPremium,onNeedPremium}){
           {showTgPanel&&(
             <div style={{marginTop:8,background:"rgba(10,14,26,0.97)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:14,padding:"16px 18px",display:"flex",flexDirection:"column",gap:12}}>
               <div style={{fontSize:12,fontWeight:800,color:"#F1F5F9",letterSpacing:0.3,display:"flex",alignItems:"center",gap:8}}>
-                ⚙️ Configurar alertas automáticas a Telegram
+                ⚙️ {isEN?"Configure automatic Telegram alerts":"Configurar alertas automáticas a Telegram"}
                 <span style={{fontSize:10,color:"#475569",fontWeight:500}}>— solo llegan las que cumplan todos los filtros</span>
               </div>
               {/* Row 1 — Enable toggle + Min Premium */}
               <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
                 {/* On/Off */}
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
-                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700}}>Auto-envío</span>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700}}>{isEN?"Auto-send":"Auto-envío"}</span>
                   <button onClick={()=>setTgConfig(c=>({...c,enabled:!c.enabled}))}
                     style={{width:40,height:22,borderRadius:11,border:"none",cursor:"pointer",background:tgConfig.enabled?"#00D26A":"#334155",position:"relative",transition:"background 0.2s",flexShrink:0}}>
                     <div style={{position:"absolute",top:3,left:tgConfig.enabled?21:3,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left 0.2s",boxShadow:"0 1px 4px rgba(0,0,0,0.3)"}}/>
@@ -11943,7 +12020,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 </div>
                 {/* Min Premium */}
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)",flex:1,minWidth:220}}>
-                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Premium mínimo</span>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>{isEN?"Min premium":"Premium mínimo"}</span>
                   <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                     {[{l:"$5M",v:5e6},{l:"$10M",v:1e7},{l:"$20M",v:2e7},{l:"$30M",v:3e7},{l:"$50M+",v:5e7},{l:"$100M+",v:1e8}].map(opt=>(
                       <button key={opt.v} onClick={()=>setTgConfig(c=>({...c,minPrem:opt.v}))}
@@ -11957,7 +12034,7 @@ function FlowPage({isPremium,onNeedPremium}){
               {/* Row 2 — Tipo de orden */}
               <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
-                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Dirección</span>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>{isEN?"Direction":"Dirección"}</span>
                   <div style={{display:"flex",gap:4}}>
                     {[{l:"📈📉 Ambas",calls:false},{l:"📈 Solo CALLS",calls:true}].map(opt=>(
                       <button key={opt.l} onClick={()=>setTgConfig(c=>({...c,callsOnly:opt.calls}))}
@@ -11987,7 +12064,7 @@ function FlowPage({isPremium,onNeedPremium}){
                   <div style={{display:"flex",gap:4}}>
                     <button type="button" key="sma-yes" onClick={()=>setTgConfig(c=>({...c,aboveSMA200:true}))}
                       style={{background:tgConfig.aboveSMA200===true?"rgba(16,185,129,0.2)":"transparent",border:`1px solid ${tgConfig.aboveSMA200===true?"rgba(16,185,129,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.aboveSMA200===true?"#10B981":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
-                      ✅ Sí (recomendado)
+                      ✅ {isEN?"Yes (recommended)":"Sí (recomendado)"}
                     </button>
                     <button type="button" key="sma-no" onClick={()=>setTgConfig(c=>({...c,aboveSMA200:false}))}
                       style={{background:tgConfig.aboveSMA200===false?"rgba(239,68,68,0.15)":"transparent",border:`1px solid ${tgConfig.aboveSMA200===false?"rgba(239,68,68,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.aboveSMA200===false?"#EF4444":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
@@ -12001,7 +12078,7 @@ function FlowPage({isPremium,onNeedPremium}){
                   <div style={{display:"flex",gap:4}}>
                     <button type="button" key="vol-yes" onClick={()=>setTgConfig(c=>({...c,highVol:true}))}
                       style={{background:tgConfig.highVol===true?"rgba(245,158,11,0.2)":"transparent",border:`1px solid ${tgConfig.highVol===true?"rgba(245,158,11,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.highVol===true?"#F59E0B":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
-                      ✅ Sí (&gt;1K contratos)
+                      ✅ {isEN?"Yes (>1K contracts)":"Sí (>1K contratos)"}
                     </button>
                     <button type="button" key="vol-no" onClick={()=>setTgConfig(c=>({...c,highVol:false}))}
                       style={{background:tgConfig.highVol===false?"rgba(239,68,68,0.15)":"transparent",border:`1px solid ${tgConfig.highVol===false?"rgba(239,68,68,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.highVol===false?"#EF4444":"#64748B",cursor:"pointer",transition:"all 0.15s"}}>
@@ -12012,7 +12089,7 @@ function FlowPage({isPremium,onNeedPremium}){
               </div>
               {/* Summary */}
               <div style={{fontSize:11,color:"#475569",borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:10}}>
-                📡 Recibirás alertas de: <span style={{color:"#29B6F6",fontWeight:700}}>
+                📡 {isEN?"You will get alerts for:":"Recibirás alertas de:"} <span style={{color:"#29B6F6",fontWeight:700}}>
                   {tgConfig.callsOnly?"solo CALLS":"CALLS y PUTS"} · {tgConfig.goldenOnly?"solo Golden Sweeps":"todos los tipos"} · premium ≥ ${tgConfig.minPrem>=1e9?(tgConfig.minPrem/1e9).toFixed(0)+"B":tgConfig.minPrem>=1e6?(tgConfig.minPrem/1e6).toFixed(0)+"M":(tgConfig.minPrem/1e3).toFixed(0)+"K"}{tgConfig.aboveSMA200?" · sobre SMA200":""}{tgConfig.highVol?" · alta volatilidad":""}
                 </span>
               </div>
@@ -12025,11 +12102,11 @@ function FlowPage({isPremium,onNeedPremium}){
       {filter!=="whales" && (
         <div className="nexo-flow-stats" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginBottom:10}}>
           {[
-            {l:"FLUJO CALLS",v:fmt$(totalCallPrem),c:"#00D26A",icon:"📈"},
-            {l:"FLUJO PUTS",v:fmt$(totalPutPrem),c:"#FF4D6A",icon:"📉"},
-            {l:"RATIO CALL/PUT",v:`${ratio}x`,c:(ratio==="∞"||parseFloat(ratio)>=2)?"#00D26A":parseFloat(ratio)>=1?"#F59E0B":"#FF4D6A",icon:"⚖️",sub:(ratio==="∞"||parseFloat(ratio)>=2)?"Muy alcista 🔥":parseFloat(ratio)>=1?"Neutral":"Bajista"},
-            {l:"ORDEN MÁS GRANDE",v:bigItem?fmt$(bigItem.premium):"—",c:"#F59E0B",icon:"👑",sub:bigItem?`${bigItem.ticker} ${bigItem.isCall?"CALL":"PUT"}`:""},
-            {l:"ÓRDENES TOTALES",v:visible.length,c:"#60A5FA",icon:"📊",sub:"Actualizado ahora"},
+            {l:isEN?"CALL FLOW":"FLUJO CALLS",v:fmt$(totalCallPrem),c:"#00D26A",icon:"📈"},
+            {l:isEN?"PUT FLOW":"FLUJO PUTS",v:fmt$(totalPutPrem),c:"#FF4D6A",icon:"📉"},
+            {l:"RATIO CALL/PUT",v:`${ratio}x`,c:(ratio==="∞"||parseFloat(ratio)>=2)?"#00D26A":parseFloat(ratio)>=1?"#F59E0B":"#FF4D6A",icon:"⚖️",sub:(ratio==="∞"||parseFloat(ratio)>=2)?(isEN?"Very bullish 🔥":"Muy alcista 🔥"):parseFloat(ratio)>=1?"Neutral":(isEN?"Bearish":"Bajista")},
+            {l:isEN?"BIGGEST ORDER":"ORDEN MÁS GRANDE",v:bigItem?fmt$(bigItem.premium):"—",c:"#F59E0B",icon:"👑",sub:bigItem?`${bigItem.ticker} ${bigItem.isCall?"CALL":"PUT"}`:""},
+            {l:isEN?"TOTAL ORDERS":"ÓRDENES TOTALES",v:visible.length,c:"#60A5FA",icon:"📊",sub:isEN?"Updated now":"Actualizado ahora"},
           ].map(s=>(
             <div key={s.l} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:12,padding:"12px 14px",position:"relative",overflow:"hidden"}}>
               <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${s.c},transparent)`}}/>
@@ -12048,7 +12125,7 @@ function FlowPage({isPremium,onNeedPremium}){
             <div style={{display:"flex",alignItems:"center",gap:6}}>
               <span style={{fontSize:11,fontWeight:800,color:"#00D26A"}}>▲ CALLS {callPct}% · {fmt$(totalCallPrem)}</span>
             </div>
-            <div style={{fontSize:11,fontWeight:700,color:"#475569"}}>FLUJO NETO</div>
+            <div style={{fontSize:11,fontWeight:700,color:"#475569"}}>{isEN?"NET FLOW":"FLUJO NETO"}</div>
             <div style={{display:"flex",alignItems:"center",gap:6}}>
               <span style={{fontSize:11,fontWeight:800,color:"#FF4D6A"}}>{fmt$(totalPutPrem)} · PUTS {100-callPct}% ▼</span>
             </div>
@@ -12058,8 +12135,8 @@ function FlowPage({isPremium,onNeedPremium}){
             <div style={{flex:100-callPct,background:"linear-gradient(90deg,#FF4D6A,#FF4D6A80)",transition:"flex 0.5s ease"}}/>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:9,color:"#334155"}}>
-            <span>Vol total: {fmt$(totalCallPrem+totalPutPrem)}</span>
-            <span>• {visible.length} órdenes</span>
+            <span>{isEN?"Total vol":"Vol total"}: {fmt$(totalCallPrem+totalPutPrem)}</span>
+            <span>• {visible.length} {isEN?"orders":"órdenes"}</span>
           </div>
         </div>
       )}
@@ -12146,7 +12223,7 @@ function FlowPage({isPremium,onNeedPremium}){
         ))}
         <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6,fontSize:11,color:C.muted}}>
           <span style={{width:7,height:7,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>
-          {visible.length} órdenes
+          {visible.length} {isEN?"orders":"órdenes"}
         </div>
       </div>
 
@@ -12155,7 +12232,7 @@ function FlowPage({isPremium,onNeedPremium}){
       <div style={{minWidth:860}}>
       {/* Table header */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 1.3fr 1.1fr 1fr 1.1fr 1.1fr 1.4fr",gap:6,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
-        {["HORA","TICKER","TIPO","PREMIUM","TAMAÑO","STRIKE","EXPIRY","OTM","SENTIMIENTO"].map(h=>(
+        {(isEN?["TIME","TICKER","TYPE","PREMIUM","SIZE","STRIKE","EXPIRY","OTM","SENTIMENT"]:["HORA","TICKER","TIPO","PREMIUM","TAMAÑO","STRIKE","EXPIRY","OTM","SENTIMIENTO"]).map(h=>(
           <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
         ))}
       </div>
@@ -12260,8 +12337,8 @@ function FlowPage({isPremium,onNeedPremium}){
       {filter!=="whales" && (
         <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
           {realFlow
-            ? "📡 Datos reales de opciones — CBOE (retraso ~15 min) · No es consejo financiero"
-            : "⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero"}
+            ? (isEN?"📡 Real options data — CBOE (~15 min delay) · Not financial advice":"📡 Datos reales de opciones — CBOE (retraso ~15 min) · No es consejo financiero")
+            : (isEN?"⚠️ Educational data based on real market patterns · Not financial advice":"⚠️ Datos educativos basados en patrones de mercado real · No es consejo financiero")}
         </div>
       )}
 
@@ -12271,15 +12348,15 @@ function FlowPage({isPremium,onNeedPremium}){
           {whaleLoad && (
             <div style={{textAlign:"center",padding:"60px 20px"}}>
               <div style={{width:40,height:40,borderRadius:"50%",border:"3px solid rgba(247,147,26,0.2)",borderTopColor:"#F7931A",animation:"spin 1s linear infinite",margin:"0 auto 14px"}}/>
-              <div style={{color:C.muted,fontSize:13}}>Cargando datos de ballenas en tiempo real…</div>
+              <div style={{color:C.muted,fontSize:13}}>{isEN?"Loading real-time whale data…":"Cargando datos de ballenas en tiempo real…"}</div>
             </div>
           )}
 
           {!whaleLoad && whaleErr && (
             <div style={{textAlign:"center",padding:"48px 20px"}}>
               <div style={{fontSize:40,marginBottom:10}}>🐳</div>
-              <div style={{color:C.muted,fontSize:13,marginBottom:14}}>No se pudieron cargar los datos · Intenta de nuevo</div>
-              <button onClick={fetchWhales} style={{background:"linear-gradient(135deg,#F7931A,#ff6b00)",border:"none",borderRadius:10,padding:"10px 24px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>Reintentar</button>
+              <div style={{color:C.muted,fontSize:13,marginBottom:14}}>{isEN?"Could not load data · Try again":"No se pudieron cargar los datos · Intenta de nuevo"}</div>
+              <button onClick={fetchWhales} style={{background:"linear-gradient(135deg,#F7931A,#ff6b00)",border:"none",borderRadius:10,padding:"10px 24px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>{isEN?"Retry":"Reintentar"}</button>
             </div>
           )}
 
@@ -12325,21 +12402,21 @@ function FlowPage({isPremium,onNeedPremium}){
                   <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",textAlign:"center"}}>
                     <div style={{fontSize:10,color:C.muted,fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>ETF Flow 7d</div>
                     <div style={{fontSize:22,fontWeight:900,color:totalEtfFlow7d>=0?"#10B981":"#EF4444",lineHeight:1}}>{totalEtfFlow7d>=0?"+":""}{fmt$B(totalEtfFlow7d*1e6)}</div>
-                    <div style={{fontSize:11,color:totalEtfFlow7d>=0?"#10B981":"#EF4444",marginTop:3,fontWeight:700}}>{totalEtfFlow7d>=0?"Entrada neta":"Salida neta"}</div>
+                    <div style={{fontSize:11,color:totalEtfFlow7d>=0?"#10B981":"#EF4444",marginTop:3,fontWeight:700}}>{totalEtfFlow7d>=0?(isEN?"Net inflow":"Entrada neta"):(isEN?"Net outflow":"Salida neta")}</div>
                   </div>
                   {/* Hash Rate */}
                   {onChain?.hashRate && (
                     <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",textAlign:"center"}}>
                       <div style={{fontSize:10,color:C.muted,fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>Hash Rate</div>
                       <div style={{fontSize:20,fontWeight:900,color:"#FCD34D",lineHeight:1}}>{(onChain.hashRate/1e18).toFixed(0)} EH/s</div>
-                      <div style={{fontSize:11,color:C.muted,marginTop:3}}>Seguridad histórica</div>
+                      <div style={{fontSize:11,color:C.muted,marginTop:3}}>{isEN?"Record security":"Seguridad histórica"}</div>
                     </div>
                   )}
                 </div>
 
                 {/* ── SEÑALES ON-CHAIN ── */}
                 <div>
-                  <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>📡 Señales Manos Fuertes</div>
+                  <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>📡 {isEN?"Smart Money Signals":"Señales Manos Fuertes"}</div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:8}}>
                     {signals.map((s,i)=>(
                       <div key={i} style={{background:s.bull?"rgba(16,185,129,0.06)":"rgba(239,68,68,0.06)",border:`1px solid ${s.bull?"rgba(16,185,129,0.18)":"rgba(239,68,68,0.18)"}`,borderRadius:12,padding:"11px 14px",display:"flex",alignItems:"center",gap:10}}>
@@ -12362,10 +12439,10 @@ function FlowPage({isPremium,onNeedPremium}){
                     <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                       <div>
                         <div style={{fontWeight:800,fontSize:13,color:C.text,display:"flex",alignItems:"center",gap:8}}>
-                          🐳 Transacciones en Vivo
+                          🐳 {isEN?"Live Transactions":"Transacciones en Vivo"}
                           <span style={{width:6,height:6,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>
                         </div>
-                        <div style={{fontSize:10,color:C.muted,marginTop:2}}>Movimientos BTC +100 BTC</div>
+                        <div style={{fontSize:10,color:C.muted,marginTop:2}}>{isEN?"BTC moves +100 BTC":"Movimientos BTC +100 BTC"}</div>
                       </div>
                       <button onClick={()=>setWhalePaused(p=>!p)}
                         style={{background:whalePaused?"rgba(245,158,11,0.15)":"rgba(0,210,106,0.1)",border:`1px solid ${whalePaused?"rgba(245,158,11,0.3)":"rgba(0,210,106,0.2)"}`,borderRadius:8,padding:"4px 10px",fontSize:11,fontWeight:700,color:whalePaused?"#F59E0B":"#00D26A",cursor:"pointer"}}>
@@ -12375,15 +12452,15 @@ function FlowPage({isPremium,onNeedPremium}){
                     <div style={{maxHeight:340,overflowY:"auto",padding:"6px 0"}}>
                       {whaleTxs.length===0 && (
                         <div style={{padding:"30px",textAlign:"center",color:C.muted,fontSize:12}}>
-                          Sin transacciones grandes recientes…<br/>
-                          <span style={{fontSize:10,color:"#1E293B",marginTop:4,display:"block"}}>Datos on-chain reales · Se actualiza cada 60s</span>
+                          {isEN?"No large recent transactions…":"Sin transacciones grandes recientes…"}<br/>
+                          <span style={{fontSize:10,color:"#1E293B",marginTop:4,display:"block"}}>{isEN?"Real on-chain data · Updates every 60s":"Datos on-chain reales · Se actualiza cada 60s"}</span>
                         </div>
                       )}
                       {whaleTxs.map((tx,i)=>{
                         const usdVal=tx.usd||(btcPrice?.price?tx.btc*btcPrice.price:null);
                         const usdStr=usdVal?(usdVal>=1e6?`$${(usdVal/1e6).toFixed(1)}M`:`$${(usdVal/1e3).toFixed(0)}K`):null;
                         const mins=Math.max(0,Math.round((Date.now()-Date.parse(tx.time.replace(" ","T")+"Z"))/60000));
-                        const ago=mins<1?"ahora":mins<60?`hace ${mins}m`:`hace ${Math.floor(mins/60)}h ${mins%60}m`;
+                        const ago=mins<1?(isEN?"now":"ahora"):mins<60?(isEN?`${mins}m ago`:`hace ${mins}m`):(isEN?`${Math.floor(mins/60)}h ${mins%60}m ago`:`hace ${Math.floor(mins/60)}h ${mins%60}m`);
                         return(
                           <div key={tx.hash} style={{padding:"8px 14px",borderBottom:`1px solid ${C.border}`,transition:"background 0.3s",background:tx.isNew?"rgba(247,147,26,0.06)":"transparent",animation:tx.isNew?"fadeInRow 0.4s ease-out":undefined}}>
                             <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -12396,7 +12473,7 @@ function FlowPage({isPremium,onNeedPremium}){
                                 <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:2}}>
                                   <a href={`https://mempool.space/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" style={{color:C.muted,textDecoration:"none"}}>
                                     {tx.hash.slice(0,10)}…{tx.hash.slice(-6)} ↗
-                                  </a> · {ago}{tx.block?` · bloque ${tx.block.toLocaleString("en-US")}`:""}
+                                  </a> · {ago}{tx.block?` · ${isEN?"block":"bloque"} ${tx.block.toLocaleString("en-US")}`:""}
                                 </div>
                               </div>
                             </div>
@@ -12405,21 +12482,21 @@ function FlowPage({isPremium,onNeedPremium}){
                       })}
                     </div>
                     <div style={{padding:"8px 14px",borderTop:`1px solid ${C.border}`,fontSize:10,color:"#1E293B",textAlign:"center"}}>
-                      Fuente: Blockchair · Datos on-chain reales · TXs &gt;100 BTC · <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener" style={{color:C.accent}}>BitInfoCharts ↗</a>
+                      {isEN?"Source":"Fuente"}: Blockchair · {isEN?"Real on-chain data":"Datos on-chain reales"} · TXs &gt;100 BTC · <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener" style={{color:C.accent}}>BitInfoCharts ↗</a>
                     </div>
                   </div>
 
                   {/* ETF Flows table */}
                   <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:16,overflow:"hidden"}}>
                     <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`}}>
-                      <div style={{fontWeight:800,fontSize:13,color:C.text}}>🏦 ETF Bitcoin — Flujos Institucionales</div>
+                      <div style={{fontWeight:800,fontSize:13,color:C.text}}>🏦 ETF Bitcoin — {isEN?"Institutional Flows":"Flujos Institucionales"}</div>
                       <div style={{fontSize:10,color:C.muted,marginTop:2}}>BlackRock · Fidelity · ARK · Grayscale</div>
                     </div>
                     <div style={{overflowX:"auto"}}>
                       <table style={{width:"100%",borderCollapse:"collapse",minWidth:320}}>
                         <thead>
                           <tr style={{background:"rgba(255,255,255,0.03)"}}>
-                            {["ETF","Emisor","7d","YTD","AUM"].map(h=>(
+                            {["ETF",isEN?"Issuer":"Emisor","7d","YTD","AUM"].map(h=>(
                               <th key={h} style={{padding:"7px 12px",textAlign:"left",fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>
                             ))}
                           </tr>
@@ -12450,7 +12527,7 @@ function FlowPage({isPremium,onNeedPremium}){
                       </table>
                     </div>
                     <div style={{padding:"7px 14px",borderTop:`1px solid ${C.border}`,fontSize:10,color:"#1E293B",textAlign:"center"}}>
-                      Fuente: Bloomberg · Farside Investors · Datos semanales
+                      {isEN?"Source":"Fuente"}: Bloomberg · Farside Investors · {isEN?"Weekly data":"Datos semanales"}
                     </div>
                   </div>
                 </div>
@@ -12458,7 +12535,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 {/* ── GRANDES TENEDORES (BitInfoCharts style) ── */}
                 <div>
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-                    <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>🏆 Manos Fuertes — Mayores Tenedores BTC</div>
+                    <div style={{fontSize:12,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>🏆 {isEN?"Smart Money — Largest BTC Holders":"Manos Fuertes — Mayores Tenedores BTC"}</div>
                     <a href="https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html" target="_blank" rel="noopener noreferrer"
                       style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"3px 10px",textDecoration:"none",display:"flex",alignItems:"center",gap:4}}>
                       📊 BitInfoCharts ↗
@@ -12486,7 +12563,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 {/* ── Fear & Greed histórico ── */}
                 {fng?.history?.length>0 && (
                   <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px"}}>
-                    <div style={{fontSize:11,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:10}}>😱 Fear &amp; Greed — Últimos 7 días</div>
+                    <div style={{fontSize:11,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:10}}>😱 Fear &amp; Greed — {isEN?"Last 7 days":"Últimos 7 días"}</div>
                     <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
                       {fng.history.map((d,i)=>(
                         <div key={i} style={{flex:1,textAlign:"center"}}>
@@ -12500,7 +12577,7 @@ function FlowPage({isPremium,onNeedPremium}){
                 )}
 
                 <div style={{textAlign:"center",fontSize:10,color:"#1E293B",padding:"4px 0"}}>
-                  Fuentes: alternative.me · Binance · Blockchair · Farside Investors · BitInfoCharts · No es consejo financiero
+                  {isEN?"Sources":"Fuentes"}: alternative.me · Binance · Blockchair · Farside Investors · BitInfoCharts · {isEN?"Not financial advice":"No es consejo financiero"}
                 </div>
               </div>
             );
@@ -13085,7 +13162,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
 
   const fmt$ = v => v >= 1e9 ? `$${(v/1e9).toFixed(1)}B` : v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v/1e3).toFixed(0)}K` : `$${v}`;
   const TABS = [
-    {k:"gurus",    l:"🏛️ Gurús"},
+    {k:"gurus",    l:isEN?"🏛️ Gurus":"🏛️ Gurús"},
     {k:"ark",      l:"🚀 ARK Daily"},
     {k:"insiders", l:"🕵️ Insiders SEC"},
     {k:"congress", l:"🏛️ Congresistas", vip:true},
@@ -13101,7 +13178,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           <span style={{fontSize:32}}>👁️</span>
           <div>
             <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>🏛️ Wall St. & Capitol</div>
-            <div style={{fontSize:12,color:"#475569"}}>Gurús 13F · ARK Daily · Insiders SEC · Congresistas</div>
+            <div style={{fontSize:12,color:"#475569"}}>{isEN?"13F Gurus · ARK Daily · SEC Insiders · Congress":"Gurús 13F · ARK Daily · Insiders SEC · Congresistas"}</div>
           </div>
           <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
             {pxUpdated && <span style={{fontSize:10,color:"#334155"}}>Act. {pxUpdated}</span>}
@@ -13176,7 +13253,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                           </div>
                           <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
                             <div style={{fontSize:10,fontWeight:700,color:"#F1F5F9"}}>{g.period}</div>
-                            <div style={{fontSize:9,color:"#475569"}}>Período</div>
+                            <div style={{fontSize:9,color:"#475569"}}>{isEN?"Period":"Período"}</div>
                           </div>
                         </div>
                         <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{g.bio || `${g.fund} · ${g.period} · ${g.numStocks} posiciones`}</div>
@@ -13196,13 +13273,13 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:2}}>
                         <div style={{background:"rgba(12,10,30,0.96)",border:"1px solid rgba(217,119,6,0.4)",borderRadius:16,padding:"18px 22px",textAlign:"center",maxWidth:220,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
                           <div style={{fontSize:26,marginBottom:6}}>🔒</div>
-                          <div style={{fontWeight:800,color:"#fff",fontSize:13,marginBottom:5}}>{GURUS_13F.length - FREE_LIMIT} gurús más bloqueados</div>
-                          <div style={{fontSize:11,color:"#94a3b8",marginBottom:12}}>Desbloquea todos: Buffett, Ackman, Burry, ARK y más</div>
+                          <div style={{fontWeight:800,color:"#fff",fontSize:13,marginBottom:5}}>{GURUS_13F.length - FREE_LIMIT} {isEN?"more gurus locked":"gurús más bloqueados"}</div>
+                          <div style={{fontSize:11,color:"#94a3b8",marginBottom:12}}>{isEN?"Unlock them all: Buffett, Ackman, Burry, ARK and more":"Desbloquea todos: Buffett, Ackman, Burry, ARK y más"}</div>
                           <button onClick={onNeedPremium}
                             style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:800,cursor:"pointer",width:"100%"}}>
                             ✦ Ver todos — $9.99/mes
                           </button>
-                          <div style={{fontSize:10,color:"#475569",marginTop:5}}>7 días gratis</div>
+                          <div style={{fontSize:10,color:"#475569",marginTop:5}}>{isEN?"$9.99/mo · Cancel anytime":"$9.99/mes · Cancela cuando quieras"}</div>
                         </div>
                       </div>
                     )}
@@ -13217,7 +13294,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 <div style={{fontSize:12,color:"#64748b",marginBottom:12}}>Buffett · Ackman · Burry · ARK · Insiders SEC · Dark Pools</div>
                 <button onClick={onNeedPremium}
                   style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(217,119,6,0.4)"}}>
-                  ✦ Activar PREMIUM — 7 días gratis →
+                  ✦ {isEN?"Go PREMIUM — $9.99/mo →":"Activar PREMIUM — $9.99/mes →"}
                 </button>
               </div>
             )}
@@ -13250,7 +13327,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 </div>
               </div>
               <div className="nexo-guru-detail-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
-                {[["Período",g.period],["Fecha portafolio",g.portfolioDate],["N° de acciones",g.numStocks],["Valor portafolio",g.aum]].map(([l,v])=>(
+                {[[isEN?"Period":"Período",g.period],[isEN?"Portfolio date":"Fecha portafolio",g.portfolioDate],[isEN?"# of stocks":"N° de acciones",g.numStocks],[isEN?"Portfolio value":"Valor portafolio",g.aum]].map(([l,v])=>(
                   <div key={l} style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 14px"}}>
                     <div style={{fontSize:10,color:"#475569",marginBottom:3}}>{l}</div>
                     <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{v}</div>
@@ -13312,7 +13389,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             </div>{/* /minWidth:900 */}
             </div>{/* /nexo-scroll-x */}
             <div style={{textAlign:"center",padding:"12px 0",fontSize:11,color:C.muted2}}>
-              * Precio reportado = precio al cierre del trimestre · Precio actual en tiempo real vía Finnhub
+              {isEN?"* Reported price = quarter-close price · Current price in real time via Finnhub":"* Precio reportado = precio al cierre del trimestre · Precio actual en tiempo real vía Finnhub"}
             </div>
           </div>
         );
@@ -13348,7 +13425,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
               <div style={{fontSize:40,marginBottom:12}}>⚠️</div>
               <div style={{fontSize:14,color:"#FF4D6A",marginBottom:8}}>No se pudo cargar datos de ARK</div>
-              <div style={{fontSize:12,color:C.muted2}}>Intenta hacer Refresh o revisa más tarde</div>
+              <div style={{fontSize:12,color:C.muted2}}>{isEN?"Try refreshing or check back later":"Intenta hacer Refresh o revisa más tarde"}</div>
             </div>
           ) : (
             <>
@@ -13498,7 +13575,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           {/* Subheader */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,gap:8,flexWrap:"wrap"}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <span style={{fontSize:12,color:C.muted}}>Operaciones bursátiles bajo el STOCK Act · Datos públicos</span>
+              <span style={{fontSize:12,color:C.muted}}>{isEN?"Stock trades under the STOCK Act · Public data":"Operaciones bursátiles bajo el STOCK Act · Datos públicos"}</span>
               <a href="https://www.capitoltrades.com/trades" target="_blank" rel="noopener noreferrer"
                 style={{fontSize:10,fontWeight:700,color:C.accent,background:"rgba(0,102,255,0.07)",border:"1px solid rgba(0,102,255,0.2)",borderRadius:6,padding:"2px 8px",textDecoration:"none"}}>
                 📡 Capitol Trades ↗
@@ -13753,7 +13830,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(0,102,255,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:"12px 14px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
                     <span style={{fontSize:16}}>🔥</span>
-                    <span style={{fontWeight:800,fontSize:13,color:C.text}}>Más Activos</span>
+                    <span style={{fontWeight:800,fontSize:13,color:C.text}}>{isEN?"Most Active":"Más Activos"}</span>
                   </div>
                   {topBuyers.map(([name,count],i)=>(
                     <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
@@ -13815,7 +13892,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                   </div>
                 ))}
               <div style={{padding:"8px 14px",textAlign:"center",fontSize:10,color:C.muted,background:C.card2,borderRadius:"0 0 10px 10px",border:`1px solid ${C.border}`,borderTop:"none"}}>
-                Fuente: STOCK Act (divulgaciones públicas) · NexoTrade no se responsabiliza por la exactitud de las operaciones
+                {isEN?"Source: STOCK Act (public disclosures) · NexoTrade is not responsible for the accuracy of the trades":"Fuente: STOCK Act (divulgaciones públicas) · NexoTrade no se responsabiliza por la exactitud de las operaciones"}
               </div>
             </div>
           )}
@@ -14120,7 +14197,8 @@ function BotPostCard({post,onTickerClick,lang}){
   );
 }
 
-function IdeasPage({ isPremium, onNeedPremium }) {
+function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
+  const isEN = lang==="en";
   const [filter, setFilter]     = useState("todos");
   const [sectorF, setSectorF]   = useState("todos");
   const [riskF, setRiskF]       = useState("todos");
@@ -14382,8 +14460,8 @@ function IdeasPage({ isPremium, onNeedPremium }) {
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
           <span style={{fontSize:28}}>💡</span>
           <div>
-            <div style={{fontSize:19,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Ideas de Inversión</div>
-            <div style={{fontSize:12,color:"#475569"}}>Señales analizadas por NexoTrade Research · Precios en tiempo real · {IDEAS_DATA.length} ideas activas</div>
+            <div style={{fontSize:19,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>{isEN?"Investment Ideas":"Ideas de Inversión"}</div>
+            <div style={{fontSize:12,color:"#475569"}}>{isEN?"Signals analyzed by NexoTrade Research · Real-time prices":"Señales analizadas por NexoTrade Research · Precios en tiempo real"} · {IDEAS_DATA.length} ideas activas</div>
           </div>
           <div style={{marginLeft:"auto",display:"flex",gap:8,flexWrap:"wrap"}}>
             {[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}].map(s=>(
@@ -14417,9 +14495,9 @@ function IdeasPage({ isPremium, onNeedPremium }) {
         <div style={{marginLeft:"auto"}}>
           <select value={sortBy} onChange={e=>{setSortBy(e.target.value);setPage(1);}}
             style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:10,padding:"6px 12px",fontSize:12,color:C.muted,cursor:"pointer"}}>
-            <option value="fecha">Más recientes</option>
+            <option value="fecha">{isEN?"Most recent":"Más recientes"}</option>
             <option value="upside">Mayor upside</option>
-            <option value="señal">Por señal</option>
+            <option value="señal">{isEN?"By signal":"Por señal"}</option>
           </select>
         </div>
       </div>
@@ -14439,12 +14517,12 @@ function IdeasPage({ isPremium, onNeedPremium }) {
                     <div style={{background:"rgba(12,10,30,0.97)",border:"1px solid rgba(217,119,6,0.4)",borderRadius:16,padding:"20px 24px",textAlign:"center",maxWidth:240,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
                       <div style={{fontSize:28,marginBottom:8}}>🔒</div>
                       <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:6}}>+{filtered.length - 3} ideas bloqueadas</div>
-                      <div style={{fontSize:12,color:"#94a3b8",marginBottom:14}}>Hazte PREMIUM para ver todas las señales, tesis y precios objetivo</div>
+                      <div style={{fontSize:12,color:"#94a3b8",marginBottom:14}}>{isEN?"Go PREMIUM to see all signals, theses and price targets":"Hazte PREMIUM para ver todas las señales, tesis y precios objetivo"}</div>
                       <button onClick={onNeedPremium}
                         style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"10px 20px",fontSize:13,fontWeight:800,cursor:"pointer",width:"100%"}}>
                         ✦ Ver todas — $9.99/mes
                       </button>
-                      <div style={{fontSize:10,color:"#475569",marginTop:6}}>7 días gratis · Cancela cuando quieras</div>
+                      <div style={{fontSize:10,color:"#475569",marginTop:6}}>{isEN?"$9.99/mo · Cancel anytime":"$9.99/mes · Cancela cuando quieras"}</div>
                     </div>
                   </div>
                 )}
@@ -14455,11 +14533,11 @@ function IdeasPage({ isPremium, onNeedPremium }) {
         {/* Banner debajo si hay más páginas y es free */}
         {!isPremium && page === 1 && (
           <div style={{background:"linear-gradient(135deg,rgba(217,119,6,0.12),rgba(99,102,241,0.08))",border:"1px solid rgba(217,119,6,0.25)",borderRadius:16,padding:"20px 24px",marginTop:4,marginBottom:20,textAlign:"center"}}>
-            <div style={{fontWeight:800,color:"#FCD34D",fontSize:15,marginBottom:6}}>✦ Desbloquea {IDEAS_DATA.length - 3} ideas más con PREMIUM</div>
-            <div style={{fontSize:13,color:"#64748b",marginBottom:14}}>Señales de compra/venta, tesis completa, precio objetivo y stop loss actualizado en tiempo real</div>
+            <div style={{fontWeight:800,color:"#FCD34D",fontSize:15,marginBottom:6}}>✦ {isEN?`Unlock ${IDEAS_DATA.length - 3} more ideas with PREMIUM`:`Desbloquea ${IDEAS_DATA.length - 3} ideas más con PREMIUM`}</div>
+            <div style={{fontSize:13,color:"#64748b",marginBottom:14}}>{isEN?"Buy/sell signals, full thesis, price target and stop loss updated":"Señales de compra/venta, tesis completa, precio objetivo y stop loss actualizados"}zado en tiempo real</div>
             <button onClick={onNeedPremium}
               style={{background:"linear-gradient(135deg,#D97706,#6366F1)",color:"#fff",border:"none",borderRadius:10,padding:"12px 32px",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(217,119,6,0.4)"}}>
-              ✦ Activar PREMIUM — 7 días gratis →
+              ✦ {isEN?"Go PREMIUM — $9.99/mo →":"Activar PREMIUM — $9.99/mes →"}
             </button>
           </div>
         )}
@@ -14481,7 +14559,7 @@ function IdeasPage({ isPremium, onNeedPremium }) {
       )}
 
       <div style={{textAlign:"center",padding:"8px 0 16px",fontSize:10,color:"#1E293B"}}>
-        ⚠️ Las ideas son análisis informativos del equipo NexoTrade. No constituyen consejo financiero. Invierte con responsabilidad.
+        ⚠️ {isEN?"Ideas are informational analyses by the NexoTrade team. Not financial advice. Invest responsibly.":"Las ideas son análisis informativos del equipo NexoTrade. No constituyen consejo financiero. Invierte con responsabilidad."}
       </div>
 
       {/* Modal */}
@@ -14491,7 +14569,8 @@ function IdeasPage({ isPremium, onNeedPremium }) {
 }
 
 // ── MENSAJES PRIVADOS PAGE ────────────────────────────────────────────────────
-function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat }) {
+function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat, lang="es" }) {
+  const isEN = lang==="en";
   const [conversations, setConversations] = useState([]);  // {userId, username, avatar, avatarColor, lastMsg, unread, isMutual}
   const [selConv, setSelConv]   = useState(initialChat || null); // {id, username, avatar, avatarColor}
   const [messages, setMessages] = useState([]);
@@ -14614,9 +14693,9 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
       <div style={{maxWidth:480,margin:"80px auto",textAlign:"center",padding:"0 20px"}}>
         <div style={{fontSize:64,marginBottom:16}}>💬</div>
         <div style={{fontSize:22,fontWeight:900,color:C.text,marginBottom:8}}>Mensajes Privados</div>
-        <div style={{fontSize:14,color:C.muted,marginBottom:24}}>Inicia sesión para ver y enviar mensajes privados.</div>
+        <div style={{fontSize:14,color:C.muted,marginBottom:24}}>{isEN?"Sign in to view and send private messages.":"Inicia sesión para ver y enviar mensajes privados."}</div>
         <button onClick={onNeedAuth} style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:12,padding:"12px 32px",fontSize:15,fontWeight:800,cursor:"pointer"}}>
-          Iniciar sesión
+          {isEN?"Sign in":"Iniciar sesión"}
         </button>
       </div>
     );
@@ -14629,7 +14708,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
   return (
     <div className="nexo-messages-wrapper" style={{maxWidth:920,margin:"0 auto",height:"calc(100vh - 130px)",display:"flex",flexDirection:"column",gap:0}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(180,83,9,0.08))",border:"1px solid rgba(139,92,246,0.25)",borderRadius:"18px 18px 0 0",padding:"14px 20px",display:"flex",alignItems:"center",gap:12,borderBottom:"none"}}>
+      <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:"18px 18px 0 0",padding:"14px 20px",display:"flex",alignItems:"center",gap:12,borderBottom:"none"}}>
         <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#F59E0B,#B45309)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>💬</div>
         <div>
           <div style={{fontSize:16,fontWeight:900,color:C.text,letterSpacing:"-0.3px"}}>Mensajes Privados</div>
@@ -14640,34 +14719,34 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
           </div>
         </div>
         <button onClick={()=>{setNewDM(true);setSelConv(null);}}
-          style={{marginLeft:"auto",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:20,padding:"8px 18px",fontSize:12,fontWeight:800,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:6,boxShadow:"0 2px 12px rgba(139,92,246,0.35)",whiteSpace:"nowrap"}}>
+          style={{marginLeft:"auto",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:20,padding:"8px 18px",fontSize:12,fontWeight:800,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:6,boxShadow:"0 2px 12px rgba(33,150,243,0.35)",whiteSpace:"nowrap"}}>
           ✏️ <span className="nexo-msg-btn-text">Nuevo mensaje</span>
         </button>
       </div>
 
-      <div className="nexo-messages-grid" style={{display:"grid",gridTemplateColumns:"300px 1fr",flex:1,minHeight:0,border:`1px solid rgba(139,92,246,0.2)`,borderRadius:"0 0 18px 18px",overflow:"hidden"}}>
+      <div className="nexo-messages-grid" style={{display:"grid",gridTemplateColumns:"300px 1fr",flex:1,minHeight:0,border:`1px solid rgba(33,150,243,0.2)`,borderRadius:"0 0 18px 18px",overflow:"hidden"}}>
         {/* ── LISTA DE CONVERSACIONES ── */}
-        <div className="nexo-messages-list" style={{background:C.card,borderRight:`1px solid rgba(139,92,246,0.15)`,overflow:"auto",display:"flex",flexDirection:"column"}}>
+        <div className="nexo-messages-list" style={{background:C.card,borderRight:`1px solid rgba(33,150,243,0.15)`,overflow:"auto",display:"flex",flexDirection:"column"}}>
           {/* Search */}
-          <div style={{padding:"10px 12px",borderBottom:`1px solid rgba(139,92,246,0.1)`,background:"rgba(139,92,246,0.04)"}}>
+          <div style={{padding:"10px 12px",borderBottom:`1px solid rgba(33,150,243,0.1)`,background:"rgba(33,150,243,0.04)"}}>
             <div style={{position:"relative"}}>
               <svg style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",opacity:0.4}} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar conversación…"
-                style={{width:"100%",background:"rgba(255,255,255,0.05)",border:`1px solid rgba(139,92,246,0.2)`,borderRadius:20,padding:"7px 10px 7px 28px",fontSize:12,color:C.text,outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}/>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={isEN?"Search conversation…":"Buscar conversación…"}
+                style={{width:"100%",background:"rgba(255,255,255,0.05)",border:`1px solid rgba(33,150,243,0.2)`,borderRadius:20,padding:"7px 10px 7px 28px",fontSize:12,color:C.text,outline:"none",boxSizing:"border-box",fontFamily:"inherit"}}/>
             </div>
           </div>
 
           {loading && (
             <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8,padding:24,color:C.muted}}>
-              <div style={{width:28,height:28,borderRadius:"50%",border:"2px solid rgba(139,92,246,0.3)",borderTopColor:"#F59E0B",animation:"spin 1s linear infinite"}}/>
+              <div style={{width:28,height:28,borderRadius:"50%",border:"2px solid rgba(33,150,243,0.3)",borderTopColor:"#F59E0B",animation:"spin 1s linear infinite"}}/>
               <span style={{fontSize:12}}>Cargando…</span>
             </div>
           )}
 
           {!loading && mutuals.length === 0 && (
             <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 16px",textAlign:"center"}}>
-              <div style={{width:52,height:52,borderRadius:16,background:"rgba(139,92,246,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,marginBottom:12}}>👥</div>
-              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:6}}>Sin conexiones aún</div>
+              <div style={{width:52,height:52,borderRadius:16,background:"rgba(33,150,243,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,marginBottom:12}}>👥</div>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:6}}>{isEN?"No connections yet":"Sin conexiones aún"}</div>
               <div style={{fontSize:12,color:C.muted,lineHeight:1.6}}>Sigue a alguien y espera que te siga de vuelta para poder chatear.</div>
             </div>
           )}
@@ -14679,16 +14758,16 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
               const isSelected = selConv?.id === prof.id;
               return (
                 <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
-                  style={{display:"flex",gap:10,alignItems:"center",padding:"11px 14px",cursor:"pointer",background:isSelected?"rgba(139,92,246,0.13)":"transparent",borderLeft:`3px solid ${isSelected?"#F59E0B":"transparent"}`,transition:"all 0.15s",position:"relative"}}
+                  style={{display:"flex",gap:10,alignItems:"center",padding:"11px 14px",cursor:"pointer",background:isSelected?"rgba(33,150,243,0.13)":"transparent",borderLeft:`3px solid ${isSelected?"#F59E0B":"transparent"}`,transition:"all 0.15s",position:"relative"}}
                   onMouseEnter={e=>{ if(!isSelected){e.currentTarget.style.background="rgba(255,255,255,0.04)";} }}
                   onMouseLeave={e=>{ if(!isSelected){e.currentTarget.style.background="transparent";} }}>
                   {/* Avatar */}
-                  <div style={{width:40,height:40,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,border:isSelected?"2px solid rgba(139,92,246,0.5)":"2px solid transparent",transition:"border 0.15s"}}>
+                  <div style={{width:40,height:40,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,border:isSelected?"2px solid rgba(33,150,243,0.5)":"2px solid transparent",transition:"border 0.15s"}}>
                     {prof.avatar_emoji||"👤"}
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontWeight:700,color:isSelected?"#FCD34D":C.text,fontSize:13,marginBottom:2}}>{prof.username}</div>
-                    <div style={{fontSize:11,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{conv?.lastMsg || <span style={{color:"rgba(139,92,246,0.6)",fontStyle:"italic"}}>Iniciar conversación…</span>}</div>
+                    <div style={{fontSize:11,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{conv?.lastMsg || <span style={{color:"rgba(33,150,243,0.6)",fontStyle:"italic"}}>Iniciar conversación…</span>}</div>
                   </div>
                   {/* Online dot (decorativo) */}
                   <div style={{width:8,height:8,borderRadius:"50%",background:"#10B981",flexShrink:0,opacity:0.7}}/>
@@ -14704,9 +14783,9 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
           {newDM && !selConv && (
             <div style={{flex:1,overflow:"auto",padding:"20px 24px"}}>
               <div style={{fontWeight:900,color:C.text,fontSize:16,marginBottom:4,letterSpacing:"-0.3px"}}>✏️ Nuevo mensaje</div>
-              <div style={{fontSize:12,color:C.muted,marginBottom:20}}>Solo puedes escribir a usuarios que también te siguen a ti.</div>
+              <div style={{fontSize:12,color:C.muted,marginBottom:20}}>{isEN?"You can only message users who also follow you.":"Solo puedes escribir a usuarios que también te siguen a ti."}</div>
               {filteredMutualsForNew.length === 0 && (
-                <div style={{textAlign:"center",padding:"32px 24px",background:"rgba(139,92,246,0.04)",borderRadius:16,border:"1px dashed rgba(139,92,246,0.2)"}}>
+                <div style={{textAlign:"center",padding:"32px 24px",background:"rgba(33,150,243,0.04)",borderRadius:16,border:"1px dashed rgba(33,150,243,0.2)"}}>
                   <div style={{fontSize:36,marginBottom:10}}>🔒</div>
                   <div style={{fontWeight:700,color:C.text,fontSize:14,marginBottom:6}}>Sin conexiones mutuas</div>
                   <div style={{fontSize:12,color:C.muted,lineHeight:1.7}}>Sigue a alguien y espera que te sigan de vuelta para poder chatear.</div>
@@ -14715,9 +14794,9 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 {filteredMutualsForNew.map(prof => (
                   <div key={prof.id} onClick={()=>{setSelConv({id:prof.id,username:prof.username,avatar:prof.avatar_emoji||"👤",avatarColor:prof.avatar_color||C.accent});setNewDM(false);}}
-                    style={{display:"flex",gap:12,alignItems:"center",padding:"12px 16px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(139,92,246,0.15)",borderRadius:14,cursor:"pointer",transition:"all 0.15s"}}
-                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(139,92,246,0.08)";e.currentTarget.style.borderColor="rgba(139,92,246,0.3)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.03)";e.currentTarget.style.borderColor="rgba(139,92,246,0.15)";}}>
+                    style={{display:"flex",gap:12,alignItems:"center",padding:"12px 16px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(33,150,243,0.15)",borderRadius:14,cursor:"pointer",transition:"all 0.15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(33,150,243,0.08)";e.currentTarget.style.borderColor="rgba(33,150,243,0.3)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.03)";e.currentTarget.style.borderColor="rgba(33,150,243,0.15)";}}>
                     <div style={{width:44,height:44,borderRadius:"50%",background:prof.avatar_color||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{prof.avatar_emoji||"👤"}</div>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontWeight:700,color:C.text,fontSize:14}}>{prof.username}</div>
@@ -14734,14 +14813,14 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
           {selConv && (
             <>
               {/* Chat header */}
-              <div style={{padding:"12px 18px",borderBottom:"1px solid rgba(139,92,246,0.15)",display:"flex",alignItems:"center",gap:12,background:"rgba(139,92,246,0.05)"}}>
+              <div style={{padding:"12px 18px",borderBottom:"1px solid rgba(33,150,243,0.15)",display:"flex",alignItems:"center",gap:12,background:"rgba(33,150,243,0.05)"}}>
                 <div style={{position:"relative"}}>
                   <div style={{width:38,height:38,borderRadius:"50%",background:selConv.avatarColor||C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19}}>{selConv.avatar||"👤"}</div>
                   <div style={{position:"absolute",bottom:0,right:0,width:10,height:10,borderRadius:"50%",background:"#10B981",border:"2px solid #0a0e1a"}}/>
                 </div>
                 <div>
                   <div style={{fontWeight:800,color:C.text,fontSize:14,letterSpacing:"-0.2px"}}>@{selConv.username}</div>
-                  <div style={{fontSize:10,color:"#10B981",marginTop:1}}>● En línea · Chat privado cifrado</div>
+                  <div style={{fontSize:10,color:"#10B981",marginTop:1}}>● {isEN?"Online · Encrypted private chat":"En línea · Chat privado cifrado"}</div>
                 </div>
                 <button onClick={()=>setSelConv(null)} style={{marginLeft:"auto",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,color:C.muted,cursor:"pointer",fontSize:14,padding:"4px 8px",lineHeight:1}}>✕</button>
               </div>
@@ -14764,7 +14843,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
                     {messages.length === 0 && (
                       <div style={{textAlign:"center",color:C.muted,padding:"40px 0",fontSize:13}}>
                         <div style={{fontSize:36,marginBottom:8}}>👋</div>
-                        Sé el primero en escribir. Esta conversación es privada.
+                        {isEN?"Be the first to write. This conversation is private.":"Sé el primero en escribir. Esta conversación es privada."}
                       </div>
                     )}
                     {messages.map((m,i) => {
@@ -14783,17 +14862,17 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
                   </div>
 
                   {/* Input */}
-                  <div style={{padding:"10px 14px",borderTop:"1px solid rgba(139,92,246,0.15)",display:"flex",gap:8,alignItems:"center",background:"rgba(139,92,246,0.03)"}}>
+                  <div style={{padding:"10px 14px",borderTop:"1px solid rgba(33,150,243,0.15)",display:"flex",gap:8,alignItems:"center",background:"rgba(33,150,243,0.03)"}}>
                     <input value={msgText} onChange={e=>setMsgText(e.target.value)}
                       onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
                       placeholder={`Escribe a @${selConv.username}…`}
                       maxLength={500}
-                      style={{flex:1,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:22,padding:"10px 18px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit",transition:"border 0.15s"}}
-                      onFocus={e=>e.target.style.borderColor="rgba(139,92,246,0.5)"}
-                      onBlur={e=>e.target.style.borderColor="rgba(139,92,246,0.2)"}
+                      style={{flex:1,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(33,150,243,0.2)",borderRadius:22,padding:"10px 18px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit",transition:"border 0.15s"}}
+                      onFocus={e=>e.target.style.borderColor="rgba(33,150,243,0.5)"}
+                      onBlur={e=>e.target.style.borderColor="rgba(33,150,243,0.2)"}
                     />
                     <button onClick={sendMessage} disabled={!msgText.trim()||sending}
-                      style={{background:msgText.trim()&&!sending?"linear-gradient(135deg,#F59E0B,#B45309)":"rgba(139,92,246,0.2)",border:"none",borderRadius:22,padding:"10px 18px",fontSize:13,fontWeight:800,color:msgText.trim()&&!sending?"#fff":"rgba(139,92,246,0.5)",cursor:msgText.trim()&&!sending?"pointer":"not-allowed",whiteSpace:"nowrap",transition:"all 0.2s",boxShadow:msgText.trim()&&!sending?"0 2px 12px rgba(139,92,246,0.35)":"none"}}>
+                      style={{background:msgText.trim()&&!sending?"linear-gradient(135deg,#F59E0B,#B45309)":"rgba(33,150,243,0.2)",border:"none",borderRadius:22,padding:"10px 18px",fontSize:13,fontWeight:800,color:msgText.trim()&&!sending?"#fff":"rgba(33,150,243,0.5)",cursor:msgText.trim()&&!sending?"pointer":"not-allowed",whiteSpace:"nowrap",transition:"all 0.2s",boxShadow:msgText.trim()&&!sending?"0 2px 12px rgba(33,150,243,0.35)":"none"}}>
                       {sending?"…":"Enviar ↗"}
                     </button>
                   </div>
@@ -14807,21 +14886,21 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
             <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:14,padding:"0 20px"}}>
               {/* Ilustración */}
               <div style={{position:"relative",marginBottom:4}}>
-                <div style={{width:72,height:72,borderRadius:22,background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(180,83,9,0.08))",border:"1px solid rgba(139,92,246,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>💬</div>
-                <div style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,#F59E0B,#B45309)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",fontWeight:800,boxShadow:"0 2px 8px rgba(139,92,246,0.5)"}}>
+                <div style={{width:72,height:72,borderRadius:22,background:"#E8F4FF",border:"1px solid #BFDBFE",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34}}>💬</div>
+                <div style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,#F59E0B,#B45309)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",fontWeight:800,boxShadow:"0 2px 8px rgba(33,150,243,0.5)"}}>
                   {mutuals.length}
                 </div>
               </div>
               <div>
                 <div style={{fontWeight:900,color:C.text,fontSize:17,textAlign:"center",letterSpacing:"-0.4px",marginBottom:6}}>Tus mensajes privados</div>
                 <div style={{fontSize:13,color:C.muted,textAlign:"center",maxWidth:260,lineHeight:1.7}}>
-                  Selecciona una conversación o empieza una nueva. Solo con seguidores mutuos.
+                  {isEN?"Select a conversation or start a new one. Mutual followers only.":"Selecciona una conversación o empieza una nueva. Solo con seguidores mutuos."}
                 </div>
               </div>
               <button onClick={()=>setNewDM(true)}
-                style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:14,padding:"11px 28px",fontSize:13,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(139,92,246,0.4)",transition:"transform 0.15s,box-shadow 0.15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 20px rgba(139,92,246,0.5)";}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 4px 16px rgba(139,92,246,0.4)";}}>
+                style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:14,padding:"11px 28px",fontSize:13,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(33,150,243,0.4)",transition:"transform 0.15s,box-shadow 0.15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 20px rgba(33,150,243,0.5)";}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 4px 16px rgba(33,150,243,0.4)";}}>
                 ✏️ Nuevo mensaje
               </button>
             </div>
@@ -16655,7 +16734,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
 
 // ── PORTFOLIO TRACKER PAGE ───────────────────────────────────────────────────
 // ── IA NEXO PORTFOLIO SCORE ──────────────────────────────────────────────────
-function calcPortfolioScore(positions, livePrices) {
+function calcPortfolioScore(positions, livePrices, isEN=false) {
   if (!positions || positions.length < 2) return null;
   const CRYPTO = new Set(['BTC','ETH','SOL','BNB','XRP','ADA','DOGE','SHIB','AVAX','MATIC','LINK','UNI','ATOM','DOT','LTC','NEAR','FTM','APT','ARB','OP']);
   const TECH   = new Set(['NVDA','AAPL','MSFT','GOOGL','GOOG','META','AMZN','AMD','TSLA','INTC','QCOM','AVGO','TSM','ASML','ARM','SMCI','MU','AMAT','LRCX','ORCL','CRM','NOW','ADBE','SNOW']);
@@ -16690,22 +16769,22 @@ function calcPortfolioScore(positions, livePrices) {
   const gradeColor = total>=80?'#00D26A':total>=64?'#F59E0B':'#FF4D6A';
   // Insights
   const insights=[];
-  if(topW>50) insights.push({icon:'⚠️',col:'#F59E0B',txt:`${topPos.tk} representa el ${topW.toFixed(0)}% de tu portfolio — alta concentración en un solo activo.`});
-  else insights.push({icon:'✅',col:'#00D26A',txt:`Buena distribución: ningún activo domina más del ${topW.toFixed(0)}% del total.`});
-  if(cryptoW>65) insights.push({icon:'🔮',col:'#FCD34D',txt:`${cryptoW.toFixed(0)}% en crypto — muy alta volatilidad. Considera balancear con acciones de valor o ETFs.`});
-  else if(techW>70) insights.push({icon:'💡',col:'#38BDF8',txt:`${techW.toFixed(0)}% en tecnología. NVDA, AMD y META se mueven juntas — no es diversificación real.`});
-  else if(cryptoW>0&&techW>0) insights.push({icon:'✅',col:'#00D26A',txt:`Buena mezcla de crypto y acciones. Considera agregar commodities o dividendos para más balance.`});
-  else insights.push({icon:'📊',col:'#38BDF8',txt:`Considera agregar activos no correlacionados como GLD, TLT o acciones internacionales.`});
-  if(overallPnl>15) insights.push({icon:'🚀',col:'#00D26A',txt:`+${overallPnl.toFixed(1)}% de retorno total — excelente. Considera asegurar ganancias en las posiciones más ganadoras.`});
-  else if(overallPnl>0) insights.push({icon:'📈',col:'#00D26A',txt:`+${overallPnl.toFixed(1)}% de retorno. En positivo — mantén la disciplina y respeta tus stop losses.`});
-  else if(overallPnl>-10) insights.push({icon:'⏳',col:'#94A3B8',txt:`${overallPnl.toFixed(1)}% ligeramente en rojo. Evalúa si tu tesis de inversión sigue siendo válida.`});
-  else insights.push({icon:'🛑',col:'#FF4D6A',txt:`${overallPnl.toFixed(1)}% en pérdida. Revisa tus stop losses y considera reducir riesgo en las posiciones más afectadas.`});
-  if(bigLosers.length>0){const w=bigLosers.reduce((a,b)=>a.pnlPct<b.pnlPct?a:b);insights.push({icon:'🔴',col:'#FF4D6A',txt:`${w.tk} lleva ${w.pnlPct.toFixed(1)}% de pérdida — si rompió tu stop loss, es momento de reevaluar.`});}
+  if(topW>50) insights.push({icon:'⚠️',col:'#F59E0B',txt:isEN?`${topPos.tk} is ${topW.toFixed(0)}% of your portfolio — high concentration in a single asset.`:`${topPos.tk} representa el ${topW.toFixed(0)}% de tu portfolio — alta concentración en un solo activo.`});
+  else insights.push({icon:'✅',col:'#00D26A',txt:isEN?`Good distribution: no asset dominates more than ${topW.toFixed(0)}% of the total.`:`Buena distribución: ningún activo domina más del ${topW.toFixed(0)}% del total.`});
+  if(cryptoW>65) insights.push({icon:'🔮',col:'#FCD34D',txt:isEN?`${cryptoW.toFixed(0)}% in crypto — very high volatility. Consider balancing with value stocks or ETFs.`:`${cryptoW.toFixed(0)}% en crypto — muy alta volatilidad. Considera balancear con acciones de valor o ETFs.`});
+  else if(techW>70) insights.push({icon:'💡',col:'#38BDF8',txt:isEN?`${techW.toFixed(0)}% in tech. NVDA, AMD and META move together — not real diversification.`:`${techW.toFixed(0)}% en tecnología. NVDA, AMD y META se mueven juntas — no es diversificación real.`});
+  else if(cryptoW>0&&techW>0) insights.push({icon:'✅',col:'#00D26A',txt:isEN?`Good mix of crypto and stocks. Consider adding commodities or dividends for more balance.`:`Buena mezcla de crypto y acciones. Considera agregar commodities o dividendos para más balance.`});
+  else insights.push({icon:'📊',col:'#38BDF8',txt:isEN?`Consider adding uncorrelated assets like GLD, TLT or international stocks.`:`Considera agregar activos no correlacionados como GLD, TLT o acciones internacionales.`});
+  if(overallPnl>15) insights.push({icon:'🚀',col:'#00D26A',txt:isEN?`+${overallPnl.toFixed(1)}% total return — excellent. Consider locking in gains on your biggest winners.`:`+${overallPnl.toFixed(1)}% de retorno total — excelente. Considera asegurar ganancias en las posiciones más ganadoras.`});
+  else if(overallPnl>0) insights.push({icon:'📈',col:'#00D26A',txt:isEN?`+${overallPnl.toFixed(1)}% return. In the green — keep your discipline and respect your stops.`:`+${overallPnl.toFixed(1)}% de retorno. En positivo — mantén la disciplina y respeta tus stop losses.`});
+  else if(overallPnl>-10) insights.push({icon:'⏳',col:'#94A3B8',txt:isEN?`${overallPnl.toFixed(1)}% slightly in the red. Reassess whether your investment thesis still holds.`:`${overallPnl.toFixed(1)}% ligeramente en rojo. Evalúa si tu tesis de inversión sigue siendo válida.`});
+  else insights.push({icon:'🛑',col:'#FF4D6A',txt:isEN?`${overallPnl.toFixed(1)}% in loss. Review your stop losses and consider cutting risk on the worst positions.`:`${overallPnl.toFixed(1)}% en pérdida. Revisa tus stop losses y considera reducir riesgo en las posiciones más afectadas.`});
+  if(bigLosers.length>0){const w=bigLosers.reduce((a,b)=>a.pnlPct<b.pnlPct?a:b);insights.push({icon:'🔴',col:'#FF4D6A',txt:isEN?`${w.tk} is down ${w.pnlPct.toFixed(1)}% — if it broke your stop loss, it is time to reassess.`:`${w.tk} lleva ${w.pnlPct.toFixed(1)}% de pérdida — si rompió tu stop loss, es momento de reevaluar.`});}
   return { total, grade, gradeColor, divScore, concScore, sectScore, perfScore, riskScore, insights:insights.slice(0,3), topPos, topW, overallPnl, cryptoW, techW, n };
 }
 
 function PortfolioIAScoreCard({ positions, livePrices, isEN, onShare }) {
-  const sc = calcPortfolioScore(positions, livePrices);
+  const sc = calcPortfolioScore(positions, livePrices, isEN);
   if (!sc) return null;
   const { total, grade, gradeColor, divScore, concScore, sectScore, perfScore, riskScore, insights } = sc;
   const ARC_R=54, CIRC=Math.PI*ARC_R, dash=(total/100)*CIRC;
@@ -19757,6 +19836,24 @@ function AdminDashboard(){
             </button>
           ))}
         </div>
+        <button onClick={async()=>{
+          // 📣 Enviar push a TODOS los suscriptores
+          const title=prompt("Título de la notificación:","🔥 NexoTrade");
+          if(!title) return;
+          const body=prompt("Mensaje:","Hay picks PREMIUM nuevos esta semana 🚀");
+          if(!body) return;
+          const url=prompt("URL al hacer clic (opcional):","https://nexotradeia.com")||"/";
+          try{
+            const {data:{session}}=await supabase.auth.getSession();
+            if(!session?.access_token){ alert("Sesión no válida — vuelve a iniciar sesión."); return; }
+            const r=await fetch("/api/webhook?action=push",{method:"POST",headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({title,body,url,token:session.access_token})});
+            const d=await r.json();
+            alert(r.ok?`📣 Push enviado: ${d.sent} ok · ${d.failed} fallidos · ${d.total} suscriptores`:`❌ Error: ${d.error}`);
+          }catch(e){ alert("❌ Error: "+e.message); }
+        }} style={{background:"linear-gradient(135deg,#D97706,#F59E0B)",border:"none",borderRadius:10,padding:"8px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6,marginRight:8}}>
+          📣 Push
+        </button>
         <button onClick={()=>window.location.reload()} style={{background:"#0066FF",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
           + Nuevo
         </button>
@@ -20301,7 +20398,7 @@ export default function App(){
       {n:"Luis H.",loc:"Perú"},        {n:"Camila T.",loc:"Venezuela"},
       {n:"Javier O.",loc:"México"},    {n:"Isabella N.",loc:"Colombia"},
     ];
-    const actions=["se acaba de registrar 🎉","compró membresía PREMIUM ⭐","hizo su primer pick 🎯","se unió a la comunidad 🚀"];
+    const actions=lang==="en"?["just signed up 🎉","bought PREMIUM membership ⭐","made their first pick 🎯","joined the community 🚀"]:["se acaba de registrar 🎉","compró membresía PREMIUM ⭐","hizo su primer pick 🎯","se unió a la comunidad 🚀"];
     let idx=0;
     const show=()=>{
       const p=names[idx%names.length];
@@ -20413,16 +20510,24 @@ export default function App(){
       const perm = await Notification.requestPermission();
       if(perm==="granted"){
         const reg = await navigator.serviceWorker.ready;
-        // Solo mostramos notificación de bienvenida local (no requiere servidor)
-        reg.showNotification("🔔 NexoTrade activado",{
-          body:"Te avisaremos cuando haya picks PREMIUM nuevos y posts trending.",
+        reg.showNotification(lang==="en"?"🔔 NexoTrade activated":"🔔 NexoTrade activado",{
+          body:lang==="en"?"We'll notify you about new PREMIUM picks and trending posts.":"Te avisaremos cuando haya picks PREMIUM nuevos y posts trending.",
           icon:"/logo_nexo.png",
           badge:"/favicon.svg",
           tag:"nexo-welcome-push",
         });
+        // Suscripción REAL a Web Push (Sesión 12) — guarda endpoint en Supabase
+        subscribeWebPush(user);
       }
     }catch(e){}
   };
+
+  // Si el permiso ya está concedido, sincronizar la suscripción push al cargar
+  useEffect(()=>{
+    if(typeof Notification==="undefined" || Notification.permission!=="granted") return;
+    const t = setTimeout(()=>subscribeWebPush(user), 8000);
+    return ()=>clearTimeout(t);
+  },[user?.id]);
 
   // Helper: guardar/borrar usuario en localStorage + state
   const saveUser = useCallback((u) => {
@@ -20778,12 +20883,12 @@ export default function App(){
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)}/>;
-    if(page===14) return <EconCalendarPage/>;
+    if(page===14) return <EconCalendarPage lang={lang}/>;
     if(page===18) return <CommoditiesPage/>;
-    if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
-    if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
-    if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} />;
-    if(page===15) return <DividendCalendarPage/>;
+    if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} lang={lang}/>;
+    if(page===15) return <DividendCalendarPage lang={lang}/>;
     if(page===16) return <IpoCalendarPage/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;

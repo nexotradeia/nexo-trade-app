@@ -1,9 +1,69 @@
-// api/webhook.js — NEXO TRADE Stripe Webhook Handler
+// api/webhook.js — NEXO TRADE Stripe Webhook Handler + Push Broadcast
 import crypto from 'crypto';
+
+const SUPA_URL  = 'https://glvrzrtatekuuhwtzzhd.supabase.co';
+const SUPA_ANON = 'sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl';
+const VAPID_PUBLIC = 'BHEABdZbcAr7ka890b3KOA15ZwgKVBrMxMWxUw217-tE-BmDz11HFjzWzPbuoHmm7-Rbh6m9NPZD5zjevUCHtOY';
+const PUSH_ADMINS = ['mariangat26@gmail.com', 'mariagalarraga2013@gmail.com'];
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // ── PUSH BROADCAST (Sesión 12): POST /api/webhook?action=push ─────────────
+  // Body: { title, body, url, token }  — token = access_token Supabase de un admin
+  if (req.query?.action === 'push') {
+    try {
+      const chunks = [];
+      for await (const c of req) chunks.push(c);
+      const { title, body, url, token } = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+      if (!token) return res.status(401).json({ error: 'token requerido' });
+      if (!title || !body) return res.status(400).json({ error: 'title y body requeridos' });
+
+      // Verificar que el token pertenece a un admin real
+      const ur = await fetch(`${SUPA_URL}/auth/v1/user`, {
+        headers: { Authorization: `Bearer ${token}`, apikey: SUPA_ANON },
+      });
+      const u = await ur.json().catch(() => ({}));
+      if (!ur.ok || !PUSH_ADMINS.includes((u.email || '').toLowerCase())) {
+        return res.status(403).json({ error: 'no autorizado' });
+      }
+
+      if (!process.env.SUPABASE_SERVICE_KEY) return res.status(500).json({ error: 'falta SUPABASE_SERVICE_KEY' });
+      const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
+      if (!VAPID_PRIVATE) return res.status(500).json({ error: 'falta VAPID_PRIVATE_KEY' });
+
+      const { createClient } = await import('@supabase/supabase-js');
+      const sb = createClient(SUPA_URL, process.env.SUPABASE_SERVICE_KEY);
+      const { data: subs, error } = await sb.from('push_subscriptions').select('endpoint,p256dh,auth').limit(5000);
+      if (error) return res.status(500).json({ error: error.message });
+      if (!subs?.length) return res.status(200).json({ sent: 0, failed: 0, total: 0 });
+
+      const webpushMod = await import('web-push');
+      const webpush = webpushMod.default || webpushMod;
+      webpush.setVapidDetails('mailto:info@nexotradeia.com', VAPID_PUBLIC, VAPID_PRIVATE);
+
+      let sent = 0, failed = 0;
+      const stale = [];
+      await Promise.allSettled(subs.map(async (s) => {
+        try {
+          await webpush.sendNotification(
+            { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+            JSON.stringify({ title, body, url: url || '/' }),
+            { TTL: 86400 }
+          );
+          sent++;
+        } catch (e) {
+          failed++;
+          if (e.statusCode === 404 || e.statusCode === 410) stale.push(s.endpoint);
+        }
+      }));
+      if (stale.length) await sb.from('push_subscriptions').delete().in('endpoint', stale);
+      return res.status(200).json({ sent, failed, total: subs.length, cleaned: stale.length });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
   }
 
   const sig = req.headers['stripe-signature'];
