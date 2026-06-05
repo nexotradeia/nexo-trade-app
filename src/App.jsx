@@ -3409,7 +3409,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
               <button onClick={()=>setImage(null)} style={{position:"absolute",top:5,right:5,background:"rgba(0,0,0,0.6)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
             </div>
           )}
-          {showGif&&<GifPicker onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)} onText={txt=>{setText(prev=>prev+txt);}}/>}
+          {showGif&&<GifPicker lang={lang} onSelect={url=>{setImage(url);setShowGif(false);}} onClose={()=>setShowGif(false)} onText={txt=>{setText(prev=>prev+txt);}}/>}
 
           {/* ── Link input + preview ── */}
           {showLink&&(
@@ -3533,7 +3533,7 @@ const TRADING_EMOJIS = [
   "⬆️","⬇️","🟢","🔴","🟡","📌","🏦","🛑","🎰","🌊","🏄","🧲","🪙","₿","Ξ","🦅"
 ];
 
-const QUICK_REACTIONS = [
+const QUICK_REACTIONS_FN = (isEN=false) => [
   {label:"🚀 To the moon!",   text:"🚀 To the moon! "},
   {label:"💎 Diamond hands",  text:"💎 Diamond hands! "},
   {label:"📈 Alcista total",  text:"📈 Alcista total en este ticker! "},
@@ -3559,7 +3559,8 @@ const STICKERS = [
   {id:"s8", label:"LFG! ⚡",       emoji:"⚡", bg:"linear-gradient(135deg,#ea580c,#c2410c)", text:"LFG!"},
 ];
 
-function GifPicker({onSelect,onClose,onText}){
+function GifPicker({onSelect,onClose,onText,lang="es"}){
+  const isEN = lang==="en";
   const [tab,setTab]         = useState("gif");
   const [q,setQ]             = useState("");
   const [gifs,setGifs]       = useState([]);
@@ -3643,7 +3644,7 @@ function GifPicker({onSelect,onClose,onText}){
         {tab==="reaction"&&<>
           <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Inserta una frase rápida en tu post:</div>
           <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:260,overflowY:"auto"}}>
-            {QUICK_REACTIONS.map(r=>(
+            {QUICK_REACTIONS_FN(isEN).map(r=>(
               <button key={r.label} onClick={()=>{ onText&&onText(r.text); onClose(); }}
                 style={{background:"none",border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 12px",cursor:"pointer",textAlign:"left",fontSize:12,color:C.text,fontWeight:600,transition:"all 0.12s"}}
                 onMouseEnter={ev=>{ev.currentTarget.style.background=C.card2||"#f0f9ff";ev.currentTarget.style.borderColor=C.accent;}}
