@@ -1151,7 +1151,7 @@ function TickerTape({lang="es", onPremium}) {
   const doubled = [...merged, ...merged]; // duplicar para el loop infinito
   return (
     <div style={{background:"#0f172a",height:36,overflow:"hidden"}}>
-      <style>{`@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}} .tape{display:flex;animation:tape 36s linear infinite;width:max-content;} .tape:hover{animation-play-state:paused}`}</style>
+      <style>{`@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}} .tape{display:flex;animation:tape 60s linear infinite;width:max-content;} .tape:hover{animation-play-state:paused}`}</style>
       <div className="tape" style={{alignItems:"center",height:36}}>
         {doubled.map((item,i)=>item.promo?(
           <div key={i} onClick={onPremium}
@@ -5768,39 +5768,21 @@ function SponsoredPostCard({sp}){
   const [dismissed,setDismissed]=useState(false);
   if(dismissed) return null;
   return(
-    <div style={{
-      background:C.card,
-      border:`1.5px solid ${C.border}`,
-      borderRadius:18,
-      padding:"16px 18px",
-      margin:"8px 0",
-      position:"relative",
-      boxShadow:C.shadow,
-    }}>
-      {/* Header: logo-avatar + brand + badge */}
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-        <div style={{width:42,height:42,borderRadius:12,background:sp.brandColor+"20",border:`1.5px solid ${sp.brandColor}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>
-          {sp.logo}
+    <a href={sp.url} target="_blank" rel="noopener noreferrer"
+      style={{display:"flex",alignItems:"center",gap:10,background:"#F9FAFB",border:"1px solid rgba(0,0,0,0.07)",borderRadius:12,padding:"10px 14px",margin:"6px 0",textDecoration:"none",transition:"all 0.15s",cursor:"pointer"}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor=(sp.brandColor||"#0066FF")+"55";e.currentTarget.style.background=(sp.brandColor||"#0066FF")+"08";}}
+      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(0,0,0,0.07)";e.currentTarget.style.background="#F9FAFB";}}>
+      <div style={{width:34,height:34,borderRadius:9,background:(sp.brandColor||"#0066FF")+"18",border:`1px solid ${(sp.brandColor||"#0066FF")}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{sp.logo}</div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:1}}>
+          <span style={{fontWeight:700,fontSize:12,color:"#0F172A"}}>{sp.brand}</span>
+          <span style={{fontSize:9,color:"#94A3B8",background:"rgba(0,0,0,0.04)",borderRadius:20,padding:"1px 7px",fontWeight:600}}>Patrocinado</span>
         </div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-            <span style={{fontWeight:800,fontSize:13.5,color:C.text}}>{sp.brand}</span>
-            <span style={{background:"rgba(0,102,255,0.08)",border:"1px solid rgba(0,102,255,0.18)",borderRadius:20,padding:"1px 8px",fontSize:9,color:C.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase"}}>Patrocinado</span>
-          </div>
-          <div style={{fontSize:11,color:C.muted,marginTop:1}}>NexoTrade Partner</div>
-        </div>
-        <button onClick={()=>setDismissed(true)} style={{background:"none",border:"none",color:C.muted,fontSize:20,cursor:"pointer",lineHeight:1,padding:"2px 6px",borderRadius:8,opacity:0.6}}>×</button>
+        <div style={{fontSize:11,color:"#64748B",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{sp.text}</div>
       </div>
-      {/* Texto */}
-      <p style={{margin:"0 0 14px",color:C.text,fontSize:13.5,lineHeight:1.65}}>{sp.text}</p>
-      {/* CTA */}
-      <a href={sp.url} target="_blank" rel="noopener noreferrer"
-        style={{display:"inline-flex",alignItems:"center",gap:6,background:sp.brandColor,color:"#fff",borderRadius:11,padding:"9px 22px",fontSize:13,fontWeight:700,textDecoration:"none",transition:"opacity 0.15s",boxShadow:`0 4px 14px ${sp.brandColor}33`}}
-        onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
-        onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
-        {sp.cta}
-      </a>
-    </div>
+      <span style={{fontSize:11,color:sp.brandColor||"#0066FF",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>{sp.cta} →</span>
+      <button onClick={e=>{e.preventDefault();e.stopPropagation();setDismissed(true);}} style={{background:"none",border:"none",color:"#94A3B8",fontSize:16,cursor:"pointer",lineHeight:1,padding:"2px 4px",flexShrink:0}}>×</button>
+    </a>
   );
 }
 
@@ -11930,24 +11912,24 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
       {/* Whale Alert popup disabled — too intrusive on mobile */}
 
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)"}}/>
+      <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
               <span style={{fontSize:28}}>🐋</span>
-              <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Flujo Institucional</div>
+              <div style={{fontSize:20,fontWeight:900,color:"#0F172A",letterSpacing:-0.5}}>{isEN?"Institutional Flow":"Flujo Institucional"}</div>
               <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800,display:"flex",alignItems:"center",gap:4}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
               </span>
             </div>
-            <div style={{fontSize:12,color:"#475569"}}>Options flow · Dark Pool prints · Sweeps institucionales</div>
+            <div style={{fontSize:12,color:"#1A5FAD"}}>Options flow · Dark Pool prints · {isEN?"Institutional sweeps":"Sweeps institucionales"}</div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
               {PREM_FILTERS.map(p=>(
                 <button key={p.k} onClick={()=>setMinPrem(p.k)}
-                  style={{background:minPrem===p.k?"rgba(139,92,246,0.2)":"transparent",border:`1px solid ${minPrem===p.k?"rgba(139,92,246,0.5)":"rgba(255,255,255,0.1)"}`,borderRadius:20,padding:"5px 10px",fontSize:11,fontWeight:700,color:minPrem===p.k?"#FCD34D":"#475569",cursor:"pointer"}}>
+                  style={{background:minPrem===p.k?"#1A5FAD":"#fff",border:`1px solid ${minPrem===p.k?"#1A5FAD":"#BFDBFE"}`,borderRadius:20,padding:"5px 10px",fontSize:11,fontWeight:700,color:minPrem===p.k?"#fff":"#1A5FAD",cursor:"pointer"}}>
                   {p.l}
                 </button>
               ))}
@@ -11958,9 +11940,9 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
             </button>
             {/* Full-screen toggle */}
             <button onClick={()=>setFullscreen(v=>!v)} title={fullscreen?"Salir de pantalla completa":"Pantalla completa"}
-              style={{background:fullscreen?"rgba(139,92,246,0.25)":"rgba(255,255,255,0.06)",border:`1px solid ${fullscreen?"rgba(139,92,246,0.5)":"rgba(255,255,255,0.12)"}`,borderRadius:10,padding:"7px 10px",fontSize:16,cursor:"pointer",lineHeight:1,color:fullscreen?"#FCD34D":"#94A3B8",transition:"all 0.2s"}}
-              onMouseEnter={e=>e.currentTarget.style.background=fullscreen?"rgba(139,92,246,0.35)":"rgba(255,255,255,0.1)"}
-              onMouseLeave={e=>e.currentTarget.style.background=fullscreen?"rgba(139,92,246,0.25)":"rgba(255,255,255,0.06)"}>
+              style={{background:fullscreen?"#1A5FAD":"#fff",border:`1px solid ${fullscreen?"#1A5FAD":"#BFDBFE"}`,borderRadius:10,padding:"7px 10px",fontSize:16,cursor:"pointer",lineHeight:1,color:fullscreen?"#fff":"#1A5FAD",transition:"all 0.2s"}}
+              onMouseEnter={e=>e.currentTarget.style.background=fullscreen?"#0C447C":"#F0F7FF"}
+              onMouseLeave={e=>e.currentTarget.style.background=fullscreen?"#1A5FAD":"#fff"}>
               {fullscreen?"⊠":"⛶"}
             </button>
           </div>
