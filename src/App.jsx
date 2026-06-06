@@ -5557,7 +5557,8 @@ function LiveConferenceModal({event, lang, onClose}){
 }
 
 // ── NEXO TERMÓMETRO — Fear & Greed Index ─────────────────────────────────────
-function NexoTermometro() {
+function NexoTermometro({lang="es"}) {
+  const isEN = lang==="en";
   const [cryptoFG, setCryptoFG] = useState(null);
   const [stockFG,  setStockFG]  = useState(null);
   const [loading,  setLoading]  = useState(true);
@@ -5589,7 +5590,9 @@ function NexoTermometro() {
   useEffect(()=>{ const id=setInterval(fetchAll,3600000); return()=>clearInterval(id); },[fetchAll]);
 
   const combined = cryptoFG!==null && stockFG!==null ? Math.round((cryptoFG+stockFG)/2) : cryptoFG??stockFG??50;
-  const label  = combined>=80?"Codicia Extrema":combined>=60?"Codicia":combined>=45?"Neutral":combined>=25?"Miedo":"Pánico Extremo";
+  const label  = isEN
+    ? (combined>=80?"Extreme Greed":combined>=60?"Greed":combined>=45?"Neutral":combined>=25?"Fear":"Extreme Fear")
+    : (combined>=80?"Codicia Extrema":combined>=60?"Codicia":combined>=45?"Neutral":combined>=25?"Miedo":"Pánico Extremo");
   const color  = combined>=80?"#22C55E":combined>=60?"#84CC16":combined>=45?"#EAB308":combined>=25?"#F97316":"#EF4444";
   const emoji  = combined>=80?"🤑":combined>=60?"😄":combined>=45?"😐":combined>=25?"😨":"😱";
 
@@ -5625,7 +5628,7 @@ function NexoTermometro() {
         </svg>
         {val===null?<div style={{color:"#334155",fontSize:11}}>--</div>:<>
           <div style={{fontWeight:900,fontSize:20,color:c,fontFamily:"monospace",lineHeight:1}}>{val}</div>
-          <div style={{fontSize:10,color:c,fontWeight:700,marginTop:2}}>{val>=80?"Codicia Ext.":val>=60?"Codicia":val>=45?"Neutral":val>=25?"Miedo":"Pánico"}</div>
+          <div style={{fontSize:10,color:c,fontWeight:700,marginTop:2}}>{isEN?(val>=80?"Ext. Greed":val>=60?"Greed":val>=45?"Neutral":val>=25?"Fear":"Panic"):(val>=80?"Codicia Ext.":val>=60?"Codicia":val>=45?"Neutral":val>=25?"Miedo":"Pánico")}</div>
         </>}
       </div>
     );
@@ -5637,8 +5640,8 @@ function NexoTermometro() {
       {/* Title */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,position:"relative"}}>
         <div>
-          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:14}}>🌡️ Termómetro NexoTrade</div>
-          <div style={{fontSize:10,color:"#64748B",marginTop:1}}>Índice Miedo/Codicia del mercado en español</div>
+          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:14}}>🌡️ {isEN?"NexoTrade Thermometer":"Termómetro NexoTrade"}</div>
+          <div style={{fontSize:10,color:"#64748B",marginTop:1}}>{isEN?"Market Fear/Greed index":"Índice Miedo/Codicia del mercado"}</div>
         </div>
         <div style={{textAlign:"right",display:"flex",alignItems:"center",gap:8}}>
           {updated&&<div style={{fontSize:10,color:"#64748B",fontWeight:600}}>🕐 {updated}</div>}
@@ -5648,7 +5651,7 @@ function NexoTermometro() {
       {/* Main gauge */}
       <div style={{textAlign:"center",marginBottom:10}}>
         {loading
-          ?<div style={{height:90,display:"flex",alignItems:"center",justifyContent:"center",color:"#475569",fontSize:11}}>⏳ Calculando índice...</div>
+          ?<div style={{height:90,display:"flex",alignItems:"center",justifyContent:"center",color:"#475569",fontSize:11}}>⏳ {isEN?"Calculating index...":"Calculando índice..."}</div>
           :<>
             <svg viewBox="0 0 220 115" width="180" height="92" style={{margin:"0 auto",display:"block"}}>
               <path d={arc(R,0,100)} stroke="rgba(255,255,255,0.06)" strokeWidth="14" fill="none" strokeLinecap="round"/>
@@ -5660,8 +5663,8 @@ function NexoTermometro() {
               <circle cx={CX} cy={CY} r="5" fill="white"/>
               <circle cx={CX} cy={CY} r="2.5" fill="#0F172A"/>
               <text x={CX} y={CY-12} textAnchor="middle" fill="#F1F5F9" fontSize="30" fontWeight="900" fontFamily="monospace">{combined}</text>
-              <text x="18" y="108" textAnchor="middle" fill="#EF4444" fontSize="7.5" fontWeight="700">PÁNICO</text>
-              <text x="202" y="108" textAnchor="middle" fill="#22C55E" fontSize="7.5" fontWeight="700">CODICIA</text>
+              <text x="18" y="108" textAnchor="middle" fill="#EF4444" fontSize="7.5" fontWeight="700">{isEN?"FEAR":"PÁNICO"}</text>
+              <text x="202" y="108" textAnchor="middle" fill="#22C55E" fontSize="7.5" fontWeight="700">{isEN?"GREED":"CODICIA"}</text>
             </svg>
             <div style={{marginTop:-2}}>
               <span style={{fontSize:16}}>{emoji}</span>
@@ -5673,10 +5676,10 @@ function NexoTermometro() {
       {/* Mini gauges */}
       {!loading&&<div style={{display:"flex",gap:8}}>
         <MiniGauge val={cryptoFG} label="Crypto" icon="₿"/>
-        <MiniGauge val={stockFG}  label="Acciones (S&P)" icon="📈"/>
+        <MiniGauge val={stockFG}  label={isEN?"Stocks (S&P)":"Acciones (S&P)"} icon="📈"/>
       </div>}
       <div style={{textAlign:"center",fontSize:9,color:"#475569",marginTop:8,fontWeight:600}}>
-        Crypto: Alternative.me Fear & Greed · Acciones: SPY+QQQ Finnhub · Actualización horaria
+        {isEN?"Crypto: Alternative.me Fear & Greed · Stocks: SPY+QQQ Finnhub · Hourly update":"Crypto: Alternative.me Fear & Greed · Acciones: SPY+QQQ Finnhub · Actualización horaria"}
       </div>
     </div>
   );
@@ -5722,7 +5725,8 @@ function MoverSparkline({dir, chg}){
   );
 }
 
-function TrendingPage({posts=[]}){
+function TrendingPage({posts=[],lang="es"}){
+  const isEN=lang==="en";
   const [quotes,setQuotes]=useState({});
   const [loading,setLoading]=useState(true);
   const [refreshing,setRefreshing]=useState(false);
@@ -5774,19 +5778,19 @@ function TrendingPage({posts=[]}){
   return(
     <div>
       {/* Termómetro NexoTrade */}
-      <NexoTermometro/>
+      <NexoTermometro lang={lang}/>
 
       {/* Header */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,flexWrap:"wrap"}}>
-        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>🔥 Trending en NexoTrade</h2>
+        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>🔥 {isEN?"Trending on NexoTrade":"Trending en NexoTrade"}</h2>
         <span style={{background:"rgba(239,68,68,0.12)",color:"#EF4444",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,border:"1px solid rgba(239,68,68,0.25)"}}>
-          ● ÚLTIMAS 24H
+          ● {isEN?"LAST 24H":"ÚLTIMAS 24H"}
         </span>
         {/* Refresh button */}
         <button onClick={()=>fetchQuotes(true)} disabled={refreshing||loading}
           style={{display:"flex",alignItems:"center",gap:5,background:refreshing?"rgba(15,76,129,0.15)":"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:20,padding:"4px 13px",fontSize:11,fontWeight:700,color:"#0F4C81",cursor:refreshing?"not-allowed":"pointer",transition:"all 0.2s"}}>
           <span style={{display:"inline-block",animation:refreshing?"spin 0.7s linear infinite":"none",fontSize:12}}>🔄</span>
-          {refreshing?"Actualizando…":"Refrescar"}
+          {refreshing?(isEN?"Refreshing…":"Actualizando…"):(isEN?"Refresh":"Refrescar")}
         </button>
         <span style={{marginLeft:"auto",fontSize:11,color:"#22c55e",fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
           <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>
@@ -5844,10 +5848,10 @@ function TrendingPage({posts=[]}){
                       <span style={{fontSize:11,color:C.muted2}}>{m.name}</span>
                     </div>
                     <div style={{fontSize:12,color:C.muted,lineHeight:1.5,marginBottom:8}}>
-                      <span style={{fontWeight:700,color:C.text}}>¿Por qué trending? </span>{m.why}
+                      <span style={{fontWeight:700,color:C.text}}>{isEN?"Why trending? ":"¿Por qué trending? "}</span>{m.why}
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-                      <span style={{fontSize:12,color:C.muted2}}>💬 <strong style={{color:C.text}}>{m.mentions}</strong> menciones</span>
+                      <span style={{fontSize:12,color:C.muted2}}>💬 <strong style={{color:C.text}}>{m.mentions}</strong> {isEN?"mentions":"menciones"}</span>
                       {/* Badge */}
                       <span style={{
                         background:`${m.badgeColor}18`,
@@ -21374,7 +21378,7 @@ export default function App(){
     if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')}/>;
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
-    if(page===7) return <TrendingPage posts={posts}/>;
+    if(page===7) return <TrendingPage posts={posts} lang={lang}/>;
     if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
