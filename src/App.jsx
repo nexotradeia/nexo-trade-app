@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 21:15:45 Sesión 14 — Educación (Webinars+Academia) agrupada en Tools, barra más limpia
+// NEXO TRADE — build: 2026-06-06 22:04:06 Sesión 14 — móvil: hamburger, chatbot menos invasivo, ticker grueso, skeleton loader, fix heatmap
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1221,19 +1221,19 @@ function TickerTape({lang="es", onPremium}) {
   });
   const doubled = [...merged, ...merged]; // duplicar para el loop infinito
   return (
-    <div style={{background:"#0f172a",height:36,overflow:"hidden"}}>
+    <div style={{background:"linear-gradient(180deg,#0b1426,#0f172a)",height:42,overflow:"hidden",borderBottom:"1px solid #1e293b"}}>
       <style>{`@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}} .tape{display:flex;animation:tape 95s linear infinite;width:max-content;} .tape:hover{animation-play-state:paused}`}</style>
-      <div className="tape" style={{alignItems:"center",height:36}}>
+      <div className="tape" style={{alignItems:"center",height:42}}>
         {doubled.map((item,i)=>item.promo?(
           <div key={i} onClick={onPremium}
             style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap",cursor:"pointer",background:"linear-gradient(90deg,rgba(245,158,11,0.12),rgba(15,94,104,0.06))"}}>
             <span style={{color:"#FCD34D",fontSize:11,fontWeight:800,letterSpacing:0.2}}>{item.promo}</span>
           </div>
         ):(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:7,padding:"0 16px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap"}}>
-            <span style={{color:"#e2e8f0",fontWeight:700,fontSize:12,fontFamily:"monospace"}}>${item.ticker}</span>
-            <span style={{color:"#94a3b8",fontSize:11,fontFamily:"monospace"}}>{item.price}</span>
-            <span style={{color:item.change>=0?"#00d4aa":"#f87171",fontSize:11,fontWeight:700,fontFamily:"monospace"}}>{fmtChg(item.change)}</span>
+          <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"0 16px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap"}}>
+            <span style={{color:"#fff",fontWeight:800,fontSize:13,fontFamily:"monospace",letterSpacing:0.2}}>${item.ticker}</span>
+            <span style={{color:"#cbd5e1",fontSize:12,fontWeight:600,fontFamily:"monospace"}}>{item.price}</span>
+            <span style={{color:"#fff",fontSize:12.5,fontWeight:800,fontFamily:"monospace",background:item.change>=0?"#16a34a":"#dc2626",borderRadius:6,padding:"2px 7px",display:"inline-flex",alignItems:"center",gap:2}}>{item.change>=0?"▲":"▼"}{fmtChg(item.change).replace(/^[+-]/,"")}</span>
             {item.earning&&<span style={{background:"#f59e0b22",color:"#f59e0b",border:"1px solid #f59e0b55",borderRadius:4,padding:"1px 5px",fontSize:9,fontWeight:800}}>📅 EARN</span>}
           </div>
         ))}
@@ -8233,7 +8233,7 @@ function ForwardRatesCalc({lang="es"}){
 function CurrencyHeatMap({lang="es"}){
   const isEN=lang==="en";const[rows,setRows]=useState(null);const[loading,setLoading]=useState(true);
   useEffect(()=>{let c=false;const load=()=>{fetch("/api/data?type=quotes&set=forex").then(r=>r.json()).then(j=>{if(!c){setRows(j.rows||[]);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});};load();const iv=setInterval(load,60000);return()=>{c=true;clearInterval(iv);};},[]);
-  const data=(rows||[]).filter(r=>r.s.includes("=X"));
+  const data=(rows||[]);
   const cell=v=>{const a=Math.min(Math.abs(v)/2,1);return v>=0?`rgba(22,163,74,${0.12+a*0.45})`:`rgba(220,38,38,${0.12+a*0.45})`;};
   return(
     <ToolShell emoji="🌡️" title={isEN?"Currencies Heat Map":"Mapa de Calor de Divisas"} desc={isEN?"Today's % move across major FX pairs. Green = up, red = down.":"Movimiento % de hoy en los pares de divisas principales. Verde = sube, rojo = baja."}>
@@ -8515,6 +8515,46 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
       )}
     </div>
   );
+}
+
+// ── MENÚ HAMBURGER MÓVIL — drawer con todo (reemplaza las 2 filas de nav) ─────
+function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPremium=false}){
+  if(!open) return null;
+  const isEN=lang==="en";
+  const go=idx=>{onClose();onNavigate(idx);};
+  const SECTIONS=[
+    {t:isEN?"Main":"Principal",items:[["🔥 Feed",0],["⚡ Stock Pick IA",3],["🚀 Movers 24H",7],["📅 Earnings",6],[isEN?"📰 News":"📰 Noticias",5],[isEN?"💬 Messages":"💬 Mensajes",22],["🏆 "+(isEN?"Leaderboard":"Ranking"),40]]},
+    {t:isEN?"📅 Calendars":"📅 Calendarios",items:[[isEN?"Economic":"Económico",14],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
+    {t:isEN?"🧮 Calculators":"🧮 Calculadoras",items:[["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
+    {t:isEN?"💱 Currencies":"💱 Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",51],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
+    {t:isEN?"📊 Investing":"📊 Inversión",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
+    {t:isEN?"🌐 Markets":"🌐 Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow Premium",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
+    {t:isEN?"📚 Education":"📚 Educación",items:[["Webinars",11],[isEN?"Academy":"Academia",12]]},
+  ];
+  return(<>
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:99996,backdropFilter:"blur(2px)"}}/>
+    <div style={{position:"fixed",top:0,left:0,bottom:0,width:"87vw",maxWidth:350,background:"#fff",zIndex:99997,overflowY:"auto",boxShadow:"8px 0 50px rgba(0,0,0,0.35)",display:"flex",flexDirection:"column",animation:"nexo-slidein 0.25s ease"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderBottom:`1px solid ${C.border}`,position:"sticky",top:0,background:"#fff",zIndex:2}}>
+        <span style={{fontWeight:900,fontSize:17,color:"#0F4C81",fontFamily:"'Space Grotesk',sans-serif"}}>NexoTrade</span>
+        <button onClick={onClose} style={{background:C.card2||"#f1f5f9",border:"none",borderRadius:"50%",width:32,height:32,fontSize:16,color:C.muted,cursor:"pointer"}}>✕</button>
+      </div>
+      <div style={{padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
+        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:12,padding:"11px",color:"#1B1303",fontWeight:900,fontSize:14,cursor:"pointer"}}>✦ {isEN?"Go Premium — $9.99/mo":"Hazte Premium — $9.99/mes"}</button>}
+        <button onClick={()=>{onClose();onAI&&onAI();}} style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:12,padding:"11px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer"}}>🤖 {isEN?"Ask the AI":"Preguntar a la IA"}</button>
+      </div>
+      <div style={{padding:"0 10px 28px"}}>
+        {SECTIONS.map(s=>(
+          <div key={s.t} style={{marginBottom:10}}>
+            <div style={{fontSize:11,fontWeight:900,color:"#0F172A",letterSpacing:0.3,padding:"6px 8px",borderBottom:`1px solid ${C.border}`,marginBottom:2}}>{s.t}</div>
+            {s.items.map(([l,idx])=>(
+              <button key={l} onClick={()=>go(idx)} style={{display:"block",width:"100%",textAlign:"left",background:"none",border:"none",cursor:"pointer",padding:"9px 10px",fontSize:13.5,fontWeight:600,color:"#1A5FAD",fontFamily:"inherit",borderRadius:8}}
+                onTouchStart={()=>{}}>{l}</button>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  </>);
 }
 
 // ── BONOS — mini widget de rendimientos del Tesoro USA (sidebar) ──────────────
@@ -21938,6 +21978,7 @@ export default function App(){
   const presenceChRef = useRef(null);
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]           = useState(false);
+  const [showMobileMenu,setShowMobileMenu] = useState(false);
   const [aiHidden,setAiHidden]       = useState(false);
   // Ocultar bot flotante al scrollear hacia abajo (patrón Instagram/TikTok) — crítico en mobile
   const [aiScrollHide,setAiScrollHide] = useState(false);
@@ -22844,6 +22885,13 @@ export default function App(){
         .nexo-btn-alerts { display: flex !important; }
         .nexo-hide-mobile { display: none !important; }
         .nexo-logout-mobile { display: flex !important; }
+        /* Chatbot IA menos invasivo en móvil: sin burbuja ancha y botón más arriba/pequeño */
+        .nexo-ai-bubble { display: none !important; }
+        .nexo-ai-fab { bottom: 76px !important; }
+        .nexo-ai-fab button { width: 46px !important; height: 46px !important; font-size: 21px !important; }
+        /* Móvil: ocultar las 2 filas de tabs (van al hamburger) y mostrar el hamburger */
+        .nexo-tabs { display: none !important; }
+        .nexo-only-mobile { display: flex !important; }
 
         /* ── TABS ── */
         .nexo-tabs { justify-content: flex-start !important; }
@@ -23160,6 +23208,12 @@ export default function App(){
       {/* NAVBAR */}
       <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,height:52,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
+
+          {/* Hamburger — solo móvil */}
+          <button className="nexo-only-mobile" onClick={()=>setShowMobileMenu(true)} title="Menú"
+            style={{display:"none",width:40,height:40,borderRadius:11,border:"1.5px solid rgba(15,76,129,0.25)",background:"transparent",cursor:"pointer",alignItems:"center",justifyContent:"center",flexShrink:0,padding:0}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F4C81" strokeWidth="2.4" strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
 
           {/* Logo — integrado al navbar */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
@@ -23839,7 +23893,7 @@ export default function App(){
 
       {/* ── CHATBOT FLOTANTE IA ── */}
       {!showAI && !aiHidden && (
-        <div style={{
+        <div className="nexo-ai-fab" style={{
           position:"fixed", bottom:24, [aiSide]:24,
           zIndex:8900, display:"flex",
           flexDirection: aiSide==="right" ? "column" : "column",
@@ -23851,7 +23905,7 @@ export default function App(){
         }}>
           {/* Bubble tooltip */}
           {!aiBubbleOff && (
-            <div style={{
+            <div className="nexo-ai-bubble" style={{
               background:"linear-gradient(135deg,#0B1A2E,#0D2244)",
               border:"1px solid rgba(15,76,129,0.5)",
               borderRadius:14, padding:"9px 12px 9px 14px",
@@ -23927,6 +23981,7 @@ export default function App(){
       )}
       {showAlerts&&<AlertsPanel lang={lang} user={user} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase}/>}
+      <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
       <PointToast show={toast.show} points={toast.points} reason={toast.reason}/>
     </div>
     </PriceProvider>
