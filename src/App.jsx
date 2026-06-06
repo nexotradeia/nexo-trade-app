@@ -796,6 +796,7 @@ const NAV_ICOS = {
   paper:       <><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><rect x="2" y="6" width="20" height="12" rx="2"/></>,
   star:        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>,
   lock:        <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
+  globe:       <><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>,
 };
 const NavIco = ({name, size=17}) => {
   const inner = NAV_ICOS[name];
@@ -20326,11 +20327,11 @@ function AdminDashboard(){
     <div style={{maxWidth:1200,margin:"0 auto",padding:"0 4px 40px"}}>
 
       {/* ── NAVBAR ADMIN ── */}
-      <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"0 24px",marginBottom:20,display:"flex",alignItems:"center",gap:0,height:60,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+      <div className="nexo-admin-navbar" style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"0 24px",marginBottom:20,display:"flex",alignItems:"center",gap:0,minHeight:60,boxShadow:"0 1px 3px rgba(0,0,0,0.05)",flexWrap:"wrap",overflowX:"auto"}}>
         <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginRight:32,letterSpacing:-0.5}}>
           <span style={{fontFamily:"'Space Grotesk',sans-serif",letterSpacing:-0.5}}><span style={{color:"#0F4C81"}}>Nexo</span>Trade</span>
         </div>
-        <div style={{display:"flex",gap:2,flex:1}}>
+        <div style={{display:"flex",gap:2,flex:1,overflowX:"auto",scrollbarWidth:"none"}}>
           {TABS.map(t=>(
             <button key={t.k} onClick={()=>setTab(t.k)} style={{padding:"6px 18px",borderRadius:8,border:"none",fontSize:13,fontWeight:tab===t.k?700:500,cursor:"pointer",background:tab===t.k?"#0F4C81":"transparent",color:tab===t.k?"#fff":"#6B7280",transition:"all 0.15s"}}>
               {t.l}
@@ -20364,7 +20365,7 @@ function AdminDashboard(){
       {tab==="dashboard" && (<>
 
         {/* KPI Cards */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}}>
+        <div className="nexo-admin-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:14,marginBottom:20}}>
           {[
             {label:"TOTAL USUARIOS",   value:stats.totalUsers.toLocaleString(), badge:`↑ ${stats.newWeek}%`, badgeUp:true,  sub:"vs mes anterior"},
             {label:"ACTIVOS HOY",      value:stats.activosHoy.toLocaleString(), badge:`↑ ${Math.round(stats.activosHoy/Math.max(stats.totalUsers,1)*100)}%`, badgeUp:true, sub:"últimas 24h"},
@@ -20385,7 +20386,7 @@ function AdminDashboard(){
         </div>
 
         {/* Main grid: tabla + sidebar */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 280px",gap:16,alignItems:"start"}}>
+        <div className="nexo-admin-overview" style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 280px",gap:16,alignItems:"start"}}>
 
           {/* Tabla usuarios */}
           <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,overflow:"hidden",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
@@ -20401,7 +20402,7 @@ function AdminDashboard(){
             </div>
 
             {/* Cabecera tabla */}
-            <div style={{display:"grid",gridTemplateColumns:"2fr 80px 1fr 100px",gap:0,padding:"0 22px 8px",borderBottom:"1px solid #EBEBEB"}}>
+            <div style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 80px minmax(0,1fr) 100px",gap:0,padding:"0 22px 8px",borderBottom:"1px solid #EBEBEB"}}>
               {["USUARIO","PLAN","LOGINS / MES","ÚLTIMO ACCESO"].map(h=>(
                 <div key={h} style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:0.8}}>{h}</div>
               ))}
@@ -20409,7 +20410,7 @@ function AdminDashboard(){
 
             {/* Filas */}
             {filtered.slice(0,20).map((u,i)=>(
-              <div key={u.id} style={{display:"grid",gridTemplateColumns:"2fr 80px 1fr 100px",gap:0,padding:"13px 22px",borderBottom:i<filtered.length-1?"1px solid #F5F5F5":"none",alignItems:"center",transition:"background 0.1s"}}
+              <div key={u.id} style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 80px minmax(0,1fr) 100px",gap:0,padding:"13px 22px",borderBottom:i<filtered.length-1?"1px solid #F5F5F5":"none",alignItems:"center",transition:"background 0.1s"}}
                 onMouseEnter={e=>e.currentTarget.style.background="#FAFAFA"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 {/* Avatar + nombre */}
@@ -20583,7 +20584,7 @@ function AdminDashboard(){
       {/* ── USUARIOS TAB ── */}
       {tab==="usuarios" && (
         <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24}}>
+          <div className="nexo-admin-stats" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:12,marginBottom:24}}>
             {[
               {l:"Total registrados",v:stats.totalUsers,c:"#16A34A"},
               {l:"Nuevos esta semana",v:stats.newWeek,c:"#0F4C81"},
@@ -22109,6 +22110,7 @@ export default function App(){
             {label:lang==="en"?"Screener":"Screener",idx:36,locked:!effectivePremium,icon:"screener"},
             {label:lang==="en"?"Portfolio Oracle AI":"Portafolio Oracle IA",idx:37,locked:!effectivePremium,icon:"oracle"},
             {label:"Watchlist",idx:38,icon:"watchlist"},
+            {label:lang==="en"?"Global Radar":"Radar Global",idx:44,icon:"globe"},
             {label:lang==="en"?"Alerts":"Alertas",idx:42,icon:"alerts"},
             {label:lang==="en"?"Paper Trading":"Paper Trading",idx:9,locked:!effectivePremium,icon:"paper"},
           ].map(n=>{
