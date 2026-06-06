@@ -19213,19 +19213,19 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <button onClick={()=>setSavedFilters({search,minScore,filterPat,filterMkt,minChg})}
-              style={{background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#FCD34D",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+              style={{background:"rgba(15,76,129,0.10)",border:"1px solid rgba(15,76,129,0.30)",color:"#0F4C81",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
               💾 {isEN?"Save filters":"Guardar filtros"}
             </button>
             <button onClick={exportCSV}
-              style={{background:"rgba(16,185,129,0.12)",border:"1px solid rgba(16,185,129,0.3)",color:"#10B981",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+              style={{background:"rgba(15,76,129,0.10)",border:"1px solid rgba(15,76,129,0.30)",color:"#0F4C81",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
               ⬇️ {isEN?"Export CSV":"Exportar CSV"}
             </button>
             <button onClick={async()=>{setRefreshing(true);await fetchPricesREST();setRefreshing(false);}} disabled={refreshing}
-              style={{background:refreshing?"rgba(139,92,246,0.25)":"rgba(139,92,246,0.15)",border:"1px solid rgba(139,92,246,0.3)",color:"#FCD34D",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,opacity:refreshing?0.7:1}}>
+              style={{background:refreshing?"rgba(15,76,129,0.2)":"rgba(15,76,129,0.10)",border:"1px solid rgba(15,76,129,0.30)",color:"#0F4C81",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",gap:5,opacity:refreshing?0.7:1}}>
               {refreshing?"⏳":"↻"} {refreshing?(isEN?"Updating...":"Actualizando..."):(isEN?"Refresh":"Actualizar")}
             </button>
             <button onClick={()=>setFullScreen(f=>!f)} title={fullScreen?"Esc":""}
-              style={{background:fullScreen?"rgba(239,68,68,0.12)":"rgba(15,76,129,0.12)",border:`1px solid ${fullScreen?"rgba(239,68,68,0.3)":"rgba(15,76,129,0.3)"}`,color:fullScreen?"#EF4444":"#3B82F6",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+              style={{background:fullScreen?"rgba(239,68,68,0.12)":"rgba(15,76,129,0.12)",border:`1px solid ${fullScreen?"rgba(239,68,68,0.3)":"rgba(15,76,129,0.35)"}`,color:fullScreen?"#DC2626":"#0F4C81",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
               {fullScreen?"✕":"⛶"} {fullScreen?(isEN?"Exit":"Salir"):(isEN?"Full screen":"Pantalla completa")}
             </button>
           </div>
