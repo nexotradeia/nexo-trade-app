@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 20:08:24 Sesión 14 — traducción EN (Settings, Polymarket, Search)
+// NEXO TRADE — build: 2026-06-06 20:27:48 Sesión 14 — fix Vercel 12-func limit (router /api/data + /lib)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -11252,7 +11252,7 @@ function CommoditiesPage(){
   const fetchPrices = async () => {
     setLoading(true);
     try {
-      const r = await fetch("/api/commodities");
+      const r = await fetch("/api/data?type=commodities");
       const d = await r.json();
       if(d.commodities && d.commodities.length > 0){
         const newRows = {};
@@ -11420,7 +11420,7 @@ function EconCalendarPage({lang="es"}) {
   const fmtDate = d => new Date(d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"});
 
   useEffect(()=>{
-    fetch("/api/econCalendar")
+    fetch("/api/data?type=econ")
       .then(r=>r.json())
       .then(d=>{
         if(d.events && d.events.length > 5){
@@ -11606,7 +11606,7 @@ function DividendCalendarPage({lang="es"}) {
     setLoading(true);
     // Para años futuros usamos fallback con fechas proyectadas (+N años)
     const diffYears = parseInt(year) - curYear;
-    fetch(`/api/dividends?year=${year}`)
+    fetch(`/api/data?type=dividends&year=${year}`)
       .then(r=>r.json())
       .then(d=>{
         if(d.dividends && d.dividends.length > 3){
@@ -11783,7 +11783,7 @@ function IpoCalendarPage() {
     setLoading(true);
     const withAutoStatus = IPOS_2026.map(ipo => ({...ipo, status: autoStatus(ipo)}));
     setIpos(withAutoStatus);
-    fetch("/api/ipos")
+    fetch("/api/data?type=ipos")
       .then(r=>r.json())
       .then(d=>{
         if(d.ipos && d.ipos.length > 0){
@@ -13861,7 +13861,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
     if (tab !== "ark") return;
     setArkLoad(true);
     setArkErr(false);
-    fetch(`/api/ark?fund=${arkFund}`)
+    fetch(`/api/data?type=ark&fund=${arkFund}`)
       .then(r => r.json())
       .then(d => {
         if (d && (d.holdings?.length > 0)) { setArkData(d); setArkErr(false); }
@@ -14140,7 +14140,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 {f}
               </button>
             ))}
-            <button onClick={()=>{ setArkData(null); setArkLoad(true); setArkErr(false); fetch(`/api/ark?fund=${arkFund}`).then(r=>r.json()).then(d=>{if(d?.holdings?.length>0){setArkData(d);}else setArkErr(true);setArkLoad(false);}).catch(()=>{setArkErr(true);setArkLoad(false);}); }}
+            <button onClick={()=>{ setArkData(null); setArkLoad(true); setArkErr(false); fetch(`/api/data?type=ark&fund=${arkFund}`).then(r=>r.json()).then(d=>{if(d?.holdings?.length>0){setArkData(d);}else setArkErr(true);setArkLoad(false);}).catch(()=>{setArkErr(true);setArkLoad(false);}); }}
               style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4,background:"rgba(15,94,104,0.1)",border:`1px solid rgba(15,94,104,0.25)`,borderRadius:16,padding:"4px 12px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer"}}>
               🔄 Refresh
             </button>
@@ -19197,7 +19197,7 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
     let cancel = false;
     const load = () => {
       setLoading(true);
-      fetch(`/api/premarket?session=${session}`)
+      fetch(`/api/data?type=premarket&session=${session}`)
         .then(r => r.json())
         .then(d => { if (!cancel) { setData(d); setLoading(false); } })
         .catch(() => { if (!cancel) { setData({ source:"error" }); setLoading(false); } });
@@ -19384,7 +19384,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     let cancel=false;
     const load=()=>{
       setCryptoLoading(true);
-      fetch("/api/crypto").then(r=>r.json()).then(d=>{
+      fetch("/api/data?type=crypto").then(r=>r.json()).then(d=>{
         if(cancel) return;
         setCryptoData(Array.isArray(d.coins)?d.coins:[]);
         setCryptoGlobal(d.global||{});
