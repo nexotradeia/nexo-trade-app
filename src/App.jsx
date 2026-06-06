@@ -13602,6 +13602,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
   const [congLoad, setCongLoad] = useState(false);
   const [congFilter, setCongFilter] = useState("all");
   const [congParty, setCongParty]   = useState("all");
+  const [insType, setInsType]       = useState("all"); // filtro Insiders: all|COMPRA|VENTA
   const [livePx, setLivePx]     = useState({});
   const [selGuru, setSelGuru]   = useState(null);
   const [detailTab, setDetailTab] = useState("holdings");
@@ -13984,14 +13985,17 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,gap:8,flexWrap:"wrap"}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{display:"flex",gap:6}}>
-                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,color:"#00D26A"}}>
+                <button onClick={()=>setInsType(insType==="COMPRA"?"all":"COMPRA")}
+                  style={{display:"inline-flex",alignItems:"center",gap:4,background:insType==="COMPRA"?"rgba(0,210,106,0.22)":"rgba(0,210,106,0.1)",border:`1px solid ${insType==="COMPRA"?"#00D26A":"rgba(0,210,106,0.2)"}`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,color:"#00D26A",cursor:"pointer"}}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-                  COMPRA
-                </span>
-                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,77,106,0.1)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,color:"#FF4D6A"}}>
+                  {lang==="en"?"BUY":"COMPRA"}
+                </button>
+                <button onClick={()=>setInsType(insType==="VENTA"?"all":"VENTA")}
+                  style={{display:"inline-flex",alignItems:"center",gap:4,background:insType==="VENTA"?"rgba(255,77,106,0.22)":"rgba(255,77,106,0.1)",border:`1px solid ${insType==="VENTA"?"#FF4D6A":"rgba(255,77,106,0.2)"}`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,color:"#FF4D6A",cursor:"pointer"}}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-                  VENTA
-                </span>
+                  {lang==="en"?"SELL":"VENTA"}
+                </button>
+                {insType!=="all"&&<button onClick={()=>setInsType("all")} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,color:C.muted,cursor:"pointer"}}>{lang==="en"?"All":"Todos"}</button>}
               </div>
               <span style={{fontSize:11,color:"#334155"}}>Compras y ventas de ejecutivos · SEC EDGAR Form 4</span>
             </div>
@@ -14023,7 +14027,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                   <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted,letterSpacing:"0.07em",textTransform:"uppercase"}}>{h}</div>
                 ))}
               </div>
-              {(insiders?.transactions||[]).map((t,i) => {
+              {(insiders?.transactions||[]).filter(t=>insType==="all"||t.type===insType).map((t,i) => {
                 const isCompra = t.type==="COMPRA";
                 const BuyIcon = () => (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D26A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -14372,8 +14376,8 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 ))}
               </div>
               {congress
-                .filter(t=>congFilter==="all"||t.type===congFilter)
-                .filter(t=>congParty==="all"||t.party===congParty)
+                .filter(t=>congFilter==="all"||(t.type||"").toLowerCase()===congFilter)
+                .filter(t=>congParty==="all"||(t.party||"").toUpperCase().startsWith(congParty))
                 .map((t,i)=>(
                   <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(140px,1fr) 55px 112px minmax(120px,1fr) 90px 80px",gap:0,padding:"10px 14px",borderBottom:`1px solid ${C.border}`,background:i%2===0?C.card2:"transparent",transition:"background 0.1s",minWidth:560}}
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.05)"}
@@ -17497,6 +17501,15 @@ function RadarGlobalPage({lang="es"}){
   const [nowN,setNowN]=useState(0);
   const [utcStr,setUtcStr]=useState('');
   const [dataSrc,setDataSrc]=useState('');
+  const [sessionStr,setSessionStr]=useState('');   // reloj de sesiones (NYSE/Londres/Tokio/HK)
+  const [opsN,setOpsN]=useState(0);                 // operaciones por segundo (efecto wow)
+  // ── Sesiones de mercado (horas UTC) ──
+  const SESSIONS=[
+    {name:'NYSE',  city:isEN?'New York':'Nueva York', o:14.5, c:21,    flag:'🇺🇸'},
+    {name:'LSE',   city:isEN?'London':'Londres',      o:8,    c:16.5,  flag:'🇬🇧'},
+    {name:'TSE',   city:isEN?'Tokyo':'Tokio',         o:0,    c:6,     flag:'🇯🇵'},
+    {name:'HKEX',  city:'Hong Kong',                  o:1.5,  c:8,     flag:'🇭🇰'},
+  ];
   const isOpenR=(m)=>{
     const now=new Date(),day=now.getUTCDay();
     if(day===0||day===6)return false;
