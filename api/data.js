@@ -8,8 +8,9 @@ import dividends from '../lib/dividends.js';
 import ipos from '../lib/ipos.js';
 import commodities from '../lib/commodities.js';
 import ark from '../lib/ark.js';
+import quotes from '../lib/quotes.js';
 
-const ROUTES = { crypto, premarket, econ: econCalendar, econCalendar, dividends, ipos, commodities, ark };
+const ROUTES = { crypto, premarket, econ: econCalendar, econCalendar, dividends, ipos, commodities, ark, quotes };
 
 export default async function handler(req, res) {
   const type = String(req.query.type || "").trim();

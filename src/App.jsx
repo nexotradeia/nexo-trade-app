@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 20:34:22 Sesión 14 — Pre-Market full-width (sin sidebars)
+// NEXO TRADE — build: 2026-06-06 20:46:25 Sesión 14 — Screener: tabs Commodities/ETFs/Forex GRATIS + datos free
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -19356,7 +19356,7 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
 
 function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const isEN = lang === "en";
-  const [tab,          setTab]         = useState("stocks");
+  const [tab,          setTab]         = useState(isPremium?"stocks":"crypto");
   const [sortCol,      setSortCol]     = useState("score");
   const [sortDir,      setSortDir]     = useState(-1);
   const [search,       setSearch]      = useState("");
@@ -19391,6 +19391,25 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     };
     load();
     const iv=setInterval(load,60000); // refresca cada 60s
+    return()=>{ cancel=true; clearInterval(iv); };
+  },[tab]);
+
+  // ── Datos de mercado (Commodities / ETFs / Forex) vía Yahoo (/api/data?type=quotes) ──
+  const [mktData,    setMktData]    = useState({});   // {commodities:[],etfs:[],forex:[]}
+  const [mktLoading, setMktLoading] = useState(false);
+  useEffect(()=>{
+    if(!["commodities","etfs","forex"].includes(tab)) return;
+    let cancel=false;
+    const load=()=>{
+      setMktLoading(true);
+      fetch(`/api/data?type=quotes&set=${tab}`).then(r=>r.json()).then(d=>{
+        if(cancel) return;
+        setMktData(m=>({...m,[tab]:Array.isArray(d.rows)?d.rows:[]}));
+        setMktLoading(false);
+      }).catch(()=>{ if(!cancel){ setMktData(m=>({...m,[tab]:[]})); setMktLoading(false); } });
+    };
+    load();
+    const iv=setInterval(load,60000);
     return()=>{ cancel=true; clearInterval(iv); };
   },[tab]);
 
@@ -19495,20 +19514,29 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     return()=>{clearInterval(pollTimer);clearTimeout(retryTimer);try{if(ws)ws.close();}catch(e){}};
   },[isPremium]);
 
-  if(!isPremium) return(
-    <PremiumGate lang={isEN?"en":"es"} icon="🔬" onPlans={onNeedPremium}
-      title={isEN?"Advanced Screener":"Screener Avanzado"}
-      desc={isEN?"Scan stocks, options, intraday, scalping and crypto with AI signals, live prices and institutional-grade filters.":"Escanea acciones, opciones, intraday, scalping y crypto con señales IA, precios en vivo y filtros de grado institucional."}
-      bullets={isEN?["🔬 5 scanners: stocks/options/intraday/scalping/crypto","₿ Live crypto: BTC dominance, Fear & Greed, 24h volume","🤖 AI setup & score per asset","⚡ Real-time prices & alerts"]:["🔬 5 scanners: acciones/opciones/intraday/scalping/crypto","₿ Crypto en vivo: dominancia BTC, Fear & Greed, volumen 24h","🤖 Setup IA y score por activo","⚡ Precios en vivo y alertas"]}/>
-  );
-
   const tabs=[
     {id:"stocks",  l:"📊 "+(isEN?"Stocks":"Acciones")},
     {id:"options", l:"⚡ "+(isEN?"Options":"Opciones")},
     {id:"intraday",l:"🕐 Intraday"},
     {id:"scalping",l:"⚡ Scalping"},
     {id:"crypto",  l:"₿ Crypto"},
+    {id:"commodities", l:"🛢️ "+(isEN?"Commodities":"Materias")},
+    {id:"etfs",    l:"🗂️ ETFs"},
+    {id:"forex",   l:"💱 Forex"},
   ];
+  // Tabs de datos = GRATIS (unlimited). Señales IA (stocks/options/intraday/scalping) = Premium.
+  const FREE_TABS   = ["crypto","commodities","etfs","forex"];
+  const MARKET_TABS = ["commodities","etfs","forex"];
+  const tabBarEl = (
+    <div style={{display:"flex",gap:0,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:4,marginBottom:14,width:"fit-content",maxWidth:"100%",overflowX:"auto"}}>
+      {tabs.map(t=>(
+        <button key={t.id} onClick={()=>setTab(t.id)}
+          style={{padding:"8px 16px",borderRadius:9,border:"none",background:tab===t.id?"linear-gradient(135deg,#F59E0B,#0F5E68)":"transparent",color:tab===t.id?"#fff":C.muted,fontSize:13,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.2s",whiteSpace:"nowrap"}}>
+          {t.l}{!isPremium&&!FREE_TABS.includes(t.id)?" 🔒":""}
+        </button>
+      ))}
+    </div>
+  );
 
   // ---- Contratos REALES de opciones (api/options -> Yahoo, ~15 min retraso) ----
   const [realOpts,setRealOpts]=useState(null);
@@ -19588,6 +19616,55 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     a.download=`nexotrade_screener_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
   };
+
+  // 🔒 Señales IA (stocks/options/intraday/scalping) → Premium. Datos (crypto/commodities/etfs/forex) → GRATIS.
+  if (!isPremium && !FREE_TABS.includes(tab)) return(
+    <div style={{maxWidth:1180,margin:"0 auto",padding:"0 12px 60px"}}>
+      {tabBarEl}
+      <PremiumGate lang={isEN?"en":"es"} icon="🔬" onPlans={onNeedPremium}
+        title={isEN?"AI Signals — Premium":"Señales IA — Premium"}
+        desc={isEN?"AI setup (entry/SL/TP), scores and institutional filters for stocks, options, intraday & scalping. Crypto, commodities, ETFs & forex data are FREE — pick a tab above.":"Setup IA (entrada/SL/TP), scores y filtros institucionales para acciones, opciones, intraday y scalping. Los datos de crypto, commodities, ETFs y forex son GRATIS — elige un tab arriba."}
+        bullets={isEN?["🤖 AI setup: entry, SL & TP per stock","📊 20+ technical & fundamental filters","⚡ Real-time prices & alerts","✦ Free: crypto, commodities, ETFs & forex"]:["🤖 Setup IA: entrada, SL y TP por acción","📊 20+ filtros técnicos y fundamentales","⚡ Precios en vivo y alertas","✦ Gratis: crypto, commodities, ETFs y forex"]}/>
+    </div>
+  );
+
+  if (MARKET_TABS.includes(tab)) {
+    const mrows = (mktData[tab] || []).filter(r=>!search||r.s.toLowerCase().includes(search.toLowerCase())||r.n.toLowerCase().includes(search.toLowerCase()));
+    const showVol = tab==="etfs";
+    const cCol = v => v>=0 ? "#10B981" : "#EF4444";
+    const fmtMP = p => p==null?"—":(tab==="forex" ? (p>=100?p.toFixed(2):p.toFixed(4)) : (p>=1000?"$"+p.toLocaleString(undefined,{maximumFractionDigits:2}):"$"+p.toFixed(2)));
+    const cols = showVol?"1fr 120px 110px 100px":"1fr 150px 120px";
+    return(
+      <div style={{maxWidth:1180,margin:"0 auto",padding:"0 12px 60px"}}>
+        {tabBarEl}
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={isEN?"Search…":"Buscar…"} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"7px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit",width:160}}/>
+          <span style={{fontSize:11,fontWeight:700,color:"#16A34A",background:"rgba(22,163,74,0.1)",border:"1px solid rgba(22,163,74,0.3)",borderRadius:20,padding:"3px 10px"}}>✦ {isEN?"Free · unlimited":"Gratis · ilimitado"}</span>
+          <span style={{marginLeft:"auto",fontSize:11,fontWeight:700,color:mktLoading?"#F59E0B":C.muted2}}>{mktLoading?(isEN?"updating…":"actualizando…"):(isEN?"auto-refresh 60s":"auto 60s")}</span>
+        </div>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden"}}>
+          <div style={{display:"grid",gridTemplateColumns:cols,gap:8,padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
+            {(showVol?[isEN?"Name":"Nombre",isEN?"Last":"Último","Chg%","Vol"]:[isEN?"Name":"Nombre",isEN?"Last":"Último","Chg%"]).map((h,i)=>(
+              <span key={i} style={{fontSize:9.5,fontWeight:700,color:C.muted2,textTransform:"uppercase",letterSpacing:0.6,textAlign:i===0?"left":"right"}}>{h}</span>
+            ))}
+          </div>
+          {mrows.map((r,i)=>(
+            <div key={r.s+i} style={{display:"grid",gridTemplateColumns:cols,gap:8,alignItems:"center",padding:"10px 16px",borderBottom:`1px solid ${C.border}`}}>
+              <div style={{minWidth:0}}>
+                <div style={{fontWeight:800,fontSize:13,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</div>
+                <div style={{fontSize:10.5,color:C.muted2,fontFamily:"monospace"}}>{r.s.replace("=F","").replace("=X","").replace("^","")}</div>
+              </div>
+              <span style={{fontSize:13.5,fontWeight:700,color:C.text,fontFamily:"monospace",textAlign:"right"}}>{fmtMP(r.p)}</span>
+              <span style={{fontSize:12.5,fontWeight:800,color:cCol(r.chg),background:r.chg>=0?"rgba(22,163,74,0.10)":"rgba(220,38,38,0.10)",borderRadius:6,padding:"3px 6px",textAlign:"center",fontFamily:"monospace"}}>{r.chg>=0?"+":""}{(r.chg??0).toFixed(2)}%</span>
+              {showVol && <span style={{fontSize:11,color:C.muted,textAlign:"right",fontFamily:"monospace"}}>{r.volFmt}</span>}
+            </div>
+          ))}
+          {mrows.length===0 && <div style={{padding:"28px 16px",textAlign:"center",color:C.muted,fontSize:13}}>{mktLoading?(isEN?"Loading live data…":"Cargando datos en vivo…"):(isEN?"Data unavailable. Try again in a moment.":"Datos no disponibles. Intenta en un momento.")}</div>}
+        </div>
+        <p style={{color:C.muted2,fontSize:11,marginTop:12,textAlign:"center"}}>{isEN?"Live data via Yahoo Finance · Free for everyone. Educational, not financial advice.":"Datos en vivo vía Yahoo Finance · Gratis para todos. Educativo, no es consejo financiero."}</p>
+      </div>
+    );
+  }
 
   return(
     <div style={fullScreen
@@ -19753,14 +19830,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       </div>
 
       {/* ── TABS ── */}
-      <div style={{display:"flex",gap:0,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:4,marginBottom:14,width:"fit-content"}}>
-        {tabs.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)}
-            style={{padding:"8px 18px",borderRadius:9,border:"none",background:tab===t.id?"linear-gradient(135deg,#F59E0B,#0F5E68)":"transparent",color:tab===t.id?"#fff":C.muted,fontSize:13,fontWeight:tab===t.id?700:500,cursor:"pointer",transition:"all 0.2s"}}>
-            {t.l}
-          </button>
-        ))}
-      </div>
+      {tabBarEl}
 
       {/* ── FILTERS ── */}
       <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
