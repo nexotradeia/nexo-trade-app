@@ -1223,7 +1223,7 @@ function TickerTape({lang="es", onPremium}) {
   const doubled = [...merged, ...merged]; // duplicar para el loop infinito
   return (
     <div style={{background:"#0f172a",height:36,overflow:"hidden"}}>
-      <style>{`@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}} .tape{display:flex;animation:tape 60s linear infinite;width:max-content;} .tape:hover{animation-play-state:paused}`}</style>
+      <style>{`@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}} .tape{display:flex;animation:tape 95s linear infinite;width:max-content;} .tape:hover{animation-play-state:paused}`}</style>
       <div className="tape" style={{alignItems:"center",height:36}}>
         {doubled.map((item,i)=>item.promo?(
           <div key={i} onClick={onPremium}
@@ -2652,30 +2652,37 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             const winRate = Math.round((bars.filter(b=>b>0).length / bars.length) * 100);
             const totalReturn = bars.reduce((a,b)=>a+b,0).toFixed(1);
             return (
-              <div style={{background:"rgba(15,76,129,0.04)",padding:"10px 16px 12px",borderTop:"1px solid rgba(15,76,129,0.08)"}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-                  <span style={{fontSize:10,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:"0.08em"}}>
+              <div style={{position:"relative",zIndex:3,background:"#FFFFFF",margin:"0 16px 14px",padding:"12px 14px",borderRadius:14,border:"1px solid rgba(15,23,42,0.07)",boxShadow:"0 2px 10px rgba(15,23,42,0.05)"}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                  <span style={{fontSize:10,fontWeight:700,color:"#64748B",textTransform:"uppercase",letterSpacing:"0.08em"}}>
                     {lang==="en"?"Pick Performance (8w)":"Rendimiento de picks (8 sem)"}
                   </span>
                   <div style={{display:"flex",gap:12}}>
-                    <span style={{fontSize:11,fontWeight:700,color:parseFloat(totalReturn)>=0?"#10B981":"#EF4444"}}>
+                    <span style={{fontSize:11,fontWeight:800,color:parseFloat(totalReturn)>=0?"#16A34A":"#DC2626"}}>
                       {parseFloat(totalReturn)>=0?"+":""}{totalReturn}%
                     </span>
-                    <span style={{fontSize:11,fontWeight:700,color:"#F59E0B"}}>{winRate}% {lang==="en"?"WR":"Aciertos"}</span>
+                    <span style={{fontSize:11,fontWeight:800,color:"#D97706"}}>{winRate}% {lang==="en"?"WR":"Aciertos"}</span>
                   </div>
                 </div>
-                <div style={{display:"flex",alignItems:"flex-end",gap:3,height:32}}>
+                <div style={{display:"flex",alignItems:"center",gap:3,height:38,borderTop:"1px dashed rgba(15,23,42,0.08)",borderBottom:"1px dashed rgba(15,23,42,0.08)"}}>
                   {bars.map((v,i)=>{
-                    const h = Math.min(32, Math.max(4, Math.abs(v) * 2.2));
+                    const h = Math.min(17, Math.max(3, Math.abs(v) * 1.4));
                     const isPos = v >= 0;
                     return (
-                      <div key={i} title={`${isPos?"+":""}${v}%`} style={{flex:1,height:h,borderRadius:3,background:isPos?"rgba(16,185,129,0.75)":"rgba(239,68,68,0.65)",alignSelf:isPos?"flex-end":"flex-start",transition:"height 0.3s",cursor:"default"}}/>
+                      <div key={i} style={{flex:1,height:"100%",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"stretch"}}>
+                        <div style={{flex:1,display:"flex",alignItems:"flex-end"}}>
+                          {isPos&&<div title={`+${v}%`} style={{width:"100%",height:h,borderRadius:"3px 3px 0 0",background:"#16A34A"}}/>}
+                        </div>
+                        <div style={{flex:1,display:"flex",alignItems:"flex-start"}}>
+                          {!isPos&&<div title={`${v}%`} style={{width:"100%",height:h,borderRadius:"0 0 3px 3px",background:"#DC2626"}}/>}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
-                <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
-                  <span style={{fontSize:9,color:"rgba(255,255,255,0.2)"}}>8 {lang==="en"?"weeks ago":"sem. atrás"}</span>
-                  <span style={{fontSize:9,color:"rgba(255,255,255,0.2)"}}>{lang==="en"?"Now":"Ahora"}</span>
+                <div style={{display:"flex",justifyContent:"space-between",marginTop:6}}>
+                  <span style={{fontSize:9,color:"#94A3B8"}}>8 {lang==="en"?"weeks ago":"sem. atrás"}</span>
+                  <span style={{fontSize:9,color:"#94A3B8"}}>{lang==="en"?"Now":"Ahora"}</span>
                 </div>
               </div>
             );
