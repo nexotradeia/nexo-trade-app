@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 22:04:06 Sesión 14 — móvil: hamburger, chatbot menos invasivo, ticker grueso, skeleton loader, fix heatmap
+// NEXO TRADE — build: 2026-06-06 22:09:05 Sesión 14 — fotos gurús (Wikimedia + fallback emoji)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -14381,6 +14381,23 @@ const GURUS_13F = [
     ]},
 ];
 
+// Fotos públicas (Wikimedia) de gurús famosos. Si una no carga → fallback al emoji.
+const GURU_PHOTOS = {
+  buffett:"https://commons.wikimedia.org/wiki/Special:FilePath/Warren%20Buffett%20at%20the%202015%20SelectUSA%20Investment%20Summit%20(cropped).jpg",
+  munger:"https://commons.wikimedia.org/wiki/Special:FilePath/Charlie%20Munger%20discussion.jpg",
+  ackman:"https://commons.wikimedia.org/wiki/Special:FilePath/Bill%20Ackman%202023.jpg",
+  burry:"https://commons.wikimedia.org/wiki/Special:FilePath/Michael%20Burry.jpg",
+  icahn:"https://commons.wikimedia.org/wiki/Special:FilePath/Carl%20Icahn%202.jpg",
+  soros:"https://commons.wikimedia.org/wiki/Special:FilePath/George%20Soros%20-%20World%20Economic%20Forum%20Annual%20Meeting%202011.jpg",
+  dalio:"https://commons.wikimedia.org/wiki/Special:FilePath/Web%20Summit%202018%20-%20Forum%20-%20Day%202%2C%20November%207%20HM1%208399%20(31774017968)%20(cropped).jpg",
+  cathiewood:"https://commons.wikimedia.org/wiki/Special:FilePath/Cathie%20Wood%202021.jpg",
+  wood:"https://commons.wikimedia.org/wiki/Special:FilePath/Cathie%20Wood%202021.jpg",
+  druckenmiller:"https://commons.wikimedia.org/wiki/Special:FilePath/Stanley%20Druckenmiller.jpg",
+  tepper:"https://commons.wikimedia.org/wiki/Special:FilePath/David%20Tepper.jpg",
+  einhorn:"https://commons.wikimedia.org/wiki/Special:FilePath/David%20Einhorn%202013.jpg",
+  pelosi:"https://commons.wikimedia.org/wiki/Special:FilePath/Nancy%20Pelosi%202022.jpg",
+};
+
 function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
   const isEN = lang === "en";
   const [tab, setTab]           = useState(initialTab||"gurus");
@@ -14538,7 +14555,10 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                         onMouseLeave={e=>{e.currentTarget.style.border=`1px solid ${g.color}30`;e.currentTarget.style.boxShadow="none";}}>
                         <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}12 0%,transparent 70%)`,pointerEvents:"none"}}/>
                         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                          <div style={{width:46,height:46,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{g.emoji}</div>
+                          <div style={{width:46,height:46,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,position:"relative",overflow:"hidden",flexShrink:0}}>
+                            <span>{g.emoji}</span>
+                            {GURU_PHOTOS[g.id]&&<img src={GURU_PHOTOS[g.id]} alt={g.name} onError={e=>{e.target.style.display="none";}} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",borderRadius:14}}/>}
+                          </div>
                           <div>
                             <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14}}>{g.name}</div>
                             <div style={{fontSize:11,color:"#475569"}}>{g.fund}</div>
