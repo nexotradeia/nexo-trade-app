@@ -21664,6 +21664,10 @@ export default function App(){
         /* ── LAYOUT BASE ── */
         .nexo-sidebar { display: none !important; }
         .nexo-show-mobile { display: block !important; }
+        /* Red de seguridad: nada de imágenes se desborda en móvil */
+        img:not(.nexo-keep-size) { max-width: 100%; }
+        .nexo-admin-overview { grid-template-columns: 1fr !important; }
+        .nexo-admin-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
         .nexo-left-sidebar { display: none !important; }
         .nexo-mobile-affiliate-banner { display: flex !important; }
         body { padding-bottom: 84px; }
