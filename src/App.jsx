@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 19:45:38 Sesión 14 — Pre-Market & After-Hours page
+// NEXO TRADE — build: 2026-06-06 19:56:25 Sesión 14 — auto-detección de idioma (global)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -21306,7 +21306,7 @@ export default function App(){
     const t=setInterval(checkAlerts,30000);
     return()=>clearInterval(t);
   },[]);
-  const [lang,setLang]         = useState(()=>{ try{ const s=localStorage.getItem("nexo-lang"); return (s==="es"||s==="en")?s:"en"; }catch{ return "en"; } });
+  const [lang,setLang]         = useState(()=>{ try{ const s=localStorage.getItem("nexo-lang"); if(s==="es"||s==="en") return s; /* Auto-detección: español si el navegador del visitante es hispano; inglés para el resto del mundo */ const navs=(typeof navigator!=="undefined")?((navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||navigator.userLanguage||"en"]):["en"]; return navs.some(l=>String(l).toLowerCase().startsWith("es"))?"es":"en"; }catch{ return "en"; } });
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
