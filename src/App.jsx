@@ -22053,8 +22053,8 @@ export default function App(){
           ))}
         </div>
         {/* ── ROW 2: VIP TABS ── */}
-        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#E8F4FF",borderTop:"1px solid #BFDBFE",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
-          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#fff",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 10px rgba(15,94,104,0.4)",display:"inline-flex",alignItems:"center",gap:5}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 16px rgba(15,94,104,0.6)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(15,94,104,0.4)"}><NavIco name="star" size={13}/> PREMIUM</span>
+        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#0B1F3F",borderTop:"1px solid #14305A",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
+          <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#1B1303",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 12px rgba(224,182,75,0.45)",display:"inline-flex",alignItems:"center",gap:5}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 18px rgba(224,182,75,0.7)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 12px rgba(224,182,75,0.45)"}><NavIco name="star" size={13}/> PREMIUM</span>
           {[
             {label:lang==="en"?"Ideas Premium":"Ideas Premium",idx:21,locked:!effectivePremium,icon:"ideas"},
             {label:lang==="en"?"Whale Flow":"Flujo Premium",idx:20,locked:!effectivePremium,icon:"whale"},
@@ -22068,9 +22068,9 @@ export default function App(){
             const active=page===n.idx;
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:active?"rgba(245,158,11,0.09)":"transparent",border:"none",borderBottom:`2.5px solid ${active?"#F59E0B":"transparent"}`,padding:"0 16px",height:47,cursor:"pointer",color:active?"#F59E0B":n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)",fontSize:13.5,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit"}}
-                onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#F59E0B";e.currentTarget.style.background="rgba(245,158,11,0.05)";}}}
-                onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"rgba(245,158,11,0.40)":"var(--c-muted)";e.currentTarget.style.background="transparent";}}}
+                style={{background:active?"rgba(224,182,75,0.12)":"transparent",border:"none",borderBottom:`2.5px solid ${active?"#E0B64B":"transparent"}`,padding:"0 16px",height:47,cursor:"pointer",color:active?"#E0B64B":n.locked?"#5E7390":"#D9E4F1",fontSize:13.5,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit"}}
+                onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#E0B64B";e.currentTarget.style.background="rgba(224,182,75,0.08)";}}}
+                onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"#5E7390":"#D9E4F1";e.currentTarget.style.background="transparent";}}}
               >
                 {n.locked?<NavIco name="lock" size={13}/>:<NavIco name={n.icon}/>}
                 {stripEmoji(n.label)}
@@ -22078,7 +22078,7 @@ export default function App(){
             );
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{flexShrink:0,margin:"0 10px 0 14px",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#fff",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
+            style={{flexShrink:0,margin:"0 10px 0 14px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#1B1303",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
             {effectivePremium ? "✦ Premium" : (lang==="en"?"✦ Join Premium — $9.99/mo":"✦ Únete a Premium — $9.99/mes")}
           </button>
         </div>
