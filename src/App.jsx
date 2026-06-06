@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 21:14:42 Sesión 14 — Correlación/Volatilidad/Fed Monitor + calendarios + Tools en navbar
+// NEXO TRADE — build: 2026-06-06 21:15:45 Sesión 14 — Educación (Webinars+Academia) agrupada en Tools, barra más limpia
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -8488,6 +8488,8 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
       ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
     {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
       ["Movers 24H",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow",20]]},
+    {t:isEN?"📚 Education":"📚 Educación", items:[
+      ["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
   const navBtn = variant==="nav";
   return(
@@ -23251,8 +23253,6 @@ export default function App(){
             {label:t.noticias,idx:5,icon:"news"},
             {label:t.earnings,idx:6,icon:"earnings"},
             {label:t.trending,idx:7,icon:"movers"},
-            {label:lang==="en"?"Academy":"Academia",idx:12,icon:"academy"},
-            {label:"Webinars",idx:11,icon:"webinars"},
             {label:lang==="en"?"Messages":"Mensajes",idx:22,icon:"messages"},
           ].map(n=>(
             <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
