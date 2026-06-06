@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 22:53:33 Sesión 14 — link Stripe 5.99/mes conectado
+// NEXO TRADE — build: 2026-06-06 23:26:52 Sesión 14 — FIX crítico: email gate ya no se cuelga (fire-and-forget Supabase)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7901,10 +7901,10 @@ function EmailCaptureFeedCard({user, isPremium=false, lang="es"}){
   const [closed,setClosed]=useState(()=>{try{return sessionStorage.getItem("nexo-email-card-closed")==="1";}catch{return false;}});
   // No mostrar a usuarios Premium ni si ya lo cerró/completó
   if(isPremium||closed) return null;
-  const submit=async()=>{
+  const submit=()=>{
     if(!email.includes("@")) return;
-    try{ await supabase.from("newsletter_subscribers").upsert({email, source:"feed_card", created_at:new Date().toISOString()}); }catch{}
-    fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{});
+    try{ supabase.from("newsletter_subscribers").upsert({email, source:"feed_card", created_at:new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
+    try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
     setDone(true);
   };
   if(done) return(
@@ -8034,10 +8034,11 @@ function EmailGate({lang="es", onDone, onLogin}){
   const isEN=lang==="en";
   const [email,setEmail]=useState("");
   const [err,setErr]=useState(false);
-  const submit=async()=>{
+  const submit=()=>{
     if(!email.includes("@")||!email.includes(".")){setErr(true);return;}
-    try{ await supabase.from("newsletter_subscribers").upsert({email, source:"email_gate", created_at:new Date().toISOString()}); }catch{}
-    fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{});
+    // Fire-and-forget: NUNCA esperar a Supabase (si se cuelga, no debe bloquear la entrada)
+    try{ supabase.from("newsletter_subscribers").upsert({email, source:"email_gate", created_at:new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
+    try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
     try{localStorage.setItem("nexo-email-gate-done","1");}catch{}
     onDone&&onDone();
   };
