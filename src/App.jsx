@@ -10701,6 +10701,18 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
         </a>
       </div>
 
+      {/* ── PARTNER DESTACADO: CalculatedWealth (arte de trading) ── */}
+      <a href="https://www.etsy.com/shop/CalculatedWealth" target="_blank" rel="noopener noreferrer"
+        style={{display:"flex",alignItems:"center",gap:16,background:"linear-gradient(135deg,#0A0A0A,#1A1408)",border:"1px solid rgba(212,175,55,0.45)",borderRadius:18,padding:"18px 22px",marginTop:14,textDecoration:"none",boxShadow:"0 4px 20px rgba(212,175,55,0.12)",position:"relative",overflow:"hidden",flexWrap:"wrap"}}>
+        <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontSize:9,fontWeight:800,padding:"4px 12px",borderRadius:"0 18px 0 10px",letterSpacing:0.5}}>PARTNER</div>
+        <div style={{width:52,height:52,borderRadius:14,background:"radial-gradient(circle,#1a1408,#000)",border:"1px solid rgba(212,175,55,0.5)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>📈</div>
+        <div style={{flex:1,minWidth:180}}>
+          <div style={{fontWeight:900,color:"#E0B64B",fontSize:16,letterSpacing:0.2,fontFamily:"'Space Grotesk',sans-serif"}}>CalculatedWealth</div>
+          <div style={{fontSize:12.5,color:"#C9B687",marginTop:3,lineHeight:1.5}}>{isEN?"Premium trading wall art — charts & motivation for your office or trading desk.":"Cuadros de trading premium — gráficos y motivación para tu oficina o escritorio."}</div>
+        </div>
+        <span style={{flexShrink:0,background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontWeight:800,fontSize:13,borderRadius:12,padding:"10px 20px",whiteSpace:"nowrap"}}>{isEN?"Visit shop →":"Ver tienda →"}</span>
+      </a>
+
       {/* ── ACADEMIAS RECOMENDADAS ── */}
       <div style={{marginTop:32}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
@@ -15173,7 +15185,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
     return (
       <div style={{maxWidth:480,margin:"80px auto",textAlign:"center",padding:"0 20px"}}>
         <div style={{fontSize:64,marginBottom:16}}>💬</div>
-        <div style={{fontSize:22,fontWeight:900,color:C.text,marginBottom:8}}>Mensajes Privados</div>
+        <div style={{fontSize:22,fontWeight:900,color:C.text,marginBottom:8}}>{isEN?"Private Messages":"Mensajes Privados"}</div>
         <div style={{fontSize:14,color:C.muted,marginBottom:24}}>{isEN?"Sign in to view and send private messages.":"Inicia sesión para ver y enviar mensajes privados."}</div>
         <button onClick={onNeedAuth} style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:12,padding:"12px 32px",fontSize:15,fontWeight:800,cursor:"pointer"}}>
           {isEN?"Sign in":"Iniciar sesión"}
@@ -22572,11 +22584,11 @@ export default function App(){
         <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9998,background:C.surface,border:`1px solid ${C.accent}44`,borderRadius:18,padding:"20px 24px",maxWidth:380,width:"calc(100% - 32px)",boxShadow:"0 16px 48px rgba(0,0,0,0.6)",display:"flex",gap:14,alignItems:"flex-start"}}>
           <div style={{fontSize:28,flexShrink:0}}>🔔</div>
           <div style={{flex:1}}>
-            <div style={{color:C.text,fontWeight:800,fontSize:14,marginBottom:4}}>¿Activar notificaciones?</div>
-            <div style={{color:C.muted2,fontSize:12,lineHeight:1.5,marginBottom:14}}>Te avisamos cuando haya picks PREMIUM nuevos, posts trending y alertas de precio.</div>
+            <div style={{color:C.text,fontWeight:800,fontSize:14,marginBottom:4}}>{lang==="en"?"Enable notifications?":"¿Activar notificaciones?"}</div>
+            <div style={{color:C.muted2,fontSize:12,lineHeight:1.5,marginBottom:14}}>{lang==="en"?"We'll alert you about new PREMIUM picks, trending posts and price alerts.":"Te avisamos cuando haya picks PREMIUM nuevos, posts trending y alertas de precio."}</div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={activarPush} style={{flex:1,background:`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Activar →</button>
-              <button onClick={()=>{setShowPushPrompt(false);localStorage.setItem("nexo-push-asked","1");}} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 14px",color:C.muted2,fontSize:12,cursor:"pointer"}}>Ahora no</button>
+              <button onClick={activarPush} style={{flex:1,background:`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:10,padding:"9px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{lang==="en"?"Enable →":"Activar →"}</button>
+              <button onClick={()=>{setShowPushPrompt(false);localStorage.setItem("nexo-push-asked","1");}} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 14px",color:C.muted2,fontSize:12,cursor:"pointer"}}>{lang==="en"?"Not now":"Ahora no"}</button>
             </div>
           </div>
         </div>
