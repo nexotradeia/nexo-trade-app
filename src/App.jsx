@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 20:46:25 Sesión 14 — Screener: tabs Commodities/ETFs/Forex GRATIS + datos free
+// NEXO TRADE — build: 2026-06-06 20:52:41 Sesión 14 — Bonos (sidebar) + Market Overview (Movers)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -5805,6 +5805,8 @@ function TrendingPage({posts=[],lang="es"}){
 
   return(
     <div>
+      {/* 🌐 Resumen del mercado (índices + crypto + commodities) */}
+      <MarketOverview lang={lang}/>
       {/* Termómetro NexoTrade */}
       <NexoTermometro lang={lang}/>
 
@@ -8069,6 +8071,85 @@ function EmailGate({lang="es", onDone, onLogin}){
   );
 }
 
+// ── BONOS — mini widget de rendimientos del Tesoro USA (sidebar) ──────────────
+function BondsWidget({lang="es"}){
+  const isEN=lang==="en";
+  const [d,setD]=useState(null);
+  useEffect(()=>{
+    let c=false;
+    const load=()=>fetch("/api/data?type=quotes&set=bonds").then(r=>r.json()).then(j=>{if(!c)setD(j);}).catch(()=>{});
+    load(); const iv=setInterval(load,120000); return()=>{c=true;clearInterval(iv);};
+  },[]);
+  const rows=d?.rows||[];
+  const get=s=>rows.find(r=>r.s===s);
+  const items=[["2YY=F","US 2Y"],["^FVX","US 5Y"],["^TNX","US 10Y"],["^TYX","US 30Y"]].map(([s,l])=>({l,r:get(s)})).filter(x=>x.r&&x.r.p!=null);
+  const spread=d?.spread10_2;
+  if(items.length===0) return null;
+  return(
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"14px 16px",boxShadow:C.shadow}}>
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+        <span style={{fontSize:15}}>🏦</span>
+        <span style={{fontWeight:800,fontSize:13,color:C.text}}>{isEN?"US Treasury Yields":"Bonos del Tesoro USA"}</span>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
+        {items.map(({l,r})=>(
+          <div key={l} style={{background:C.card2,borderRadius:9,padding:"7px 10px"}}>
+            <div style={{fontSize:10,color:C.muted2,fontWeight:700}}>{l}</div>
+            <div style={{fontSize:14,fontWeight:800,color:C.text,fontFamily:"monospace"}}>{r.p.toFixed(2)}%</div>
+          </div>
+        ))}
+      </div>
+      {spread!=null && (
+        <div style={{marginTop:9,display:"flex",alignItems:"center",justifyContent:"space-between",background:spread<0?"rgba(220,38,38,0.08)":"rgba(22,163,74,0.08)",border:`1px solid ${spread<0?"rgba(220,38,38,0.25)":"rgba(22,163,74,0.25)"}`,borderRadius:9,padding:"7px 10px"}}>
+          <span style={{fontSize:10.5,fontWeight:700,color:C.muted}}>{isEN?"10Y-2Y spread":"Spread 10A-2A"}</span>
+          <span style={{fontSize:12.5,fontWeight:800,fontFamily:"monospace",color:spread<0?"#DC2626":"#16A34A"}}>{spread>0?"+":""}{spread.toFixed(2)}%{spread<0?(isEN?" ⚠":"⚠"):""}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── MARKET OVERVIEW — índices + crypto + commodities en una vista ─────────────
+function MarketOverview({lang="es"}){
+  const isEN=lang==="en";
+  const [d,setD]=useState(null);
+  const [loading,setLoading]=useState(true);
+  useEffect(()=>{
+    let c=false;
+    const load=()=>{fetch("/api/data?type=quotes&set=overview").then(r=>r.json()).then(j=>{if(!c){setD(j);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});};
+    load(); const iv=setInterval(load,60000); return()=>{c=true;clearInterval(iv);};
+  },[]);
+  const Section=({title,rows})=>(
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 14px",boxShadow:C.shadow}}>
+      <div style={{fontSize:11,fontWeight:800,color:C.muted2,textTransform:"uppercase",letterSpacing:0.6,marginBottom:8}}>{title}</div>
+      {(rows||[]).length===0
+        ? <div style={{fontSize:11,color:C.muted2,padding:"6px 0"}}>{loading?(isEN?"loading…":"cargando…"):"—"}</div>
+        : rows.map((r,i)=>(
+        <div key={r.s} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 0",borderBottom:i<rows.length-1?`1px solid ${C.border}`:"none"}}>
+          <span style={{fontSize:12.5,fontWeight:600,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+          <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
+            <span style={{fontSize:12,fontWeight:700,color:C.text,fontFamily:"monospace",marginRight:8}}>{r.p>=1000?r.p.toLocaleString(undefined,{maximumFractionDigits:0}):r.p?.toFixed(2)}</span>
+            <span style={{fontSize:12,fontWeight:800,fontFamily:"monospace",color:r.chg>=0?"#16A34A":"#DC2626"}}>{r.chg>=0?"+":""}{(r.chg??0).toFixed(2)}%</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  return(
+    <div style={{marginBottom:20}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+        <h2 style={{margin:0,fontSize:16,fontWeight:800,color:C.text}}>🌐 {isEN?"Market Overview":"Resumen del Mercado"}</h2>
+        <span style={{fontSize:10.5,fontWeight:700,color:loading?"#F59E0B":"#16A34A"}}>{loading?(isEN?"loading…":"cargando…"):"● "+(isEN?"live":"en vivo")}</span>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:12}}>
+        <Section title={isEN?"Indices":"Índices"} rows={d?.indices}/>
+        <Section title="Crypto" rows={d?.crypto}/>
+        <Section title="Commodities" rows={d?.commodities}/>
+      </div>
+    </div>
+  );
+}
+
 function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[],isPremium=false,onUpgrade}){
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
@@ -8288,6 +8369,9 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           💬 {lang==="en"?"Ask the AI →":"Preguntar a la IA →"}
         </div>
       </div>
+
+      {/* ── 🏦 BONOS DEL TESORO ── */}
+      <BondsWidget lang={lang}/>
 
       {/* ── 📡 MERCADOS ── */}
       <div style={card}>
