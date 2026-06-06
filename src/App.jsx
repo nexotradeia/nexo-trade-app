@@ -164,11 +164,6 @@ const C = {
 const LANG_META = [
   { code:"es", flag:"🇪🇸", label:"Español"    },
   { code:"en", flag:"🇺🇸", label:"English"    },
-  { code:"pt", flag:"🇧🇷", label:"Português"  },
-  { code:"fr", flag:"🇫🇷", label:"Français"   },
-  { code:"de", flag:"🇩🇪", label:"Deutsch"    },
-  { code:"it", flag:"🇮🇹", label:"Italiano"   },
-  { code:"ja", flag:"🇯🇵", label:"日本語"      },
 ];
 
 const LANGS = {
@@ -20851,7 +20846,7 @@ export default function App(){
     const t=setInterval(checkAlerts,30000);
     return()=>clearInterval(t);
   },[]);
-  const [lang,setLang]         = useState(()=>{ try{ return localStorage.getItem("nexo-lang")||"en"; }catch{ return "en"; } });
+  const [lang,setLang]         = useState(()=>{ try{ const s=localStorage.getItem("nexo-lang"); return (s==="es"||s==="en")?s:"en"; }catch{ return "en"; } });
   const [toast,setToast]       = useState({show:false,points:0,reason:""});
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
