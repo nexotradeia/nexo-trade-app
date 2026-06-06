@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 19:21:52 Sesión 14 — crypto screener, paywall, email gate, founder, referidos
+// NEXO TRADE — build: 2026-06-06 19:45:38 Sesión 14 — Pre-Market & After-Hours page
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7021,6 +7021,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
     {icon:"🚀", label:"Movers 24H",                                  idx:7},
+    {icon:"🌅", label:isEN?"Pre-Market & After-Hours":"Pre-Market y After-Hours", idx:45},
     {icon:"🎓", label:"Webinars",                                    idx:11},
     {icon:"📚", label:isEN?"Academy":"Academia",                     idx:12},
     {icon:"🌍", label:isEN?"Global Radar":"Radar Global",           idx:44},
@@ -16533,6 +16534,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:t.trending,idx:7},
   {label:t.crypto,idx:2},
   {label:t.earnings,idx:6},
+  {label:isEN?"🌅 Pre-Market":"🌅 Pre-Market",idx:45},
   {label:t.noticias,idx:5},
   // ── Comunidad ──
   {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
@@ -19084,6 +19086,178 @@ const AI_ANALYSIS = {
   "Volatility":    (r) => `$${r.s} con alta volatilidad — RSI ${r.rsi} irregular. Reducir tamaño de posición. Solo traders experimentados. Stop tight obligatorio.`,
   "Base":          (r) => `$${r.s} construyendo base sólida. RSI ${r.rsi} saludable. Acumulación institucional detectada. Paciencia — el setup se está formando.`,
 };
+
+// ── PRE-MARKET & AFTER-HOURS PAGE (datos reales vía /api/premarket) ──────────
+function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
+  const isEN = lang === "en";
+  const [session, setSession] = useState("pre");   // pre | post
+  const [data,    setData]    = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [railTab, setRailTab] = useState("indices"); // indices | commodities
+  const [moversTab, setMoversTab] = useState("active"); // active | gainers | losers
+
+  useEffect(() => {
+    let cancel = false;
+    const load = () => {
+      setLoading(true);
+      fetch(`/api/premarket?session=${session}`)
+        .then(r => r.json())
+        .then(d => { if (!cancel) { setData(d); setLoading(false); } })
+        .catch(() => { if (!cancel) { setData({ source:"error" }); setLoading(false); } });
+    };
+    load();
+    const iv = setInterval(load, 60000);
+    return () => { cancel = true; clearInterval(iv); };
+  }, [session]);
+
+  // ── Estado del mercado en hora ET ──
+  const et = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+  const dow = et.getDay(), mins = et.getHours()*60 + et.getMinutes();
+  const isWeekday = dow >= 1 && dow <= 5;
+  const preOpen  = isWeekday && mins >= 240 && mins < 570;   // 4:00–9:30
+  const postOpen = isWeekday && mins >= 960 && mins < 1200;  // 16:00–20:00
+  const sessionOpen = session === "pre" ? preOpen : postOpen;
+  const hoursTxt = session === "pre"
+    ? (isEN ? "Opens 4:00 AM · Closes 9:30 AM ET" : "Abre 4:00 AM · Cierra 9:30 AM ET")
+    : (isEN ? "Opens 4:00 PM · Closes 8:00 PM ET" : "Abre 4:00 PM · Cierra 8:00 PM ET");
+
+  const cCol = v => v >= 0 ? C.bull : C.bear;
+  const cBg  = v => v >= 0 ? "rgba(22,163,74,0.10)" : "rgba(220,38,38,0.10)";
+  const fmtP = p => p == null ? "—" : p >= 1000 ? "$"+p.toLocaleString(undefined,{maximumFractionDigits:2}) : "$"+p.toFixed(2);
+  const fmtPct = v => (v >= 0 ? "+" : "") + (v ?? 0).toFixed(2) + "%";
+
+  const GOLD = "#F59E0B", GOLD_DK = "#B45309";
+  const etfs = data?.etfs || [], indices = data?.indices || [], commodities = data?.commodities || [];
+  const movers = moversTab === "active" ? (data?.mostActive || []) : moversTab === "gainers" ? (data?.gainers || []) : (data?.losers || []);
+  const railRows = railTab === "indices" ? indices : commodities;
+  const isError = data?.source === "error";
+
+  const tableRow = (r, i, showVol) => (
+    <div key={r.s+i} style={{display:"grid",gridTemplateColumns:showVol?"1fr 90px 90px 80px":"1fr 100px 100px",gap:8,alignItems:"center",padding:"9px 14px",borderBottom:`1px solid ${C.border}`}}>
+      <div style={{minWidth:0}}>
+        <div style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>{r.s}</div>
+        <div style={{fontSize:10.5,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</div>
+      </div>
+      <span style={{fontSize:13,fontWeight:700,color:C.text,fontFamily:"monospace",textAlign:"right"}}>{fmtP(r.p)}</span>
+      <span style={{fontSize:12.5,fontWeight:800,color:cCol(r.chg),background:cBg(r.chg),borderRadius:6,padding:"3px 6px",textAlign:"center",fontFamily:"monospace"}}>{fmtPct(r.chg)}</span>
+      {showVol && <span style={{fontSize:11,color:C.muted,textAlign:"right",fontFamily:"monospace"}}>{r.volFmt}</span>}
+    </div>
+  );
+
+  return (
+    <div style={{maxWidth:1180,margin:"0 auto",padding:"0 4px 40px"}}>
+      {/* HEADER */}
+      <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",marginBottom:14}}>
+        <span style={{fontSize:26}}>🇺🇸</span>
+        <h1 style={{margin:0,fontSize:"clamp(20px,3.5vw,26px)",fontWeight:900,color:C.text,letterSpacing:-0.6,fontFamily:"'Space Grotesk',sans-serif"}}>
+          {session==="pre" ? (isEN?"Pre-Market · United States":"Pre-Market · Estados Unidos") : (isEN?"After-Hours · United States":"After-Hours · Estados Unidos")}
+        </h1>
+        <span style={{display:"inline-flex",alignItems:"center",gap:6,background:sessionOpen?"rgba(22,163,74,0.12)":"rgba(220,38,38,0.10)",border:`1px solid ${sessionOpen?"rgba(22,163,74,0.35)":"rgba(220,38,38,0.3)"}`,borderRadius:20,padding:"4px 12px"}}>
+          <span style={{width:7,height:7,borderRadius:"50%",background:sessionOpen?C.bull:C.bear,display:"inline-block",animation:sessionOpen?"nexo-pulse 1.5s infinite":"none"}}/>
+          <span style={{fontSize:11.5,fontWeight:800,color:sessionOpen?C.bull:C.bear,letterSpacing:0.3}}>
+            {sessionOpen ? (isEN?"● LIVE":"● EN VIVO") : (session==="pre"?(isEN?"Pre-Market Closed":"Pre-Market Cerrado"):(isEN?"After-Hours Closed":"After-Hours Cerrado"))}
+          </span>
+        </span>
+      </div>
+
+      {/* TABS Pre / After */}
+      <div style={{display:"flex",gap:4,borderBottom:`1px solid ${C.border}`,marginBottom:14}}>
+        {[["pre",isEN?"Pre-Market":"Pre-Market"],["post",isEN?"After-Hours":"After-Hours"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setSession(k)}
+            style={{background:"none",border:"none",cursor:"pointer",padding:"9px 16px",fontSize:14,fontWeight:800,fontFamily:"inherit",color:session===k?C.accent:C.muted,borderBottom:session===k?`3px solid ${C.accent}`:"3px solid transparent",marginBottom:-1,transition:"all 0.15s"}}>
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {/* BANNER estado + horarios */}
+      <div style={{display:"flex",alignItems:"center",gap:10,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"11px 16px",marginBottom:16,boxShadow:C.shadow}}>
+        <span style={{width:22,height:22,borderRadius:"50%",background:C.accentDim,color:C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,flexShrink:0}}>i</span>
+        <span style={{fontSize:12.5,fontWeight:700,color:sessionOpen?C.bull:C.muted}}>{sessionOpen?(isEN?"Session open":"Sesión abierta"):(session==="pre"?(isEN?"Pre-Market Closed":"Pre-Market Cerrado"):(isEN?"After-Hours Closed":"After-Hours Cerrado"))}</span>
+        <span style={{fontSize:12,color:C.muted2}}>· {hoursTxt}</span>
+        <span style={{marginLeft:"auto",fontSize:10.5,fontWeight:700,color:loading?GOLD:C.muted2}}>{loading?(isEN?"updating…":"actualizando…"):(isEN?"auto-refresh 60s":"auto 60s")}</span>
+      </div>
+
+      {/* ACTIVIDAD ETFs */}
+      <div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:8}}>{session==="pre"?(isEN?"Pre-Market Activity":"Actividad Pre-Market"):(isEN?"After-Hours Activity":"Actividad After-Hours")}</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10,marginBottom:22}}>
+        {(etfs.length?etfs:[{s:"DIA"},{s:"QQQ"},{s:"SPY"},{s:"IWM"}]).map((e,i)=>(
+          <div key={e.s+i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",boxShadow:C.shadow}}>
+            <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
+              <LogoBadge sym={e.s} col={e.chg>=0?C.bull:C.bear} size={26} radius={7}/>
+              <div style={{minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:800,color:C.text}}>{e.s}</div>
+                <div style={{fontSize:10,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.n||""}</div>
+              </div>
+            </div>
+            <div style={{fontSize:21,fontWeight:900,color:C.text,letterSpacing:-0.5,fontFamily:"monospace"}}>{fmtP(e.p)}</div>
+            {e.p!=null && <div style={{fontSize:12.5,fontWeight:800,color:cCol(e.chg),marginTop:2,fontFamily:"monospace"}}>{fmtPct(e.chg)}{e.ext?"":(isEN?" · reg":"")}</div>}
+            {e.p==null && <div style={{fontSize:11,color:C.muted2,marginTop:4}}>{loading?(isEN?"loading…":"cargando…"):"—"}</div>}
+          </div>
+        ))}
+      </div>
+
+      {/* GRID: movers (izq) + rail (der) */}
+      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 320px",gap:16}} className="nexo-premarket-grid">
+        {/* IZQUIERDA — movers */}
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden"}}>
+          <div style={{display:"flex",gap:4,padding:"10px 12px",borderBottom:`1px solid ${C.border}`,background:C.card2}}>
+            {[["active",isEN?"🔥 Most Active":"🔥 Más Activos"],["gainers",isEN?"📈 Gainers":"📈 Sube"],["losers",isEN?"📉 Losers":"📉 Baja"]].map(([k,l])=>(
+              <button key={k} onClick={()=>setMoversTab(k)}
+                style={{background:moversTab===k?C.accentDim:"transparent",border:`1px solid ${moversTab===k?"rgba(15,76,129,0.3)":"transparent"}`,borderRadius:8,padding:"6px 11px",cursor:"pointer",fontSize:11.5,fontWeight:800,color:moversTab===k?C.accent:C.muted,fontFamily:"inherit"}}>{l}</button>
+            ))}
+            <span style={{marginLeft:"auto",alignSelf:"center",fontSize:10.5,color:C.muted2,fontWeight:700}}>{movers.length} {isEN?"results":"resultados"}</span>
+          </div>
+          {/* header */}
+          <div style={{display:"grid",gridTemplateColumns:moversTab==="active"?"1fr 90px 90px 80px":"1fr 100px 100px",gap:8,padding:"8px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
+            {(moversTab==="active"?[isEN?"Name":"Nombre",isEN?"Last":"Último","Chg%",isEN?"Vol":"Vol"]:[isEN?"Name":"Nombre",isEN?"Last":"Último","Chg%"]).map((h,i)=>(
+              <span key={i} style={{fontSize:9.5,fontWeight:700,color:C.muted2,textTransform:"uppercase",letterSpacing:0.6,textAlign:i===0?"left":"right"}}>{h}</span>
+            ))}
+          </div>
+          {isError && <div style={{padding:"28px 16px",textAlign:"center",color:C.muted,fontSize:13}}>⚠️ {isEN?"Market data unavailable right now.":"Datos del mercado no disponibles ahora."}</div>}
+          {!isError && movers.length===0 && <div style={{padding:"28px 16px",textAlign:"center",color:C.muted,fontSize:13}}>{loading?(isEN?"Loading live data…":"Cargando datos en vivo…"):(isEN?"No data for this session.":"Sin datos para esta sesión.")}</div>}
+          {movers.map((r,i)=>tableRow(r,i,moversTab==="active"))}
+        </div>
+
+        {/* DERECHA — rail índices / commodities */}
+        <div>
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden",marginBottom:14}}>
+            <div style={{display:"flex",gap:4,padding:"10px 12px",borderBottom:`1px solid ${C.border}`,background:C.card2}}>
+              {[["indices",isEN?"Indices":"Índices"],["commodities","Commodities"]].map(([k,l])=>(
+                <button key={k} onClick={()=>setRailTab(k)}
+                  style={{flex:1,background:railTab===k?C.accentDim:"transparent",border:"none",borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:11.5,fontWeight:800,color:railTab===k?C.accent:C.muted,fontFamily:"inherit"}}>{l}</button>
+              ))}
+            </div>
+            {railRows.length===0 && <div style={{padding:"22px 14px",textAlign:"center",color:C.muted2,fontSize:12}}>{loading?(isEN?"Loading…":"Cargando…"):"—"}</div>}
+            {railRows.map((r,i)=>(
+              <div key={r.s+i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderBottom:i<railRows.length-1?`1px solid ${C.border}`:"none"}}>
+                <span style={{fontSize:12.5,fontWeight:700,color:C.text}}>{r.n}</span>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:12.5,fontWeight:700,color:C.text,fontFamily:"monospace"}}>{r.p!=null?r.p.toLocaleString(undefined,{maximumFractionDigits:2}):"—"}</div>
+                  <div style={{fontSize:11,fontWeight:800,color:cCol(r.regChg),fontFamily:"monospace"}}>{fmtPct(r.regChg)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* CTA Premium */}
+          {!isPremium && (
+            <div style={{background:`linear-gradient(135deg,${GOLD}1a,${GOLD_DK}12)`,border:`1px solid ${GOLD}55`,borderRadius:14,padding:"16px"}}>
+              <div style={{fontSize:13,fontWeight:900,color:GOLD_DK,marginBottom:4}}>✦ {isEN?"Unlock full Pre-Market":"Desbloquea todo el Pre-Market"}</div>
+              <div style={{fontSize:11.5,color:C.muted,lineHeight:1.5,marginBottom:10}}>{isEN?"500+ stocks, real volume and move alerts.":"500+ acciones, volumen real y alertas de movimiento."}</div>
+              <button onClick={()=>onNeedPremium&&onNeedPremium()} style={{width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD_DK})`,border:"none",borderRadius:10,padding:"11px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",boxShadow:`0 4px 16px ${GOLD}55`,fontFamily:"inherit"}}>
+                {isEN?"Activate Premium — $9.99/mo":"Activar Premium — $9.99/mes"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p style={{color:C.muted2,fontSize:11,marginTop:18,textAlign:"center"}}>
+        {isEN?"Extended-hours data via Yahoo Finance. Educational, not financial advice.":"Datos de sesión extendida vía Yahoo Finance. Educativo, no es consejo financiero."}
+      </p>
+    </div>
+  );
+}
 
 function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const isEN = lang === "en";
@@ -21667,6 +21841,7 @@ export default function App(){
     if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===43) return <PaperTradingFullPage user={user} onBack={()=>setPage(0)}/>;
     if(page===44) return <RadarGlobalPage lang={lang}/>;
+    if(page===45) return <PreMarketPage lang={lang} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -22166,6 +22341,9 @@ export default function App(){
       }
       @media (min-width: 768px) {
         .nexo-mobile-search { display: none !important; }
+      }
+      @media (max-width: 820px) {
+        .nexo-premarket-grid { grid-template-columns: 1fr !important; }
       }
       * { -webkit-font-smoothing: antialiased; }
       ::-webkit-scrollbar { width: 4px; height: 4px; }
