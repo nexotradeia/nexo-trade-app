@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 20:27:48 Sesión 14 — fix Vercel 12-func limit (router /api/data + /lib)
+// NEXO TRADE — build: 2026-06-06 20:32:28 Sesión 14 — share modal: solo WhatsApp+X, anti-recorte
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7949,15 +7949,13 @@ function ShareModal({ open, onClose, user, lang="es" }){
   const enc=encodeURIComponent, eu=enc(url), et=enc(text);
   const nets=[
     {k:"wa",  label:"WhatsApp", bg:"#25D366", icon:"🟢", href:`https://wa.me/?text=${enc(text+" "+url)}`},
-    {k:"tg",  label:"Telegram", bg:"#229ED9", icon:"✈️", href:`https://t.me/share/url?url=${eu}&text=${et}`},
     {k:"x",   label:"X / Twitter", bg:"#0F172A", icon:"𝕏", href:`https://twitter.com/intent/tweet?text=${et}&url=${eu}`},
-    {k:"fb",  label:"Facebook", bg:"#1877F2", icon:"f", href:`https://www.facebook.com/sharer/sharer.php?u=${eu}`},
   ];
   const copy=()=>{ try{ navigator.clipboard.writeText(url); setCopied(true); setTimeout(()=>setCopied(false),2200);}catch{} };
   return(
     <>
       <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(8,13,24,0.6)",backdropFilter:"blur(3px)",zIndex:99990}}/>
-      <div style={{position:"fixed",left:"50%",top:"50%",transform:"translate(-50%,-50%)",width:380,maxWidth:"94vw",background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:20,boxShadow:"0 30px 80px rgba(0,0,0,0.45)",zIndex:99991,overflow:"hidden"}}>
+      <div style={{position:"fixed",left:"50%",top:"50%",transform:"translate(-50%,-50%)",width:380,maxWidth:"94vw",maxHeight:"90vh",overflowY:"auto",background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:20,boxShadow:"0 30px 80px rgba(0,0,0,0.45)",zIndex:99991}}>
         <div style={{background:"linear-gradient(135deg,#0F4C81,#0F5E68)",padding:"22px 22px 18px",textAlign:"center",position:"relative"}}>
           <button onClick={onClose} style={{position:"absolute",top:12,right:14,background:"rgba(255,255,255,0.18)",border:"none",borderRadius:"50%",width:26,height:26,cursor:"pointer",color:"#fff",fontSize:13}}>✕</button>
           <div style={{fontSize:30,marginBottom:6}}>🌍</div>
