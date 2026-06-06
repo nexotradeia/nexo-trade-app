@@ -103,31 +103,48 @@ export default async function handler(req, res) {
     console.log('Stripe event:', event.type);
     const dbg = { type: event.type, ran: false };
 
-    if (event.type === 'checkout.session.completed' || event.type === 'invoice.paid') {
+    const ACTIVATE   = ['checkout.session.completed','invoice.paid','customer.subscription.created'];
+    const DEACTIVATE = ['customer.subscription.deleted','charge.refunded'];
+
+    if (ACTIVATE.includes(event.type) || DEACTIVATE.includes(event.type)) {
       const obj = event.data.object;
-      const email = (obj.customer_details?.email || obj.customer_email || '').toLowerCase();
-      dbg.ran = true; dbg.email = email; dbg.foundUser = false; dbg.updated = false;
+      let setTo = ACTIVATE.includes(event.type);
+      dbg.ran = true; dbg.setTo = setTo;
+
+      // En reembolso parcial NO quitar Premium (solo en reembolso total)
+      if (event.type === 'charge.refunded' && obj.amount_refunded != null && obj.amount != null && obj.amount_refunded < obj.amount) {
+        dbg.skipped = 'partial_refund';
+        return res.status(200).json({ received: true, dbg });
+      }
+
+      // Resolver email del evento; si no viene, buscar el cliente vía Stripe API
+      let email = (obj.customer_details?.email || obj.customer_email || obj.billing_details?.email || obj.receipt_email || '').toLowerCase();
+      if (!email && obj.customer && process.env.STRIPE_SECRET_KEY) {
+        try {
+          const cr = await fetch(`https://api.stripe.com/v1/customers/${obj.customer}`, { headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` } });
+          const c = await cr.json();
+          email = (c.email || '').toLowerCase();
+        } catch (e) { dbg.custErr = e.message; }
+      }
+      dbg.email = email;
 
       if (email && process.env.SUPABASE_SERVICE_KEY) {
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(SUPA_URL, process.env.SUPABASE_SERVICE_KEY);
-
-        // 1) Buscar el usuario por email en auth.users (profiles puede no tener columna email)
+        dbg.foundUser = false; dbg.updated = false;
         try {
           const { data: list, error: lerr } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
           if (lerr) dbg.listError = lerr.message;
           const u = list?.users?.find(x => (x.email || '').toLowerCase() === email);
           if (u) {
             dbg.foundUser = true;
-            const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('id', u.id);
-            if (!error) { dbg.updated = true; } else dbg.updateError = error.message;
+            const { error } = await supabase.from('profiles').update({ is_premium: setTo }).eq('id', u.id);
+            if (!error) dbg.updated = true; else dbg.updateError = error.message;
           }
         } catch (e) { dbg.lookupError = e.message; }
-
-        // 2) Fallback: por email directo en profiles (si la columna existe)
         if (!dbg.updated) {
-          const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('email', email);
-          if (error) dbg.emailUpdateError = error.message; else dbg.updatedByEmail = true;
+          const { error } = await supabase.from('profiles').update({ is_premium: setTo }).eq('email', email);
+          if (!error) dbg.updatedByEmail = true; else dbg.emailUpdateError = error.message;
         }
       } else { dbg.noEmailOrKey = true; }
     }
