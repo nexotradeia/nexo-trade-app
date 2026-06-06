@@ -102,24 +102,34 @@ export default async function handler(req, res) {
     const event = JSON.parse(rawBody);
     console.log('Stripe event:', event.type);
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      const email = session.customer_details?.email || session.customer_email;
+    if (event.type === 'checkout.session.completed' || event.type === 'invoice.paid') {
+      const obj = event.data.object;
+      const email = (obj.customer_details?.email || obj.customer_email || '').toLowerCase();
 
       if (email && process.env.SUPABASE_SERVICE_KEY) {
         const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-          'https://glvrzrtatekuuhwtzzhd.supabase.co',
-          process.env.SUPABASE_SERVICE_KEY
-        );
+        const supabase = createClient(SUPA_URL, process.env.SUPABASE_SERVICE_KEY);
 
-        const { error } = await supabase
-          .from('profiles')
-          .update({ is_premium: true })
-          .eq('email', email);
+        let updated = false;
+        // 1) Buscar el usuario por email en auth.users (profiles puede no tener columna email)
+        try {
+          const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+          const u = list?.users?.find(x => (x.email || '').toLowerCase() === email);
+          if (u) {
+            const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('id', u.id);
+            if (!error) { updated = true; console.log('✅ Premium activado (id) para:', email); }
+            else console.error('update by id error:', error.message);
+          } else {
+            console.error('⚠️ no user found for email:', email);
+          }
+        } catch (e) { console.error('admin lookup error:', e.message); }
 
-        if (error) console.error('Supabase error:', error.message);
-        else console.log('✅ Premium activado para:', email);
+        // 2) Fallback: por email directo en profiles (si la columna existe)
+        if (!updated) {
+          const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('email', email);
+          if (error) console.error('update by email error:', error.message);
+          else console.log('✅ Premium activado (email) para:', email);
+        }
       }
     }
 
