@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
+// NEXO TRADE — build: 2026-06-06 19:21:52 Sesión 14 — crypto screener, paywall, email gate, founder, referidos
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -1203,11 +1203,13 @@ function TickerTape({lang="es", onPremium}) {
   });
   // Mensajes Premium intercalados cada 8 tickers (lo primero que ve el usuario)
   const PROMOS = isEN ? [
-    "🔥 Premium: real-time AI picks — $9.99/mo",
+    "🔥 Launch price $9.99/mo — going up to $29 soon",
+    "✦ Founder offer — first 500 members only",
     "🐋 See what hedge funds are buying → Premium",
     "🎯 AI Screener + institutional flow → Join Premium",
   ] : [
-    "🔥 Premium: picks de IA en tiempo real — $9.99/mes",
+    "🔥 Precio de lanzamiento $9.99/mes — sube a $29 pronto",
+    "✦ Oferta de fundador — solo primeros 500 miembros",
     "🐋 Ve qué compran los hedge funds → Premium",
     "🎯 Screener IA + flujo institucional → Únete a Premium",
   ];
@@ -3193,7 +3195,7 @@ function LinkPreviewCard({url}){
   );
 }
 
-function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth,following=[],onFollow,onDM,onDelete}){
+function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,user,onNeedAuth,following=[],onFollow,onDM,onDelete,isPremium=false,onNeedPremium}){
   const isEN = lang==="en";
   const [liked,setLiked]=useState(false),[likes,setLikes]=useState(post.likes);
   const [reposted,setReposted]=useState(()=>{try{return JSON.parse(localStorage.getItem("nx-rp-"+post.id)||"false");}catch{return false;}});
@@ -3279,7 +3281,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
         } else if(error.code==="42501"||error.message?.toLowerCase().includes("policy")||error.message?.toLowerCase().includes("rls")){
           alert(isEN?"Permissions error (RLS). Sign out, sign back in and try again.":"Error de permisos (RLS). Cierra sesión, vuelve a entrar e intenta de nuevo.");
         } else {
-          alert("No se pudo guardar el comentario: " + (error.message||error.code||"error desconocido"));
+          alert((isEN?"Could not save the comment: ":"No se pudo guardar el comentario: ") + (error.message||error.code||(isEN?"unknown error":"error desconocido")));
         }
       } else if(data){
         setComments(prev=>prev.map(c=>c.id===tempId?{...tempComment,...data,username:user.username}:c));
@@ -3300,6 +3302,8 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
   const sparkMax=Math.max(...spark), sparkMin=Math.min(...spark);
   const sparkPts=spark.map((v,i)=>`${(i/(spark.length-1))*80},${20-((v-sparkMin)/(sparkMax-sparkMin||1))*18}`).join(" ");
   const isBull=post.sentiment==="bull";
+  // 🔒 Paywall: posts Premium quedan bloqueados para usuarios no-Premium (excepto el autor)
+  const locked = post.is_premium && !post.is_pro && !isPremium && !isOwner;
   return(
     <div
       className={isNew ? "post-card-new" : ""}
@@ -3321,13 +3325,13 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             {isOtherUser && onFollow && (
               <button onClick={e=>{e.stopPropagation();if(!user){onNeedAuth&&onNeedAuth();return;}onFollow(postUserId||post.user);}}
                 style={{background:isFollowing?"rgba(22,163,74,0.1)":"rgba(15,76,129,0.08)",border:`1px solid ${isFollowing?"rgba(22,163,74,0.3)":"rgba(15,76,129,0.25)"}`,borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:700,color:isFollowing?"#16A34A":"#0F4C81",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
-                {isFollowing?"✓ Siguiendo":"+ Seguir"}
+                {isFollowing?(isEN?"✓ Following":"✓ Siguiendo"):(isEN?"+ Follow":"+ Seguir")}
               </button>
             )}
             {/* Botón DM (solo si es otro usuario y hay sesión) */}
             {isOtherUser && onDM && user && (
               <button onClick={e=>{e.stopPropagation();onDM({id:postUserId||post.user, username:post.user, avatar:post.avatar, avatarColor:post.avatarColor});}}
-                title="Mensaje privado"
+                title={isEN?"Direct message":"Mensaje privado"}
                 style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"2px 9px",fontSize:10,fontWeight:700,color:"#FCD34D",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}}>
                 💬 DM
               </button>
@@ -3342,16 +3346,19 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
               ⚠️ {isEN?"Not saved":"No se guardó"}{post._errMsg ? ` — ${post._errMsg}` : (isEN?" — open the browser console (F12) to see the error":" — abre consola del navegador (F12) para ver el error")}.
             </div>
           )}
+          {/* ── Contenido del post (se difumina si es Premium bloqueado) ── */}
+          <div style={{position:"relative"}}>
+          <div style={locked?{filter:"blur(7px)",pointerEvents:"none",userSelect:"none",maxHeight:150,overflow:"hidden"}:undefined}>
           {/* Post text */}
-          <p style={{margin:"0 0 10px",color:"var(--c-text)",fontSize:14,lineHeight:1.65,fontWeight:400,opacity:0.88}}>{renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
+          <p style={{margin:"0 0 10px",color:"var(--c-text)",fontSize:14,lineHeight:1.65,fontWeight:400,opacity:0.88}}>{locked?(isEN?"Premium signal — entry, target and stop reserved for VIP members. Unlock the full thesis and price levels.":"Señal Premium — entrada, objetivo y stop reservados para miembros VIP. Desbloquea la tesis completa y los niveles de precio."):renderWithCashtags(post.text, onTickerClick, onTickerClick)}</p>
           {/* Mini chart — solo cuando el post lo pide (bots de análisis) */}
           {post.showChart && post.ticker && (
             <MiniPostChart ticker={post.ticker} isBull={isBull} fallbackSpark={spark}/>
           )}
           {/* Imagen / GIF */}
-          {post.image&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
+          {post.image&&!locked&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
           {/* Link preview card */}
-          {post.link ? <LinkPreviewCard url={post.link}/> : null}
+          {post.link&&!locked ? <LinkPreviewCard url={post.link}/> : null}
           {/* Metrics row — compacto */}
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
             <div style={{display:"flex",alignItems:"center",gap:3,background:isBull?"rgba(22,163,74,0.08)":"rgba(220,38,38,0.08)",borderRadius:8,padding:"3px 9px",border:`1px solid ${isBull?"rgba(22,163,74,0.18)":"rgba(220,38,38,0.18)"}`}}>
@@ -3374,10 +3381,22 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           {post.tags?.length>0&&<div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
             {post.tags.map(tg=><span key={tg} style={{background:"rgba(15,76,129,0.07)",color:"#0F4C81",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:600,letterSpacing:0.2}}>#{tg}</span>)}
           </div>}
+          </div>
+          {/* 🔒 Overlay Premium — botón dorado para desbloquear */}
+          {locked&&(
+            <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,zIndex:2}}>
+              <button onClick={e=>{e.stopPropagation();onNeedPremium?onNeedPremium():(onNeedAuth&&onNeedAuth());}}
+                style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:24,padding:"10px 22px",fontSize:13,fontWeight:800,letterSpacing:0.3,cursor:"pointer",boxShadow:"0 6px 20px rgba(245,158,11,0.45)",display:"flex",alignItems:"center",gap:7}}>
+                <span style={{fontSize:15}}>🔓</span>{isEN?"Unlock with Premium":"Desbloquear con Premium"}
+              </button>
+              <span style={{fontSize:10.5,fontWeight:700,color:"#B45309",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"2px 10px"}}>✦ {isEN?"VIP · $9.99/mo · 7-day free trial":"VIP · $9.99/mes · 7 días gratis"}</span>
+            </div>
+          )}
+          </div>
           {/* Action row */}
           <div className="nexo-action-row" style={{display:"flex",gap:0,alignItems:"center",borderTop:"1px solid var(--c-border)",paddingTop:8,marginTop:4,flexWrap:"wrap"}}>
             {[
-              {icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,"¡Like recibido!");}},
+              {icon:"♥",val:likes,active:liked,col:"#EF4444",fn:()=>{setLiked(!liked);setLikes(liked?likes-1:likes+1);if(!liked)onPoints(POINT_ACTIONS.like_received,isEN?"Like received!":"¡Like recibido!");}},
               {icon:"💬",val:commentCount,active:showComments,col:"#0F4C81",fn:toggleComments},
             ].map(({icon,val,active,col,fn},i)=>(
               <button key={i} onClick={fn}
@@ -3411,7 +3430,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
                 const txt=`${post.sentiment==="bull"?"📈":"📉"} $${post.ticker} — ${post.text.slice(0,180)}${post.text.length>180?"...":""}\n\nvía @NexoTradeIA nexotradeia.com`;
                 window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(txt)}`,"_blank","width=560,height=420");
               }}
-              title="Compartir en X"
+              title={isEN?"Share on X":"Compartir en X"}
               style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:3,color:"var(--c-muted2)",padding:"5px 8px",borderRadius:8,transition:"all 0.15s"}}
               onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,0,0,0.05)";e.currentTarget.style.color="var(--c-text)";}}
               onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color="var(--c-muted2)";}}>
@@ -3424,7 +3443,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             </span>
             {/* Botón Eliminar — solo dueño del post */}
             {isOwner && !delConfirm && (
-              <button onClick={()=>setDelConfirm(true)} title="Eliminar mi post"
+              <button onClick={()=>setDelConfirm(true)} title={isEN?"Delete my post":"Eliminar mi post"}
                 style={{background:"none",border:"none",cursor:"pointer",color:"var(--c-muted2)",fontSize:13,padding:"5px 8px",borderRadius:8,transition:"all 0.15s",display:"flex",alignItems:"center"}}
                 onMouseEnter={e=>{e.currentTarget.style.background="rgba(239,68,68,0.08)";e.currentTarget.style.color="#EF4444";}}
                 onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color="var(--c-muted2)";}}>
@@ -3434,7 +3453,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             {isOwner && delConfirm && (
               <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:4}}>
                 <span style={{fontSize:11,color:"#EF4444",fontWeight:600}}>{isEN?"Delete?":"¿Borrar?"}</span>
-                <button onClick={handleDelete} style={{background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,color:"#EF4444",cursor:"pointer"}}>Sí</button>
+                <button onClick={handleDelete} style={{background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,color:"#EF4444",cursor:"pointer"}}>{isEN?"Yes":"Sí"}</button>
                 <button onClick={()=>setDelConfirm(false)} style={{background:"rgba(255,255,255,0.05)",border:"1px solid var(--c-border)",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,color:"var(--c-muted)",cursor:"pointer"}}>No</button>
               </div>
             )}
@@ -3443,7 +3462,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           {/* ── Panel de comentarios ── */}
           {showComments&&(
             <div style={{borderTop:"1px solid var(--c-border)",marginTop:8,paddingTop:10}}>
-              {loadingComments&&<div style={{color:"var(--c-muted2)",fontSize:12,textAlign:"center",padding:"8px 0"}}>Cargando...</div>}
+              {loadingComments&&<div style={{color:"var(--c-muted2)",fontSize:12,textAlign:"center",padding:"8px 0"}}>{isEN?"Loading...":"Cargando..."}</div>}
               {!loadingComments&&comments.length===0&&(
                 <div style={{color:"var(--c-muted2)",fontSize:12,textAlign:"center",padding:"6px 0"}}>
                   {lang==="en"?"No replies yet. Be the first!":"Sin respuestas aún. ¡Sé el primero!"}
@@ -3455,7 +3474,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
                     {(c.username||"U")[0].toUpperCase()}
                   </div>
                   <div style={{background:"var(--c-card2)",borderRadius:10,padding:"6px 10px",flex:1,minWidth:0}}>
-                    <div style={{fontSize:11,fontWeight:700,color:"var(--c-accent)",marginBottom:2}}>{c.username||"Usuario"}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"var(--c-accent)",marginBottom:2}}>{c.username||(isEN?"User":"Usuario")}</div>
                     <div style={{fontSize:13,color:"var(--c-text)",wordBreak:"break-word"}}>{c.text}</div>
                   </div>
                 </div>
@@ -3752,7 +3771,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
 
   useEffect(()=>{ if(tab==="gif") search(""); },[tab]);
 
-  const TAGS = ["📈 bull","📉 bear","🚀 moon","💎 hodl","stonks","crypto","trading","celebrate"];
+  const TAGS = ["💰 money","💵 cash","🤑 rich","💸 dollars","📈 bull","📉 bear","🚀 moon","💎 hodl","crypto","🎉 celebrate"];
   const tabs = [{k:"gif",l:"GIF 🎞️"},{k:"emoji",l:"Emojis 😎"},{k:"reaction",l:"Frases ⚡"},{k:"sticker",l:"Stickers 🎨"}];
 
   return(
@@ -3777,7 +3796,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
           <div style={{display:"flex",gap:6,marginBottom:8}}>
             <input value={q} onChange={e=>setQ(e.target.value)}
               onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();search(q);}}}
-              placeholder="🔍 Buscar: bull, moon, trading..." autoFocus
+              placeholder={isEN?"🔍 Search: money, cash, bull...":"🔍 Buscar: dinero, cash, bull..."} autoFocus
               style={{flex:1,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 11px",fontSize:12,outline:"none",background:C.card2||"#f8fafc",color:C.text}}/>
             <button onClick={()=>search(q)} style={{background:C.accent,border:"none",borderRadius:9,padding:"7px 14px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>⟳</button>
           </div>
@@ -3787,7 +3806,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
                 style={{background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"2px 9px",fontSize:10,cursor:"pointer",color:C.accentText,fontWeight:600}}>{tag}</button>
             );})}
           </div>
-          {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ Buscando GIFs...</div>:(
+          {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ {isEN?"Searching GIFs...":"Buscando GIFs..."}</div>:(
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:260,overflowY:"auto"}}>
               {gifs.map(g=>(
                 <div key={g.id} style={{borderRadius:7,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:"#f1f5f9"}}
@@ -3803,7 +3822,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
         {/* ── EMOJI TAB ── */}
 
         {tab==="emoji"&&<>
-          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Toca un emoji para añadirlo a tu post:</div>
+          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>{isEN?"Tap an emoji to add it to your post:":"Toca un emoji para añadirlo a tu post:"}</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(8,1fr)",gap:4,maxHeight:240,overflowY:"auto"}}>
             {TRADING_EMOJIS.map(e=>(
               <button key={e} onClick={()=>{ onText&&onText(e+" "); onClose(); }}
@@ -3816,7 +3835,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
 
         {/* ── FRASES RÁPIDAS TAB ── */}
         {tab==="reaction"&&<>
-          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Inserta una frase rápida en tu post:</div>
+          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>{isEN?"Insert a quick phrase in your post:":"Inserta una frase rápida en tu post:"}</div>
           <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:260,overflowY:"auto"}}>
             {QUICK_REACTIONS_FN(isEN).map(r=>(
               <button key={r.label} onClick={()=>{ onText&&onText(r.text); onClose(); }}
@@ -3831,7 +3850,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
 
         {/* ── STICKERS TAB ── */}
         {tab==="sticker"&&<>
-          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>Stickers de trading para tu post:</div>
+          <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:600}}>{isEN?"Trading stickers for your post:":"Stickers de trading para tu post:"}</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,maxHeight:260,overflowY:"auto"}}>
             {STICKERS.map(s=>(
               <button key={s.id} onClick={()=>{ onText&&onText(s.emoji+" "+s.text+" "); onClose(); }}
@@ -4171,7 +4190,7 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
           <div style={{fontSize:14}}>{lang==="en"?`Be the first to post about $${ticker}!`:`¡Sé el primero en comentar $${ticker}!`}</div>
         </div>
       ):(
-        tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang} onRepost={onRepost} user={user} onNeedAuth={onNeedAuth}/>)
+        tkPosts.map(p=><PostCard key={p.id} post={p} onProfile={()=>{}} onPoints={()=>{}} onTickerClick={()=>{}} lang={lang} onRepost={onRepost} user={user} onNeedAuth={onNeedAuth} isPremium={isPremium} onNeedPremium={onNeedPremium||onNeedAuth}/>)
       )}
 
     </div>
@@ -6242,10 +6261,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 </div>
               </>
             : <>
-                {/* Urgency banner */}
-                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:20,padding:"6px 16px",marginBottom:14}}>
-                  <span style={{width:7,height:7,borderRadius:"50%",background:"#ef4444",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
-                  <span style={{color:"#f87171",fontSize:12,fontWeight:700,letterSpacing:0.5}}>🔥 {lang==="en"?"Only 23 PREMIUM spots left this month":"Solo quedan 23 spots PREMIUM este mes"}</span>
+                {/* Founder offer banner — sin contador numérico */}
+                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,rgba(245,158,11,0.14),rgba(180,83,9,0.10))",border:"1px solid rgba(245,158,11,0.45)",borderRadius:20,padding:"6px 16px",marginBottom:14}}>
+                  <span style={{width:7,height:7,borderRadius:"50%",background:"#F59E0B",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
+                  <span style={{color:"#FBBF24",fontSize:12,fontWeight:800,letterSpacing:0.4}}>✦ {lang==="en"?"Founder offer — first 500 members only":"Oferta de fundador — solo primeros 500 miembros"}</span>
                 </div>
                 <h1 style={{margin:"0 0 10px",color:"#fff",fontSize:"clamp(22px,4vw,30px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Take your trading to the next level":"Lleva tu trading al siguiente nivel"}</h1>
                 <p style={{margin:"0 auto 20px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, unlimited AI, email alerts and exclusive education.":"Señales en tiempo real, IA sin límites, alertas por email y formación exclusiva."}</p>
@@ -6285,7 +6304,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   ? <div style={{fontSize:12,color:"#10B981",marginBottom:8,fontWeight:700}}>🎉 {lang==="en"?`You save $${savingsAnual}/year vs monthly`:`Ahorras $${savingsAnual} al año vs mensual`}</div>
                   : null
                 }
-                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"No card required · Cancel anytime · 840+ active PREMIUM traders":"Sin tarjeta requerida · Cancela cuando quieras · 840+ traders PREMIUM activos"}</div>
+                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"No card required · Cancel anytime · 🔥 Launch price, going up to $29 soon":"Sin tarjeta requerida · Cancela cuando quieras · 🔥 Precio de lanzamiento, sube a $29 pronto"}</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {(lang==="en"
                     ?["💡 Ideas PREMIUM","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
@@ -7648,9 +7667,16 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
               </div>
             ))}
           </div>
+          {/* Ribbon de fundador */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7,background:"linear-gradient(135deg,rgba(245,158,11,0.12),rgba(180,83,9,0.10))",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 12px",marginBottom:12}}>
+            <span style={{fontSize:14}}>✦</span>
+            <span style={{fontSize:11.5,fontWeight:800,color:"#B45309",letterSpacing:0.2}}>{isEN?"Founder offer · first 500 members only":"Oferta de fundador · solo primeros 500 miembros"}</span>
+          </div>
           <div style={{textAlign:"center",marginBottom:14}}>
+            <span style={{fontSize:14,color:"#94A3B8",fontWeight:600,textDecoration:"line-through",marginRight:7}}>$29</span>
             <span style={{fontSize:30,fontWeight:900,color:"#0F172A",letterSpacing:-1}}>$9.99</span>
             <span style={{fontSize:13,color:"#94A3B8",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
+            <div style={{fontSize:11,color:"#B45309",fontWeight:800,marginTop:3}}>{isEN?"🔥 Launch price — going up to $29 soon":"🔥 Precio de lanzamiento — sube a $29 pronto"}</div>
             <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:2}}>{isEN?"7 days free · cancel anytime":"7 días gratis · cancela cuando quieras"}</div>
           </div>
           <button onClick={onUpgrade}
@@ -7844,6 +7870,105 @@ function WatchlistFeedBanner({user, isPremium=false, onUpgrade, lang="es"}){
         ✦ {isEN?"Try free":"Probar gratis"}
       </button>
       <PaywallModal open={showPaywall} onClose={()=>setShowPaywall(false)} onUpgrade={()=>{setShowPaywall(false);onUpgrade&&onUpgrade();}} lang={lang}/>
+    </div>
+  );
+}
+
+// ── EMAIL CAPTURE — tarjeta en el feed para capturar leads (free/anónimos) ──
+function EmailCaptureFeedCard({user, isPremium=false, lang="es"}){
+  const isEN=lang==="en";
+  const [email,setEmail]=useState("");
+  const [done,setDone]=useState(false);
+  const [closed,setClosed]=useState(()=>{try{return sessionStorage.getItem("nexo-email-card-closed")==="1";}catch{return false;}});
+  // No mostrar a usuarios Premium ni si ya lo cerró/completó
+  if(isPremium||closed) return null;
+  const submit=async()=>{
+    if(!email.includes("@")) return;
+    try{ await supabase.from("newsletter_subscribers").upsert({email, source:"feed_card", created_at:new Date().toISOString()}); }catch{}
+    fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{});
+    setDone(true);
+  };
+  if(done) return(
+    <div style={{background:"linear-gradient(135deg,#0F4C81 0%,#0F5E68 100%)",borderRadius:16,padding:"16px 18px",marginBottom:6,textAlign:"center"}}>
+      <div style={{fontSize:22,marginBottom:4}}>✅</div>
+      <div style={{fontSize:13.5,fontWeight:800,color:"#fff"}}>{isEN?"You're in! Free weekly market signals are on the way.":"¡Listo! Recibirás señales del mercado gratis cada semana."}</div>
+    </div>
+  );
+  return(
+    <div style={{background:"linear-gradient(135deg,#0F4C81 0%,#0F5E68 100%)",borderRadius:16,padding:"16px 18px",marginBottom:6,position:"relative",overflow:"hidden"}}>
+      <button onClick={()=>{setClosed(true);try{sessionStorage.setItem("nexo-email-card-closed","1");}catch{}}}
+        style={{position:"absolute",top:8,right:10,background:"rgba(255,255,255,0.18)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:11,display:"flex",alignItems:"center",justifyContent:"center",zIndex:2}}>✕</button>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,paddingRight:18}}>
+        <div style={{width:40,height:40,borderRadius:11,background:"rgba(255,255,255,0.14)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>📧</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:13.5,fontWeight:800,color:"#fff",letterSpacing:-0.2,marginBottom:2}}>
+            {isEN?"Free weekly trade signals":"Señales de trading gratis cada semana"}
+          </div>
+          <div style={{fontSize:11.5,color:"rgba(255,255,255,0.82)",lineHeight:1.4}}>
+            {isEN?"Stock & crypto picks, straight to your inbox. No spam.":"Picks de acciones y crypto, directo a tu correo. Sin spam."}
+          </div>
+        </div>
+      </div>
+      <div style={{display:"flex",gap:8}}>
+        <input value={email} onChange={e=>setEmail(e.target.value)}
+          onKeyDown={e=>{if(e.key==="Enter")submit();}}
+          type="email" placeholder={isEN?"your@email.com":"tu@email.com"}
+          style={{flex:1,minWidth:0,border:"none",borderRadius:10,padding:"10px 14px",fontSize:13,outline:"none",background:"rgba(255,255,255,0.95)",color:"#0f172a",fontFamily:"inherit"}}/>
+        <button onClick={submit}
+          style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:10,padding:"10px 18px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",flexShrink:0,boxShadow:"0 3px 12px rgba(245,158,11,0.4)",whiteSpace:"nowrap"}}>
+          {isEN?"Get signals":"Quiero señales"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── EMAIL GATE — captura obligatoria de email en la primera visita ──────────
+function EmailGate({lang="es", onDone, onLogin}){
+  const isEN=lang==="en";
+  const [email,setEmail]=useState("");
+  const [err,setErr]=useState(false);
+  const submit=async()=>{
+    if(!email.includes("@")||!email.includes(".")){setErr(true);return;}
+    try{ await supabase.from("newsletter_subscribers").upsert({email, source:"email_gate", created_at:new Date().toISOString()}); }catch{}
+    fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{});
+    try{localStorage.setItem("nexo-email-gate-done","1");}catch{}
+    onDone&&onDone();
+  };
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:100000,background:"linear-gradient(150deg,#0B1220 0%,#0F2C44 55%,#0F3B44 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:18,overflowY:"auto"}}>
+      <div style={{width:430,maxWidth:"96vw",background:"#0E1B2E",border:"1px solid rgba(255,255,255,0.10)",borderRadius:22,padding:"32px 28px",boxShadow:"0 30px 90px rgba(0,0,0,0.6)",textAlign:"center"}}>
+        {/* Logo */}
+        <div style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:54,height:54,borderRadius:15,background:"linear-gradient(135deg,#0F4C81,#0F5E68)",marginBottom:16}}>
+          <svg width="30" height="30" viewBox="0 0 56 56" fill="none"><path d="M14 38L22 26L30 32L38 18" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="42" cy="18" r="3" fill="#00E58F"/></svg>
+        </div>
+        <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:20,padding:"4px 12px",marginBottom:14}}>
+          <span style={{fontSize:11.5,fontWeight:800,color:"#FBBF24",letterSpacing:0.3}}>✦ {isEN?"Founder offer — first 500 members":"Oferta de fundador — primeros 500 miembros"}</span>
+        </div>
+        <h2 style={{margin:"0 0 8px",color:"#fff",fontSize:23,fontWeight:900,letterSpacing:-0.5,lineHeight:1.2,fontFamily:"'Space Grotesk',sans-serif"}}>
+          {isEN?"Free trade signals, every week":"Señales de trading gratis, cada semana"}
+        </h2>
+        <p style={{margin:"0 0 22px",color:"#9FB3C8",fontSize:14,lineHeight:1.55}}>
+          {isEN?"Enter your email to access the live feed — stock & crypto picks, AI signals and institutional flow.":"Ingresa tu email para acceder al feed en vivo — picks de acciones y crypto, señales IA y flujo institucional."}
+        </p>
+        <input value={email} autoFocus type="email"
+          onChange={e=>{setEmail(e.target.value);setErr(false);}}
+          onKeyDown={e=>{if(e.key==="Enter")submit();}}
+          placeholder={isEN?"your@email.com":"tu@email.com"}
+          style={{width:"100%",boxSizing:"border-box",border:`1px solid ${err?"#EF4444":"rgba(255,255,255,0.18)"}`,borderRadius:12,padding:"13px 16px",fontSize:15,outline:"none",background:"rgba(255,255,255,0.06)",color:"#fff",fontFamily:"inherit",marginBottom:err?6:14}}/>
+        {err&&<div style={{fontSize:11.5,color:"#F87171",marginBottom:12,textAlign:"left"}}>{isEN?"Please enter a valid email.":"Ingresa un email válido."}</div>}
+        <button onClick={submit}
+          style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px",color:"#fff",fontWeight:900,fontSize:15.5,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.4)",fontFamily:"inherit"}}>
+          {isEN?"Enter the feed →":"Entrar al feed →"}
+        </button>
+        <div style={{fontSize:10.5,color:"#64748B",marginTop:12}}>{isEN?"No spam. Unsubscribe anytime.":"Sin spam. Cancela cuando quieras."}</div>
+        <div style={{marginTop:18,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)",fontSize:13,color:"#9FB3C8"}}>
+          {isEN?"Already have an account?":"¿Ya tienes cuenta?"}{" "}
+          <button onClick={onLogin} style={{background:"none",border:"none",color:"#38BDF8",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit",padding:0}}>
+            {isEN?"Log in":"Iniciar sesión"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -8371,6 +8496,7 @@ function PointsBenefitsCard({user, lang="es"}){
 
 // ── REFERRAL SECTION ──────────────────────────────────────────────────────────
 function ReferralSection({ user }) {
+  const isEN = (()=>{try{return (localStorage.getItem("nexo-lang")||"en")==="en";}catch{return true;}})();
   const [copied, setCopied] = useState(false);
   const [refCount, setRefCount] = useState(null);
   const [refCode, setRefCode] = useState(null);
@@ -8404,13 +8530,13 @@ function ReferralSection({ user }) {
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
         <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#0F4C8122,#0F5E6822)",border:"1px solid rgba(15,76,129,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🔗</div>
         <div>
-          <div style={{fontWeight:800,fontSize:13,color:"var(--c-text,#0F172A)"}}>Programa de Referidos</div>
-          <div style={{fontSize:10,color:"#64748B"}}>Gana 1 mes PREMIUM gratis por cada amigo que se suscriba</div>
+          <div style={{fontWeight:800,fontSize:13,color:"var(--c-text,#0F172A)"}}>{isEN?"Referral Program":"Programa de Referidos"}</div>
+          <div style={{fontSize:10,color:"#64748B"}}>{isEN?"Earn 1 month of PREMIUM free for every friend who subscribes":"Gana 1 mes PREMIUM gratis por cada amigo que se suscriba"}</div>
         </div>
         {refCount !== null && (
           <div style={{marginLeft:"auto",textAlign:"center",background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:10,padding:"5px 10px"}}>
             <div style={{fontSize:18,fontWeight:900,color:"#0F4C81"}}>{refCount}</div>
-            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>referidos</div>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>{isEN?"referrals":"referidos"}</div>
           </div>
         )}
       </div>
@@ -8418,8 +8544,8 @@ function ReferralSection({ user }) {
       {/* Rewards */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}}>
         {[
-          {icon:"🎁",title:"Tú ganas",val:"1 mes PREMIUM gratis",sub:"por cada referido PREMIUM"},
-          {icon:"🤝",title:"Tu amigo gana",val:"7 días gratis",sub:"al suscribirse PREMIUM"},
+          {icon:"🎁",title:isEN?"You earn":"Tú ganas",val:isEN?"1 month PREMIUM free":"1 mes PREMIUM gratis",sub:isEN?"per PREMIUM referral":"por cada referido PREMIUM"},
+          {icon:"🤝",title:isEN?"Your friend gets":"Tu amigo gana",val:isEN?"7 days free":"7 días gratis",sub:isEN?"on PREMIUM signup":"al suscribirse PREMIUM"},
         ].map((r,i)=>(
           <div key={i} style={{background:"rgba(255,255,255,0.5)",border:"1px solid rgba(0,0,0,0.06)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
             <div style={{fontSize:16,marginBottom:2}}>{r.icon}</div>
@@ -8433,7 +8559,7 @@ function ReferralSection({ user }) {
       {/* Tu código */}
       {refCode && (
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-          <div style={{fontSize:10,color:"#64748B",fontWeight:600,whiteSpace:"nowrap"}}>Tu código:</div>
+          <div style={{fontSize:10,color:"#64748B",fontWeight:600,whiteSpace:"nowrap"}}>{isEN?"Your code:":"Tu código:"}</div>
           <div style={{background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:6,padding:"4px 10px",fontSize:12,fontWeight:800,color:"#0F4C81",fontFamily:"monospace",letterSpacing:1}}>{refCode}</div>
         </div>
       )}
@@ -8445,7 +8571,7 @@ function ReferralSection({ user }) {
         </div>
         <button onClick={handleCopy}
           style={{background:copied?"#10b981":"#0F4C81",border:"none",borderRadius:7,padding:"7px 12px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap"}}>
-          {copied ? "✓ Copiado" : "Copiar link"}
+          {copied ? (isEN?"✓ Copied":"✓ Copiado") : (isEN?"Copy link":"Copiar link")}
         </button>
       </div>
 
@@ -18978,6 +19104,26 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const [selectedRow,  setSelectedRow] = useState(null); // mini AI panel
   const [savedFilters, setSavedFilters]= useState(null);
   const [fullScreen,   setFullScreen]  = useState(false);
+  // ── Crypto Screener (datos en vivo CoinGecko vía /api/crypto) ──
+  const [cryptoData,   setCryptoData]  = useState(null);
+  const [cryptoGlobal, setCryptoGlobal]= useState({});
+  const [cryptoLoading,setCryptoLoading]=useState(false);
+  useEffect(()=>{
+    if(tab!=="crypto") return;
+    let cancel=false;
+    const load=()=>{
+      setCryptoLoading(true);
+      fetch("/api/crypto").then(r=>r.json()).then(d=>{
+        if(cancel) return;
+        setCryptoData(Array.isArray(d.coins)?d.coins:[]);
+        setCryptoGlobal(d.global||{});
+        setCryptoLoading(false);
+      }).catch(()=>{ if(!cancel){ setCryptoData([]); setCryptoLoading(false); } });
+    };
+    load();
+    const iv=setInterval(load,60000); // refresca cada 60s
+    return()=>{ cancel=true; clearInterval(iv); };
+  },[tab]);
 
   // Salir de pantalla completa con tecla Escape
   useEffect(()=>{
@@ -19083,8 +19229,8 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   if(!isPremium) return(
     <PremiumGate lang={isEN?"en":"es"} icon="🔬" onPlans={onNeedPremium}
       title={isEN?"Advanced Screener":"Screener Avanzado"}
-      desc={isEN?"Scan stocks, options, intraday and scalping with AI signals, live prices and institutional-grade filters.":"Escanea acciones, opciones, intraday y scalping con señales IA, precios en vivo y filtros de grado institucional."}
-      bullets={isEN?["🔬 4 scanners: stocks/options/intraday/scalping","🤖 AI setup: entry, SL & TP","⚡ Real-time prices & alerts","⬇️ Export to CSV"]:["🔬 4 scanners: acciones/opciones/intraday/scalping","🤖 Setup IA: entrada, SL y TP","⚡ Precios en vivo y alertas","⬇️ Exportar a CSV"]}/>
+      desc={isEN?"Scan stocks, options, intraday, scalping and crypto with AI signals, live prices and institutional-grade filters.":"Escanea acciones, opciones, intraday, scalping y crypto con señales IA, precios en vivo y filtros de grado institucional."}
+      bullets={isEN?["🔬 5 scanners: stocks/options/intraday/scalping/crypto","₿ Live crypto: BTC dominance, Fear & Greed, 24h volume","🤖 AI setup & score per asset","⚡ Real-time prices & alerts"]:["🔬 5 scanners: acciones/opciones/intraday/scalping/crypto","₿ Crypto en vivo: dominancia BTC, Fear & Greed, volumen 24h","🤖 Setup IA y score por activo","⚡ Precios en vivo y alertas"]}/>
   );
 
   const tabs=[
@@ -19092,6 +19238,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     {id:"options", l:"⚡ "+(isEN?"Options":"Opciones")},
     {id:"intraday",l:"🕐 Intraday"},
     {id:"scalping",l:"⚡ Scalping"},
+    {id:"crypto",  l:"₿ Crypto"},
   ];
 
   // ---- Contratos REALES de opciones (api/options -> Yahoo, ~15 min retraso) ----
@@ -19110,10 +19257,12 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     return()=>{cancel=true;};
   },[tab]);
 
-  const mergedData=(tab==="options"?(realOpts||buildLiveOptions(livePrices)):(SCREENER_DATA[tab]||[])).map(r=>{
-    const live=livePrices[r.s];
-    return{...r, p:live?.price??r.p, chg:live?.change??r.chg, liveHigh:live?.high, liveLow:live?.low};
-  });
+  const mergedData = tab==="crypto"
+    ? (cryptoData||[])
+    : (tab==="options"?(realOpts||buildLiveOptions(livePrices)):(SCREENER_DATA[tab]||[])).map(r=>{
+        const live=livePrices[r.s];
+        return{...r, p:live?.price??r.p, chg:live?.change??r.chg, liveHigh:live?.high, liveLow:live?.low};
+      });
 
   const PATTERNS_AVAILABLE=[...new Set((SCREENER_DATA.stocks||[]).map(r=>r.pattern))];
   const MKT_RANGES=["Todos","< $100B","$100B–$1T","$1T+"];
@@ -19381,6 +19530,29 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
         </div>
       </div>
 
+      {/* ── CRYPTO: franja de stats globales en vivo ── */}
+      {tab==="crypto"&&(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10,marginBottom:12}}>
+          {(()=>{
+            const g=cryptoGlobal||{};
+            const fngCol=g.fng==null?C.muted:g.fng<25?"#EF4444":g.fng<45?"#F59E0B":g.fng<55?"#FBBF24":g.fng<75?"#10B981":"#22c55e";
+            const cards=[
+              {lbl:isEN?"Total Market Cap":"Market Cap Total", val:g.totalMcap||"—", sub:g.mcapChg!=null?`${g.mcapChg>=0?"+":""}${g.mcapChg}% 24h`:"", subCol:g.mcapChg>=0?"#10B981":"#EF4444", icon:"🌐"},
+              {lbl:isEN?"BTC Dominance":"Dominancia BTC", val:g.btcDom!=null?g.btcDom+"%":"—", sub:g.ethDom!=null?`ETH ${g.ethDom}%`:"", subCol:C.muted, icon:"₿"},
+              {lbl:isEN?"24h Volume":"Volumen 24h", val:g.totalVol||"—", sub:isEN?"global":"global", subCol:C.muted, icon:"📊"},
+              {lbl:"Fear & Greed", val:g.fng!=null?String(g.fng):"—", sub:g.fngLabel||"", subCol:fngCol, icon:"😱"},
+            ];
+            return cards.map((c,i)=>(
+              <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"11px 14px",boxShadow:C.shadow}}>
+                <div style={{fontSize:10,color:C.muted2,fontWeight:700,textTransform:"uppercase",letterSpacing:0.6,marginBottom:5,display:"flex",alignItems:"center",gap:5}}><span>{c.icon}</span>{c.lbl}</div>
+                <div style={{fontSize:18,fontWeight:900,color:C.text,letterSpacing:-0.5}}>{c.val}</div>
+                {c.sub&&<div style={{fontSize:11,fontWeight:700,color:c.subCol,marginTop:2}}>{c.sub}</div>}
+              </div>
+            ));
+          })()}
+        </div>
+      )}
+
       {/* ── TABLE ── */}
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         <div style={{minWidth:1100}}>
@@ -19410,6 +19582,11 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
               {[["s","Ticker"],["n","Nombre"],["p","Price"],["spread","Spread"],["trades","Ops/hr"],["tf","TF"],["pattern","Setup"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
+          {tab==="crypto"&&(
+            <div style={{display:"grid",gridTemplateColumns:"56px 150px 110px 78px 78px 110px 110px 130px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8,alignItems:"center"}}>
+              {[["rank","#"],["n",isEN?"Coin":"Cripto"],["p",isEN?"Price":"Precio"],["chg","24h%"],["chg7","7d%"],["mcapRaw","Mkt Cap"],["vol",isEN?"Vol 24h":"Vol 24h"],["pattern",isEN?"Pattern":"Patrón"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
+            </div>
+          )}
 
           {/* Rows */}
           {data.map((r,i)=>{
@@ -19422,6 +19599,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                 gridTemplateColumns:tab==="stocks"?"80px 100px 105px 85px 65px 95px 105px 130px 1fr 72px 88px":
                   tab==="options"?"66px 140px 84px 66px 76px 60px 64px 64px 70px 72px":
                   tab==="intraday"?"70px 160px 95px 78px 62px 68px 120px 100px 72px":
+                  tab==="crypto"?"56px 150px 110px 78px 78px 110px 110px 130px 72px":
                   "70px 160px 95px 90px 88px 68px 140px 72px",
                 padding:"9px 14px",borderBottom:`1px solid ${C.border}`,gap:8,
                 transition:"background 0.25s",background:isSelected?"rgba(15,76,129,0.10)":rowBg,
@@ -19429,8 +19607,35 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                 onMouseEnter={e=>{if(!flash&&!isSelected)e.currentTarget.style.background="rgba(15,76,129,0.05)";}}
                 onMouseLeave={e=>{if(!flash&&!isSelected)e.currentTarget.style.background=rowBg;}}>
 
-                {/* Ticker */}
-                <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13,letterSpacing:0.3}}>{r.s}</span>
+                {/* Ticker / rank */}
+                {tab==="crypto"
+                  ? <span style={{fontFamily:"monospace",fontWeight:700,color:C.muted,fontSize:12}}>{r.rank||(i+1)}</span>
+                  : <span style={{fontFamily:"monospace",fontWeight:800,color:"#00e58f",fontSize:13,letterSpacing:0.3}}>{r.s}</span>}
+
+                {tab==="crypto"&&<>
+                  {/* Coin (logo + nombre + símbolo) */}
+                  <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
+                    {r.img&&<img src={r.img} alt="" style={{width:22,height:22,borderRadius:"50%",flexShrink:0}} onError={e=>e.target.style.display="none"}/>}
+                    <div style={{minWidth:0}}>
+                      <div style={{fontSize:12.5,fontWeight:800,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.s}</div>
+                      <div style={{fontSize:10,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</div>
+                    </div>
+                  </div>
+                  {/* Precio */}
+                  <span style={{fontSize:13,fontWeight:800,color:C.text,fontFamily:"monospace"}}>{r.p>=1000?"$"+r.p.toLocaleString(undefined,{maximumFractionDigits:0}):r.p>=1?"$"+r.p.toFixed(2):"$"+r.p?.toFixed(r.p>=0.01?4:6)}</span>
+                  {/* 24h % */}
+                  <span style={{fontSize:12,fontWeight:800,color:chgColor(r.chg),background:chgBg(r.chg),borderRadius:5,padding:"1px 4px"}}>{r.chg>=0?"+":""}{r.chg?.toFixed(2)}%</span>
+                  {/* 7d % */}
+                  <span style={{fontSize:12,fontWeight:700,color:chgColor(r.chg7||0)}}>{r.chg7>=0?"+":""}{r.chg7?.toFixed(1)}%</span>
+                  {/* Mkt Cap */}
+                  <span style={{fontSize:11,color:C.muted,fontWeight:600}}>{r.mkt}</span>
+                  {/* Vol 24h */}
+                  <span style={{fontSize:11,color:C.muted}}>{r.vol}</span>
+                  {/* Patrón */}
+                  <span style={{fontSize:11,background:"rgba(245,158,11,0.12)",color:"#B45309",border:"1px solid rgba(245,158,11,0.3)",borderRadius:6,padding:"2px 6px",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4,justifySelf:"start"}}>
+                    {PATTERN_ICON[r.pattern]||"📊"} {r.pattern}
+                  </span>
+                </>}
 
                 {tab==="stocks"&&<>
                   {/* Sparkline */}
@@ -19511,6 +19716,13 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
               </div>
             );
           })}
+          {/* Crypto: estados de carga / vacío */}
+          {tab==="crypto"&&cryptoLoading&&(!cryptoData||cryptoData.length===0)&&(
+            <div style={{padding:"30px 16px",textAlign:"center",color:C.muted,fontSize:13}}>₿ {isEN?"Loading live crypto data...":"Cargando datos de crypto en vivo..."}</div>
+          )}
+          {tab==="crypto"&&!cryptoLoading&&cryptoData&&cryptoData.length===0&&(
+            <div style={{padding:"30px 16px",textAlign:"center",color:C.muted,fontSize:13}}>⚠️ {isEN?"Crypto data unavailable right now. Try again in a moment.":"Datos de crypto no disponibles ahora. Inténtalo en un momento."}</div>
+          )}
         </div>
       </div>
 
@@ -21533,12 +21745,16 @@ export default function App(){
           <div key={p._key||p.id}>
             {p._isBot
               ? <BotPostCard post={p} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
-              : <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))}/>
+              : <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))} isPremium={effectivePremium} onNeedPremium={()=>{setPage(8);setShowLanding(false);}}/>
             }
             {/* 🏆 Top Traders del mes — visible en el feed tras el 2º post */}
             {i===1 && SHOW_TOP_TRADERS && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={()=>{setPage(8);setShowLanding(false);}}/>}
             {/* 👁 Banner Watchlist Premium — entre posts (cerrable) */}
             {i===2 && <WatchlistFeedBanner user={user} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}} lang={lang}/>}
+            {/* 📧 Captura de email — leads de usuarios free/anónimos (cerrable) */}
+            {i===4 && <EmailCaptureFeedCard user={user} isPremium={effectivePremium} lang={lang}/>}
+            {/* 🔗 Referidos — visible en el feed para usuarios logueados */}
+            {i===6 && user && <div style={{marginBottom:6}}><ReferralSection user={user}/></div>}
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
@@ -21595,6 +21811,7 @@ export default function App(){
   };
 
   const [showLanding, setShowLanding] = useState(false); // Feed visible siempre, sin obligar registro
+  const [emailGateDone, setEmailGateDone] = useState(()=>{try{return localStorage.getItem("nexo-email-gate-done")==="1";}catch{return true;}});
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
@@ -22004,6 +22221,12 @@ export default function App(){
       }
     `}</style>
     <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s",overflowX:"hidden"}}>
+      {/* 📧 Email gate obligatorio en primera visita (no usuarios logueados) */}
+      {!user && !emailGateDone && (
+        <EmailGate lang={lang}
+          onDone={()=>setEmailGateDone(true)}
+          onLogin={()=>{setEmailGateDone(true);setAuth("login");}}/>
+      )}
       <TickerTape lang={lang} onPremium={()=>{setPage(8);setShowLanding(false);}}/>
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
