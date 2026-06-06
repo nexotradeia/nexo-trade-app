@@ -1051,7 +1051,7 @@ const TAPE_TICKERS = [
   // Sesión 11: más stocks + SPCX (SpaceX — IPO 11 jun 2026; muestra precio automático al cotizar)
   "SPCX","JPM","BAC","GS","DIS","INTC","MU","BABA","HOOD","ABNB","GME","RIVN","MARA",
 ];
-const SIDEBAR_TICKERS = ["BTC","NVDA","TSLA","ETH","SOL","AAPL","SPY","QQQ"];
+const SIDEBAR_TICKERS = ["BTC","NVDA","TSLA","ETH","SOL","AAPL","SPY","QQQ","DIA","IWM"];
 const ALL_TRACK = [...new Set([...TAPE_TICKERS,...SIDEBAR_TICKERS])];
 
 const PriceCtx = createContext({});
@@ -1124,7 +1124,7 @@ function PriceProvider({children}){
   // REST — carga inicial; primero los tickers VISIBLES (cards de mercado) para que no se vean stale
   useEffect(() => {
     const delay = (ms) => new Promise(r => setTimeout(r, ms));
-    const PRIORITY = ["SPY","QQQ","NVDA","AAPL","TSLA","MSFT","AMZN","META","GOOGL","AVGO","BTC","ETH"];
+    const PRIORITY = ["SPY","QQQ","DIA","IWM","NVDA","AAPL","TSLA","MSFT","AMZN","META","GOOGL","AVGO","BTC","ETH"];
     (async () => {
       const all=[...trackedRef.current];
       const ordered=[...PRIORITY.filter(t=>all.includes(t)), ...all.filter(t=>!PRIORITY.includes(t))];
@@ -4488,6 +4488,10 @@ const TICKER_DATA_INIT = [
   {s:"META",  n:"Meta",       p:512.8,  c:+1.10,  col:"#0082fb", cg:null, fh:"META"},
   {s:"GOOGL", n:"Alphabet",   p:196.8,  c:+0.30,  col:"#4285f4", cg:null, fh:"GOOGL"},
   {s:"AVGO",  n:"Broadcom",   p:248.6,  c:+0.55,  col:"#cc0000", cg:null, fh:"AVGO"},
+  {s:"DIA",   n:"Dow Jones",  p:432.5,  c:+0.20,  col:"#1A5FAD", cg:null, fh:"DIA"},
+  {s:"IWM",   n:"Russell 2000",p:208.3, c:-0.35,  col:"#0F5E68", cg:null, fh:"IWM"},
+  {s:"BTC",   n:"Bitcoin",    p:61000,  c:-3.0,   col:"#F7931A", cg:null, fh:"BINANCE:BTCUSDT"},
+  {s:"ETH",   n:"Ethereum",   p:1590,   c:-9.0,   col:"#627EEA", cg:null, fh:"BINANCE:ETHUSDT"},
 ];
 
 // ── Mapa ticker → dominio para logos oficiales (Clearbit). Índices/ETF sin logo → letra ──
@@ -5191,9 +5195,7 @@ function EarningsPage({lang}){
                   </div>
                   {/* Company */}
                   <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
-                    <div style={{width:36,height:36,borderRadius:8,background:bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:"#fff",flexShrink:0,letterSpacing:-0.5}}>
-                      {e.ticker.slice(0,2)}
-                    </div>
+                    <LogoBadge sym={e.ticker} col={bg} size={36} radius={8}/>
                     <div style={{minWidth:0}}>
                       <div style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>{e.ticker}</div>
                       <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
@@ -5305,9 +5307,7 @@ function EarningsDetailModal({e, result, onClose, C}){
         {/* Header */}
         <div style={{background:pend?"rgba(148,163,184,0.08)":beat===false?"rgba(239,68,68,0.1)":"rgba(16,185,129,0.1)",borderBottom:`1px solid ${C.border}`,padding:"18px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{width:44,height:44,borderRadius:10,background:pend?"#475569":beat===false?"#EF4444":"#10B981",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>
-              {e.ticker.slice(0,2)}
-            </div>
+            <LogoBadge sym={e.ticker} col={pend?"#475569":beat===false?"#EF4444":"#10B981"} size={44} radius={10}/>
             <div>
               <div style={{fontWeight:900,fontSize:17,color:C.text,fontFamily:"monospace",letterSpacing:-0.5}}>{e.ticker}</div>
               <div style={{fontSize:11,color:C.muted}}>{e.nombre}</div>
@@ -11510,6 +11510,13 @@ const IPOS_2026 = [
   {company:"Panera Brands",        ticker:"PNRA",  exchange:"NYSE",    date:"2026-09-30",range:"$16–$20", raise:"$900M",  sector:"Food",        status:"upcoming",  desc:"Bakery-café chain with 2,100+ locations in the U.S. Re-listing after going private in 2017."},
   {company:"Cerebras Systems",     ticker:"CBRS",  exchange:"NASDAQ",  date:"2026-10-10",range:"$28–$35", raise:"$450M",  sector:"Semiconductors",status:"upcoming",desc:"AI chip designer building wafer-scale processors for LLM training. Direct NVIDIA competitor."},
   {company:"Databricks Inc",       ticker:"DBRK",  exchange:"NASDAQ",  date:"2026-Q4",   range:"TBD",     raise:"$2.0B+", sector:"Cloud/AI",    status:"upcoming",  desc:"Data and AI platform valued at $62B in last private round. One of the most anticipated tech IPOs."},
+  {company:"Stripe Inc",           ticker:"STRP",  exchange:"NASDAQ",  date:"2026-Q4",   range:"TBD",     raise:"$4.0B+", sector:"Fintech",     status:"upcoming",  desc:"Global payments infrastructure powering millions of businesses. Valued ~$70B. The most awaited fintech IPO."},
+  {company:"Canva Pty Ltd",        ticker:"CNVA",  exchange:"NASDAQ",  date:"2026-11-12",range:"$30–$36", raise:"$1.5B",  sector:"Design/SaaS", status:"upcoming",  desc:"Online design platform with 220M+ monthly users. Profitable and fast-growing — Australia's biggest tech startup."},
+  {company:"Revolut Ltd",          ticker:"RVLT",  exchange:"NASDAQ",  date:"2026-Q4",   range:"TBD",     raise:"$2.5B",  sector:"Neobank",     status:"upcoming",  desc:"European super-app neobank with 45M+ users. Valued ~$45B. Banking, crypto, stocks and FX in one app."},
+  {company:"Plaid Inc",            ticker:"PLAD",  exchange:"NASDAQ",  date:"2026-12-03",range:"$24–$28", raise:"$800M",  sector:"Fintech",     status:"upcoming",  desc:"Financial data network connecting apps to bank accounts. Backbone of thousands of fintech apps."},
+  {company:"Fanatics Inc",         ticker:"FANS",  exchange:"NYSE",    date:"2026-Q4",   range:"TBD",     raise:"$1.0B",  sector:"E-Commerce",  status:"upcoming",  desc:"Sports merchandise and betting giant valued ~$31B. Licensed gear, trading cards and sportsbook."},
+  {company:"Rippling Inc",         ticker:"RIPL",  exchange:"NASDAQ",  date:"2026-Q4",   range:"TBD",     raise:"$1.2B",  sector:"HR/SaaS",     status:"upcoming",  desc:"All-in-one workforce platform (HR, IT, payroll). Valued ~$16.8B, growing rapidly among mid-market companies."},
+  {company:"Anduril Industries",   ticker:"ANDU",  exchange:"NYSE",    date:"2026-Q4",   range:"TBD",     raise:"$1.5B",  sector:"Defense/AI",  status:"upcoming",  desc:"Defense tech building autonomous systems and AI for the military. Valued ~$28B. Disrupting legacy defense primes."},
 ];
 const IPOS_2027 = [
   {company:"Stripe Inc",           ticker:"STRP",  exchange:"NASDAQ",  date:"2027-Q1",   range:"TBD",     raise:"~$2.0B", sector:"Fintech",     status:"expected",  valuation:"$65B+",  desc:"La mayor plataforma de pagos digitales del mundo. 1M+ empresas. IPO más esperado del sector fintech."},
@@ -11680,6 +11687,7 @@ function IpoCalendarPage() {
               onMouseLeave={e=>e.currentTarget.style.boxShadow=C.shadow}>
               <div>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}>
+                  <LogoBadge sym={(ipo.ticker&&ipo.ticker!=="—"&&ipo.ticker!=="TBD")?ipo.ticker:ipo.company} col={st.color} size={30} radius={8}/>
                   <div style={{fontWeight:900,fontSize:15,color:C.text}}>{ipo.company}</div>
                   {ipo.ticker && ipo.ticker!=="—" && ipo.ticker!=="TBD" && <div style={{fontWeight:800,fontSize:11,color:C.accent,background:C.accentDim,borderRadius:8,padding:"2px 8px"}}>{ipo.ticker}</div>}
                   {ipo.exchange && ipo.exchange!=="—" && ipo.exchange!=="TBD" && <div style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"2px 8px",border:`1px solid ${C.border}`}}>{ipo.exchange}</div>}

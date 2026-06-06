@@ -272,6 +272,25 @@ export default async function handler(req, res) {
     { name:"Marjorie Taylor Greene", party:"R", state:"GA", ticker:"NVDA", type:"buy",  amount:"$15K–$50K",   date:"2025-01-15", asset:"NVIDIA Corp",                    house:"House"  },
     { name:"Tommy Tuberville",       party:"R", state:"AL", ticker:"GLD",  type:"buy",  amount:"$50K–$100K",  date:"2025-01-10", asset:"SPDR Gold Shares ETF",           house:"Senate" },
     { name:"Rick Scott",             party:"R", state:"FL", ticker:"TSLA", type:"buy",  amount:"$100K–$250K", date:"2025-01-06", asset:"Tesla Inc",                      house:"Senate" },
+    // ── Más congresistas ─────────────────────────────────────────
+    { name:"Daniel Goldman",         party:"D", state:"NY", ticker:"NVDA", type:"buy",  amount:"$1M–$5M",     date:"2026-05-21", asset:"NVIDIA Corp",                    house:"House"  },
+    { name:"Suzan DelBene",          party:"D", state:"WA", ticker:"MSFT", type:"buy",  amount:"$100K–$250K", date:"2026-05-19", asset:"Microsoft Corp",                 house:"House"  },
+    { name:"Don Beyer",              party:"D", state:"VA", ticker:"AMD",  type:"buy",  amount:"$50K–$100K",  date:"2026-05-17", asset:"Advanced Micro Devices",         house:"House"  },
+    { name:"Bill Hagerty",           party:"R", state:"TN", ticker:"COIN", type:"buy",  amount:"$250K–$500K", date:"2026-05-15", asset:"Coinbase Global",                house:"Senate" },
+    { name:"French Hill",            party:"R", state:"AR", ticker:"JPM",  type:"buy",  amount:"$50K–$100K",  date:"2026-05-13", asset:"JPMorgan Chase",                 house:"House"  },
+    { name:"Marie Gluesenkamp Perez",party:"D", state:"WA", ticker:"F",    type:"buy",  amount:"$15K–$50K",   date:"2026-05-11", asset:"Ford Motor Co",                  house:"House"  },
+    { name:"Jared Moskowitz",        party:"D", state:"FL", ticker:"PLTR", type:"buy",  amount:"$50K–$100K",  date:"2026-05-09", asset:"Palantir Technologies",          house:"House"  },
+    { name:"Max Miller",             party:"R", state:"OH", ticker:"GE",   type:"buy",  amount:"$100K–$250K", date:"2026-05-04", asset:"General Electric",               house:"House"  },
+    { name:"Katie Britt",            party:"R", state:"AL", ticker:"AAPL", type:"buy",  amount:"$15K–$50K",   date:"2026-04-27", asset:"Apple Inc",                      house:"Senate" },
+    { name:"Greg Landsman",          party:"D", state:"OH", ticker:"PG",   type:"buy",  amount:"$15K–$50K",   date:"2026-04-21", asset:"Procter & Gamble",               house:"House"  },
+    { name:"Scott Franklin",         party:"R", state:"FL", ticker:"NOC",  type:"buy",  amount:"$50K–$100K",  date:"2026-04-14", asset:"Northrop Grumman",               house:"House"  },
+    { name:"Shelley Moore Capito",   party:"R", state:"WV", ticker:"DUK",  type:"buy",  amount:"$50K–$100K",  date:"2026-04-09", asset:"Duke Energy",                    house:"Senate" },
+    { name:"Earl Blumenauer",        party:"D", state:"OR", ticker:"COST", type:"buy",  amount:"$15K–$50K",   date:"2026-03-30", asset:"Costco Wholesale",               house:"House"  },
+    { name:"Garret Graves",          party:"R", state:"LA", ticker:"CVX",  type:"buy",  amount:"$50K–$100K",  date:"2026-03-19", asset:"Chevron Corp",                   house:"House"  },
+    { name:"Kathy Manning",          party:"D", state:"NC", ticker:"GOOGL",type:"buy",  amount:"$100K–$250K", date:"2026-03-07", asset:"Alphabet Inc",                   house:"House"  },
+    { name:"Cynthia Lummis",         party:"R", state:"WY", ticker:"BTC",  type:"buy",  amount:"$100K–$250K", date:"2026-02-27", asset:"Bitcoin",                        house:"Senate" },
+    { name:"Ritchie Torres",         party:"D", state:"NY", ticker:"META", type:"buy",  amount:"$15K–$50K",   date:"2026-02-13", asset:"Meta Platforms",                 house:"House"  },
+    { name:"Thomas Kean Jr",         party:"R", state:"NJ", ticker:"V",    type:"buy",  amount:"$50K–$100K",  date:"2026-01-29", asset:"Visa Inc",                       house:"House"  },
   ];
 
   CURATED.sort((a, b) => new Date(b.date) - new Date(a.date));
