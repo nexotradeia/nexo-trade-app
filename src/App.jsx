@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 19:58:40 Sesión 14 — botón compartir viral global
+// NEXO TRADE — build: 2026-06-06 20:08:24 Sesión 14 — traducción EN (Settings, Polymarket, Search)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -840,6 +840,7 @@ function LangSelector({lang, setLang}){
 
 // ── SETTINGS PANEL ────────────────────────────────────────────────────────────
 function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, supabase }) {
+  const isEN = lang === "en";
   const notifStatus = typeof Notification !== "undefined" ? Notification.permission : "unsupported";
   const [hideLeaderboard, setHideLeaderboard] = useState(() => localStorage.getItem("nexo-hide-leaderboard") === "1");
   const [saving, setSaving] = useState(false);
@@ -863,7 +864,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
     if (typeof Notification === "undefined") return;
     const perm = await Notification.requestPermission();
     if (perm === "granted") {
-      new Notification("NexoTrade", { body: "¡Notificaciones activadas! 🎉", icon: "/logo192.png" });
+      new Notification("NexoTrade", { body: isEN?"Notifications enabled! 🎉":"¡Notificaciones activadas! 🎉", icon: "/logo192.png" });
     }
   };
 
@@ -876,8 +877,8 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
         {/* Header */}
         <div style={{padding:"24px 24px 18px",borderBottom:"1px solid #334155",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
-            <div style={{color:"#ffffff",fontWeight:900,fontSize:17,letterSpacing:-0.3}}>⚙️ Configuración</div>
-            <div style={{color:"#64748b",fontSize:12,marginTop:3}}>Personaliza tu experiencia</div>
+            <div style={{color:"#ffffff",fontWeight:900,fontSize:17,letterSpacing:-0.3}}>⚙️ {isEN?"Settings":"Configuración"}</div>
+            <div style={{color:"#64748b",fontSize:12,marginTop:3}}>{isEN?"Customize your experience":"Personaliza tu experiencia"}</div>
           </div>
           <button onClick={onClose} style={{background:"transparent",border:"none",color:"#64748b",fontSize:20,cursor:"pointer",padding:4,lineHeight:1}}>✕</button>
         </div>
@@ -886,13 +887,13 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
         <div style={{padding:"20px 24px",display:"flex",flexDirection:"column",gap:6,flex:1}}>
 
           {/* === APARIENCIA === */}
-          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:4}}>APARIENCIA</div>
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:4}}>{isEN?"APPEARANCE":"APARIENCIA"}</div>
 
           {/* Dark / Light toggle */}
           <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
             <div>
-              <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>{darkMode ? "🌙 Modo oscuro" : "☀️ Modo claro"}</div>
-              <div style={{color:"#64748b",fontSize:11,marginTop:2}}>Cambia el tema visual</div>
+              <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>{darkMode ? (isEN?"🌙 Dark mode":"🌙 Modo oscuro") : (isEN?"☀️ Light mode":"☀️ Modo claro")}</div>
+              <div style={{color:"#64748b",fontSize:11,marginTop:2}}>{isEN?"Switch the visual theme":"Cambia el tema visual"}</div>
             </div>
             <button
               onClick={() => setDarkMode(!darkMode)}
@@ -909,7 +910,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
           </div>
 
           {/* === IDIOMA === */}
-          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>IDIOMA</div>
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>{isEN?"LANGUAGE":"IDIOMA"}</div>
           <div style={{background:"#0f172a",borderRadius:14,padding:"12px 14px",border:"1px solid #334155",marginBottom:8}}>
             <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
               {LANG_META.map(l => (
@@ -926,35 +927,35 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
           </div>
 
           {/* === NOTIFICACIONES === */}
-          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>NOTIFICACIONES</div>
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>{isEN?"NOTIFICATIONS":"NOTIFICACIONES"}</div>
           <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <div>
                 <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>🔔 Push notifications</div>
                 <div style={{color:"#64748b",fontSize:11,marginTop:2}}>
-                  {notifStatus === "granted" ? "✅ Activadas" : notifStatus === "denied" ? "🚫 Bloqueadas en el navegador" : notifStatus === "unsupported" ? "No soportado" : "Sin activar"}
+                  {notifStatus === "granted" ? (isEN?"✅ Enabled":"✅ Activadas") : notifStatus === "denied" ? (isEN?"🚫 Blocked in browser":"🚫 Bloqueadas en el navegador") : notifStatus === "unsupported" ? (isEN?"Not supported":"No soportado") : (isEN?"Not enabled":"Sin activar")}
                 </div>
               </div>
               {notifStatus !== "granted" && notifStatus !== "denied" && notifStatus !== "unsupported" && (
                 <button onClick={requestPush}
                   style={{background:"linear-gradient(135deg,#0F4C81,#0C3D68)",border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                  Activar
+                  {isEN?"Enable":"Activar"}
                 </button>
               )}
               {notifStatus === "granted" && <span style={{fontSize:20}}>✅</span>}
-              {notifStatus === "denied" && <span style={{fontSize:11,color:"#ef4444",maxWidth:100,textAlign:"right",lineHeight:1.4}}>Actívalas en ajustes del navegador</span>}
+              {notifStatus === "denied" && <span style={{fontSize:11,color:"#ef4444",maxWidth:100,textAlign:"right",lineHeight:1.4}}>{isEN?"Enable them in browser settings":"Actívalas en ajustes del navegador"}</span>}
             </div>
           </div>
 
           {/* === PRIVACIDAD === */}
           {user && (
             <>
-              <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>PRIVACIDAD</div>
+              <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>{isEN?"PRIVACY":"PRIVACIDAD"}</div>
               <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div>
-                  <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>👁️ Ocultar del leaderboard</div>
-                  <div style={{color:"#64748b",fontSize:11,marginTop:2}}>No aparecer en el ranking público</div>
-                  {saved && <div style={{color:"#10b981",fontSize:10,marginTop:4}}>✓ Guardado</div>}
+                  <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>{isEN?"👁️ Hide from leaderboard":"👁️ Ocultar del leaderboard"}</div>
+                  <div style={{color:"#64748b",fontSize:11,marginTop:2}}>{isEN?"Don't appear in the public ranking":"No aparecer en el ranking público"}</div>
+                  {saved && <div style={{color:"#10b981",fontSize:10,marginTop:4}}>{isEN?"✓ Saved":"✓ Guardado"}</div>}
                 </div>
                 <button
                   onClick={() => toggleHideLeaderboard(!hideLeaderboard)}
@@ -976,13 +977,13 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
           {/* === REFERIDOS === */}
           {user && (
             <>
-              <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>🎁 INVITA Y GANA</div>
+              <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>🎁 {isEN?"INVITE & EARN":"INVITA Y GANA"}</div>
               <ReferralSection user={user}/>
             </>
           )}
 
           {/* === CUENTA === */}
-          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>CUENTA</div>
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>{isEN?"ACCOUNT":"CUENTA"}</div>
           <div style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8}}>
             {user ? (
               <div style={{display:"flex",alignItems:"center",gap:12}}>
@@ -995,7 +996,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
                 </div>
               </div>
             ) : (
-              <div style={{color:"#64748b",fontSize:13}}>No has iniciado sesión</div>
+              <div style={{color:"#64748b",fontSize:13}}>{isEN?"You're not logged in":"No has iniciado sesión"}</div>
             )}
           </div>
 
@@ -1003,7 +1004,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
           <a href="mailto:info@nexotradeia.com?subject=Soporte NexoTrade"
             style={{display:"flex",alignItems:"center",gap:10,background:"#0f172a",borderRadius:14,padding:"14px 18px",border:"1px solid #334155",color:"#94a3b8",fontSize:13,fontWeight:600,textDecoration:"none",marginBottom:4}}>
             <span style={{fontSize:18}}>📧</span>
-            <span>Contactar soporte</span>
+            <span>{isEN?"Contact support":"Contactar soporte"}</span>
             <span style={{marginLeft:"auto",color:"#334155"}}>→</span>
           </a>
           <a href="https://nexotradeia.com" target="_blank" rel="noopener"
@@ -1016,7 +1017,7 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
 
         {/* Footer */}
         <div style={{padding:"16px 24px",borderTop:"1px solid #334155",textAlign:"center",color:"#334155",fontSize:11}}>
-          NexoTrade · v1.0 · Solo educativo
+          NexoTrade · v1.0 · {isEN?"Educational only":"Solo educativo"}
         </div>
       </div>
     </>
@@ -1244,6 +1245,7 @@ function TickerTape({lang="es", onPremium}) {
 // ── SEARCH BAR ────────────────────────────────────────────────────────────────
 function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}) {
   const t = LANGS[lang];
+  const isEN = lang === "en";
   const [q,setQ]=useState(""),[res,setRes]=useState([]),[foc,setFoc]=useState(false);
   const [selected,setSelected]=useState(null);
   const [searchTab, setSearchTab]=useState("tickers"); // "tickers"|"posts"|"users"
@@ -1326,10 +1328,10 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
           })}
           {searchTab==="tickers" && res.length===0 && (
             <div style={{padding:"14px 16px",textAlign:"center"}}>
-              <div style={{color:"#94A3B8",fontSize:12,marginBottom:10}}>"{q.replace(/[@$\s]/g,"").toUpperCase()}" no está en nuestra lista</div>
+              <div style={{color:"#94A3B8",fontSize:12,marginBottom:10}}>"{q.replace(/[@$\s]/g,"").toUpperCase()}" {isEN?"is not in our list":"no está en nuestra lista"}</div>
               <button onClick={()=>{const tk=q.replace(/[@$\s]/g,"").toUpperCase();if(tk&&onTickerNav){setQ("");setRes([]);setFoc(false);onTickerNav(tk);}}}
                 style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:8,padding:"7px 18px",color:"#0F4C81",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-                🔍 Buscar ${q.replace(/[@$\s]/g,"").toUpperCase()} de todas formas →
+                🔍 {isEN?"Search":"Buscar"} ${q.replace(/[@$\s]/g,"").toUpperCase()} {isEN?"anyway":"de todas formas"} →
               </button>
             </div>
           )}
@@ -1338,7 +1340,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
           {searchTab==="posts" && (()=>{
             const matchPosts = posts.filter(p=>p.text?.toLowerCase().includes(q.toLowerCase())||p.ticker?.toLowerCase().includes(q.toLowerCase())).slice(0,5);
             return matchPosts.length===0
-              ? <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>No hay posts con "{q}"</div>
+              ? <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>{isEN?`No posts with "${q}"`:`No hay posts con "${q}"`}</div>
               : matchPosts.map(p=>(
                 <div key={p.id} style={{padding:"10px 14px",borderBottom:"1px solid rgba(0,0,0,0.05)",cursor:"pointer",transition:"background 0.12s"}}
                   onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.04)"}
@@ -1363,7 +1365,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
           {searchTab==="users" && (()=>{
             const matchUsers = users.filter(u=>u.name?.toLowerCase().includes(q.toLowerCase())).slice(0,5);
             return matchUsers.length===0
-              ? <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>No se encontró "{q}"</div>
+              ? <div style={{padding:"16px",textAlign:"center",color:"#94A3B8",fontSize:12}}>{isEN?`No results for "${q}"`:`No se encontró "${q}"`}</div>
               : matchUsers.map(u=>{
                 const lvl=getLevel(u.points);
                 return(
@@ -1433,7 +1435,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
             ))}
           </div>
           <div style={{padding:"10px 16px",background:"rgba(15,76,129,0.03)",borderTop:"1px solid rgba(0,0,0,0.06)",fontSize:10.5,color:"#64748B",textAlign:"center"}}>
-            Regístrate gratis para ver análisis completo · <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}}>Unirme →</span>
+            {isEN?"Sign up free for full analysis":"Regístrate gratis para ver análisis completo"} · <span style={{color:C.accent,fontWeight:700,cursor:"pointer"}}>{isEN?"Join →":"Unirme →"}</span>
           </div>
         </div>
       )}
@@ -1567,12 +1569,18 @@ function useCountUp(target, duration=2000){
 
 // ── POLYMARKET WIDGET ─────────────────────────────────────────────────────────
 function PolymarketWidget(){
+  const isEN = (()=>{try{return (localStorage.getItem("nexo-lang")||"en")==="en";}catch{return true;}})();
   const [markets, setMarkets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(()=>{
     // Fallback curado de mercados financieros relevantes mientras la API carga
-    const fallback = [
+    const fallback = isEN ? [
+      {question:"Will the Fed cut rates in 2025?", probability:0.62, volume:"$1.2M"},
+      {question:"Will the S&P 500 close above 5,500 in 2025?", probability:0.58, volume:"$890K"},
+      {question:"Will Bitcoin top $100K before year-end?", probability:0.71, volume:"$3.1M"},
+      {question:"Will U.S. inflation fall below 3% in 2025?", probability:0.45, volume:"$670K"},
+    ] : [
       {question:"¿Habrá recorte de tasas de la Fed en 2025?", probability:0.62, volume:"$1.2M"},
       {question:"¿El S&P 500 cerrará por encima de 5,500 en 2025?", probability:0.58, volume:"$890K"},
       {question:"¿Bitcoin superará $100K antes de fin de año?", probability:0.71, volume:"$3.1M"},
@@ -1613,12 +1621,12 @@ function PolymarketWidget(){
       <div style={{padding:"16px 18px 12px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}>
         <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#0F5E68,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🎯</div>
         <div>
-          <div style={{color:C.text,fontWeight:800,fontSize:14}}>Polymarket — Predicciones</div>
-          <div style={{color:C.muted2,fontSize:11}}>Mercados de predicción en vivo · powered by Polymarket</div>
+          <div style={{color:C.text,fontWeight:800,fontSize:14}}>{isEN?"Polymarket — Predictions":"Polymarket — Predicciones"}</div>
+          <div style={{color:C.muted2,fontSize:11}}>{isEN?"Live prediction markets · powered by Polymarket":"Mercados de predicción en vivo · powered by Polymarket"}</div>
         </div>
         <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer"
           style={{marginLeft:"auto",color:"#0F5E68",fontSize:11,fontWeight:700,textDecoration:"none",background:"rgba(15,94,104,0.1)",padding:"4px 10px",borderRadius:8,border:"1px solid rgba(15,94,104,0.3)"}}>
-          Ver más →
+          {isEN?"See more →":"Ver más →"}
         </a>
       </div>
       {/* Markets */}
