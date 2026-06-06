@@ -10336,7 +10336,8 @@ const WEEKLY_PICKS_FALLBACK = {
   ],
 };
 
-function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
+function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
+  const isEN = lang==="en";
   const [picks,setPicks]=useState(WEEKLY_PICKS_FALLBACK);
   const [showAdmin,setShowAdmin]=useState(false);
   const [livePrices,setLivePrices]=useState({});
@@ -10488,12 +10489,12 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
             <div>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
                 <span style={{fontFamily:"monospace",fontWeight:900,fontSize:26,background:`linear-gradient(135deg,${th.from},${th.to})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:`drop-shadow(0 0 10px ${th.from}50)`}}>{p.ticker}</span>
-                <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?"#00D26A":"#FF4D6A",border:`1px solid ${bull?"#00D26A44":"#FF4D6A44"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>{bull?"▲ COMPRA":"▼ VENTA"}</span>
+                <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?"#00D26A":"#FF4D6A",border:`1px solid ${bull?"#00D26A44":"#FF4D6A44"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>{bull?(isEN?"▲ BUY":"▲ COMPRA"):(isEN?"▼ SELL":"▼ VENTA")}</span>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 <div style={{fontSize:12,color:"#475569",fontWeight:500}}>{p.nombre}</div>
                 {live&&<div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,padding:"2px 8px"}}>
-                  <span style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5}}>PRECIO HOY</span>
+                  <span style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5}}>{isEN?"PRICE TODAY":"PRECIO HOY"}</span>
                   <span style={{fontFamily:"monospace",fontWeight:800,color:"#F1F5F9",fontSize:13}}>${live.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
                   <span style={{fontSize:11,fontWeight:700,color:liveIsPos?"#00D26A":"#FF4D6A"}}>{liveIsPos?"+":""}{liveChg.toFixed(2)}%</span>
                 </div>}
@@ -10520,7 +10521,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
 
           {/* Row 2: prices */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:12}}>
-            {[["📥","Entrada",fmtPrice(p.entrada),"#64748B"],["🎯","Target",fmtPrice(p.target),"#00D26A"],["🛑","Stop",fmtPrice(p.stop_loss),"#FF4D6A"]].map(([ico,lbl,val,col])=>(
+            {[["📥",isEN?"Entry":"Entrada",fmtPrice(p.entrada),"#64748B"],["🎯","Target",fmtPrice(p.target),"#00D26A"],["🛑","Stop",fmtPrice(p.stop_loss),"#FF4D6A"]].map(([ico,lbl,val,col])=>(
               <div key={lbl} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:12,padding:"10px 8px",textAlign:"center"}}>
                 <div style={{fontSize:14,marginBottom:2}}>{ico}</div>
                 <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,textTransform:"uppercase",marginBottom:4}}>{lbl}</div>
@@ -10552,7 +10553,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
           <div style={{fontSize:11,color:"#64748B",marginBottom:10}}>{p.sector}</div>
           {p.entrada && (
             <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,padding:"4px 10px"}}>
-              <span style={{fontSize:10,color:"#64748B",fontWeight:700}}>ENTRADA</span>
+              <span style={{fontSize:10,color:"#64748B",fontWeight:700}}>{isEN?"ENTRY":"ENTRADA"}</span>
               <span style={{fontSize:13,fontWeight:800,fontFamily:"monospace",color:"#F1F5F9"}}>{p.entrada}</span>
             </div>
           )}
@@ -10560,7 +10561,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         {/* Yield badge grande */}
         <div style={{textAlign:"center",background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.3)",borderRadius:14,padding:"12px 18px",flexShrink:0}}>
           <div style={{fontWeight:900,color:"#F59E0B",fontSize:36,lineHeight:1,letterSpacing:-1}}>{p.yield_div}</div>
-          <div style={{fontSize:10,color:"#92400E",fontWeight:800,letterSpacing:1,marginTop:4}}>YIELD ANUAL</div>
+          <div style={{fontSize:10,color:"#92400E",fontWeight:800,letterSpacing:1,marginTop:4}}>{isEN?"ANNUAL YIELD":"YIELD ANUAL"}</div>
           <div style={{color:"#F59E0B",fontSize:13,marginTop:6}}>{p.rating}</div>
         </div>
       </div>
@@ -10578,13 +10579,13 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <span style={{background:"linear-gradient(135deg,rgba(139,92,246,0.3),rgba(180,83,9,0.2))",color:"#FCD34D",border:"1px solid rgba(139,92,246,0.4)",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:1}}>✦ EXCLUSIVO PREMIUM</span>
+              <span style={{background:"linear-gradient(135deg,rgba(139,92,246,0.3),rgba(180,83,9,0.2))",color:"#FCD34D",border:"1px solid rgba(139,92,246,0.4)",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:1}}>✦ {isEN?"PREMIUM EXCLUSIVE":"EXCLUSIVO PREMIUM"}</span>
               <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:700,color:"#00D26A"}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>EN VIVO
               </span>
             </div>
             <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5}}>🧠 Stock Pick IA · Semana {new Date().toLocaleDateString("es",{day:"numeric",month:"short"})}</h2>
-            <div style={{fontSize:11,color:"#475569"}}>Selección algorítmica + análisis fundamental · Wall Street consensus</div>
+            <div style={{fontSize:11,color:"#475569"}}>{isEN?"Algorithmic selection + fundamental analysis · Wall Street consensus":"Selección algorítmica + análisis fundamental · Wall Street consensus"}</div>
           </div>
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
             <div style={{textAlign:"center",background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(180,83,9,0.1))",border:"1px solid rgba(139,92,246,0.25)",borderRadius:14,padding:"10px 18px"}}>
@@ -10615,7 +10616,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin}){
       ) : (
       <>
       <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(139,92,246,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="⚡" title="Corto Plazo" sub="Horizonte 1-4 semanas · Momentum y técnico" color="#F59E0B"/>
+        <SectionTitle icon="⚡" title={isEN?"Short Term":"Corto Plazo"} sub={isEN?"1-4 week horizon · Momentum & technical":"Horizonte 1-4 semanas · Momentum y técnico"} color="#F59E0B"/>
         {data.corto.map((p,i)=><PickCard key={p.ticker} p={p} idx={i}/>)}
       </div>
       <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(6,182,212,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
@@ -21375,7 +21376,7 @@ export default function App(){
         <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>← Volver al Feed</button>
       </div>
     );
-    if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')}/>;
+    if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')} lang={lang}/>;
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage posts={posts} lang={lang}/>;
