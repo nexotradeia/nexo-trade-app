@@ -22068,9 +22068,9 @@ export default function App(){
             const active=page===n.idx;
             return(
               <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-                style={{background:active?"rgba(224,182,75,0.12)":"transparent",border:"none",borderBottom:`2.5px solid ${active?"#E0B64B":"transparent"}`,padding:"0 16px",height:47,cursor:"pointer",color:active?"#E0B64B":n.locked?"#5E7390":"#D9E4F1",fontSize:13.5,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit"}}
+                style={{background:active?"rgba(224,182,75,0.12)":"transparent",border:"none",borderBottom:`2.5px solid ${active?"#E0B64B":"transparent"}`,padding:"0 16px",height:47,cursor:"pointer",color:active?"#E0B64B":"#EAF1FA",fontSize:13.5,fontWeight:active?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:6,flexShrink:0,fontFamily:"inherit"}}
                 onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#E0B64B";e.currentTarget.style.background="rgba(224,182,75,0.08)";}}}
-                onMouseLeave={e=>{if(!active){e.currentTarget.style.color=n.locked?"#5E7390":"#D9E4F1";e.currentTarget.style.background="transparent";}}}
+                onMouseLeave={e=>{if(!active){e.currentTarget.style.color="#EAF1FA";e.currentTarget.style.background="transparent";}}}
               >
                 {n.locked?<NavIco name="lock" size={13}/>:<NavIco name={n.icon}/>}
                 {stripEmoji(n.label)}
