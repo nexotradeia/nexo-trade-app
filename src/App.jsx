@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 23:31:27 Sesión 14 — FIX: Premium sticky (no se desactiva si falla la consulta del perfil)
+// NEXO TRADE — build: 2026-06-06 23:59:53 Sesión 14 — fix newsletter banner+popup botones (fire-and-forget, ya no se cuelgan)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -23208,10 +23208,10 @@ export default function App(){
               }}}
             />
             <button
-              onClick={async()=>{
+              onClick={()=>{
                 if(!newsletterEmail.includes("@")) return;
-                await supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).catch(()=>{});
-                fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:newsletterEmail})}).catch(()=>{});
+                try{ supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
+                try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:newsletterEmail})}).catch(()=>{}); }catch{}
                 setNewsletterDone(true);
               }}
               style={{background:"#0F4C81",border:"none",borderRadius:8,padding:"7px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
@@ -23885,13 +23885,13 @@ export default function App(){
             <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:22,fontWeight:900}}>Recibe el pick de la semana gratis</h3>
             <p style={{margin:"0 0 24px",color:"#64748b",fontSize:14,lineHeight:1.6}}>Cada lunes a las 9am te enviamos el pick <strong style={{color:"#fff"}}>más votado por la comunidad</strong> directo a tu email. Sin spam.</p>
             {!emailPopupSent ? (
-              <form onSubmit={async(e)=>{
+              <form onSubmit={(e)=>{
                 e.preventDefault();
                 const email = e.target.email.value;
                 if(!email) return;
-                // Guardar en Supabase + enviar email de bienvenida
-                try{ await supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}); }catch(err){}
-                fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{});
+                // Fire-and-forget: nunca esperar a Supabase (no bloquear el botón)
+                try{ supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
+                try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
                 setEmailPopupSent(true);
                 localStorage.setItem("nexo-email-popup-seen","1");
               }}>
