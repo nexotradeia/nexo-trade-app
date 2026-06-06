@@ -4916,8 +4916,10 @@ function EarningsPage({lang}){
     let h=0; for(const c of t) h=(h*31+c.charCodeAt(0))%cols.length;
     return cols[h];
   };
-  const MONTH_NAMES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-  const DAY_NAMES=["D","L","M","X","J","V","S"];
+  const MONTH_NAMES=isEN
+    ? ["January","February","March","April","May","June","July","August","September","October","November","December"]
+    : ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  const DAY_NAMES=isEN?["S","M","T","W","T","F","S"]:["D","L","M","X","J","V","S"];
 
   // ── Fetch from Finnhub for current month ──
   useEffect(()=>{
@@ -4998,7 +5000,7 @@ function EarningsPage({lang}){
   const nextMonth=()=>{ if(calMonth===11){setCalMonth(0);setCalYear(y=>y+1);}else setCalMonth(m=>m+1); };
   const formatDay=()=>{
     if(!selDay)return"";
-    return new Date(selDay+"T12:00:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    return new Date(selDay+"T12:00:00").toLocaleDateString(isEN?"en-US":"es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   };
 
   const sendEarningsAlert=(e)=>{
@@ -5076,7 +5078,7 @@ function EarningsPage({lang}){
 
           {/* Upcoming list */}
           <div style={{background:C.card,borderRadius:14,padding:"14px 16px",border:`1px solid ${C.border}`}}>
-            <div style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:10}}>PRÓXIMOS EARNINGS</div>
+            <div style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:10}}>{isEN?"UPCOMING EARNINGS":"PRÓXIMOS EARNINGS"}</div>
             {upcomingUniq.map((e,idx)=>{
               const d=new Date(e.rawDate+"T12:00:00");
               const isT=e.rawDate===todayStr;
@@ -5111,14 +5113,14 @@ function EarningsPage({lang}){
             <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
               {/* Hora filter */}
               <div style={{display:"flex",background:C.card,border:`1px solid ${C.border}`,borderRadius:10,overflow:"hidden"}}>
-                {[{k:"all",l:"Todas"},{k:"bmo",l:"Before open"},{k:"amc",l:"After close"}].map(f=>(
+                {[{k:"all",l:isEN?"All":"Todas"},{k:"bmo",l:"Before open"},{k:"amc",l:"After close"}].map(f=>(
                   <button key={f.k} onClick={()=>setHoraFilter(f.k)} style={{padding:"7px 13px",fontSize:11,fontWeight:700,border:"none",cursor:"pointer",background:horaFilter===f.k?"#0F4C81":"transparent",color:horaFilter===f.k?"#fff":C.muted,transition:"all 0.15s",whiteSpace:"nowrap"}}>{f.l}</button>
                 ))}
               </div>
               {/* Search */}
               <div style={{position:"relative"}}>
                 <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",color:C.muted2,fontSize:12}}>🔍</span>
-                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar ticker..."
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={isEN?"Search ticker...":"Buscar ticker..."}
                   style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 10px 7px 28px",fontSize:12,color:C.text,outline:"none",width:150,fontFamily:"inherit"}}/>
               </div>
               <button onClick={()=>setRefreshKey(k=>k+1)} disabled={loadingEar}
@@ -5131,10 +5133,10 @@ function EarningsPage({lang}){
           {/* 4 Stat cards */}
           <div className="nexo-earnings-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
             {[
-              {icon:"📅",l:"REPORTAN HOY",v:selDayAll.length,c:C.text,mono:true},
-              {icon:"🔴",l:"ALTO IMPACTO",v:highImpactCount,c:"#EF4444",mono:true},
-              {icon:"📈",l:"CONSENSO ALCISTA",v:`${avgBull}%`,c:avgBull>=60?"#10B981":avgBull>=40?"#F59E0B":"#EF4444",mono:true},
-              {icon:"⏰",l:"PRÓXIMO CALL",v:nextCall?`${nextCall.ticker} · ${nextCall.horaRaw==="bmo"?"Pre-mkt":"4PM"}`:"—",c:"#0F4C81",mono:false},
+              {icon:"📅",l:isEN?"REPORT TODAY":"REPORTAN HOY",v:selDayAll.length,c:C.text,mono:true},
+              {icon:"🔴",l:isEN?"HIGH IMPACT":"ALTO IMPACTO",v:highImpactCount,c:"#EF4444",mono:true},
+              {icon:"📈",l:isEN?"BULLISH CONSENSUS":"CONSENSO ALCISTA",v:`${avgBull}%`,c:avgBull>=60?"#10B981":avgBull>=40?"#F59E0B":"#EF4444",mono:true},
+              {icon:"⏰",l:isEN?"NEXT CALL":"PRÓXIMO CALL",v:nextCall?`${nextCall.ticker} · ${nextCall.horaRaw==="bmo"?"Pre-mkt":"4PM"}`:"—",c:"#0F4C81",mono:false},
             ].map(s=>(
               <div key={s.l} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px"}}>
                 <div style={{fontSize:9,color:C.muted,fontWeight:700,letterSpacing:0.7,textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
@@ -5150,7 +5152,7 @@ function EarningsPage({lang}){
           <div style={{minWidth:700,background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
             {/* Header */}
             <div style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
-              {["","EMPRESA","HORA","EPS EST.","MKT CAP","IMPACTO","SENTIMIENTO",""].map(h=>(
+              {["",isEN?"COMPANY":"EMPRESA",isEN?"TIME":"HORA","EPS EST.","MKT CAP",isEN?"IMPACT":"IMPACTO",isEN?"SENTIMENT":"SENTIMIENTO",""].map(h=>(
                 <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.6,textTransform:"uppercase"}}>{h}</div>
               ))}
             </div>
@@ -5280,7 +5282,7 @@ function EarningsPage({lang}){
           </div>{/* /nexo-scroll-x inner */}
 
           <div style={{marginTop:10,fontSize:10,color:C.muted2,textAlign:"center"}}>
-            📡 Datos: Finnhub API · Calendario en tiempo real · No es consejo financiero
+            📡 {isEN?"Data: Finnhub API · Real-time calendar · Not financial advice":"Datos: Finnhub API · Calendario en tiempo real · No es consejo financiero"}
           </div>
         </div>
       </div>
