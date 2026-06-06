@@ -13726,7 +13726,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
         {tab==="gurus" && !selGuru && (
           <div style={{marginLeft:"auto",position:"relative"}}>
             <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:12,color:C.muted2}}>🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar inversor…"
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==="en"?"Search investor…":"Buscar inversor…"}
               style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:20,padding:"7px 12px 7px 30px",fontSize:12,color:C.text,outline:"none",width:180}}/>
           </div>
         )}
@@ -14382,7 +14382,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 .filter(t=>congFilter==="all"||t.type===congFilter)
                 .filter(t=>congParty==="all"||t.party===congParty)
                 .map((t,i)=>(
-                  <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(140px,1fr) 55px 80px minmax(120px,1fr) 90px 80px",gap:0,padding:"10px 14px",borderBottom:`1px solid ${C.border}`,background:i%2===0?C.card2:"transparent",transition:"background 0.1s",minWidth:540}}
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(140px,1fr) 55px 112px minmax(120px,1fr) 90px 80px",gap:0,padding:"10px 14px",borderBottom:`1px solid ${C.border}`,background:i%2===0?C.card2:"transparent",transition:"background 0.1s",minWidth:560}}
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.05)"}
                     onMouseLeave={e=>e.currentTarget.style.background=i%2===0?C.card2:"transparent"}>
                     <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0}}>
@@ -14393,6 +14393,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                       <span style={{fontSize:11,fontWeight:800,color:t.party==="D"?"#0F4C81":t.party==="R"?"#EF4444":"#94A3B8",background:t.party==="D"?"rgba(15,76,129,0.15)":t.party==="R"?"rgba(239,68,68,0.15)":"rgba(148,163,184,0.1)",borderRadius:5,padding:"2px 6px"}}>{t.party||"?"}</span>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:5}}>
+                      {t.ticker&&<LogoBadge sym={t.ticker} col={C.accent} size={20} radius={5}/>}
                       <span style={{fontSize:11,fontWeight:800,background:"rgba(15,76,129,0.1)",color:C.accent,borderRadius:5,padding:"2px 6px",fontFamily:"monospace"}}>{t.ticker}</span>
                       <span style={{fontSize:13,fontWeight:900,color:t.type==="buy"?"#10B981":"#EF4444"}}>{t.type==="buy"?"↑":"↓"}</span>
                     </div>
