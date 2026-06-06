@@ -7857,6 +7857,25 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
     return {ticker:s.ticker, price:live?fmtLivePrice(s.ticker,live.price):s.price, change:live?live.change:s.change};
   });
 
+  // ── AI MARKET PULSE — calculado en vivo desde los precios reales ──
+  const PULSE_UNIVERSE=["SPY","QQQ","NVDA","AAPL","TSLA","MSFT","AMZN","META","GOOGL","AVGO","BTC","ETH"];
+  const pulse=(()=>{
+    const rows=PULSE_UNIVERSE.map(s=>({s,ch:lp[s]?.change})).filter(r=>r.ch!=null);
+    if(rows.length<3) return null; // aún cargando → usa fallback estático
+    const greens=rows.filter(r=>r.ch>=0).length;
+    const bullishPct=Math.round(greens/rows.length*100);
+    const movers=[...rows].sort((a,b)=>Math.abs(b.ch)-Math.abs(a.ch)).slice(0,3).map(r=>({s:r.s,up:r.ch>=0}));
+    const avgAbs=rows.reduce((a,r)=>a+Math.abs(r.ch),0)/rows.length;
+    const risk=avgAbs>=2.5?"high":avgAbs>=1?"med":"low";
+    return {bullishPct,movers,risk};
+  })();
+  const pBull = pulse? pulse.bullishPct : 71;
+  const pIsBull = pBull>=50;
+  const pMovers = pulse? pulse.movers : [{s:"NVDA",up:true},{s:"BTC",up:true},{s:"TSLA",up:false}];
+  const pRisk = pulse? pulse.risk : "med";
+  const RISK_LABEL = {high:lang==="en"?"HIGH ⚡":"ALTO ⚡", med:lang==="en"?"MEDIUM ⚡":"MEDIO ⚡", low:lang==="en"?"LOW ⚡":"BAJO ⚡"};
+  const RISK_COLOR = {high:"#DC2626", med:"#D97706", low:"#16A34A"};
+
   // Estilo base de cada tarjeta
   const card={
     background:"#FFFFFF",
@@ -8011,16 +8030,16 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         <div style={{marginBottom:8}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
             <span style={{fontSize:10.5,color:"#64748B",fontWeight:600}}>{lang==="en"?"Sentiment":"Sentimiento"}</span>
-            <span style={{fontSize:10.5,color:"#16A34A",fontWeight:800}}>BULLISH 71%</span>
+            <span style={{fontSize:10.5,color:pIsBull?"#16A34A":"#DC2626",fontWeight:800}}>{pIsBull?"BULLISH":"BEARISH"} {pBull}%</span>
           </div>
           <div style={{height:5,background:"rgba(15,23,42,0.06)",borderRadius:5,overflow:"hidden"}}>
-            <div style={{width:"71%",height:"100%",background:"#16A34A",borderRadius:5}}/>
+            <div style={{width:`${pBull}%`,height:"100%",background:pIsBull?"#16A34A":"#DC2626",borderRadius:5,transition:"width 0.6s"}}/>
           </div>
         </div>
 
-        {/* Chips */}
+        {/* Chips — top 3 movers reales */}
         <div style={{display:"flex",gap:5,marginBottom:8,flexWrap:"wrap"}}>
-          {[{s:"NVDA",up:true},{s:"BTC",up:true},{s:"TSLA",up:false}].map(({s,up})=>(
+          {pMovers.map(({s,up})=>(
             <span key={s} style={{fontSize:9.5,fontWeight:700,fontFamily:"monospace",padding:"2px 7px",borderRadius:6,
               background:up?"rgba(22,163,74,0.08)":"rgba(220,38,38,0.08)",
               color:up?"#16A34A":"#DC2626",
@@ -8033,7 +8052,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         {/* Riesgo — fila compacta */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(15,23,42,0.03)",border:"1px solid rgba(15,23,42,0.06)",borderRadius:8,padding:"5px 10px",marginBottom:8}}>
           <span style={{fontSize:10.5,color:"#94A3B8",fontWeight:600}}>{lang==="en"?"Market risk":"Riesgo del mercado"}</span>
-          <span style={{fontSize:10.5,color:"#0F5E68",fontWeight:800}}>{lang==="en"?"MEDIUM ⚡":"MEDIO ⚡"}</span>
+          <span style={{fontSize:10.5,color:RISK_COLOR[pRisk],fontWeight:800}}>{RISK_LABEL[pRisk]}</span>
         </div>
 
         {/* CTA — sólido sobrio */}
