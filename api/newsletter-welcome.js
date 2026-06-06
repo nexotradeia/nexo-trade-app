@@ -37,7 +37,7 @@ export default async function handler(req, res) {
               </tr>`;
   const html = `
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -57,39 +57,39 @@ export default async function handler(req, res) {
             </svg>
             <div style="margin:18px 0 0;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;font-size:22px;font-weight:600;letter-spacing:3px;">NEXOTRADE</div>
             <div style="margin:8px auto 0;width:40px;height:2px;background:#19B3A6;"></div>
-            <p style="margin:14px 0 0;color:#9FB3C8;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Inteligencia de mercados</p>
+            <p style="margin:14px 0 0;color:#9FB3C8;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Market Intelligence</p>
           </td>
         </tr>
 
         <!-- BODY -->
         <tr>
           <td style="padding:40px 44px;">
-            <h1 style="margin:0 0 18px;color:#0B1A2E;font-size:22px;font-weight:600;">Bienvenido a NexoTrade.</h1>
+            <h1 style="margin:0 0 18px;color:#0B1A2E;font-size:22px;font-weight:600;">Welcome to NexoTrade.</h1>
             <p style="margin:0 0 16px;color:#3D4F61;font-size:15px;line-height:1.7;">
-              Gracias por suscribirte. A partir de ahora recibirás nuestro análisis de mercados directamente en tu correo, con la misma profundidad que esperan los inversores profesionales.
+              Thank you for subscribing. From now on you'll receive our market analysis straight to your inbox — with the same depth professional investors rely on.
             </p>
             <p style="margin:0 0 8px;color:#6B7C8E;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
-              Cada semana recibirás
+              Every week you'll receive
             </p>
 
             <table width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 30px;font-family:'Helvetica Neue',Arial,sans-serif;">
-              ${row("Análisis técnico de los mercados")}
-              ${row("Picks de acciones y cripto de la semana")}
-              ${row("Noticias que mueven el mercado")}
-              ${row("Acceso anticipado a webinars en vivo")}
+              ${row("Technical analysis of the markets")}
+              ${row("Weekly stock & crypto picks")}
+              ${row("News that moves the market")}
+              ${row("Early access to live webinars")}
             </table>
 
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:30px;">
               <tr><td align="center">
                 <a href="https://nexotradeia.com" style="display:inline-block;background:#0F4C81;color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;font-weight:600;letter-spacing:0.5px;">
-                  Acceder a la plataforma
+                  Access the platform
                 </a>
               </td></tr>
             </table>
 
             <p style="margin:0;color:#9AA7B4;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;text-align:center;line-height:1.6;">
-              Si no realizaste esta suscripción, puedes ignorar este mensaje.<br/>
-              <a href="https://nexotradeia.com" style="color:#0F4C81;text-decoration:underline;">Cancelar suscripción</a>
+              If you didn't sign up for this, you can safely ignore this message.<br/>
+              <a href="https://nexotradeia.com" style="color:#0F4C81;text-decoration:underline;">Unsubscribe</a>
             </p>
           </td>
         </tr>
@@ -99,7 +99,7 @@ export default async function handler(req, res) {
           <td style="background:#0B1A2E;padding:22px 40px;text-align:center;">
             <p style="margin:0;color:#7C8EA0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:0.5px;">
               © 2026 NexoTrade · <a href="https://nexotradeia.com" style="color:#9FB3C8;text-decoration:none;">nexotradeia.com</a><br/>
-              <span style="color:#5A6B7D;">Contenido educativo. No constituye asesoría financiera.</span>
+              <span style="color:#5A6B7D;">Educational content. Not financial advice.</span>
             </p>
           </td>
         </tr>
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
         from:     FROM_EMAIL,
         to:       [email],
         reply_to: REPLY_TO,
-        subject:  "Bienvenido a NexoTrade — tu análisis semanal de mercados",
+        subject:  "Welcome to NexoTrade — your weekly market analysis",
         html,
       }),
     });
