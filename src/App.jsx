@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 20:52:41 Sesión 14 — Bonos (sidebar) + Market Overview (Movers)
+// NEXO TRADE — build: 2026-06-06 21:03:39 Sesión 14 — Tools mega-menu + 7 calculadoras/herramientas
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7032,6 +7032,14 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"📅", label:"Earnings",                                    idx:6},
     {icon:"🚀", label:"Movers 24H",                                  idx:7},
     {icon:"🌅", label:isEN?"Pre-Market & After-Hours":"Pre-Market y After-Hours", idx:45},
+    {icon:"📐", label:isEN?"Pivot Points":"Puntos Pivote",           idx:46},
+    {icon:"💵", label:isEN?"Profit Calculator":"Calc. Ganancias",    idx:47},
+    {icon:"⚖️", label:isEN?"Margin Calculator":"Calc. Margen",       idx:48},
+    {icon:"🌀", label:isEN?"Fibonacci":"Fibonacci",                  idx:52},
+    {icon:"🏠", label:isEN?"Mortgage Calc.":"Calc. Hipoteca",        idx:49},
+    {icon:"🔮", label:isEN?"Forward Rates":"Tasas Forward",          idx:50},
+    {icon:"💱", label:isEN?"Currency Converter":"Conversor Divisas", idx:53},
+    {icon:"🌡️", label:isEN?"FX Heat Map":"Heat Map Divisas",         idx:51},
     {icon:"🎓", label:"Webinars",                                    idx:11},
     {icon:"📚", label:isEN?"Academy":"Academia",                     idx:12},
     {icon:"🌍", label:isEN?"Global Radar":"Radar Global",           idx:44},
@@ -8067,6 +8075,281 @@ function EmailGate({lang="es", onDone, onLogin}){
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── HERRAMIENTAS / CALCULADORAS ───────────────────────────────────────────────
+function ToolShell({emoji,title,desc,children}){
+  return(
+    <div style={{maxWidth:760,margin:"0 auto",padding:"0 4px 40px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
+        <div style={{width:46,height:46,borderRadius:13,background:"linear-gradient(135deg,#0F4C81,#0F5E68)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{emoji}</div>
+        <h1 style={{margin:0,fontSize:"clamp(20px,3.5vw,26px)",fontWeight:900,color:C.text,letterSpacing:-0.5,fontFamily:"'Space Grotesk',sans-serif"}}>{title}</h1>
+      </div>
+      {desc&&<p style={{margin:"0 0 18px 58px",color:C.muted,fontSize:13.5,lineHeight:1.5}}>{desc}</p>}
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:18,padding:"22px",boxShadow:C.shadow}}>{children}</div>
+      <p style={{color:C.muted2,fontSize:11,marginTop:14,textAlign:"center"}}>NexoTrade · {(localStorage.getItem("nexo-lang")||"en")==="en"?"Educational only, not financial advice.":"Solo educativo, no es consejo financiero."}</p>
+    </div>
+  );
+}
+const TF_IN = {width:"100%",boxSizing:"border-box",border:`1px solid ${C.border}`,borderRadius:10,padding:"11px 13px",fontSize:15,outline:"none",background:C.card2,color:C.text,fontFamily:"inherit",fontWeight:700};
+function TField({label,value,onChange,type="number",placeholder,suffix}){
+  return(
+    <div style={{marginBottom:12}}>
+      <label style={{display:"block",fontSize:11.5,fontWeight:700,color:C.muted,marginBottom:5,textTransform:"uppercase",letterSpacing:0.4}}>{label}</label>
+      <div style={{position:"relative"}}>
+        <input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={TF_IN}/>
+        {suffix&&<span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",fontSize:12,color:C.muted2,fontWeight:700}}>{suffix}</span>}
+      </div>
+    </div>
+  );
+}
+const ToolResult = ({rows}) => (
+  <div style={{marginTop:6,background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,overflow:"hidden"}}>
+    {rows.map((r,i)=>(
+      <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 16px",borderBottom:i<rows.length-1?`1px solid ${C.border}`:"none",background:r.hi?"rgba(15,94,104,0.06)":"transparent"}}>
+        <span style={{fontSize:13,fontWeight:r.hi?800:600,color:r.hi?C.accent:C.muted}}>{r.l}</span>
+        <span style={{fontSize:r.hi?16:14,fontWeight:800,color:r.col||C.text,fontFamily:"monospace"}}>{r.v}</span>
+      </div>
+    ))}
+  </div>
+);
+
+function PivotCalc({lang="es"}){
+  const isEN=lang==="en";const[h,setH]=useState("");const[l,setL]=useState("");const[c,setC]=useState("");
+  const H=parseFloat(h),L=parseFloat(l),Cl=parseFloat(c);
+  const ok=H>0&&L>0&&Cl>0&&H>=L;
+  const P=ok?(H+L+Cl)/3:0;
+  const f=n=>n.toFixed(2);
+  return(
+    <ToolShell emoji="📐" title={isEN?"Pivot Point Calculator":"Calculadora de Puntos Pivote"} desc={isEN?"Classic floor-trader pivots from yesterday's High, Low & Close.":"Pivotes clásicos a partir del Máximo, Mínimo y Cierre del día anterior."}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        <TField label={isEN?"High":"Máximo"} value={h} onChange={setH}/>
+        <TField label={isEN?"Low":"Mínimo"} value={l} onChange={setL}/>
+        <TField label={isEN?"Close":"Cierre"} value={c} onChange={setC}/>
+      </div>
+      {ok ? <ToolResult rows={[
+        {l:"R3",v:f(H+2*(P-L)),col:"#16A34A"},{l:"R2",v:f(P+(H-L)),col:"#16A34A"},{l:"R1",v:f(2*P-L),col:"#16A34A"},
+        {l:isEN?"Pivot (P)":"Pivote (P)",v:f(P),hi:true},
+        {l:"S1",v:f(2*P-H),col:"#DC2626"},{l:"S2",v:f(P-(H-L)),col:"#DC2626"},{l:"S3",v:f(L-2*(H-L)),col:"#DC2626"},
+      ]}/> : <div style={{textAlign:"center",color:C.muted2,fontSize:13,padding:"14px 0"}}>{isEN?"Enter High, Low and Close.":"Ingresa Máximo, Mínimo y Cierre."}</div>}
+    </ToolShell>
+  );
+}
+
+function ProfitCalc({lang="es"}){
+  const isEN=lang==="en";const[en,setEn]=useState("");const[ex,setEx]=useState("");const[qty,setQty]=useState("");const[dir,setDir]=useState("long");
+  const E=parseFloat(en),X=parseFloat(ex),Q=parseFloat(qty);
+  const ok=E>0&&X>0&&Q>0;
+  const pl=ok?(dir==="long"?(X-E):(E-X))*Q:0;
+  const pct=ok?(dir==="long"?(X-E)/E:(E-X)/E)*100:0;
+  return(
+    <ToolShell emoji="💵" title={isEN?"Profit Calculator":"Calculadora de Ganancias"} desc={isEN?"Estimate profit/loss for a trade by entry, exit and size.":"Calcula ganancia/pérdida de una operación por entrada, salida y tamaño."}>
+      <div style={{display:"flex",gap:8,marginBottom:14}}>
+        {[["long",isEN?"▲ Long":"▲ Compra"],["short",isEN?"▼ Short":"▼ Venta"]].map(([k,lb])=>(
+          <button key={k} onClick={()=>setDir(k)} style={{flex:1,padding:"10px",borderRadius:10,border:`1px solid ${dir===k?(k==="long"?"#16A34A":"#DC2626"):C.border}`,background:dir===k?(k==="long"?"rgba(22,163,74,0.1)":"rgba(220,38,38,0.1)"):"transparent",color:dir===k?(k==="long"?"#16A34A":"#DC2626"):C.muted,fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>{lb}</button>
+        ))}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        <TField label={isEN?"Entry":"Entrada"} value={en} onChange={setEn} suffix="$"/>
+        <TField label={isEN?"Exit":"Salida"} value={ex} onChange={setEx} suffix="$"/>
+        <TField label={isEN?"Size (units)":"Tamaño (unid.)"} value={qty} onChange={setQty}/>
+      </div>
+      {ok&&<ToolResult rows={[
+        {l:isEN?"Profit / Loss":"Ganancia / Pérdida",v:`${pl>=0?"+":""}$${pl.toFixed(2)}`,hi:true,col:pl>=0?"#16A34A":"#DC2626"},
+        {l:isEN?"Return":"Retorno",v:`${pct>=0?"+":""}${pct.toFixed(2)}%`,col:pct>=0?"#16A34A":"#DC2626"},
+      ]}/>}
+    </ToolShell>
+  );
+}
+
+function MarginCalc({lang="es"}){
+  const isEN=lang==="en";const[price,setPrice]=useState("");const[qty,setQty]=useState("");const[lev,setLev]=useState("10");
+  const P=parseFloat(price),Q=parseFloat(qty),L=parseFloat(lev);
+  const ok=P>0&&Q>0&&L>0;
+  const notional=ok?P*Q:0,margin=ok?notional/L:0;
+  return(
+    <ToolShell emoji="⚖️" title={isEN?"Margin Calculator":"Calculadora de Margen"} desc={isEN?"Required margin for a leveraged position.":"Margen requerido para una posición apalancada."}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        <TField label={isEN?"Price":"Precio"} value={price} onChange={setPrice} suffix="$"/>
+        <TField label={isEN?"Size (units)":"Tamaño (unid.)"} value={qty} onChange={setQty}/>
+        <TField label={isEN?"Leverage":"Apalancamiento"} value={lev} onChange={setLev} suffix="x"/>
+      </div>
+      {ok&&<ToolResult rows={[
+        {l:isEN?"Position value":"Valor de posición",v:`$${notional.toLocaleString(undefined,{maximumFractionDigits:2})}`},
+        {l:isEN?"Required margin":"Margen requerido",v:`$${margin.toLocaleString(undefined,{maximumFractionDigits:2})}`,hi:true},
+      ]}/>}
+    </ToolShell>
+  );
+}
+
+function MortgageCalc({lang="es"}){
+  const isEN=lang==="en";const[amt,setAmt]=useState("");const[rate,setRate]=useState("");const[yrs,setYrs]=useState("30");
+  const A=parseFloat(amt),R=parseFloat(rate),Y=parseFloat(yrs);
+  const ok=A>0&&R>=0&&Y>0;
+  const n=Y*12,i=R/100/12;
+  const m=ok?(i>0?A*i*Math.pow(1+i,n)/(Math.pow(1+i,n)-1):A/n):0;
+  const total=ok?m*n:0;
+  return(
+    <ToolShell emoji="🏠" title={isEN?"Mortgage Calculator":"Calculadora de Hipoteca"} desc={isEN?"Monthly payment, total paid and interest.":"Pago mensual, total pagado e intereses."}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        <TField label={isEN?"Loan amount":"Monto del préstamo"} value={amt} onChange={setAmt} suffix="$"/>
+        <TField label={isEN?"Annual rate":"Tasa anual"} value={rate} onChange={setRate} suffix="%"/>
+        <TField label={isEN?"Years":"Años"} value={yrs} onChange={setYrs}/>
+      </div>
+      {ok&&<ToolResult rows={[
+        {l:isEN?"Monthly payment":"Pago mensual",v:`$${m.toLocaleString(undefined,{maximumFractionDigits:2})}`,hi:true},
+        {l:isEN?"Total paid":"Total pagado",v:`$${total.toLocaleString(undefined,{maximumFractionDigits:0})}`},
+        {l:isEN?"Total interest":"Intereses totales",v:`$${(total-A).toLocaleString(undefined,{maximumFractionDigits:0})}`,col:"#DC2626"},
+      ]}/>}
+    </ToolShell>
+  );
+}
+
+function ForwardRatesCalc({lang="es"}){
+  const isEN=lang==="en";const[spot,setSpot]=useState("");const[rd,setRd]=useState("");const[rf,setRf]=useState("");const[days,setDays]=useState("90");
+  const S=parseFloat(spot),Rd=parseFloat(rd)/100,Rf=parseFloat(rf)/100,D=parseFloat(days);
+  const ok=S>0&&!isNaN(Rd)&&!isNaN(Rf)&&D>0;
+  const t=D/360;
+  const fwd=ok?S*(1+Rd*t)/(1+Rf*t):0;
+  const pts=ok?(fwd-S)*10000:0;
+  return(
+    <ToolShell emoji="🔮" title={isEN?"Forward Rates Calculator":"Calculadora de Tasas Forward"} desc={isEN?"Forward FX rate via covered interest-rate parity.":"Tasa forward de divisas por paridad de tasas de interés."}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <TField label={isEN?"Spot rate":"Tasa spot"} value={spot} onChange={setSpot}/>
+        <TField label={isEN?"Days":"Días"} value={days} onChange={setDays}/>
+        <TField label={isEN?"Domestic rate":"Tasa local"} value={rd} onChange={setRd} suffix="%"/>
+        <TField label={isEN?"Foreign rate":"Tasa extranjera"} value={rf} onChange={setRf} suffix="%"/>
+      </div>
+      {ok&&<ToolResult rows={[
+        {l:isEN?"Forward rate":"Tasa forward",v:fwd.toFixed(5),hi:true},
+        {l:isEN?"Forward points":"Puntos forward",v:`${pts>=0?"+":""}${pts.toFixed(1)}`,col:pts>=0?"#16A34A":"#DC2626"},
+      ]}/>}
+    </ToolShell>
+  );
+}
+
+function CurrencyHeatMap({lang="es"}){
+  const isEN=lang==="en";const[rows,setRows]=useState(null);const[loading,setLoading]=useState(true);
+  useEffect(()=>{let c=false;const load=()=>{fetch("/api/data?type=quotes&set=forex").then(r=>r.json()).then(j=>{if(!c){setRows(j.rows||[]);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});};load();const iv=setInterval(load,60000);return()=>{c=true;clearInterval(iv);};},[]);
+  const data=(rows||[]).filter(r=>r.s.includes("=X"));
+  const cell=v=>{const a=Math.min(Math.abs(v)/2,1);return v>=0?`rgba(22,163,74,${0.12+a*0.45})`:`rgba(220,38,38,${0.12+a*0.45})`;};
+  return(
+    <ToolShell emoji="🌡️" title={isEN?"Currencies Heat Map":"Mapa de Calor de Divisas"} desc={isEN?"Today's % move across major FX pairs. Green = up, red = down.":"Movimiento % de hoy en los pares de divisas principales. Verde = sube, rojo = baja."}>
+      {loading&&(!rows)?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Loading live FX…":"Cargando divisas en vivo…"}</div>:
+      data.length===0?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Data unavailable. Try again.":"Datos no disponibles. Intenta de nuevo."}</div>:
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:8}}>
+        {data.map(r=>(
+          <div key={r.s} style={{background:cell(r.chg),border:`1px solid ${C.border}`,borderRadius:11,padding:"12px 10px",textAlign:"center"}}>
+            <div style={{fontSize:12.5,fontWeight:800,color:C.text}}>{r.n}</div>
+            <div style={{fontSize:13,fontWeight:800,fontFamily:"monospace",color:r.chg>=0?"#16A34A":"#DC2626",marginTop:3}}>{r.chg>=0?"+":""}{(r.chg??0).toFixed(2)}%</div>
+            <div style={{fontSize:10.5,color:C.muted2,fontFamily:"monospace",marginTop:1}}>{r.p?.toFixed(r.p>=100?2:4)}</div>
+          </div>
+        ))}
+      </div>}
+    </ToolShell>
+  );
+}
+
+function FibonacciCalc({lang="es"}){
+  const isEN=lang==="en";const[h,setH]=useState("");const[l,setL]=useState("");const[dir,setDir]=useState("up");
+  const H=parseFloat(h),L=parseFloat(l);const ok=H>0&&L>0&&H>L;const d=H-L;
+  const retr=[0,0.236,0.382,0.5,0.618,0.786,1];
+  const ext=[1.272,1.414,1.618,2.0,2.618];
+  const lvl=p=>dir==="up"?(H-d*p):(L+d*p);
+  const f=n=>n.toFixed(2);
+  return(
+    <ToolShell emoji="🌀" title={isEN?"Fibonacci Calculator":"Calculadora de Fibonacci"} desc={isEN?"Retracement & extension levels from a swing High and Low.":"Niveles de retroceso y extensión a partir de un Máximo y Mínimo."}>
+      <div style={{display:"flex",gap:8,marginBottom:14}}>
+        {[["up",isEN?"▲ Uptrend":"▲ Tendencia alcista"],["down",isEN?"▼ Downtrend":"▼ Tendencia bajista"]].map(([k,lb])=>(
+          <button key={k} onClick={()=>setDir(k)} style={{flex:1,padding:"10px",borderRadius:10,border:`1px solid ${dir===k?C.accent:C.border}`,background:dir===k?"rgba(15,76,129,0.1)":"transparent",color:dir===k?C.accent:C.muted,fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>{lb}</button>
+        ))}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <TField label={isEN?"Swing High":"Máximo"} value={h} onChange={setH}/>
+        <TField label={isEN?"Swing Low":"Mínimo"} value={l} onChange={setL}/>
+      </div>
+      {ok?<>
+        <div style={{fontSize:11,fontWeight:800,color:C.muted,margin:"6px 0",textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Retracements":"Retrocesos"}</div>
+        <ToolResult rows={retr.map(p=>({l:`${(p*100).toFixed(1)}%`,v:f(lvl(p)),hi:p===0.618}))}/>
+        <div style={{fontSize:11,fontWeight:800,color:C.muted,margin:"12px 0 6px",textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Extensions":"Extensiones"}</div>
+        <ToolResult rows={ext.map(p=>({l:`${(p*100).toFixed(1)}%`,v:f(lvl(p)),col:dir==="up"?"#16A34A":"#DC2626"}))}/>
+      </>:<div style={{textAlign:"center",color:C.muted2,fontSize:13,padding:"14px 0"}}>{isEN?"Enter a High greater than the Low.":"Ingresa un Máximo mayor que el Mínimo."}</div>}
+    </ToolShell>
+  );
+}
+
+function CurrencyConverter({lang="es"}){
+  const isEN=lang==="en";
+  const[rows,setRows]=useState(null);const[amt,setAmt]=useState("100");const[from,setFrom]=useState("USD");const[to,setTo]=useState("EUR");
+  useEffect(()=>{let c=false;const load=()=>fetch("/api/data?type=quotes&set=forex").then(r=>r.json()).then(j=>{if(!c)setRows(j.rows||[]);}).catch(()=>{});load();const iv=setInterval(load,60000);return()=>{c=true;clearInterval(iv);};},[]);
+  // valor de 1 unidad de cada moneda en USD
+  const usd={USD:1};
+  (rows||[]).forEach(r=>{const s=r.s.replace("=X","");if(s.length===6&&r.p>0){const a=s.slice(0,3),b=s.slice(3);if(a==="USD")usd[b]=1/r.p;else if(b==="USD")usd[a]=r.p;}});
+  const CUR=["USD","EUR","GBP","JPY","CHF","AUD","CAD","NZD","MXN","BRL","CNY"].filter(c=>usd[c]!=null);
+  const A=parseFloat(amt);const ok=A>=0&&usd[from]&&usd[to];
+  const res=ok?A*usd[from]/usd[to]:0;
+  const rate=usd[from]&&usd[to]?usd[from]/usd[to]:0;
+  const sel={...TF_IN,cursor:"pointer"};
+  return(
+    <ToolShell emoji="💱" title={isEN?"Currency Converter":"Conversor de Divisas"} desc={isEN?"Convert between major currencies at live rates (Yahoo).":"Convierte entre divisas principales con tasas en vivo (Yahoo)."}>
+      {!rows?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Loading live rates…":"Cargando tasas en vivo…"}</div>:
+      CUR.length===0?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Rates unavailable. Try again.":"Tasas no disponibles. Intenta de nuevo."}</div>:<>
+        <TField label={isEN?"Amount":"Cantidad"} value={amt} onChange={setAmt}/>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div><label style={{display:"block",fontSize:11.5,fontWeight:700,color:C.muted,marginBottom:5,textTransform:"uppercase"}}>{isEN?"From":"De"}</label>
+            <select value={from} onChange={e=>setFrom(e.target.value)} style={sel}>{CUR.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+          <div><label style={{display:"block",fontSize:11.5,fontWeight:700,color:C.muted,marginBottom:5,textTransform:"uppercase"}}>{isEN?"To":"A"}</label>
+            <select value={to} onChange={e=>setTo(e.target.value)} style={sel}>{CUR.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+        </div>
+        {ok&&<ToolResult rows={[
+          {l:`${A.toLocaleString()} ${from} =`,v:`${res.toLocaleString(undefined,{maximumFractionDigits:4})} ${to}`,hi:true,col:C.accent},
+          {l:isEN?"Rate":"Tasa",v:`1 ${from} = ${rate.toLocaleString(undefined,{maximumFractionDigits:6})} ${to}`},
+        ]}/>}
+      </>}
+    </ToolShell>
+  );
+}
+
+// ── MENÚ HERRAMIENTAS — mega-dropdown organizado por categorías ───────────────
+function ToolsMenu({lang="es", onNavigate, isPremium=false}){
+  const isEN=lang==="en";
+  const [open,setOpen]=useState(false);
+  const ref=useRef();
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
+  const go=idx=>{setOpen(false);onNavigate&&onNavigate(idx);};
+  const groups=[
+    {t:isEN?"📅 Calendars":"📅 Calendarios", items:[
+      [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],[isEN?"Dividends":"Dividendos",15],["IPOs",16]]},
+    {t:isEN?"🧮 Calculators":"🧮 Calculadoras", items:[
+      ["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
+    {t:isEN?"💱 Currencies":"💱 Divisas", items:[
+      [isEN?"Currency Converter":"Conversor",53],["Heat Map",51]]},
+    {t:isEN?"📊 Investing Tools":"📊 Inversión", items:[
+      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9]]},
+    {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
+      ["Movers 24H",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow",20]]},
+  ];
+  return(
+    <div ref={ref} style={{position:"relative"}}>
+      <button onClick={()=>setOpen(o=>!o)} style={{display:"flex",alignItems:"center",gap:6,background:open?"rgba(15,76,129,0.1)":"transparent",border:`1px solid ${open?"rgba(15,76,129,0.35)":"rgba(15,76,129,0.2)"}`,borderRadius:10,padding:"7px 13px",cursor:"pointer",color:"#0F4C81",fontSize:13,fontWeight:800,fontFamily:"inherit",whiteSpace:"nowrap"}}>
+        🧰 {isEN?"Tools":"Herramientas"} <span style={{fontSize:9}}>▾</span>
+      </button>
+      {open&&(
+        <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,background:"#fff",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 50px rgba(0,0,0,0.18)",zIndex:300,padding:16,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:"6px 22px",width:"min(620px,90vw)",maxHeight:"min(70vh,560px)",overflowY:"auto"}}>
+          {groups.map(g=>(
+            <div key={g.t} style={{marginBottom:6}}>
+              <div style={{fontSize:11,fontWeight:900,color:"#0F172A",letterSpacing:0.3,marginBottom:6,paddingBottom:5,borderBottom:`1px solid ${C.border}`}}>{g.t}</div>
+              {g.items.map(([l,idx])=>(
+                <button key={l} onClick={()=>go(idx)} style={{display:"block",width:"100%",textAlign:"left",background:"none",border:"none",cursor:"pointer",padding:"6px 4px",fontSize:13,fontWeight:600,color:"#1A5FAD",fontFamily:"inherit",borderRadius:6,transition:"all 0.1s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.06)";e.currentTarget.style.paddingLeft="8px";}}
+                  onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.paddingLeft="4px";}}>→ {l}</button>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -22091,6 +22374,14 @@ export default function App(){
     if(page===43) return <PaperTradingFullPage user={user} onBack={()=>setPage(0)}/>;
     if(page===44) return <RadarGlobalPage lang={lang}/>;
     if(page===45) return <PreMarketPage lang={lang} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===46) return <PivotCalc lang={lang}/>;
+    if(page===47) return <ProfitCalc lang={lang}/>;
+    if(page===48) return <MarginCalc lang={lang}/>;
+    if(page===49) return <MortgageCalc lang={lang}/>;
+    if(page===50) return <ForwardRatesCalc lang={lang}/>;
+    if(page===51) return <CurrencyHeatMap lang={lang}/>;
+    if(page===52) return <FibonacciCalc lang={lang}/>;
+    if(page===53) return <CurrencyConverter lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -22760,6 +23051,9 @@ export default function App(){
               onMouseLeave={e=>{e.currentTarget.style.background=showSettings?"rgba(15,76,129,0.13)":"transparent";e.currentTarget.style.borderColor=showSettings?"rgba(15,76,129,0.6)":"rgba(15,76,129,0.2)";}}>
               <IcoSettings/>
             </button>
+
+            {/* 🧰 Menú Herramientas (mega-dropdown) */}
+            <span className="nexo-hide-mobile"><ToolsMenu lang={lang} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}}/></span>
 
             {/* Compartir / Invitar (viral, global) */}
             <ShareNavButton user={user} lang={lang}/>
