@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 21:03:39 Sesión 14 — Tools mega-menu + 7 calculadoras/herramientas
+// NEXO TRADE — build: 2026-06-06 21:14:42 Sesión 14 — Correlación/Volatilidad/Fed Monitor + calendarios + Tools en navbar
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -8312,32 +8312,193 @@ function CurrencyConverter({lang="es"}){
   );
 }
 
+// ── DIVISAS: Correlación y Volatilidad (histórico vía /api/data?type=fxhist) ──
+const _rets = a => a.slice(1).map((v,i)=>(v-a[i])/a[i]);
+const _mean = a => a.reduce((s,x)=>s+x,0)/(a.length||1);
+const _pearson = (a,b)=>{const n=Math.min(a.length,b.length);if(n<3)return 0;const A=a.slice(-n),B=b.slice(-n),ma=_mean(A),mb=_mean(B);let num=0,da=0,db=0;for(let i=0;i<n;i++){const x=A[i]-ma,y=B[i]-mb;num+=x*y;da+=x*x;db+=y*y;}return (da&&db)?num/Math.sqrt(da*db):0;};
+const _stdev = a => {const m=_mean(a);return Math.sqrt(_mean(a.map(x=>(x-m)**2)));};
+
+function CurrencyCorrelation({lang="es"}){
+  const isEN=lang==="en";const[pairs,setPairs]=useState(null);const[loading,setLoading]=useState(true);
+  useEffect(()=>{let c=false;fetch("/api/data?type=fxhist").then(r=>r.json()).then(j=>{if(!c){setPairs(j.pairs||[]);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});return()=>{c=true;};},[]);
+  const data=(pairs||[]).map(p=>({...p,r:_rets(p.closes)}));
+  const col=v=>{const a=Math.abs(v);return v>=0?`rgba(22,163,74,${0.1+a*0.55})`:`rgba(220,38,38,${0.1+a*0.55})`;};
+  return(
+    <ToolShell emoji="🔗" title={isEN?"Currency Correlation":"Correlación de Divisas"} desc={isEN?"30-day correlation of daily returns between major FX pairs. +1 move together, −1 opposite.":"Correlación a 30 días de los retornos diarios entre pares principales. +1 se mueven igual, −1 al revés."}>
+      {loading&&!pairs?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Loading history…":"Cargando histórico…"}</div>:
+      data.length<2?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Data unavailable. Try again.":"Datos no disponibles. Intenta de nuevo."}</div>:
+      <div style={{overflowX:"auto"}}><div style={{display:"grid",gridTemplateColumns:`70px repeat(${data.length},1fr)`,gap:2,minWidth:60+data.length*52}}>
+        <div/>
+        {data.map(p=><div key={p.s} style={{fontSize:9.5,fontWeight:800,color:C.muted,textAlign:"center",padding:"4px 0"}}>{p.n.replace("/","")}</div>)}
+        {data.map(row=>(<React.Fragment key={row.s}>
+          <div style={{fontSize:9.5,fontWeight:800,color:C.muted,display:"flex",alignItems:"center"}}>{row.n.replace("/","")}</div>
+          {data.map(cl=>{const v=row.s===cl.s?1:_pearson(row.r,cl.r);return(
+            <div key={cl.s} style={{background:col(v),borderRadius:5,padding:"7px 2px",textAlign:"center",fontSize:10.5,fontWeight:800,color:Math.abs(v)>0.5?"#fff":C.text,fontFamily:"monospace"}}>{v.toFixed(2)}</div>
+          );})}
+        </React.Fragment>))}
+      </div></div>}
+    </ToolShell>
+  );
+}
+
+function CurrencyVolatility({lang="es"}){
+  const isEN=lang==="en";const[pairs,setPairs]=useState(null);const[loading,setLoading]=useState(true);
+  useEffect(()=>{let c=false;fetch("/api/data?type=fxhist").then(r=>r.json()).then(j=>{if(!c){setPairs(j.pairs||[]);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});return()=>{c=true;};},[]);
+  const data=(pairs||[]).map(p=>({n:p.n,vol:_stdev(_rets(p.closes))*Math.sqrt(252)*100})).sort((a,b)=>b.vol-a.vol);
+  const max=data[0]?.vol||1;
+  return(
+    <ToolShell emoji="📊" title={isEN?"Currency Volatility":"Volatilidad de Divisas"} desc={isEN?"Annualized volatility (last 2 months) of major FX pairs. Higher = bigger swings.":"Volatilidad anualizada (últimos 2 meses) de los pares principales. Mayor = más movimiento."}>
+      {loading&&!pairs?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Loading history…":"Cargando histórico…"}</div>:
+      data.length===0?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Data unavailable.":"Datos no disponibles."}</div>:
+      <div style={{display:"flex",flexDirection:"column",gap:9}}>
+        {data.map(d=>(
+          <div key={d.n} style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{width:70,fontSize:12.5,fontWeight:800,color:C.text}}>{d.n}</span>
+            <div style={{flex:1,height:18,background:C.card2,borderRadius:9,overflow:"hidden"}}>
+              <div style={{width:`${(d.vol/max)*100}%`,height:"100%",background:d.vol>=max*0.66?"linear-gradient(90deg,#DC2626,#F59E0B)":"linear-gradient(90deg,#0F4C81,#0F5E68)",borderRadius:9}}/>
+            </div>
+            <span style={{width:54,textAlign:"right",fontSize:12.5,fontWeight:800,fontFamily:"monospace",color:C.text}}>{d.vol.toFixed(1)}%</span>
+          </div>
+        ))}
+      </div>}
+    </ToolShell>
+  );
+}
+
+function FedRateMonitor({lang="es"}){
+  const isEN=lang==="en";const[d,setD]=useState(null);const[loading,setLoading]=useState(true);
+  useEffect(()=>{let c=false;fetch("/api/data?type=quotes&set=bonds").then(r=>r.json()).then(j=>{if(!c){setD(j);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});return()=>{c=true;};},[]);
+  const rows=d?.rows||[];const get=s=>rows.find(r=>r.s===s)?.p;
+  const items=[["^IRX",isEN?"3-Month (Fed proxy)":"3 Meses (proxy Fed)"],["2YY=F","US 2Y"],["^FVX","US 5Y"],["^TNX","US 10Y"],["^TYX","US 30Y"]].map(([s,l])=>({l,p:get(s)})).filter(x=>x.p!=null);
+  const spread=d?.spread10_2;
+  return(
+    <ToolShell emoji="🏛️" title={isEN?"Fed Rate Monitor":"Monitor de Tasas Fed"} desc={isEN?"Market-implied rates via US Treasury yields. The 3-month bill tracks the Fed funds rate closely.":"Tasas implícitas del mercado vía rendimientos del Tesoro. La letra a 3 meses sigue de cerca la tasa de la Fed."}>
+      {loading&&!d?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Loading yields…":"Cargando rendimientos…"}</div>:
+      items.length===0?<div style={{textAlign:"center",color:C.muted,padding:"24px 0"}}>{isEN?"Data unavailable.":"Datos no disponibles."}</div>:<>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(110px,1fr))",gap:10,marginBottom:14}}>
+        {items.map(it=>(
+          <div key={it.l} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px",textAlign:"center"}}>
+            <div style={{fontSize:10,color:C.muted2,fontWeight:700,marginBottom:4}}>{it.l}</div>
+            <div style={{fontSize:20,fontWeight:900,color:C.text,fontFamily:"monospace"}}>{it.p.toFixed(2)}%</div>
+          </div>
+        ))}
+      </div>
+      {spread!=null&&(
+        <div style={{background:spread<0?"rgba(220,38,38,0.08)":"rgba(22,163,74,0.08)",border:`1px solid ${spread<0?"rgba(220,38,38,0.25)":"rgba(22,163,74,0.25)"}`,borderRadius:12,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontSize:12.5,fontWeight:700,color:C.muted}}>{isEN?"10Y-2Y spread (recession signal)":"Spread 10A-2A (señal de recesión)"}</span>
+          <span style={{fontSize:15,fontWeight:900,fontFamily:"monospace",color:spread<0?"#DC2626":"#16A34A"}}>{spread>0?"+":""}{spread.toFixed(2)}%{spread<0?(isEN?" ⚠ inverted":" ⚠ invertida"):""}</span>
+        </div>
+      )}
+      </>}
+    </ToolShell>
+  );
+}
+
+// ── CALENDARIOS extra (Festivos, Splits, Vencimiento de Futuros) ──────────────
+const US_HOLIDAYS_2026 = [
+  ["2026-01-01","New Year's Day","Año Nuevo","closed"],
+  ["2026-01-19","Martin Luther King Jr. Day","Día de MLK","closed"],
+  ["2026-02-16","Presidents' Day","Día de los Presidentes","closed"],
+  ["2026-04-03","Good Friday","Viernes Santo","closed"],
+  ["2026-05-25","Memorial Day","Día de los Caídos","closed"],
+  ["2026-06-19","Juneteenth","Juneteenth","closed"],
+  ["2026-07-03","Independence Day (observed)","Día de la Independencia (observado)","closed"],
+  ["2026-09-07","Labor Day","Día del Trabajo","closed"],
+  ["2026-11-26","Thanksgiving","Acción de Gracias","closed"],
+  ["2026-11-27","Day after Thanksgiving","Día después de Acción de Gracias","early"],
+  ["2026-12-24","Christmas Eve","Víspera de Navidad","early"],
+  ["2026-12-25","Christmas","Navidad","closed"],
+];
+function HolidayCalendar({lang="es"}){
+  const isEN=lang==="en";const today=new Date().toISOString().slice(0,10);
+  const fmt=ds=>new Date(ds+"T12:00:00").toLocaleDateString(isEN?"en-US":"es-ES",{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+  return(
+    <ToolShell emoji="📅" title={isEN?"Market Holiday Calendar 2026":"Calendario de Festivos del Mercado 2026"} desc={isEN?"US stock market (NYSE/Nasdaq) closures and early closes.":"Cierres y cierres anticipados del mercado de EE.UU. (NYSE/Nasdaq)."}>
+      <div style={{display:"flex",flexDirection:"column"}}>
+        {US_HOLIDAYS_2026.map(([ds,en,es,type])=>{const past=ds<today;return(
+          <div key={ds} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 4px",borderBottom:`1px solid ${C.border}`,opacity:past?0.45:1}}>
+            <div><div style={{fontSize:13.5,fontWeight:700,color:C.text}}>{isEN?en:es}</div><div style={{fontSize:11,color:C.muted2}}>{fmt(ds)}</div></div>
+            <span style={{fontSize:10.5,fontWeight:800,padding:"3px 10px",borderRadius:20,background:type==="closed"?"rgba(220,38,38,0.1)":"rgba(245,158,11,0.12)",color:type==="closed"?"#DC2626":"#B45309",border:`1px solid ${type==="closed"?"rgba(220,38,38,0.25)":"rgba(245,158,11,0.3)"}`}}>{type==="closed"?(isEN?"Closed":"Cerrado"):(isEN?"Early close 1pm":"Cierre 1pm")}</span>
+          </div>
+        );})}
+      </div>
+    </ToolShell>
+  );
+}
+
+function FuturesExpiryCalendar({lang="es"}){
+  const isEN=lang==="en";const now=new Date();
+  const thirdFri=(y,m)=>{const d=new Date(y,m,1);const off=(5-d.getDay()+7)%7;return new Date(y,m,1+off+14);};
+  const list=[];for(let i=0;i<9;i++){const dt=new Date(now.getFullYear(),now.getMonth()+i,1);const f=thirdFri(dt.getFullYear(),dt.getMonth());if(f>=new Date(now.toDateString())){const q=[2,5,8,11].includes(f.getMonth());list.push({f,q});}}
+  const fmt=d=>d.toLocaleDateString(isEN?"en-US":"es-ES",{weekday:"long",month:"short",day:"numeric",year:"numeric"});
+  return(
+    <ToolShell emoji="⏳" title={isEN?"Futures & Options Expiry":"Vencimiento de Futuros y Opciones"} desc={isEN?"Monthly options expiry (3rd Friday). Quarterly = 'triple witching' (higher volume/volatility).":"Vencimiento mensual de opciones (3er viernes). Trimestral = 'triple hora bruja' (más volumen/volatilidad)."}>
+      <div style={{display:"flex",flexDirection:"column"}}>
+        {list.map(({f,q},i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 4px",borderBottom:i<list.length-1?`1px solid ${C.border}`:"none"}}>
+            <div style={{fontSize:13.5,fontWeight:700,color:C.text}}>{fmt(f)}</div>
+            <span style={{fontSize:10.5,fontWeight:800,padding:"3px 10px",borderRadius:20,background:q?"rgba(245,158,11,0.14)":"rgba(15,76,129,0.08)",color:q?"#B45309":"#0F4C81",border:`1px solid ${q?"rgba(245,158,11,0.35)":"rgba(15,76,129,0.2)"}`}}>{q?(isEN?"🔮 Triple Witching":"🔮 Triple Hora Bruja"):(isEN?"Monthly":"Mensual")}</span>
+          </div>
+        ))}
+      </div>
+    </ToolShell>
+  );
+}
+
+const SPLITS_REF = [
+  ["NVDA","NVIDIA","10:1","2024-06-10"],["AAPL","Apple","4:1","2020-08-31"],["TSLA","Tesla","3:1","2022-08-25"],
+  ["AMZN","Amazon","20:1","2022-06-06"],["GOOGL","Alphabet","20:1","2022-07-18"],["SMCI","Super Micro","10:1","2024-10-01"],
+  ["CMG","Chipotle","50:1","2024-06-26"],["MSTR","MicroStrategy","10:1","2024-08-08"],["WMT","Walmart","3:1","2024-02-26"],
+];
+function SplitsCalendar({lang="es"}){
+  const isEN=lang==="en";
+  return(
+    <ToolShell emoji="✂️" title={isEN?"Stock Splits":"Splits de Acciones"} desc={isEN?"Notable recent stock splits (reference). A live upcoming-splits feed requires a market-data provider.":"Splits recientes destacados (referencia). Un feed en vivo de próximos splits requiere un proveedor de datos."}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 90px 120px",gap:8,padding:"8px 12px",background:C.card2,borderBottom:`1px solid ${C.border}`,fontSize:9.5,fontWeight:700,color:C.muted2,textTransform:"uppercase",letterSpacing:0.5}}>
+        <span>{isEN?"Company":"Empresa"}</span><span style={{textAlign:"center"}}>{isEN?"Ratio":"Proporción"}</span><span style={{textAlign:"right"}}>{isEN?"Date":"Fecha"}</span>
+      </div>
+      {SPLITS_REF.map(([s,n,r,d])=>(
+        <div key={s} style={{display:"grid",gridTemplateColumns:"1fr 90px 120px",gap:8,alignItems:"center",padding:"10px 12px",borderBottom:`1px solid ${C.border}`}}>
+          <div><span style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>{s}</span> <span style={{fontSize:11,color:C.muted2}}>{n}</span></div>
+          <span style={{textAlign:"center",fontSize:12.5,fontWeight:800,color:C.accent,fontFamily:"monospace"}}>{r}</span>
+          <span style={{textAlign:"right",fontSize:11.5,color:C.muted,fontFamily:"monospace"}}>{d}</span>
+        </div>
+      ))}
+    </ToolShell>
+  );
+}
+
 // ── MENÚ HERRAMIENTAS — mega-dropdown organizado por categorías ───────────────
-function ToolsMenu({lang="es", onNavigate, isPremium=false}){
+function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
   const isEN=lang==="en";
   const [open,setOpen]=useState(false);
-  const ref=useRef();
-  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
+  const [pos,setPos]=useState({left:0,top:0});
+  const ref=useRef(); const btnRef=useRef();
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener("mousedown",h);const sc=()=>setOpen(false);window.addEventListener("resize",sc);return()=>{document.removeEventListener("mousedown",h);window.removeEventListener("resize",sc);};},[]);
+  const toggle=()=>{ if(!open&&btnRef.current){const r=btnRef.current.getBoundingClientRect();setPos({left:Math.max(8,Math.min(r.left,(window.innerWidth||1000)-628)),top:r.bottom+6});} setOpen(o=>!o); };
   const go=idx=>{setOpen(false);onNavigate&&onNavigate(idx);};
   const groups=[
     {t:isEN?"📅 Calendars":"📅 Calendarios", items:[
-      [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],[isEN?"Dividends":"Dividendos",15],["IPOs",16]]},
+      [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
     {t:isEN?"🧮 Calculators":"🧮 Calculadoras", items:[
       ["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
     {t:isEN?"💱 Currencies":"💱 Divisas", items:[
-      [isEN?"Currency Converter":"Conversor",53],["Heat Map",51]]},
+      [isEN?"Currency Converter":"Conversor",53],["Heat Map",51],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
     {t:isEN?"📊 Investing Tools":"📊 Inversión", items:[
-      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9]]},
+      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
     {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
       ["Movers 24H",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow",20]]},
   ];
+  const navBtn = variant==="nav";
   return(
-    <div ref={ref} style={{position:"relative"}}>
-      <button onClick={()=>setOpen(o=>!o)} style={{display:"flex",alignItems:"center",gap:6,background:open?"rgba(15,76,129,0.1)":"transparent",border:`1px solid ${open?"rgba(15,76,129,0.35)":"rgba(15,76,129,0.2)"}`,borderRadius:10,padding:"7px 13px",cursor:"pointer",color:"#0F4C81",fontSize:13,fontWeight:800,fontFamily:"inherit",whiteSpace:"nowrap"}}>
+    <div ref={ref} style={{position:"relative",display:"inline-flex",flexShrink:0}}>
+      <button ref={btnRef} onClick={toggle} style={navBtn
+        ? {display:"flex",alignItems:"center",gap:7,height:52,padding:"0 18px",border:"none",borderBottom:`2.5px solid ${open?"#2196F3":"transparent"}`,background:open?"rgba(33,150,243,0.06)":"transparent",color:open?"#2196F3":"#1A5FAD",fontSize:14,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit"}
+        : {display:"flex",alignItems:"center",gap:6,background:open?"rgba(15,76,129,0.1)":"transparent",border:`1px solid ${open?"rgba(15,76,129,0.35)":"rgba(15,76,129,0.2)"}`,borderRadius:10,padding:"7px 13px",cursor:"pointer",color:"#0F4C81",fontSize:13,fontWeight:800,fontFamily:"inherit",whiteSpace:"nowrap"}}>
         🧰 {isEN?"Tools":"Herramientas"} <span style={{fontSize:9}}>▾</span>
       </button>
       {open&&(
-        <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,background:"#fff",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 50px rgba(0,0,0,0.18)",zIndex:300,padding:16,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:"6px 22px",width:"min(620px,90vw)",maxHeight:"min(70vh,560px)",overflowY:"auto"}}>
+        <div style={{position:"fixed",left:pos.left,top:pos.top,background:"#fff",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 50px rgba(0,0,0,0.22)",zIndex:99995,padding:16,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(175px,1fr))",gap:"6px 22px",width:"min(620px,94vw)",maxHeight:"min(74vh,580px)",overflowY:"auto"}}>
           {groups.map(g=>(
             <div key={g.t} style={{marginBottom:6}}>
               <div style={{fontSize:11,fontWeight:900,color:"#0F172A",letterSpacing:0.3,marginBottom:6,paddingBottom:5,borderBottom:`1px solid ${C.border}`}}>{g.t}</div>
@@ -22382,6 +22543,12 @@ export default function App(){
     if(page===51) return <CurrencyHeatMap lang={lang}/>;
     if(page===52) return <FibonacciCalc lang={lang}/>;
     if(page===53) return <CurrencyConverter lang={lang}/>;
+    if(page===54) return <CurrencyCorrelation lang={lang}/>;
+    if(page===55) return <CurrencyVolatility lang={lang}/>;
+    if(page===56) return <FedRateMonitor lang={lang}/>;
+    if(page===57) return <HolidayCalendar lang={lang}/>;
+    if(page===58) return <SplitsCalendar lang={lang}/>;
+    if(page===59) return <FuturesExpiryCalendar lang={lang}/>;
     if(page===30) return <AboutPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===31) return <TermsPage onBack={()=>setPage(0)} lang={lang}/>;
     if(page===32) return <PrivacyPage onBack={()=>setPage(0)} lang={lang}/>;
@@ -23052,9 +23219,6 @@ export default function App(){
               <IcoSettings/>
             </button>
 
-            {/* 🧰 Menú Herramientas (mega-dropdown) */}
-            <span className="nexo-hide-mobile"><ToolsMenu lang={lang} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}}/></span>
-
             {/* Compartir / Invitar (viral, global) */}
             <ShareNavButton user={user} lang={lang}/>
 
@@ -23101,6 +23265,8 @@ export default function App(){
               {n.badge&&<span style={{fontSize:9,fontWeight:800,color:"#2196F3",background:"rgba(33,150,243,0.11)",border:"1px solid rgba(33,150,243,0.28)",borderRadius:4,padding:"2px 5px",letterSpacing:0.5}}>{n.badge}</span>}
             </button>
           ))}
+          {/* 🧰 Menú Herramientas (todas las tools agrupadas) */}
+          <ToolsMenu variant="nav" lang={lang} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}}/>
         </div>
         {/* ── ROW 2: VIP TABS ── */}
         <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",position:"relative",background:"#0B1F3F",borderTop:"1px solid #14305A",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:47}}>
