@@ -8037,10 +8037,10 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         <div style={{marginBottom:8}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
             <span style={{fontSize:10.5,color:"#64748B",fontWeight:600}}>{lang==="en"?"Sentiment":"Sentimiento"}</span>
-            <span style={{fontSize:10.5,color:pIsBull?"#16A34A":"#DC2626",fontWeight:800}}>{pIsBull?"BULLISH":"BEARISH"} {pBull}%</span>
+            <span style={{fontSize:10.5,color:pIsBull?"#16A34A":"#DC2626",fontWeight:800}}>{pIsBull?`BULLISH ${pBull}%`:`BEARISH ${100-pBull}%`}</span>
           </div>
           <div style={{height:5,background:"rgba(15,23,42,0.06)",borderRadius:5,overflow:"hidden"}}>
-            <div style={{width:`${pBull}%`,height:"100%",background:pIsBull?"#16A34A":"#DC2626",borderRadius:5,transition:"width 0.6s"}}/>
+            <div style={{width:`${pIsBull?pBull:100-pBull}%`,height:"100%",background:pIsBull?"#16A34A":"#DC2626",borderRadius:5,transition:"width 0.6s"}}/>
           </div>
         </div>
 
