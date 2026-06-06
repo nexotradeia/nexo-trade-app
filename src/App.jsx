@@ -17501,7 +17501,7 @@ function RadarGlobalPage({lang="es"}){
   const [nowN,setNowN]=useState(0);
   const [utcStr,setUtcStr]=useState('');
   const [dataSrc,setDataSrc]=useState('');
-  const [sessionStr,setSessionStr]=useState('');   // reloj de sesiones (NYSE/Londres/Tokio/HK)
+  const [sessions,setSessions]=useState([]);        // estado de las 4 bolsas (NYSE/Londres/Tokio/HK)
   const [opsN,setOpsN]=useState(0);                 // operaciones por segundo (efecto wow)
   // ── Sesiones de mercado (horas UTC) ──
   const SESSIONS=[
@@ -17535,18 +17535,19 @@ function RadarGlobalPage({lang="es"}){
     const ivTime=setInterval(()=>{
       const n=new Date();
       setUtcStr(`UTC ${n.getUTCHours().toString().padStart(2,'0')}:${n.getUTCMinutes().toString().padStart(2,'0')}`);
-      // ── Reloj de sesiones: cuál está abierta y cuánto falta ──
+      // ── Reloj de sesiones: estado de las 4 bolsas ──
       const h=n.getUTCHours()+n.getUTCMinutes()/60;
       const wknd=[0,6].includes(n.getUTCDay());
-      const fmt=(hrs)=>{const H=Math.floor(hrs),M=Math.round((hrs-H)*60);return `${H}h ${M}m`;};
-      let open=null;
-      for(const s of SESSIONS){ if(!wknd && h>=s.o && h<s.c){ open={...s,left:s.c-h}; break; } }
-      if(open){ setSessionStr(`🟢 ${open.flag} ${open.name} ${isEN?'open · closes in':'abierta · cierra en'} ${fmt(open.left)}`); }
-      else {
-        let next=null,best=99;
-        for(const s of SESSIONS){ let d=s.o-h; if(d<=0)d+=24; if(d<best){best=d;next=s;} }
-        setSessionStr(next?`⚪ ${next.flag} ${next.name} ${isEN?'opens in':'abre en'} ${fmt(best)}`:'');
-      }
+      const fmt=(hrs)=>{let x=hrs;if(x<0)x+=24;const H=Math.floor(x),M=Math.round((x-H)*60);return `${H}h ${M}m`;};
+      setSessions(SESSIONS.map(s=>{
+        const isOpen = !wknd && h>=s.o && h<s.c;
+        return {
+          flag:s.flag, name:s.name, city:s.city, open:isOpen,
+          label: wknd ? (isEN?'Closed (weekend)':'Cerrada (fin de sem.)')
+                : isOpen ? `${isEN?'closes in':'cierra en'} ${fmt(s.c-h)}`
+                : `${isEN?'opens in':'abre en'} ${fmt(s.o-h)}`
+        };
+      }));
     },1000);
     // ── Operaciones por segundo (efecto wow) ──
     const ivOps=setInterval(()=>{
@@ -17703,9 +17704,17 @@ function RadarGlobalPage({lang="es"}){
             <div style={{fontSize:15,fontWeight:800,color:'#fbbf24',fontFamily:'monospace',letterSpacing:-.5}}>{opsN.toLocaleString()}<span style={{fontSize:9,color:'#64748b',fontWeight:600}}> {isEN?'orders/sec':'órdenes/seg'}</span></div>
           </div>
         </div>
-        {/* Reloj de sesiones */}
-        {sessionStr&&<div style={{position:'absolute',top:14,left:14,background:'rgba(6,13,26,0.88)',border:'1px solid rgba(68,136,255,0.25)',borderRadius:10,padding:'6px 12px',pointerEvents:'none'}}>
-          <div style={{fontSize:11,fontWeight:700,color:'#cbd5e1',whiteSpace:'nowrap'}}>{sessionStr}</div>
+        {/* Panel de sesiones — las 4 bolsas con su estado */}
+        {sessions.length>0&&<div style={{position:'absolute',top:14,left:14,background:'rgba(6,13,26,0.9)',border:'1px solid rgba(68,136,255,0.25)',borderRadius:10,padding:'8px 12px',pointerEvents:'none'}}>
+          <div style={{fontSize:9,color:'#64748b',letterSpacing:.8,textTransform:'uppercase',marginBottom:5}}>{isEN?'Market sessions':'Sesiones de mercado'}</div>
+          {sessions.map(s=>(
+            <div key={s.name} style={{display:'flex',alignItems:'center',gap:6,marginBottom:3,whiteSpace:'nowrap'}}>
+              <span style={{width:7,height:7,borderRadius:'50%',background:s.open?'#22c55e':'#475569',boxShadow:s.open?'0 0 7px #22c55e':'none',flexShrink:0}}/>
+              <span style={{fontSize:11}}>{s.flag}</span>
+              <span style={{fontSize:11,fontWeight:700,color:s.open?'#86efac':'#94a3b8',width:42}}>{s.name}</span>
+              <span style={{fontSize:10,color:s.open?'#22c55e':'#64748b'}}>{s.open?(isEN?'OPEN':'ABIERTA'):''} {s.label}</span>
+            </div>
+          ))}
         </div>}
         {/* Market legend */}
         <div style={{position:'absolute',bottom:14,right:14,background:'rgba(6,13,26,0.85)',border:'1px solid rgba(68,136,255,0.15)',borderRadius:10,padding:'8px 12px',maxWidth:170}}>
