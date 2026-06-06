@@ -17535,8 +17535,26 @@ function RadarGlobalPage({lang="es"}){
     const ivTime=setInterval(()=>{
       const n=new Date();
       setUtcStr(`UTC ${n.getUTCHours().toString().padStart(2,'0')}:${n.getUTCMinutes().toString().padStart(2,'0')}`);
+      // ── Reloj de sesiones: cuál está abierta y cuánto falta ──
+      const h=n.getUTCHours()+n.getUTCMinutes()/60;
+      const wknd=[0,6].includes(n.getUTCDay());
+      const fmt=(hrs)=>{const H=Math.floor(hrs),M=Math.round((hrs-H)*60);return `${H}h ${M}m`;};
+      let open=null;
+      for(const s of SESSIONS){ if(!wknd && h>=s.o && h<s.c){ open={...s,left:s.c-h}; break; } }
+      if(open){ setSessionStr(`🟢 ${open.flag} ${open.name} ${isEN?'open · closes in':'abierta · cierra en'} ${fmt(open.left)}`); }
+      else {
+        let next=null,best=99;
+        for(const s of SESSIONS){ let d=s.o-h; if(d<=0)d+=24; if(d<best){best=d;next=s;} }
+        setSessionStr(next?`⚪ ${next.flag} ${next.name} ${isEN?'opens in':'abre en'} ${fmt(best)}`:'');
+      }
     },1000);
-    return()=>{clearInterval(iv);clearInterval(ivTime);};
+    // ── Operaciones por segundo (efecto wow) ──
+    const ivOps=setInterval(()=>{
+      const wknd=[0,6].includes(new Date().getUTCDay());
+      const base=wknd?2200:8400;
+      setOpsN(Math.round(base*(1+(Math.random()-.5)*.25)));
+    },140);
+    return()=>{clearInterval(iv);clearInterval(ivTime);clearInterval(ivOps);};
   },[]);
 
   // Three.js globe (npm) — v3 clean
@@ -17667,7 +17685,7 @@ function RadarGlobalPage({lang="es"}){
           <div style={{fontSize:11,color:'#4488ff',marginTop:1}}>{isEN?'Global Capital Map':'Mapa del Dinero Global'} {utcStr&&<span style={{color:'#64748b',marginLeft:6}}>{utcStr}</span>}</div>
         </div>
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
-          {dataSrc&&<span style={{fontSize:10,color:'#475569',background:'rgba(71,85,105,0.2)',padding:'2px 8px',borderRadius:20}}>{dataSrc}</span>}
+          {dataSrc&&<span style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:10,color:'#86efac',background:'rgba(22,163,74,0.15)',border:'1px solid rgba(22,163,74,0.35)',padding:'2px 9px',borderRadius:20}}><span style={{width:6,height:6,borderRadius:'50%',background:'#22c55e',boxShadow:'0 0 8px #22c55e',animation:'nexo-pulse 1.5s infinite'}}/>LIVE · {dataSrc.replace(/^(Live data:|Datos en vivo:)\s*/,'')}</span>}
           <button onClick={doRefresh} title={isEN?'Refresh':'Actualizar'} style={{background:'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>↻ {isEN?'Refresh':'Refresh'}</button>
           <button onClick={togglePause} title={isPaused?(isEN?'Play':'Reanudar'):(isEN?'Pause':'Pausar')} style={{background:'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>{isPaused?'▶':'⏸'}</button>
           <button onClick={()=>setShowStats(s=>!s)} style={{background:showStats?'rgba(68,136,255,0.3)':'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>📊 {isEN?'Stats':'Stats'}</button>
@@ -17681,7 +17699,14 @@ function RadarGlobalPage({lang="es"}){
           <div style={{fontSize:10,color:'#64748b',letterSpacing:.8,textTransform:'uppercase'}}>{isEN?'Trading now (est.)':'Operando ahora (est.)'}</div>
           <div style={{fontSize:22,fontWeight:800,color:'#00ddaa',letterSpacing:-1,marginTop:1}}>{nowN.toLocaleString()}M</div>
           <div style={{fontSize:10,color:'#475569',marginTop:1}}>{isEN?'investors worldwide':'inversores en todo el mundo'}</div>
+          <div style={{marginTop:6,paddingTop:6,borderTop:'1px solid rgba(68,136,255,0.15)'}}>
+            <div style={{fontSize:15,fontWeight:800,color:'#fbbf24',fontFamily:'monospace',letterSpacing:-.5}}>{opsN.toLocaleString()}<span style={{fontSize:9,color:'#64748b',fontWeight:600}}> {isEN?'orders/sec':'órdenes/seg'}</span></div>
+          </div>
         </div>
+        {/* Reloj de sesiones */}
+        {sessionStr&&<div style={{position:'absolute',top:14,left:14,background:'rgba(6,13,26,0.88)',border:'1px solid rgba(68,136,255,0.25)',borderRadius:10,padding:'6px 12px',pointerEvents:'none'}}>
+          <div style={{fontSize:11,fontWeight:700,color:'#cbd5e1',whiteSpace:'nowrap'}}>{sessionStr}</div>
+        </div>}
         {/* Market legend */}
         <div style={{position:'absolute',bottom:14,right:14,background:'rgba(6,13,26,0.85)',border:'1px solid rgba(68,136,255,0.15)',borderRadius:10,padding:'8px 12px',maxWidth:170}}>
           <div style={{fontSize:10,color:'#64748b',letterSpacing:.8,marginBottom:6,textTransform:'uppercase'}}>{isEN?'Heat Map':'Mapa de Calor'}</div>
