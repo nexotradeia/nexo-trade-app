@@ -1308,9 +1308,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                 onClick={()=>handleSelect(ticker)}>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{width:32,height:32,borderRadius:8,background:isUp?"rgba(0,229,143,0.1)":"rgba(255,77,106,0.1)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                    <span style={{fontSize:13,fontWeight:800,fontFamily:"monospace",color:isUp?C.bull:C.bear}}>{ticker.slice(0,2)}</span>
-                  </div>
+                  <LogoBadge sym={ticker} col={isUp?C.bull:C.bear} size={32} radius={8}/>
                   <div>
                     <div style={{fontSize:12.5,fontWeight:700,color:"#0F172A",fontFamily:"monospace"}}>${ticker}</div>
                     <div style={{fontSize:10.5,color:"#64748B"}}>{NAMES[ticker]||ticker}</div>
@@ -5835,12 +5833,7 @@ function TrendingPage({posts=[],lang="es"}){
                   {/* Rank + badge */}
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,flexShrink:0,width:52}}>
                     {rankMedal(i)}
-                    <div style={{
-                      width:44,height:44,borderRadius:10,
-                      background:isPos?"linear-gradient(135deg,#16a34a,#22c55e)":"linear-gradient(135deg,#dc2626,#ef4444)",
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      fontSize:13,fontWeight:900,color:"#fff",fontFamily:"monospace",letterSpacing:-0.5,
-                    }}>{m.ticker.slice(0,3)}</div>
+                    <LogoBadge sym={m.ticker} col={isPos?"#16a34a":"#dc2626"} size={44} radius={10}/>
                   </div>
 
                   {/* Ticker info + why */}
