@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 22:09:05 Sesión 14 — fotos gurús (Wikimedia + fallback emoji)
+// NEXO TRADE — build: 2026-06-06 22:45:25 Sesión 14 — precio Premium .99 → 5.99 (mensual); anual 9 (59% OFF)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -51,7 +51,7 @@ async function subscribeWebPush(user){
 }
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
-// ✅ VIP $9.99/mes — link activo
+// ✅ VIP $15.99/mes — link activo
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
 
 // ══════════════════════════════════════════════════════════════════
@@ -60,7 +60,7 @@ const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
 // ══════════════════════════════════════════════════════════════════
 const STRIPE_LINKS = {
   // ── Suscripciones ──────────────────────────────────────────────
-  vip:      "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $9.99/mes
+  vip:      "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $15.99/mes
   vipAnual: "https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e", // ✅ activo $79/año
   pro:      "https://buy.stripe.com/8x23co0vE2Hvgd29cpaR203", // ✅ activo $24.99/mes
 
@@ -1204,12 +1204,12 @@ function TickerTape({lang="es", onPremium}) {
   });
   // Mensajes Premium intercalados cada 8 tickers (lo primero que ve el usuario)
   const PROMOS = isEN ? [
-    "🔥 Launch price $9.99/mo — going up to $29 soon",
+    "🔥 Launch price $15.99/mo — going up to $29 soon",
     "✦ Founder offer — first 500 members only",
     "🐋 See what hedge funds are buying → Premium",
     "🎯 AI Screener + institutional flow → Join Premium",
   ] : [
-    "🔥 Precio de lanzamiento $9.99/mes — sube a $29 pronto",
+    "🔥 Precio de lanzamiento $15.99/mes — sube a $29 pronto",
     "✦ Oferta de fundador — solo primeros 500 miembros",
     "🐋 Ve qué compran los hedge funds → Premium",
     "🎯 Screener IA + flujo institucional → Únete a Premium",
@@ -3397,7 +3397,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
                 style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:24,padding:"10px 22px",fontSize:13,fontWeight:800,letterSpacing:0.3,cursor:"pointer",boxShadow:"0 6px 20px rgba(245,158,11,0.45)",display:"flex",alignItems:"center",gap:7}}>
                 <span style={{fontSize:15}}>🔓</span>{isEN?"Unlock with Premium":"Desbloquear con Premium"}
               </button>
-              <span style={{fontSize:10.5,fontWeight:700,color:"#B45309",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"2px 10px"}}>✦ {isEN?"VIP · $9.99/mo · 7-day free trial":"VIP · $9.99/mes · 7 días gratis"}</span>
+              <span style={{fontSize:10.5,fontWeight:700,color:"#B45309",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"2px 10px"}}>✦ {isEN?"VIP · $15.99/mo · 7-day free trial":"VIP · $15.99/mes · 7 días gratis"}</span>
             </div>
           )}
           </div>
@@ -5970,7 +5970,7 @@ function VipFeedCard({onGoVIP}){
 
       {/* CTA */}
       <div style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",borderRadius:12,padding:"11px 20px",textAlign:"center",color:"#fff",fontWeight:900,fontSize:14,boxShadow:"0 4px 16px rgba(15,94,104,0.5)"}}>
-        ✦ Hazte PREMIUM — Solo $9.99/mes →
+        ✦ Hazte PREMIUM — Solo $15.99/mes →
       </div>
     </div>
   );
@@ -6095,8 +6095,8 @@ function VipPopup({onClose, onGoVIP}){
 
         {/* Precio + CTA */}
         <div style={{textAlign:"center",marginBottom:10}}>
-          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",textDecoration:"line-through"}}>$19.99/mes</span>
-          <span style={{fontSize:28,fontWeight:900,color:"#FCD34D",marginLeft:8}}>$9.99</span>
+          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",textDecoration:"line-through"}}>$29/mes</span>
+          <span style={{fontSize:28,fontWeight:900,color:"#FCD34D",marginLeft:8}}>$15.99</span>
           <span style={{fontSize:12,color:"rgba(255,255,255,0.4)"}}>/mes</span>
         </div>
 
@@ -6125,7 +6125,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   const [activeTab, setActiveTab] = useState("planes");
   const [billing, setBilling] = useState("annual"); // "monthly" | "annual"
 
-  const price = 9.99;
+  const price = 15.99;
   const priceAnual = 79;
   const savingsAnual = Math.round((price * 12 - priceAnual));
   const savingsPct = Math.round((1 - priceAnual / (price * 12)) * 100);
@@ -6284,7 +6284,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                     style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:700,transition:"all 0.2s",
                       background: billing==="monthly" ? "rgba(15,76,129,0.3)" : "transparent",
                       color: billing==="monthly" ? "#fff" : "#64748B"}}>
-                    {lang==="en"?"Monthly":"Mensual"} <span style={{opacity:0.7}}>$9.99</span>
+                    {lang==="en"?"Monthly":"Mensual"} <span style={{opacity:0.7}}>$15.99</span>
                   </button>
                   <button onClick={()=>setBilling("annual")}
                     style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:800,transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,
@@ -6306,7 +6306,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                     onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 32px rgba(15,94,104,0.6)";}}>
                     {billing==="annual"
                       ? (lang==="en" ? `✦ Get PREMIUM Annual — $79/year` : `✦ Obtener PREMIUM Anual — $79/año`)
-                      : (lang==="en" ? `✦ Start free 7 days — $9.99/mo` : `✦ Empieza gratis 7 días — $9.99/mes`)
+                      : (lang==="en" ? `✦ Start free 7 days — $15.99/mo` : `✦ Empieza gratis 7 días — $15.99/mes`)
                     }
                   </button>
                 </div>
@@ -6434,13 +6434,13 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                         </button>
                         <div style={{textAlign:"center",fontSize:11,color:"#10B981",fontWeight:700,marginBottom:4}}>Ahorras ${savingsAnual} vs mensual · Acceso inmediato</div>
                         <div style={{textAlign:"center",fontSize:10,color:"#334155",cursor:"pointer",textDecoration:"underline"}} onClick={()=>setBilling("monthly")}>
-                          {isEN?"Or continue monthly at $9.99/mo →":"O continúa mensual por $9.99/mes →"}
+                          {isEN?"Or continue monthly at $15.99/mo →":"O continúa mensual por $15.99/mes →"}
                         </div>
                       </>
                     ) : (
                       <>
                         <div style={{background:"rgba(0,200,100,0.1)",border:"1px solid rgba(0,200,100,0.25)",borderRadius:10,padding:"8px 12px",marginBottom:10,textAlign:"center"}}>
-                          <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>{isEN?"🎁 Cancel anytime · Just $9.99/mo":"🎁 Cancela cuando quieras · Solo $9.99/mes"}</span>
+                          <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>{isEN?"🎁 Cancel anytime · Just $15.99/mo":"🎁 Cancela cuando quieras · Solo $15.99/mes"}</span>
                         </div>
                         <button onClick={()=>handleSubscribe("monthly")}
                           style={{width:"100%",background:"linear-gradient(135deg,#0F5E68,#0F5E68)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(15,94,104,0.55)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
@@ -6670,7 +6670,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           <span style={{fontSize:32}}>✦</span>
           <div style={{flex:1}}>
             <div style={{fontWeight:800,color:"#a78bfa",fontSize:15,marginBottom:4}}>Hazte PREMIUM y ahorra 50% en todos los webinars</div>
-            <div style={{color:"#7c3aed",fontSize:13}}>{isEN?"For just $9.99/mo you get PREMIUM prices, weekly picks, signals and recordings of all the web":"Por solo $9.99/mes tienes acceso a precios PREMIUM, picks semanales, señales y grabaciones de todos los web"}inars anteriores.</div>
+            <div style={{color:"#7c3aed",fontSize:13}}>{isEN?"For just $15.99/mo you get PREMIUM prices, weekly picks, signals and recordings of all the web":"Por solo $15.99/mes tienes acceso a precios PREMIUM, picks semanales, señales y grabaciones de todos los web"}inars anteriores.</div>
           </div>
           <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#0F5E68,#4c1d95)",border:"none",borderRadius:10,padding:"10px 22px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>✦ Ver PREMIUM →</button>
         </div>}
@@ -7693,7 +7693,7 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
           </div>
           <div style={{textAlign:"center",marginBottom:14}}>
             <span style={{fontSize:14,color:"#94A3B8",fontWeight:600,textDecoration:"line-through",marginRight:7}}>$29</span>
-            <span style={{fontSize:30,fontWeight:900,color:"#0F172A",letterSpacing:-1}}>$9.99</span>
+            <span style={{fontSize:30,fontWeight:900,color:"#0F172A",letterSpacing:-1}}>$15.99</span>
             <span style={{fontSize:13,color:"#94A3B8",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
             <div style={{fontSize:11,color:"#B45309",fontWeight:800,marginTop:3}}>{isEN?"🔥 Launch price — going up to $29 soon":"🔥 Precio de lanzamiento — sube a $29 pronto"}</div>
             <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:2}}>{isEN?"7 days free · cancel anytime":"7 días gratis · cancela cuando quieras"}</div>
@@ -8539,7 +8539,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
         <button onClick={onClose} style={{background:C.card2||"#f1f5f9",border:"none",borderRadius:"50%",width:32,height:32,fontSize:16,color:C.muted,cursor:"pointer"}}>✕</button>
       </div>
       <div style={{padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
-        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:12,padding:"11px",color:"#1B1303",fontWeight:900,fontSize:14,cursor:"pointer"}}>✦ {isEN?"Go Premium — $9.99/mo":"Hazte Premium — $9.99/mes"}</button>}
+        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:12,padding:"11px",color:"#1B1303",fontWeight:900,fontSize:14,cursor:"pointer"}}>✦ {isEN?"Go Premium — $15.99/mo":"Hazte Premium — $15.99/mes"}</button>}
         <button onClick={()=>{onClose();onAI&&onAI();}} style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:12,padding:"11px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer"}}>🤖 {isEN?"Ask the AI":"Preguntar a la IA"}</button>
       </div>
       <div style={{padding:"0 10px 28px"}}>
@@ -8976,7 +8976,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>PREMIUM Member</div>
           <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>{lang==="en"?<>Exclusive signals, unlimited AI<br/>and access to all the data</>:<>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</>}</div>
           <div style={{fontSize:22,fontWeight:900,color:"#fff",marginBottom:10}}>
-            <span style={{color:"#FCD34D"}}>$9.99</span>
+            <span style={{color:"#FCD34D"}}>$15.99</span>
             <span style={{fontSize:12,color:"rgba(255,255,255,0.4)",fontWeight:400}}>{lang==="en"?"/mo":"/mes"}</span>
           </div>
           <button onClick={()=>window.open(STRIPE_PAYMENT_LINK,"_blank")}
@@ -9340,7 +9340,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"Live Webinars":"Webinars",         page:11},
         {label: isEN?"Academy":"Academia",               page:12},
         {label: isEN?"Messages":"Mensajes",              page:22},
-        {label: isEN?"💰 Plans & Pricing — $9.99/mo ✦":"💰 Planes y precios — $9.99/mes ✦",page:8},
+        {label: isEN?"💰 Plans & Pricing — $15.99/mo ✦":"💰 Planes y precios — $15.99/mes ✦",page:8},
         {label: isEN?"Join free →":"Únete gratis →",     action:"auth"},
       ]
     },
@@ -9595,7 +9595,7 @@ function PredictionBanner({lang="es", isPremium=false, onUpgrade}){
             <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
               <button onClick={onUpgrade}
                 style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:9,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",boxShadow:"0 2px 12px rgba(15,94,104,0.35)",whiteSpace:"nowrap"}}>
-                {isEN?"See Pro analysis → $9.99/mo":"Ver análisis Pro → $9.99/mes"}
+                {isEN?"See Pro analysis → $15.99/mo":"Ver análisis Pro → $15.99/mes"}
               </button>
               <button onClick={()=>setCtaOff(true)} style={{background:"none",border:"none",color:"#94A3B8",fontSize:15,cursor:"pointer",padding:2,lineHeight:1}}>×</button>
             </div>
@@ -9642,7 +9642,7 @@ function TopTradersFeedCard({lang="es", isPremium, onLeaderboard, onPremium}){
       {!isPremium && (
         <button onClick={onPremium}
           style={{width:"100%",marginTop:10,background:"linear-gradient(135deg,rgba(15,94,104,0.12),rgba(245,158,11,0.08))",border:"1px solid rgba(245,158,11,0.35)",borderRadius:10,padding:"8px 14px",color:"#B45309",fontSize:12,fontWeight:800,cursor:"pointer"}}>
-          {isEN?"🔓 Follow their full ideas & picks → Premium $9.99/mo":"🔓 Sigue sus ideas y picks completos → Premium $9.99/mes"}
+          {isEN?"🔓 Follow their full ideas & picks → Premium $15.99/mo":"🔓 Sigue sus ideas y picks completos → Premium $15.99/mes"}
         </button>
       )}
     </div>
@@ -9703,7 +9703,7 @@ function PremiumGate({lang="es", icon="🔒", title, desc, bullets=[], onPlans})
         )}
         <button onClick={onPlans}
           style={{display:"block",width:"100%",background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:14,padding:"16px 32px",color:"#fff",fontSize:16,fontWeight:900,cursor:"pointer",boxShadow:"0 8px 32px rgba(15,94,104,0.45)",marginBottom:10,animation:"nexoPremiumGlow 2.4s ease-in-out infinite"}}>
-          {isEN?"See plans → $9.99/mo":"Ver planes → $9.99/mes"}
+          {isEN?"See plans → $15.99/mo":"Ver planes → $15.99/mes"}
         </button>
         <div style={{fontSize:11.5,color:"var(--c-muted2)",display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
           <span>✓ {isEN?"Instant access":"Acceso inmediato"}</span>
@@ -11211,7 +11211,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
           <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Stock Pick IA PREMIUM</h2>
           <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>10 picks cada lunes — entrada, target, stop loss y análisis completo.</p>
           <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(15,94,104,0.45)",width:"100%",marginBottom:10}}>
-            ✦ Hazte PREMIUM — $9.99/mes
+            ✦ Hazte PREMIUM — $15.99/mes
           </button>
           <div style={{fontSize:11,color:"#475569"}}>✓ Cancela cuando quieras · ✓ Acceso inmediato</div>
         </div>
@@ -11477,7 +11477,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
       {/* VIP banner */}
       {!isPremium && <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:14,padding:"14px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
         <span style={{fontSize:24}}>✦</span>
-        <div style={{flex:1,fontSize:13,color:"#1A5FAD"}}><strong style={{color:"#0C447C"}}>PREMIUM ($9.99/mes)</strong> {isEN?" — get up to 40% off all courses.":" — obtén hasta 40% de descuento en todos los cursos."}</div>
+        <div style={{flex:1,fontSize:13,color:"#1A5FAD"}}><strong style={{color:"#0C447C"}}>PREMIUM ($15.99/mes)</strong> {isEN?" — get up to 40% off all courses.":" — obtén hasta 40% de descuento en todos los cursos."}</div>
         <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:10,padding:"8px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{isEN?"See PREMIUM →":"Ver PREMIUM →"}</button>
       </div>}
 
@@ -12579,7 +12579,7 @@ function ScreenerPage({isPremium, onNeedPremium}) {
           <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Stock Screener PREMIUM</h2>
           <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>Filtra 10,000+ acciones por momentum, valoración, dividendo y crecimiento.</p>
           <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(15,94,104,0.45)",width:"100%",marginBottom:10}}>
-            ✦ Activar PREMIUM — $9.99/mes
+            ✦ Activar PREMIUM — $15.99/mes
           </button>
           <div style={{fontSize:11,color:"#475569"}}>✓ Cancela cuando quieras · ✓ Acceso inmediato</div>
         </div>
@@ -14599,9 +14599,9 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                           <div style={{fontSize:11,color:"#94a3b8",marginBottom:12}}>{isEN?"Unlock them all: Buffett, Ackman, Burry, ARK and more":"Desbloquea todos: Buffett, Ackman, Burry, ARK y más"}</div>
                           <button onClick={onNeedPremium}
                             style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:800,cursor:"pointer",width:"100%"}}>
-                            ✦ Ver todos — $9.99/mes
+                            ✦ Ver todos — $15.99/mes
                           </button>
-                          <div style={{fontSize:10,color:"#475569",marginTop:5}}>{isEN?"$9.99/mo · Cancel anytime":"$9.99/mes · Cancela cuando quieras"}</div>
+                          <div style={{fontSize:10,color:"#475569",marginTop:5}}>{isEN?"$15.99/mo · Cancel anytime":"$15.99/mes · Cancela cuando quieras"}</div>
                         </div>
                       </div>
                     )}
@@ -14616,7 +14616,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 <div style={{fontSize:12,color:"#64748b",marginBottom:12}}>Buffett · Ackman · Burry · ARK · Insiders SEC · Dark Pools</div>
                 <button onClick={onNeedPremium}
                   style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(15,94,104,0.4)"}}>
-                  ✦ {isEN?"Go PREMIUM — $9.99/mo →":"Activar PREMIUM — $9.99/mes →"}
+                  ✦ {isEN?"Go PREMIUM — $15.99/mo →":"Activar PREMIUM — $15.99/mes →"}
                 </button>
               </div>
             )}
@@ -15844,9 +15844,9 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
                       <div style={{fontSize:12,color:"#94a3b8",marginBottom:14}}>{isEN?"Go PREMIUM to see all signals, theses and price targets":"Hazte PREMIUM para ver todas las señales, tesis y precios objetivo"}</div>
                       <button onClick={onNeedPremium}
                         style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"10px 20px",fontSize:13,fontWeight:800,cursor:"pointer",width:"100%"}}>
-                        ✦ Ver todas — $9.99/mes
+                        ✦ Ver todas — $15.99/mes
                       </button>
-                      <div style={{fontSize:10,color:"#475569",marginTop:6}}>{isEN?"$9.99/mo · Cancel anytime":"$9.99/mes · Cancela cuando quieras"}</div>
+                      <div style={{fontSize:10,color:"#475569",marginTop:6}}>{isEN?"$15.99/mo · Cancel anytime":"$15.99/mes · Cancela cuando quieras"}</div>
                     </div>
                   </div>
                 )}
@@ -15861,7 +15861,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
             <div style={{fontSize:13,color:"#64748b",marginBottom:14}}>{isEN?"Buy/sell signals, full thesis, price target and stop loss updated":"Señales de compra/venta, tesis completa, precio objetivo y stop loss actualizados"}zado en tiempo real</div>
             <button onClick={onNeedPremium}
               style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"12px 32px",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(15,94,104,0.4)"}}>
-              ✦ {isEN?"Go PREMIUM — $9.99/mo →":"Activar PREMIUM — $9.99/mes →"}
+              ✦ {isEN?"Go PREMIUM — $15.99/mo →":"Activar PREMIUM — $15.99/mes →"}
             </button>
           </div>
         )}
@@ -17494,7 +17494,7 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
      text: isEN ? "Welcome to NexoTrade! Complete your profile to get <strong>+50 points</strong>" : "¡Bienvenido a NexoTrade! Completa tu perfil para ganar <strong>+50 puntos</strong>",
      time: user.created_at||new Date().toISOString()},
     {id:"sys_vip", type:"system", icon:"✦",
-     text: isEN ? "Upgrade to <strong>PREMIUM</strong> and access Picks, Portfolio Tracker, and more for $9.99/mo" : "Actualiza a <strong>PREMIUM</strong> y accede a Picks, Portfolio Tracker y más por $9.99/mes",
+     text: isEN ? "Upgrade to <strong>PREMIUM</strong> and access Picks, Portfolio Tracker, and more for $15.99/mo" : "Actualiza a <strong>PREMIUM</strong> y accede a Picks, Portfolio Tracker y más por $15.99/mes",
      time: new Date(Date.now()-86400000).toISOString()},
   ];
 
@@ -18700,7 +18700,7 @@ function OracleIA({ positions, livePrices, isPremium, onNeedPremium, isEN }) {
                 style={{background:"linear-gradient(135deg,#0F5E68,#B45309)",border:"none",borderRadius:14,padding:"13px 36px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 0 24px rgba(15,94,104,0.4)",letterSpacing:0.3}}>
                 🔮 {isEN?"Activate Oracle":"Activar Oracle"}
               </button>
-              {!isPremium && <div style={{marginTop:10,fontSize:11,color:"#475569"}}>{isEN?"PREMIUM exclusive · $9.99/month":"Exclusivo PREMIUM · $9.99/mes"}</div>}
+              {!isPremium && <div style={{marginTop:10,fontSize:11,color:"#475569"}}>{isEN?"PREMIUM exclusive · $15.99/month":"Exclusivo PREMIUM · $15.99/mes"}</div>}
             </div>
           )}
 
@@ -19930,7 +19930,7 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
               <div style={{fontSize:13,fontWeight:900,color:GOLD_DK,marginBottom:4}}>✦ {isEN?"Unlock full Pre-Market":"Desbloquea todo el Pre-Market"}</div>
               <div style={{fontSize:11.5,color:C.muted,lineHeight:1.5,marginBottom:10}}>{isEN?"500+ stocks, real volume and move alerts.":"500+ acciones, volumen real y alertas de movimiento."}</div>
               <button onClick={()=>onNeedPremium&&onNeedPremium()} style={{width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD_DK})`,border:"none",borderRadius:10,padding:"11px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",boxShadow:`0 4px 16px ${GOLD}55`,fontFamily:"inherit"}}>
-                {isEN?"Activate Premium — $9.99/mo":"Activar Premium — $9.99/mes"}
+                {isEN?"Activate Premium — $15.99/mo":"Activar Premium — $15.99/mes"}
               </button>
             </div>
           )}
@@ -21177,8 +21177,8 @@ function TermsPage({onBack, lang}){
       </LegalSection>
       <LegalSection title={isEN?"5. PREMIUM Membership":"5. Membresía PREMIUM"}>
         <p>{isEN
-          ?"PREMIUM memberships are billed monthly at $9.99/month. You may cancel at any time. Refunds are not provided for partial billing periods. Features included in PREMIUM may change with notice."
-          :"Las membresías PREMIUM se facturan mensualmente a $9.99/mes. Puedes cancelar en cualquier momento. No se proporcionan reembolsos por períodos de facturación parciales. Las características incluidas en PREMIUM pueden cambiar con aviso previo."
+          ?"PREMIUM memberships are billed monthly at $15.99/month. You may cancel at any time. Refunds are not provided for partial billing periods. Features included in PREMIUM may change with notice."
+          :"Las membresías PREMIUM se facturan mensualmente a $15.99/mes. Puedes cancelar en cualquier momento. No se proporcionan reembolsos por períodos de facturación parciales. Las características incluidas en PREMIUM pueden cambiar con aviso previo."
         }</p>
       </LegalSection>
       <LegalSection title={isEN?"6. Modifications":"6. Modificaciones"}>
@@ -21494,7 +21494,7 @@ function AdminDashboard(){
   const maxLogins = Math.max(...users.map(u=>u.logins),1);
   const filtered = users.filter(u=>!search||u.username?.toLowerCase().includes(search.toLowerCase()));
   const top4 = [...users].slice(0,4);
-  const mrr = (stats.vipCount*9.99).toFixed(0);
+  const mrr = (stats.vipCount*15.99).toFixed(0);
 
   // Iniciales del username
   const initials = name => (name||"?").slice(0,2).toUpperCase();
@@ -21826,7 +21826,7 @@ function AdminDashboard(){
           <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
             <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:16}}>💰 Ingresos estimados</div>
             {[
-              {l:"VIP $9.99/mes",v:`$${(stats.vipCount*9.99).toFixed(2)}`,c:"#0F5E68"},
+              {l:"VIP $15.99/mes",v:`$${(stats.vipCount*15.99).toFixed(2)}`,c:"#0F5E68"},
               {l:"Webinars",v:"Pendiente Stripe",c:"#9CA3AF"},
               {l:"Cursos",v:"Pendiente Stripe",c:"#9CA3AF"},
             ].map((r,i)=>(
@@ -21870,7 +21870,7 @@ function WelcomeModal({name, onClose, onGoVip}){
     {emoji:"📈", titulo:"Publica tu primera idea", desc:"Comparte tu análisis con miles de traders"},
     {emoji:"👥", titulo:"Sigue a top traders",     desc:"Descubre quién está ganando en el leaderboard"},
     {emoji:"🎮", titulo:"Paper trading $100k",     desc:"Practica sin arriesgar dinero real"},
-    {emoji:"✦",  titulo:"Hazte PREMIUM por $9.99/mes", desc:"Picks semanales, señales y mucho más"},
+    {emoji:"✦",  titulo:"Hazte PREMIUM por $15.99/mes", desc:"Picks semanales, señales y mucho más"},
   ];
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
@@ -23370,7 +23370,7 @@ export default function App(){
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
             style={{flexShrink:0,margin:"0 10px 0 14px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#1B1303",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
-            {effectivePremium ? "✦ Premium" : (lang==="en"?"✦ Join Premium — $9.99/mo":"✦ Únete a Premium — $9.99/mes")}
+            {effectivePremium ? "✦ Premium" : (lang==="en"?"✦ Join Premium — $15.99/mo":"✦ Únete a Premium — $15.99/mes")}
           </button>
         </div>
       </nav>
@@ -23664,7 +23664,7 @@ export default function App(){
             {/* Badge ahorro anual */}
             <div style={{textAlign:"center",marginBottom:36}}>
               <span style={{background:"rgba(0,210,106,0.12)",border:"1px solid rgba(0,210,106,0.3)",borderRadius:20,padding:"5px 16px",color:"#10b981",fontSize:12,fontWeight:700}}>
-                {lang==="en"?"💡 Annual PREMIUM plan: $79.99/yr — save $39.89 (33% OFF)":"💡 Plan anual PREMIUM: $79.99/año — ahorra $39.89 (33% OFF)"}
+                {lang==="en"?"💡 Annual PREMIUM plan: $79/yr — save $112 (59% OFF)":"💡 Plan anual PREMIUM: $79/año — ahorra $112 (59% OFF)"}
               </span>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,alignItems:"start"}}>
@@ -23688,7 +23688,7 @@ export default function App(){
                 },
                 {
                   plan:"PREMIUM ✦",badge:"⚡ MÁS POPULAR",
-                  precio:"$9.99",periodo:"/mes · o $79.99/año",
+                  precio:"$15.99",periodo:"/mes · o $79/año",
                   color:"#a78bfa",bg:"linear-gradient(135deg,#1a0f2e,#1e1040)",border:"#0F5E68",btnBg:"linear-gradient(135deg,#0F5E68,#4c1d95)",btnBorder:"#0F5E68",
                   featured:true,
                   features:[
@@ -23747,7 +23747,7 @@ export default function App(){
                     onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
                     {p.cta} →
                   </button>
-                  {p.plan==="PREMIUM ✦"&&<div style={{textAlign:"center",marginTop:10,color:"#475569",fontSize:11}}>o $79.99/año (ahorra $39.89) · sin tarjeta para probar</div>}
+                  {p.plan==="PREMIUM ✦"&&<div style={{textAlign:"center",marginTop:10,color:"#475569",fontSize:11}}>o $79/año (ahorra $112) · sin tarjeta para probar</div>}
                 </div>
               ))}
             </div>
