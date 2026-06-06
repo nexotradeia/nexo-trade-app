@@ -4522,18 +4522,23 @@ const logoUrlFor = (sym) => {
 // Badge con logo oficial; si no hay/falla → cuadrito de color con la inicial
 function LogoBadge({sym, col="#0F4C81", size=38, radius=10}){
   const [err,setErr]=useState(false);
+  const [loaded,setLoaded]=useState(false);
   const url=logoUrlFor(sym);
-  if(url && !err){
-    return(
-      <div style={{width:size,height:size,borderRadius:radius,background:"#fff",border:"1px solid #EEF2F7",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0,boxShadow:`0 2px 8px ${col}22`}}>
-        <img src={url} alt={sym} onError={()=>setErr(true)} loading="lazy"
-          style={{width:"78%",height:"78%",objectFit:"contain",display:"block"}}/>
-      </div>
-    );
-  }
+  const showLogo = url && !err;
   return(
-    <div style={{width:size,height:size,borderRadius:radius,background:col,display:"flex",alignItems:"center",justifyContent:"center",fontSize:Math.round(size*0.42),fontWeight:900,color:"#fff",flexShrink:0,boxShadow:`0 3px 10px ${col}55`}}>
-      {(sym||"?").slice(0,1)}
+    <div style={{position:"relative",width:size,height:size,borderRadius:radius,flexShrink:0,overflow:"hidden",
+      background:(showLogo&&loaded)?"#fff":col,
+      border:(showLogo&&loaded)?"1px solid #EEF2F7":"none",
+      boxShadow:(showLogo&&loaded)?`0 2px 8px ${col}22`:`0 3px 10px ${col}55`,
+      display:"flex",alignItems:"center",justifyContent:"center"}}>
+      {/* Letra de color visible de inmediato (y como fallback) */}
+      {!(showLogo&&loaded)&&<span style={{fontSize:Math.round(size*0.42),fontWeight:900,color:"#fff"}}>{(sym||"?").slice(0,1)}</span>}
+      {/* Logo real encima cuando carga */}
+      {showLogo&&(
+        <img src={url} alt={sym} loading="lazy"
+          onLoad={()=>setLoaded(true)} onError={()=>setErr(true)}
+          style={{position:"absolute",inset:0,margin:"auto",width:"78%",height:"78%",objectFit:"contain",opacity:loaded?1:0,transition:"opacity 0.2s"}}/>
+      )}
     </div>
   );
 }
