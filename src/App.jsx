@@ -20329,7 +20329,7 @@ function AdminDashboard(){
     <div style={{maxWidth:1200,margin:"0 auto",padding:"0 4px 40px"}}>
 
       {/* ── NAVBAR ADMIN ── */}
-      <div className="nexo-admin-navbar" style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"0 24px",marginBottom:20,display:"flex",alignItems:"center",gap:0,minHeight:60,boxShadow:"0 1px 3px rgba(0,0,0,0.05)",flexWrap:"wrap",overflowX:"auto"}}>
+      <div className="nexo-admin-navbar" style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"10px 16px",marginBottom:20,display:"flex",alignItems:"center",gap:8,minHeight:60,boxShadow:"0 1px 3px rgba(0,0,0,0.05)",flexWrap:"wrap"}}>
         <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginRight:32,letterSpacing:-0.5}}>
           <span style={{fontFamily:"'Space Grotesk',sans-serif",letterSpacing:-0.5}}><span style={{color:"#0F4C81"}}>Nexo</span>Trade</span>
         </div>
