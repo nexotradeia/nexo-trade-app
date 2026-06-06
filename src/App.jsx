@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 23:26:52 Sesión 14 — FIX crítico: email gate ya no se cuelga (fire-and-forget Supabase)
+// NEXO TRADE — build: 2026-06-06 23:31:27 Sesión 14 — FIX: Premium sticky (no se desactiva si falla la consulta del perfil)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -22260,9 +22260,9 @@ export default function App(){
         return;
       }
       if(session?.user && (event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="INITIAL_SESSION")){
-        let {data:profile}=await supabase.from("profiles").select("*").eq("id",session.user.id).single();
-        // Si no tiene perfil, lo creamos automáticamente
-        if(!profile){
+        let {data:profile,error:perr}=await supabase.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
+        // Si no tiene perfil (y NO fue error de red), lo creamos automáticamente
+        if(!profile && !perr){
           const username = session.user.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g,"").slice(0,20);
           const avatars = ["🦅","🐺","🦁","🐯","🦊","🐻","🦈","🦅","🐉","⚡"];
           const colors  = ["#0F4C81","#0F5E68","#00D26A","#F59E0B","#EF4444","#EC4899"];
@@ -22278,7 +22278,9 @@ export default function App(){
           profile = newProfile;
         }
         const isAdmin = ADMIN_EMAILS.includes(session.user.email);
-        setIsPremium((profile?.is_premium || false) || isAdmin);
+        // Premium "sticky": si el perfil cargó, usa su valor; si la consulta falló, NO desactives
+        if(profile) setIsPremium((profile.is_premium || false) || isAdmin);
+        else setIsPremium(prev => prev || isAdmin || (_getSavedUser()?.is_premium || false));
         if(profile){
           const u = buildUserFromProfile(session.user, profile);
           saveUser(u);
