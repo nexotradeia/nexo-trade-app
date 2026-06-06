@@ -22042,9 +22042,9 @@ export default function App(){
             {label:lang==="en"?"Messages":"Mensajes",idx:22,icon:"messages"},
           ].map(n=>(
             <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
-              style={{background:page===n.idx?"rgba(33,150,243,0.06)":"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#2196F3":"transparent"}`,padding:"0 18px",height:52,cursor:"pointer",color:page===n.idx?"#2196F3":"var(--c-muted)",fontSize:14,fontWeight:page===n.idx?700:500,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:7,flexShrink:0,fontFamily:"inherit",letterSpacing:page===n.idx?0.1:0}}
+              style={{background:page===n.idx?"rgba(33,150,243,0.06)":"transparent",border:"none",borderBottom:`2.5px solid ${page===n.idx?"#2196F3":"transparent"}`,padding:"0 18px",height:52,cursor:"pointer",color:page===n.idx?"#2196F3":"#1A5FAD",fontSize:14,fontWeight:page===n.idx?700:600,whiteSpace:"nowrap",transition:"all 0.18s",display:"flex",alignItems:"center",gap:7,flexShrink:0,fontFamily:"inherit",letterSpacing:page===n.idx?0.1:0}}
               onMouseEnter={e=>{if(page!==n.idx){e.currentTarget.style.color="#2196F3";e.currentTarget.style.background="rgba(33,150,243,0.04)";}}}
-              onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="var(--c-muted)";e.currentTarget.style.background="transparent";}}}
+              onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#1A5FAD";e.currentTarget.style.background="transparent";}}}
             >
               <NavIco name={n.icon}/>
               {stripEmoji(n.label)}
