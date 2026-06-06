@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 22:45:25 Sesión 14 — precio Premium .99 → 5.99 (mensual); anual 9 (59% OFF)
+// NEXO TRADE — build: 2026-06-06 22:53:33 Sesión 14 — link Stripe 5.99/mes conectado
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -52,7 +52,7 @@ async function subscribeWebPush(user){
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 // ✅ VIP $15.99/mes — link activo
-const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/fZu6oAdiq3Lz1i8fANaR20f";
 
 // ══════════════════════════════════════════════════════════════════
 // 📋 STRIPE LINKS — ACTUALIZAR AQUÍ cuando crees los productos
@@ -60,7 +60,7 @@ const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202";
 // ══════════════════════════════════════════════════════════════════
 const STRIPE_LINKS = {
   // ── Suscripciones ──────────────────────────────────────────────
-  vip:      "https://buy.stripe.com/6oU00c6U24PDe4U3S5aR202", // ✅ activo $15.99/mes
+  vip:      "https://buy.stripe.com/fZu6oAdiq3Lz1i8fANaR20f", // ✅ activo $15.99/mes
   vipAnual: "https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e", // ✅ activo $79/año
   pro:      "https://buy.stripe.com/8x23co0vE2Hvgd29cpaR203", // ✅ activo $24.99/mes
 
