@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 19:56:25 Sesión 14 — auto-detección de idioma (global)
+// NEXO TRADE — build: 2026-06-06 19:58:40 Sesión 14 — botón compartir viral global
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7920,6 +7920,95 @@ function EmailCaptureFeedCard({user, isPremium=false, lang="es"}){
           {isEN?"Get signals":"Quiero señales"}
         </button>
       </div>
+    </div>
+  );
+}
+
+// ── SHARE VIRAL — invita al mundo (WhatsApp/X/Telegram/Facebook/copiar) ──────
+function buildShare(user, lang){
+  const isEN = lang==="en";
+  const url  = user?.id ? `https://nexotradeia.com?ref=${user.id}` : "https://nexotradeia.com";
+  const text = isEN
+    ? "📈 Join NexoTrade — the global social trading platform. AI signals, live pre-market, crypto screener & more 🌍"
+    : "📈 Únete a NexoTrade — la plataforma social de trading global. Señales IA, pre-market en vivo, screener de crypto y más 🌍";
+  return { url, text, isEN };
+}
+
+function ShareModal({ open, onClose, user, lang="es" }){
+  const [copied,setCopied]=useState(false);
+  if(!open) return null;
+  const { url, text, isEN } = buildShare(user, lang);
+  const enc=encodeURIComponent, eu=enc(url), et=enc(text);
+  const nets=[
+    {k:"wa",  label:"WhatsApp", bg:"#25D366", icon:"🟢", href:`https://wa.me/?text=${enc(text+" "+url)}`},
+    {k:"tg",  label:"Telegram", bg:"#229ED9", icon:"✈️", href:`https://t.me/share/url?url=${eu}&text=${et}`},
+    {k:"x",   label:"X / Twitter", bg:"#0F172A", icon:"𝕏", href:`https://twitter.com/intent/tweet?text=${et}&url=${eu}`},
+    {k:"fb",  label:"Facebook", bg:"#1877F2", icon:"f", href:`https://www.facebook.com/sharer/sharer.php?u=${eu}`},
+  ];
+  const copy=()=>{ try{ navigator.clipboard.writeText(url); setCopied(true); setTimeout(()=>setCopied(false),2200);}catch{} };
+  return(
+    <>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(8,13,24,0.6)",backdropFilter:"blur(3px)",zIndex:99990}}/>
+      <div style={{position:"fixed",left:"50%",top:"50%",transform:"translate(-50%,-50%)",width:380,maxWidth:"94vw",background:C.surface||"#fff",border:`1px solid ${C.border}`,borderRadius:20,boxShadow:"0 30px 80px rgba(0,0,0,0.45)",zIndex:99991,overflow:"hidden"}}>
+        <div style={{background:"linear-gradient(135deg,#0F4C81,#0F5E68)",padding:"22px 22px 18px",textAlign:"center",position:"relative"}}>
+          <button onClick={onClose} style={{position:"absolute",top:12,right:14,background:"rgba(255,255,255,0.18)",border:"none",borderRadius:"50%",width:26,height:26,cursor:"pointer",color:"#fff",fontSize:13}}>✕</button>
+          <div style={{fontSize:30,marginBottom:6}}>🌍</div>
+          <div style={{fontSize:18,fontWeight:900,color:"#fff",fontFamily:"'Space Grotesk',sans-serif",letterSpacing:-0.3}}>{isEN?"Invite the world":"Invita al mundo"}</div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,0.85)",marginTop:4,lineHeight:1.4}}>{user?.id?(isEN?"Share your link — earn 1 month Premium free per friend who subscribes.":"Comparte tu link — gana 1 mes Premium gratis por cada amigo que se suscriba."):(isEN?"Share NexoTrade with traders everywhere.":"Comparte NexoTrade con traders de todo el mundo.")}</div>
+        </div>
+        <div style={{padding:18}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
+            {nets.map(n=>(
+              <a key={n.k} href={n.href} target="_blank" rel="noopener noreferrer" onClick={onClose}
+                style={{display:"flex",alignItems:"center",gap:9,background:n.bg,borderRadius:11,padding:"11px 12px",color:"#fff",fontWeight:800,fontSize:13,textDecoration:"none"}}>
+                <span style={{fontSize:16,width:20,textAlign:"center"}}>{n.icon}</span>{n.label}
+              </a>
+            ))}
+          </div>
+          <div style={{display:"flex",gap:7,alignItems:"center"}}>
+            <div style={{flex:1,minWidth:0,background:C.card2||"#f1f5f9",border:`1px solid ${C.border}`,borderRadius:9,padding:"9px 12px",fontSize:11.5,color:C.muted,fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{url.replace("https://","")}</div>
+            <button onClick={copy} style={{background:copied?"#16A34A":C.accent,border:"none",borderRadius:9,padding:"9px 15px",color:"#fff",fontWeight:800,fontSize:12.5,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit"}}>{copied?(isEN?"✓ Copied":"✓ Copiado"):(isEN?"Copy":"Copiar")}</button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Botón de la barra de navegación (usa share nativo en móvil)
+function ShareNavButton({ user, lang="es" }){
+  const [open,setOpen]=useState(false);
+  const click=async()=>{
+    const { url, text } = buildShare(user, lang);
+    if(typeof navigator!=="undefined" && navigator.share){
+      try{ await navigator.share({title:"NexoTrade", text, url}); return; }catch{}
+    }
+    setOpen(true);
+  };
+  return(
+    <>
+      <button onClick={click} title={lang==="en"?"Share / Invite":"Compartir / Invitar"}
+        style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(245,158,11,0.45)",background:"rgba(245,158,11,0.08)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
+        onMouseEnter={e=>{e.currentTarget.style.background="rgba(245,158,11,0.18)";}}
+        onMouseLeave={e=>{e.currentTarget.style.background="rgba(245,158,11,0.08)";}}>🌍</button>
+      <ShareModal open={open} onClose={()=>setOpen(false)} user={user} lang={lang}/>
+    </>
+  );
+}
+
+// Tarjeta viral en el feed
+function ShareFeedCard({ user, lang="es" }){
+  const [open,setOpen]=useState(false);
+  const isEN=lang==="en";
+  return(
+    <div style={{background:"linear-gradient(135deg,#0F4C81 0%,#0F5E68 100%)",borderRadius:16,padding:"15px 17px",marginBottom:6,display:"flex",alignItems:"center",gap:12}}>
+      <div style={{width:40,height:40,borderRadius:11,background:"rgba(255,255,255,0.14)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>🌍</div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:13.5,fontWeight:800,color:"#fff",letterSpacing:-0.2}}>{isEN?"Invite traders worldwide":"Invita a traders de todo el mundo"}</div>
+        <div style={{fontSize:11.5,color:"rgba(255,255,255,0.82)",lineHeight:1.4}}>{user?.id?(isEN?"Earn 1 month Premium free per friend.":"Gana 1 mes Premium gratis por amigo."):(isEN?"Share NexoTrade in one tap.":"Comparte NexoTrade en un toque.")}</div>
+      </div>
+      <button onClick={()=>setOpen(true)} style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:10,padding:"9px 15px",color:"#fff",fontWeight:800,fontSize:12.5,cursor:"pointer",flexShrink:0,boxShadow:"0 3px 12px rgba(245,158,11,0.4)",whiteSpace:"nowrap"}}>{isEN?"Share 🚀":"Compartir 🚀"}</button>
+      <ShareModal open={open} onClose={()=>setOpen(false)} user={user} lang={lang}/>
     </div>
   );
 }
@@ -21930,6 +22019,8 @@ export default function App(){
             {i===4 && <EmailCaptureFeedCard user={user} isPremium={effectivePremium} lang={lang}/>}
             {/* 🔗 Referidos — visible en el feed para usuarios logueados */}
             {i===6 && user && <div style={{marginBottom:6}}><ReferralSection user={user}/></div>}
+            {/* 🌍 Compartir viral — para todos (global) */}
+            {i===8 && <ShareFeedCard user={user} lang={lang}/>}
             {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
             {(i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
@@ -22509,6 +22600,9 @@ export default function App(){
               onMouseLeave={e=>{e.currentTarget.style.background=showSettings?"rgba(15,76,129,0.13)":"transparent";e.currentTarget.style.borderColor=showSettings?"rgba(15,76,129,0.6)":"rgba(15,76,129,0.2)";}}>
               <IcoSettings/>
             </button>
+
+            {/* Compartir / Invitar (viral, global) */}
+            <ShareNavButton user={user} lang={lang}/>
 
             {/* Idioma */}
             <span className="nexo-hide-mobile"><LangSelector lang={lang} setLang={setLang}/></span>
