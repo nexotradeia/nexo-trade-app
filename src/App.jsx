@@ -13890,7 +13890,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             <span style={{fontSize:12,color:C.muted,fontWeight:600}}>ETF:</span>
             {ARK_FUNDS.map(f => (
               <button key={f} onClick={()=>setArkFund(f)}
-                style={{background:arkFund===f?"rgba(139,92,246,0.2)":"transparent",border:`1px solid ${arkFund===f?"rgba(139,92,246,0.5)":C.border}`,borderRadius:20,padding:"5px 12px",fontSize:12,fontWeight:700,color:arkFund===f?"#FCD34D":C.muted,cursor:"pointer"}}>
+                style={{background:arkFund===f?"#0F4C81":"transparent",border:`1px solid ${arkFund===f?"#0F4C81":C.border}`,borderRadius:20,padding:"5px 12px",fontSize:12,fontWeight:800,color:arkFund===f?"#fff":C.muted,cursor:"pointer",boxShadow:arkFund===f?"0 2px 8px rgba(15,76,129,0.35)":"none",transition:"all 0.15s"}}>
                 {f}
               </button>
             ))}
