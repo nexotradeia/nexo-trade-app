@@ -101,39 +101,38 @@ export default async function handler(req, res) {
 
     const event = JSON.parse(rawBody);
     console.log('Stripe event:', event.type);
+    const dbg = { type: event.type, ran: false };
 
     if (event.type === 'checkout.session.completed' || event.type === 'invoice.paid') {
       const obj = event.data.object;
       const email = (obj.customer_details?.email || obj.customer_email || '').toLowerCase();
+      dbg.ran = true; dbg.email = email; dbg.foundUser = false; dbg.updated = false;
 
       if (email && process.env.SUPABASE_SERVICE_KEY) {
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(SUPA_URL, process.env.SUPABASE_SERVICE_KEY);
 
-        let updated = false;
         // 1) Buscar el usuario por email en auth.users (profiles puede no tener columna email)
         try {
-          const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+          const { data: list, error: lerr } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+          if (lerr) dbg.listError = lerr.message;
           const u = list?.users?.find(x => (x.email || '').toLowerCase() === email);
           if (u) {
+            dbg.foundUser = true;
             const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('id', u.id);
-            if (!error) { updated = true; console.log('✅ Premium activado (id) para:', email); }
-            else console.error('update by id error:', error.message);
-          } else {
-            console.error('⚠️ no user found for email:', email);
+            if (!error) { dbg.updated = true; } else dbg.updateError = error.message;
           }
-        } catch (e) { console.error('admin lookup error:', e.message); }
+        } catch (e) { dbg.lookupError = e.message; }
 
         // 2) Fallback: por email directo en profiles (si la columna existe)
-        if (!updated) {
+        if (!dbg.updated) {
           const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('email', email);
-          if (error) console.error('update by email error:', error.message);
-          else console.log('✅ Premium activado (email) para:', email);
+          if (error) dbg.emailUpdateError = error.message; else dbg.updatedByEmail = true;
         }
-      }
+      } else { dbg.noEmailOrKey = true; }
     }
 
-    return res.status(200).json({ received: true });
+    return res.status(200).json({ received: true, dbg });
   } catch (err) {
     console.error('Webhook error:', err.message);
     return res.status(400).json({ error: err.message });
