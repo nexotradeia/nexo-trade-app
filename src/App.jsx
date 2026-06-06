@@ -16792,11 +16792,11 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     const day = et.getDay(); // 0=Sun,6=Sat
     const h = et.getHours(), m = et.getMinutes();
     const mins = h*60+m;
-    if(day===0||day===6) return {status:"closed",label:isEN?"Market Closed":"Mercado Cerrado",sub:"Abre el lunes",color:"#EF4444",dot:"#EF4444"};
-    if(mins>=570&&mins<960) return {status:"open",label:isEN?"Market Open":"Mercado Abierto",sub:`NYSE · Cierra ${isEN?"4:00 PM ET":"4:00 PM ET"}`,color:"#10B981",dot:"#10B981"};
-    if(mins>=240&&mins<570) return {status:"pre",label:isEN?"Pre-Market":"Pre-Mercado",sub:`Abre 9:30 AM ET`,color:"#F59E0B",dot:"#F59E0B"};
-    if(mins>=960&&mins<1200) return {status:"after",label:isEN?"After-Hours":"After-Hours",sub:`Cierra 8:00 PM ET`,color:"#F59E0B",dot:"#F59E0B"};
-    return {status:"closed",label:isEN?"Market Closed":"Mercado Cerrado",sub:`Abre 9:30 AM ET`,color:"#EF4444",dot:"#EF4444"};
+    if(day===0||day===6) return {status:"closed",label:isEN?"Market Closed":"Mercado Cerrado",sub:isEN?"Opens Monday":"Abre el lunes",color:"#EF4444",dot:"#EF4444"};
+    if(mins>=570&&mins<960) return {status:"open",label:isEN?"Market Open":"Mercado Abierto",sub:`NYSE · ${isEN?"Closes":"Cierra"} 4:00 PM ET`,color:"#10B981",dot:"#10B981"};
+    if(mins>=240&&mins<570) return {status:"pre",label:isEN?"Pre-Market":"Pre-Mercado",sub:`${isEN?"Opens":"Abre"} 9:30 AM ET`,color:"#F59E0B",dot:"#F59E0B"};
+    if(mins>=960&&mins<1200) return {status:"after",label:isEN?"After-Hours":"After-Hours",sub:`${isEN?"Closes":"Cierra"} 8:00 PM ET`,color:"#F59E0B",dot:"#F59E0B"};
+    return {status:"closed",label:isEN?"Market Closed":"Mercado Cerrado",sub:`${isEN?"Opens":"Abre"} 9:30 AM ET`,color:"#EF4444",dot:"#EF4444"};
   };
 
   useEffect(()=>{
@@ -17063,7 +17063,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
               {lastUpdated&&(
                 <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.07)",borderRadius:20,padding:"4px 12px",border:"1px solid rgba(255,255,255,0.1)"}}>
                   <span style={{width:6,height:6,borderRadius:"50%",background:"#10B981",display:"inline-block",animation:"pulse 2s infinite"}}/>
-                  <span style={{fontSize:11,color:"#1A5FAD"}}>Act. {lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
+                  <span style={{fontSize:11,color:"#1A5FAD"}}>{isEN?"Upd.":"Act."} {lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
                 </div>
               )}
             </div>
