@@ -24,6 +24,17 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, message: "Registrado (sin email key)" });
   }
 
+  const row = (title) => `
+              <tr>
+                <td style="padding:14px 2px;border-bottom:1px solid #ECEFF3;">
+                  <table cellpadding="0" cellspacing="0"><tr>
+                    <td style="vertical-align:middle;width:26px;">
+                      <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:#0F4C81;color:#fff;font-size:11px;line-height:20px;text-align:center;font-weight:700;">&#10003;</span>
+                    </td>
+                    <td style="vertical-align:middle;color:#243B53;font-size:15px;font-weight:500;padding-left:10px;">${title}</td>
+                  </tr></table>
+                </td>
+              </tr>`;
   const html = `
 <!DOCTYPE html>
 <html lang="es">
@@ -31,88 +42,64 @@ export default async function handler(req, res) {
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
 </head>
-<body style="margin:0;padding:0;background:#F0F4F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
+<body style="margin:0;padding:0;background:#EEF1F5;font-family:Georgia,'Times New Roman',-apple-system,BlinkMacSystemFont,'Segoe UI',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;background:#EEF1F5;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #E2E7EE;border-radius:6px;overflow:hidden;">
 
         <!-- HEADER -->
         <tr>
-          <td style="background:linear-gradient(135deg,#00A8FF 0%,#0066CC 100%);padding:36px 40px;text-align:center;">
-            <svg width="48" height="48" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="56" height="56" rx="14" fill="rgba(255,255,255,0.15)"/>
-              <path d="M14 38L22 26L30 32L38 18" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="42" cy="18" r="3" fill="#00E58F"/>
+          <td style="background:linear-gradient(135deg,#0B1A2E 0%,#0F3B44 100%);padding:40px 40px 32px;text-align:center;">
+            <svg width="44" height="44" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="56" height="56" rx="13" fill="rgba(255,255,255,0.10)"/>
+              <path d="M14 38L22 26L30 32L38 18" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="40" cy="18" r="3" fill="#19B3A6"/>
             </svg>
-            <h1 style="margin:16px 0 4px;color:#fff;font-size:26px;font-weight:700;letter-spacing:-0.5px;">¡Bienvenido a NexoTrade! 🎉</h1>
-            <p style="margin:0;color:rgba(255,255,255,0.85);font-size:15px;">La comunidad inversora en español</p>
+            <div style="margin:18px 0 0;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;font-size:22px;font-weight:600;letter-spacing:3px;">NEXOTRADE</div>
+            <div style="margin:8px auto 0;width:40px;height:2px;background:#19B3A6;"></div>
+            <p style="margin:14px 0 0;color:#9FB3C8;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Inteligencia de mercados</p>
           </td>
         </tr>
 
         <!-- BODY -->
         <tr>
-          <td style="padding:36px 40px;">
-            <p style="margin:0 0 20px;color:#1E293B;font-size:16px;line-height:1.6;">
-              Hola 👋, gracias por suscribirte al análisis de mercado semanal de NexoTrade.
+          <td style="padding:40px 44px;">
+            <h1 style="margin:0 0 18px;color:#0B1A2E;font-size:22px;font-weight:600;">Bienvenido a NexoTrade.</h1>
+            <p style="margin:0 0 16px;color:#3D4F61;font-size:15px;line-height:1.7;">
+              Gracias por suscribirte. A partir de ahora recibirás nuestro análisis de mercados directamente en tu correo, con la misma profundidad que esperan los inversores profesionales.
             </p>
-            <p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.7;">
-              Cada semana recibirás en tu correo:
+            <p style="margin:0 0 8px;color:#6B7C8E;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+              Cada semana recibirás
             </p>
 
-            <!-- BENEFICIOS -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-              <tr>
-                <td style="padding:12px 16px;background:#F0F9FF;border-radius:10px;margin-bottom:8px;display:block;">
-                  <span style="font-size:20px;">📊</span>
-                  <span style="color:#1E293B;font-size:15px;font-weight:600;margin-left:10px;">Análisis técnico de los mercados</span>
-                </td>
-              </tr>
-              <tr><td style="height:8px;"></td></tr>
-              <tr>
-                <td style="padding:12px 16px;background:#F0FFF4;border-radius:10px;">
-                  <span style="font-size:20px;">🎯</span>
-                  <span style="color:#1E293B;font-size:15px;font-weight:600;margin-left:10px;">Picks de acciones y crypto de la semana</span>
-                </td>
-              </tr>
-              <tr><td style="height:8px;"></td></tr>
-              <tr>
-                <td style="padding:12px 16px;background:#FFF7ED;border-radius:10px;">
-                  <span style="font-size:20px;">📰</span>
-                  <span style="color:#1E293B;font-size:15px;font-weight:600;margin-left:10px;">Noticias que mueven el mercado</span>
-                </td>
-              </tr>
-              <tr><td style="height:8px;"></td></tr>
-              <tr>
-                <td style="padding:12px 16px;background:#FDF4FF;border-radius:10px;">
-                  <span style="font-size:20px;">🔴</span>
-                  <span style="color:#1E293B;font-size:15px;font-weight:600;margin-left:10px;">Avisos de webinars en vivo</span>
-                </td>
-              </tr>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 30px;font-family:'Helvetica Neue',Arial,sans-serif;">
+              ${row("Análisis técnico de los mercados")}
+              ${row("Picks de acciones y cripto de la semana")}
+              ${row("Noticias que mueven el mercado")}
+              ${row("Acceso anticipado a webinars en vivo")}
             </table>
 
-            <!-- CTA -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-              <tr>
-                <td align="center">
-                  <a href="https://nexotradeia.com" style="display:inline-block;background:linear-gradient(135deg,#00A8FF,#0066CC);color:#fff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:600;letter-spacing:0.3px;">
-                    Ir a NexoTrade →
-                  </a>
-                </td>
-              </tr>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:30px;">
+              <tr><td align="center">
+                <a href="https://nexotradeia.com" style="display:inline-block;background:#0F4C81;color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;font-weight:600;letter-spacing:0.5px;">
+                  Acceder a la plataforma
+                </a>
+              </td></tr>
             </table>
 
-            <p style="margin:0;color:#94A3B8;font-size:13px;text-align:center;line-height:1.6;">
-              Si no te suscribiste tú, puedes ignorar este correo.<br/>
-              <a href="https://nexotradeia.com" style="color:#00A8FF;text-decoration:none;">Darse de baja</a>
+            <p style="margin:0;color:#9AA7B4;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;text-align:center;line-height:1.6;">
+              Si no realizaste esta suscripción, puedes ignorar este mensaje.<br/>
+              <a href="https://nexotradeia.com" style="color:#0F4C81;text-decoration:underline;">Cancelar suscripción</a>
             </p>
           </td>
         </tr>
 
         <!-- FOOTER -->
         <tr>
-          <td style="background:#F8FAFC;padding:20px 40px;text-align:center;border-top:1px solid #E2E8F0;">
-            <p style="margin:0;color:#94A3B8;font-size:12px;">
-              © 2025 NexoTrade · <a href="https://nexotradeia.com" style="color:#64748B;text-decoration:none;">nexotradeia.com</a>
+          <td style="background:#0B1A2E;padding:22px 40px;text-align:center;">
+            <p style="margin:0;color:#7C8EA0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:0.5px;">
+              © 2026 NexoTrade · <a href="https://nexotradeia.com" style="color:#9FB3C8;text-decoration:none;">nexotradeia.com</a><br/>
+              <span style="color:#5A6B7D;">Contenido educativo. No constituye asesoría financiera.</span>
             </p>
           </td>
         </tr>
@@ -134,7 +121,7 @@ export default async function handler(req, res) {
         from:     FROM_EMAIL,
         to:       [email],
         reply_to: REPLY_TO,
-        subject:  "✅ Suscripción confirmada — Análisis de mercado gratis cada semana",
+        subject:  "Bienvenido a NexoTrade — tu análisis semanal de mercados",
         html,
       }),
     });
