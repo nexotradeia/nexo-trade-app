@@ -15045,7 +15045,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         )}
       </div>
       {filtered.length === 0 && (
-        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>No hay ideas con esos filtros</div>
+        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>{lang==="en"?"No ideas match those filters":"No hay ideas con esos filtros"}</div>
       )}
 
       {/* ── PAGINATION ── */}
@@ -15241,7 +15241,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
           {loading && (
             <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8,padding:24,color:C.muted}}>
               <div style={{width:28,height:28,borderRadius:"50%",border:"2px solid rgba(33,150,243,0.3)",borderTopColor:"#F59E0B",animation:"spin 1s linear infinite"}}/>
-              <span style={{fontSize:12}}>Cargando…</span>
+              <span style={{fontSize:12}}>{isEN?"Loading…":"Cargando…"}</span>
             </div>
           )}
 
