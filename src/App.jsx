@@ -8706,7 +8706,7 @@ function SocialProofBar({user, onRegister, lang="es"}){
 
   return(
     <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 6px"}}>
-      <div style={{background:"#EBF3FF",borderRadius:10,padding:"6px 14px",border:"1px solid #C5DEFF",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
+      <div style={{background:"#FFFFFF",borderRadius:10,padding:"6px 14px",border:"1px solid #EEF2F7",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
         <div style={{display:"flex",gap:10,flexWrap:"wrap",flex:1}}>
           {items.map((s,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
@@ -8747,7 +8747,7 @@ function PredictionBanner({lang="es", isPremium=false, onUpgrade}){
     ? "NVDA holding above the 20-day MA with unusual CALL flow at $1,200 strike. Institutional sweeps detected at…"
     : "NVDA aguanta sobre la media de 20 días con flujo CALL inusual en strike $1,200. Sweeps institucionales detectados en…";
   return(
-    <div style={{background:"#E8F4FF",borderBottom:"1px solid #BFDBFE",padding:"7px 16px"}}>
+    <div style={{background:"#FFFFFF",borderBottom:"1px solid #EEF2F7",padding:"7px 16px"}}>
       <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
         <span style={{background:"#2196F3",color:"#fff",borderRadius:20,padding:"3px 11px",fontSize:10,fontWeight:800,letterSpacing:0.4,flexShrink:0,whiteSpace:"nowrap"}}>🔥 {isEN?"PREDICTION OF THE DAY":"PREDICCIÓN DEL DÍA"}</span>
         <span className="nexo-prediction-text" style={{color:"#1E293B",fontWeight:600,fontSize:12.5,flex:1,minWidth:0}}>{isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}</span>
