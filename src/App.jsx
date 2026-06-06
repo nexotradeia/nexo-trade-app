@@ -21646,9 +21646,11 @@ export default function App(){
         .nexo-body-grid { grid-template-columns: minmax(0,1fr) 280px !important; }
         .nexo-left-sidebar { display: none !important; }
       }
+      .nexo-show-mobile { display: none; }
       @media (max-width: 767px) {
         /* ── LAYOUT BASE ── */
         .nexo-sidebar { display: none !important; }
+        .nexo-show-mobile { display: block !important; }
         .nexo-left-sidebar { display: none !important; }
         .nexo-mobile-affiliate-banner { display: flex !important; }
         body { padding-bottom: 84px; }
@@ -22529,6 +22531,13 @@ export default function App(){
       {page===0 && !showLanding && page!==99 && (
         <div style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
           <MarketsMiniWidget lang={lang}/>
+        </div>
+      )}
+
+      {/* MI WATCHLIST — solo móvil (en desktop va en el sidebar derecho) */}
+      {page===0 && !showLanding && page!==99 && (
+        <div className="nexo-show-mobile" style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
+          <MiWatchlistWidget user={user} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}} lang={lang}/>
         </div>
       )}
 
