@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-07 00:10:21 Sesión 14 — buscador en IPOs y Dividendos
+// NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -8599,11 +8599,31 @@ function MarketOverview({lang="es"}){
   const isEN=lang==="en";
   const [d,setD]=useState(null);
   const [loading,setLoading]=useState(true);
+  const [region,setRegion]=useState("global");
+  const [rd,setRd]=useState({});           // cache por región
+  const [rLoading,setRLoading]=useState(false);
+  const REGION_TABS=[
+    {id:"global",label:"Global",flag:"🌐"},
+    {id:"europe",label:"Europa",flag:"🇪🇺"},
+    {id:"asia",  label:isEN?"Asia-Pacific":"Asia-Pacífico",flag:"🌏"},
+    {id:"latam", label:"Latam",flag:"🌎"},
+  ];
   useEffect(()=>{
     let c=false;
     const load=()=>{fetch("/api/data?type=quotes&set=overview").then(r=>r.json()).then(j=>{if(!c){setD(j);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});};
     load(); const iv=setInterval(load,60000); return()=>{c=true;clearInterval(iv);};
   },[]);
+  useEffect(()=>{
+    if(region==="global") return;
+    let c=false;
+    const load=()=>{
+      setRLoading(true);
+      fetch("/api/data?type=quotes&set="+region).then(r=>r.json()).then(j=>{
+        if(!c){ setRd(prev=>({...prev,[region]:j.rows||[]})); setRLoading(false); }
+      }).catch(()=>{if(!c)setRLoading(false);});
+    };
+    load(); const iv=setInterval(load,60000); return()=>{c=true;clearInterval(iv);};
+  },[region]);
   const Section=({title,rows})=>(
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 14px",boxShadow:C.shadow}}>
       <div style={{fontSize:11,fontWeight:800,color:C.muted2,textTransform:"uppercase",letterSpacing:0.6,marginBottom:8}}>{title}</div>
@@ -8620,17 +8640,51 @@ function MarketOverview({lang="es"}){
       ))}
     </div>
   );
+  const regionRows=region==="global"?null:(rd[region]||[]);
+  const Tile=({r})=>(
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 14px",boxShadow:C.shadow,display:"flex",flexDirection:"column",gap:6}}>
+      <span style={{fontSize:12,fontWeight:700,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
+      <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between"}}>
+        <span style={{fontSize:18,fontWeight:800,color:C.text,fontFamily:"monospace"}}>{r.p>=1000?r.p.toLocaleString(undefined,{maximumFractionDigits:0}):r.p?.toFixed(2)}</span>
+        <span style={{fontSize:13,fontWeight:800,fontFamily:"monospace",color:r.chg>=0?"#16A34A":"#DC2626"}}>{r.chg>=0?"▲ ":"▼ "}{r.chg>=0?"+":""}{(r.chg??0).toFixed(2)}%</span>
+      </div>
+    </div>
+  );
+  const busy=region==="global"?loading:rLoading;
   return(
     <div style={{marginBottom:20}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
         <h2 style={{margin:0,fontSize:16,fontWeight:800,color:C.text}}>🌐 {isEN?"Market Overview":"Resumen del Mercado"}</h2>
-        <span style={{fontSize:10.5,fontWeight:700,color:loading?"#F59E0B":"#16A34A"}}>{loading?(isEN?"loading…":"cargando…"):"● "+(isEN?"live":"en vivo")}</span>
+        <span style={{fontSize:10.5,fontWeight:700,color:busy?"#F59E0B":"#16A34A"}}>{busy?(isEN?"loading…":"cargando…"):"● "+(isEN?"live":"en vivo")}</span>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:12}}>
-        <Section title={isEN?"Indices":"Índices"} rows={d?.indices}/>
-        <Section title="Crypto" rows={d?.crypto}/>
-        <Section title="Commodities" rows={d?.commodities}/>
+      <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+        {REGION_TABS.map(t=>{
+          const on=region===t.id;
+          return(
+            <button key={t.id} onClick={()=>setRegion(t.id)} style={{
+              display:"flex",alignItems:"center",gap:5,padding:"6px 13px",borderRadius:999,cursor:"pointer",
+              fontSize:12.5,fontWeight:700,transition:"all .15s",
+              border:`1px solid ${on?C.accent:C.border}`,
+              background:on?C.accent:C.surface,
+              color:on?"#fff":C.text,
+            }}>
+              <span style={{fontSize:13}}>{t.flag}</span>{t.label}
+            </button>
+          );
+        })}
       </div>
+      {region==="global"
+        ? <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:12}}>
+            <Section title={isEN?"Indices":"Índices"} rows={d?.indices}/>
+            <Section title="Crypto" rows={d?.crypto}/>
+            <Section title="Commodities" rows={d?.commodities}/>
+          </div>
+        : (regionRows&&regionRows.length===0)
+          ? <div style={{fontSize:12.5,color:C.muted2,padding:"14px 0"}}>{rLoading?(isEN?"loading…":"cargando…"):(isEN?"No data available":"Sin datos disponibles")}</div>
+          : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
+              {(regionRows||[]).map(r=><Tile key={r.s} r={r}/>)}
+            </div>}
+      {region!=="global" && <div style={{fontSize:10.5,color:C.muted2,marginTop:8}}>{isEN?"Index proxies via regional ETFs · for reference":"Aproximación vía ETFs regionales · referencial"}</div>}
     </div>
   );
 }
