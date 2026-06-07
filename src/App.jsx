@@ -1860,7 +1860,7 @@ function AIAssistant({lang,onClose}){
       const res=await fetch("/api/chat",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({message:userMsg,systemPrompt:t.aiSys})
+        body:JSON.stringify({message:userMsg,systemPrompt:t.aiSys,lang})
       });
       if(!res.ok) throw new Error("api_error");
       const data=await res.json();
@@ -11370,12 +11370,12 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
       <div style={{position:"absolute",bottom:0,left:0,right:0,display:"flex",flexDirection:"column",alignItems:"center",padding:"0 20px 48px"}}>
         <div style={{background:"rgba(10,14,26,0.98)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"28px 32px",textAlign:"center",maxWidth:380,boxShadow:"0 8px 40px rgba(0,0,0,0.7),0 0 0 1px rgba(245,158,11,0.1)"}}>
           <div style={{fontSize:36,marginBottom:10}}>✦</div>
-          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Stock Pick IA PREMIUM</h2>
-          <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>10 picks cada lunes — entrada, target, stop loss y análisis completo.</p>
+          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>{isEN?"Stock Pick AI PREMIUM":"Stock Pick IA PREMIUM"}</h2>
+          <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>{isEN?"10 picks every Monday — entry, target, stop loss and full analysis.":"10 picks cada lunes — entrada, target, stop loss y análisis completo."}</p>
           <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(15,94,104,0.45)",width:"100%",marginBottom:10}}>
-            ✦ Hazte PREMIUM — $15.99/mes
+            {isEN?"✦ Go PREMIUM — $15.99/mo":"✦ Hazte PREMIUM — $15.99/mes"}
           </button>
-          <div style={{fontSize:11,color:"#475569"}}>✓ Cancela cuando quieras · ✓ Acceso inmediato</div>
+          <div style={{fontSize:11,color:"#475569"}}>{isEN?"✓ Cancel anytime · ✓ Instant access":"✓ Cancela cuando quieras · ✓ Acceso inmediato"}</div>
         </div>
       </div>
     </div>
@@ -12708,7 +12708,8 @@ const SCREENER_PRESETS = [
   {k:"dividend",   label:"💰 Dividendos",      desc:"Carteras anchor de dividendo"},
 ];
 
-function ScreenerPage({isPremium, onNeedPremium}) {
+function ScreenerPage({isPremium, onNeedPremium, lang="es"}) {
+  const isEN = lang==="en";
   const [screen,  setScreen]  = useState("gainers");
   const [quotes,  setQuotes]  = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12755,12 +12756,12 @@ function ScreenerPage({isPremium, onNeedPremium}) {
       <div style={{position:"absolute",bottom:0,left:0,right:0,display:"flex",flexDirection:"column",alignItems:"center",padding:"0 20px 48px"}}>
         <div style={{background:"rgba(10,14,26,0.98)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"28px 32px",textAlign:"center",maxWidth:380,boxShadow:"0 8px 40px rgba(0,0,0,0.7)"}}>
           <div style={{fontSize:36,marginBottom:10}}>🔬</div>
-          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Stock Screener PREMIUM</h2>
-          <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>Filtra 10,000+ acciones por momentum, valoración, dividendo y crecimiento.</p>
+          <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>{isEN?"Stock Screener PREMIUM":"Stock Screener PREMIUM"}</h2>
+          <p style={{color:"#64748B",fontSize:13,lineHeight:1.65,margin:"0 0 22px"}}>{isEN?"Filter 10,000+ stocks by momentum, valuation, dividend and growth.":"Filtra 10,000+ acciones por momentum, valoración, dividendo y crecimiento."}</p>
           <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#0F5E68,#F59E0B)",border:"none",borderRadius:12,padding:"14px 32px",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 0 28px rgba(15,94,104,0.45)",width:"100%",marginBottom:10}}>
-            ✦ Activar PREMIUM — $15.99/mes
+            {isEN?"✦ Activate PREMIUM — $15.99/mo":"✦ Activar PREMIUM — $15.99/mes"}
           </button>
-          <div style={{fontSize:11,color:"#475569"}}>✓ Cancela cuando quieras · ✓ Acceso inmediato</div>
+          <div style={{fontSize:11,color:"#475569"}}>{isEN?"✓ Cancel anytime · ✓ Instant access":"✓ Cancela cuando quieras · ✓ Acceso inmediato"}</div>
         </div>
       </div>
     </div>
@@ -22788,7 +22789,7 @@ export default function App(){
     if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} lang={lang}/>;
     if(page===15) return <DividendCalendarPage lang={lang}/>;
     if(page===16) return <IpoCalendarPage/>;
-    if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===35) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} initialTab="congress"/>;
     if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
