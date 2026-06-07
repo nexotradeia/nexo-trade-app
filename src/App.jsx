@@ -14804,7 +14804,8 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
 
       {/* ── GURÚS TAB ── */}
       {tab==="gurus" && !selGuru && (() => {
-        const visibleGurus = GURUS_13F.filter(g => !search || g.name.toLowerCase().includes(search.toLowerCase()) || g.fund.toLowerCase().includes(search.toLowerCase()));
+        const visibleGurus = GURUS_13F.filter(g => !search || g.name.toLowerCase().includes(search.toLowerCase()) || g.fund.toLowerCase().includes(search.toLowerCase()))
+          .sort((a,b)=>gAum(b.aum)-gAum(a.aum)); // jerarquía: fondos más grandes primero
         const FREE_LIMIT = 5;
         return (
           <div>
@@ -14821,6 +14822,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                         onMouseEnter={e=>{if(!isLocked){e.currentTarget.style.border=`1px solid ${g.color}60`;e.currentTarget.style.boxShadow=`0 8px 24px ${g.color}15`;}}}
                         onMouseLeave={e=>{e.currentTarget.style.border=`1px solid ${g.color}30`;e.currentTarget.style.boxShadow="none";}}>
                         <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}12 0%,transparent 70%)`,pointerEvents:"none"}}/>
+                        {!search && !isLocked && idx<3 && <div style={{position:"absolute",top:12,right:12,background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontSize:9,fontWeight:900,letterSpacing:0.4,borderRadius:20,padding:"3px 9px",zIndex:2,boxShadow:"0 2px 10px rgba(200,144,31,0.5)"}}>⭐ TOP GURU</div>}
                         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                           <div style={{width:46,height:46,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,position:"relative",overflow:"hidden",flexShrink:0}}>
                             <span>{g.emoji}</span>
@@ -14865,10 +14867,10 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                           <div style={{fontWeight:800,color:"#fff",fontSize:13,marginBottom:5}}>{GURUS_13F.length - FREE_LIMIT} {isEN?"more gurus locked":"gurús más bloqueados"}</div>
                           <div style={{fontSize:11,color:"#94a3b8",marginBottom:12}}>{isEN?"Unlock them all: Buffett, Ackman, Burry, ARK and more":"Desbloquea todos: Buffett, Ackman, Burry, ARK y más"}</div>
                           <button onClick={onNeedPremium}
-                            style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:800,cursor:"pointer",width:"100%"}}>
-                            ✦ Ver todos — $15.99/mes
+                            style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:900,cursor:"pointer",width:"100%",boxShadow:"0 4px 16px rgba(200,144,31,0.4)"}}>
+                            ✦ {isEN?"See all gurus":"Ver todos los gurús"}
                           </button>
-                          <div style={{fontSize:10,color:"#475569",marginTop:5}}>{isEN?"$15.99/mo · Cancel anytime":"$15.99/mes · Cancela cuando quieras"}</div>
+                          <div style={{fontSize:10,color:"#94a3b8",marginTop:5}}>{isEN?"$15.99/mo or $79/yr · 7-day free trial":"$15.99/mes o $79/año · 7 días gratis"}</div>
                         </div>
                       </div>
                     )}
@@ -14882,8 +14884,8 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 <div style={{fontWeight:800,color:"#FCD34D",fontSize:14,marginBottom:4}}>🏛️ Accede a los {GURUS_13F.length} portafolios institucionales con PREMIUM</div>
                 <div style={{fontSize:12,color:"#64748b",marginBottom:12}}>Buffett · Ackman · Burry · ARK · Insiders SEC · Dark Pools</div>
                 <button onClick={onNeedPremium}
-                  style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px rgba(15,94,104,0.4)"}}>
-                  ✦ {isEN?"Go PREMIUM — $15.99/mo →":"Activar PREMIUM — $15.99/mes →"}
+                  style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:900,cursor:"pointer",boxShadow:"0 4px 20px rgba(200,144,31,0.4)"}}>
+                  ✦ {isEN?"Go PREMIUM — from $79/yr →":"Activar PREMIUM — desde $79/año →"}
                 </button>
               </div>
             )}
