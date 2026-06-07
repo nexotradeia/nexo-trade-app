@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-06 23:59:53 Sesión 14 — fix newsletter banner+popup botones (fire-and-forget, ya no se cuelgan)
+// NEXO TRADE — build: 2026-06-07 00:04:28 Sesión 14 — avatares monograma: header con iniciales + selector de color (sin emojis)
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -7096,8 +7096,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
             <div style={{position:"absolute",bottom:-26,left:14}}>
               {user
                 ? <div onClick={()=>setShowAvatarPicker(v=>!v)} title="Cambiar avatar"
-                    style={{width:56,height:56,borderRadius:16,background:"#fff",border:"3px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,boxShadow:"0 4px 16px rgba(0,0,0,0.3)",cursor:"pointer",position:"relative",overflow:"hidden"}}>
-                    {user.avatarUrl?<img src={user.avatarUrl} alt="" style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:13,display:"block"}}/>:user.emoji}
+                    style={{width:56,height:56,borderRadius:16,background:user.avatarUrl?"#fff":(user.avatarColor||"#0F4C81"),border:"3px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,0.3)",cursor:"pointer",position:"relative",overflow:"hidden"}}>
+                    {user.avatarUrl?<img src={user.avatarUrl} alt="" style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:13,display:"block"}}/>:<span style={{color:"#fff",fontWeight:900,fontSize:22,letterSpacing:0.5,fontFamily:"'Inter',sans-serif"}}>{nexoInitials(user.name||user.username)}</span>}
                     <span style={{position:"absolute",bottom:-3,right:-3,width:18,height:18,background:"#0F4C81",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,border:"2px solid #fff",color:"#fff"}}>&#x270E;</span>
                   </div>
                 : <div style={{width:56,height:56,borderRadius:16,background:"#1e3a5f",border:"3px solid rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>&#x1F464;</div>
@@ -7237,24 +7237,22 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
       {showAvatarPicker && user && (
         <div style={{background:"#fff",border:"1px solid rgba(0,0,0,0.08)",borderRadius:16,padding:"14px",boxShadow:"0 4px 20px rgba(0,0,0,0.1)",position:"relative",zIndex:10}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-            <span style={{fontSize:12,fontWeight:700,color:"#0F172A"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
+            <span style={{fontSize:12,fontWeight:700,color:"#0F172A"}}>{lang==="en"?"Choose your color":"Elige tu color"}</span>
             <button onClick={()=>setShowAvatarPicker(false)} style={{background:"none",border:"none",color:"#9CA3AF",fontSize:14,cursor:"pointer"}}>✕</button>
           </div>
-          <div style={{display:"flex",flexWrap:"wrap",gap:6,maxHeight:140,overflowY:"auto"}}>
-            {AVATAR_OPTIONS.map(av=>(
-              <button key={av.emoji} onClick={async()=>{
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,maxHeight:160,overflowY:"auto"}}>
+            {["#0F4C81","#0F5E68","#185FA5","#1D9E75","#534AB7","#D85A30","#993556","#B45309","#0C447C","#444441"].map(col=>(
+              <button key={col} onClick={()=>{
                 if(savingAvatar) return;
                 setSavingAvatar(true);
-                try{
-                  await supabase.from("profiles").update({avatar_emoji:av.emoji,avatar_color:av.color,avatar_url:null}).eq("id",user.id);
-                  onUserUpdate&&onUserUpdate({...user,emoji:av.emoji,avatarColor:av.color,avatarUrl:null});
-                }catch(e){}
+                try{ supabase.from("profiles").update({avatar_color:col,avatar_url:null}).eq("id",user.id).then(()=>{}).catch(()=>{}); }catch{}
+                onUserUpdate&&onUserUpdate({...user,avatarColor:col,avatarUrl:null});
                 setSavingAvatar(false);
                 setShowAvatarPicker(false);
               }}
-              title={av.emoji}
-              style={{width:38,height:38,borderRadius:10,background:user.emoji===av.emoji?`${av.color}33`:"rgba(255,255,255,0.04)",border:`2px solid ${user.emoji===av.emoji?av.color:"rgba(255,255,255,0.08)"}`,cursor:"pointer",fontSize:20,transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                {av.emoji}
+              title={col}
+              style={{width:44,height:44,borderRadius:"50%",background:col,border:user.avatarColor===col?"3px solid #0F172A":"2px solid rgba(0,0,0,0.12)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:900,fontSize:15,fontFamily:"'Inter',sans-serif",transition:"all 0.15s"}}>
+                {nexoInitials(user.name||user.username)}
               </button>
             ))}
           </div>
