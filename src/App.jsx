@@ -6506,8 +6506,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         {/* Trust badges */}
         <div className="nexo-trust-badges" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
           {[
-            {icon:"🔒",title:"Pago seguro",desc:"SSL + Stripe",   href:"https://stripe.com/es/payments/payment-links",tip:"Pagos 100% seguros con Stripe"},
-            {icon:"↩️",title:"Cancela ya", desc:"Sin permanencia",href:STRIPE_PAYMENT_LINK,tip:"Cancela cuando quieras"},
+            {icon:"🔒",title:isEN?"Secure payment":"Pago seguro",desc:"SSL + Stripe",   href:"https://stripe.com/es/payments/payment-links",tip:isEN?"100% secure payments with Stripe":"Pagos 100% seguros con Stripe"},
+            {icon:"↩️",title:isEN?"Cancel anytime":"Cancela ya", desc:isEN?"No lock-in":"Sin permanencia",href:STRIPE_PAYMENT_LINK,tip:isEN?"Cancel whenever you want":"Cancela cuando quieras"},
             {icon:"📧",title:isEN?"Email alerts":"Alertas email",desc:isEN?"Instant":"Instantáneas", href:null, action:"alerts", tip:isEN?"Set up your alerts":"Configura tus alertas"},
             {icon:"🛟",title:isEN?"24/7 Support":"Soporte 24/7",desc:isEN?"2h response":"Respuesta en 2h",href:"mailto:info@nexotradeia.com?subject=Soporte NexoTrade",tip:isEN?"Write to us":"Escríbenos"},
           ].map(b=>(
@@ -11807,12 +11807,12 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
         <div style={{position:"relative"}}>
           <div style={{fontSize:44,marginBottom:10}}>🎓</div>
           <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"Webinars & Free Education":"Webinars & Educación Gratuita"}</h1>
-          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:500,marginLeft:"auto",marginRight:"auto"}}>Recursos educativos reales de las instituciones financieras más importantes del mundo. 100% gratuitos.</p>
+          <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:14,maxWidth:500,marginLeft:"auto",marginRight:"auto"}}>{isEN?"Real educational resources from the world's most important financial institutions. 100% free.":"Recursos educativos reales de las instituciones financieras más importantes del mundo. 100% gratuitos."}</p>
           <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
             {[
-              {v:`${WEBINARS_LIST.length} recursos`,l:"Disponibles"},
-              {v:"100% Gratis",l:"Sin costo"},
-              {v:"Instituciones reales",l:"CME · Schwab · TradingView"},
+              {v:`${WEBINARS_LIST.length} ${isEN?"resources":"recursos"}`,l:isEN?"Available":"Disponibles"},
+              {v:isEN?"100% Free":"100% Gratis",l:isEN?"No cost":"Sin costo"},
+              {v:isEN?"Real institutions":"Instituciones reales",l:"CME · Schwab · TradingView"},
             ].map((s,i)=>(
               <div key={i} style={{background:"#ffffff10",borderRadius:12,padding:"10px 20px",border:"1px solid #ffffff15"}}>
                 <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{s.v}</div>
@@ -22067,8 +22067,14 @@ function AdminDashboard(){
 /* ═══════════════════════════════════════════════════════════════
    WELCOME MODAL — aparece al registrarse por primera vez
 ═══════════════════════════════════════════════════════════════ */
-function WelcomeModal({name, onClose, onGoVip}){
-  const steps = [
+function WelcomeModal({name, onClose, onGoVip, lang="es"}){
+  const isEN = lang==="en";
+  const steps = isEN ? [
+    {emoji:"📈", titulo:"Post your first idea",     desc:"Share your analysis with thousands of traders"},
+    {emoji:"👥", titulo:"Follow top traders",       desc:"See who's winning on the leaderboard"},
+    {emoji:"🎮", titulo:"Paper trading $100k",      desc:"Practice without risking real money"},
+    {emoji:"✦",  titulo:"Go PREMIUM for $15.99/mo", desc:"Weekly picks, signals and much more"},
+  ] : [
     {emoji:"📈", titulo:"Publica tu primera idea", desc:"Comparte tu análisis con miles de traders"},
     {emoji:"👥", titulo:"Sigue a top traders",     desc:"Descubre quién está ganando en el leaderboard"},
     {emoji:"🎮", titulo:"Paper trading $100k",     desc:"Practica sin arriesgar dinero real"},
@@ -22083,8 +22089,8 @@ function WelcomeModal({name, onClose, onGoVip}){
         {/* Confetti header */}
         <div style={{textAlign:"center",marginBottom:24}}>
           <div style={{fontSize:56,marginBottom:8}}>🎉</div>
-          <h2 style={{margin:"0 0 6px",color:C.text,fontSize:22,fontWeight:900}}>¡Bienvenido, {name}!</h2>
-          <p style={{margin:0,color:C.muted,fontSize:13}}>Ya eres parte de la comunidad global de inversores más activa.</p>
+          <h2 style={{margin:"0 0 6px",color:C.text,fontSize:22,fontWeight:900}}>{isEN?`Welcome, ${name}!`:`¡Bienvenido, ${name}!`}</h2>
+          <p style={{margin:0,color:C.muted,fontSize:13}}>{isEN?"You're now part of the most active global investor community.":"Ya eres parte de la comunidad global de inversores más activa."}</p>
         </div>
 
         {/* Steps */}
@@ -22104,15 +22110,15 @@ function WelcomeModal({name, onClose, onGoVip}){
         <div style={{background:"linear-gradient(135deg,#f59e0b22,#0F5E6822)",border:"1px solid #f59e0b44",borderRadius:12,padding:"10px 16px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
           <span style={{fontSize:22}}>🎁</span>
           <div>
-            <div style={{color:"#f59e0b",fontWeight:700,fontSize:13}}>+100 puntos de bienvenida añadidos</div>
-            <div style={{color:"#92400e",fontSize:11}}>Badge "Early Adopter" desbloqueado en tu perfil</div>
+            <div style={{color:"#f59e0b",fontWeight:700,fontSize:13}}>{isEN?"+100 welcome points added":"+100 puntos de bienvenida añadidos"}</div>
+            <div style={{color:"#92400e",fontSize:11}}>{isEN?'"Early Adopter" badge unlocked on your profile':'Badge "Early Adopter" desbloqueado en tu perfil'}</div>
           </div>
         </div>
 
         {/* CTAs */}
         <div style={{display:"flex",gap:10,flexDirection:"column"}}>
-          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#0F5E68,#4c1d95)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",width:"100%"}}>✦ Ver plan PREMIUM — 50% en webinars</button>
-          <button onClick={onClose} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:12,padding:"11px",color:C.muted,fontSize:13,fontWeight:600,cursor:"pointer",width:"100%"}}>Explorar el feed →</button>
+          <button onClick={onGoVip} style={{background:"linear-gradient(135deg,#0F5E68,#4c1d95)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",width:"100%"}}>{isEN?"✦ See PREMIUM plan — 50% off webinars":"✦ Ver plan PREMIUM — 50% en webinars"}</button>
+          <button onClick={onClose} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:12,padding:"11px",color:C.muted,fontSize:13,fontWeight:600,cursor:"pointer",width:"100%"}}>{isEN?"Explore the feed →":"Explorar el feed →"}</button>
         </div>
       </div>
     </div>
@@ -22770,8 +22776,8 @@ export default function App(){
       <div style={{textAlign:"center",padding:"60px 20px"}}>
         <div style={{fontSize:48,marginBottom:16}}>🚧</div>
         <h2 style={{color:C.text,fontWeight:800,marginBottom:8}}>Macro</h2>
-        <p style={{color:C.muted,fontSize:15}}>Esta sección estará disponible muy pronto.<br/>Mientras tanto, explora el feed principal.</p>
-        <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>← Volver al Feed</button>
+        <p style={{color:C.muted,fontSize:15}}>{lang==="en"?<>This section will be available very soon.<br/>Meanwhile, explore the main feed.</>:<>Esta sección estará disponible muy pronto.<br/>Mientras tanto, explora el feed principal.</>}</p>
+        <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>{lang==="en"?"← Back to Feed":"← Volver al Feed"}</button>
       </div>
     );
     if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')} lang={lang}/>;
@@ -24044,7 +24050,7 @@ export default function App(){
 
       {/* MODALS */}
       {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onAuth={(u,isNew)=>{saveUser(u);setShowLanding(false);setIsPremium(u.is_premium||false||ADMIN_EMAILS.includes(u.email||''));if(isNew){setWelcomeName(u.name||u.email?.split("@")[0]||"");setShowWelcome(true);}}} lang={lang}/>}
-      {showWelcome&&<WelcomeModal name={welcomeName} onClose={()=>setShowWelcome(false)} onGoVip={()=>{setShowWelcome(false);setPage(8);}}/>}
+      {showWelcome&&<WelcomeModal name={welcomeName} onClose={()=>setShowWelcome(false)} onGoVip={()=>{setShowWelcome(false);setPage(8);}} lang={lang}/>}
       {showPushPrompt&&(
         <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9998,background:C.surface,border:`1px solid ${C.accent}44`,borderRadius:18,padding:"20px 24px",maxWidth:380,width:"calc(100% - 32px)",boxShadow:"0 16px 48px rgba(0,0,0,0.6)",display:"flex",gap:14,alignItems:"flex-start"}}>
           <div style={{fontSize:28,flexShrink:0}}>🔔</div>
