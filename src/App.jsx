@@ -8722,6 +8722,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
       </div>
       <div style={{padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
         {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:12,padding:"11px",color:"#1B1303",fontWeight:900,fontSize:14,cursor:"pointer"}}>✦ {isEN?"Go Premium — $15.99/mo":"Hazte Premium — $15.99/mes"}</button>}
+        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"none",border:"none",marginTop:-2,color:"#10B981",fontWeight:800,fontSize:11.5,cursor:"pointer",textAlign:"center"}}>{isEN?"💡 or $79/year — save $112 (59% off)":"💡 o $79/año — ahorra $112 (59% off)"}</button>}
         <button onClick={()=>{onClose();onAI&&onAI();}} style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:12,padding:"11px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer"}}>🤖 {isEN?"Ask the AI":"Preguntar a la IA"}</button>
       </div>
       <div style={{padding:"0 10px 28px"}}>
