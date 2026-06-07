@@ -11374,7 +11374,10 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
   const isEN = lang==="en";
   const [picks,setPicks]=useState(WEEKLY_PICKS_FALLBACK);
   const [showAdmin,setShowAdmin]=useState(false);
-  const [livePrices,setLivePrices]=useState({});
+  // Precios SIEMPRE en vivo: usamos el sistema central (PriceCtx, WebSocket + endpoint cacheado),
+  // no fetch directo a Finnhub (que se saturaba y dejaba precios viejos). Sección paga → debe estar al día.
+  const livePrices=useContext(PriceCtx);
+  const registerPx=useContext(PriceRegisterCtx);
   const semana = new Date().toLocaleDateString("es",{day:"numeric",month:"long",year:"numeric"});
 
   useEffect(()=>{
@@ -11400,28 +11403,18 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
     loadPicks();
   },[showAdmin]);
 
-  // Fetch precios en tiempo real de Finnhub para todos los tickers de picks
+  // Registrar todos los tickers de las picks en el sistema central de precios en vivo
+  // (REST inicial + WebSocket en tiempo real). Esto mantiene "PRECIO HOY" siempre actualizado.
   useEffect(()=>{
-    if(!picks) return;
+    if(!picks||!registerPx) return;
     const tickers=[...new Set([
       ...(picks.corto||[]).map(p=>p.ticker),
       ...(picks.largo||[]).map(p=>p.ticker),
       ...(picks.crypto||[]).map(p=>p.ticker),
-    ].filter(t=>!["BTC","ETH","SOL","BNB"].includes(t)))]; // solo stocks, no crypto
-    if(!tickers.length) return;
-    Promise.all(tickers.map(async t=>{
-      try{
-        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${t}&token=${FINNHUB_KEY}`);
-        const d=await r.json();
-        if(d.c>0) return {ticker:t,price:d.c,change:d.dp||0};
-      }catch{}
-      return null;
-    })).then(results=>{
-      const map={};
-      results.filter(Boolean).forEach(r=>{map[r.ticker]={price:r.price,change:r.change};});
-      setLivePrices(map);
-    });
-  },[picks]);
+      ...(picks.dividendos||[]).map(p=>p.ticker),
+    ].filter(Boolean))];
+    if(tickers.length) registerPx(tickers);
+  },[picks, registerPx]);
 
   const data = picks;
   const C2={bull:"#00D26A",bear:"#FF4D6A",card:"rgba(10,16,30,0.98)",border:"rgba(255,255,255,0.08)"};
