@@ -1238,21 +1238,18 @@ function TickerTape({lang="es", onPremium}) {
     };
   });
   // Mensajes Premium intercalados cada 8 tickers (lo primero que ve el usuario)
+  // Solo 2 promos, espaciadas cada 16 tickers → cinta limpia/premium con el CTA presente sin saturar
   const PROMOS = isEN ? [
     "🔥 Launch price $15.99/mo — going up to $29 soon",
-    "✦ Founder offer — first 500 members only",
     "🐋 See what hedge funds are buying → Premium",
-    "🎯 AI Screener + institutional flow → Join Premium",
   ] : [
     "🔥 Precio de lanzamiento $15.99/mes — sube a $29 pronto",
-    "✦ Oferta de fundador — solo primeros 500 miembros",
     "🐋 Ve qué compran los hedge funds → Premium",
-    "🎯 Screener IA + flujo institucional → Únete a Premium",
   ];
   const merged = [];
   items.forEach((it,i)=>{
     merged.push(it);
-    if((i+1)%8===0) merged.push({promo:PROMOS[Math.floor((i+1)/8-1)%PROMOS.length]});
+    if((i+1)%16===0) merged.push({promo:PROMOS[Math.floor((i+1)/16-1)%PROMOS.length]});
   });
   const doubled = [...merged, ...merged]; // duplicar para el loop infinito
   return (
