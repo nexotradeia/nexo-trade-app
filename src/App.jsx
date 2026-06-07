@@ -8027,9 +8027,8 @@ function ShareFeedCard({ user, lang="es" }){
   );
 }
 
-// ── EMAIL GATE — captura obligatoria de email en la primera visita ──────────
+// ── EMAIL GATE / LANDING — bienvenida + captura de email + presentación ──────
 function EmailGate({lang="es", onDone, onLogin}){
-  const isEN=lang==="en";
   const [email,setEmail]=useState("");
   const [err,setErr]=useState(false);
   const submit=()=>{
@@ -8040,38 +8039,115 @@ function EmailGate({lang="es", onDone, onLogin}){
     try{localStorage.setItem("nexo-email-gate-done","1");}catch{}
     onDone&&onDone();
   };
+  const skip=()=>{ try{localStorage.setItem("nexo-email-gate-done","1");}catch{} onDone&&onDone(); };
+  const FEATURES=[
+    {ic:"📈",t:"Live Market Feed",d:"Real-time stock & crypto picks, breaking news and trade ideas from a global community of investors."},
+    {ic:"🤖",t:"AI Stock Picks",d:"Daily AI-powered signals and setups — entries, targets and risk, distilled from thousands of data points."},
+    {ic:"🐋",t:"Institutional Flow",d:"Track whale moves, unusual options and dark-pool activity to see where the smart money is going."},
+    {ic:"🌐",t:"Global Markets",d:"Indices, forex, commodities and bonds across the US, Europe, Asia-Pacific and Latin America — in one place."},
+    {ic:"📊",t:"Paper Trading",d:"Practice with a real-time simulator. Build conviction and test strategies before risking a single dollar."},
+    {ic:"💬",t:"Investor Community",d:"Follow top traders, share ideas and learn together. Markets are better when you don't trade alone."},
+  ];
+  const card={background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:16,padding:"20px 18px"};
   return(
-    <div style={{position:"fixed",inset:0,zIndex:100000,background:"linear-gradient(150deg,#0B1220 0%,#0F2C44 55%,#0F3B44 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:18,overflowY:"auto"}}>
-      <div style={{width:430,maxWidth:"96vw",background:"#0E1B2E",border:"1px solid rgba(255,255,255,0.10)",borderRadius:22,padding:"32px 28px",boxShadow:"0 30px 90px rgba(0,0,0,0.6)",textAlign:"center"}}>
-        {/* Logo */}
-        <div style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:54,height:54,borderRadius:15,background:"linear-gradient(135deg,#0F4C81,#0F5E68)",marginBottom:16}}>
-          <svg width="30" height="30" viewBox="0 0 56 56" fill="none"><path d="M14 38L22 26L30 32L38 18" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="42" cy="18" r="3" fill="#00E58F"/></svg>
+    <div style={{position:"fixed",inset:0,zIndex:100000,background:"linear-gradient(165deg,#0A1018 0%,#0C2236 48%,#0E2F3A 100%)",overflowY:"auto",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      {/* glow decorativo */}
+      <div style={{position:"absolute",top:-160,left:"50%",transform:"translateX(-50%)",width:680,height:340,background:"radial-gradient(ellipse,rgba(15,94,104,0.45),transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"relative",maxWidth:1040,margin:"0 auto",padding:"clamp(28px,6vw,64px) 20px 60px"}}>
+
+        {/* ── HERO ── */}
+        <div style={{textAlign:"center",maxWidth:560,margin:"0 auto"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:10,marginBottom:22}}>
+            <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:46,height:46,borderRadius:13,background:"linear-gradient(135deg,#0F4C81,#0F5E68)"}}>
+              <svg width="26" height="26" viewBox="0 0 56 56" fill="none"><path d="M14 38L22 26L30 32L38 18" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="42" cy="18" r="3" fill="#00E58F"/></svg>
+            </span>
+            <span style={{color:"#fff",fontSize:21,fontWeight:800,letterSpacing:2,fontFamily:"'Space Grotesk',sans-serif"}}>NEXOTRADE</span>
+          </div>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:20,padding:"5px 14px",marginBottom:20}}>
+            <span style={{fontSize:11.5,fontWeight:800,color:"#FBBF24",letterSpacing:0.3}}>✦ Founder offer — free for the first 500 members</span>
+          </div>
+          <h1 style={{margin:"0 0 16px",color:"#fff",fontSize:"clamp(30px,6vw,46px)",fontWeight:900,letterSpacing:-1,lineHeight:1.08,fontFamily:"'Space Grotesk',sans-serif"}}>
+            Trade smarter.<br/><span style={{background:"linear-gradient(90deg,#34D399,#38BDF8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Together.</span>
+          </h1>
+          <p style={{margin:"0 0 28px",color:"#A9BCCE",fontSize:"clamp(15px,2.4vw,17px)",lineHeight:1.6}}>
+            The global investor community for stocks & crypto. Get AI-powered picks, institutional flow and a live market feed — straight to your inbox, every week.
+          </p>
+
+          {/* email capture */}
+          <div style={{maxWidth:440,margin:"0 auto"}}>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              <input value={email} type="email"
+                onChange={e=>{setEmail(e.target.value);setErr(false);}}
+                onKeyDown={e=>{if(e.key==="Enter")submit();}}
+                placeholder="your@email.com"
+                style={{flex:"1 1 200px",minWidth:0,boxSizing:"border-box",border:`1px solid ${err?"#EF4444":"rgba(255,255,255,0.18)"}`,borderRadius:12,padding:"14px 16px",fontSize:15,outline:"none",background:"rgba(255,255,255,0.06)",color:"#fff",fontFamily:"inherit"}}/>
+              <button onClick={submit}
+                style={{flex:"0 0 auto",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px 24px",color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.35)",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+                Get free access →
+              </button>
+            </div>
+            {err&&<div style={{fontSize:12,color:"#F87171",marginTop:8,textAlign:"left"}}>Please enter a valid email.</div>}
+            <div style={{fontSize:10.5,color:"#64748B",marginTop:10}}>No spam. Unsubscribe anytime.</div>
+          </div>
+
+          {/* entrar directo / login */}
+          <div style={{marginTop:20,display:"flex",gap:18,justifyContent:"center",alignItems:"center",flexWrap:"wrap"}}>
+            <button onClick={skip} style={{background:"none",border:"none",color:"#CBD5E1",fontWeight:700,fontSize:13.5,cursor:"pointer",fontFamily:"inherit",padding:0,display:"inline-flex",alignItems:"center",gap:5}}>
+              Skip — explore the platform <span style={{fontSize:15}}>→</span>
+            </button>
+            <span style={{color:"#3A4A5C",fontSize:12}}>·</span>
+            <button onClick={onLogin} style={{background:"none",border:"none",color:"#38BDF8",fontWeight:800,fontSize:13.5,cursor:"pointer",fontFamily:"inherit",padding:0}}>
+              Log in
+            </button>
+          </div>
         </div>
-        <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:20,padding:"4px 12px",marginBottom:14}}>
-          <span style={{fontSize:11.5,fontWeight:800,color:"#FBBF24",letterSpacing:0.3}}>✦ {isEN?"Founder offer — first 500 members":"Oferta de fundador — primeros 500 miembros"}</span>
-        </div>
-        <h2 style={{margin:"0 0 8px",color:"#fff",fontSize:23,fontWeight:900,letterSpacing:-0.5,lineHeight:1.2,fontFamily:"'Space Grotesk',sans-serif"}}>
-          {isEN?"Free trade signals, every week":"Señales de trading gratis, cada semana"}
-        </h2>
-        <p style={{margin:"0 0 22px",color:"#9FB3C8",fontSize:14,lineHeight:1.55}}>
-          {isEN?"Enter your email to access the live feed — stock & crypto picks, AI signals and institutional flow.":"Ingresa tu email para acceder al feed en vivo — picks de acciones y crypto, señales IA y flujo institucional."}
-        </p>
-        <input value={email} autoFocus type="email"
-          onChange={e=>{setEmail(e.target.value);setErr(false);}}
-          onKeyDown={e=>{if(e.key==="Enter")submit();}}
-          placeholder={isEN?"your@email.com":"tu@email.com"}
-          style={{width:"100%",boxSizing:"border-box",border:`1px solid ${err?"#EF4444":"rgba(255,255,255,0.18)"}`,borderRadius:12,padding:"13px 16px",fontSize:15,outline:"none",background:"rgba(255,255,255,0.06)",color:"#fff",fontFamily:"inherit",marginBottom:err?6:14}}/>
-        {err&&<div style={{fontSize:11.5,color:"#F87171",marginBottom:12,textAlign:"left"}}>{isEN?"Please enter a valid email.":"Ingresa un email válido."}</div>}
-        <button onClick={submit}
-          style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px",color:"#fff",fontWeight:900,fontSize:15.5,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.4)",fontFamily:"inherit"}}>
-          {isEN?"Enter the feed →":"Entrar al feed →"}
-        </button>
-        <div style={{fontSize:10.5,color:"#64748B",marginTop:12}}>{isEN?"No spam. Unsubscribe anytime.":"Sin spam. Cancela cuando quieras."}</div>
-        <div style={{marginTop:18,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)",fontSize:13,color:"#9FB3C8"}}>
-          {isEN?"Already have an account?":"¿Ya tienes cuenta?"}{" "}
-          <button onClick={onLogin} style={{background:"none",border:"none",color:"#38BDF8",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit",padding:0}}>
-            {isEN?"Log in":"Iniciar sesión"}
-          </button>
+
+        {/* ── PRESENTACIÓN / WHAT IS NEXOTRADE ── */}
+        <div style={{marginTop:"clamp(48px,9vw,84px)"}}>
+          <div style={{textAlign:"center",maxWidth:600,margin:"0 auto 34px"}}>
+            <div style={{fontSize:12,fontWeight:800,letterSpacing:2,color:"#34D399",textTransform:"uppercase",marginBottom:10}}>What is NexoTrade</div>
+            <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4.5vw,34px)",fontWeight:900,letterSpacing:-0.6,lineHeight:1.15,fontFamily:"'Space Grotesk',sans-serif"}}>
+              Everything a modern investor needs — in one platform
+            </h2>
+            <p style={{margin:0,color:"#9FB3C8",fontSize:15,lineHeight:1.6}}>
+              NexoTrade brings professional-grade market intelligence to everyone. Real-time data, AI insight and a worldwide community, designed to help you make better decisions with confidence.
+            </p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
+            {FEATURES.map((f,i)=>(
+              <div key={i} style={card}>
+                <div style={{fontSize:26,marginBottom:10}}>{f.ic}</div>
+                <div style={{color:"#fff",fontSize:16,fontWeight:800,marginBottom:6,fontFamily:"'Space Grotesk',sans-serif"}}>{f.t}</div>
+                <div style={{color:"#9FB3C8",fontSize:13.5,lineHeight:1.55}}>{f.d}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* métricas */}
+          <div style={{display:"flex",justifyContent:"center",gap:"clamp(24px,8vw,72px)",flexWrap:"wrap",margin:"clamp(40px,7vw,60px) 0 0",textAlign:"center"}}>
+            {[["50+","Markets tracked"],["24/7","Live data feed"],["AI","Daily signals"],["100%","Beginner-friendly"]].map(([n,l],i)=>(
+              <div key={i}>
+                <div style={{color:"#fff",fontSize:"clamp(26px,5vw,36px)",fontWeight:900,fontFamily:"'Space Grotesk',sans-serif",lineHeight:1}}>{n}</div>
+                <div style={{color:"#7C8EA0",fontSize:12.5,fontWeight:600,marginTop:6,letterSpacing:0.3}}>{l}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA final */}
+          <div style={{textAlign:"center",marginTop:"clamp(40px,7vw,60px)"}}>
+            <h3 style={{margin:"0 0 18px",color:"#fff",fontSize:"clamp(20px,3.5vw,26px)",fontWeight:800,fontFamily:"'Space Grotesk',sans-serif"}}>Ready to start? It's free.</h3>
+            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+              <button onClick={()=>{const el=document.querySelector("input[type=email]");el&&el.focus();el&&el.scrollIntoView({behavior:"smooth",block:"center"});}}
+                style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px 30px",color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.35)",fontFamily:"inherit"}}>
+                Get free access →
+              </button>
+              <button onClick={skip}
+                style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.18)",borderRadius:12,padding:"14px 30px",color:"#E2E8F0",fontWeight:800,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>
+                Explore first
+              </button>
+            </div>
+            <div style={{color:"#5A6B7D",fontSize:11.5,marginTop:26}}>NexoTrade · Educational content. Not financial advice.</div>
+          </div>
         </div>
       </div>
     </div>
