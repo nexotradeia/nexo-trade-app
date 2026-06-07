@@ -23085,8 +23085,10 @@ export default function App(){
         .nexo-admin-overview { grid-template-columns: 1fr !important; }
         .nexo-admin-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
         .nexo-left-sidebar { display: none !important; }
-        .nexo-mobile-affiliate-banner { display: flex !important; }
-        body { padding-bottom: 84px; }
+        .nexo-mobile-affiliate-banner { display: flex !important; bottom: 58px !important; }
+        body { padding-bottom: 122px; }
+        /* Bottom nav móvil tipo Robinhood */
+        .nexo-bottom-nav { display: flex !important; }
         .nexo-body-grid {
           padding: 6px 8px !important;
           gap: 8px !important;
@@ -23110,7 +23112,7 @@ export default function App(){
         .nexo-logout-mobile { display: flex !important; }
         /* Chatbot IA menos invasivo en móvil: sin burbuja ancha y botón más arriba/pequeño */
         .nexo-ai-bubble { display: none !important; }
-        .nexo-ai-fab { bottom: 92px !important; opacity: 0.92; }
+        .nexo-ai-fab { bottom: 126px !important; opacity: 0.92; }
         .nexo-ai-fab > div > button:first-child, .nexo-ai-fab > div > button:last-child { display: none !important; }
         .nexo-ai-fab button { width: 46px !important; height: 46px !important; font-size: 21px !important; }
         /* Móvil: ocultar las 2 filas de tabs (van al hamburger) y mostrar el hamburger */
@@ -24199,6 +24201,22 @@ export default function App(){
       {showAlerts&&<AlertsPanel lang={lang} user={user} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase} onOpenAlerts={()=>setAlerts(true)} alertCount={alertCount}/>}
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
+
+      {/* ── BOTTOM NAV MÓVIL (estilo Robinhood/Instagram) — visible solo en móvil vía CSS ── */}
+      <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"rgba(255,255,255,0.98)",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",backdropFilter:"blur(12px)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
+        {[
+          {ic:"🏠",l:lang==="en"?"Home":"Inicio",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
+          {ic:"📊",l:lang==="en"?"Markets":"Mercados",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
+          {ic:"🤖",l:"IA",on:()=>setShowAI(true),active:false},
+          {ic:"⭐",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
+          {ic:"☰",l:lang==="en"?"Menu":"Menú",on:()=>setShowMobileMenu(true),active:false},
+        ].map((b,i)=>(
+          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0}}>
+            <span style={{fontSize:19,lineHeight:1}}>{b.ic}</span>
+            <span style={{fontSize:9.5,fontWeight:b.active?800:600}}>{b.l}</span>
+          </button>
+        ))}
+      </div>
       <PointToast show={toast.show} points={toast.points} reason={toast.reason}/>
     </div>
     </PriceProvider>
