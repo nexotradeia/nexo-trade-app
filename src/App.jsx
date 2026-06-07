@@ -23087,7 +23087,8 @@ export default function App(){
         .nexo-logout-mobile { display: flex !important; }
         /* Chatbot IA menos invasivo en móvil: sin burbuja ancha y botón más arriba/pequeño */
         .nexo-ai-bubble { display: none !important; }
-        .nexo-ai-fab { bottom: 76px !important; }
+        .nexo-ai-fab { bottom: 92px !important; opacity: 0.92; }
+        .nexo-ai-fab > div > button:first-child, .nexo-ai-fab > div > button:last-child { display: none !important; }
         .nexo-ai-fab button { width: 46px !important; height: 46px !important; font-size: 21px !important; }
         /* Móvil: ocultar las 2 filas de tabs (van al hamburger) y mostrar el hamburger */
         .nexo-tabs { display: none !important; }
@@ -23543,7 +23544,7 @@ export default function App(){
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
             style={{flexShrink:0,margin:"0 10px 0 14px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#1B1303",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
-            {effectivePremium ? "✦ Premium" : (lang==="en"?"✦ Join Premium — $15.99/mo":"✦ Únete a Premium — $15.99/mes")}
+            {effectivePremium ? "✦ Premium" : (lang==="en"?"⭐ Go Premium":"⭐ Ir Premium")}
           </button>
         </div>
       </nav>
