@@ -15538,7 +15538,7 @@ const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
 const TICKER_NAMES={
   NVDA:"NVIDIA",AAPL:"Apple",TSLA:"Tesla",MSFT:"Microsoft",META:"Meta",
   AMZN:"Amazon",GOOGL:"Alphabet",PLTR:"Palantir",AMD:"AMD",SPY:"S&P 500 ETF",
-  SMCI:"Super Micro",COIN:"Coinbase",QQQ:"Nasdaq ETF",MSFT:"Microsoft",
+  SMCI:"Super Micro",COIN:"Coinbase",QQQ:"Nasdaq ETF",
   BTC:"Bitcoin",ETH:"Ethereum",SOL:"Solana",BNB:"Binance Coin",
   XRP:"Ripple",ADA:"Cardano",DOGE:"Dogecoin",AVAX:"Avalanche",
   JPM:"JPMorgan",BAC:"Bank of America",GS:"Goldman Sachs",
