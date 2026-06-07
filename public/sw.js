@@ -1,5 +1,5 @@
-// NexoTrade Service Worker — v3.0 (con Push Notifications)
-const CACHE_NAME = 'nexotrade-v2';
+// NexoTrade Service Worker — v4.0 (Push + app siempre fresca)
+const CACHE_NAME = 'nexotrade-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -85,21 +85,29 @@ self.addEventListener('fetch', (event) => {
 
   if (isExternalAPI) return;
 
+  // Navegaciones (el HTML de la app): SIEMPRE de la red para no servir una versión vieja.
+  // El cache solo se usa como respaldo si el teléfono está sin internet.
+  const isNav = event.request.mode === 'navigate' ||
+    (event.request.headers.get('accept') || '').includes('text/html');
+  if (isNav) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Resto (JS/CSS/imágenes con hash): red primero, cache de respaldo offline
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Guardar en cache si es exitoso
         if (response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
       })
-      .catch(() => {
-        // Si no hay red, usar cache
-        return caches.match(event.request).then(
-          (cached) => cached || caches.match('/index.html')
-        );
-      })
+      .catch(() => caches.match(event.request).then(
+        (cached) => cached || caches.match('/index.html')
+      ))
   );
 });
