@@ -12828,6 +12828,8 @@ function ScreenerPage({isPremium, onNeedPremium}) {
 }
 
 // ── SUPER INVERSORES PAGE (estilo Dataroma) ───────────────────────────────────
+// AUM normalizado a $B para ordenar y destacar a los gurús más grandes
+const gAum = s => { const m=String(s||"").match(/([\d.]+)\s*([BMT])?/); if(!m) return 0; const v=parseFloat(m[1]); return m[2]==="T"?v*1000:m[2]==="M"?v/1000:v; };
 const GURUS = [
   {
     id:"buffett", name:"Warren Buffett", firm:"Berkshire Hathaway", emoji:"🎩",
@@ -12950,11 +12952,12 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
 
       {/* Guru cards grid */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:14}}>
-        {GURUS.map(g=>(
+        {[...GURUS].sort((a,b)=>gAum(b.aum)-gAum(a.aum)).map((g,gi)=>{ const isTop=gi<3; return (
           <div key={g.id} onClick={()=>openGuru(g.id)}
-            style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden",boxShadow:`0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04)`}}
+            style={{background:isTop?"linear-gradient(145deg,rgba(20,28,48,0.99),rgba(26,36,60,0.97))":"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:isTop?`2px solid ${g.color}`:`1px solid ${g.color}30`,borderRadius:18,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden",boxShadow:isTop?`0 8px 30px ${g.color}33,inset 0 1px 0 rgba(255,255,255,0.06)`:`0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04)`}}
             onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 12px 32px rgba(0,0,0,0.4),0 0 0 1px ${g.color}50`;}}
-            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=`0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04)`;}}>
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=isTop?`0 8px 30px ${g.color}33,inset 0 1px 0 rgba(255,255,255,0.06)`:`0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04)`;}}>
+            {isTop&&<div style={{position:"absolute",top:10,right:10,background:`linear-gradient(135deg,${g.color},${g.color}AA)`,color:"#0B1426",fontSize:9,fontWeight:900,letterSpacing:0.4,borderRadius:20,padding:"3px 9px",zIndex:2,boxShadow:`0 2px 10px ${g.color}66`}}>⭐ TOP GURU</div>}
             <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}20 0%,transparent 70%)`,pointerEvents:"none"}}/>
             <div style={{height:3,background:`linear-gradient(90deg,${g.color},transparent)`,borderRadius:4,marginBottom:14,marginLeft:-18,marginRight:-18,marginTop:-18}}/>
             <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:12}}>
@@ -12985,7 +12988,7 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
               <span style={{fontSize:11,color:g.color,fontWeight:700}}>Ver cartera →</span>
             </div>
           </div>
-        ))}
+        );})}
       </div>
       <div style={{textAlign:"center",padding:"20px 0",fontSize:11,color:C.muted2}}>
         Datos de reportes públicos SEC 13F · Actualización trimestral · No es consejo financiero
@@ -23641,8 +23644,8 @@ export default function App(){
                   <span style={{marginLeft:"auto",fontSize:11,color:"#64748b",background:"#1e293b",padding:"2px 8px",borderRadius:6}}>{lang==="en"?"2 min ago":"hace 2 min"}</span>
                 </div>
                 {[
-                  {u:"SPY_Trader",e:"🦅",c:"#00D26A",t:"NVDA rompiendo resistencia en $890. Target $950 en 2 semanas. Stop en $860. R:R 3:1 🚀",bull:true,likes:47},
-                  {u:"CryptoWolf",e:"🐺",c:"#0F5E68",t:"BTC acumulando en $67k. On-chain muestra manos fuertes comprando. Bullish largo plazo. ₿",bull:true,likes:82},
+                  {u:"SPY_Trader",e:"🦅",c:"#00D26A",t:"NVDA rompiendo resistencia en $205. Target $230 en 2 semanas. Stop en $195. R:R 3:1 🚀",bull:true,likes:47},
+                  {u:"CryptoWolf",e:"🐺",c:"#0F5E68",t:"BTC acumulando en $62k. On-chain muestra manos fuertes comprando. Bullish largo plazo. ₿",bull:true,likes:82},
                   {u:"NvidiaChad",e:"🦁",c:"#F59E0B",t:"TSLA reporta earnings la próxima semana. Cuidado con la volatilidad. Yo flat hasta el dato 📊",bull:false,likes:31},
                 ].map((p,i)=>(
                   <div key={i} style={{marginBottom:12,paddingBottom:12,borderBottom:i<2?"1px solid #1e293b":"none"}}>
