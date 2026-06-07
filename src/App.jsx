@@ -1225,6 +1225,34 @@ const fmtLivePrice = (ticker, price) => {
   return `$${price.toFixed(2)}`;
 };
 
+// Banner que aparece SOLO en días de caída fuerte del mercado (engagement cuando más tráfico llega)
+function MarketCrisisBanner({lang="es", onCTA}){
+  const lp = useContext(PriceCtx);
+  const [dismissed,setDismissed] = useState(()=>{ try{ return sessionStorage.getItem("nexo-crisis-dismissed")==="1"; }catch{ return false; } });
+  const isEN = lang==="en";
+  const spy = lp?.SPY?.change;
+  const qqq = lp?.QQQ?.change;
+  const vals = [spy,qqq].filter(v=>typeof v==="number");
+  const worst = vals.length ? Math.min(...vals) : 0;
+  if(dismissed) return null;
+  if(!(worst <= -1.5)) return null; // umbral: caída ≥ 1.5%
+  const pct = Math.abs(worst).toFixed(1);
+  return(
+    <div style={{background:"linear-gradient(90deg,#3b0a0a 0%,#5b1111 50%,#3b0a0a 100%)",borderBottom:"1px solid rgba(239,68,68,0.4)",padding:"10px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
+      <span style={{fontSize:16,flexShrink:0}}>📉</span>
+      <span style={{color:"#FECACA",fontSize:13,fontWeight:700}}>
+        {isEN ? `Market selling off — down ${pct}% today.` : `Mercado en caída — baja ${pct}% hoy.`}
+      </span>
+      <button onClick={onCTA}
+        style={{background:"linear-gradient(135deg,#EF4444,#B91C1C)",border:"none",borderRadius:8,padding:"7px 16px",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,boxShadow:"0 2px 12px rgba(239,68,68,0.4)"}}>
+        {isEN ? "See live analysis →" : "Ver análisis en vivo →"}
+      </button>
+      <button onClick={()=>{ setDismissed(true); try{ sessionStorage.setItem("nexo-crisis-dismissed","1"); }catch{} }}
+        style={{background:"none",border:"none",color:"#fca5a5",fontSize:18,cursor:"pointer",lineHeight:1,flexShrink:0,marginLeft:4}}>×</button>
+    </div>
+  );
+}
+
 function TickerTape({lang="es", onPremium}) {
   const lp = useContext(PriceCtx);
   const isEN = lang==="en";
@@ -8052,6 +8080,7 @@ function ShareFeedCard({ user, lang="es" }){
 
 // ── EMAIL GATE / LANDING — bienvenida + captura de email + presentación ──────
 function EmailGate({lang="es", onDone, onLogin, onSkip}){
+  const isEN = lang!=="es";
   const [email,setEmail]=useState("");
   const [err,setErr]=useState(false);
   const submit=()=>{
@@ -8063,13 +8092,20 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
     (onSkip||onDone)&&(onSkip||onDone)(); // entrar al Feed tras suscribirse
   };
   const skip=()=>{ try{localStorage.setItem("nexo-email-gate-done","1");}catch{} (onSkip||onDone)&&(onSkip||onDone)(); };
-  const FEATURES=[
+  const FEATURES = isEN ? [
     {ic:"📈",t:"Live Market Feed",d:"Real-time stock & crypto picks, breaking news and trade ideas from a global community of investors."},
     {ic:"🤖",t:"AI Stock Picks",d:"Daily AI-powered signals and setups — entries, targets and risk, distilled from thousands of data points."},
     {ic:"🐋",t:"Institutional Flow",d:"Track whale moves, unusual options and dark-pool activity to see where the smart money is going."},
     {ic:"🌐",t:"Global Markets",d:"Indices, forex, commodities and bonds across the US, Europe, Asia-Pacific and Latin America — in one place."},
     {ic:"📊",t:"Paper Trading",d:"Practice with a real-time simulator. Build conviction and test strategies before risking a single dollar."},
     {ic:"💬",t:"Investor Community",d:"Follow top traders, share ideas and learn together. Markets are better when you don't trade alone."},
+  ] : [
+    {ic:"📈",t:"Feed de Mercado en Vivo",d:"Picks de acciones y crypto en tiempo real, noticias de última hora e ideas de trading de una comunidad global de inversores."},
+    {ic:"🤖",t:"Picks con IA",d:"Señales y setups diarios con IA — entradas, objetivos y riesgo, destilados de miles de datos del mercado."},
+    {ic:"🐋",t:"Flujo Institucional",d:"Sigue los movimientos de ballenas, opciones inusuales y dark pools para ver hacia dónde va el dinero grande."},
+    {ic:"🌐",t:"Mercados Globales",d:"Índices, forex, materias primas y bonos de EE.UU., Europa, Asia-Pacífico y Latinoamérica — en un solo lugar."},
+    {ic:"📊",t:"Paper Trading",d:"Practica con un simulador en tiempo real. Gana confianza y prueba estrategias antes de arriesgar un solo dólar."},
+    {ic:"💬",t:"Comunidad de Inversores",d:"Sigue a los mejores traders, comparte ideas y aprende en comunidad. El mercado es mejor cuando no operas solo."},
   ];
   const card={background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:16,padding:"20px 18px"};
   return(
@@ -8087,13 +8123,15 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
             <span style={{color:"#fff",fontSize:21,fontWeight:800,letterSpacing:2,fontFamily:"'Syne',sans-serif"}}>NEXOTRADE</span>
           </div>
           <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:20,padding:"5px 14px",marginBottom:20}}>
-            <span style={{fontSize:11.5,fontWeight:800,color:"#FBBF24",letterSpacing:0.3}}>✦ Founder offer — free for the first 500 members</span>
+            <span style={{fontSize:11.5,fontWeight:800,color:"#FBBF24",letterSpacing:0.3}}>{isEN?"✦ Founder offer — free for the first 500 members":"✦ Oferta fundadores — gratis para los primeros 500 miembros"}</span>
           </div>
           <h1 style={{margin:"0 0 16px",color:"#fff",fontSize:"clamp(30px,6vw,46px)",fontWeight:900,letterSpacing:-1,lineHeight:1.08,fontFamily:"'Syne',sans-serif"}}>
-            Trade smarter.<br/><span style={{background:"linear-gradient(90deg,#34D399,#38BDF8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Together.</span>
+            {isEN?"Trade smarter.":"Invierte mejor."}<br/><span style={{background:"linear-gradient(90deg,#34D399,#38BDF8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{isEN?"Together.":"En comunidad."}</span>
           </h1>
           <p style={{margin:"0 0 28px",color:"#A9BCCE",fontSize:"clamp(15px,2.4vw,17px)",lineHeight:1.6}}>
-            The global investor community for stocks & crypto. Get AI-powered picks, institutional flow and a live market feed — straight to your inbox, every week.
+            {isEN
+              ? "The global investor community for stocks & crypto. Get AI-powered picks, institutional flow and a live market feed — straight to your inbox, every week."
+              : "La comunidad global de inversores en acciones y crypto. Recibe picks con IA, flujo institucional y un feed de mercado en vivo — directo a tu correo, cada semana."}
           </p>
 
           {/* email capture */}
@@ -8102,25 +8140,25 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
               <input value={email} type="email"
                 onChange={e=>{setEmail(e.target.value);setErr(false);}}
                 onKeyDown={e=>{if(e.key==="Enter")submit();}}
-                placeholder="your@email.com"
+                placeholder={isEN?"your@email.com":"tu@email.com"}
                 style={{flex:"1 1 200px",minWidth:0,boxSizing:"border-box",border:`1px solid ${err?"#EF4444":"rgba(255,255,255,0.18)"}`,borderRadius:12,padding:"14px 16px",fontSize:16,outline:"none",background:"rgba(255,255,255,0.06)",color:"#fff",fontFamily:"inherit"}}/>
               <button onClick={submit}
                 style={{flex:"0 0 auto",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px 24px",color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.35)",fontFamily:"inherit",whiteSpace:"nowrap"}}>
-                Get free access →
+                {isEN?"Get free access →":"Acceso gratis →"}
               </button>
             </div>
-            {err&&<div style={{fontSize:12,color:"#F87171",marginTop:8,textAlign:"left"}}>Please enter a valid email.</div>}
-            <div style={{fontSize:10.5,color:"#64748B",marginTop:10}}>No spam. Unsubscribe anytime.</div>
+            {err&&<div style={{fontSize:12,color:"#F87171",marginTop:8,textAlign:"left"}}>{isEN?"Please enter a valid email.":"Ingresa un correo válido."}</div>}
+            <div style={{fontSize:10.5,color:"#64748B",marginTop:10}}>{isEN?"No spam. Unsubscribe anytime.":"Sin spam. Cancela cuando quieras."}</div>
           </div>
 
           {/* entrar directo / login */}
           <div style={{marginTop:20,display:"flex",gap:18,justifyContent:"center",alignItems:"center",flexWrap:"wrap"}}>
             <button onClick={skip} style={{background:"none",border:"none",color:"#CBD5E1",fontWeight:700,fontSize:13.5,cursor:"pointer",fontFamily:"inherit",padding:0,display:"inline-flex",alignItems:"center",gap:5}}>
-              Skip — explore the platform <span style={{fontSize:15}}>→</span>
+              {isEN?"Skip — explore the platform":"Saltar — explorar la plataforma"} <span style={{fontSize:15}}>→</span>
             </button>
             <span style={{color:"#3A4A5C",fontSize:12}}>·</span>
             <button onClick={onLogin} style={{background:"none",border:"none",color:"#38BDF8",fontWeight:800,fontSize:13.5,cursor:"pointer",fontFamily:"inherit",padding:0}}>
-              Log in
+              {isEN?"Log in":"Iniciar sesión"}
             </button>
           </div>
         </div>
@@ -8128,12 +8166,14 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
         {/* ── PRESENTACIÓN / WHAT IS NEXOTRADE ── */}
         <div style={{marginTop:"clamp(48px,9vw,84px)"}}>
           <div style={{textAlign:"center",maxWidth:600,margin:"0 auto 34px"}}>
-            <div style={{fontSize:12,fontWeight:800,letterSpacing:2,color:"#34D399",textTransform:"uppercase",marginBottom:10}}>What is NexoTrade</div>
+            <div style={{fontSize:12,fontWeight:800,letterSpacing:2,color:"#34D399",textTransform:"uppercase",marginBottom:10}}>{isEN?"What is NexoTrade":"Qué es NexoTrade"}</div>
             <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4.5vw,34px)",fontWeight:900,letterSpacing:-0.6,lineHeight:1.15,fontFamily:"'Syne',sans-serif"}}>
-              Everything a modern investor needs — in one platform
+              {isEN?"Everything a modern investor needs — in one platform":"Todo lo que un inversor moderno necesita — en una plataforma"}
             </h2>
             <p style={{margin:0,color:"#9FB3C8",fontSize:15,lineHeight:1.6}}>
-              NexoTrade brings professional-grade market intelligence to everyone. Real-time data, AI insight and a worldwide community, designed to help you make better decisions with confidence.
+              {isEN
+                ? "NexoTrade brings professional-grade market intelligence to everyone. Real-time data, AI insight and a worldwide community, designed to help you make better decisions with confidence."
+                : "NexoTrade lleva inteligencia de mercado de nivel profesional a todos. Datos en tiempo real, análisis con IA y una comunidad mundial, diseñados para ayudarte a tomar mejores decisiones con confianza."}
             </p>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
@@ -8148,7 +8188,7 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
 
           {/* métricas */}
           <div style={{display:"flex",justifyContent:"center",gap:"clamp(24px,8vw,72px)",flexWrap:"wrap",margin:"clamp(40px,7vw,60px) 0 0",textAlign:"center"}}>
-            {[["50+","Markets tracked"],["24/7","Live data feed"],["AI","Daily signals"],["100%","Beginner-friendly"]].map(([n,l],i)=>(
+            {(isEN?[["50+","Markets tracked"],["24/7","Live data feed"],["AI","Daily signals"],["100%","Beginner-friendly"]]:[["50+","Mercados cubiertos"],["24/7","Datos en vivo"],["IA","Señales diarias"],["100%","Fácil para principiantes"]]).map(([n,l],i)=>(
               <div key={i}>
                 <div style={{color:"#fff",fontSize:"clamp(26px,5vw,36px)",fontWeight:900,fontFamily:"'Syne',sans-serif",lineHeight:1}}>{n}</div>
                 <div style={{color:"#7C8EA0",fontSize:12.5,fontWeight:600,marginTop:6,letterSpacing:0.3}}>{l}</div>
@@ -8158,18 +8198,18 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
 
           {/* CTA final */}
           <div style={{textAlign:"center",marginTop:"clamp(40px,7vw,60px)"}}>
-            <h3 style={{margin:"0 0 18px",color:"#fff",fontSize:"clamp(20px,3.5vw,26px)",fontWeight:800,fontFamily:"'Syne',sans-serif"}}>Ready to start? It's free.</h3>
+            <h3 style={{margin:"0 0 18px",color:"#fff",fontSize:"clamp(20px,3.5vw,26px)",fontWeight:800,fontFamily:"'Syne',sans-serif"}}>{isEN?"Ready to start? It's free.":"¿Listo para empezar? Es gratis."}</h3>
             <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
               <button onClick={()=>{const el=document.querySelector("input[type=email]");el&&el.focus();el&&el.scrollIntoView({behavior:"smooth",block:"center"});}}
                 style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px 30px",color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.35)",fontFamily:"inherit"}}>
-                Get free access →
+                {isEN?"Get free access →":"Acceso gratis →"}
               </button>
               <button onClick={skip}
                 style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.18)",borderRadius:12,padding:"14px 30px",color:"#E2E8F0",fontWeight:800,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>
-                Explore first
+                {isEN?"Explore first":"Explorar primero"}
               </button>
             </div>
-            <div style={{color:"#5A6B7D",fontSize:11.5,marginTop:26}}>NexoTrade · Educational content. Not financial advice.</div>
+            <div style={{color:"#5A6B7D",fontSize:11.5,marginTop:26}}>{isEN?"NexoTrade · Educational content. Not financial advice.":"NexoTrade · Contenido educativo. No es consejo financiero."}</div>
           </div>
         </div>
       </div>
@@ -22181,6 +22221,7 @@ export default function App(){
   const [newPostId,setNewPostId]= useState(null);
   const [page,setPage]         = useState(()=>{ try{ const p=parseInt(localStorage.getItem("nexo_page")||"0"); return isNaN(p)?0:p; }catch{return 0;} });
   const [sent,setSent]         = useState("all");
+  const [showFeedFilters,setShowFeedFilters] = useState(false); // dropdown de filtros extra en móvil
   // ── Bots dinámicos: postean automáticamente cada ~22s ──────────────────────
   const [liveBots,setLiveBots] = useState(()=>{
     // Mostrar los primeros 8 bots al cargar para que el feed nunca esté vacío
@@ -22222,6 +22263,8 @@ export default function App(){
   },[]);
   const [aiSide,setAiSide]           = useState("right");
   const [aiBubbleOff,setAiBubbleOff] = useState(false);
+  // Auto-ocultar la burbuja del chatbot tras 7s para no tapar contenido (desktop)
+  useEffect(()=>{ const t=setTimeout(()=>setAiBubbleOff(true),7000); return ()=>clearTimeout(t); },[]);
   const [showAlerts,setAlerts]       = useState(false);
   const [communityCount, setCommunityCount] = useState(3200);
   const animatedCount = useCountUp(communityCount, 2500);
@@ -22831,20 +22874,41 @@ export default function App(){
     return(
       <>
         {/* Feed tabs */}
-        <div style={{background:"#FFFFFF",border:"1px solid rgba(0,0,0,0.07)",borderRadius:14,padding:"0 12px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",display:"flex",gap:0,alignItems:"center",overflowX:"auto"}}>
+        <div style={{position:"relative",background:"#FFFFFF",border:"1px solid rgba(0,0,0,0.07)",borderRadius:14,padding:"0 12px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",display:"flex",gap:0,alignItems:"center",overflowX:"auto"}}>
           {[
-            {v:"all",   l:lang==="en"?"🏠 For You":"🏠 Para Ti"},
-            {v:"bull",  l:lang==="en"?"📈 Bullish":"📈 Alcistas"},
-            {v:"bear",  l:lang==="en"?"📉 Bearish":"📉 Bajistas"},
-            {v:"crypto",l:lang==="en"?"₿ Crypto":"₿ Cripto"},
-            {v:"stocks",l:lang==="en"?"🏦 Stocks":"🏦 Acciones"},
-            {v:"viral", l:"🔥 Viral"},
-          ].map(({v,l})=>(
-            <button key={v} onClick={()=>setSent(v)}
+            {v:"all",   l:lang==="en"?"🏠 For You":"🏠 Para Ti", pri:true},
+            {v:"viral", l:lang==="en"?"🔥 Trending":"🔥 Trending", pri:true},
+            {v:"crypto",l:lang==="en"?"₿ Crypto":"₿ Cripto", pri:true},
+            {v:"bull",  l:lang==="en"?"📈 Bullish":"📈 Alcistas", pri:false},
+            {v:"bear",  l:lang==="en"?"📉 Bearish":"📉 Bajistas", pri:false},
+            {v:"stocks",l:lang==="en"?"🏦 Stocks":"🏦 Acciones", pri:false},
+          ].map(({v,l,pri})=>(
+            <button key={v} onClick={()=>setSent(v)} className={pri?undefined:"nexo-tab-2nd"}
               style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?"#0F4C81":"transparent"}`,padding:"13px 14px",cursor:"pointer",color:sent===v?"#0F4C81":"#64748B",fontSize:13,fontWeight:sent===v?700:500,transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0}}>
               {l}
             </button>
           ))}
+          {/* Filtros extra — solo móvil (Alcistas/Bajistas/Acciones van aquí) */}
+          <div className="nexo-only-mobile-inline" style={{display:"none",position:"relative",flexShrink:0,marginLeft:4}}>
+            <button onClick={()=>setShowFeedFilters(s=>!s)}
+              style={{background:["bull","bear","stocks"].includes(sent)?"rgba(15,76,129,0.08)":"transparent",border:"none",padding:"13px 12px",cursor:"pointer",color:["bull","bear","stocks"].includes(sent)?"#0F4C81":"#64748B",fontSize:13,fontWeight:600,whiteSpace:"nowrap"}}>
+              {sent==="bull"?(lang==="en"?"📈 Bullish":"📈 Alcistas"):sent==="bear"?(lang==="en"?"📉 Bearish":"📉 Bajistas"):sent==="stocks"?(lang==="en"?"🏦 Stocks":"🏦 Acciones"):(lang==="en"?"⚙ Filters":"⚙ Filtros")} ▾
+            </button>
+            {showFeedFilters&&(
+              <div style={{position:"absolute",top:"100%",right:0,zIndex:50,background:"#fff",border:"1px solid rgba(0,0,0,0.1)",borderRadius:12,boxShadow:"0 8px 28px rgba(0,0,0,0.18)",padding:6,minWidth:160,marginTop:4}}>
+                {[
+                  {v:"bull",  l:lang==="en"?"📈 Bullish":"📈 Alcistas"},
+                  {v:"bear",  l:lang==="en"?"📉 Bearish":"📉 Bajistas"},
+                  {v:"stocks",l:lang==="en"?"🏦 Stocks":"🏦 Acciones"},
+                ].map(({v,l})=>(
+                  <button key={v} onClick={()=>{setSent(v);setShowFeedFilters(false);}}
+                    style={{display:"block",width:"100%",textAlign:"left",background:sent===v?"rgba(15,76,129,0.08)":"transparent",border:"none",borderRadius:8,padding:"10px 12px",cursor:"pointer",color:sent===v?"#0F4C81":"#334155",fontSize:13,fontWeight:sent===v?700:500}}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           {tickerFilter&&(
             <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.25)",borderRadius:20,padding:"4px 12px",flexShrink:0}}>
               <span style={{color:"#0F4C81",fontWeight:800,fontSize:12}}>${tickerFilter}</span>
@@ -23071,6 +23135,7 @@ export default function App(){
         .nexo-left-sidebar { display: none !important; }
       }
       .nexo-show-mobile { display: none; }
+      .nexo-only-mobile-inline { display: none; }
       @media (max-width: 767px) {
         /* ── LAYOUT BASE ── */
         .nexo-sidebar { display: none !important; }
@@ -23112,6 +23177,9 @@ export default function App(){
         .nexo-ai-fab button { width: 46px !important; height: 46px !important; font-size: 21px !important; }
         /* Móvil: ocultar las 2 filas de tabs (van al hamburger) y mostrar el hamburger */
         .nexo-tabs { display: none !important; }
+        /* Feed: en móvil solo 3 tabs (Para Ti / Trending / Cripto); el resto en el dropdown de filtros */
+        .nexo-tab-2nd { display: none !important; }
+        .nexo-only-mobile-inline { display: block !important; }
         .nexo-only-mobile { display: flex !important; }
 
         /* ── TABS ── */
@@ -23387,18 +23455,19 @@ export default function App(){
           onLogin={()=>{setEmailGateDone(true);setAuth("login");}}/>
       )}
       <TickerTape lang={lang} onPremium={()=>{setPage(8);setShowLanding(false);}}/>
+      <MarketCrisisBanner lang={lang} onCTA={()=>{setSent("all");setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
       {!user && showNewsletter && !newsletterDone && (
         <div style={{background:"linear-gradient(90deg,#0F172A 0%,#1E293B 100%)",borderBottom:"1px solid rgba(15,76,129,0.2)",padding:"10px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
           <span style={{fontSize:16,flexShrink:0}}>📈</span>
-          <span style={{color:"#E2E8F0",fontSize:13,fontWeight:600,flexShrink:0}}>Análisis de mercado gratis cada semana:</span>
+          <span style={{color:"#E2E8F0",fontSize:13,fontWeight:600,flexShrink:0}}>{lang==="en"?"📈 Get this week's stock pick — free:":"📈 Recibe el pick de la semana — gratis:"}</span>
           <div style={{display:"flex",gap:8,alignItems:"center",flex:"1 1 260px",maxWidth:400}}>
             <input
               type="email"
               value={newsletterEmail}
               onChange={e=>setNewsletterEmail(e.target.value)}
-              placeholder="tu@email.com"
+              placeholder={lang==="en"?"your@email.com":"tu@email.com"}
               style={{flex:1,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:8,padding:"7px 12px",color:"#F1F5F9",fontSize:13,outline:"none",minWidth:0}}
               onKeyDown={e=>{if(e.key==="Enter"&&newsletterEmail.includes("@")){
                 supabase.from("newsletter_subscribers").insert({email:newsletterEmail,created_at:new Date().toISOString()}).then(()=>{});
@@ -23414,7 +23483,7 @@ export default function App(){
                 setNewsletterDone(true);
               }}
               style={{background:"#0F4C81",border:"none",borderRadius:8,padding:"7px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
-              Suscribirme →
+              {lang==="en"?"Get my pick →":"Quiero mi pick →"}
             </button>
           </div>
           <button onClick={()=>{setShowNewsletter(false);sessionStorage.setItem("nexo-newsletter-dismissed","1");}}
@@ -23563,7 +23632,7 @@ export default function App(){
             );
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{flexShrink:0,margin:"0 10px 0 14px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#1B1303",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
+            style={{flexShrink:0,position:"sticky",right:6,zIndex:6,margin:"0 6px 0 14px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#1B1303",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",boxShadow:"-10px 0 14px 6px #0B1F3F, 0 2px 12px rgba(224,182,75,0.45)",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
             {effectivePremium ? "✦ Premium" : (lang==="en"?"⭐ Go Premium":"⭐ Ir Premium")}
           </button>
         </div>
@@ -24125,7 +24194,7 @@ export default function App(){
               borderRadius:14, padding:"9px 12px 9px 14px",
               color:"#fff", fontSize:12, fontWeight:600,
               boxShadow:"0 4px 24px rgba(15,76,129,0.25)",
-              whiteSpace:"nowrap", backdropFilter:"blur(12px)",
+              maxWidth:230, lineHeight:1.35, backdropFilter:"blur(12px)",
               pointerEvents:"auto", cursor:"pointer",
               animation:"nexo-float 3s ease-in-out infinite",
               display:"flex", alignItems:"center", gap:10,
