@@ -3140,10 +3140,12 @@ function LinkPreviewCard({url}){
       .then(d => {
         if (cancelled) return;
         if (d.status === "success" && d.data) {
+          const img = d.data.image;
           setMeta({
             title:       d.data.title || "",
             description: d.data.description || "",
-            image:       d.data.image?.url || d.data.logo?.url || null,
+            image:       img?.url || null,        // solo imagen real del artículo, NO el logo
+            imageW:      img?.width || 0,
             logo:        d.data.logo?.url || null,
             publisher:   d.data.publisher || domain,
           });
@@ -3194,8 +3196,8 @@ function LinkPreviewCard({url}){
       onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(15,76,129,0.4)";e.currentTarget.style.boxShadow="0 4px 16px rgba(15,76,129,0.1)";}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="none";}}>
 
-      {/* Imagen del artículo */}
-      {meta.image && (
+      {/* Imagen del artículo — solo si es una imagen real ancha (evita agrandar el logo del sitio y verse borroso) */}
+      {meta.image && meta.imageW >= 480 && (
         <div style={{width:"100%",height:180,overflow:"hidden",background:"var(--c-border)"}}>
           <img src={meta.image} alt={meta.title}
             style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"transform 0.3s"}}
@@ -3400,24 +3402,6 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           {post.image&&!locked&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
           {/* Link preview card */}
           {post.link&&!locked ? <LinkPreviewCard url={post.link}/> : null}
-          {/* Metrics row — compacto */}
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
-            <div style={{display:"flex",alignItems:"center",gap:3,background:isBull?"rgba(22,163,74,0.08)":"rgba(220,38,38,0.08)",borderRadius:8,padding:"3px 9px",border:`1px solid ${isBull?"rgba(22,163,74,0.18)":"rgba(220,38,38,0.18)"}`}}>
-              <span style={{fontSize:10,fontWeight:700,color:isBull?C.bull:C.bear,fontFamily:"monospace"}}>🎯 {target}</span>
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:4,flex:1,minWidth:100}}>
-              <div style={{flex:1,height:2,background:"var(--c-border)",borderRadius:3,overflow:"hidden"}}>
-                <div style={{width:`${conf}%`,height:"100%",background:confLevel.col,borderRadius:3}}/>
-              </div>
-              <span style={{fontSize:10,color:confLevel.col,fontWeight:700,whiteSpace:"nowrap"}}>{conf}%</span>
-            </div>
-            <svg viewBox="0 0 80 20" style={{width:44,height:13,flexShrink:0}}>
-              <polyline points={sparkPts} fill="none" stroke={isBull?"#16A34A":"#DC2626"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.14)",borderRadius:8,padding:"3px 8px"}}>
-              <span style={{fontSize:10,fontWeight:700,color:"#0F4C81"}}>🧠 {aiPct}%</span>
-            </div>
-          </div>
           {/* Tags */}
           {post.tags?.length>0&&<div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
             {post.tags.map(tg=><span key={tg} style={{background:"rgba(15,76,129,0.07)",color:"#0F4C81",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:600,letterSpacing:0.2}}>#{tg}</span>)}
@@ -23004,23 +22988,11 @@ export default function App(){
     return base;
   })();
 
-  // ── Mezclar liveBots + posts reales en el feed ───────────────────────────────
+  // ── Feed CORRIDO estilo StockTwits: posts reales continuos (tus posts primero vía sortedPosts), sin bots intercalados ──
   const displayFeed = (()=>{
     const result = [];
-    // MIS posts van primero de todo (así el usuario ve su mensaje justo al publicar)
-    const mine = [], others = [];
-    filtered2.forEach(p => { if(user && (p.userId===user.id || p.user===user.name)) mine.push(p); else others.push(p); });
-    mine.forEach(p => result.push(p));
-    // luego la actividad en vivo (bots)
-    liveBots.forEach(b => result.push(b));
-    // intercalar el resto de posts reales con bots adicionales cada 2 posts
-    others.forEach((post, i) => {
-      result.push(post);
-      if ((i + 1) % 2 === 0) {
-        const ALL = [...CASUAL_BOT_POSTS, ...BOT_POSTS];
-        result.push({...ALL[(liveBots.length + i) % ALL.length], _isBot:true, _key:`bot_filler_${i}`});
-      }
-    });
+    filtered2.forEach(p => result.push(p));   // posts reales, uno tras otro
+    liveBots.forEach(b => result.push(b));     // actividad en vivo al final (relleno)
     return result;
   })();
 
