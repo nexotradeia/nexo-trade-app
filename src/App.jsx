@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-07 00:04:28 Sesión 14 — avatares monograma: header con iniciales + selector de color (sin emojis)
+// NEXO TRADE — build: 2026-06-07 00:07:08 Sesión 14 — móvil: ocultar Home/IA/dark/share del navbar (ya en hamburger), deja barra limpia
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -23251,7 +23251,7 @@ export default function App(){
           <div className="nexo-nav-icons" style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
 
             {/* Home */}
-            <button onClick={()=>{setPage(0);setShowLanding(false);}}
+            <button className="nexo-hide-mobile" onClick={()=>{setPage(0);setShowLanding(false);}}
               title="Inicio — Página principal"
               style={{width:40,height:40,borderRadius:11,border:`2px solid ${page===0?"#0F4C81":"rgba(15,76,129,0.25)"}`,background:page===0?"rgba(15,76,129,0.15)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",transition:"all 0.15s",boxShadow:page===0?"0 0 14px rgba(15,76,129,0.28)":"none"}}
               onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.15)";e.currentTarget.style.boxShadow="0 0 14px rgba(15,76,129,0.25)";}}
@@ -23260,7 +23260,7 @@ export default function App(){
             </button>
 
             {/* IA */}
-            <button onClick={()=>setShowAI(true)}
+            <button className="nexo-hide-mobile" onClick={()=>setShowAI(true)}
               title="IA de NexoTrade"
               style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(15,76,129,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",transition:"all 0.15s"}}
               onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.12)";e.currentTarget.style.borderColor="rgba(15,76,129,0.5)";}}
@@ -23279,7 +23279,7 @@ export default function App(){
             </button>
 
             {/* Dark mode toggle */}
-            <button onClick={()=>setDarkMode(!darkMode)}
+            <button className="nexo-hide-mobile" onClick={()=>setDarkMode(!darkMode)}
               title={darkMode ? "Modo claro" : "Modo oscuro"}
               style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${darkMode?"rgba(250,204,21,0.45)":"rgba(100,116,139,0.22)"}`,background:darkMode?"rgba(250,204,21,0.07)":"rgba(100,116,139,0.05)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:darkMode?"#FCD34D":"#64748B",transition:"all 0.2s"}}
               onMouseEnter={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.15)":"rgba(100,116,139,0.12)";}}
@@ -23297,7 +23297,7 @@ export default function App(){
             </button>
 
             {/* Compartir / Invitar (viral, global) */}
-            <ShareNavButton user={user} lang={lang}/>
+            <span className="nexo-hide-mobile"><ShareNavButton user={user} lang={lang}/></span>
 
             {/* Idioma */}
             <span className="nexo-hide-mobile"><LangSelector lang={lang} setLang={setLang}/></span>
