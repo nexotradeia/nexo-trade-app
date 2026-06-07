@@ -22577,6 +22577,7 @@ export default function App(){
         if(!error && data){
           const mapped = data.map(p=>({
             id:         p.id,
+            _ts:        p.created_at ? +new Date(p.created_at) : Date.now(),
             userId:     p.user_id,
             user:       p.profiles?.username || p.user_name || p.username || "Trader",
             avatar:     p.profiles?.avatar_emoji || p.avatar_emoji || "🦅",
@@ -22617,7 +22618,7 @@ export default function App(){
         const p=payload.new;
         const {data:profile}=await supabase.from("profiles").select("username,avatar_emoji,avatar_color,points").eq("id",p.user_id).single();
         const newPost={
-          id:p.id,userId:p.user_id,
+          id:p.id,_ts:Date.now(),userId:p.user_id,
           user:profile?.username||p.user_name||"Trader",
           avatar:profile?.avatar_emoji||"🦅",
           avatarColor:profile?.avatar_color||C.accent,
@@ -22674,7 +22675,7 @@ export default function App(){
     const localId = `local-${Date.now()}`;
     // 1. Mostrar el post INMEDIATAMENTE en la pantalla (optimista)
     const localPost={
-      id:localId, userId:user?.id, user:user?.name||"Tú",
+      id:localId, _ts:Date.now(), userId:user?.id, user:user?.name||"Tú",
       avatar:user?.emoji||"🦅", avatarColor:user?.avatarColor||C.accent, photo:user?.avatarUrl||null,
       time:"ahora", ticker, sentiment, text, image:image||null, link:link||null,
       likes:0, comments:0, reposts:0, tags:[ticker]
@@ -22994,19 +22995,13 @@ export default function App(){
     return base;
   })();
 
-  // ── Feed estilo Twitter/StockTwits: cronológico + INTERCALADO con la comunidad ──
-  // Como casi todos los posts reales son del mismo usuario, intercalamos actividad de la comunidad
-  // entre ellos para que NO se vea un muro de "todos los míos juntos".
+  // ── Feed estilo Twitter/StockTwits: TODO ordenado por tiempo real (más reciente arriba) ──
+  // La comunidad (bots) recibe timestamps escalonados hacia atrás (desde ~12 min) para que un post
+  // recién publicado del usuario quede ARRIBA y el feed se lea cronológico sin saltos (1h, now, 2h…).
   const displayFeed = (()=>{
-    const result = [];
-    const community = [...liveBots, ...CASUAL_BOT_POSTS.map((b,i)=>({...b,_isBot:true,_key:`cb_${i}`}))];
-    let ci = 0;
-    filtered2.forEach((post) => {
-      result.push(post);
-      if (ci < community.length) { result.push(community[ci]); ci++; }  // 1 post de comunidad tras cada post real
-    });
-    while (ci < community.length && result.length < 16) { result.push(community[ci]); ci++; }  // rellenar si hay pocos reales
-    return result;
+    const community = [...liveBots, ...CASUAL_BOT_POSTS.map((b,i)=>({...b,_isBot:true,_key:`cb_${i}`}))]
+      .map((b,i)=>{ const ts=Date.now()-(i+1)*12*60000; return {...b,_ts:ts,time:fmtTimeAgo(new Date(ts).toISOString())}; });
+    return [...filtered2, ...community].sort((a,b)=>(b._ts||0)-(a._ts||0));
   })();
 
   const showingMockData = false; // ya no usamos mock posts
