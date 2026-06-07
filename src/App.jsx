@@ -23007,10 +23007,14 @@ export default function App(){
   // ── Mezclar liveBots + posts reales en el feed ───────────────────────────────
   const displayFeed = (()=>{
     const result = [];
-    // liveBots siempre van primero (los más recientes al tope)
+    // MIS posts van primero de todo (así el usuario ve su mensaje justo al publicar)
+    const mine = [], others = [];
+    filtered2.forEach(p => { if(user && (p.userId===user.id || p.user===user.name)) mine.push(p); else others.push(p); });
+    mine.forEach(p => result.push(p));
+    // luego la actividad en vivo (bots)
     liveBots.forEach(b => result.push(b));
-    // Intercalar posts reales entre bots adicionales cada 2 posts reales
-    filtered2.forEach((post, i) => {
+    // intercalar el resto de posts reales con bots adicionales cada 2 posts
+    others.forEach((post, i) => {
       result.push(post);
       if ((i + 1) % 2 === 0) {
         const ALL = [...CASUAL_BOT_POSTS, ...BOT_POSTS];
