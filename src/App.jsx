@@ -1141,15 +1141,31 @@ function PriceProvider({children}){
     }
   }, []);
 
-  // REST — carga inicial; primero los tickers VISIBLES (cards de mercado) para que no se vean stale
+  // Carga inicial vía endpoint del servidor (1 llamada cacheada en CDN, compartida entre visitantes).
+  // Reemplaza el bombardeo per-navegador a Finnhub (key compartida se saturaba → precios estáticos viejos).
   useEffect(() => {
-    const delay = (ms) => new Promise(r => setTimeout(r, ms));
-    const PRIORITY = ["SPY","QQQ","DIA","IWM","NVDA","AAPL","TSLA","MSFT","AMZN","META","GOOGL","AVGO","BTC","ETH"];
-    (async () => {
-      const all=[...trackedRef.current];
-      const ordered=[...PRIORITY.filter(t=>all.includes(t)), ...all.filter(t=>!PRIORITY.includes(t))];
-      for(let i=0;i<ordered.length;i++){ await delay(1050); restFetch(ordered[i]); } // 1050ms ≈ 57/min (límite free 60/min)
-    })();
+    let cancel=false;
+    const load = async () => {
+      try{
+        const r = await fetch("/api/data?type=quotes&set=tape");
+        const j = await r.json();
+        if(cancel || !j || !j.prices) return;
+        setPrices(p => {
+          const next = {...p};
+          Object.entries(j.prices).forEach(([t,v]) => {
+            if(v && v.price > 0){
+              next[t] = { price: v.price, change: v.change ?? 0 };
+              // sembrar prev-close para que los ticks del WebSocket calculen el % correctamente
+              prevCRef.current[t] = (v.change!=null && v.change!==0) ? v.price/(1+v.change/100) : v.price;
+            }
+          });
+          return next;
+        });
+      }catch(_){}
+    };
+    load();
+    const iv = setInterval(load, 45000); // refresca cada 45s (mismo cache del CDN)
+    return () => { cancel=true; clearInterval(iv); };
   }, []);
 
   // WebSocket — actualizaciones tick a tick en tiempo real
