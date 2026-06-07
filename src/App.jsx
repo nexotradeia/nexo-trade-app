@@ -1275,10 +1275,21 @@ function TickerTape({lang="es", onPremium}) {
   // "Foto" de precios cada 12s: la cinta NO se redibuja con cada tick.
   // Así el ancho de los items no cambia constantemente y la animación corre fluida (sin saltos en móvil).
   const [snap,setSnap] = useState(lp);
+  const rootRef = useRef(null);
+  const tapeRef = useRef(null);
   useEffect(()=>{
     const first = setTimeout(()=>setSnap({...lpRef.current}), 1500);
     const id = setInterval(()=>setSnap({...lpRef.current}), 12000);
     return ()=>{ clearTimeout(first); clearInterval(id); };
+  },[]);
+  // Pausar la animación cuando la cinta no está a la vista (ahorra CPU/batería en móvil al bajar en el feed)
+  useEffect(()=>{
+    if(!rootRef.current || typeof IntersectionObserver==="undefined") return;
+    const io = new IntersectionObserver(es=>{
+      if(tapeRef.current) tapeRef.current.style.animationPlayState = es[0]?.isIntersecting ? "" : "paused";
+    },{threshold:0});
+    io.observe(rootRef.current);
+    return ()=>io.disconnect();
   },[]);
   const isEN = lang==="en";
   const doubled = useMemo(()=>{
@@ -1321,9 +1332,9 @@ function TickerTape({lang="es", onPremium}) {
         </div>
       )),[doubled, onPremium]);
   return (
-    <div style={{background:"linear-gradient(180deg,#0b1426,#0f172a)",height:42,overflow:"hidden",borderBottom:"1px solid #1e293b"}}>
+    <div ref={rootRef} style={{background:"linear-gradient(180deg,#0b1426,#0f172a)",height:42,overflow:"hidden",borderBottom:"1px solid #1e293b"}}>
       <style>{`@keyframes tape{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}} .tape{display:flex;animation:tape 70s linear infinite;width:max-content;will-change:transform;transform:translateZ(0);backface-visibility:hidden;contain:layout style paint;} .tape:hover{animation-play-state:paused} @media(max-width:767px){.tape{animation-duration:60s}}`}</style>
-      <div className="tape" style={{alignItems:"center",height:42}}>
+      <div className="tape" ref={tapeRef} style={{alignItems:"center",height:42}}>
         {children}
       </div>
     </div>
