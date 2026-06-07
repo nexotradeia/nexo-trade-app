@@ -5964,7 +5964,8 @@ function TrendingPage({posts=[],lang="es"}){
 
 
 // ── VIP UPSELL CARD (aparece en el feed cada 5 posts) ─────────────────────────
-function VipFeedCard({onGoVIP}){
+function VipFeedCard({onGoVIP, lang="es"}){
+  const isEN = lang==="en";
   return(
     <div onClick={onGoVIP} style={{
       background:"linear-gradient(135deg,#0F0A2E,#1A0A3D,#0D1A3D)",
@@ -5983,27 +5984,27 @@ function VipFeedCard({onGoVIP}){
       {/* Badge */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
         <span style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:800,letterSpacing:0.8}}>✦ NEXO PREMIUM</span>
-        <span style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>Oferta especial</span>
+        <span style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>{isEN?"Special offer":"Oferta especial"}</span>
       </div>
 
       {/* Título */}
       <div style={{fontWeight:900,color:"#fff",fontSize:17,marginBottom:4,letterSpacing:-0.3}}>
-        Accede a picks exclusivos 📈
+        {isEN?"Access exclusive picks 📈":"Accede a picks exclusivos 📈"}
       </div>
       <div style={{color:"rgba(255,255,255,0.55)",fontSize:12,marginBottom:14,lineHeight:1.5}}>
-        Señales PREMIUM · Picks semanales · Sala privada · Análisis en tiempo real
+        {isEN?"PREMIUM signals · Weekly picks · Private room · Real-time analysis":"Señales PREMIUM · Picks semanales · Sala privada · Análisis en tiempo real"}
       </div>
 
       {/* Features */}
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
-        {["📊 Picks PREMIUM","🔔 Alertas","💬 Sala privada","📅 Earnings"].map(f=>(
+        {(isEN?["📊 PREMIUM Picks","🔔 Alerts","💬 Private room","📅 Earnings"]:["📊 Picks PREMIUM","🔔 Alertas","💬 Sala privada","📅 Earnings"]).map(f=>(
           <span key={f} style={{background:"rgba(15,94,104,0.15)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"rgba(255,255,255,0.7)",fontWeight:600}}>{f}</span>
         ))}
       </div>
 
       {/* CTA */}
       <div style={{background:"linear-gradient(135deg,#0F5E68,#0F5E68)",borderRadius:12,padding:"11px 20px",textAlign:"center",color:"#fff",fontWeight:900,fontSize:14,boxShadow:"0 4px 16px rgba(15,94,104,0.5)"}}>
-        ✦ Hazte PREMIUM — Solo $15.99/mes →
+        {isEN?"✦ Go PREMIUM — Only $15.99/mo →":"✦ Hazte PREMIUM — Solo $15.99/mes →"}
       </div>
     </div>
   );
@@ -22662,7 +22663,7 @@ export default function App(){
     const isFollowing=following.includes(id);
     setFollow(prev=>isFollowing?prev.filter(x=>x!==id):[...prev,id]);
     if(!isFollowing){
-      showPoints(POINT_ACTIONS.follower,"¡Siguiendo!");
+      showPoints(POINT_ACTIONS.follower,lang==="en"?"Following!":"¡Siguiendo!");
       // Guardar en BD si hay sesión
       if(user?.id && user.id!=="local"){
         await supabase.from("follows").insert({follower_id:user.id,following_id:id}).select();
@@ -22959,7 +22960,7 @@ export default function App(){
             {/* AdSense banner cada 6 posts */}
             {(i+1)%6===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
             {!effectivePremium && (i+1)%5===0 && (
-              <VipFeedCard onGoVIP={()=>setPage(8)}/>
+              <VipFeedCard onGoVIP={()=>setPage(8)} lang={lang}/>
             )}
           </div>
         ))}
