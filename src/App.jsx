@@ -7699,7 +7699,7 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
           <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.15)",borderRadius:20,padding:"4px 12px",marginBottom:12}}>
             <span style={{fontSize:12,fontWeight:800,color:"#fff",letterSpacing:0.5}}>✦ PREMIUM</span>
           </div>
-          <div style={{fontSize:21,fontWeight:900,color:"#fff",letterSpacing:-0.4,marginBottom:6,fontFamily:"'Space Grotesk',sans-serif"}}>
+          <div style={{fontSize:21,fontWeight:900,color:"#fff",letterSpacing:-0.4,marginBottom:6,fontFamily:"'Syne',sans-serif"}}>
             {isEN?"Unlock everything":"Desbloquea todo"}
           </div>
           <div style={{fontSize:13,color:"rgba(255,255,255,0.85)",lineHeight:1.5}}>
@@ -7799,7 +7799,7 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderBottom:"1px solid rgba(15,23,42,0.06)"}}>
         <div style={{display:"flex",alignItems:"center",gap:7}}>
           <span style={{width:7,height:7,borderRadius:"50%",background:GOLD,display:"inline-block"}}/>
-          <span style={{fontSize:13,fontWeight:800,color:"#0F172A",letterSpacing:-0.2,fontFamily:"'Space Grotesk',sans-serif"}}>{isEN?"My Watchlist":"Mi Watchlist"}</span>
+          <span style={{fontSize:13,fontWeight:800,color:"#0F172A",letterSpacing:-0.2,fontFamily:"'Syne',sans-serif"}}>{isEN?"My Watchlist":"Mi Watchlist"}</span>
           <span style={{fontSize:10,fontWeight:700,color:"#64748B",background:"rgba(15,23,42,0.05)",borderRadius:8,padding:"1px 7px"}}>{tickers.length}</span>
         </div>
         <span onClick={isPremium?undefined:openPaywall} style={{fontSize:11,fontWeight:700,color:GOLD,cursor:"pointer"}}>{isEN?"See all →":"Ver todo →"}</span>
@@ -7999,7 +7999,7 @@ function ShareModal({ open, onClose, user, lang="es" }){
         <div style={{background:"linear-gradient(135deg,#0F4C81,#0F5E68)",padding:"22px 22px 18px",textAlign:"center",position:"relative"}}>
           <button onClick={onClose} style={{position:"absolute",top:12,right:14,background:"rgba(255,255,255,0.18)",border:"none",borderRadius:"50%",width:26,height:26,cursor:"pointer",color:"#fff",fontSize:13}}>✕</button>
           <div style={{fontSize:30,marginBottom:6}}>🌍</div>
-          <div style={{fontSize:18,fontWeight:900,color:"#fff",fontFamily:"'Space Grotesk',sans-serif",letterSpacing:-0.3}}>{isEN?"Invite the world":"Invita al mundo"}</div>
+          <div style={{fontSize:18,fontWeight:900,color:"#fff",fontFamily:"'Syne',sans-serif",letterSpacing:-0.3}}>{isEN?"Invite the world":"Invita al mundo"}</div>
           <div style={{fontSize:12,color:"rgba(255,255,255,0.85)",marginTop:4,lineHeight:1.4}}>{user?.id?(isEN?"Share your link — earn 1 month Premium free per friend who subscribes.":"Comparte tu link — gana 1 mes Premium gratis por cada amigo que se suscriba."):(isEN?"Share NexoTrade with traders everywhere.":"Comparte NexoTrade con traders de todo el mundo.")}</div>
         </div>
         <div style={{padding:18}}>
@@ -8093,12 +8093,12 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
             <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:46,height:46,borderRadius:13,background:"linear-gradient(135deg,#0F4C81,#0F5E68)"}}>
               <svg width="26" height="26" viewBox="0 0 56 56" fill="none"><path d="M14 38L22 26L30 32L38 18" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="42" cy="18" r="3" fill="#00E58F"/></svg>
             </span>
-            <span style={{color:"#fff",fontSize:21,fontWeight:800,letterSpacing:2,fontFamily:"'Space Grotesk',sans-serif"}}>NEXOTRADE</span>
+            <span style={{color:"#fff",fontSize:21,fontWeight:800,letterSpacing:2,fontFamily:"'Syne',sans-serif"}}>NEXOTRADE</span>
           </div>
           <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:20,padding:"5px 14px",marginBottom:20}}>
             <span style={{fontSize:11.5,fontWeight:800,color:"#FBBF24",letterSpacing:0.3}}>✦ Founder offer — free for the first 500 members</span>
           </div>
-          <h1 style={{margin:"0 0 16px",color:"#fff",fontSize:"clamp(30px,6vw,46px)",fontWeight:900,letterSpacing:-1,lineHeight:1.08,fontFamily:"'Space Grotesk',sans-serif"}}>
+          <h1 style={{margin:"0 0 16px",color:"#fff",fontSize:"clamp(30px,6vw,46px)",fontWeight:900,letterSpacing:-1,lineHeight:1.08,fontFamily:"'Syne',sans-serif"}}>
             Trade smarter.<br/><span style={{background:"linear-gradient(90deg,#34D399,#38BDF8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Together.</span>
           </h1>
           <p style={{margin:"0 0 28px",color:"#A9BCCE",fontSize:"clamp(15px,2.4vw,17px)",lineHeight:1.6}}>
@@ -8138,7 +8138,7 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
         <div style={{marginTop:"clamp(48px,9vw,84px)"}}>
           <div style={{textAlign:"center",maxWidth:600,margin:"0 auto 34px"}}>
             <div style={{fontSize:12,fontWeight:800,letterSpacing:2,color:"#34D399",textTransform:"uppercase",marginBottom:10}}>What is NexoTrade</div>
-            <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4.5vw,34px)",fontWeight:900,letterSpacing:-0.6,lineHeight:1.15,fontFamily:"'Space Grotesk',sans-serif"}}>
+            <h2 style={{margin:"0 0 12px",color:"#fff",fontSize:"clamp(24px,4.5vw,34px)",fontWeight:900,letterSpacing:-0.6,lineHeight:1.15,fontFamily:"'Syne',sans-serif"}}>
               Everything a modern investor needs — in one platform
             </h2>
             <p style={{margin:0,color:"#9FB3C8",fontSize:15,lineHeight:1.6}}>
@@ -8149,7 +8149,7 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
             {FEATURES.map((f,i)=>(
               <div key={i} style={card}>
                 <div style={{fontSize:26,marginBottom:10}}>{f.ic}</div>
-                <div style={{color:"#fff",fontSize:16,fontWeight:800,marginBottom:6,fontFamily:"'Space Grotesk',sans-serif"}}>{f.t}</div>
+                <div style={{color:"#fff",fontSize:16,fontWeight:800,marginBottom:6,fontFamily:"'Syne',sans-serif"}}>{f.t}</div>
                 <div style={{color:"#9FB3C8",fontSize:13.5,lineHeight:1.55}}>{f.d}</div>
               </div>
             ))}
@@ -8159,7 +8159,7 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
           <div style={{display:"flex",justifyContent:"center",gap:"clamp(24px,8vw,72px)",flexWrap:"wrap",margin:"clamp(40px,7vw,60px) 0 0",textAlign:"center"}}>
             {[["50+","Markets tracked"],["24/7","Live data feed"],["AI","Daily signals"],["100%","Beginner-friendly"]].map(([n,l],i)=>(
               <div key={i}>
-                <div style={{color:"#fff",fontSize:"clamp(26px,5vw,36px)",fontWeight:900,fontFamily:"'Space Grotesk',sans-serif",lineHeight:1}}>{n}</div>
+                <div style={{color:"#fff",fontSize:"clamp(26px,5vw,36px)",fontWeight:900,fontFamily:"'Syne',sans-serif",lineHeight:1}}>{n}</div>
                 <div style={{color:"#7C8EA0",fontSize:12.5,fontWeight:600,marginTop:6,letterSpacing:0.3}}>{l}</div>
               </div>
             ))}
@@ -8167,7 +8167,7 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
 
           {/* CTA final */}
           <div style={{textAlign:"center",marginTop:"clamp(40px,7vw,60px)"}}>
-            <h3 style={{margin:"0 0 18px",color:"#fff",fontSize:"clamp(20px,3.5vw,26px)",fontWeight:800,fontFamily:"'Space Grotesk',sans-serif"}}>Ready to start? It's free.</h3>
+            <h3 style={{margin:"0 0 18px",color:"#fff",fontSize:"clamp(20px,3.5vw,26px)",fontWeight:800,fontFamily:"'Syne',sans-serif"}}>Ready to start? It's free.</h3>
             <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
               <button onClick={()=>{const el=document.querySelector("input[type=email]");el&&el.focus();el&&el.scrollIntoView({behavior:"smooth",block:"center"});}}
                 style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px 30px",color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.35)",fontFamily:"inherit"}}>
@@ -8192,7 +8192,7 @@ function ToolShell({emoji,title,desc,children}){
     <div style={{maxWidth:760,margin:"0 auto",padding:"0 4px 40px"}}>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
         <div style={{width:46,height:46,borderRadius:13,background:"linear-gradient(135deg,#0F4C81,#0F5E68)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{emoji}</div>
-        <h1 style={{margin:0,fontSize:"clamp(20px,3.5vw,26px)",fontWeight:900,color:C.text,letterSpacing:-0.5,fontFamily:"'Space Grotesk',sans-serif"}}>{title}</h1>
+        <h1 style={{margin:0,fontSize:"clamp(20px,3.5vw,26px)",fontWeight:900,color:C.text,letterSpacing:-0.5,fontFamily:"'Syne',sans-serif"}}>{title}</h1>
       </div>
       {desc&&<p style={{margin:"0 0 18px 58px",color:C.muted,fontSize:13.5,lineHeight:1.5}}>{desc}</p>}
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:18,padding:"22px",boxShadow:C.shadow}}>{children}</div>
@@ -8642,7 +8642,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:99996,backdropFilter:"blur(2px)"}}/>
     <div style={{position:"fixed",top:0,left:0,bottom:0,width:"87vw",maxWidth:350,background:"#fff",zIndex:99997,overflowY:"auto",boxShadow:"8px 0 50px rgba(0,0,0,0.35)",display:"flex",flexDirection:"column",animation:"nexo-slidein 0.25s ease"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderBottom:`1px solid ${C.border}`,position:"sticky",top:0,background:"#fff",zIndex:2}}>
-        <span style={{fontWeight:900,fontSize:17,color:"#0F4C81",fontFamily:"'Space Grotesk',sans-serif"}}>NexoTrade</span>
+        <span style={{fontWeight:900,fontSize:17,color:"#0F4C81",fontFamily:"'Syne',sans-serif"}}>NexoTrade</span>
         <button onClick={onClose} style={{background:C.card2||"#f1f5f9",border:"none",borderRadius:"50%",width:32,height:32,fontSize:16,color:C.muted,cursor:"pointer"}}>✕</button>
       </div>
       <div style={{padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
@@ -11666,7 +11666,7 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
         <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontSize:9,fontWeight:800,padding:"4px 12px",borderRadius:"0 18px 0 10px",letterSpacing:0.5}}>PARTNER</div>
         <div style={{width:52,height:52,borderRadius:14,background:"radial-gradient(circle,#1a1408,#000)",border:"1px solid rgba(212,175,55,0.5)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>📈</div>
         <div style={{flex:1,minWidth:180}}>
-          <div style={{fontWeight:900,color:"#E0B64B",fontSize:16,letterSpacing:0.2,fontFamily:"'Space Grotesk',sans-serif"}}>CalculatedWealth</div>
+          <div style={{fontWeight:900,color:"#E0B64B",fontSize:16,letterSpacing:0.2,fontFamily:"'Syne',sans-serif"}}>CalculatedWealth</div>
           <div style={{fontSize:12.5,color:"#C9B687",marginTop:3,lineHeight:1.5}}>{isEN?"Premium trading wall art — charts & motivation for your office or trading desk.":"Cuadros de trading premium — gráficos y motivación para tu oficina o escritorio."}</div>
         </div>
         <span style={{flexShrink:0,background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontWeight:800,fontSize:13,borderRadius:12,padding:"10px 20px",whiteSpace:"nowrap"}}>{isEN?"Visit shop →":"Ver tienda →"}</span>
@@ -20012,7 +20012,7 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
       {/* HEADER */}
       <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",marginBottom:14}}>
         <span style={{fontSize:26}}>🇺🇸</span>
-        <h1 style={{margin:0,fontSize:"clamp(20px,3.5vw,26px)",fontWeight:900,color:C.text,letterSpacing:-0.6,fontFamily:"'Space Grotesk',sans-serif"}}>
+        <h1 style={{margin:0,fontSize:"clamp(20px,3.5vw,26px)",fontWeight:900,color:C.text,letterSpacing:-0.6,fontFamily:"'Syne',sans-serif"}}>
           {session==="pre" ? (isEN?"Pre-Market · United States":"Pre-Market · Estados Unidos") : (isEN?"After-Hours · United States":"After-Hours · Estados Unidos")}
         </h1>
         <span style={{display:"inline-flex",alignItems:"center",gap:6,background:sessionOpen?"rgba(22,163,74,0.12)":"rgba(220,38,38,0.10)",border:`1px solid ${sessionOpen?"rgba(22,163,74,0.35)":"rgba(220,38,38,0.3)"}`,borderRadius:20,padding:"4px 12px"}}>
@@ -21697,7 +21697,7 @@ function AdminDashboard(){
       {/* ── NAVBAR ADMIN ── */}
       <div className="nexo-admin-navbar" style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"10px 16px",marginBottom:20,display:"flex",alignItems:"center",gap:8,minHeight:60,boxShadow:"0 1px 3px rgba(0,0,0,0.05)",flexWrap:"wrap"}}>
         <div style={{fontWeight:900,fontSize:18,color:"#0F172A",marginRight:32,letterSpacing:-0.5}}>
-          <span style={{fontFamily:"'Space Grotesk',sans-serif",letterSpacing:-0.5}}><span style={{color:"#0F4C81"}}>Nexo</span>Trade</span>
+          <span style={{fontFamily:"'Syne',sans-serif",letterSpacing:-0.5}}><span style={{color:"#0F4C81"}}>Nexo</span>Trade</span>
         </div>
         <div style={{display:"flex",gap:2,flex:1,overflowX:"auto",scrollbarWidth:"none"}}>
           {TABS.map(t=>(
