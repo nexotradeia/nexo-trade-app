@@ -2140,6 +2140,10 @@ function AuthModal({mode,onClose,onAuth,lang}){
           options:{data:{username:finalUsername,avatar_emoji:avatar.emoji,avatar_color:avatar.color}}
         });
         if(err){setError(err.message);setLoading(false);return;}
+        // Referido: quién lo invitó (?ref= en la URL o guardado en localStorage al cargar)
+        let refId=null;
+        try{ refId = new URLSearchParams(window.location.search).get("ref") || localStorage.getItem("nexo-ref") || null; }catch{}
+        if(refId && data.user?.id && refId===data.user.id) refId=null; // no auto-referirse
         // Insertar perfil en tabla profiles
         try{
           await supabase.from("profiles").upsert({
@@ -2149,8 +2153,10 @@ function AuthModal({mode,onClose,onAuth,lang}){
             avatar_color:avatar.color,
             bio: lang==="en"?"New on NexoTrade 🚀":"Nuevo en NexoTrade 🚀",
             points:100,
+            ...(refId?{referred_by:refId}:{}),
           });
         }catch(e){}
+        try{ localStorage.removeItem("nexo-ref"); }catch{}
         // Email de bienvenida via Edge Function (no bloquea el flujo)
         try{
           supabase.functions.invoke("send-welcome",{body:{email,name:finalUsername}});
@@ -22286,6 +22292,8 @@ export default function App(){
   const [aiBubbleOff,setAiBubbleOff] = useState(false);
   // Auto-ocultar la burbuja del chatbot tras 7s para no tapar contenido (desktop)
   useEffect(()=>{ const t=setTimeout(()=>setAiBubbleOff(true),7000); return ()=>clearTimeout(t); },[]);
+  // Referidos: guardar ?ref= al cargar (persiste si el visitante explora antes de registrarse)
+  useEffect(()=>{ try{ const r=new URLSearchParams(window.location.search).get("ref"); if(r) localStorage.setItem("nexo-ref", r); }catch{} },[]);
   const [showAlerts,setAlerts]       = useState(false);
   const [communityCount, setCommunityCount] = useState(3200);
   const animatedCount = useCountUp(communityCount, 2500);
