@@ -4670,11 +4670,16 @@ function TickerStrip(){
 function MarketsMiniWidget({ lang="es" }){
   const isEN = lang === "en";
   const [tab, setTab] = useState("mercados");
-  const [polyData] = useState([
-    {q:"Fed rate cut in 2026?", p:0.55, vol:"$1.8M"},
-    {q:"S&P 500 closes above 6,000 in 2026?", p:0.63, vol:"$2.1M"},
-    {q:"Bitcoin hits $120K before year end?", p:0.48, vol:"$5.2M"},
+  const [polyData] = useState(isEN ? [
+    {q:"Fed cuts rates again in 2026?", p:0.55, vol:"$1.8M"},
+    {q:"S&P 500 closes above 7,000 in 2026?", p:0.42, vol:"$2.1M"},
+    {q:"Bitcoin hits $120K before year end?", p:0.38, vol:"$5.2M"},
     {q:"US inflation stays below 3% all 2026?", p:0.61, vol:"$940K"},
+  ] : [
+    {q:"¿La Fed vuelve a bajar tasas en 2026?", p:0.55, vol:"$1.8M"},
+    {q:"¿El S&P 500 cierra sobre 7,000 en 2026?", p:0.42, vol:"$2.1M"},
+    {q:"¿Bitcoin llega a $120K antes de fin de año?", p:0.38, vol:"$5.2M"},
+    {q:"¿La inflación de EE.UU. se mantiene bajo 3% todo 2026?", p:0.61, vol:"$940K"},
   ]);
   // Usar el PriceCtx centralizado — mismo WebSocket que el resto del app
   const lp = useContext(PriceCtx);
