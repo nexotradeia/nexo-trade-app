@@ -8709,14 +8709,20 @@ function MarketOverview({lang="es"}){
   },[]);
   useEffect(()=>{
     if(region==="global") return;
-    let c=false;
+    let c=false, tries=0, retryTimer=null;
     const load=()=>{
       setRLoading(true);
       fetch("/api/data?type=quotes&set="+region).then(r=>r.json()).then(j=>{
-        if(!c){ setRd(prev=>({...prev,[region]:j.rows||[]})); setRLoading(false); }
-      }).catch(()=>{if(!c)setRLoading(false);});
+        if(c) return;
+        const rows=j.rows||[];
+        setRd(prev=>({...prev,[region]:rows}));
+        setRLoading(false);
+        // Solo datos reales: si la API libre no alcanzó, reintenta pronto (no deja "Sin datos" pegado)
+        if(rows.length===0 && tries<5){ tries++; retryTimer=setTimeout(load, 3500); }
+      }).catch(()=>{ if(!c){ setRLoading(false); if(tries<5){ tries++; retryTimer=setTimeout(load,3500); } } });
     };
-    load(); const iv=setInterval(load,60000); return()=>{c=true;clearInterval(iv);};
+    load(); const iv=setInterval(()=>{tries=0;load();},60000);
+    return()=>{c=true;clearInterval(iv);clearTimeout(retryTimer);};
   },[region]);
   const Section=({title,rows})=>(
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 14px",boxShadow:C.shadow}}>
@@ -8774,7 +8780,7 @@ function MarketOverview({lang="es"}){
             <Section title="Commodities" rows={d?.commodities}/>
           </div>
         : (regionRows&&regionRows.length===0)
-          ? <div style={{fontSize:12.5,color:C.muted2,padding:"14px 0"}}>{rLoading?(isEN?"loading…":"cargando…"):(isEN?"No data available":"Sin datos disponibles")}</div>
+          ? <div style={{fontSize:12.5,color:C.muted2,padding:"14px 0"}}>{isEN?"Updating real data…":"Actualizando datos reales…"}</div>
           : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12}}>
               {(regionRows||[]).map(r=><Tile key={r.s} r={r}/>)}
             </div>}
