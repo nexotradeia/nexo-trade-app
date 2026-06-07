@@ -1,7 +1,6 @@
 // NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import * as THREE from 'three';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
 // ── Flags de visibilidad — reactivar cuando haya 30+ usuarios ──
@@ -1100,14 +1099,30 @@ function PriceProvider({children}){
     ALL_TRACK.forEach(t => { symToTickerRef.current[fhSymbolOf(t)] = t; });
   }
 
+  // Buffer de ticks: en horario de mercado llegan decenas de ticks/seg.
+  // Antes cada tick hacía setPrices → re-render de toda la app (lag en móvil).
+  // Ahora acumulamos en un ref y volcamos a estado 1 vez/seg.
+  const pendingRef = useRef({});
   const updatePrice = (ticker, price) => {
     const pc = prevCRef.current[ticker];
     const dp = pc && pc > 0 ? parseFloat(((price - pc) / pc * 100).toFixed(2)) : null;
-    setPrices(p => ({
-      ...p,
-      [ticker]: { price, change: dp ?? p[ticker]?.change ?? 0 }
-    }));
+    pendingRef.current[ticker] = { price, change: dp };
   };
+  useEffect(() => {
+    const flush = setInterval(() => {
+      const pend = pendingRef.current;
+      if (!pend || Object.keys(pend).length === 0) return;
+      pendingRef.current = {};
+      setPrices(p => {
+        const next = { ...p };
+        Object.entries(pend).forEach(([t, v]) => {
+          next[t] = { price: v.price, change: v.change ?? next[t]?.change ?? 0 };
+        });
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(flush);
+  }, []);
 
   // REST puntual para un ticker (carga inicial / al registrarse)
   const restFetch = async (ticker) => {
@@ -18590,9 +18605,13 @@ function RadarGlobalPage({lang="es"}){
     return()=>{clearInterval(iv);clearInterval(ivTime);clearInterval(ivOps);};
   },[]);
 
-  // Three.js globe (npm) — v3 clean
+  // Three.js globe (npm) — v3 clean · carga dinámica (no infla el bundle inicial en móvil)
   useEffect(()=>{
     if(!cvsRef.current||!wrapRef.current)return;
+    let cleanup=()=>{}; let cancelled=false;
+    (async()=>{
+    const THREE = await import('three');
+    if(cancelled||!cvsRef.current||!wrapRef.current)return;
     const W=wrapRef.current.clientWidth||700, H=480;
     function l2v(lat,lon,r=5){const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));}
     function makeTex(fn,sz=256){const c=document.createElement('canvas');c.width=c.height=sz;fn(c.getContext('2d'),sz);return new THREE.CanvasTexture(c);}
@@ -18690,12 +18709,14 @@ function RadarGlobalPage({lang="es"}){
     fetch('https://api.coingecko.com/api/v3/exchanges?per_page=250',{signal:ctrl.signal})
       .then(r=>r.json()).then(data=>{const vm={};data.forEach(ex=>{if(ex.country)vm[ex.country]=(vm[ex.country]||0)+(ex.trade_volume_24h_btc||0);});T.current.volMap=vm;renderGlows(vm);setDataSrc(isEN?'Live data: CoinGecko':'Datos en vivo: CoinGecko');})
       .catch(()=>setDataSrc(isEN?'Source: estimated data':'Fuente: datos estimados'));
-    return()=>{
+    cleanup=()=>{
       cancelAnimationFrame(afId3);
       cvs.removeEventListener('click',onClick);cvs.removeEventListener('mousedown',onMD);
       window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);
       renderer.dispose();
     };
+    })();
+    return ()=>{ cancelled=true; cleanup(); };
   },[]);
 
   // pause toggle
