@@ -22608,8 +22608,11 @@ export default function App(){
       }catch(e){ console.error("Error cargando posts:", e); }
     };
     loadPosts();
-    // Auto-refresh cada 15 segundos — solo agrega posts NUEVOS sin mover el scroll
-    const refreshTimer=setInterval(loadPosts, 15000);
+    // Auto-refresh cada 7 segundos — los posts de otras cuentas aparecen rápido
+    const refreshTimer=setInterval(loadPosts, 7000);
+    // Al volver a la pestaña (p.ej. cambiar de cuenta), refrescar de inmediato
+    const onVis=()=>{ if(document.visibilityState==="visible") loadPosts(); };
+    document.addEventListener("visibilitychange", onVis);
 
     // Suscripción realtime — nuevos posts aparecen al instante
     sub=supabase
@@ -22646,7 +22649,7 @@ export default function App(){
       })
       .subscribe();
 
-    return()=>{ if(sub) supabase.removeChannel(sub); clearInterval(refreshTimer); };
+    return()=>{ if(sub) supabase.removeChannel(sub); clearInterval(refreshTimer); document.removeEventListener("visibilitychange", onVis); };
   },[]);
 
   const showPoints = (pts, reason) => {
