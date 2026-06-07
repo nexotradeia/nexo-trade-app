@@ -1255,7 +1255,7 @@ function TickerTape({lang="es", onPremium}) {
   const doubled = [...merged, ...merged]; // duplicar para el loop infinito
   return (
     <div style={{background:"linear-gradient(180deg,#0b1426,#0f172a)",height:42,overflow:"hidden",borderBottom:"1px solid #1e293b"}}>
-      <style>{`@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}} .tape{display:flex;animation:tape 95s linear infinite;width:max-content;} .tape:hover{animation-play-state:paused}`}</style>
+      <style>{`@keyframes tape{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}} .tape{display:flex;animation:tape 70s linear infinite;width:max-content;will-change:transform;transform:translateZ(0);backface-visibility:hidden;contain:layout style paint;} .tape:hover{animation-play-state:paused} @media(max-width:767px){.tape{animation-duration:60s}}`}</style>
       <div className="tape" style={{alignItems:"center",height:42}}>
         {doubled.map((item,i)=>item.promo?(
           <div key={i} onClick={onPremium}
