@@ -20181,6 +20181,25 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     return()=>{ cancel=true; clearInterval(iv); };
   },[tab]);
 
+  // ── Precios REALES del screener desde el endpoint cacheado (mismo que la cinta) ──
+  // Hace que precio/cambio (y por tanto el Setup IA calculado de ellos) coincidan con la realidad.
+  useEffect(()=>{
+    let cancel=false;
+    const load=()=>{
+      fetch("/api/data?type=quotes&set=tape").then(r=>r.json()).then(j=>{
+        if(cancel||!j||!j.prices) return;
+        setLivePrices(prev=>{
+          const next={...prev};
+          Object.entries(j.prices).forEach(([t,v])=>{ if(v&&v.price>0) next[t]={...(next[t]||{}),price:v.price,change:v.change??0}; });
+          return next;
+        });
+      }).catch(()=>{});
+    };
+    load();
+    const iv=setInterval(load,45000);
+    return()=>{ cancel=true; clearInterval(iv); };
+  },[]);
+
   // Salir de pantalla completa con tecla Escape
   useEffect(()=>{
     if(!fullScreen) return;
