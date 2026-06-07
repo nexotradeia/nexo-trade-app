@@ -24233,7 +24233,8 @@ export default function App(){
       )}
 
       {/* ── CHATBOT FLOTANTE IA ── */}
-      {!showAI && !aiHidden && (
+      {/* Robot flotante DESACTIVADO (pedido usuaria: ocupaba mucho espacio). La IA se abre desde el botón "IA" del navbar/barra inferior. */}
+      {false && !showAI && !aiHidden && (
         <div className="nexo-ai-fab" style={{
           position:"fixed", bottom:24, [aiSide]:24,
           zIndex:8900, display:"flex",
@@ -24310,7 +24311,7 @@ export default function App(){
       )}
 
       {/* Chip para restaurar cuando está oculto */}
-      {!showAI && aiHidden && (
+      {false && !showAI && aiHidden && (
         <button onClick={()=>setAiHidden(false)}
           style={{position:"fixed",bottom:16,right:16,zIndex:8900,
             background:"rgba(15,23,42,0.95)",border:"1px solid rgba(15,76,129,0.35)",
