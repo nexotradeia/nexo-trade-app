@@ -22972,13 +22972,8 @@ export default function App(){
   };
 
   // Posts: el del usuario actual siempre primero, luego el resto por fecha desc
-  const sortedPosts = [...posts].sort((a,b)=>{
-    const aIsMe = user && (a.userId===user.id || a.user===user.name);
-    const bIsMe = user && (b.userId===user.id || b.user===user.name);
-    if(aIsMe && !bIsMe) return -1;
-    if(!aIsMe && bIsMe) return 1;
-    return 0;
-  });
+  // Orden cronológico natural (más reciente arriba) — sin agrupar los posts por autor (estilo StockTwits)
+  const sortedPosts = posts;
   const filteredByTicker = tickerFilter
     ? sortedPosts.filter(p => p.text?.toUpperCase().includes(`$${tickerFilter}`) || p.ticker===tickerFilter)
     : sortedPosts;
