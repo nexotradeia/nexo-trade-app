@@ -1599,7 +1599,7 @@ function Badge2({badge,lang}){
 
 function SentPill({sentiment,lang}){
   const t=LANGS[lang],bull=sentiment==="bull";
-  return <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?C.bull:C.bear,border:`1px solid ${bull?"rgba(0,210,106,0.3)":"rgba(255,77,106,0.3)"}`,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,display:"inline-flex",alignItems:"center",gap:4,backdropFilter:"blur(8px)",letterSpacing:0.3}}>{bull?"▲":"▼"} {bull?(lang==="en"?"Bullish":"Alcista"):(lang==="en"?"Bearish":"Bajista")}</span>;
+  return <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?C.bull:C.bear,border:`1px solid ${bull?"rgba(0,210,106,0.3)":"rgba(255,77,106,0.3)"}`,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,display:"inline-flex",alignItems:"center",gap:4,letterSpacing:0.3}}>{bull?"▲":"▼"} {bull?(lang==="en"?"Bullish":"Alcista"):(lang==="en"?"Bearish":"Bajista")}</span>;
 }
 
 function TickerBadge({ticker,sentiment}){
@@ -23484,7 +23484,7 @@ export default function App(){
           onLogin={()=>{setEmailGateDone(true);setAuth("login");}}/>
       )}
       <TickerTape lang={lang} onPremium={()=>{setPage(8);setShowLanding(false);}}/>
-      <MarketCrisisBanner lang={lang} onCTA={()=>{setSent("all");setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}/>
+      <MarketCrisisBanner lang={lang} onCTA={()=>{setShowLanding(false);setPage(7);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
       {!user && showNewsletter && !newsletterDone && (
@@ -23526,7 +23526,7 @@ export default function App(){
       )}
 
       {/* NAVBAR */}
-      <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
+      <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,height:52,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Hamburger — solo móvil */}
@@ -24296,7 +24296,7 @@ export default function App(){
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BOTTOM NAV MÓVIL (estilo Robinhood/Instagram) — visible solo en móvil vía CSS ── */}
-      <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"rgba(255,255,255,0.98)",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",backdropFilter:"blur(12px)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
+      <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"#FFFFFF",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
         {[
           {ic:"🏠",l:lang==="en"?"Home":"Inicio",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
           {ic:"📊",l:lang==="en"?"Markets":"Mercados",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
