@@ -22989,11 +22989,18 @@ export default function App(){
     return base;
   })();
 
-  // ── Feed CORRIDO estilo StockTwits: posts reales continuos (tus posts primero vía sortedPosts), sin bots intercalados ──
+  // ── Feed estilo Twitter/StockTwits: cronológico + INTERCALADO con la comunidad ──
+  // Como casi todos los posts reales son del mismo usuario, intercalamos actividad de la comunidad
+  // entre ellos para que NO se vea un muro de "todos los míos juntos".
   const displayFeed = (()=>{
     const result = [];
-    filtered2.forEach(p => result.push(p));   // posts reales, uno tras otro
-    liveBots.forEach(b => result.push(b));     // actividad en vivo al final (relleno)
+    const community = [...liveBots, ...CASUAL_BOT_POSTS.map((b,i)=>({...b,_isBot:true,_key:`cb_${i}`}))];
+    let ci = 0;
+    filtered2.forEach((post) => {
+      result.push(post);
+      if (ci < community.length) { result.push(community[ci]); ci++; }  // 1 post de comunidad tras cada post real
+    });
+    while (ci < community.length && result.length < 16) { result.push(community[ci]); ci++; }  // rellenar si hay pocos reales
     return result;
   })();
 
