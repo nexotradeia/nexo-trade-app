@@ -839,7 +839,7 @@ function LangSelector({lang, setLang}){
 }
 
 // ── SETTINGS PANEL ────────────────────────────────────────────────────────────
-function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, supabase }) {
+function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, supabase, onOpenAlerts, alertCount=0 }) {
   const isEN = lang === "en";
   const notifStatus = typeof Notification !== "undefined" ? Notification.permission : "unsupported";
   const [hideLeaderboard, setHideLeaderboard] = useState(() => localStorage.getItem("nexo-hide-leaderboard") === "1");
@@ -925,6 +925,25 @@ function SettingsPanel({ onClose, darkMode, setDarkMode, lang, setLang, user, su
               ))}
             </div>
           </div>
+
+          {/* === ALERTAS DE PRECIO === */}
+          <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>{isEN?"PRICE ALERTS":"ALERTAS DE PRECIO"}</div>
+          <button onClick={()=>{ onClose&&onClose(); onOpenAlerts&&onOpenAlerts(); }}
+            style={{background:"#0f172a",borderRadius:14,padding:"16px 18px",border:"1px solid #334155",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",width:"100%",textAlign:"left",fontFamily:"inherit"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#0F4C81";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="#334155";}}>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:20}}>🔔</span>
+              <div>
+                <div style={{color:"#ffffff",fontWeight:700,fontSize:14}}>{isEN?"My price alerts":"Mis alertas de precio"}</div>
+                <div style={{color:"#64748b",fontSize:11,marginTop:2}}>{isEN?"Get notified when a ticker hits your target":"Te avisamos cuando un ticker llegue a tu objetivo"}</div>
+              </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+              {alertCount>0&&<span style={{minWidth:20,height:20,background:"#EF4444",borderRadius:10,fontSize:11,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px"}}>{alertCount}</span>}
+              <span style={{color:"#64748b",fontSize:18}}>›</span>
+            </div>
+          </button>
 
           {/* === NOTIFICACIONES === */}
           <div style={{color:"#64748b",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8,marginTop:8}}>{isEN?"NOTIFICATIONS":"NOTIFICACIONES"}</div>
@@ -23416,15 +23435,7 @@ export default function App(){
               <IcoBot/>
             </button>
 
-            {/* Alertas */}
-            <button className="nexo-btn-alerts" onClick={()=>setAlerts(true)}
-              title="Alertas"
-              style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(15,76,129,0.25)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",position:"relative",transition:"all 0.15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.12)";e.currentTarget.style.borderColor="rgba(15,76,129,0.5)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(15,76,129,0.25)";}}>
-              <IcoBell/>
-              {alertCount>0&&<span style={{position:"absolute",top:-3,right:-3,minWidth:16,height:16,background:"#EF4444",borderRadius:"50%",border:"2px solid var(--c-nav,#fff)",fontSize:9,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 2px",animation:"nexo-pulse 2s infinite"}}>{alertCount}</span>}
-            </button>
+            {/* Alertas → movidas a Configuración para ahorrar espacio en la barra */}
 
             {/* Dark mode toggle */}
             <button className="nexo-hide-mobile" onClick={()=>setDarkMode(!darkMode)}
@@ -24149,7 +24160,7 @@ export default function App(){
         </button>
       )}
       {showAlerts&&<AlertsPanel lang={lang} user={user} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
-      {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase}/>}
+      {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase} onOpenAlerts={()=>setAlerts(true)} alertCount={alertCount}/>}
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
       <PointToast show={toast.show} points={toast.points} reason={toast.reason}/>
     </div>
