@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-07 00:07:08 Sesión 14 — móvil: ocultar Home/IA/dark/share del navbar (ya en hamburger), deja barra limpia
+// NEXO TRADE — build: 2026-06-07 00:10:21 Sesión 14 — buscador en IPOs y Dividendos
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as THREE from 'three';
@@ -12166,6 +12166,7 @@ function DividendCalendarPage({lang="es"}) {
   const [loading, setLoading] = useState(true);
   const [source,  setSource]  = useState("local");
   const [sector,  setSector]  = useState("todos");
+  const [search,  setSearch]  = useState("");
   const today = new Date().toISOString().split("T")[0];
   const sectors = ["todos","Tecnología","Salud","Consumo","Energía","Telecomunicaciones","Finanzas","REITs","Utilities","BDC/Yield"];
 
@@ -12204,7 +12205,8 @@ function DividendCalendarPage({lang="es"}) {
 
   useEffect(()=>{ fetchDivs(yearTab); },[yearTab]);
 
-  const rows = divs.filter(d=> sector==="todos" || d.sector===sector);
+  const q = search.trim().toLowerCase();
+  const rows = divs.filter(d=> (sector==="todos" || d.sector===sector) && (!q || d.ticker.toLowerCase().includes(q) || (d.name||"").toLowerCase().includes(q)));
   const soon = (dateStr) => dateStr && dateStr >= today && new Date(dateStr)-new Date(today) < 30*864e5;
   const fmt  = d => d ? new Date(d+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"}) : "—";
 
@@ -12233,6 +12235,11 @@ function DividendCalendarPage({lang="es"}) {
               {y!==String(curYear) && <span style={{fontSize:10,color:yearTab===y?C.bull:C.muted2,fontWeight:600,marginLeft:4}}>Proy.</span>}
             </button>
           ))}
+        </div>
+        <div style={{position:"relative",marginBottom:10}}>
+          <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.muted2}}>🔍</span>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={isEN?"Search ticker or company…":"Buscar ticker o empresa…"}
+            style={{width:"100%",boxSizing:"border-box",background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 12px 9px 32px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit"}}/>
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {sectors.map(s=>(
@@ -12321,8 +12328,10 @@ const IPOS_2028 = [
 ];
 
 function IpoCalendarPage() {
+  const isEN = (()=>{try{return (localStorage.getItem("nexo-lang")||"en")==="en";}catch{return true;}})();
   const [yearTab, setYearTab] = useState("2026");
   const [filter,  setFilter]  = useState("all");
+  const [search,  setSearch]  = useState("");
   const [ipos,    setIpos]    = useState(IPOS_2026);
   const [loading, setLoading] = useState(true);
   const [source,  setSource]  = useState("local");
@@ -12390,7 +12399,8 @@ function IpoCalendarPage() {
     }
   },[yearTab]);
 
-  const rows = ipos.filter(ipo => filter==="all" || ipo.status===filter);
+  const q = search.trim().toLowerCase();
+  const rows = ipos.filter(ipo => (filter==="all" || ipo.status===filter) && (!q || (ipo.ticker||"").toLowerCase().includes(q) || (ipo.company||"").toLowerCase().includes(q)));
   const counts = {
     all:ipos.length,
     upcoming:ipos.filter(x=>x.status==="upcoming").length,
@@ -12450,6 +12460,13 @@ function IpoCalendarPage() {
               <span style={{fontSize:10,color:yearTab===t.k?t.color:C.muted2,fontWeight:600}}>{t.sub}</span>
             </button>
           ))}
+        </div>
+
+        {/* Buscador */}
+        <div style={{position:"relative",marginBottom:10}}>
+          <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.muted2}}>🔍</span>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={isEN?"Search company or ticker…":"Buscar empresa o ticker…"}
+            style={{width:"100%",boxSizing:"border-box",background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"9px 12px 9px 32px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit"}}/>
         </div>
 
         {/* Status filter */}
