@@ -3434,7 +3434,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6,flexWrap:"wrap"}}>
             <span style={{fontWeight:700,color:"var(--c-text)",fontSize:14,cursor:"pointer",letterSpacing:-0.3}}
               onClick={()=>{const u=MOCK_USERS.find(u=>u.name===post.user);if(u)onProfile(u);}}>{post.user}</span>
-            {post.is_pro&&<span style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",color:"#000",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
+            {post.is_pro&&<span style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>⚡PRO</span>}
             {post.is_premium&&!post.is_pro&&<span style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>✦ PREMIUM</span>}
             {/* Botón + Seguir (solo si es otro usuario) */}
             {isOtherUser && onFollow && (
@@ -3479,14 +3479,17 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             {post.tags.map(tg=><span key={tg} style={{background:"rgba(15,76,129,0.07)",color:"#0F4C81",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:600,letterSpacing:0.2}}>#{tg}</span>)}
           </div>}
           </div>
-          {/* 🔒 Overlay Premium — botón dorado para desbloquear */}
+          {/* 🔒 Overlay Premium — candado dorado para desbloquear */}
           {locked&&(
-            <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,zIndex:2}}>
+            <div onClick={e=>{e.stopPropagation();onNeedPremium?onNeedPremium():(onNeedAuth&&onNeedAuth());}}
+              style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,zIndex:2,cursor:"pointer",background:"linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(200,144,31,0.06) 55%,var(--c-card) 100%)",borderRadius:12}}>
+              <div style={{width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#E0B64B,#C8901F)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,boxShadow:"0 6px 22px rgba(200,144,31,0.5)"}}>🔒</div>
+              <div style={{fontSize:12,fontWeight:800,color:"var(--c-text)",textAlign:"center",letterSpacing:0.2}}>{isEN?"Entry · Target · Stop — locked":"Entrada · Objetivo · Stop — bloqueados"}</div>
               <button onClick={e=>{e.stopPropagation();onNeedPremium?onNeedPremium():(onNeedAuth&&onNeedAuth());}}
-                style={{background:"linear-gradient(135deg,#F59E0B,#B45309)",color:"#fff",border:"none",borderRadius:24,padding:"10px 22px",fontSize:13,fontWeight:800,letterSpacing:0.3,cursor:"pointer",boxShadow:"0 6px 20px rgba(245,158,11,0.45)",display:"flex",alignItems:"center",gap:7}}>
+                style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",border:"none",borderRadius:24,padding:"10px 24px",fontSize:13,fontWeight:900,letterSpacing:0.3,cursor:"pointer",boxShadow:"0 6px 20px rgba(200,144,31,0.45)",display:"flex",alignItems:"center",gap:7}}>
                 <span style={{fontSize:15}}>🔓</span>{isEN?"Unlock with Premium":"Desbloquear con Premium"}
               </button>
-              <span style={{fontSize:10.5,fontWeight:700,color:"#B45309",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"2px 10px"}}>✦ {isEN?"VIP · $15.99/mo · 7-day free trial":"VIP · $15.99/mes · 7 días gratis"}</span>
+              <span style={{fontSize:10.5,fontWeight:700,color:"#B45309",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"2px 10px"}}>✦ {isEN?"$15.99/mo · or $79/yr · 7-day free trial":"$15.99/mes · o $79/año · 7 días gratis"}</span>
             </div>
           )}
           </div>
@@ -6620,11 +6623,11 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
           {SIGNALS.map((s,i)=>(
             <div key={i} style={{background:C.surface,border:`1px solid ${s.tipo==="COMPRA"?C.bull:C.bear}33`,borderRadius:16,padding:"18px 20px",boxShadow:C.shadow,borderLeft:`4px solid ${s.tipo==="COMPRA"?C.bull:C.bear}`,position:"relative",overflow:"hidden"}}>
-              {s.blur&&<div style={{position:"absolute",inset:0,backdropFilter:"blur(6px)",background:"rgba(255,255,255,0.6)",zIndex:2,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:16}}>
+              {s.blur&&<div style={{position:"absolute",inset:0,backdropFilter:"blur(6px)",WebkitBackdropFilter:"blur(6px)",background:"rgba(255,255,255,0.55)",zIndex:2,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:16}}>
                 <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:28,marginBottom:8}}>🔒</div>
-                  <div style={{fontWeight:800,color:C.text,fontSize:14,marginBottom:4}}>Solo para miembros Premium</div>
-                  <button onClick={()=>setActiveTab("planes")} style={{background:`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:10,padding:"8px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Ver planes →</button>
+                  <div style={{width:42,height:42,borderRadius:"50%",margin:"0 auto 8px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:"0 6px 20px rgba(200,144,31,0.45)"}}>🔒</div>
+                  <div style={{fontWeight:800,color:"#1e293b",fontSize:14,marginBottom:8}}>{isEN?"Premium members only":"Solo para miembros Premium"}</div>
+                  <button onClick={()=>setActiveTab("planes")} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:24,padding:"9px 22px",color:"#1B1303",fontSize:13,fontWeight:900,cursor:"pointer",boxShadow:"0 6px 18px rgba(200,144,31,0.4)"}}>🔓 {isEN?"Unlock — from $79/yr":"Desbloquear — desde $79/año"}</button>
                 </div>
               </div>}
               <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
