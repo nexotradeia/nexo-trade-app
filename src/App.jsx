@@ -8028,7 +8028,7 @@ function ShareFeedCard({ user, lang="es" }){
 }
 
 // ── EMAIL GATE / LANDING — bienvenida + captura de email + presentación ──────
-function EmailGate({lang="es", onDone, onLogin}){
+function EmailGate({lang="es", onDone, onLogin, onSkip}){
   const [email,setEmail]=useState("");
   const [err,setErr]=useState(false);
   const submit=()=>{
@@ -8037,9 +8037,9 @@ function EmailGate({lang="es", onDone, onLogin}){
     try{ supabase.from("newsletter_subscribers").upsert({email, source:"email_gate", created_at:new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
     try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
     try{localStorage.setItem("nexo-email-gate-done","1");}catch{}
-    onDone&&onDone();
+    (onSkip||onDone)&&(onSkip||onDone)(); // entrar al Feed tras suscribirse
   };
-  const skip=()=>{ try{localStorage.setItem("nexo-email-gate-done","1");}catch{} onDone&&onDone(); };
+  const skip=()=>{ try{localStorage.setItem("nexo-email-gate-done","1");}catch{} (onSkip||onDone)&&(onSkip||onDone)(); };
   const FEATURES=[
     {ic:"📈",t:"Live Market Feed",d:"Real-time stock & crypto picks, breaking news and trade ideas from a global community of investors."},
     {ic:"🤖",t:"AI Stock Picks",d:"Daily AI-powered signals and setups — entries, targets and risk, distilled from thousands of data points."},
@@ -23330,6 +23330,7 @@ export default function App(){
       {!user && !emailGateDone && (
         <EmailGate lang={lang}
           onDone={()=>setEmailGateDone(true)}
+          onSkip={()=>{setEmailGateDone(true);setPage(0);setShowLanding(false);try{window.scrollTo({top:0});}catch{}}}
           onLogin={()=>{setEmailGateDone(true);setAuth("login");}}/>
       )}
       <TickerTape lang={lang} onPremium={()=>{setPage(8);setShowLanding(false);}}/>
