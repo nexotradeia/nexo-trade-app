@@ -1270,49 +1270,61 @@ function MarketCrisisBanner({lang="es", onCTA}){
 
 function TickerTape({lang="es", onPremium}) {
   const lp = useContext(PriceCtx);
+  const lpRef = useRef(lp);
+  lpRef.current = lp;
+  // "Foto" de precios cada 12s: la cinta NO se redibuja con cada tick.
+  // Así el ancho de los items no cambia constantemente y la animación corre fluida (sin saltos en móvil).
+  const [snap,setSnap] = useState(lp);
+  useEffect(()=>{
+    const first = setTimeout(()=>setSnap({...lpRef.current}), 1500);
+    const id = setInterval(()=>setSnap({...lpRef.current}), 12000);
+    return ()=>{ clearTimeout(first); clearInterval(id); };
+  },[]);
   const isEN = lang==="en";
-  const items = TAPE_TICKERS.map(ticker => {
-    const live   = lp[ticker];
-    const static_ = TAPE_ITEMS.find(t => t.ticker === ticker) || {};
-    return {
-      ...static_,
-      ticker,
-      price:  live ? fmtLivePrice(ticker, live.price) : static_.price,
-      change: live ? live.change : (static_.change ?? 0),
-    };
-  });
-  // Mensajes Premium intercalados cada 8 tickers (lo primero que ve el usuario)
-  // Solo 2 promos, espaciadas cada 16 tickers → cinta limpia/premium con el CTA presente sin saturar
-  const PROMOS = isEN ? [
-    "🔥 Launch price $15.99/mo — going up to $29 soon",
-    "🐋 See what hedge funds are buying → Premium",
-  ] : [
-    "🔥 Precio de lanzamiento $15.99/mes — sube a $29 pronto",
-    "🐋 Ve qué compran los hedge funds → Premium",
-  ];
-  const merged = [];
-  items.forEach((it,i)=>{
-    merged.push(it);
-    if((i+1)%16===0) merged.push({promo:PROMOS[Math.floor((i+1)/16-1)%PROMOS.length]});
-  });
-  const doubled = [...merged, ...merged]; // duplicar para el loop infinito
+  const doubled = useMemo(()=>{
+    const items = TAPE_TICKERS.map(ticker => {
+      const live   = snap[ticker];
+      const static_ = TAPE_ITEMS.find(t => t.ticker === ticker) || {};
+      return {
+        ...static_,
+        ticker,
+        price:  live ? fmtLivePrice(ticker, live.price) : static_.price,
+        change: live ? live.change : (static_.change ?? 0),
+      };
+    });
+    const PROMOS = isEN ? [
+      "🔥 Launch price $15.99/mo — going up to $29 soon",
+      "🐋 See what hedge funds are buying → Premium",
+    ] : [
+      "🔥 Precio de lanzamiento $15.99/mes — sube a $29 pronto",
+      "🐋 Ve qué compran los hedge funds → Premium",
+    ];
+    const merged = [];
+    items.forEach((it,i)=>{
+      merged.push(it);
+      if((i+1)%16===0) merged.push({promo:PROMOS[Math.floor((i+1)/16-1)%PROMOS.length]});
+    });
+    return [...merged, ...merged]; // duplicar para el loop infinito
+  },[snap, isEN]);
+  // Memoizar los nodos: entre fotos React no reconcilia la cinta (cero reflow = animación fluida)
+  const children = useMemo(()=> doubled.map((item,i)=>item.promo?(
+        <div key={i} onClick={onPremium}
+          style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap",cursor:"pointer",background:"linear-gradient(90deg,rgba(245,158,11,0.12),rgba(15,94,104,0.06))"}}>
+          <span style={{color:"#FCD34D",fontSize:11,fontWeight:800,letterSpacing:0.2}}>{item.promo}</span>
+        </div>
+      ):(
+        <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"0 16px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap"}}>
+          <span style={{color:"#fff",fontWeight:800,fontSize:13,fontFamily:"monospace",letterSpacing:0.2}}>${item.ticker}</span>
+          <span style={{color:"#cbd5e1",fontSize:12,fontWeight:600,fontFamily:"monospace"}}>{item.price}</span>
+          <span style={{color:"#fff",fontSize:12.5,fontWeight:800,fontFamily:"monospace",background:item.change>=0?"#16a34a":"#dc2626",borderRadius:6,padding:"2px 7px",display:"inline-flex",alignItems:"center",gap:2}}>{item.change>=0?"▲":"▼"}{fmtChg(item.change).replace(/^[+-]/,"")}</span>
+          {item.earning&&<span style={{background:"#f59e0b22",color:"#f59e0b",border:"1px solid #f59e0b55",borderRadius:4,padding:"1px 5px",fontSize:9,fontWeight:800}}>📅 EARN</span>}
+        </div>
+      )),[doubled, onPremium]);
   return (
     <div style={{background:"linear-gradient(180deg,#0b1426,#0f172a)",height:42,overflow:"hidden",borderBottom:"1px solid #1e293b"}}>
       <style>{`@keyframes tape{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}} .tape{display:flex;animation:tape 70s linear infinite;width:max-content;will-change:transform;transform:translateZ(0);backface-visibility:hidden;contain:layout style paint;} .tape:hover{animation-play-state:paused} @media(max-width:767px){.tape{animation-duration:60s}}`}</style>
       <div className="tape" style={{alignItems:"center",height:42}}>
-        {doubled.map((item,i)=>item.promo?(
-          <div key={i} onClick={onPremium}
-            style={{display:"flex",alignItems:"center",gap:6,padding:"0 18px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap",cursor:"pointer",background:"linear-gradient(90deg,rgba(245,158,11,0.12),rgba(15,94,104,0.06))"}}>
-            <span style={{color:"#FCD34D",fontSize:11,fontWeight:800,letterSpacing:0.2}}>{item.promo}</span>
-          </div>
-        ):(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"0 16px",borderRight:"1px solid #1e293b",height:"100%",whiteSpace:"nowrap"}}>
-            <span style={{color:"#fff",fontWeight:800,fontSize:13,fontFamily:"monospace",letterSpacing:0.2}}>${item.ticker}</span>
-            <span style={{color:"#cbd5e1",fontSize:12,fontWeight:600,fontFamily:"monospace"}}>{item.price}</span>
-            <span style={{color:"#fff",fontSize:12.5,fontWeight:800,fontFamily:"monospace",background:item.change>=0?"#16a34a":"#dc2626",borderRadius:6,padding:"2px 7px",display:"inline-flex",alignItems:"center",gap:2}}>{item.change>=0?"▲":"▼"}{fmtChg(item.change).replace(/^[+-]/,"")}</span>
-            {item.earning&&<span style={{background:"#f59e0b22",color:"#f59e0b",border:"1px solid #f59e0b55",borderRadius:4,padding:"1px 5px",fontSize:9,fontWeight:800}}>📅 EARN</span>}
-          </div>
-        ))}
+        {children}
       </div>
     </div>
   );
