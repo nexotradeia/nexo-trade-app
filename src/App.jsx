@@ -8080,7 +8080,7 @@ function EmailGate({lang="es", onDone, onLogin}){
                 onChange={e=>{setEmail(e.target.value);setErr(false);}}
                 onKeyDown={e=>{if(e.key==="Enter")submit();}}
                 placeholder="your@email.com"
-                style={{flex:"1 1 200px",minWidth:0,boxSizing:"border-box",border:`1px solid ${err?"#EF4444":"rgba(255,255,255,0.18)"}`,borderRadius:12,padding:"14px 16px",fontSize:15,outline:"none",background:"rgba(255,255,255,0.06)",color:"#fff",fontFamily:"inherit"}}/>
+                style={{flex:"1 1 200px",minWidth:0,boxSizing:"border-box",border:`1px solid ${err?"#EF4444":"rgba(255,255,255,0.18)"}`,borderRadius:12,padding:"14px 16px",fontSize:16,outline:"none",background:"rgba(255,255,255,0.06)",color:"#fff",fontFamily:"inherit"}}/>
               <button onClick={submit}
                 style={{flex:"0 0 auto",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:12,padding:"14px 24px",color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",boxShadow:"0 8px 26px rgba(245,158,11,0.35)",fontFamily:"inherit",whiteSpace:"nowrap"}}>
                 Get free access →
@@ -8757,7 +8757,7 @@ function MarketOverview({lang="es"}){
           </div>
         : (regionRows&&regionRows.length===0)
           ? <div style={{fontSize:12.5,color:C.muted2,padding:"14px 0"}}>{rLoading?(isEN?"loading…":"cargando…"):(isEN?"No data available":"Sin datos disponibles")}</div>
-          : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
+          : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12}}>
               {(regionRows||[]).map(r=><Tile key={r.s} r={r}/>)}
             </div>}
       {region!=="global" && <div style={{fontSize:10.5,color:C.muted2,marginTop:8}}>{isEN?"Index proxies via regional ETFs · for reference":"Aproximación vía ETFs regionales · referencial"}</div>}
