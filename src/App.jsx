@@ -4520,8 +4520,8 @@ function NoticiasPage({lang}){
 const COINGECKO_IDS = "bitcoin,ethereum,solana,binancecoin";
 // Semillas (fallback hasta que llega el precio en vivo via WebSocket/REST Finnhub)
 const TICKER_DATA_INIT = [
-  {s:"SPY",   n:"S&P 500",    p:591.2,  c:+0.15,  col:"#0F4C81", cg:null, fh:"SPY"},
-  {s:"QQQ",   n:"Nasdaq ETF", p:525.0,  c:+0.30,  col:"#0F5E68", cg:null, fh:"QQQ"},
+  {s:"SPY",   n:"S&P 500",    p:737.6,  c:-0.20,  col:"#0F4C81", cg:null, fh:"SPY"},
+  {s:"QQQ",   n:"Nasdaq ETF", p:705.1,  c:+0.30,  col:"#0F5E68", cg:null, fh:"QQQ"},
   {s:"NVDA",  n:"NVIDIA",     p:205.1,  c:+0.90,  col:"#76b900", cg:null, fh:"NVDA"},
   {s:"AAPL",  n:"Apple",      p:307.3,  c:-0.20,  col:"#94a3b8", cg:null, fh:"AAPL"},
   {s:"TSLA",  n:"Tesla",      p:391.0,  c:-0.80,  col:"#e31937", cg:null, fh:"TSLA"},
@@ -4530,8 +4530,8 @@ const TICKER_DATA_INIT = [
   {s:"META",  n:"Meta",       p:512.8,  c:+1.10,  col:"#0082fb", cg:null, fh:"META"},
   {s:"GOOGL", n:"Alphabet",   p:196.8,  c:+0.30,  col:"#4285f4", cg:null, fh:"GOOGL"},
   {s:"AVGO",  n:"Broadcom",   p:248.6,  c:+0.55,  col:"#cc0000", cg:null, fh:"AVGO"},
-  {s:"DIA",   n:"Dow Jones",  p:432.5,  c:+0.20,  col:"#1A5FAD", cg:null, fh:"DIA"},
-  {s:"IWM",   n:"Russell 2000",p:208.3, c:-0.35,  col:"#0F5E68", cg:null, fh:"IWM"},
+  {s:"DIA",   n:"Dow Jones",  p:509.7,  c:-0.35,  col:"#1A5FAD", cg:null, fh:"DIA"},
+  {s:"IWM",   n:"Russell 2000",p:281.7, c:-0.40,  col:"#0F5E68", cg:null, fh:"IWM"},
   {s:"BTC",   n:"Bitcoin",    p:61000,  c:-3.0,   col:"#F7931A", cg:null, fh:"BINANCE:BTCUSDT"},
   {s:"ETH",   n:"Ethereum",   p:1590,   c:-9.0,   col:"#627EEA", cg:null, fh:"BINANCE:ETHUSDT"},
 ];
@@ -8793,12 +8793,12 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
   const SIDEBAR_STATIC=[
-    {ticker:"BTC",  price:"$68,420", change:+4.2},
-    {ticker:"NVDA", price:"$875.40", change:+2.8},
-    {ticker:"TSLA", price:"$172.80", change:-3.1},
-    {ticker:"ETH",  price:"$3,820",  change:+5.7},
-    {ticker:"AAPL", price:"$189.50", change:+0.4},
-    {ticker:"SPY",  price:"$521.30", change:-0.8},
+    {ticker:"BTC",  price:"$61,800", change:+1.4},
+    {ticker:"NVDA", price:"$205.10", change:+0.9},
+    {ticker:"TSLA", price:"$391.00", change:-1.1},
+    {ticker:"ETH",  price:"$1,617",  change:+3.0},
+    {ticker:"AAPL", price:"$307.30", change:-0.3},
+    {ticker:"SPY",  price:"$737.55", change:-0.2},
   ];
   const mini=SIDEBAR_STATIC.map(s=>{
     const live=lp[s.ticker];
