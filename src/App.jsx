@@ -11386,9 +11386,15 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
         // Buscar los picks más recientes por semana
         const {data,error}=await supabase.from("weekly_picks").select("*").order("semana",{ascending:false}).order("id").limit(40);
         if(!error && data && data.length>0){
+          // Solo usar picks de la semana MÁS RECIENTE y si no están viejos (≤10 días).
+          // Si las picks en la DB ya caducaron, se usa el fallback curado y actualizado → nunca se ven precios viejos.
+          const latest = data[0].semana;
+          const daysOld = latest ? (Date.now()-new Date(latest).getTime())/86400000 : 999;
           const grouped={corto:[],largo:[],dividendos:[],crypto:[]};
-          data.forEach(p=>{ if(grouped[p.categoria]) grouped[p.categoria].push(p); });
-          // Solo usar si hay al menos algún pick en alguna categoría
+          if(daysOld <= 10){
+            data.filter(p=>p.semana===latest).forEach(p=>{ if(grouped[p.categoria]) grouped[p.categoria].push(p); });
+          }
+          // Solo usar si hay al menos algún pick reciente en alguna categoría
           if(Object.values(grouped).some(arr=>arr.length>0)){
             setPicks(grouped);
             return;
