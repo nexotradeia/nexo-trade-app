@@ -19872,7 +19872,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [shareMsg, setShareMsg] = useState(null);
   const [sortBy, setSortBy] = useState("pnl"); // pnl | ticker | value
   const [ptTab, setPtTab] = useState("returns"); // returns | market | risk | efficiency | projections | health
-  const [ptFull, setPtFull] = useState(false); // pantalla completa
+  const [ptFull, setPtFull] = useState(true); // pantalla completa (default ON)
   const [pCloud, setPCloud] = useState(user?.id ? "loading" : "off"); // off | loading | synced | saving | error
   const pCloudReady = useRef(false);
 
