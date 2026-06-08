@@ -6492,7 +6492,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
           {/* VIP */}
           <div style={{background:"rgba(12,10,30,0.99)",padding:"28px 24px",position:"relative",overflow:"hidden",borderLeft:"2px solid #0F5E68"}}>
-            <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#C8901F,#8A5E10)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8}}>✦ MÁS POPULAR</div>
+            <div style={{position:"absolute",top:0,right:0,background:billing==="annual"?"linear-gradient(135deg,#10B981,#059669)":"linear-gradient(135deg,#C8901F,#8A5E10)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8,transition:"background .2s"}}>{billing==="annual"?(isEN?"💎 BEST VALUE":"💎 MEJOR VALOR"):(isEN?"✦ MOST POPULAR":"✦ MÁS POPULAR")}</div>
             <div style={{position:"absolute",top:0,left:0,width:220,height:220,background:"radial-gradient(circle,rgba(15,94,104,0.1),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{position:"relative"}}>
               <div style={{fontSize:11,fontWeight:700,color:"#FCD34D",letterSpacing:1.5,marginBottom:10}}>✦ PREMIUM</div>
