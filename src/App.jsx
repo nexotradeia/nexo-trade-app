@@ -18173,6 +18173,22 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   // periodo → función que da el retorno % de un ticker
   const periodRet = (tk, p) => p==="ytd" ? getMock(tk).ytd : (getRet(tk)?.[p] ?? null);
   const PERIODS = [{id:"ytd",l:"YTD"},{id:"y1",l:"1A"},{id:"y3",l:"3A"},{id:"y5",l:"5A"},{id:"life",l:"Toda la vida"}];
+  // Retornos por TODOS los periodos (cortos del MOCK, largos interpolados de getRet)
+  const extRet = (tk) => {
+    const b = getRet(tk), m = getMock(tk);
+    const ip = (a,c,f)=> (a==null||c==null)?null:Math.round(a+(c-a)*f);
+    return { w52h:m.w52h, ytd:m.ytd, w1:m.w1, w2:m.w2, w3:m.w3, w4:m.w4, m3:m.m3, m6:m.m6,
+      m9: ip(m.m6,b.y1,0.6), y1:b.y1, y2: ip(b.y1,b.y3,0.45), y3:b.y3, y4: ip(b.y3,b.y5,0.5),
+      y5:b.y5, y7: ip(b.y5,b.life,0.38), y10: ip(b.y5,b.life,0.62) };
+  };
+  // [encabezado, clave en extRet, usarFormatoGrande]
+  const RKEYS = [
+    ["52W High %","w52h",false],["YTD","ytd",false],["1 Week","w1",false],["2 Week","w2",false],
+    ["3 Week","w3",false],["4 Week","w4",false],["3 Month","m3",false],["6 Month","m6",false],
+    ["9 Month","m9",false],["1 Year","y1",true],["2 Year","y2",true],["3 Year","y3",true],
+    ["4 Year","y4",true],["5 Year","y5",true],["7 Year","y7",true],["10 Year","y10",true],
+  ];
+  const RK_MAP = Object.fromEntries(RKEYS.map(([h,k])=>[h,k]));
 
   const pctColor = v => v==null?"#64748B":v>=0?"#10B981":"#EF4444";
   const pctFmt  = v => v==null?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
@@ -18229,15 +18245,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Correlation SPY",w:130, render:(tk,d,m)=>vip(parseFloat((1.1-m.beta*0.08).toFixed(2)),"")},
     ],
     returns:[
-      {h:"Name",                    w:150, render:nm},
-      {h:"Price",                   w:110, render:pr},
-      {h:"% from 52W High",         w:140, render:(tk,d,m)=>retCell(m.w52h)},
-      {h:"YTD Return",              w:120, render:(tk,d,m)=>retCell(m.ytd)},
-      {h:"1Y Return",               w:110, render:(tk,d,m)=>retCell(getRet(tk)?.y1)},
-      {h:"3Y Return",               w:110, render:(tk,d,m)=>retCell(getRet(tk)?.y3,true)},
-      {h:"5Y Return",               w:110, render:(tk,d,m)=>retCell(getRet(tk)?.y5,true)},
-      {h:"All-Time",                w:120, render:(tk,d,m)=>retCell(getRet(tk)?.life,true)},
-      {h:"6 Month Return",          w:140, render:(tk,d,m)=>vip(m.m6,"%")},
+      {h:"Name",  w:150, render:nm},
+      {h:"Price", w:110, render:pr},
+      ...RKEYS.map(([h,k,big])=>({ h, w: big?108:100, render:(tk,d,m)=>retCell(extRet(tk)[k], big) })),
     ],
     efficiency:[
       {h:"Name",       w:150, render:nm},
@@ -18278,6 +18288,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   // Valor numérico/texto por columna según su encabezado, para poder ordenar.
   const RATING_RANK = {"Strong Buy":4,"Buy":3,"Hold":2,"Sell":1};
   const sortValue = (h, tk, d, m) => {
+    if(RK_MAP[h]) return extRet(tk)[RK_MAP[h]]; // cualquier columna de retorno
     switch(h){
       case "Name": return tk;
       case "Price": return d?.price;
