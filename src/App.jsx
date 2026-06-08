@@ -1731,7 +1731,7 @@ function PolymarketWidget(){
       {/* Markets */}
       <div style={{padding:"12px 18px"}}>
         {loading ? (
-          <div style={{textAlign:"center",padding:"20px",color:C.muted2,fontSize:13}}>Cargando mercados... ⏳</div>
+          <div style={{textAlign:"center",padding:"20px",color:C.muted2,fontSize:13}}>{isEN?"Loading markets… ⏳":"Cargando mercados… ⏳"}</div>
         ) : markets.map((m, i) => (
           <div key={i} style={{marginBottom: i < markets.length-1 ? 14 : 0, paddingBottom: i < markets.length-1 ? 14 : 0, borderBottom: i < markets.length-1 ? `1px solid ${C.border}` : "none"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8}}>
@@ -2955,7 +2955,7 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
 
         {/* Header */}
         <div style={{padding:"18px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.card2,borderRadius:"22px 22px 0 0",position:"sticky",top:0,zIndex:1}}>
-          <h3 style={{margin:0,color:C.text,fontSize:16,fontWeight:800}}>🔔 Mis Alertas de Precio</h3>
+          <h3 style={{margin:0,color:C.text,fontSize:16,fontWeight:800}}>{isEN?"🔔 My Price Alerts":"🔔 Mis Alertas de Precio"}</h3>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",color:C.muted2,fontSize:20}}>×</button>
         </div>
 
@@ -3006,7 +3006,7 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
                 <input value={notifEmail} onChange={e=>setNotifEmail(e.target.value)} placeholder="tu@email.com" type="email"
                   style={{flex:1,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"7px 10px",fontSize:12,color:C.text,outline:"none"}}/>
                 <button onClick={()=>{localStorage.setItem("nexo-alert-email",notifEmail);setTriggered("✅ Email guardado: "+notifEmail);setTimeout(()=>setTriggered(null),2500);}}
-                  style={{background:C.accent,border:"none",borderRadius:8,padding:"7px 14px",color:"#000",fontSize:12,fontWeight:700,cursor:"pointer"}}>Guardar</button>
+                  style={{background:C.accent,border:"none",borderRadius:8,padding:"7px 14px",color:"#000",fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"Save":"Guardar"}</button>
               </div>}
             </div>
           </div>
@@ -12296,7 +12296,7 @@ function EconCalendarPage({lang="es"}) {
               {lastUpd && <span style={{marginLeft:8,color:C.muted2}}>· Actualizado {lastUpd}</span>}
             </div>
           </div>
-          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",border:`1px solid ${C.border}`}}>⏳ Cargando...</span>}
+          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",border:`1px solid ${C.border}`}}>{isEN?"⏳ Loading…":"⏳ Cargando…"}</span>}
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {[{k:"all",l:isEN?"All":"Todos"},{k:"upcoming",l:isEN?"📌 Upcoming":"📌 Próximos"},{k:"past",l:isEN?"Past":"Pasados"}].map(({k,l})=>(
@@ -12323,7 +12323,7 @@ function EconCalendarPage({lang="es"}) {
 
       <div className="nexo-scroll-x" style={{borderRadius:12}}>
       <div style={{minWidth:440,display:"flex",flexDirection:"column",gap:8}}>
-        {rows.length===0 && <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>Sin eventos con ese filtro.</div>}
+        {rows.length===0 && <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>{isEN?"No events for this filter.":"Sin eventos con ese filtro."}</div>}
         {rows.map((ev,i)=>{
           const past    = ev.date < today;
           const isToday = ev.date === today;
@@ -12748,7 +12748,7 @@ function IpoCalendarPage() {
       </div>
 
       <div style={{display:"grid",gap:10}}>
-        {rows.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Sin IPOs con ese filtro.</div>}
+        {rows.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>{isEN?"No IPOs for this filter.":"Sin IPOs con ese filtro."}</div>}
         {rows.map((ipo,i)=>{
           const st = STATUS[ipo.status] || STATUS.upcoming;
           const isFuture = !ipo.date || ipo.date >= today;
@@ -12896,7 +12896,7 @@ function ScreenerPage({isPremium, onNeedPremium, lang="es"}) {
         </div>
       </div>
 
-      {loading && <div style={{textAlign:"center",padding:"40px",color:C.muted,fontSize:14}}>Cargando screener... ⏳</div>}
+      {loading && <div style={{textAlign:"center",padding:"40px",color:C.muted,fontSize:14}}>{isEN?"Loading screener… ⏳":"Cargando screener… ⏳"}</div>}
       {error   && <div style={{textAlign:"center",padding:"40px",color:C.bear,fontSize:14}}>Error al cargar datos. Intenta de nuevo.</div>}
 
       {!loading && !error && quotes.length > 0 && (
@@ -12930,7 +12930,7 @@ function ScreenerPage({isPremium, onNeedPremium, lang="es"}) {
           </div>
         </div>
       )}
-      {!loading && !error && quotes.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Sin resultados. Intenta otro filtro.</div>}
+      {!loading && !error && quotes.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>{isEN?"No results. Try another filter.":"Sin resultados. Intenta otro filtro."}</div>}
     </div>
   );
 }
@@ -15115,12 +15115,12 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           {insLoad ? (
             <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
               <div style={{width:36,height:36,borderRadius:"50%",border:"3px solid rgba(15,94,104,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 12px"}}/>
-              <div style={{fontSize:13}}>Cargando datos de SEC EDGAR...</div>
+              <div style={{fontSize:13}}>{isEN?"Loading SEC EDGAR data…":"Cargando datos de SEC EDGAR…"}</div>
             </div>
           ) : (insiders?.transactions||[]).length === 0 ? (
             <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.01)",borderRadius:16,border:"1px dashed rgba(255,255,255,0.06)"}}>
               <svg style={{opacity:0.3,marginBottom:10}} width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <div style={{fontSize:13,color:C.muted}}>No hay transacciones recientes · Haz clic en Actualizar</div>
+              <div style={{fontSize:13,color:C.muted}}>{isEN?"No recent transactions · Click Refresh":"No hay transacciones recientes · Haz clic en Actualizar"}</div>
             </div>
           ) : (
             <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -16083,7 +16083,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
             {[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}].map(s=>(
               <div key={s.l} style={{background:s.bg,border:`1px solid ${s.c}30`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:800,color:s.c}}>{s.l}</div>
             ))}
-            {loading && <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8"}}>⟳ Cargando precios…</div>}
+            {loading && <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8"}}>{isEN?"⟳ Loading prices…":"⟳ Cargando precios…"}</div>}
           </div>
         </div>
       </div>
@@ -16336,7 +16336,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
         </div>
         <button onClick={()=>{setNewDM(true);setSelConv(null);}}
           style={{marginLeft:"auto",background:"linear-gradient(135deg,#F59E0B,#B45309)",border:"none",borderRadius:20,padding:"8px 18px",fontSize:12,fontWeight:800,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:6,boxShadow:"0 2px 12px rgba(33,150,243,0.35)",whiteSpace:"nowrap"}}>
-          ✏️ <span className="nexo-msg-btn-text">Nuevo mensaje</span>
+          ✏️ <span className="nexo-msg-btn-text">{isEN?"New message":"Nuevo mensaje"}</span>
         </button>
       </div>
 
@@ -16398,12 +16398,12 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
           {/* ── NUEVO MENSAJE UI ── */}
           {newDM && !selConv && (
             <div style={{flex:1,overflow:"auto",padding:"20px 24px"}}>
-              <div style={{fontWeight:900,color:C.text,fontSize:16,marginBottom:4,letterSpacing:"-0.3px"}}>✏️ Nuevo mensaje</div>
+              <div style={{fontWeight:900,color:C.text,fontSize:16,marginBottom:4,letterSpacing:"-0.3px"}}>{isEN?"✏️ New message":"✏️ Nuevo mensaje"}</div>
               <div style={{fontSize:12,color:C.muted,marginBottom:20}}>{isEN?"You can only message users who also follow you.":"Solo puedes escribir a usuarios que también te siguen a ti."}</div>
               {filteredMutualsForNew.length === 0 && (
                 <div style={{textAlign:"center",padding:"32px 24px",background:"rgba(33,150,243,0.04)",borderRadius:16,border:"1px dashed rgba(33,150,243,0.2)"}}>
                   <div style={{fontSize:36,marginBottom:10}}>🔒</div>
-                  <div style={{fontWeight:700,color:C.text,fontSize:14,marginBottom:6}}>Sin conexiones mutuas</div>
+                  <div style={{fontWeight:700,color:C.text,fontSize:14,marginBottom:6}}>{isEN?"No mutual connections":"Sin conexiones mutuas"}</div>
                   <div style={{fontSize:12,color:C.muted,lineHeight:1.7}}>Sigue a alguien y espera que te sigan de vuelta para poder chatear.</div>
                 </div>
               )}
