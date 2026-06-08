@@ -168,7 +168,7 @@ const LANG_META = [
 const LANGS = {
   es: {
     feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
-    macro:"🌍 Macro", noticias:"📰 Noticias", earnings:"📅 Earnings", trending:"🚀 Movers 24H",
+    macro:"🌍 Macro", noticias:"📰 Noticias", earnings:"📅 Earnings", trending:"📡 Mercado en Vivo",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrarse →",
     publish:"Publicar →", bullish:"▲ ALCISTA", bearish:"▼ BAJISTA",
     followers:"Seguidores", following:"Siguiendo", points:"Puntos", posts:"Posts",
@@ -192,7 +192,7 @@ const LANGS = {
   },
   en: {
     feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
-    macro:"🌍 Macro", noticias:"📰 News", earnings:"📅 Earnings", trending:"🚀 Movers 24H",
+    macro:"🌍 Macro", noticias:"📰 News", earnings:"📅 Earnings", trending:"📡 Live Markets",
     search:"Search ticker... AAPL, BTC, NVDA", login:"Sign in", register:"Sign up →",
     publish:"Post →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
     followers:"Followers", following:"Following", points:"Points", posts:"Posts",
@@ -7128,7 +7128,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🏆", label:isEN?"Leaderboard":"Ranking",                  idx:40},
     {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
-    {icon:"🚀", label:"Movers 24H",                                  idx:7},
+    {icon:"🚀", label:isEN?"Live Markets":"Mercado en Vivo",         idx:7},
     {icon:"🌅", label:isEN?"Pre-Market & After-Hours":"Pre-Market y After-Hours", idx:45},
     {icon:"📐", label:isEN?"Pivot Points":"Puntos Pivote",           idx:46},
     {icon:"💵", label:isEN?"Profit Calculator":"Calc. Ganancias",    idx:47},
@@ -8672,7 +8672,7 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
     {t:isEN?"📊 Investing Tools":"📊 Inversión", items:[
       ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
     {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
-      ["Movers 24H",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow",20]]},
+      [isEN?"Live Markets":"Mercado en Vivo",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow",20]]},
     {t:isEN?"📚 Education":"📚 Educación", items:[
       ["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
@@ -8708,7 +8708,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
   const isEN=lang==="en";
   const go=idx=>{onClose();onNavigate(idx);};
   const SECTIONS=[
-    {t:isEN?"Main":"Principal",items:[["🔥 Feed",0],["⚡ Stock Pick IA",3],["🚀 Movers 24H",7],["📅 Earnings",6],[isEN?"📰 News":"📰 Noticias",5],[isEN?"💬 Messages":"💬 Mensajes",22],["🏆 "+(isEN?"Leaderboard":"Ranking"),40]]},
+    {t:isEN?"Main":"Principal",items:[["🔥 Feed",0],["⚡ Stock Pick IA",3],[isEN?"📡 Live Markets":"📡 Mercado en Vivo",7],["📅 Earnings",6],[isEN?"📰 News":"📰 Noticias",5],[isEN?"💬 Messages":"💬 Mensajes",22],["🏆 "+(isEN?"Leaderboard":"Ranking"),40]]},
     {t:isEN?"📅 Calendars":"📅 Calendarios",items:[[isEN?"Economic":"Económico",14],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
     {t:isEN?"🧮 Calculators":"🧮 Calculadoras",items:[["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
     {t:isEN?"💱 Currencies":"💱 Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",51],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
@@ -23528,6 +23528,8 @@ export default function App(){
         .nexo-logout-mobile { display: none !important; }
       }
       @keyframes nexo-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+      @keyframes nexoLiveGlow { 0%,100%{ color:#2196F3; text-shadow:0 0 0 rgba(33,150,243,0); } 50%{ color:#06B6D4; text-shadow:0 0 9px rgba(6,182,212,0.7); } }
+      .nexo-live-glow { animation: nexoLiveGlow 1.8s ease-in-out infinite; font-weight:800 !important; letter-spacing:0.2px; }
       @keyframes nexo-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
       @keyframes nexo-slidein { from{transform:translateX(-30px);opacity:0} to{transform:translateX(0);opacity:1} }
       html, body {
@@ -23738,7 +23740,7 @@ export default function App(){
             {label:lang==="en"?"Stock Pick IA":"Stock Pick IA",idx:3,badge:"NEW",icon:"stockpick"},
             {label:t.noticias,idx:5,icon:"news"},
             {label:t.earnings,idx:6,icon:"earnings"},
-            {label:t.trending,idx:7,icon:"movers"},
+            {label:t.trending,idx:7,icon:"movers",live:true},
             {label:lang==="en"?"Messages":"Mensajes",idx:22,icon:"messages"},
           ].map(n=>(
             <button key={n.idx} onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}
@@ -23747,7 +23749,12 @@ export default function App(){
               onMouseLeave={e=>{if(page!==n.idx){e.currentTarget.style.color="#1A5FAD";e.currentTarget.style.background="transparent";}}}
             >
               <NavIco name={n.icon}/>
-              {stripEmoji(n.label)}
+              {n.live
+                ? <span style={{display:"inline-flex",alignItems:"center",gap:6}}>
+                    <span style={{width:7,height:7,borderRadius:"50%",background:"#22C55E",boxShadow:"0 0 6px #22C55E",animation:"nexo-pulse 1.3s infinite",flexShrink:0}}/>
+                    <span className="nexo-live-glow">{stripEmoji(n.label)}</span>
+                  </span>
+                : stripEmoji(n.label)}
               {n.badge&&<span style={{fontSize:9,fontWeight:800,color:"#2196F3",background:"rgba(33,150,243,0.11)",border:"1px solid rgba(33,150,243,0.28)",borderRadius:4,padding:"2px 5px",letterSpacing:0.5}}>{n.badge}</span>}
             </button>
           ))}
