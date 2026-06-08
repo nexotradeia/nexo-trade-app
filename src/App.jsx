@@ -20051,6 +20051,7 @@ const AI_ANALYSIS = {
 // ── PRE-MARKET & AFTER-HOURS PAGE (datos reales vía /api/premarket) ──────────
 function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
   const isEN = lang === "en";
+  const lp = useContext(PriceCtx); // precios en vivo / último cierre (fallback cuando el pre-market está cerrado)
   const [session, setSession] = useState("pre");   // pre | post
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20142,20 +20143,26 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
       {/* ACTIVIDAD ETFs */}
       <div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:8}}>{session==="pre"?(isEN?"Pre-Market Activity":"Actividad Pre-Market"):(isEN?"After-Hours Activity":"Actividad After-Hours")}</div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10,marginBottom:22}}>
-        {(etfs.length?etfs:[{s:"DIA"},{s:"QQQ"},{s:"SPY"},{s:"IWM"}]).map((e,i)=>(
+        {(etfs.length?etfs:[{s:"DIA"},{s:"QQQ"},{s:"SPY"},{s:"IWM"}]).map((e,i)=>{
+          // Fallback al último cierre (PriceCtx) cuando no hay dato de pre-market (mercado cerrado / fin de semana)
+          const px  = e.p!=null ? e.p : lp?.[e.s]?.price;
+          const chg = e.p!=null ? e.chg : lp?.[e.s]?.change;
+          const isClose = e.p==null && px!=null;
+          return (
           <div key={e.s+i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",boxShadow:C.shadow}}>
             <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
-              <LogoBadge sym={e.s} col={e.chg>=0?C.bull:C.bear} size={26} radius={7}/>
+              <LogoBadge sym={e.s} col={(chg||0)>=0?C.bull:C.bear} size={26} radius={7}/>
               <div style={{minWidth:0}}>
                 <div style={{fontSize:13,fontWeight:800,color:C.text}}>{e.s}</div>
                 <div style={{fontSize:10,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.n||""}</div>
               </div>
             </div>
-            <div style={{fontSize:21,fontWeight:900,color:C.text,letterSpacing:-0.5,fontFamily:"monospace"}}>{fmtP(e.p)}</div>
-            {e.p!=null && <div style={{fontSize:12.5,fontWeight:800,color:cCol(e.chg),marginTop:2,fontFamily:"monospace"}}>{fmtPct(e.chg)}{e.ext?"":(isEN?" · reg":"")}</div>}
-            {e.p==null && <div style={{fontSize:11,color:C.muted2,marginTop:4}}>{loading?(isEN?"loading…":"cargando…"):"—"}</div>}
+            <div style={{fontSize:21,fontWeight:900,color:C.text,letterSpacing:-0.5,fontFamily:"monospace"}}>{fmtP(px)}</div>
+            {px!=null && <div style={{fontSize:12.5,fontWeight:800,color:cCol(chg),marginTop:2,fontFamily:"monospace"}}>{fmtPct(chg)}{isClose?(isEN?" · close":" · cierre"):(e.ext?"":(isEN?" · reg":""))}</div>}
+            {px==null && <div style={{fontSize:11,color:C.muted2,marginTop:4}}>{loading?(isEN?"loading…":"cargando…"):"—"}</div>}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* GRID: movers (izq) + rail (der) */}
