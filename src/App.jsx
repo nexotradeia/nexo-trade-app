@@ -5827,6 +5827,22 @@ const ALL_MOVERS_POOL = [
   {ticker:"BTC",name:"Bitcoin",sector:"Crypto",bull:71,bear:29,why:"Ballena movió $8.4M en opciones CALL. Congreso EE.UU. debate Bitcoin Reserve Act. ETF inflows $400M.",whyEn:"Whale moved $8.4M in CALL options. U.S. Congress debates Bitcoin Reserve Act. $400M ETF inflows.",volX:2,volLabel:"$42B",badge:"WHALE",badgeColor:"#06B6D4",badgeIcon:"🐋",flames:1,fallbackPrice:71126,fallbackChg:1.24},
 ];
 
+// Segunda sección — acciones emergentes / más volátiles (menor capitalización, más movimiento)
+const EMERGING_POOL = [
+  {ticker:"PLTR",name:"Palantir",sector:"IA/Defensa",bull:84,bear:16,why:"Nuevo contrato con el Ejército de EE.UU. AIP adoptado por Fortune 500. Momentum institucional fuerte.",whyEn:"New US Army contract. AIP adopted by Fortune 500. Strong institutional momentum.",volX:6,volLabel:"78M",badge:"VIRAL",badgeColor:"#EF4444",badgeIcon:"🔥",flames:3,fallbackPrice:134,fallbackChg:2.6},
+  {ticker:"SOFI",name:"SoFi Technologies",sector:"Fintech",bull:69,bear:31,why:"Crecimiento de miembros récord. Banca digital escalando. Analistas suben target.",whyEn:"Record member growth. Digital banking scaling. Analysts raise target.",volX:5,volLabel:"62M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:2,fallbackPrice:15.2,fallbackChg:4.1},
+  {ticker:"HOOD",name:"Robinhood",sector:"Fintech/Trading",bull:72,bear:28,why:"Volumen de trading crypto en alza. Nuevos productos de inversión. Flujo retail fuerte.",whyEn:"Crypto trading volume rising. New investing products. Strong retail flow.",volX:6,volLabel:"40M",badge:"WHALE",badgeColor:"#06B6D4",badgeIcon:"🐋",flames:2,fallbackPrice:62,fallbackChg:3.4},
+  {ticker:"MSTR",name:"Strategy (MSTR)",sector:"Bitcoin Proxy",bull:66,bear:34,why:"Alta beta con Bitcoin. Mayor tenedor corporativo de BTC del mundo. Máxima volatilidad.",whyEn:"High beta with Bitcoin. Largest corporate BTC holder. Maximum volatility.",volX:7,volLabel:"14M",badge:"WHALE",badgeColor:"#06B6D4",badgeIcon:"🐋",flames:3,fallbackPrice:330,fallbackChg:5.2},
+  {ticker:"SMCI",name:"Super Micro",sector:"Servidores/IA",bull:63,bear:37,why:"Demanda de servidores IA disparada. Volatilidad alta tras informes. Movimiento explosivo.",whyEn:"AI server demand surging. High volatility after filings. Explosive moves.",volX:8,volLabel:"33M",badge:"VIRAL",badgeColor:"#EF4444",badgeIcon:"🔥",flames:3,fallbackPrice:42,fallbackChg:6.8},
+  {ticker:"MARA",name:"MARA Holdings",sector:"Minería BTC",bull:64,bear:36,why:"Sigue el precio de Bitcoin con apalancamiento. Hashrate récord. Alta beta crypto.",whyEn:"Tracks Bitcoin price with leverage. Record hashrate. High crypto beta.",volX:6,volLabel:"38M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:2,fallbackPrice:18,fallbackChg:5.5},
+  {ticker:"RIVN",name:"Rivian",sector:"EV/Auto",bull:48,bear:52,why:"Producción en aumento pero quema de caja. Volatilidad alta. Trade de momentum especulativo.",whyEn:"Ramping production but cash burn. High volatility. Speculative momentum trade.",volX:5,volLabel:"45M",badge:"WATCH",badgeColor:"#F59E0B",badgeIcon:"⚠️",flames:2,fallbackPrice:13,fallbackChg:-3.2},
+  {ticker:"AFRM",name:"Affirm",sector:"Fintech/BNPL",bull:61,bear:39,why:"Volumen de compras BNPL al alza. Alianzas con grandes retailers. Sensible a tasas.",whyEn:"BNPL volume rising. Partnerships with major retailers. Rate-sensitive.",volX:5,volLabel:"21M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:2,fallbackPrice:58,fallbackChg:4.6},
+  {ticker:"NU",name:"Nu Holdings",sector:"Fintech/LatAm",bull:75,bear:25,why:"Banco digital líder en Latinoamérica. Crecimiento de usuarios explosivo. Buffett invertido.",whyEn:"Leading digital bank in Latin America. Explosive user growth. Buffett-backed.",volX:4,volLabel:"35M",badge:"GOLDEN",badgeColor:"#F59E0B",badgeIcon:"⭐",flames:2,fallbackPrice:13.5,fallbackChg:3.1},
+  {ticker:"DKNG",name:"DraftKings",sector:"Apuestas/iGaming",bull:62,bear:38,why:"Apuestas deportivas online en expansión. Nuevos estados legalizando. Crecimiento de usuarios.",whyEn:"Online sports betting expanding. New states legalizing. User growth.",volX:4,volLabel:"19M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:1,fallbackPrice:42,fallbackChg:2.4},
+  {ticker:"SHOP",name:"Shopify",sector:"E-Commerce",bull:70,bear:30,why:"GMV en crecimiento. Herramientas IA para comercios. Recuperación de márgenes.",whyEn:"Growing GMV. AI tools for merchants. Margin recovery.",volX:3,volLabel:"15M",badge:"BULLISH",badgeColor:"#22c55e",badgeIcon:"📈",flames:1,fallbackPrice:110,fallbackChg:2.0},
+  {ticker:"AVGO",name:"Broadcom",sector:"Semiconductores/IA",bull:74,bear:26,why:"Chips de IA a medida en alza. Integración VMware. Guidance al alza.",whyEn:"Custom AI chips surging. VMware integration. Raised guidance.",volX:4,volLabel:"16M",badge:"GOLDEN",badgeColor:"#F59E0B",badgeIcon:"⭐",flames:2,fallbackPrice:195,fallbackChg:3.3},
+];
+
 function MoverSparkline({dir, chg}){
   const bull = chg >= 0;
   const color = bull ? "#22c55e" : "#ef4444";
@@ -5852,46 +5868,44 @@ function MoverSparkline({dir, chg}){
 
 function TrendingPage({posts=[],lang="es"}){
   const isEN=lang==="en";
-  const [quotes,setQuotes]=useState({});
-  const [loading,setLoading]=useState(true);
+  // Precios EN VIVO desde el sistema central (1 fuente cacheada compartida + WebSocket).
+  // Esto da tiempo real SIN saturar la API: da igual cuántas acciones haya.
+  const lp = useContext(PriceCtx);
+  const registerPx = useContext(PriceRegisterCtx);
   const [refreshing,setRefreshing]=useState(false);
   const [lastUpdate,setLastUpdate]=useState(null);
-  const [top5,setTop5]=useState(ALL_MOVERS_POOL.slice(0,5));
+  const [tick,setTick]=useState(0);
+  const loading=false;
 
-  const fetchQuotes=useCallback(async(isRefresh=false)=>{
-    if(isRefresh) setRefreshing(true);
-    else setLoading(true);
-    const tickers=ALL_MOVERS_POOL.map(m=>m.ticker);
-    try{
-      const results=await Promise.all(
-        tickers.map(ticker=>
-          fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`)
-            .then(r=>r.json())
-            .then(q=>({ticker,price:q.c&&q.c>0?q.c:null,change:q.dp??null}))
-            .catch(()=>({ticker,price:null,change:null}))
-        )
-      );
-      const q={};
-      results.forEach(r=>{q[r.ticker]=r;});
-      setQuotes(q);
-      // Sort pool by absolute % change (biggest movers first), pick top 5
-      const sorted=[...ALL_MOVERS_POOL].sort((a,b)=>{
-        const ca=Math.abs(q[a.ticker]?.change??a.fallbackChg);
-        const cb=Math.abs(q[b.ticker]?.change??b.fallbackChg);
-        return cb-ca;
-      });
-      setTop5(sorted.slice(0,5));
-      setLastUpdate(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
-    }catch{}
-    setLoading(false);
-    setRefreshing(false);
-  },[]);
-
-  useEffect(()=>{ fetchQuotes(false); },[fetchQuotes]);
+  // Registrar todos los tickers (grandes + emergentes) para que reciban precio en vivo
   useEffect(()=>{
-    const t=setInterval(()=>fetchQuotes(false),60000);
+    if(!registerPx) return;
+    registerPx([...ALL_MOVERS_POOL,...EMERGING_POOL].map(m=>m.ticker));
+  },[registerPx]);
+
+  // Quotes derivados de PriceCtx (se actualizan solos cada ~1s en horario de mercado)
+  const quotes={};
+  [...ALL_MOVERS_POOL,...EMERGING_POOL].forEach(m=>{ const v=lp&&lp[m.ticker]; if(v&&v.price>0) quotes[m.ticker]={price:v.price,change:v.change}; });
+
+  // Ranking por mayor movimiento — se re-calcula cada 10s (no en cada tick, para que no salte)
+  const rankPool=(pool,n)=>[...pool].sort((a,b)=>Math.abs((quotes[b.ticker]?.change)??b.fallbackChg)-Math.abs((quotes[a.ticker]?.change)??a.fallbackChg)).slice(0,n);
+  const topBig = useMemo(()=>rankPool(ALL_MOVERS_POOL,8),[tick,lang]);
+  const topEmerging = useMemo(()=>rankPool(EMERGING_POOL,8),[tick,lang]);
+  // Filas combinadas con cabeceras de sección
+  const rows = [
+    {_header:isEN?"🐘 Large Caps · biggest movers":"🐘 Grandes · mayores movimientos"},
+    ...topBig.map((m,idx)=>({...m,_rank:idx})),
+    {_header:isEN?"🚀 Emerging · most volatile":"🚀 Emergentes · más volátiles"},
+    ...topEmerging.map((m,idx)=>({...m,_rank:idx})),
+  ];
+
+  const fetchQuotes=(isRefresh)=>{ setRefreshing(true); setTick(t=>t+1); setLastUpdate(new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"})); setTimeout(()=>setRefreshing(false),500); };
+
+  useEffect(()=>{
+    setLastUpdate(new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"}));
+    const t=setInterval(()=>{ setTick(x=>x+1); setLastUpdate(new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"})); },10000);
     return()=>clearInterval(t);
-  },[fetchQuotes]);
+  },[]);
 
   const rankMedal=(i)=>{
     if(i===0) return <span style={{fontSize:22}}>🥇</span>;
@@ -5926,7 +5940,13 @@ function TrendingPage({posts=[],lang="es"}){
       </div>
 
       {/* Cards */}
-      {top5.map((m,i)=>{
+      {rows.map((m,i)=>{
+        if(m._header) return(
+          <div key={"h"+i} style={{display:"flex",alignItems:"center",gap:8,margin:i===0?"4px 0 10px":"22px 0 10px",fontSize:13,fontWeight:800,color:C.text,letterSpacing:0.2}}>
+            <span>{m._header}</span>
+            <div style={{flex:1,height:1,background:C.border}}/>
+          </div>
+        );
         const q=quotes[m.ticker]||{};
         const price = q.price ?? m.fallbackPrice;
         const chg   = q.change ?? m.fallbackChg;
@@ -5958,7 +5978,7 @@ function TrendingPage({posts=[],lang="es"}){
 
                   {/* Rank + badge */}
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,flexShrink:0,width:52}}>
-                    {rankMedal(i)}
+                    {rankMedal(m._rank)}
                     <LogoBadge sym={m.ticker} col={isPos?"#16a34a":"#dc2626"} size={44} radius={10}/>
                   </div>
 
