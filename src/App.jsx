@@ -20027,11 +20027,13 @@ function Sparkline({ points, chg, width=80, height=28 }) {
 }
 
 // Setup IA calc (ENT / SL / TP)
-const calcSetup = (p, chg) => {
-  const bull = chg >= 0;
+const calcSetup = (p, bull) => {
+  // bull = dirección del setup (basada en el score/patrón, NO en la vela roja del día).
+  // Así un "Breakout" alcista siempre tiene target arriba y stop abajo, aunque hoy el mercado baje.
+  const dir = bull !== false; // por defecto alcista (el screener busca oportunidades de compra)
   const ent = Math.round(p);
-  const sl  = bull ? Math.round(p * 0.950) : Math.round(p * 1.052);
-  const tp  = bull ? Math.round(p * 1.120) : Math.round(p * 0.880);
+  const sl  = dir ? Math.round(p * 0.950) : Math.round(p * 1.052);
+  const tp  = dir ? Math.round(p * 1.120) : Math.round(p * 0.880);
   return { ent, sl, tp };
 };
 
@@ -20598,7 +20600,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             </div>
 
             {/* Setup IA */}
-            {(()=>{const {ent,sl,tp}=calcSetup(selectedRow.p,selectedRow.chg);return(
+            {(()=>{const {ent,sl,tp}=calcSetup(selectedRow.p,selectedRow.score>=50);return(
               <div style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:12,padding:"14px",marginBottom:16}}>
                 <div style={{fontSize:11,fontWeight:700,color:"#FCD34D",letterSpacing:0.5,marginBottom:10}}>🤖 SETUP IA</div>
                 <div className="nexo-radar-detail-stats2" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
@@ -20610,8 +20612,8 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   ))}
                 </div>
                 <div style={{marginTop:10,fontSize:11,color:C.muted,display:"flex",justifyContent:"space-between"}}>
-                  <span>R/R Ratio: <strong style={{color:"#10B981"}}>{((Math.abs(calcSetup(selectedRow.p,selectedRow.chg).tp-selectedRow.p)/Math.abs(calcSetup(selectedRow.p,selectedRow.chg).sl-selectedRow.p))||0).toFixed(1)}:1</strong></span>
-                  <span>Risk: <strong style={{color:"#EF4444"}}>-{(Math.abs(calcSetup(selectedRow.p,selectedRow.chg).sl-selectedRow.p)/selectedRow.p*100).toFixed(1)}%</strong></span>
+                  <span>R/R Ratio: <strong style={{color:"#10B981"}}>{((Math.abs(calcSetup(selectedRow.p,selectedRow.score>=50).tp-selectedRow.p)/Math.abs(calcSetup(selectedRow.p,selectedRow.score>=50).sl-selectedRow.p))||0).toFixed(1)}:1</strong></span>
+                  <span>Risk: <strong style={{color:"#EF4444"}}>-{(Math.abs(calcSetup(selectedRow.p,selectedRow.score>=50).sl-selectedRow.p)/selectedRow.p*100).toFixed(1)}%</strong></span>
                 </div>
               </div>
             );})()}
@@ -20814,7 +20816,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           {data.map((r,i)=>{
             const flash=flashRows[r.s];
             const rowBg=flash==="up"?"rgba(16,185,129,0.15)":flash==="down"?"rgba(239,68,68,0.15)":chgBg(r.chg);
-            const {ent,sl,tp}=calcSetup(r.p,r.chg);
+            const {ent,sl,tp}=calcSetup(r.p,r.score>=50);
             const isSelected=selectedRow?.s===r.s;
             return(
               <div key={i} style={{display:"grid",
