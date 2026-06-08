@@ -13761,7 +13761,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
         const PAD_T=10; const PAD_B=8;
         const toY=(v)=>PAD_T+(H*(1-(v-minL)/rng));
         return(
-          <div style={{background:"#F9FAFB",border:`1px solid ${mktOpen?"rgba(34,197,94,0.35)":"rgba(0,0,0,0.08)"}`,borderRadius:14,padding:"14px 16px 10px",marginBottom:10,boxShadow:mktOpen?"0 0 18px rgba(34,197,94,0.12)":"none",transition:"box-shadow .3s,border-color .3s"}}>
+          <div style={{background:"#F9FAFB",border:`1px solid ${mktOpen?"rgba(34,197,94,0.35)":"rgba(0,0,0,0.08)"}`,borderRadius:14,padding:"10px 14px 8px",marginBottom:10,boxShadow:mktOpen?"0 0 18px rgba(34,197,94,0.12)":"none",transition:"box-shadow .3s,border-color .3s"}}>
             <style>{`@keyframes nexoGreenMove{0%{background-position:0% 50%}100%{background-position:200% 50%}}@keyframes flowLiveDot{0%,100%{box-shadow:0 0 3px 1px rgba(34,197,94,.5);opacity:.7}50%{box-shadow:0 0 11px 4px rgba(34,197,94,.95);opacity:1}}@keyframes flowNowPulse{0%,100%{opacity:.22}50%{opacity:.82}}@keyframes flowBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}`}</style>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:6}}>
               <div style={{fontSize:10,fontWeight:800,letterSpacing:1,textTransform:"uppercase",display:"flex",alignItems:"center",gap:8}}>
@@ -13776,7 +13776,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                 <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#FF4D6A",borderRadius:1,display:"inline-block"}}/>{isEN?"Bearish":"Bajista"}</span>
               </div>
             </div>
-            <svg viewBox={`0 0 ${SLOTS*W} ${H+PAD_T+PAD_B}`} style={{width:"100%",height:210,display:"block"}} preserveAspectRatio="none">
+            <svg viewBox={`0 0 ${SLOTS*W} ${H+PAD_T+PAD_B}`} style={{width:"100%",height:138,display:"block"}} preserveAspectRatio="none">
               <defs>
                 <filter id="glow-up" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur stdDeviation="2" result="blur"/>
