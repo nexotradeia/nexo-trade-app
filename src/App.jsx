@@ -13325,8 +13325,8 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
   });
   const [showTgPanel,setShowTgPanel]=useState(false);
   useEffect(()=>{ try{localStorage.setItem("nexo-tg-config",JSON.stringify(tgConfig));}catch{} },[tgConfig]);
-  // Hourly candles — generated once, deterministic
-  const [hourlyCandles]=useState(()=>{
+  // Hourly candles — semilla determinista; con el mercado abierto laten en vivo
+  const [hourlyCandles,setHourlyCandles]=useState(()=>{
     const HRS=["8AM","9AM","10AM","11AM","12PM","1PM","2PM","NOW"];
     const seeds=[3.2,5.8,4.1,7.3,6.0,8.9,5.5,9.4];
     return HRS.map((h,i)=>{
@@ -13339,6 +13339,16 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
       return{h,open,close,high,low,isUp:!!isUp};
     });
   });
+
+  // ¿Mercado abierto? NYSE: Lun–Vie 9:30–16:00 ET
+  const isMktOpen=()=>{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); const m=et.getHours()*60+et.getMinutes(); return d>=1&&d<=5&&m>=570&&m<960; };
+  const [mktOpen,setMktOpen]=useState(isMktOpen());
+  // Sensación EN VIVO: con el mercado abierto, las barras laten y la última ("NOW") se mueve cada 2.5s
+  useEffect(()=>{
+    const tick=()=>{ const op=isMktOpen(); setMktOpen(op); if(!op||filter==="whales") return;
+      setHourlyCandles(prev=>prev.map((c,i)=>{ const last=i===prev.length-1; const j=(Math.random()-0.5)*(last?0.11:0.035); const close=Math.max(0.5,c.close*(1+j)); const isUp=close>=c.open; const high=Math.max(c.open,close)*1.07, low=Math.min(c.open,close)*0.94; return {...c,close,high,low,isUp}; })); };
+    tick(); const iv=setInterval(tick,2500); return()=>clearInterval(iv);
+  },[filter]);
 
   const fetchWhales=async(silent)=>{
     if(!silent){ setWhaleLoad(true); } setWhaleErr(false);
@@ -13748,12 +13758,19 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
         const PAD_T=8; const PAD_B=28;
         const toY=(v)=>PAD_T+(H*(1-(v-minL)/rng));
         return(
-          <div style={{background:"#F9FAFB",border:"1px solid rgba(0,0,0,0.08)",borderRadius:14,padding:"14px 16px 10px",marginBottom:10}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-              <div style={{fontSize:10,fontWeight:800,color:"#334155",letterSpacing:1,textTransform:"uppercase"}}>📊 ACTIVIDAD DE FLUJO POR HORA</div>
+          <div style={{background:"#F9FAFB",border:`1px solid ${mktOpen?"rgba(34,197,94,0.35)":"rgba(0,0,0,0.08)"}`,borderRadius:14,padding:"14px 16px 10px",marginBottom:10,boxShadow:mktOpen?"0 0 18px rgba(34,197,94,0.12)":"none",transition:"box-shadow .3s,border-color .3s"}}>
+            <style>{`@keyframes nexoGreenMove{0%{background-position:0% 50%}100%{background-position:200% 50%}}@keyframes flowLiveDot{0%,100%{box-shadow:0 0 3px 1px rgba(34,197,94,.5);opacity:.7}50%{box-shadow:0 0 11px 4px rgba(34,197,94,.95);opacity:1}}@keyframes flowNowPulse{0%,100%{opacity:.22}50%{opacity:.82}}`}</style>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:6}}>
+              <div style={{fontSize:10,fontWeight:800,letterSpacing:1,textTransform:"uppercase",display:"flex",alignItems:"center",gap:8}}>
+                <span style={{background:"linear-gradient(90deg,#15803d,#22c55e,#86efac,#22c55e,#15803d)",backgroundSize:"200% auto",WebkitBackgroundClip:"text",backgroundClip:"text",WebkitTextFillColor:"transparent",color:"transparent",animation:mktOpen?"nexoGreenMove 3s linear infinite":"none"}}>📊 {isEN?"Hourly Flow Activity":"Actividad de Flujo por Hora"}</span>
+                <span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:8.5,fontWeight:800,padding:"2px 7px",borderRadius:20,letterSpacing:0.5,background:mktOpen?"rgba(34,197,94,0.14)":"rgba(100,116,139,0.1)",color:mktOpen?"#16a34a":"#64748b",border:`1px solid ${mktOpen?"rgba(34,197,94,0.4)":"rgba(100,116,139,0.25)"}`}}>
+                  <span style={{width:6,height:6,borderRadius:"50%",background:mktOpen?"#22c55e":"#94a3b8",display:"inline-block",animation:mktOpen?"flowLiveDot 1.4s ease-in-out infinite":"none"}}/>
+                  {mktOpen?(isEN?"LIVE":"EN VIVO"):(isEN?"CLOSED":"CERRADO")}
+                </span>
+              </div>
               <div style={{display:"flex",gap:14,fontSize:9,color:"#64748B"}}>
-                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#00D26A",borderRadius:1,display:"inline-block"}}/>Alcista</span>
-                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#FF4D6A",borderRadius:1,display:"inline-block"}}/>Bajista</span>
+                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#00D26A",borderRadius:1,display:"inline-block"}}/>{isEN?"Bullish":"Alcista"}</span>
+                <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#FF4D6A",borderRadius:1,display:"inline-block"}}/>{isEN?"Bearish":"Bajista"}</span>
               </div>
             </div>
             <svg viewBox={`0 0 ${SLOTS*W} ${H+PAD_T+PAD_B}`} style={{width:"100%",height:150,display:"block"}} preserveAspectRatio="xMidYMid meet">
@@ -13787,6 +13804,9 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                     {/* Glow halo behind body */}
                     <rect x={cx-bw/2-3} y={bodyTop-3} width={bw+6} height={bodyH+6}
                       fill={c.isUp?"rgba(0,210,106,0.07)":"rgba(255,77,106,0.07)"} rx="4"/>
+                    {/* Halo latiendo en la barra "NOW" cuando el mercado está abierto */}
+                    {i===SLOTS-1 && mktOpen && <rect x={cx-bw/2-5} y={bodyTop-5} width={bw+10} height={bodyH+10}
+                      fill={c.isUp?"rgba(0,210,106,0.3)":"rgba(255,77,106,0.3)"} rx="5" style={{animation:"flowNowPulse 1.5s ease-in-out infinite"}}/>}
                     {/* Top wick */}
                     <line x1={cx} y1={hY} x2={cx} y2={bodyTop} stroke={col} strokeWidth="1.8" strokeOpacity="0.75"/>
                     {/* Bottom wick */}
