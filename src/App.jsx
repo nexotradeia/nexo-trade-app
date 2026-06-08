@@ -3679,7 +3679,8 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
           </div>}
           <textarea ref={taRef} value={text} onChange={handleTextChange}
             placeholder={isEN?"What do you think of the market? Use $NVDA or @META · Enter to post":"¿Qué piensas del mercado? Usa $NVDA o @META · Enter para publicar"}
-            style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:13.5,padding:"10px 12px",resize:"none",outline:"none",height:96,fontFamily:"inherit",lineHeight:1.55,boxSizing:"border-box",transition:"border-color 0.15s",minWidth:0}}
+            style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:14.5,padding:"9px 12px",resize:"none",outline:"none",height:58,fontFamily:"inherit",lineHeight:1.5,boxSizing:"border-box",transition:"border-color 0.15s,height 0.15s",minWidth:0}}
+            onInput={e=>{e.target.style.height="58px";e.target.style.height=Math.min(e.target.scrollHeight,150)+"px";}}
             onFocus={e=>e.target.style.borderColor="rgba(15,76,129,0.4)"}
             onBlur={e=>{e.target.style.borderColor="var(--c-border)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
             onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}/>
@@ -7141,7 +7142,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"₿",  label:isEN?"₿ Crypto":"₿ Cripto",                   idx:2},
     {icon:"📈", label:isEN?"Markets":"Mercados",                     idx:3},
     {icon:"🎮", label:isEN?"Paper Trading Sim":"Paper Trading Sim",     idx:9, vip:true, ai:true},
-    {icon:"✦",  label:isEN?"PREMIUM":"PREMIUM",              idx:8, premium:true},
+    {icon:"💎", label:isEN?"Pricing & Plans":"Precios y Planes",              idx:8, premium:true},
   ];
   const navMore = [
     {icon:"📅", label:isEN?"Economic Calendar":"Calendario",         idx:14},
@@ -7946,11 +7947,11 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
           if(locked){
             return(
               <div key={tk} onClick={openPaywall}
-                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:"1px solid rgba(15,23,42,0.04)",cursor:"pointer",position:"relative"}}>
-                <LogoBadge sym={tk} col="#0F4C81" size={22} radius={6}/>
+                style={{display:"flex",alignItems:"center",gap:8,padding:"9px 14px",borderBottom:"1px solid rgba(224,182,75,0.18)",cursor:"pointer",position:"relative",background:"linear-gradient(90deg,rgba(224,182,75,0.16),rgba(224,182,75,0.05))"}}>
+                <LogoBadge sym={tk} col="#C8901F" size={22} radius={6}/>
                 <span style={{fontSize:12.5,fontWeight:800,color:"#0F172A",width:46,flexShrink:0}}>{tk}</span>
-                <span style={{flex:1,fontSize:12.5,fontWeight:700,color:"transparent",textShadow:"0 0 8px rgba(15,23,42,0.45)",userSelect:"none"}}>$ ███.██</span>
-                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:`linear-gradient(135deg,${GOLD},${GOLD2})`,color:"#fff",fontSize:10,fontWeight:800,borderRadius:20,padding:"3px 10px",flexShrink:0,boxShadow:"0 2px 8px rgba(15,76,129,0.35)"}}>🔒 Premium</span>
+                <span style={{flex:1,fontSize:12.5,fontWeight:700,color:"transparent",textShadow:"0 0 9px rgba(15,23,42,0.5)",userSelect:"none"}}>$ ███.██</span>
+                <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontSize:10,fontWeight:900,borderRadius:20,padding:"4px 11px",flexShrink:0,boxShadow:"0 2px 11px rgba(200,144,31,0.5)",whiteSpace:"nowrap"}}>🔒 {isEN?"Unlock":"Desbloquear"}</span>
               </div>
             );
           }
@@ -7974,11 +7975,12 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
         })}
       </div>
 
-      {/* Upgrade footer (solo si no premium) */}
+      {/* Upgrade footer (solo si no premium) — dorado y persuasivo */}
       {!isPremium&&(
         <button onClick={openPaywall}
-          style={{width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD2})`,border:"none",padding:"10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontFamily:"inherit"}}>
-          ✦ {isEN?"Unlock unlimited + alerts — Premium":"Desbloquea ilimitado + alertas — Premium"}
+          style={{width:"100%",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",padding:"11px 12px",color:"#1B1303",fontWeight:900,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,fontFamily:"inherit",lineHeight:1.35}}>
+          <span style={{display:"flex",alignItems:"center",gap:6,fontSize:12}}>⚡ {isEN?"Pro traders use real-time alerts.":"Los pro usan alertas en tiempo real."}</span>
+          <span style={{fontSize:10.5,fontWeight:800,opacity:0.82}}>{isEN?"And you? Unlock Premium →":"¿Y tú? Desbloquea Premium →"}</span>
         </button>
       )}
 
