@@ -6305,10 +6305,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   ];
 
   const SIGNALS = [
-    {ticker:"NVDA", tipo:"COMPRA", entrada:"$860", target:"$950", stop:"$830", conf:92, tiempo:isEN?"2h ago":"hace 2h", blur:!isPremium},
-    {ticker:"BTC",  tipo:"COMPRA", entrada:"$67,200", target:"$72,000", stop:"$65,000", conf:85, tiempo:isEN?"4h ago":"hace 4h", blur:!isPremium},
-    {ticker:"TSLA", tipo:"VENTA",  entrada:"$178", target:"$160", stop:"$185", conf:78, tiempo:isEN?"6h ago":"hace 6h", blur:!isPremium},
-    {ticker:"ETH",  tipo:"COMPRA", entrada:"$3,750", target:"$4,200", stop:"$3,500", conf:81, tiempo:isEN?"8h ago":"hace 8h", blur:!isPremium},
+    {ticker:"NVDA", tipo:"COMPRA", entrada:"$205", target:"$300", stop:"$185", conf:92, tiempo:isEN?"2h ago":"hace 2h", blur:!isPremium},
+    {ticker:"BTC",  tipo:"COMPRA", entrada:"$63,000", target:"$82,000", stop:"$58,000", conf:85, tiempo:isEN?"4h ago":"hace 4h", blur:!isPremium},
+    {ticker:"TSLA", tipo:"VENTA",  entrada:"$391", target:"$340", stop:"$410", conf:78, tiempo:isEN?"6h ago":"hace 6h", blur:!isPremium},
+    {ticker:"ETH",  tipo:"COMPRA", entrada:"$1,685", target:"$2,200", stop:"$1,480", conf:81, tiempo:isEN?"8h ago":"hace 8h", blur:!isPremium},
   ];
 
   const WEBINARS = [
