@@ -1089,6 +1089,9 @@ const CRYPTO_SYM = {
 };
 const fhSymbolOf = (t) => FH_SYM[t] || CRYPTO_SYM[t] || t;
 
+// ¿Mercado NYSE abierto? (Lun–Vie 9:30–16:00 ET) — usado para indicadores "en vivo" en la app
+const nexoMktOpenET = () => { try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); const m=et.getHours()*60+et.getMinutes(); return d>=1&&d<=5&&m>=570&&m<960; }catch(_){ return false; } };
+
 function PriceProvider({children}){
   const [prices, setPrices] = useState({});
   const wsRef    = useRef(null);
@@ -13346,8 +13349,8 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
   // Sensación EN VIVO: con el mercado abierto, las barras laten y la última ("NOW") se mueve cada 2.5s
   useEffect(()=>{
     const tick=()=>{ const op=isMktOpen(); setMktOpen(op); if(!op||filter==="whales") return;
-      setHourlyCandles(prev=>prev.map((c,i)=>{ const last=i===prev.length-1; const j=(Math.random()-0.5)*(last?0.11:0.035); const close=Math.max(0.5,c.close*(1+j)); const isUp=close>=c.open; const high=Math.max(c.open,close)*1.07, low=Math.min(c.open,close)*0.94; return {...c,close,high,low,isUp}; })); };
-    tick(); const iv=setInterval(tick,2500); return()=>clearInterval(iv);
+      setHourlyCandles(prev=>prev.map((c,i)=>{ const last=i===prev.length-1; const j=(Math.random()-0.5)*(last?0.13:0.06); const close=Math.max(0.5,c.close*(1+j)); const isUp=close>=c.open; const high=Math.max(c.open,close)*1.07, low=Math.min(c.open,close)*0.94; return {...c,close,high,low,isUp}; })); };
+    tick(); const iv=setInterval(tick,1300); return()=>clearInterval(iv);
   },[filter]);
 
   const fetchWhales=async(silent)=>{
@@ -13755,11 +13758,11 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
         const SLOTS=hourlyCandles.length;
         const W=68;
         const H=100;
-        const PAD_T=8; const PAD_B=28;
+        const PAD_T=10; const PAD_B=8;
         const toY=(v)=>PAD_T+(H*(1-(v-minL)/rng));
         return(
           <div style={{background:"#F9FAFB",border:`1px solid ${mktOpen?"rgba(34,197,94,0.35)":"rgba(0,0,0,0.08)"}`,borderRadius:14,padding:"14px 16px 10px",marginBottom:10,boxShadow:mktOpen?"0 0 18px rgba(34,197,94,0.12)":"none",transition:"box-shadow .3s,border-color .3s"}}>
-            <style>{`@keyframes nexoGreenMove{0%{background-position:0% 50%}100%{background-position:200% 50%}}@keyframes flowLiveDot{0%,100%{box-shadow:0 0 3px 1px rgba(34,197,94,.5);opacity:.7}50%{box-shadow:0 0 11px 4px rgba(34,197,94,.95);opacity:1}}@keyframes flowNowPulse{0%,100%{opacity:.22}50%{opacity:.82}}`}</style>
+            <style>{`@keyframes nexoGreenMove{0%{background-position:0% 50%}100%{background-position:200% 50%}}@keyframes flowLiveDot{0%,100%{box-shadow:0 0 3px 1px rgba(34,197,94,.5);opacity:.7}50%{box-shadow:0 0 11px 4px rgba(34,197,94,.95);opacity:1}}@keyframes flowNowPulse{0%,100%{opacity:.22}50%{opacity:.82}}@keyframes flowBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}`}</style>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:6}}>
               <div style={{fontSize:10,fontWeight:800,letterSpacing:1,textTransform:"uppercase",display:"flex",alignItems:"center",gap:8}}>
                 <span style={{background:"linear-gradient(90deg,#15803d,#22c55e,#86efac,#22c55e,#15803d)",backgroundSize:"200% auto",WebkitBackgroundClip:"text",backgroundClip:"text",WebkitTextFillColor:"transparent",color:"transparent",animation:mktOpen?"nexoGreenMove 3s linear infinite":"none"}}>📊 {isEN?"Hourly Flow Activity":"Actividad de Flujo por Hora"}</span>
@@ -13773,7 +13776,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                 <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:9,height:9,background:"#FF4D6A",borderRadius:1,display:"inline-block"}}/>{isEN?"Bearish":"Bajista"}</span>
               </div>
             </div>
-            <svg viewBox={`0 0 ${SLOTS*W} ${H+PAD_T+PAD_B}`} style={{width:"100%",height:150,display:"block"}} preserveAspectRatio="xMidYMid meet">
+            <svg viewBox={`0 0 ${SLOTS*W} ${H+PAD_T+PAD_B}`} style={{width:"100%",height:210,display:"block"}} preserveAspectRatio="none">
               <defs>
                 <filter id="glow-up" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur stdDeviation="2" result="blur"/>
@@ -13795,7 +13798,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                 const hY=toY(c.high); const lY=toY(c.low);
                 const bodyTop=Math.min(oY,cY);
                 const bodyH=Math.max(Math.abs(oY-cY),4);
-                const bw=W*0.50;
+                const bw=W*0.42;
                 const col=c.isUp?"#00D26A":"#FF4D6A";
                 const fillCol=c.isUp?"rgba(0,210,106,0.88)":"rgba(255,77,106,0.88)";
                 const glowId=c.isUp?"url(#glow-up)":"url(#glow-dn)";
@@ -13811,20 +13814,23 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                     <line x1={cx} y1={hY} x2={cx} y2={bodyTop} stroke={col} strokeWidth="1.8" strokeOpacity="0.75"/>
                     {/* Bottom wick */}
                     <line x1={cx} y1={bodyTop+bodyH} x2={cx} y2={lY} stroke={col} strokeWidth="1.8" strokeOpacity="0.75"/>
-                    {/* Candle body */}
+                    {/* Candle body — con movimiento suave constante cuando el mercado está abierto */}
                     <rect x={cx-bw/2} y={bodyTop} width={bw} height={bodyH}
-                      fill={fillCol} rx="3" filter={glowId}/>
+                      fill={fillCol} rx="3" filter={glowId}
+                      style={mktOpen?{animation:`flowBob ${(1.5+i*0.17).toFixed(2)}s ease-in-out infinite`,transformBox:"fill-box",transformOrigin:"center"}:undefined}/>
                     {/* Open/close tick marks on body sides */}
                     <line x1={cx-bw/2-4} y1={oY} x2={cx-bw/2} y2={oY} stroke={col} strokeWidth="1.5" strokeOpacity="0.5"/>
                     <line x1={cx+bw/2} y1={cY} x2={cx+bw/2+4} y2={cY} stroke={col} strokeWidth="1.5" strokeOpacity="0.5"/>
-                    {/* Hour label */}
-                    <text x={cx} y={H+PAD_T+PAD_B-4} textAnchor="middle" fontSize="10" fill="#475569" fontFamily="monospace" fontWeight="700">{c.h}</text>
-                    {/* Up/down arrow */}
-                    <text x={cx} y={bodyTop-5} textAnchor="middle" fontSize="8" fill={col} opacity="0.7">{c.isUp?"▲":"▼"}</text>
                   </g>
                 );
               })}
             </svg>
+            {/* Etiquetas de hora en HTML (no se deforman al estirar el SVG) */}
+            <div style={{display:"flex",marginTop:2}}>
+              {hourlyCandles.map((c,i)=>(
+                <div key={i} style={{flex:1,textAlign:"center",fontSize:10,fontWeight:i===SLOTS-1?900:700,color:(i===SLOTS-1&&mktOpen)?"#16a34a":"#475569",fontFamily:"monospace",letterSpacing:0.3}}>{c.h}</div>
+              ))}
+            </div>
           </div>
         );
       })()}
@@ -23831,8 +23837,11 @@ export default function App(){
                 onMouseEnter={e=>{if(!active){e.currentTarget.style.color="#E0B64B";e.currentTarget.style.background="rgba(224,182,75,0.08)";}}}
                 onMouseLeave={e=>{if(!active){e.currentTarget.style.color="#EAF1FA";e.currentTarget.style.background="transparent";}}}
               >
-                {n.locked?<NavIco name="lock" size={13}/>:<NavIco name={n.icon}/>}
-                {stripEmoji(n.label)}
+                {(()=>{ const mo=n.idx===20&&nexoMktOpenET(); return(<>
+                  {n.locked?<NavIco name="lock" size={13}/>:<NavIco name={n.icon}/>}
+                  {mo&&<span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 7px #22c55e",animation:"nexo-pulse 1.3s infinite",display:"inline-block",flexShrink:0}}/>}
+                  <span style={mo?{color:"#22c55e",fontWeight:800,textShadow:"0 0 9px rgba(34,197,94,0.55)"}:undefined}>{stripEmoji(n.label)}</span>
+                </>);})()}
               </button>
             );
           })}
