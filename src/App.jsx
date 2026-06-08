@@ -19873,6 +19873,30 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [sortBy, setSortBy] = useState("pnl"); // pnl | ticker | value
   const [ptTab, setPtTab] = useState("returns"); // returns | market | risk | efficiency | projections | health
   const [ptFull, setPtFull] = useState(false); // pantalla completa
+  const [pCloud, setPCloud] = useState(user?.id ? "loading" : "off"); // off | loading | synced | saving | error
+  const pCloudReady = useRef(false);
+
+  // ☁️ Cargar el portafolio desde la nube (Supabase) al iniciar sesión → disponible en cualquier dispositivo
+  useEffect(()=>{
+    if(!user?.id){ pCloudReady.current=false; setPCloud("off"); return; }
+    let cancelled=false; pCloudReady.current=false; setPCloud("loading");
+    (async()=>{
+      try{
+        const { data, error } = await supabase.from("user_portfolios").select("positions").eq("user_id",user.id).maybeSingle();
+        if(cancelled) return;
+        if(error) throw error;
+        if(data && Array.isArray(data.positions) && data.positions.length>0){
+          setPositions(data.positions);
+        } else {
+          let seed=[]; try { const s=JSON.parse(localStorage.getItem(LS_KEY)||"[]"); if(s&&s.length) seed=s; } catch {}
+          if(seed.length) await supabase.from("user_portfolios").upsert({ user_id:user.id, positions:seed, updated_at:new Date().toISOString() });
+        }
+        pCloudReady.current=true; if(!cancelled) setPCloud("synced");
+      }catch(e){ console.warn("portfolio cloud load:",e?.message||e); if(!cancelled){ pCloudReady.current=true; setPCloud("error"); } }
+    })();
+    return ()=>{ cancelled=true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[user?.id]);
 
   useEffect(()=>{
     if(!ptFull) return;
@@ -19882,10 +19906,17 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     return()=>{ window.removeEventListener("keydown",onKey); document.body.style.overflow=""; };
   },[ptFull]);
 
-  // Persist to localStorage
+  // Persist: localStorage siempre + nube (Supabase) tras la carga inicial
   useEffect(()=>{
     try { localStorage.setItem(LS_KEY, JSON.stringify(positions)); } catch{}
-  },[positions, LS_KEY]);
+    if(user?.id && pCloudReady.current){
+      setPCloud("saving");
+      supabase.from("user_portfolios")
+        .upsert({ user_id:user.id, positions, updated_at:new Date().toISOString() })
+        .then(({error})=>{ setPCloud(error?"error":"synced"); })
+        .catch(()=>setPCloud("error"));
+    }
+  },[positions, LS_KEY, user?.id]);
 
   // Fetch live prices for all tickers
   useEffect(()=>{
@@ -19983,6 +20014,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
         <span style={{fontSize:20,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.4}}>💼 {isEN?"Portfolio Oracle AI":"Portafolio Oracle IA"}</span>
         <span style={{background:"linear-gradient(135deg,#C8901F,#8A5E10)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
+        {(()=>{ const s = pCloud==="synced"?{t:isEN?"☁️ Synced to your account":"☁️ Guardado en tu cuenta",c:"#10B981"} : (pCloud==="loading"||pCloud==="saving")?{t:isEN?"☁️ Syncing…":"☁️ Sincronizando…",c:"#818CF8"} : pCloud==="error"?{t:isEN?"⚠️ Saved on this device":"⚠️ Guardado en este equipo",c:"#F59E0B"} : {t:isEN?"💾 Sign in to sync":"💾 Inicia sesión para sincronizar",c:"#94A3B8"}; return <span onClick={()=>{ if(pCloud==="off"&&onNeedAuth) onNeedAuth(); }} title={s.t} style={{fontSize:11,fontWeight:700,color:s.c,background:s.c+"1A",border:`1px solid ${s.c}40`,borderRadius:20,padding:"3px 10px",cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
         <button onClick={()=>setPtFull(f=>!f)}
           style={{marginLeft:"auto",background:ptFull?"rgba(239,68,68,0.12)":"rgba(15,76,129,0.12)",border:`1px solid ${ptFull?"rgba(239,68,68,0.3)":"rgba(15,76,129,0.3)"}`,color:ptFull?"#EF4444":"#3B82F6",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
           {ptFull?"✕":"⛶"} {ptFull?(isEN?"Exit":"Salir"):(isEN?"Full screen":"Pantalla completa")}
