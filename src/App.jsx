@@ -7286,7 +7286,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                         style={{background:"transparent",border:"1px solid #e2e8f0",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:11,cursor:"pointer"}}>&#x2715;</button>
                     </div>
                     {nameStatus&&<div style={{fontSize:11,marginTop:4,fontWeight:600,color:nameStatus==="taken"||nameStatus==="error"?"#ef4444":nameStatus==="available"?"#16A34A":nameStatus==="saved"?"#16A34A":"#94a3b8"}}>
-                      {nameStatus==="checking"?"&#x1F50D; Verificando...":nameStatus==="taken"?"&#x2717; Ya en uso":nameStatus==="error"?"&#x2717; Error":nameStatus==="available"?"&#x2713; Disponible":"&#x2705; &#xA1;Guardado!"}
+                      {nameStatus==="checking"?(lang==="en"?"🔍 Checking...":"🔍 Verificando..."):nameStatus==="taken"?(lang==="en"?"✗ Taken":"✗ Ya en uso"):nameStatus==="error"?"✗ Error":nameStatus==="available"?(lang==="en"?"✓ Available":"✓ Disponible"):(lang==="en"?"✅ Saved!":"✅ ¡Guardado!")}
                     </div>}
                     <div style={{fontSize:10,color:"#CBD5E1",marginTop:3}}>Solo letras, n&#xFA;meros y _ &#xB7; M&#xED;n. 3</div>
                   </div>
@@ -7305,7 +7305,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                       <span>&#xB7;</span>
                       <span style={{display:"flex",alignItems:"center",gap:3}}>
                         <span style={{width:7,height:7,borderRadius:"50%",background:"#22C55E",display:"inline-block",boxShadow:"0 0 6px #22C55E"}}/>
-                        <span style={{color:"#22C55E",fontWeight:600}}>{lang==="en"?"Online":"En l&#xED;nea"}</span>
+                        <span style={{color:"#22C55E",fontWeight:600}}>{lang==="en"?"Online":"En línea"}</span>
                       </span>
                     </div>
                   </div>
