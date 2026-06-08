@@ -9499,6 +9499,10 @@ function ReferralSection({ user }) {
           style={{flex:1,background:"linear-gradient(135deg,#833AB4,#FD1D1D,#F77737)",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>
           📸 Instagram
         </a>
+        <button onClick={()=>{ try{navigator.clipboard.writeText(refLink);}catch{} try{window.open("https://www.tiktok.com/","_blank","noopener");}catch{} alert(isEN?"Link copied! Paste it in your TikTok bio or video caption 🎵":"¡Link copiado! Pégalo en tu bio o descripción de TikTok 🎵"); }}
+          style={{flex:1,background:"#000000",border:"none",borderRadius:7,padding:"7px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",textAlign:"center",display:"block",fontFamily:"inherit"}}>
+          🎵 TikTok
+        </button>
       </div>
     </div>
   );
