@@ -17932,6 +17932,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [marketStatus, setMarketStatus] = useState({status:"loading",label:"…",color:"#94A3B8"});
   const [exportOpen, setExportOpen] = useState(false);
   const [addViewOpen, setAddViewOpen] = useState(false);
+  const [importMsg, setImportMsg] = useState(null);
+  const [dataNote, setDataNote] = useState(null);
 
   // Market status: compute NYSE open/closed/pre-market in real time
   const computeMarketStatus = () => {
@@ -17958,28 +17960,67 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     try { localStorage.setItem(LS_KEY, JSON.stringify(tickers)); } catch{}
   },[tickers, LS_KEY]);
 
+  // Mapeo de símbolos cripto → ids de CoinGecko (precio gratis y confiable, con cambio 24h)
+  const CG_IDS = {
+    BTC:"bitcoin", ETH:"ethereum", SOL:"solana", BNB:"binancecoin", XRP:"ripple",
+    ADA:"cardano", DOGE:"dogecoin", AVAX:"avalanche-2", DOT:"polkadot", LINK:"chainlink",
+    MATIC:"matic-network", POL:"matic-network", LTC:"litecoin", SHIB:"shiba-inu", TRX:"tron",
+    UNI:"uniswap", ATOM:"cosmos", XLM:"stellar", NEAR:"near", APT:"aptos", ARB:"arbitrum",
+    OP:"optimism", FIL:"filecoin", ETC:"ethereum-classic", BCH:"bitcoin-cash", PEPE:"pepe",
+  };
+
   const fetchPrices = async () => {
     if(!tickers.length){ setLoading(false); return; }
     setLoading(true);
-    const cryptoMap={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT"};
-    // Escalonar llamadas 300ms para evitar rate limit de Finnhub
-    const results = await Promise.all(tickers.map(async (tk,idx)=>{
-      await new Promise(res=>setTimeout(res,idx*300));
-      const sym = cryptoMap[tk]||tk;
+    const map = {};
+    let ok = 0, fail = 0;
+
+    // 1) Cripto en UNA sola llamada a CoinGecko
+    const cryptoTks = tickers.filter(t=>CG_IDS[t]);
+    if(cryptoTks.length){
       try {
-        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
+        const ids = [...new Set(cryptoTks.map(t=>CG_IDS[t]))].join(",");
+        const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         if(!r.ok) throw new Error("http "+r.status);
         const d = await r.json();
-        // d.c = precio actual, d.pc = prev close como fallback
+        cryptoTks.forEach(tk=>{
+          const c = d[CG_IDS[tk]];
+          if(c && c.usd>0){
+            const price=c.usd, chg=c.usd_24h_change||0;
+            const prev = chg!==0 ? price/(1+chg/100) : price;
+            map[tk]={ticker:tk, price, change:chg, high:price, low:price, open:prev, prev};
+            ok++;
+          } else { map[tk]={ticker:tk, price:null, change:null}; fail++; }
+        });
+      } catch(e){ console.warn("CoinGecko",e.message); cryptoTks.forEach(tk=>{ map[tk]={ticker:tk, price:null, change:null}; fail++; }); }
+    }
+
+    // 2) Acciones vía Finnhub (escalonadas suave para no chocar con el rate limit)
+    const stockTks = tickers.filter(t=>!CG_IDS[t]);
+    const stockResults = await Promise.all(stockTks.map(async (tk,idx)=>{
+      await new Promise(res=>setTimeout(res,idx*150));
+      try {
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINNHUB_KEY}`);
+        if(!r.ok) throw new Error("http "+r.status);
+        const d = await r.json();
         const price = d.c>0 ? d.c : (d.pc>0 ? d.pc : null);
         if(price) return {ticker:tk, price, change:d.dp||0, high:d.h||price, low:d.l||price, open:d.o||price, prev:d.pc||price};
       } catch(e){ console.warn("Finnhub",tk,e.message); }
       return {ticker:tk, price:null, change:null};
     }));
-    const map={};
-    results.forEach(r=>{ map[r.ticker]=r; });
+    stockResults.forEach(r=>{ map[r.ticker]=r; if(r.price!=null) ok++; else fail++; });
+
     setPrices(map);
     setLastUpdated(new Date());
+    // Aviso claro si nada se actualizó o si algunos fallaron
+    if(ok===0 && tickers.length>0){
+      setDataNote(isEN?"🚫 Couldn't load prices — provider may be rate-limited, try again in a minute":"🚫 No se pudieron cargar los precios — el proveedor puede estar saturado, intenta en un minuto");
+    } else if(fail>0){
+      setDataNote(isEN?`⚠️ ${fail} ticker(s) without data`:`⚠️ ${fail} ticker(s) sin datos`);
+    } else {
+      setDataNote(isEN?"✅ Updated":"✅ Actualizado");
+    }
+    setTimeout(()=>setDataNote(null),4000);
     setLoading(false);
   };
 
@@ -18172,6 +18213,34 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     setExportOpen(false);
   };
 
+  // Import tickers from a CSV / TXT file (one per line or comma-separated; first column used)
+  const importTickers = (file) => {
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = String(e.target?.result||"");
+      const raw = text.split(/[\r\n]+/).map(line=>line.split(/[,;\t]/)[0]);
+      const cleaned = raw
+        .map(t=>t.trim().toUpperCase().replace(/[^A-Z0-9.]/g,""))
+        .filter(t=>t && t!=="TICKER" && t!=="SYMBOL" && t.length<=10);
+      const merged=[...tickers];
+      let added=0, full=false;
+      for(const t of cleaned){
+        if(merged.length>=30){ full=true; break; }
+        if(!merged.includes(t)){ merged.push(t); added++; }
+      }
+      setTickers(merged);
+      setImportMsg(
+        added>0
+          ? (isEN?`✅ ${added} imported${full?" (limit 30)":""}`:`✅ ${added} importados${full?" (máx 30)":""}`)
+          : (full?(isEN?"🚫 List full (30)":"🚫 Lista llena (30)"):(isEN?"⚠️ Nothing new found":"⚠️ Nada nuevo encontrado"))
+      );
+      setTimeout(()=>setImportMsg(null),3500);
+    };
+    reader.onerror = () => { setImportMsg(isEN?"🚫 Could not read file":"🚫 No se pudo leer el archivo"); setTimeout(()=>setImportMsg(null),3500); };
+    reader.readAsText(file);
+  };
+
   return(
     <div style={{maxWidth:1380,margin:"0 auto",padding:"0 0 60px",fontFamily:"Inter,sans-serif"}}>
 
@@ -18215,6 +18284,11 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                   <span style={{fontSize:11,color:"#1A5FAD"}}>{isEN?"Upd.":"Act."} {lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
                 </div>
               )}
+              {dataNote&&(
+                <div style={{display:"flex",alignItems:"center",gap:5,background:dataNote.startsWith("✅")?"rgba(16,185,129,0.12)":dataNote.startsWith("⚠️")?"rgba(245,158,11,0.12)":"rgba(239,68,68,0.14)",borderRadius:20,padding:"4px 12px",border:`1px solid ${dataNote.startsWith("✅")?"rgba(16,185,129,0.35)":dataNote.startsWith("⚠️")?"rgba(245,158,11,0.35)":"rgba(239,68,68,0.4)"}`}}>
+                  <span style={{fontSize:11,fontWeight:600,color:dataNote.startsWith("✅")?"#10B981":dataNote.startsWith("⚠️")?"#F59E0B":"#EF4444"}}>{dataNote}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -18237,11 +18311,11 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
             {/* Action buttons */}
             <div style={{display:"flex",gap:7,alignItems:"center"}}>
               <button onClick={fetchPrices} disabled={loading}
-                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(15,94,104,0.15)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:9,padding:"7px 14px",fontSize:12,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"all 0.15s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="rgba(15,94,104,0.28)"}
+                style={{display:"flex",alignItems:"center",gap:5,background:"rgba(15,94,104,0.15)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:9,padding:"7px 14px",fontSize:12,fontWeight:700,color:"#818CF8",cursor:loading?"wait":"pointer",opacity:loading?0.7:1,transition:"all 0.15s"}}
+                onMouseEnter={e=>{if(!loading)e.currentTarget.style.background="rgba(15,94,104,0.28)";}}
                 onMouseLeave={e=>e.currentTarget.style.background="rgba(15,94,104,0.15)"}>
                 <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none",fontSize:13}}>↻</span>
-                Refresh
+                {loading?(isEN?"Updating…":"Actualizando…"):"Refresh"}
               </button>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setAddViewOpen(p=>!p)}
@@ -18312,9 +18386,20 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         <button onClick={addTicker} style={{background:"#0047C2",border:"none",borderRadius:8,padding:"8px 18px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>
           + {isEN?"Add":"Agregar"}
         </button>
+        <label style={{background:"#fff",border:"1px solid #0047C2",borderRadius:8,padding:"8px 16px",color:"#0047C2",fontWeight:700,fontSize:13,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}
+          title={isEN?"Import a CSV/TXT list of tickers":"Importar una lista CSV/TXT de tickers"}>
+          📥 {isEN?"Import":"Importar"}
+          <input type="file" accept=".csv,.txt,text/csv,text/plain" style={{display:"none"}}
+            onChange={e=>{ importTickers(e.target.files?.[0]); e.target.value=""; }}/>
+        </label>
         {addFeedback && (
           <span style={{fontSize:12,fontWeight:600,alignSelf:"center",color:addFeedback==="added"?"#10B981":addFeedback==="exists"?"#F59E0B":"#EF4444"}}>
             {addFeedback==="added"?"✅ Agregado":addFeedback==="exists"?"⚠️ Ya existe":"🚫 Lista llena"}
+          </span>
+        )}
+        {importMsg && (
+          <span style={{fontSize:12,fontWeight:600,alignSelf:"center",color:importMsg.startsWith("✅")?"#10B981":importMsg.startsWith("⚠️")?"#F59E0B":"#EF4444"}}>
+            {importMsg}
           </span>
         )}
         <span style={{fontSize:11,color:"#5B8DC7",alignSelf:"center",marginLeft:"auto"}}>
@@ -18324,10 +18409,15 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
 
       {/* ── TABLE ── */}
       {tickers.length===0?(
-        <div style={{textAlign:"center",padding:"60px 20px",border:"2px dashed #DBEAFE",borderRadius:16}}>
+        <div style={{textAlign:"center",padding:"50px 20px",border:"2px dashed #DBEAFE",borderRadius:16}}>
           <div style={{fontSize:40,marginBottom:12}}>👁</div>
-          <div style={{fontWeight:700,fontSize:16,color:"#0F172A",marginBottom:6}}>{isEN?"Watchlist vacía":"Your watchlist is empty"}</div>
-          <div style={{color:"#64748B",fontSize:13}}>Agrega tickers arriba para comenzar</div>
+          <div style={{fontWeight:700,fontSize:16,color:"#0F172A",marginBottom:6}}>{isEN?"Your watchlist is empty":"Tu watchlist está vacía"}</div>
+          <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>{isEN?"Add tickers above, or import a list to start fast":"Agrega tickers arriba, o importa una lista para empezar rápido"}</div>
+          <label style={{background:"#0047C2",border:"none",borderRadius:9,padding:"10px 20px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:7}}>
+            📥 {isEN?"Import CSV / TXT":"Importar CSV / TXT"}
+            <input type="file" accept=".csv,.txt,text/csv,text/plain" style={{display:"none"}}
+              onChange={e=>{ importTickers(e.target.files?.[0]); e.target.value=""; }}/>
+          </label>
         </div>
       ):(
         <div style={{overflowX:"auto",border:"1px solid #DBEAFE",borderRadius:12,boxShadow:"0 4px 12px rgba(26,95,173,0.08)"}}>
@@ -18362,9 +18452,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                     ))}
                     <td style={tdStyle}>
                       <button onClick={()=>removeTicker(tk)}
-                        style={{background:"none",border:"none",color:"#94A3B8",fontSize:16,cursor:"pointer",padding:"2px 6px",borderRadius:4}}
-                        onMouseEnter={e=>e.currentTarget.style.color="#EF4444"}
-                        onMouseLeave={e=>e.currentTarget.style.color="#CBD5E1"}>×</button>
+                        title={isEN?`Remove ${tk}`:`Quitar ${tk}`}
+                        style={{background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.30)",color:"#EF4444",fontSize:14,fontWeight:800,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}
+                        onMouseEnter={e=>{e.currentTarget.style.background="#EF4444";e.currentTarget.style.color="#fff";}}
+                        onMouseLeave={e=>{e.currentTarget.style.background="rgba(239,68,68,0.10)";e.currentTarget.style.color="#EF4444";}}>🗑</button>
                     </td>
                   </tr>
                 );
