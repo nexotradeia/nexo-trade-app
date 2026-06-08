@@ -2530,7 +2530,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
 
         {/* ── X CLOSE — fuera del overflow:hidden para que siempre funcione ── */}
         <button onClick={onClose}
-          style={{position:"sticky",top:12,float:"right",marginRight:12,marginTop:12,zIndex:999,
+          style={{position:"absolute",top:12,right:12,zIndex:999,
             background:"rgba(255,255,255,0.85)",backdropFilter:"blur(8px)",
             border:"1px solid rgba(0,0,0,0.1)",borderRadius:10,
             width:34,height:34,cursor:"pointer",color:"#374151",fontSize:16,
@@ -2538,10 +2538,10 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             boxShadow:"0 2px 8px rgba(0,0,0,0.1)",flexShrink:0}}>✕</button>
 
         {/* ── COVER + HEADER INTEGRADO ── */}
-        <div style={{background:`linear-gradient(160deg,#ffffff 0%,#F1F5F9 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
+        <div style={{background:`linear-gradient(155deg,#EAF7F1 0%,#D2EDE2 55%,#C3E7DA 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
           {/* Dot grid */}
-          <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.12,pointerEvents:"none"}} viewBox="0 0 560 120" preserveAspectRatio="xMidYMid slice">
-            <defs><pattern id="pdots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#0F4C81"/></pattern></defs>
+          <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.14,pointerEvents:"none"}} viewBox="0 0 560 120" preserveAspectRatio="xMidYMid slice">
+            <defs><pattern id="pdots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#0F5E68"/></pattern></defs>
             <rect width="560" height="120" fill="url(#pdots)"/>
           </svg>
           {/* Chart line azul */}
