@@ -5741,9 +5741,9 @@ function NexoTermometro({lang="es"}) {
     const bar=(v)=>{const a=Math.PI*(1-v/100);return{x:50+40*Math.cos(a),y:50-40*Math.sin(a)};};
     const p1=bar(0), p2=bar(100);
     return(
-      <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"12px 14px",textAlign:"center"}}>
-        <div style={{fontSize:11,color:"#475569",fontWeight:700,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>{icon} {lbl}</div>
-        <svg viewBox="0 0 100 55" width="90" height="50" style={{margin:"0 auto",display:"block"}}>
+      <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"8px 10px",textAlign:"center"}}>
+        <div style={{fontSize:10,color:"#475569",fontWeight:700,marginBottom:5,textTransform:"uppercase",letterSpacing:0.5}}>{icon} {lbl}</div>
+        <svg viewBox="0 0 100 55" width="74" height="41" style={{margin:"0 auto",display:"block"}}>
           <path d={`M${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A40 40 0 0 1 ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`} stroke="rgba(255,255,255,0.08)" strokeWidth="8" fill="none" strokeLinecap="round"/>
           {ZONES.map(([s,e,cl])=>(
             <path key={s} d={`M${bar(s).x.toFixed(1)} ${bar(s).y.toFixed(1)} A40 40 0 0 1 ${bar(e).x.toFixed(1)} ${bar(e).y.toFixed(1)}`} stroke={cl} strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.7"/>
@@ -5752,21 +5752,21 @@ function NexoTermometro({lang="es"}) {
           <circle cx="50" cy="50" r="3.5" fill="white"/>
         </svg>
         {val===null?<div style={{color:"#334155",fontSize:11}}>--</div>:<>
-          <div style={{fontWeight:900,fontSize:20,color:c,fontFamily:"monospace",lineHeight:1}}>{val}</div>
-          <div style={{fontSize:10,color:c,fontWeight:700,marginTop:2}}>{isEN?(val>=80?"Ext. Greed":val>=60?"Greed":val>=45?"Neutral":val>=25?"Fear":"Panic"):(val>=80?"Codicia Ext.":val>=60?"Codicia":val>=45?"Neutral":val>=25?"Miedo":"Pánico")}</div>
+          <div style={{fontWeight:900,fontSize:17,color:c,fontFamily:"monospace",lineHeight:1}}>{val}</div>
+          <div style={{fontSize:9.5,color:c,fontWeight:700,marginTop:2}}>{isEN?(val>=80?"Ext. Greed":val>=60?"Greed":val>=45?"Neutral":val>=25?"Fear":"Panic"):(val>=80?"Codicia Ext.":val>=60?"Codicia":val>=45?"Neutral":val>=25?"Miedo":"Pánico")}</div>
         </>}
       </div>
     );
   };
 
   return(
-    <div style={{background:"linear-gradient(145deg,rgba(15,23,42,0.92),rgba(20,30,55,0.88))",border:"1px solid rgba(255,255,255,0.1)",borderRadius:18,padding:"14px 18px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+    <div style={{background:"linear-gradient(145deg,rgba(15,23,42,0.92),rgba(20,30,55,0.88))",border:"1px solid rgba(255,255,255,0.1)",borderRadius:18,padding:"11px 14px",marginBottom:14,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:-30,right:-30,width:150,height:150,background:`radial-gradient(circle,${color}15,transparent 70%)`,pointerEvents:"none"}}/>
       {/* Title */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,position:"relative"}}>
         <div>
-          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:14}}>🌡️ {isEN?"NexoTrade Thermometer":"Termómetro NexoTrade"}</div>
-          <div style={{fontSize:10,color:"#64748B",marginTop:1}}>{isEN?"Market Fear/Greed index":"Índice Miedo/Codicia del mercado"}</div>
+          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:13}}>🌡️ {isEN?"NexoTrade Thermometer":"Termómetro NexoTrade"}</div>
+          <div style={{fontSize:9.5,color:"#64748B",marginTop:1}}>{isEN?"Market Fear/Greed index":"Índice Miedo/Codicia del mercado"}</div>
         </div>
         <div style={{textAlign:"right",display:"flex",alignItems:"center",gap:8}}>
           {updated&&<div style={{fontSize:10,color:"#64748B",fontWeight:600}}>🕐 {updated}</div>}
@@ -5774,11 +5774,11 @@ function NexoTermometro({lang="es"}) {
         </div>
       </div>
       {/* Main gauge */}
-      <div style={{textAlign:"center",marginBottom:10}}>
+      <div style={{textAlign:"center",marginBottom:8}}>
         {loading
-          ?<div style={{height:90,display:"flex",alignItems:"center",justifyContent:"center",color:"#475569",fontSize:11}}>⏳ {isEN?"Calculating index...":"Calculando índice..."}</div>
+          ?<div style={{height:76,display:"flex",alignItems:"center",justifyContent:"center",color:"#475569",fontSize:11}}>⏳ {isEN?"Calculating index...":"Calculando índice..."}</div>
           :<>
-            <svg viewBox="0 0 220 115" width="180" height="92" style={{margin:"0 auto",display:"block"}}>
+            <svg viewBox="0 0 220 115" width="150" height="78" style={{margin:"0 auto",display:"block"}}>
               <path d={arc(R,0,100)} stroke="rgba(255,255,255,0.06)" strokeWidth="14" fill="none" strokeLinecap="round"/>
               {ZONES.map(([s,e,cl])=>(
                 <path key={s} d={arc(R,s,e)} stroke={cl} strokeWidth="14" fill="none" strokeLinecap="round" opacity="0.8"/>
@@ -5791,9 +5791,9 @@ function NexoTermometro({lang="es"}) {
               <text x="18" y="108" textAnchor="middle" fill="#EF4444" fontSize="7.5" fontWeight="700">{isEN?"FEAR":"PÁNICO"}</text>
               <text x="202" y="108" textAnchor="middle" fill="#22C55E" fontSize="7.5" fontWeight="700">{isEN?"GREED":"CODICIA"}</text>
             </svg>
-            <div style={{marginTop:-2}}>
-              <span style={{fontSize:16}}>{emoji}</span>
-              <span style={{fontSize:15,fontWeight:900,color:color,fontFamily:"monospace",marginLeft:6}}>{label}</span>
+            <div style={{marginTop:-4}}>
+              <span style={{fontSize:14}}>{emoji}</span>
+              <span style={{fontSize:13,fontWeight:900,color:color,fontFamily:"monospace",marginLeft:6}}>{label}</span>
             </div>
           </>
         }
@@ -5893,9 +5893,9 @@ function TrendingPage({posts=[],lang="es"}){
   const topEmerging = useMemo(()=>rankPool(EMERGING_POOL,8),[tick,lang]);
   // Filas combinadas con cabeceras de sección
   const rows = [
-    {_header:isEN?"🐘 Large Caps · biggest movers":"🐘 Grandes · mayores movimientos"},
+    {_header:isEN?"Large Caps · biggest movers":"Grandes · mayores movimientos"},
     ...topBig.map((m,idx)=>({...m,_rank:idx})),
-    {_header:isEN?"🚀 Emerging · most volatile":"🚀 Emergentes · más volátiles"},
+    {_header:isEN?"Emerging · most volatile":"Emergentes · más volátiles"},
     ...topEmerging.map((m,idx)=>({...m,_rank:idx})),
   ];
 
@@ -5916,6 +5916,7 @@ function TrendingPage({posts=[],lang="es"}){
 
   return(
     <div>
+      <style>{`@keyframes nexoGreenMove{0%{background-position:0% 50%}100%{background-position:200% 50%}}@keyframes nexoDotGlow{0%,100%{box-shadow:0 0 4px 1px rgba(34,197,94,.55);opacity:.75}50%{box-shadow:0 0 13px 4px rgba(34,197,94,.95);opacity:1}}`}</style>
       {/* 🌐 Resumen del mercado (índices + crypto + commodities) */}
       <MarketOverview lang={lang}/>
       {/* Termómetro NexoTrade */}
@@ -5923,7 +5924,10 @@ function TrendingPage({posts=[],lang="es"}){
 
       {/* Header */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,flexWrap:"wrap"}}>
-        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>🔥 {isEN?"Trending on NexoTrade":"Trending en NexoTrade"}</h2>
+        <h2 style={{margin:0,fontSize:18,fontWeight:900,display:"flex",alignItems:"center",gap:7}}>
+          <span style={{fontSize:18}}>🔥</span>
+          <span style={{background:"linear-gradient(90deg,#15803d,#22c55e,#86efac,#22c55e,#15803d)",backgroundSize:"200% auto",WebkitBackgroundClip:"text",backgroundClip:"text",WebkitTextFillColor:"transparent",color:"transparent",animation:"nexoGreenMove 3s linear infinite",filter:"drop-shadow(0 0 6px rgba(34,197,94,0.45))"}}>{isEN?"Trending on NexoTrade":"Trending en NexoTrade"}</span>
+        </h2>
         <span style={{background:"rgba(239,68,68,0.12)",color:"#EF4444",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,border:"1px solid rgba(239,68,68,0.25)"}}>
           ● {isEN?"LAST 24H":"ÚLTIMAS 24H"}
         </span>
@@ -5942,9 +5946,10 @@ function TrendingPage({posts=[],lang="es"}){
       {/* Cards */}
       {rows.map((m,i)=>{
         if(m._header) return(
-          <div key={"h"+i} style={{display:"flex",alignItems:"center",gap:8,margin:i===0?"4px 0 10px":"22px 0 10px",fontSize:13,fontWeight:800,color:C.text,letterSpacing:0.2}}>
-            <span>{m._header}</span>
-            <div style={{flex:1,height:1,background:C.border}}/>
+          <div key={"h"+i} style={{display:"flex",alignItems:"center",gap:9,margin:i===0?"4px 0 10px":"22px 0 10px",fontSize:14,fontWeight:900,letterSpacing:0.2}}>
+            <span style={{width:9,height:9,borderRadius:"50%",background:"#22c55e",display:"inline-block",flexShrink:0,animation:"nexoDotGlow 1.6s ease-in-out infinite"}}/>
+            <span style={{background:"linear-gradient(90deg,#15803d,#22c55e,#86efac,#22c55e,#15803d)",backgroundSize:"200% auto",WebkitBackgroundClip:"text",backgroundClip:"text",WebkitTextFillColor:"transparent",color:"transparent",animation:"nexoGreenMove 3s linear infinite",whiteSpace:"nowrap"}}>{m._header}</span>
+            <div style={{flex:1,height:2,borderRadius:2,background:"linear-gradient(90deg,rgba(34,197,94,0.45),rgba(34,197,94,0))"}}/>
           </div>
         );
         const q=quotes[m.ticker]||{};
