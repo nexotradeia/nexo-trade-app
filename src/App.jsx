@@ -5949,10 +5949,11 @@ function TrendingPage({posts=[],lang="es"}){
       {/* Cards */}
       {rows.map((m,i)=>{
         if(m._header) return(
-          <div key={"h"+i} style={{display:"flex",alignItems:"center",gap:9,margin:i===0?"4px 0 10px":"22px 0 10px",fontSize:14,fontWeight:900,letterSpacing:0.2}}>
-            <span style={{width:9,height:9,borderRadius:"50%",background:"#22c55e",display:"inline-block",flexShrink:0,animation:"nexoDotGlow 1.6s ease-in-out infinite"}}/>
-            <span style={{background:"linear-gradient(90deg,#15803d,#22c55e,#86efac,#22c55e,#15803d)",backgroundSize:"200% auto",WebkitBackgroundClip:"text",backgroundClip:"text",WebkitTextFillColor:"transparent",color:"transparent",animation:"nexoGreenMove 3s linear infinite",whiteSpace:"nowrap"}}>{m._header}</span>
-            <div style={{flex:1,height:2,borderRadius:2,background:"linear-gradient(90deg,rgba(34,197,94,0.45),rgba(34,197,94,0))"}}/>
+          <div key={"h"+i} style={{display:"flex",justifyContent:"center",margin:i===0?"6px 0 16px":"28px 0 16px"}}>
+            <span style={{display:"inline-flex",alignItems:"center",gap:9,padding:"7px 20px",borderRadius:999,background:"linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.04))",border:"1px solid rgba(34,197,94,0.34)",boxShadow:"0 0 20px rgba(34,197,94,0.16)"}}>
+              <span style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",display:"inline-block",flexShrink:0,animation:"nexoDotGlow 1.6s ease-in-out infinite"}}/>
+              <span style={{background:"linear-gradient(90deg,#15803d,#22c55e,#86efac,#22c55e,#15803d)",backgroundSize:"200% auto",WebkitBackgroundClip:"text",backgroundClip:"text",WebkitTextFillColor:"transparent",color:"transparent",animation:"nexoGreenMove 3s linear infinite",whiteSpace:"nowrap",fontSize:12.5,fontWeight:900,letterSpacing:1.3,textTransform:"uppercase"}}>{m._header}</span>
+            </span>
           </div>
         );
         const q=quotes[m.ticker]||{};
