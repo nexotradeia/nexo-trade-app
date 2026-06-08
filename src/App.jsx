@@ -17941,6 +17941,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [perfPeriod, setPerfPeriod] = useState("y1"); // periodo de la sección Rendimiento
   const [activeView, setActiveView] = useState("returns"); // vista activa (declarada arriba: la usan effects)
   const [techData, setTechData] = useState({});       // {ticker: {signal, score, rsi, price, sma20, sma50, loading, error}}
+  const [techSort, setTechSort] = useState(null);      // columna de orden en la vista Technical
+  const [techDir, setTechDir] = useState("desc");
   const mockRef = useRef({});
   const techReqRef = useRef(0);
   const [cloudSync, setCloudSync] = useState(user?.id ? "loading" : "off"); // off | loading | synced | error
@@ -18690,6 +18692,24 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     };
     const thS={fontSize:13,fontWeight:800,color:"#1A5FAD",padding:"12px 14px",textAlign:"left",borderBottom:"2px solid #DBEAFE",background:"#EBF3FF",whiteSpace:"nowrap"};
     const tdS={padding:"12px 14px",borderBottom:"1px solid #DBEAFE",whiteSpace:"nowrap"};
+    // ── Columnas ordenables de la vista Technical ──
+    const TCOLS=[["name",isEN?"Name":"Nombre",170],["signal",isEN?"Signal · Daily":"Señal · Diario",160],["rsi","RSI (14)",130],["sma20","vs SMA 20",120],["sma50","vs SMA 50",120],["price",isEN?"Price":"Precio",100]];
+    const tval=(tk,key)=>{ const t=techData[tk]||{}; switch(key){
+      case "name": return tk;
+      case "signal": return t.score ?? null;
+      case "rsi": return t.rsi ?? null;
+      case "sma20": return (t.price!=null&&t.sma20!=null)?(t.price-t.sma20)/t.sma20:null;
+      case "sma50": return (t.price!=null&&t.sma50!=null)?(t.price-t.sma50)/t.sma50:null;
+      case "price": return t.price ?? (priceOf(tk)?.price ?? null);
+      default: return null;
+    }};
+    const handleTSort=(k)=>{ if(techSort===k){ setTechDir(p=>p==="desc"?"asc":"desc"); } else { setTechSort(k); setTechDir("desc"); } };
+    const techTickers = techSort ? [...tickers].sort((a,b)=>{
+      const va=tval(a,techSort), vb=tval(b,techSort), na=(va==null||Number.isNaN(va)), nb=(vb==null||Number.isNaN(vb));
+      if(na&&nb)return 0; if(na)return 1; if(nb)return -1;
+      if(typeof va==="string"||typeof vb==="string"){ const r=String(va).localeCompare(String(vb)); return techDir==="asc"?r:-r; }
+      return techDir==="asc"?va-vb:vb-va;
+    }) : tickers;
     return (
       <div>
         <div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 4px 12px",flexWrap:"wrap"}}>
@@ -18698,15 +18718,18 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         <div style={{overflowX:"auto",border:"1px solid #DBEAFE",borderRadius:12,boxShadow:"0 4px 12px rgba(26,95,173,0.08)"}}>
           <table style={{borderCollapse:"collapse",width:"100%",minWidth:760}}>
             <thead><tr>
-              <th style={{...thS,minWidth:170}}>{isEN?"Name":"Nombre"}</th>
-              <th style={{...thS,minWidth:160}}>{isEN?"Signal · Daily":"Señal · Diario"}</th>
-              <th style={{...thS,minWidth:130}}>RSI (14)</th>
-              <th style={{...thS,minWidth:120}}>{isEN?"vs SMA 20":"vs SMA 20"}</th>
-              <th style={{...thS,minWidth:120}}>{isEN?"vs SMA 50":"vs SMA 50"}</th>
-              <th style={{...thS,minWidth:100}}>{isEN?"Price":"Precio"}</th>
+              {TCOLS.map(([key,label,w])=>{ const active=techSort===key; return (
+                <th key={key} onClick={()=>handleTSort(key)}
+                  title={isEN?"Click to sort":"Clic para ordenar"}
+                  style={{...thS,minWidth:w,cursor:"pointer",color:active?"#0047C2":thS.color}}>
+                  <span style={{display:"inline-flex",alignItems:"center",gap:4}}>{label}
+                    <span style={{fontSize:11,lineHeight:1,opacity:active?1:0.4,color:active?"#0047C2":"#94A3B8"}}>{active?(techDir==="desc"?"▼":"▲"):"↕"}</span>
+                  </span>
+                </th>
+              ); })}
             </tr></thead>
             <tbody>
-              {tickers.map((tk,i)=>{
+              {techTickers.map((tk,i)=>{
                 const t=techData[tk]||{};
                 return (
                   <tr key={tk} style={{background:i%2===0?"#F4F9FF":"#EBF3FF"}}>
