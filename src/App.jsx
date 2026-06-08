@@ -17939,6 +17939,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [sortCol, setSortCol] = useState(null);   // header (c.h) de la columna por la que se ordena
   const [sortDir, setSortDir] = useState("desc"); // "desc" = mayor a menor (default), "asc" = menor a mayor
   const [perfPeriod, setPerfPeriod] = useState("y1"); // periodo de la sección Rendimiento
+  const [activeView, setActiveView] = useState("returns"); // vista activa (declarada arriba: la usan effects)
   const [techData, setTechData] = useState({});       // {ticker: {signal, score, rsi, price, sma20, sma50, loading, error}}
   const mockRef = useRef({});
   const techReqRef = useRef(0);
@@ -18148,7 +18149,6 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     return "$"+p.toFixed(4).replace(/\.?0+$/,"");
   };
 
-  const [activeView, setActiveView] = useState("returns");
   const VIEWS = [
     {id:"market",  l:"Market View"},
     {id:"risk",    l:"Risk"},
@@ -18245,6 +18245,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     ["10 Year Price Total Return","y10",true,120],
   ];
   const RK_MAP = Object.fromEntries(RKEYS.map(([h,k])=>[h,k]));
+  // Unidad de cada columna para la fila de filtro: "$" precio, "%" porcentaje, "#" número
+  const USD_COLS = new Set(["Price","Price, Current","Day High","Day Low","Open","Prev Close","Price Target","FCF/Share","FCF / Share","EPS Estimate"]);
+  const PCT_COLS = new Set(["Change %","Volatility %","ROE %","ROA %","Net Margin","Upside %","Max Drawdown","VaR (95%)","Div. Yield","Dividend Yield"]);
+  const colUnit = (h) => h==="Name" ? "" : (RK_MAP[h]||PCT_COLS.has(h)) ? "%" : USD_COLS.has(h) ? "$" : "#";
 
   const pctColor = v => v==null?"#64748B":v>=0?"#10B981":"#EF4444";
   const pctFmt  = v => v==null?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
@@ -18252,6 +18256,45 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const moneyFmt = v => (v>=0?"+":"−")+"$"+Math.abs(v).toLocaleString("en-US",{maximumFractionDigits:0});
   // Celda "iluminada": fondo verde si positivo, rojo si negativo (como pidió la usuaria)
   const retCell = (v, big=false) => <span style={{display:"inline-block",fontFamily:"monospace",fontWeight:700,fontSize:13,color:v==null?"#94A3B8":pctColor(v),background:v==null?"transparent":v>=0?"rgba(16,185,129,0.14)":"rgba(239,68,68,0.13)",borderRadius:6,padding:"3px 9px"}}>{big?pctFmtBig(v):pctFmt(v)}</span>;
+
+  // ════════ HELPERS VISUALES (look profesional tipo el mockup) ════════
+  const AV_COLORS = [["#DCFCE7","#15803D"],["#DBEAFE","#1D4ED8"],["#FCE7F3","#BE185D"],["#FEF3C7","#B45309"],["#E0E7FF","#4338CA"],["#F3E8FF","#7E22CE"],["#CCFBF1","#0F766E"],["#FFE4E6","#BE123C"]];
+  const avOf = (tk) => AV_COLORS[seedNum(tk)%AV_COLORS.length];
+  const Avatar = (tk) => { const [bg,fg]=avOf(tk); return <span style={{width:36,height:36,borderRadius:11,background:bg,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11.5,fontWeight:900,color:fg,flexShrink:0,letterSpacing:0.3}}>{tk.slice(0,2)}</span>; };
+  // Mini barra horizontal (valor relativo a un máximo) junto a un número
+  const miniBar = (frac, color) => { const f=Math.max(0,Math.min(1,frac||0)); return <span style={{display:"inline-block",width:46,height:5,borderRadius:3,background:"#EEF2F7",verticalAlign:"middle",marginLeft:8,position:"relative",overflow:"hidden"}}><span style={{position:"absolute",left:0,top:0,bottom:0,width:`${f*100}%`,background:color,borderRadius:3}}/></span>; };
+  // Sparkline de tendencia (sintética, sesgada por el retorno YTD; ilustrativa)
+  const Spark = (tk, m) => {
+    const up=(m?.ytd??0)>=0, h=seedNum(tk), n=18, pts=[]; let v=0;
+    for(let i=0;i<n;i++){ v += (up?0.55:-0.55) + ((((h>>(i%13))%10)-5)/3.2); pts.push(v); }
+    const mn=Math.min(...pts), mx=Math.max(...pts), rng=(mx-mn)||1, W=92, H=34;
+    const xy=pts.map((p,i)=>[(i/(n-1)*W),(H-4-((p-mn)/rng)*(H-8))]);
+    const line=xy.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+    const area=`0,${H} ${line} ${W},${H}`;
+    const col=up?"#10B981":"#EF4444", gid=`sp${seedNum(tk)}`;
+    return (<svg width={W} height={H} style={{display:"block"}}>
+      <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={col} stopOpacity="0.22"/><stop offset="100%" stopColor={col} stopOpacity="0"/></linearGradient></defs>
+      <polygon points={area} fill={`url(#${gid})`}/>
+      <polyline points={line} fill="none" stroke={col} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+      <circle cx={xy[xy.length-1][0]} cy={xy[xy.length-1][1]} r="2.6" fill={col}/>
+    </svg>);
+  };
+  // Badge de nivel de riesgo según volatilidad
+  const riskBadge = (vol) => {
+    const lvl = vol==null?null: vol>=50?["Muy alto","#B91C1C","rgba(185,28,28,0.1)"]: vol>=38?["Alto","#EA580C","rgba(234,88,12,0.1)"]: vol>=28?["Medio","#B45309","rgba(245,158,11,0.12)"]:["Bajo","#15803D","rgba(16,185,129,0.12)"];
+    if(!lvl) return <span style={{color:"#94A3B8"}}>—</span>;
+    return <span style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11.5,fontWeight:800,color:lvl[1],background:lvl[2],borderRadius:20,padding:"3px 11px"}}><span style={{width:6,height:6,borderRadius:"50%",background:lvl[1]}}/>{lvl[0]}</span>;
+  };
+  // Gauge circular (0..1) para correlación
+  const gauge = (val, color="#EA580C") => {
+    const v=Math.max(0,Math.min(1,val||0)), R=11, C=2*Math.PI*R;
+    return <span style={{display:"inline-flex",alignItems:"center",gap:7}}>
+      <svg width="28" height="28" style={{transform:"rotate(-90deg)"}}><circle cx="14" cy="14" r={R} fill="none" stroke="#EEF2F7" strokeWidth="3"/><circle cx="14" cy="14" r={R} fill="none" stroke={color} strokeWidth="3" strokeDasharray={C} strokeDashoffset={C*(1-v)} strokeLinecap="round"/></svg>
+      <span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:"#334155"}}>{val!=null?val.toFixed(1):"—"}</span>
+    </span>;
+  };
+  // Pill numérica (badge) para métricas tipo Sharpe
+  const numPill = (v, color="#B45309", bg="rgba(245,158,11,0.12)") => v==null? <span style={{color:"#94A3B8"}}>—</span> : <span style={{display:"inline-block",fontFamily:"monospace",fontWeight:800,fontSize:13,color,background:bg,borderRadius:7,padding:"3px 10px"}}>{Number(v).toFixed(1)}</span>;
   const numFmt  = v => v==null?"—":Number(v).toFixed(1);
   const upgBtn = (
     <button onClick={onNeedPremium} style={{
@@ -18273,8 +18316,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     : upgBtn;
 
   const TICKER_NAMES_W={AAPL:"Apple",MSFT:"Microsoft",NVDA:"NVIDIA",GOOGL:"Alphabet",AMZN:"Amazon",META:"Meta",TSLA:"Tesla",AMD:"AMD",PLTR:"Palantir",COIN:"Coinbase",NFLX:"Netflix",AVGO:"Broadcom",ORCL:"Oracle",CRM:"Salesforce",NOW:"ServiceNow",DDOG:"Datadog",CRWD:"CrowdStrike",SNOW:"Snowflake",UBER:"Uber",ABNB:"Airbnb",SHOP:"Shopify",MELI:"MercadoLibre",NU:"Nubank",BTC:"Bitcoin",ETH:"Ethereum",SOL:"Solana",SPY:"S&P 500 ETF",QQQ:"Nasdaq ETF",GLD:"Gold ETF",JPM:"JPMorgan",BAC:"Bank of America",GS:"Goldman Sachs",V:"Visa",MA:"Mastercard",PYPL:"PayPal",NBIS:"NeuroBo Pharma",GLW:"Corning",INTC:"Intel",MU:"Micron",QCOM:"Qualcomm",TXN:"Texas Instr.",SMCI:"Super Micro",ARM:"ARM Holdings",RIVN:"Rivian",NIO:"NIO",BABA:"Alibaba",JD:"JD.com",PDD:"PDD Holdings",VALE:"Vale",PBR:"Petrobras",ITUB:"Itaú",BBD:"Bradesco",GGB:"Gerdau"};
-  const nm = (tk,d,m) => <><div style={{fontWeight:900,fontSize:15,fontFamily:"monospace",color:"#0F172A",letterSpacing:0.5}}>{tk}</div><div style={{fontSize:10,color:"#64748B",marginTop:1}}>{TICKER_NAMES_W[tk]||tk}</div></>;
-  const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:800,fontSize:15,color:d?.price!=null?"#0F172A":"#94A3B8"}}>{fmtPrice(d?.price??null,tk)}</span>;
+  const nm = (tk,d,m) => <div style={{display:"flex",alignItems:"center",gap:11}}>{Avatar(tk)}<div style={{minWidth:0}}><div style={{fontWeight:900,fontSize:14,fontFamily:"monospace",color:"#0F172A",letterSpacing:0.3}}>{tk}</div><div style={{fontSize:10.5,color:"#64748B",marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{TICKER_NAMES_W[tk]||tk}</div></div></div>;
+  const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:800,fontSize:14.5,color:d?.price!=null?"#0F172A":"#94A3B8"}}>{fmtPrice(d?.price??null,tk)}</span>;
   const COLS = {
     market:[
       {h:"Name",           w:150, render:nm},
@@ -18289,16 +18332,19 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Volatility %",   w:110, render:(tk,d,m)=>vip(m.vol,"%")},
       {h:"Open",           w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{fmtPrice(d?.open??null,tk)}</span>},
       {h:"Prev Close",     w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{fmtPrice(d?.prev??null,tk)}</span>},
+      {h:"Tendencia",      w:110, render:(tk,d,m)=>Spark(tk,m)},
     ],
     risk:[
-      {h:"Name",           w:150, render:nm},
+      {h:"Name",           w:170, render:nm},
       {h:"Price",          w:110, render:pr},
-      {h:"Beta",           w:80,  render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:700,color:m.beta>2?"#EF4444":m.beta>1.5?"#F59E0B":"#10B981"}}>{numFmt(m.beta)}</span>},
-      {h:"Volatility %",   w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:m.vol>50?"#EF4444":m.vol>30?"#F59E0B":"#10B981"}}>{numFmt(m.vol)}%</span>},
-      {h:"VaR (95%)",      w:100, render:(tk,d,m)=>vip(parseFloat((m.vol*0.082).toFixed(2)),"%")},
-      {h:"Sharpe Ratio",   w:110, render:(tk,d,m)=>vip(parseFloat((2.4-m.beta*0.6).toFixed(2)),"")},
-      {h:"Max Drawdown",   w:120, render:(tk,d,m)=>vip(parseFloat((-m.vol*0.58).toFixed(1)),"%")},
-      {h:"Correlation SPY",w:130, render:(tk,d,m)=>vip(parseFloat((1.1-m.beta*0.08).toFixed(2)),"")},
+      {h:"Beta",           w:120, render:(tk,d,m)=>{ const c=m.beta==null?"#94A3B8":m.beta<1.05?"#15803D":m.beta<1.8?"#B45309":"#EF4444"; return <span style={{display:"inline-flex",alignItems:"center"}}><span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:c}}>{numFmt(m.beta)}</span>{m.beta!=null&&miniBar(m.beta/3,c)}</span>; }},
+      {h:"Volatility %",   w:140, render:(tk,d,m)=>{ const c=m.vol==null?"#94A3B8":m.vol<28?"#15803D":m.vol<45?"#B45309":"#EF4444"; return <span style={{display:"inline-flex",alignItems:"center"}}><span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:c}}>{numFmt(m.vol)}%</span>{m.vol!=null&&miniBar(m.vol/70,c)}</span>; }},
+      {h:"VaR (95%)",      w:130, render:(tk,d,m)=>{ if(!isPremium) return upgBtn; const v=parseFloat((m.vol*0.082).toFixed(2)); const c=v<2.5?"#15803D":v<3.5?"#B45309":"#EF4444"; return <span style={{display:"inline-flex",alignItems:"center"}}><span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:c}}>{v}%</span>{miniBar(v/6,c)}</span>; }},
+      {h:"Sharpe Ratio",   w:110, render:(tk,d,m)=>isPremium?numPill(parseFloat((2.4-m.beta*0.6).toFixed(2))):upgBtn},
+      {h:"Max Drawdown",   w:120, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:"#EF4444"}}>{parseFloat((-m.vol*0.58).toFixed(1))}%</span>:upgBtn},
+      {h:"Correlation SPY",w:120, render:(tk,d,m)=>isPremium?gauge(parseFloat((1.1-m.beta*0.08).toFixed(2))):upgBtn},
+      {h:"Riesgo",         w:110, render:(tk,d,m)=>riskBadge(m.vol)},
+      {h:"Tendencia",      w:110, render:(tk,d,m)=>Spark(tk,m)},
     ],
     returns:[
       {h:"Name",  w:150, render:nm},
@@ -18358,6 +18404,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       case "Volatility %": return m.vol;
       case "Open": return d?.open;
       case "Prev Close": return d?.prev;
+      case "Riesgo": return m.vol;
+      case "Tendencia": return m.ytd;
       case "VaR (95%)": return m.vol!=null?m.vol*0.082:null;
       case "Sharpe Ratio": return m.beta!=null?2.4-m.beta*0.6:null;
       case "Max Drawdown": return m.vol!=null?-m.vol*0.58:null;
@@ -18684,6 +18732,57 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     );
   };
 
+  // ════════ TARJETAS-RESUMEN arriba de la tabla (por vista) ════════
+  const renderSummaryCards = () => {
+    const ms = tickers.map(getMock);
+    if(!ms.length) return null;
+    const avg = (a)=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+    const decoBars = (color) => <div style={{display:"flex",gap:4,height:22,alignItems:"flex-end",marginTop:12}}>{Array.from({length:8}).map((_,i)=><span key={i} style={{flex:1,height:`${6+((i*7+5)%15)}px`,background:color,opacity:0.16+((i%4)*0.13),borderRadius:3}}/>)}</div>;
+    const Card = ({title,value,sub,badge,accent,barColor}) => (
+      <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:16,padding:"15px 17px 12px",position:"relative",overflow:"hidden",boxShadow:"0 4px 14px rgba(26,95,173,0.06)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
+          <div style={{fontSize:10.5,fontWeight:800,color:"#64748B",letterSpacing:0.6,textTransform:"uppercase"}}>{title}</div>
+          {badge&&<span style={{fontSize:9.5,fontWeight:800,color:badge[1],background:badge[2],borderRadius:20,padding:"3px 9px",letterSpacing:0.4,whiteSpace:"nowrap"}}>{badge[0]}</span>}
+        </div>
+        <div style={{fontSize:28,fontWeight:900,color:"#0F172A",marginTop:8,letterSpacing:-0.8}}>{value}</div>
+        <div style={{fontSize:11,color:"#64748B",marginTop:2}}>{sub}</div>
+        {decoBars(barColor)}
+        <div style={{position:"absolute",left:0,right:0,bottom:0,height:3,background:accent}}/>
+      </div>
+    );
+    let cards=null;
+    if(activeView==="risk"){
+      const vols=ms.map(m=>m.vol).filter(v=>v!=null), betas=ms.map(m=>m.beta).filter(v=>v!=null);
+      const aVol=avg(vols), aVar=aVol*0.082, aSh=avg(betas.map(b=>2.4-b*0.6)), aDD=-aVol*0.58;
+      cards=[
+        {title:"Portfolio VaR (95%)",value:aVar.toFixed(1)+"%",sub:"Pérdida máx. esperada diaria",badge:aVar<2.5?["BAJO","#15803D","rgba(16,185,129,0.12)"]:aVar<3.5?["MODERADO","#B45309","rgba(245,158,11,0.14)"]:["ALTO","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#10B981,#F59E0B,#EF4444)",barColor:"#F59E0B"},
+        {title:"Volatilidad Media",value:aVol.toFixed(1)+"%",sub:"Promedio ponderado cartera",badge:aVol<28?["BAJA","#15803D","rgba(16,185,129,0.12)"]:aVol<40?["MEDIA","#B45309","rgba(245,158,11,0.14)"]:["ALTA","#B45309","rgba(245,158,11,0.14)"],accent:"linear-gradient(90deg,#F59E0B,#EF4444)",barColor:"#EF4444"},
+        {title:"Sharpe Ratio Medio",value:aSh.toFixed(2),sub:"Retorno ajustado por riesgo",badge:aSh>=1.5?["BUENO","#0F766E","rgba(15,118,110,0.12)"]:["REGULAR","#B45309","rgba(245,158,11,0.14)"],accent:"linear-gradient(90deg,#0EA5E9,#10B981)",barColor:"#0EA5E9"},
+        {title:"Max Drawdown Medio",value:aDD.toFixed(1)+"%",sub:"Mayor caída registrada",badge:["CUIDADO","#B45309","rgba(245,158,11,0.14)"],accent:"linear-gradient(90deg,#F59E0B,#EF4444)",barColor:"#F59E0B"},
+      ];
+    } else if(activeView==="market"){
+      const chg=tickers.map(t=>priceOf(t)?.change).filter(v=>v!=null);
+      const up=chg.filter(c=>c>=0).length, down=chg.filter(c=>c<0).length, aC=avg(chg);
+      cards=[
+        {title:"Activos",value:String(tickers.length),sub:"En tu watchlist",badge:["LISTA","#1D4ED8","rgba(29,78,216,0.1)"],accent:"linear-gradient(90deg,#0EA5E9,#0047C2)",barColor:"#0EA5E9"},
+        {title:"Suben hoy",value:String(up),sub:"Con cambio positivo",badge:["VERDE","#15803D","rgba(16,185,129,0.12)"],accent:"linear-gradient(90deg,#10B981,#059669)",barColor:"#10B981"},
+        {title:"Bajan hoy",value:String(down),sub:"Con cambio negativo",badge:["ROJO","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#EF4444,#B91C1C)",barColor:"#EF4444"},
+        {title:"Cambio promedio",value:(aC>=0?"+":"")+aC.toFixed(2)+"%",sub:"Promedio del día",badge:aC>=0?["+","#15803D","rgba(16,185,129,0.12)"]:["−","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#10B981,#EF4444)",barColor:aC>=0?"#10B981":"#EF4444"},
+      ];
+    } else if(activeView==="returns"){
+      const rs=tickers.map(t=>({t,r:extRet(t).ytd})).filter(x=>x.r!=null).sort((a,b)=>b.r-a.r);
+      const aY=avg(rs.map(x=>x.r)), best=rs[0], worst=rs[rs.length-1];
+      cards=[
+        {title:"YTD promedio",value:(aY>=0?"+":"")+aY.toFixed(1)+"%",sub:"Retorno medio del año",badge:aY>=0?["POSITIVO","#15803D","rgba(16,185,129,0.12)"]:["NEGATIVO","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#10B981,#EF4444)",barColor:aY>=0?"#10B981":"#EF4444"},
+        {title:"Mejor (YTD)",value:best?best.t:"—",sub:best?(best.r>=0?"+":"")+best.r.toFixed(1)+"%":"",badge:["TOP","#15803D","rgba(16,185,129,0.12)"],accent:"linear-gradient(90deg,#10B981,#059669)",barColor:"#10B981"},
+        {title:"Peor (YTD)",value:worst?worst.t:"—",sub:worst?(worst.r>=0?"+":"")+worst.r.toFixed(1)+"%":"",badge:["BOTTOM","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#EF4444,#B91C1C)",barColor:"#EF4444"},
+        {title:"1 Año promedio",value:(()=>{const a=avg(tickers.map(t=>extRet(t).y1).filter(v=>v!=null));return (a>=0?"+":"")+a.toFixed(0)+"%";})(),sub:"Retorno medio a 1 año",badge:["1A","#1D4ED8","rgba(29,78,216,0.1)"],accent:"linear-gradient(90deg,#0EA5E9,#0047C2)",barColor:"#0EA5E9"},
+      ];
+    }
+    if(!cards) return null;
+    return <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:14,marginBottom:18}}>{cards.map((c,i)=><Card key={i} {...c}/>)}</div>;
+  };
+
   return(
     <div style={{maxWidth:1380,margin:"0 auto",padding:"0 0 60px",fontFamily:"Inter,sans-serif"}}>
 
@@ -18830,6 +18929,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </div>
       </div>
 
+      {/* ── TARJETAS-RESUMEN (look profesional) ── */}
+      {["market","risk","returns"].includes(activeView) && tickers.length>0 && renderSummaryCards()}
+
       {/* ── BODY (light section) ── */}
       <div style={{background:"#F4F9FF",borderRadius:16,padding:"16px 16px 8px",marginTop:12,border:"1px solid #DBEAFE"}}>
 
@@ -18903,13 +19005,16 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                 })}
                 <th style={{...thStyle,width:60}}>×</th>
               </tr>
-              {/* Filter row */}
+              {/* Filter row — muestra la unidad de cada columna ($ / % / #) */}
               <tr style={{background:"#EBF3FF"}}>
-                {cols.map((c,i)=>(
-                  <td key={i} style={{padding:"4px 12px",borderBottom:"1px solid #DBEAFE"}}>
-                    <span style={{fontSize:10,color:"#94A3B8",fontFamily:"monospace"}}>&gt; #</span>
-                  </td>
-                ))}
+                {cols.map((c,i)=>{
+                  const u=colUnit(c.h);
+                  return (
+                    <td key={i} style={{padding:"4px 12px",borderBottom:"1px solid #DBEAFE"}}>
+                      {u && <span style={{fontSize:11,fontWeight:800,color:u==="$"?"#059669":u==="%"?"#0047C2":"#94A3B8",fontFamily:"monospace"}}>{u}</span>}
+                    </td>
+                  );
+                })}
                 <td style={{padding:"4px 12px",borderBottom:"1px solid #DBEAFE"}}/>
               </tr>
             </thead>
