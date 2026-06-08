@@ -8851,12 +8851,12 @@ function MarketOverview({lang="es"}){
     return()=>{c=true;clearInterval(iv);clearTimeout(retryTimer);};
   },[region]);
   const Section=({title,rows})=>(
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 14px",boxShadow:C.shadow}}>
-      <div style={{fontSize:11,fontWeight:800,color:C.muted2,textTransform:"uppercase",letterSpacing:0.6,marginBottom:8}}>{title}</div>
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"14px 16px",boxShadow:"0 2px 14px rgba(15,23,42,0.06)"}}>
+      <div style={{fontSize:11,fontWeight:800,color:C.muted2,textTransform:"uppercase",letterSpacing:0.7,marginBottom:10}}>{title}</div>
       {(rows||[]).length===0
         ? <div style={{fontSize:11,color:C.muted2,padding:"6px 0"}}>{loading?(isEN?"loading…":"cargando…"):"—"}</div>
         : rows.map((r,i)=>(
-        <div key={r.s} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 0",borderBottom:i<rows.length-1?`1px solid ${C.border}`:"none"}}>
+        <div key={r.s} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"7px 0",borderBottom:i<rows.length-1?`1px solid ${C.border}`:"none"}}>
           <span style={{fontSize:12.5,fontWeight:600,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
           <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
             <span style={{fontSize:12,fontWeight:700,color:C.text,fontFamily:"monospace",marginRight:8}}>{r.p>=1000?r.p.toLocaleString(undefined,{maximumFractionDigits:0}):r.p?.toFixed(2)}</span>
@@ -8868,7 +8868,7 @@ function MarketOverview({lang="es"}){
   );
   const regionRows=region==="global"?null:(rd[region]||[]);
   const Tile=({r})=>(
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"12px 14px",boxShadow:C.shadow,display:"flex",flexDirection:"column",gap:6}}>
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"14px 16px",boxShadow:"0 2px 14px rgba(15,23,42,0.06)",display:"flex",flexDirection:"column",gap:6}}>
       <span style={{fontSize:12,fontWeight:700,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
       <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between"}}>
         <span style={{fontSize:18,fontWeight:800,color:C.text,fontFamily:"monospace"}}>{r.p>=1000?r.p.toLocaleString(undefined,{maximumFractionDigits:0}):r.p?.toFixed(2)}</span>
