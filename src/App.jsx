@@ -24506,7 +24506,7 @@ export default function App(){
           {ic:"🔥",l:"Feed",on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},active:false},
           {ic:"🤖",l:"IA",on:()=>setShowAI(true),active:false},
           {ic:"⚡",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
-          {ic:"👤",l:lang==="en"?"Profile":"Perfil",on:()=>{ user?setProfUser(user):setAuth("register"); },active:false},
+          {ic:"📡",l:lang==="en"?"Live":"En Vivo",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
         ].map((b,i)=>(
           <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0}}>
             <span style={{fontSize:19,lineHeight:1}}>{b.ic}</span>
