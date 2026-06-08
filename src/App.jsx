@@ -2508,7 +2508,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
 
   // Infer trading style tags from posts
   const topTickers=[...new Set(userPosts.map(p=>p.ticker).filter(Boolean))].slice(0,4);
-  const tradeStyle=user.points>5000?"💎 Diamond Trader":user.points>2000?"⚡ Active Trader":user.points>500?"📈 Growing Trader":"🌱 New Trader";
+  const tradeStyle=user.points>5000?(lang==="en"?"💎 Diamond Trader":"💎 Trader Diamante"):user.points>2000?(lang==="en"?"⚡ Active Trader":"⚡ Trader Activo"):user.points>500?(lang==="en"?"📈 Growing Trader":"📈 Trader en Crecimiento"):(lang==="en"?"🌱 New Trader":"🌱 Trader Nuevo");
   const joinYear=user.joined||"2024";
 
   // All achievements (locked + unlocked)
@@ -2726,7 +2726,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                   {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
                 </span>
                 <span style={{fontSize:11,color:"#6B7280"}}>{tradeStyle}</span>
-                <span style={{fontSize:11,color:"#9CA3AF"}}>Desde {joinYear}</span>
+                <span style={{fontSize:11,color:"#9CA3AF"}}>{lang==="en"?"Since":"Desde"} {joinYear}</span>
               </div>
             </div>
             {/* Follow button */}
@@ -8087,7 +8087,6 @@ function ShareModal({ open, onClose, user, lang="es" }){
   const { url, text, isEN } = buildShare(user, lang);
   const enc=encodeURIComponent, eu=enc(url), et=enc(text);
   const nets=[
-    {k:"wa",  label:"WhatsApp", bg:"#25D366", icon:"🟢", href:`https://wa.me/?text=${enc(text+" "+url)}`},
     {k:"x",   label:"X / Twitter", bg:"#0F172A", icon:"𝕏", href:`https://twitter.com/intent/tweet?text=${et}&url=${eu}`},
   ];
   const copy=()=>{ try{ navigator.clipboard.writeText(url); setCopied(true); setTimeout(()=>setCopied(false),2200);}catch{} };
@@ -8135,7 +8134,7 @@ function ShareNavButton({ user, lang="es" }){
       <button onClick={click} title={lang==="en"?"Share / Invite":"Compartir / Invitar"}
         style={{width:38,height:38,borderRadius:11,border:"1.5px solid rgba(245,158,11,0.45)",background:"rgba(245,158,11,0.08)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,transition:"all 0.15s"}}
         onMouseEnter={e=>{e.currentTarget.style.background="rgba(245,158,11,0.18)";}}
-        onMouseLeave={e=>{e.currentTarget.style.background="rgba(245,158,11,0.08)";}}>🌍</button>
+        onMouseLeave={e=>{e.currentTarget.style.background="rgba(245,158,11,0.08)";}}>📤</button>
       <ShareModal open={open} onClose={()=>setOpen(false)} user={user} lang={lang}/>
     </>
   );
@@ -11385,16 +11384,16 @@ function AdminPicksModal({onClose}){
 // Fuente: Goldman Sachs, Wedbush, JPMorgan, BofA, Barclays, TipRanks consensus
 const WEEKLY_PICKS_FALLBACK = {
   corto:[
-    {ticker:"NVDA", nombre:"NVIDIA",          tipo:"COMPRA", entrada:"$205", target:"$300", stop_loss:"$185", confianza:93, razon:"Consenso Wall Street 'Compra Fuerte' (71 compras, 0 ventas en jun 2026). Target promedio de analistas ~$300 (TipRanks/StockAnalysis, 39-62 analistas). Demanda de GPU Blackwell de los hyperscalers (MSFT, GOOG, AMZN) sin desaceleración."},
-    {ticker:"META", nombre:"Meta Platforms",  tipo:"COMPRA", entrada:"$593", target:"$810", stop_loss:"$545", confianza:90, razon:"Consenso de analistas ~$834 de target (RBC Capital fijó $810 el 1 jun 2026, +35% potencial). Margen operativo récord, Llama 4 open-source y recompra de acciones masiva. 37 analistas cubriendo."},
-    {ticker:"PLTR", nombre:"Palantir",        tipo:"COMPRA", entrada:"$134", target:"$200", stop_loss:"$120", confianza:87, razon:"Rosenblatt subió el target a $225 el 5 jun 2026 (+68% potencial); consenso $174. Pipeline de contratos de gobierno e IA sin precedente. Plataforma AIP adoptada por Fortune 500."},
-    {ticker:"UBER", nombre:"Uber",            tipo:"COMPRA", entrada:"$70",  target:"$106", stop_loss:"$63",  confianza:88, razon:"Consenso 'Compra Fuerte' (27 compras, 2 hold) con target promedio $106 (+43% potencial, TipRanks jun 2026). Rentabilidad consolidada y flujo de caja libre creciente. Movilidad + delivery + publicidad."},
+    {ticker:"NVDA", nombre:"NVIDIA",          tipo:"COMPRA", entrada:"$205", target:"$300", stop_loss:"$185", confianza:93, razon:"Consenso Wall Street 'Compra Fuerte' (71 compras, 0 ventas en jun 2026). Target promedio de analistas ~$300 (TipRanks/StockAnalysis, 39-62 analistas). Demanda de GPU Blackwell de los hyperscalers (MSFT, GOOG, AMZN) sin desaceleración.", razonEn:"Wall Street 'Strong Buy' consensus (71 buys, 0 sells in Jun 2026). Average analyst target ~$300 (TipRanks/StockAnalysis, 39-62 analysts). Blackwell GPU demand from hyperscalers (MSFT, GOOG, AMZN) shows no slowdown."},
+    {ticker:"META", nombre:"Meta Platforms",  tipo:"COMPRA", entrada:"$593", target:"$810", stop_loss:"$545", confianza:90, razon:"Consenso de analistas ~$834 de target (RBC Capital fijó $810 el 1 jun 2026, +35% potencial). Margen operativo récord, Llama 4 open-source y recompra de acciones masiva. 37 analistas cubriendo.", razonEn:"Analyst consensus ~$834 target (RBC Capital set $810 on Jun 1 2026, +35% upside). Record operating margin, open-source Llama 4 and massive share buybacks. 37 analysts covering."},
+    {ticker:"PLTR", nombre:"Palantir",        tipo:"COMPRA", entrada:"$134", target:"$200", stop_loss:"$120", confianza:87, razon:"Rosenblatt subió el target a $225 el 5 jun 2026 (+68% potencial); consenso $174. Pipeline de contratos de gobierno e IA sin precedente. Plataforma AIP adoptada por Fortune 500.", razonEn:"Rosenblatt raised its target to $225 on Jun 5 2026 (+68% upside); consensus $174. Unprecedented government and AI contract pipeline. AIP platform adopted by Fortune 500."},
+    {ticker:"UBER", nombre:"Uber",            tipo:"COMPRA", entrada:"$70",  target:"$106", stop_loss:"$63",  confianza:88, razon:"Consenso 'Compra Fuerte' (27 compras, 2 hold) con target promedio $106 (+43% potencial, TipRanks jun 2026). Rentabilidad consolidada y flujo de caja libre creciente. Movilidad + delivery + publicidad.", razonEn:"'Strong Buy' consensus (27 buys, 2 hold) with average target $106 (+43% upside, TipRanks Jun 2026). Consolidated profitability and growing free cash flow. Mobility + delivery + advertising."},
   ],
   largo:[
-    {ticker:"MSFT", nombre:"Microsoft",       tipo:"COMPRA", entrada:"$416", target:"$540", stop_loss:"$390", confianza:92, razon:"Consenso de analistas ~$570 de target (TD Cowen fijó $540 el 4 jun 2026, +28% potencial). Azure IA acelerando, Copilot en el 85% de las Fortune 500. La apuesta de IA con menor riesgo del mercado."},
-    {ticker:"AMZN", nombre:"Amazon",          tipo:"COMPRA", entrada:"$246", target:"$313", stop_loss:"$225", confianza:89, razon:"Consenso 'Compra Fuerte' con target promedio $313 (S&P Global, 66 analistas, +24% potencial). AWS recuperando crecimiento + Amazon Ads superando $60B anualizados. Robótica como catalizador 2026-27."},
-    {ticker:"GOOGL",nombre:"Alphabet",        tipo:"COMPRA", entrada:"$368", target:"$440", stop_loss:"$340", confianza:85, razon:"Mayoría de analistas en 'Compra'. Gemini + Google Cloud aceleran y el buscador sigue dominante en publicidad. Valuación razonable frente al resto de las megacaps de IA. Recompra constante."},
-    {ticker:"GLD",  nombre:"SPDR Gold ETF",   tipo:"COMPRA", entrada:"$396", target:"$430", stop_loss:"$375", confianza:82, razon:"Oro cerca de máximos históricos. Bancos centrales (China, India, Polonia) comprando a ritmo récord. Cobertura ideal ante incertidumbre fiscal y debilidad del dólar. Diversifica un portafolio cargado de tech."},
+    {ticker:"MSFT", nombre:"Microsoft",       tipo:"COMPRA", entrada:"$416", target:"$540", stop_loss:"$390", confianza:92, razon:"Consenso de analistas ~$570 de target (TD Cowen fijó $540 el 4 jun 2026, +28% potencial). Azure IA acelerando, Copilot en el 85% de las Fortune 500. La apuesta de IA con menor riesgo del mercado.", razonEn:"Analyst consensus ~$570 target (TD Cowen set $540 on Jun 4 2026, +28% upside). Azure AI accelerating, Copilot in 85% of the Fortune 500. The lowest-risk AI bet in the market."},
+    {ticker:"AMZN", nombre:"Amazon",          tipo:"COMPRA", entrada:"$246", target:"$313", stop_loss:"$225", confianza:89, razon:"Consenso 'Compra Fuerte' con target promedio $313 (S&P Global, 66 analistas, +24% potencial). AWS recuperando crecimiento + Amazon Ads superando $60B anualizados. Robótica como catalizador 2026-27.", razonEn:"'Strong Buy' consensus with average target $313 (S&P Global, 66 analysts, +24% upside). AWS reaccelerating + Amazon Ads topping $60B annualized. Robotics as a 2026-27 catalyst."},
+    {ticker:"GOOGL",nombre:"Alphabet",        tipo:"COMPRA", entrada:"$368", target:"$440", stop_loss:"$340", confianza:85, razon:"Mayoría de analistas en 'Compra'. Gemini + Google Cloud aceleran y el buscador sigue dominante en publicidad. Valuación razonable frente al resto de las megacaps de IA. Recompra constante.", razonEn:"Majority of analysts at 'Buy'. Gemini + Google Cloud accelerating and search still dominant in advertising. Reasonable valuation vs other AI megacaps. Steady buybacks."},
+    {ticker:"GLD",  nombre:"SPDR Gold ETF",   tipo:"COMPRA", entrada:"$396", target:"$430", stop_loss:"$375", confianza:82, razon:"Oro cerca de máximos históricos. Bancos centrales (China, India, Polonia) comprando a ritmo récord. Cobertura ideal ante incertidumbre fiscal y debilidad del dólar. Diversifica un portafolio cargado de tech.", razonEn:"Gold near all-time highs. Central banks (China, India, Poland) buying at record pace. Ideal hedge against fiscal uncertainty and dollar weakness. Diversifies a tech-heavy portfolio."},
   ],
   dividendos:[
     {ticker:"JPM",  nombre:"JPMorgan Chase", yield_div:"2.0%", entrada:"$285", sector:"Financiero",         rating:"★★★★★"},
@@ -11403,9 +11402,9 @@ const WEEKLY_PICKS_FALLBACK = {
     {ticker:"ABBV", nombre:"AbbVie",         yield_div:"3.5%", entrada:"$188", sector:"Salud/Pharma",       rating:"★★★★★"},
   ],
   crypto:[
-    {ticker:"COIN", nombre:"Coinbase",              tipo:"COMPRA", entrada:"$164", target:"$297", stop_loss:"$145", confianza:80, razon:"Consenso 'Compra' con target promedio ~$297 (28 analistas, 5 jun 2026). Custodio oficial de la mayoría de los ETF de Bitcoin en EE.UU. Alta beta con el precio de BTC: amplifica los movimientos del Bitcoin."},
-    {ticker:"IBIT", nombre:"BlackRock Bitcoin ETF",  tipo:"COMPRA", entrada:"$36",  target:"$46",  stop_loss:"$32",  confianza:84, razon:"El mayor ETF de Bitcoin del mundo (BlackRock). BTC cotiza ~$63K y los pronósticos para jun-jul 2026 apuntan a $71K-$82K. Forma más simple y regulada de exposición a Bitcoin sin manejar una wallet."},
-    {ticker:"ETH",  nombre:"Ethereum",              tipo:"COMPRA", entrada:"$1,675",target:"$2,200",stop_loss:"$1,480",confianza:75, razon:"ETH consolidando tras la corrección. El relato de los ETF de Ethereum vuelve a ganar tracción y la actividad on-chain (L2, staking) se mantiene sólida. Mayor riesgo/recompensa que BTC en esta zona."},
+    {ticker:"COIN", nombre:"Coinbase",              tipo:"COMPRA", entrada:"$164", target:"$297", stop_loss:"$145", confianza:80, razon:"Consenso 'Compra' con target promedio ~$297 (28 analistas, 5 jun 2026). Custodio oficial de la mayoría de los ETF de Bitcoin en EE.UU. Alta beta con el precio de BTC: amplifica los movimientos del Bitcoin.", razonEn:"'Buy' consensus with average target ~$297 (28 analysts, Jun 5 2026). Official custodian of most US Bitcoin ETFs. High beta to BTC price: amplifies Bitcoin's moves."},
+    {ticker:"IBIT", nombre:"BlackRock Bitcoin ETF",  tipo:"COMPRA", entrada:"$36",  target:"$46",  stop_loss:"$32",  confianza:84, razon:"El mayor ETF de Bitcoin del mundo (BlackRock). BTC cotiza ~$63K y los pronósticos para jun-jul 2026 apuntan a $71K-$82K. Forma más simple y regulada de exposición a Bitcoin sin manejar una wallet.", razonEn:"The world's largest Bitcoin ETF (BlackRock). BTC trades ~$63K and forecasts for Jun-Jul 2026 point to $71K-$82K. Simplest, regulated way to get Bitcoin exposure without a wallet."},
+    {ticker:"ETH",  nombre:"Ethereum",              tipo:"COMPRA", entrada:"$1,675",target:"$2,200",stop_loss:"$1,480",confianza:75, razon:"ETH consolidando tras la corrección. El relato de los ETF de Ethereum vuelve a ganar tracción y la actividad on-chain (L2, staking) se mantiene sólida. Mayor riesgo/recompensa que BTC en esta zona.", razonEn:"ETH consolidating after the correction. The Ethereum ETF narrative is regaining traction and on-chain activity (L2, staking) remains solid. Higher risk/reward than BTC in this zone."},
   ],
 };
 
@@ -11605,7 +11604,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
           {/* Row 3: R:R badge + analysis */}
           <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
             {rr&&<div style={{flexShrink:0,background:`linear-gradient(135deg,${th.from}20,${th.to}10)`,border:`1px solid ${th.from}40`,borderRadius:8,padding:"4px 8px",fontSize:10,fontWeight:800,color:th.from,whiteSpace:"nowrap"}}>R:R {rr}x</div>}
-            <div style={{fontSize:12,color:"#64748B",lineHeight:1.6,flex:1}}>💡 {p.razon}</div>
+            <div style={{fontSize:12,color:"#64748B",lineHeight:1.6,flex:1}}>💡 {isEN?(p.razonEn||p.razon_en||p.razon):p.razon}</div>
           </div>
         </div>
       </div>
