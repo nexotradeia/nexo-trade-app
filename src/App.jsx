@@ -21760,18 +21760,22 @@ function AdminDashboard(){
         logins:Math.floor((r1.count||totalUsers)*7.2),
       }));
 
-      // ── VISITAS ÚLTIMO MES (tabla site_visits — migración 012, Sesión 11) ──
+      // ── VISITAS ÚLTIMO MES (tabla site_visits — migración 012) ──
+      // Una sola consulta que trae las filas y calculamos todo en cliente.
+      // (Antes usaba 3 consultas count:"exact" que con Supabase fallaban/devolvían null → el panel quedaba en 0.)
       const mes30 = new Date(); mes30.setDate(mes30.getDate()-30);
-      const [v1,v2,v3] = await Promise.all([
-        withTimeout(supabase.from("site_visits").select("*",{count:"exact",head:true}).gte("created_at",mes30.toISOString())),
-        withTimeout(supabase.from("site_visits").select("*",{count:"exact",head:true}).gte("created_at",mes30.toISOString()).eq("is_registered",false)),
-        withTimeout(supabase.from("site_visits").select("visitor_id").gte("created_at",mes30.toISOString()).limit(10000)),
-      ]);
-      setStats(s=>({...s,
-        visitasMes: v1.count||0,
-        visitasAnon: v2.count||0,
-        visitantesUnicos: new Set((v3.data||[]).map(x=>x.visitor_id)).size,
-      }));
+      const vRes = await withTimeout(
+        supabase.from("site_visits").select("visitor_id,is_registered,created_at").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),
+        15000
+      );
+      const vrows = vRes.data || [];
+      if(vrows.length || !vRes.error){
+        setStats(s=>({...s,
+          visitasMes: vrows.length,
+          visitasAnon: vrows.filter(x=>!x.is_registered).length,
+          visitantesUnicos: new Set(vrows.map(x=>x.visitor_id)).size,
+        }));
+      }
     };
     loadData();
   },[]);
