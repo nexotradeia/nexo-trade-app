@@ -2561,7 +2561,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                 </defs>
                 <path d={`${d} L${w},62 L0,62 Z`} fill={`url(#sparkGrad_${user.id?.slice(0,6)||"x"})`}/>
                 <path d={d} fill="none" stroke="#0F4C81" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
-                <circle cx={(pts.length-1)*step} cy={pts[pts.length-1]} r="4" fill="#0F4C81" opacity="0.9"/>
+                <circle cx={Math.min((pts.length-1)*step, w-6)} cy={pts[pts.length-1]} r="4" fill="#0F4C81" opacity="0.9"/>
               </svg>
             );
           })()}
