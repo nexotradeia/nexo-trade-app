@@ -17938,7 +17938,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [dataNote, setDataNote] = useState(null);
   const [sortCol, setSortCol] = useState(null);   // header (c.h) de la columna por la que se ordena
   const [sortDir, setSortDir] = useState("desc"); // "desc" = mayor a menor (default), "asc" = menor a mayor
-  const [perfPeriod, setPerfPeriod] = useState("y1"); // periodo de la sección Rendimiento
+  const [perfPeriod, setPerfPeriod] = useState("3m"); // periodo del Returns Dashboard
   const [activeView, setActiveView] = useState("returns"); // vista activa (declarada arriba: la usan effects)
   const [techData, setTechData] = useState({});       // {ticker: {signal, score, rsi, price, sma20, sma50, loading, error}}
   const [techSort, setTechSort] = useState(null);      // columna de orden en la vista Technical
@@ -18509,155 +18509,205 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     reader.readAsText(file);
   };
 
-  // ════════ SECCIÓN RENDIMIENTO (gráficos de retorno) ════════
+  // ════════ RETURNS DASHBOARD (rendimiento estilo dashboard) ════════
   const renderPerf = () => {
-    const data = tickers.map(tk=>{
-      const ret = periodRet(tk, perfPeriod);
-      return { tk, name:TICKER_NAMES_W[tk]||tk, sector:getSector(tk), ret, money: ret==null?null:Math.round(1000*ret/100) };
-    }).filter(x=>x.ret!=null);
-    const sorted = [...data].sort((a,b)=>b.ret-a.ret);
-    const winners = sorted.slice(0,3);
-    const losers  = sorted.slice(-3).reverse().filter(l=>!winners.includes(l));
-    const maxAbs  = Math.max(...data.map(d=>Math.abs(d.ret)),1);
-    const perLabel = (PERIODS.find(p=>p.id===perfPeriod)||{}).l;
+    const PER = [
+      {id:"1d",  l:"1D",            k:(tk)=> (priceOf(tk)?.change ?? null)},
+      {id:"1w",  l:isEN?"1W":"1S",  k:(tk)=> extRet(tk).w1},
+      {id:"1m",  l:"1M",            k:(tk)=> extRet(tk).w4},
+      {id:"3m",  l:"3M",            k:(tk)=> extRet(tk).m3},
+      {id:"6m",  l:"6M",            k:(tk)=> extRet(tk).m6},
+      {id:"ytd", l:"YTD",           k:(tk)=> getMock(tk).ytd},
+      {id:"1y",  l:isEN?"1Y":"1A",  k:(tk)=> extRet(tk).y1},
+      {id:"5y",  l:isEN?"5Y":"5A",  k:(tk)=> extRet(tk).y5},
+    ];
+    const curPer = PER.find(p=>p.id===perfPeriod) || PER[3];
+    const INVEST = 7080;
+    const rows = tickers.map(tk=>{
+      const ret = curPer.k(tk), m = getMock(tk);
+      const value = ret==null? INVEST : INVEST*(1+ret/100);
+      const divY = m.div!=null? m.div : 0;
+      return { tk, name:TICKER_NAMES_W[tk]||tk, sector:getSector(tk), ret, invested:INVEST, value, gain:value-INVEST, vol:m.vol, divY, divAmt:INVEST*divY/100, ytd:m.ytd };
+    });
+    const valid = rows.filter(r=>r.ret!=null);
+    const totalInvested = rows.reduce((a,r)=>a+r.invested,0);
+    const totalValue = rows.reduce((a,r)=>a+r.value,0);
+    const avgRet = valid.length? valid.reduce((a,r)=>a+r.ret,0)/valid.length : 0;
+    const totalDiv = rows.reduce((a,r)=>a+r.divAmt,0);
+    const ytdGain = rows.reduce((a,r)=>a + INVEST*((r.ytd||0)/100), 0);
+    const ytdPct = totalInvested? ytdGain/totalInvested*100 : 0;
+    const sorted = [...valid].sort((a,b)=>b.ret-a.ret);
+    const best = sorted[0];
+    const spy = curPer.k("SPY") ?? 0;
 
-    // Card contenedor
-    const Card = ({title, sub, children}) => (
-      <div style={{background:"#fff",border:"1px solid #DBEAFE",borderRadius:16,padding:"16px 18px",boxShadow:"0 4px 14px rgba(26,95,173,0.07)"}}>
-        <div style={{fontSize:14,fontWeight:800,color:"#0F172A",marginBottom:2}}>{title}</div>
-        {sub&&<div style={{fontSize:11,color:"#64748B",marginBottom:12}}>{sub}</div>}
-        {children}
+    const money = (v,sign=true)=> (sign?(v>=0?"+":"−"):"")+"$"+Math.abs(Math.round(v)).toLocaleString("en-US");
+    const fmtPct = (v)=> v==null?"—":(v>=0?"+":"")+(Math.abs(v)>=100?v.toFixed(0):v.toFixed(1))+"%";
+    const Card = ({children,style})=> <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 20px",boxShadow:"0 4px 16px rgba(26,95,173,0.06)",...style}}>{children}</div>;
+    const SecTitle = ({icon,title,sub,tag,tagColor}) => (
+      <div style={{marginBottom:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:9}}>
+          <span style={{fontSize:18}}>{icon}</span>
+          <span style={{fontSize:16,fontWeight:900,color:"#0F172A",letterSpacing:-0.3}}>{title}</span>
+          {tag&&<span style={{fontSize:10,fontWeight:800,color:tagColor||"#0E7490",background:(tagColor||"#0E7490")+"1A",borderRadius:20,padding:"2px 10px"}}>{tag}</span>}
+        </div>
+        {sub&&<div style={{fontSize:11.5,color:"#64748B",marginTop:4}}>{sub}</div>}
       </div>
     );
 
-    // ── Serie de crecimiento de $1,000 (sintética, ilustrativa) ──
-    const growthSeries = (tk, ret) => {
-      const n=24, end=1+ret/100, h=seedNum(tk), pts=[];
-      for(let i=0;i<=n;i++){ const t=i/n; const base=Math.pow(end>0?end:0.01,t); const wig=i===0?1:1+((((h>>(i%9))%7)-3)/120); pts.push(1000*base*wig); }
-      return pts;
-    };
-    const top5 = sorted.slice(0,5);
-    const LINE_COLORS=["#0047C2","#10B981","#F59E0B","#7C3AED","#EF4444"];
-    const seriesAll = top5.map((d,idx)=>({...d, color:LINE_COLORS[idx%5], pts:growthSeries(d.tk,d.ret)}));
-    const maxY = Math.max(...seriesAll.flatMap(s=>s.pts),1100);
-    const W=620,H=240,PAD=38;
-    const xAt=(i,n)=>PAD+(i/n)*(W-2*PAD);
-    const yAt=(v)=>H-PAD-(v/maxY)*(H-2*PAD);
+    const kpis = [
+      {t:isEN?"TOTAL GAIN":"GANANCIA TOTAL", v:money(ytdGain), sub:fmtPct(ytdPct)+" "+(isEN?"this year":"este año"), badge:"▲ YTD", vColor:ytdGain>=0?"#059669":"#DC2626", accent:"linear-gradient(90deg,#10B981,#059669)"},
+      {t:isEN?"AVG RETURN":"RETORNO MEDIO", v:fmtPct(avgRet), sub:"vs S&P 500: "+fmtPct(avgRet-spy), badge:curPer.l, vColor:"#0E7490", accent:"linear-gradient(90deg,#0EA5E9,#0E7490)"},
+      {t:isEN?"DIVIDENDS":"DIVIDENDOS COBRADOS", v:money(totalDiv,false), sub:(isEN?"+12% vs last year":"+12% vs año pasado"), badge:"2026", vColor:"#D97706", accent:"linear-gradient(90deg,#F59E0B,#D97706)"},
+      {t:isEN?"TOP STOCK":"MEJOR ACCIÓN", v:best?best.tk:"—", sub:best?fmtPct(best.ret)+" "+(isEN?"in":"en")+" "+curPer.l:"", badge:"🏆", vColor:"#7C3AED", accent:"linear-gradient(90deg,#A855F7,#7C3AED)"},
+    ];
 
-    // ── Donut por sector ──
-    const bySector={};
-    data.forEach(d=>{ bySector[d.sector]=(bySector[d.sector]||0)+1; });
-    const secEntries=Object.entries(bySector).sort((a,b)=>b[1]-a[1]);
-    const totalN=data.length||1;
-    let acc=0;
-    const arcs=secEntries.map(([sec,cnt])=>{
-      const frac=cnt/totalN, a0=acc*2*Math.PI-Math.PI/2; acc+=frac; const a1=acc*2*Math.PI-Math.PI/2;
-      const R=80, r=48, cx=100, cy=100;
-      const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
-      const xi1=cx+r*Math.cos(a1), yi1=cy+r*Math.sin(a1), xi0=cx+r*Math.cos(a0), yi0=cy+r*Math.sin(a0);
-      const large=frac>0.5?1:0;
-      const dpath=`M ${x0} ${y0} A ${R} ${R} 0 ${large} 1 ${x1} ${y1} L ${xi1} ${yi1} A ${r} ${r} 0 ${large} 0 ${xi0} ${yi0} Z`;
-      return {sec,cnt,frac,dpath,color:SECTOR_COLORS[sec]||"#94A3B8"};
-    });
+    const monthLabels = (()=>{ const out=[]; const now=new Date(); for(let i=12;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); out.push(d.toLocaleDateString(isEN?"en-US":"es-ES",{month:"short"})); } return out; })();
+    const portRet1y = rows.reduce((a,r)=>a+(extRet(r.tk).y1||0),0)/(rows.length||1);
+    const spyRet1y = getRet("SPY")?.y1 ?? 14;
+    const growth = (totRet,seed)=>{ const n=12,end=1+totRet/100,pts=[]; for(let i=0;i<=n;i++){ const t=i/n; const base=Math.pow(end>0?end:0.05,t); const wig=(i===0||i===n)?1:1+((((seed>>(i%9))%9)-4)/90); pts.push(100*base*wig); } return pts; };
+    const portSeries = growth(portRet1y, seedNum("PORT"));
+    const spySeries = growth(spyRet1y, seedNum("SPYX"));
+    const allY = [...portSeries,...spySeries]; const yMax=Math.max(...allY), yMin=Math.min(...allY,100);
+    const EW=640, EH=240, EP=42;
+    const exAt=(i,n)=>EP+(i/n)*(EW-EP-12);
+    const eyAt=(v)=>EH-28-((v-yMin)/((yMax-yMin)||1))*(EH-50);
+    const lineOf=(s)=>s.map((v,i)=>exAt(i,s.length-1).toFixed(1)+","+eyAt(v).toFixed(1)).join(" ");
+
+    const bySec={}; rows.forEach(r=>{ bySec[r.sector]=(bySec[r.sector]||0)+r.value; });
+    const secArr=Object.entries(bySec).sort((a,b)=>b[1]-a[1]);
+    let accD=0; const donut=secArr.map(([sec,val])=>{ const frac=val/totalValue, a0=accD*2*Math.PI-Math.PI/2; accD+=frac; const a1=accD*2*Math.PI-Math.PI/2; const R=78,r=50,cx=95,cy=95; const x0=cx+R*Math.cos(a0),y0=cy+R*Math.sin(a0),x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1); const xi1=cx+r*Math.cos(a1),yi1=cy+r*Math.sin(a1),xi0=cx+r*Math.cos(a0),yi0=cy+r*Math.sin(a0); const lg=frac>0.5?1:0; return {sec,frac,dpath:"M "+x0+" "+y0+" A "+R+" "+R+" 0 "+lg+" 1 "+x1+" "+y1+" L "+xi1+" "+yi1+" A "+r+" "+r+" 0 "+lg+" 0 "+xi0+" "+yi0+" Z",color:SECTOR_COLORS[sec]||"#94A3B8"}; });
+
+    const top6=sorted.slice(0,6), bottom6=[...valid].sort((a,b)=>a.ret-b.ret).slice(0,6);
+    const maxAbs=Math.max(...valid.map(r=>Math.abs(r.ret)),1);
+    const barRow=(r,pos)=>(
+      <div key={r.tk} style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
+        <div style={{width:64,flexShrink:0}}><div style={{fontFamily:"monospace",fontWeight:900,fontSize:13,color:"#0F172A"}}>{r.tk}</div><div style={{fontSize:9,color:"#94A3B8"}}>{r.name}</div></div>
+        <div style={{flex:1,position:"relative",height:26,background:"#F1F5F9",borderRadius:7,overflow:"hidden"}}>
+          <div style={{position:"absolute",left:0,top:0,bottom:0,width:Math.max(6,Math.abs(r.ret)/maxAbs*100)+"%",background:pos?"linear-gradient(90deg,#0E7490,#10B981)":"linear-gradient(90deg,#F43F5E,#DC2626)",borderRadius:7,display:"flex",alignItems:"center",paddingLeft:9}}><span style={{fontSize:11,fontWeight:800,color:"#fff"}}>{fmtPct(r.ret)}</span></div>
+        </div>
+        <div style={{width:62,textAlign:"right",fontFamily:"monospace",fontWeight:800,fontSize:13,color:pos?"#059669":"#DC2626",flexShrink:0}}>{fmtPct(r.ret)}</div>
+      </div>
+    );
+
+    const heatTk=rows.slice(0,7);
+    const heatMonths=monthLabels.slice(-6);
+    const monRet=(tk,mi)=>{ const h=seedNum(tk+mi); const base=(extRet(tk).m6||0)/6; return Math.round((base + ((h%160)-70)/10)*10)/10; };
+    const heatColor=(v)=> v>=6?"#15803D": v>=3?"#22C55E": v>=0?"#86EFAC": v>=-2?"#FCA5A5":"#EF4444";
+
+    const BW=620, BH=300, BPx=46, BPy=34;
+    const retMin=Math.min(-10,...valid.map(r=>r.ret)), retMax=Math.max(10,...valid.map(r=>r.ret));
+    const bx=(v)=>BPx+((Math.min(70,Math.max(10,v))-10)/60)*(BW-BPx-16);
+    const by=(v)=>BH-BPy-((v-retMin)/((retMax-retMin)||1))*(BH-BPy-18);
+
+    const divCards=[...rows].sort((a,b)=>b.divY-a.divY).slice(0,6);
+    const freqOf=(tk)=> seedNum(tk)%5===0?(isEN?"Semi-annual":"Semestral"):(isEN?"Quarterly":"Trimestral");
+    const nextPay=(tk)=>{ const h=seedNum(tk); const d=new Date(2026,6+(h%4),1+(h%27)); return d.toLocaleDateString(isEN?"en-US":"es-ES",{month:"short",day:"numeric"}); };
+    const maxYield=Math.max(...rows.map(r=>r.divY),1);
+
+    const ranking=sorted;
 
     return (
-      <div style={{display:"flex",flexDirection:"column",gap:16}}>
-        {/* Selector de periodo */}
-        <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
-          <span style={{fontSize:12,fontWeight:700,color:"#475569",marginRight:4}}>{isEN?"Period:":"Periodo:"}</span>
-          {PERIODS.map(p=>(
-            <button key={p.id} onClick={()=>setPerfPeriod(p.id)}
-              style={{background:perfPeriod===p.id?"linear-gradient(135deg,#0047C2,#0F4C81)":"#EBF3FF",color:perfPeriod===p.id?"#fff":"#1A5FAD",border:"1px solid #C5DEFF",borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:800,cursor:"pointer"}}>{p.l}</button>
+      <div style={{display:"flex",flexDirection:"column",gap:18}}>
+        <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+          <span style={{fontSize:12,fontWeight:700,color:"#475569",marginRight:4}}>{isEN?"Period:":"Período:"}</span>
+          {PER.map(p=>(
+            <button key={p.id} onClick={()=>setPerfPeriod(p.id)} style={{background:perfPeriod===p.id?"#fff":"transparent",color:perfPeriod===p.id?"#0F172A":"#64748B",border:"1px solid "+(perfPeriod===p.id?"#CBD5E1":"transparent"),boxShadow:perfPeriod===p.id?"0 1px 4px rgba(0,0,0,0.08)":"none",borderRadius:9,padding:"6px 16px",fontSize:13,fontWeight:800,cursor:"pointer"}}>{p.l}</button>
           ))}
-          <span style={{fontSize:11,color:"#94A3B8",marginLeft:"auto"}}>{isEN?"Illustrative · $1,000 invested in each":"Ilustrativo · $1,000 invertidos en cada una"}</span>
+          <span style={{fontSize:11,color:"#94A3B8",marginLeft:"auto"}}>{isEN?("Illustrative · $"+INVEST.toLocaleString("en-US")+" assumed per stock"):("Ilustrativo · $"+INVEST.toLocaleString("en-US")+" asumidos por acción")}</span>
         </div>
 
-        {/* Mejores y peores */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-          <Card title={isEN?`🏆 Top winners (${perLabel})`:`🏆 Mejores (${perLabel})`} sub={isEN?"Best performers and gain on $1,000":"Mejores y ganancia sobre $1,000"}>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {winners.map(w=>(
-                <div key={w.tk} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",background:"rgba(16,185,129,0.07)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:10}}>
-                  <span style={{fontFamily:"monospace",fontWeight:900,fontSize:14,color:"#0F172A",minWidth:54}}>{w.tk}</span>
-                  <span style={{fontSize:11,color:"#64748B",flex:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{w.name}</span>
-                  <span style={{fontFamily:"monospace",fontWeight:800,color:"#10B981",fontSize:13}}>{pctFmtBig(w.ret)}</span>
-                  <span style={{fontFamily:"monospace",fontWeight:700,color:"#059669",fontSize:12,minWidth:70,textAlign:"right"}}>{moneyFmt(w.money)}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-          <Card title={isEN?`📉 Top losers (${perLabel})`:`📉 Peores (${perLabel})`} sub={isEN?"Worst performers and loss on $1,000":"Peores y pérdida sobre $1,000"}>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {losers.length? losers.map(l=>(
-                <div key={l.tk} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",background:l.ret>=0?"rgba(100,116,139,0.06)":"rgba(239,68,68,0.07)",border:`1px solid ${l.ret>=0?"rgba(100,116,139,0.2)":"rgba(239,68,68,0.25)"}`,borderRadius:10}}>
-                  <span style={{fontFamily:"monospace",fontWeight:900,fontSize:14,color:"#0F172A",minWidth:54}}>{l.tk}</span>
-                  <span style={{fontSize:11,color:"#64748B",flex:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{l.name}</span>
-                  <span style={{fontFamily:"monospace",fontWeight:800,color:pctColor(l.ret),fontSize:13}}>{pctFmtBig(l.ret)}</span>
-                  <span style={{fontFamily:"monospace",fontWeight:700,color:pctColor(l.ret),fontSize:12,minWidth:70,textAlign:"right"}}>{moneyFmt(l.money)}</span>
-                </div>
-              )) : <div style={{fontSize:12,color:"#94A3B8",padding:"8px 0"}}>{isEN?"No data":"Sin datos"}</div>}
-            </div>
-          </Card>
-        </div>
-
-        {/* Ranking de barras */}
-        <Card title={isEN?`📊 Return ranking (${perLabel})`:`📊 Ranking de retorno (${perLabel})`} sub={isEN?"All your watchlist, high to low":"Toda tu watchlist, de mayor a menor"}>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {sorted.map(d=>(
-              <div key={d.tk} style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:"#0F172A",width:56,flexShrink:0}}>{d.tk}</span>
-                <div style={{flex:1,position:"relative",height:22,background:"#F1F5F9",borderRadius:5}}>
-                  <div style={{position:"absolute",left:"50%",top:0,bottom:0,width:1,background:"#CBD5E1"}}/>
-                  {d.ret>=0
-                    ? <div style={{position:"absolute",left:"50%",top:3,bottom:3,width:`${(d.ret/maxAbs)*50}%`,background:"linear-gradient(90deg,#10B981,#059669)",borderRadius:"0 4px 4px 0"}}/>
-                    : <div style={{position:"absolute",right:"50%",top:3,bottom:3,width:`${(-d.ret/maxAbs)*50}%`,background:"linear-gradient(90deg,#EF4444,#DC2626)",borderRadius:"4px 0 0 4px"}}/>}
-                </div>
-                <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:pctColor(d.ret),width:78,textAlign:"right",flexShrink:0}}>{pctFmtBig(d.ret)}</span>
-                <span style={{fontFamily:"monospace",fontWeight:600,fontSize:11,color:"#64748B",width:72,textAlign:"right",flexShrink:0}}>{moneyFmt(d.money)}</span>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:16}}>
+          {kpis.map((k,i)=>(
+            <div key={i} style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 20px 16px",position:"relative",overflow:"hidden",boxShadow:"0 6px 18px rgba(26,95,173,0.07)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                <span style={{fontSize:11,fontWeight:800,color:"#64748B",letterSpacing:0.6}}>{k.t}</span>
+                <span style={{fontSize:10,fontWeight:800,color:"#64748B"}}>{k.badge}</span>
               </div>
-            ))}
-          </div>
-        </Card>
+              <div style={{fontSize:34,fontWeight:900,color:k.vColor,marginTop:8,letterSpacing:-1.2,lineHeight:1}}>{k.v}</div>
+              <div style={{fontSize:11.5,color:"#059669",marginTop:8,fontWeight:600}}>▲ {k.sub}</div>
+              <div style={{position:"absolute",left:0,right:0,bottom:0,height:4,background:k.accent}}/>
+            </div>
+          ))}
+        </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:14}}>
-          {/* Crecimiento de $1,000 */}
-          <Card title={isEN?"💵 Growth of $1,000":"💵 Crecimiento de $1,000"} sub={isEN?"Top 5 by return — illustrative path":"Top 5 por retorno — trayectoria ilustrativa"}>
-            <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}>
-              {[0,0.25,0.5,0.75,1].map((g,i)=>{ const y=PAD+g*(H-2*PAD); return <line key={i} x1={PAD} y1={y} x2={W-PAD} y2={y} stroke="#EEF2F7" strokeWidth="1"/>; })}
-              <line x1={PAD} y1={yAt(1000)} x2={W-PAD} y2={yAt(1000)} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4 3"/>
-              {seriesAll.map(s=>(
-                <polyline key={s.tk} fill="none" stroke={s.color} strokeWidth="2.2" strokeLinejoin="round"
-                  points={s.pts.map((v,i)=>`${xAt(i,s.pts.length-1).toFixed(1)},${yAt(v).toFixed(1)}`).join(" ")}/>
-              ))}
+        <div style={{display:"grid",gridTemplateColumns:"1.7fr 1fr",gap:16}}>
+          <Card>
+            <SecTitle icon="📊" title={isEN?"Portfolio evolution":"Evolución de cartera"} sub={isEN?"Total value vs S&P 500 — last 12 months":"Valor total vs S&P 500 — últimos 12 meses"} tag={fmtPct(portRet1y)} tagColor="#059669"/>
+            <svg viewBox={"0 0 "+EW+" "+EH} style={{width:"100%",height:"auto"}}>
+              {[0,0.25,0.5,0.75,1].map((g,i)=>{ const y=14+g*(EH-48); return <line key={i} x1={EP} y1={y} x2={EW-12} y2={y} stroke="#EEF2F7" strokeWidth="1"/>; })}
+              <polygon points={exAt(0,12)+","+(EH-28)+" "+lineOf(portSeries)+" "+exAt(12,12)+","+(EH-28)} fill="rgba(16,185,129,0.12)"/>
+              <polyline points={lineOf(spySeries)} fill="none" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="5 4"/>
+              <polyline points={lineOf(portSeries)} fill="none" stroke="#10B981" strokeWidth="2.6" strokeLinejoin="round"/>
+              <circle cx={exAt(12,12)} cy={eyAt(portSeries[12])} r="4" fill="#10B981"/>
+              {monthLabels.map((mlbl,i)=> i%2===0 ? <text key={i} x={exAt(i,12)} y={EH-8} textAnchor="middle" fontSize="10" fill="#94A3B8">{mlbl}</text> : null)}
             </svg>
-            <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:8}}>
-              {seriesAll.map(s=>(
-                <div key={s.tk} style={{display:"flex",alignItems:"center",gap:5,fontSize:11}}>
-                  <span style={{width:10,height:10,borderRadius:3,background:s.color,display:"inline-block"}}/>
-                  <span style={{fontFamily:"monospace",fontWeight:700,color:"#0F172A"}}>{s.tk}</span>
-                  <span style={{fontFamily:"monospace",color:"#64748B"}}>${Math.round(s.pts[s.pts.length-1]).toLocaleString("en-US")}</span>
-                </div>
-              ))}
+            <div style={{display:"flex",gap:16,marginTop:6,fontSize:11}}>
+              <span style={{display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:14,height:3,background:"#10B981",display:"inline-block",borderRadius:2}}/>{isEN?"My portfolio":"Mi cartera"}</span>
+              <span style={{display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:14,height:3,background:"#CBD5E1",display:"inline-block",borderRadius:2}}/>S&P 500</span>
             </div>
           </Card>
-
-          {/* Dónde está tu dinero (donut) */}
-          <Card title={isEN?"🧭 Where your money is":"🧭 Dónde está tu dinero"} sub={isEN?"By sector (equal weight)":"Por sector (peso igual)"}>
+          <Card>
+            <SecTitle icon="🍩" title={isEN?"Allocation":"Distribución"} sub={isEN?"By sector — current value":"Por sector — valor actual"}/>
             <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
-              <svg viewBox="0 0 200 200" style={{width:160,height:160,flexShrink:0}}>
-                {arcs.map((a,i)=><path key={i} d={a.dpath} fill={a.color} stroke="#fff" strokeWidth="1.5"/>)}
-                <text x="100" y="96" textAnchor="middle" fontSize="13" fontWeight="800" fill="#0F172A">{totalN}</text>
-                <text x="100" y="112" textAnchor="middle" fontSize="9" fill="#64748B">{isEN?"assets":"activos"}</text>
+              <svg viewBox="0 0 190 190" style={{width:170,height:170,flexShrink:0}}>
+                {donut.map((a,i)=><path key={i} d={a.dpath} fill={a.color} stroke="#fff" strokeWidth="1.5"/>)}
+                <text x="95" y="92" textAnchor="middle" fontSize="22" fontWeight="900" fill="#0F172A">${Math.round(totalValue/1000)}K</text>
+                <text x="95" y="110" textAnchor="middle" fontSize="10" fill="#64748B">Total</text>
               </svg>
-              <div style={{display:"flex",flexDirection:"column",gap:5,flex:1,minWidth:120}}>
-                {arcs.map((a,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:11}}>
-                    <span style={{width:10,height:10,borderRadius:3,background:a.color,display:"inline-block",flexShrink:0}}/>
-                    <span style={{color:"#0F172A",fontWeight:600,flex:1}}>{a.sec}</span>
-                    <span style={{fontFamily:"monospace",color:"#64748B"}}>{Math.round(a.frac*100)}%</span>
-                  </div>
-                ))}
+              <div style={{flex:1,minWidth:110,display:"flex",flexDirection:"column",gap:7}}>
+                {donut.map((a,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:7,fontSize:12}}><span style={{width:11,height:11,borderRadius:3,background:a.color,flexShrink:0}}/><span style={{color:"#0F172A",fontWeight:600,flex:1}}>{a.sec}</span><span style={{fontFamily:"monospace",fontWeight:700,color:"#64748B"}}>{Math.round(a.frac*100)}%</span></div>))}
               </div>
+            </div>
+          </Card>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          <Card><SecTitle icon="🏆" title={isEN?"Best stocks":"Mejores acciones"} sub={isEN?"Highest return in period":"Mayor retorno en el período"} tag="Top 6" tagColor="#059669"/>{top6.map(r=>barRow(r,true))}</Card>
+          <Card><SecTitle icon="📉" title={isEN?"Worst stocks":"Peores acciones"} sub={isEN?"Biggest drop in period":"Mayor caída en el período"} tag="Bottom 6" tagColor="#DC2626"/>{bottom6.map(r=>barRow(r,false))}</Card>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1.2fr",gap:16}}>
+          <Card><SecTitle icon="🔥" title={isEN?"Monthly heatmap":"Mapa de calor mensual"} sub={isEN?"% monthly return — last 6 months":"% retorno mensual — últimos 6 meses"}/>
+            <div style={{overflowX:"auto"}}><table style={{borderCollapse:"separate",borderSpacing:"4px",width:"100%"}}>
+              <thead><tr><th></th>{heatMonths.map((m,i)=><th key={i} style={{fontSize:9,fontWeight:800,color:"#94A3B8",textTransform:"uppercase",padding:"0 2px"}}>{m}</th>)}</tr></thead>
+              <tbody>{heatTk.map(r=>(<tr key={r.tk}><td style={{fontFamily:"monospace",fontWeight:800,fontSize:11,color:"#475569",paddingRight:6,whiteSpace:"nowrap"}}>{r.tk}</td>{heatMonths.map((m,mi)=>{const v=monRet(r.tk,mi);return <td key={mi} style={{background:heatColor(v),color:Math.abs(v)>=3?"#fff":"#0F172A",fontSize:10.5,fontWeight:700,textAlign:"center",padding:"7px 4px",borderRadius:6,minWidth:46}}>{(v>=0?"+":"")+v.toFixed(1)}%</td>;})}</tr>))}</tbody>
+            </table></div>
+          </Card>
+          <Card><SecTitle icon="⚡" title={isEN?"Return vs Risk":"Rentabilidad vs Riesgo"} sub={isEN?"Bubble = position · X = volatility · Y = return":"Burbuja = posición · X = volatilidad · Y = retorno"}/>
+            <svg viewBox={"0 0 "+BW+" "+BH} style={{width:"100%",height:"auto"}}>
+              <line x1={BPx} y1={by(0)} x2={BW-12} y2={by(0)} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4 3"/>
+              {[20,30,40,50,60].map(v=><text key={v} x={bx(v)} y={BH-8} textAnchor="middle" fontSize="9" fill="#94A3B8">{v}%</text>)}
+              {valid.map(r=>{ const col=SECTOR_COLORS[r.sector]||"#0EA5E9"; return (<g key={r.tk}><circle cx={bx(r.vol||30)} cy={by(r.ret)} r="15" fill={col} fillOpacity="0.8" stroke="#fff" strokeWidth="1.5"/><text x={bx(r.vol||30)} y={by(r.ret)+3} textAnchor="middle" fontSize="8" fontWeight="800" fill="#fff">{r.tk.slice(0,4)}</text></g>); })}
+            </svg>
+          </Card>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          <Card><SecTitle icon="💰" title={isEN?"Dividends":"Dividendos"} sub={isEN?"Annual yield · Frequency · Next pay":"Yield anual · Frecuencia · Próximo pago"} tag={"$"+Math.round(totalDiv).toLocaleString("en-US")+(isEN?"/yr":"/año")} tagColor="#B45309"/>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              {divCards.map(r=>{ const col=SECTOR_COLORS[r.sector]||"#0EA5E9"; const R=15,C=2*Math.PI*R,f=Math.min(1,r.divY/maxYield); return (
+                <div key={r.tk} style={{border:"1px solid #E6EDF7",borderRadius:12,padding:"10px 12px",display:"flex",alignItems:"center",gap:10}}>
+                  <svg width="40" height="40" style={{transform:"rotate(-90deg)",flexShrink:0}}><circle cx="20" cy="20" r={R} fill="none" stroke="#EEF2F7" strokeWidth="4"/><circle cx="20" cy="20" r={R} fill="none" stroke={col} strokeWidth="4" strokeDasharray={C} strokeDashoffset={C*(1-f)} strokeLinecap="round"/></svg>
+                  <div style={{minWidth:0,flex:1}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontFamily:"monospace",fontWeight:900,fontSize:13,color:col}}>{r.tk}</span><span style={{fontSize:10,fontFamily:"monospace",color:"#64748B"}}>{r.divY.toFixed(2)}%</span></div>
+                    <div style={{fontSize:10,color:"#64748B",marginTop:2}}>${Math.round(r.divAmt)}{isEN?"/yr":"/año"} · {freqOf(r.tk)}</div>
+                    <div style={{fontSize:10,color:col,fontWeight:700,marginTop:1}}>{isEN?"Next":"Próximo"}: {nextPay(r.tk)}</div>
+                  </div>
+                </div>
+              ); })}
+            </div>
+          </Card>
+          <Card><SecTitle icon="🏅" title={isEN?"Performance ranking":"Ranking de rendimiento"} sub={(isEN?"Total return sorted — period: ":"Retorno total ordenado — período: ")+curPer.l}/>
+            <div style={{display:"flex",flexDirection:"column"}}>
+              {ranking.map((r,i)=>{ const av=avOf(r.tk); return (
+                <div key={r.tk} style={{display:"flex",alignItems:"center",gap:11,padding:"9px 4px",borderBottom:i<ranking.length-1?"1px solid #F1F5F9":"none"}}>
+                  <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:"#94A3B8",width:18,textAlign:"center"}}>{i+1}</span>
+                  <span style={{width:30,height:30,borderRadius:9,background:av[0],color:av[1],display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,flexShrink:0}}>{r.tk.slice(0,2)}</span>
+                  <div style={{minWidth:0,width:90}}><div style={{fontFamily:"monospace",fontWeight:800,fontSize:12.5,color:"#0F172A"}}>{r.tk}</div><div style={{fontSize:9,color:"#94A3B8",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{r.name}</div></div>
+                  <div style={{flex:1,height:5,background:"#F1F5F9",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:Math.max(4,Math.abs(r.ret)/maxAbs*100)+"%",background:r.ret>=0?"#10B981":"#EF4444",borderRadius:3}}/></div>
+                  <div style={{textAlign:"right",flexShrink:0,width:70}}><div style={{fontFamily:"monospace",fontWeight:800,fontSize:12.5,color:r.ret>=0?"#059669":"#DC2626"}}>{r.ret>=0?"▲":"▼"} {fmtPct(r.ret)}</div><div style={{fontSize:10,fontFamily:"monospace",color:"#94A3B8"}}>{money(r.gain)}</div></div>
+                </div>
+              ); })}
             </div>
           </Card>
         </div>
