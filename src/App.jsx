@@ -2538,7 +2538,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             boxShadow:"0 2px 8px rgba(0,0,0,0.1)",flexShrink:0}}>✕</button>
 
         {/* ── COVER + HEADER INTEGRADO ── */}
-        <div style={{background:`linear-gradient(160deg,#ffffff 0%,#DDEEFF 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
+        <div style={{background:`linear-gradient(160deg,#ffffff 0%,#F1F5F9 100%)`,borderRadius:"28px 28px 0 0",padding:"18px 22px 0",position:"relative",overflow:"hidden"}}>
           {/* Dot grid */}
           <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0.12,pointerEvents:"none"}} viewBox="0 0 560 120" preserveAspectRatio="xMidYMid slice">
             <defs><pattern id="pdots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#0F4C81"/></pattern></defs>
