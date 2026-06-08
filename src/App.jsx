@@ -10531,7 +10531,7 @@ function PaperTradingFullPage({ user, onBack }){
   const INTERVALS=[["1","1m"],["5","5m"],["15","15m"],["60","1h"],["240","4h"],["D","1D"],["W","1W"]];
 
   return(
-    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 58px)",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100dvh - 58px)",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
 
       {/* Toast */}
       {msg&&<div style={{position:"fixed",top:70,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:msg.ok?"#16A34A":"#DC2626",color:"#fff",padding:"10px 22px",borderRadius:12,fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.4)",whiteSpace:"nowrap"}}>{msg.text}</div>}
@@ -16298,7 +16298,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
   );
 
   return (
-    <div className="nexo-messages-wrapper" style={{maxWidth:920,margin:"0 auto",height:"calc(100vh - 130px)",display:"flex",flexDirection:"column",gap:0}}>
+    <div className="nexo-messages-wrapper" style={{maxWidth:920,margin:"0 auto",height:"calc(100dvh - 130px)",display:"flex",flexDirection:"column",gap:0}}>
       {/* Header */}
       <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:"18px 18px 0 0",padding:"14px 20px",display:"flex",alignItems:"center",gap:12,borderBottom:"none"}}>
         <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#F59E0B,#B45309)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>💬</div>
@@ -23275,6 +23275,8 @@ export default function App(){
       .nexo-show-mobile { display: none; }
       .nexo-only-mobile-inline { display: none; }
       @media (max-width: 767px) {
+        /* iOS Safari: inputs ≥16px evita el auto-zoom molesto al tocar un campo */
+        input, textarea, select { font-size: 16px !important; }
         /* ── LAYOUT BASE ── */
         .nexo-sidebar { display: none !important; }
         .nexo-show-mobile { display: block !important; }
@@ -23350,7 +23352,7 @@ export default function App(){
         .nexo-gurus-grid { grid-template-columns: 1fr !important; }
 
         /* ── MESSAGES PAGE ── */
-        .nexo-messages-wrapper { height: calc(100vh - 110px) !important; border-radius: 16px !important; }
+        .nexo-messages-wrapper { height: calc(100dvh - 110px) !important; border-radius: 16px !important; }
         .nexo-messages-grid {
           grid-template-columns: 1fr !important;
           grid-template-rows: 42vh 1fr !important;
