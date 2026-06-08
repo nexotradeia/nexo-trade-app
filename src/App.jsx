@@ -17916,6 +17916,8 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
 // ── WATCHLIST PAGE ────────────────────────────────────────────────────────────
 function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false, onNeedPremium }) {
   const isEN = lang==="en";
+  const lp = useContext(PriceCtx);              // sistema central de precios (servidor cacheado + WebSocket)
+  const registerPx = useContext(PriceRegisterCtx);
   const LS_KEY = `nexo_watchlist_${user?.id||"guest"}`;
 
   const DEFAULT_TICKERS = ["AAPL","NVDA","TSLA","MSFT","BTC","ETH","SPY","AMZN"];
@@ -18069,6 +18071,17 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   };
 
   useEffect(()=>{ fetchPrices(); },[tickers]);
+  // Registrar los tickers en el sistema central de precios (mismo que usa el resto de la app).
+  // Solo LEE precios ya existentes y añade los tuyos al rastreo — no afecta ni frena otras pantallas.
+  useEffect(()=>{ if(registerPx) registerPx(tickers); },[tickers, registerPx]);
+  // Precio combinado: usa el local (CoinGecko cripto / Finnhub directo) si lo tiene; si no, el central (lp).
+  // Así el precio nunca queda en "—" aunque Finnhub directo se sature.
+  const priceOf = (tk) => {
+    const a = prices[tk], b = lp?.[tk];
+    if(a && a.price!=null) return a;
+    if(b && b.price!=null) return { ...(a||{}), price:b.price, change:b.change ?? a?.change ?? null };
+    return a || null;
+  };
 
   const addTicker = () => {
     const tk = input.trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
@@ -18277,9 +18290,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Price Target",   w:120, render:(tk,d,m)=>vip(m.target,"","#0F5E68")},
       {h:"Analyst Rating", w:140, render:(tk,d,m)=>isPremium?<span style={{fontWeight:700,fontSize:11,color:m.rating==="Strong Buy"?"#10B981":m.rating==="Buy"?"#0F4C81":m.rating==="Hold"?"#F59E0B":"#94A3B8"}}>{m.rating||"—"}</span>:upgBtn},
       {h:"Upside %",       w:110, render:(tk,d,m)=>vip(m.upside,"%")},
-      {h:"# Analysts",     w:110, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{m.analysts!=null?m.analysts:"—"}</span>:upgBtn},
+      {h:"# Analysts",     w:110, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",fontWeight:700,color:"#334155"}}>{m.analysts!=null?m.analysts:"—"}</span>:upgBtn},
       {h:"EPS Estimate",   w:120, render:(tk,d,m)=>vip(m.eps,"")},
-      {h:"Dividend Yield", w:130, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",color:"#CBD5E1"}}>{m.div!=null?(m.div===0?"—":Number(m.div).toFixed(2)+"%"):"—"}</span>:upgBtn},
+      {h:"Dividend Yield", w:130, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",fontWeight:700,color:"#334155"}}>{m.div!=null?(m.div===0?"—":Number(m.div).toFixed(2)+"%"):"—"}</span>:upgBtn},
     ],
     health:[
       {h:"Name",           w:150, render:nm},
@@ -18357,8 +18370,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     if(!sortCol) return tickers;
     const arr=[...tickers];
     arr.sort((a,b)=>{
-      const va=sortValue(sortCol,a,prices[a],getMock(a));
-      const vb=sortValue(sortCol,b,prices[b],getMock(b));
+      const va=sortValue(sortCol,a,priceOf(a),getMock(a));
+      const vb=sortValue(sortCol,b,priceOf(b),getMock(b));
       const na=(va==null||Number.isNaN(va)), nb=(vb==null||Number.isNaN(vb));
       if(na&&nb) return 0; if(na) return 1; if(nb) return -1; // nulos siempre al final
       if(typeof va==="string"||typeof vb==="string"){
@@ -18798,7 +18811,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
             </thead>
             <tbody>
               {sortedTickers.map((tk,rowIdx)=>{
-                const d = prices[tk];
+                const d = priceOf(tk);
                 const m = getMock(tk);
                 return(
                   <tr key={tk} style={{background:rowIdx%2===0?"#F4F9FF":"#EBF3FF",transition:"background 0.1s"}}
