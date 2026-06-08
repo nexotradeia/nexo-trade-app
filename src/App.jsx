@@ -20408,66 +20408,67 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         {/* ─── PROJECTIONS TAB ─── */}
         {ptTab==="projections" && positions.length>0 && (
           <div>
-            {sorted.map((pos)=>{
-              const tk=pos.ticker.toUpperCase();
-              const lp=livePrices[tk];
-              const entry=parseFloat(pos.entryPrice)||0;
-              const curr=lp?lp.price:entry;
-              const pnlPct=entry>0?((curr-entry)/entry*100):0;
-              const isCrypto=["BTC","ETH","SOL","BNB","XRP","ADA","DOGE","AVAX","MATIC","DOT"].includes(tk);
-              const vol=isCrypto?0.35:0.18;
-              const stop=curr*(1-0.08);
-              const cons=curr*(1+vol*0.4);
-              const base=curr*(1+vol*0.8);
-              const bull=curr*(1+vol*1.4);
-              const minP=stop;const maxP=bull;const rng=maxP-minP||1;
-              const pctPos=(p)=>((p-minP)/rng*100);
-              const currPct=pctPos(curr);
-              return(
-                <div key={pos.id} style={{background:"linear-gradient(145deg,rgba(15,23,42,0.95),rgba(20,30,50,0.9))",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:"16px 18px",marginBottom:10}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                    <div style={{fontFamily:"monospace",fontWeight:900,fontSize:15,color:"#F1F5F9"}}>{tk}</div>
-                    <div style={{fontSize:11,color:pnlPct>=0?"#00D26A":"#FF4D6A",fontWeight:700,fontFamily:"monospace"}}>{pnlPct>=0?"+":""}{pnlPct.toFixed(2)}% {isEN?"current":"actual"}</div>
+            {(()=>{
+              // Valor actual del portafolio (suma de posiciones a precio en vivo)
+              const totVal = positions.reduce((a,p)=>{ const tk=p.ticker.toUpperCase(); const lp=livePrices[tk]; const curr=lp?lp.price:(parseFloat(p.entryPrice)||0); return a + curr*(parseFloat(p.shares)||0); },0);
+              if(!(totVal>0)) return null;
+              const base=totVal*1.13, bull=totVal*1.21, bear=totVal*0.86;
+              const pBull=32,pBase=48,pBear=20;
+              const fmt$=(v)=>"$"+Math.round(v).toLocaleString("en-US");
+              const now=new Date();
+              const months=[]; for(let i=0;i<=12;i++){ months.push(new Date(now.getFullYear(),now.getMonth()+i,1).toLocaleDateString(isEN?"en-US":"es-ES",{month:"short"})); }
+              const W=680,H=240,PADL=44,PADR=16,PADT=14,PADB=26;
+              const allV=[bull,base,bear,totVal]; const vMax=Math.max(...allV)*1.03, vMin=Math.min(...allV)*0.97;
+              const xAt=(i)=>PADL+(i/12)*(W-PADL-PADR);
+              const yAt=(v)=>H-PADB-((v-vMin)/((vMax-vMin)||1))*(H-PADT-PADB);
+              const lineTo=(end,curve)=>{ const pts=[]; for(let i=0;i<=12;i++){ const t=i/12; const e=Math.pow(t,curve); pts.push([xAt(i),yAt(totVal+(end-totVal)*e)]); } return pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "); };
+              const scen=[
+                {k:"bull",emo:"🐂",l:isEN?"BULLISH":"ALCISTA",v:bull,p:pBull,c:"#10B981",bg:"rgba(16,185,129,0.06)",bd:"#10B981"},
+                {k:"base",emo:"⚖️",l:"BASE",v:base,p:pBase,c:"#0EA5E9",bg:"rgba(14,165,233,0.06)",bd:"#7DD3FC"},
+                {k:"bear",emo:"🐻",l:isEN?"BEARISH":"BAJISTA",v:bear,p:pBear,c:"#EF4444",bg:"rgba(239,68,68,0.06)",bd:"#FCA5A5"},
+              ];
+              return (
+                <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"20px 22px",boxShadow:"0 6px 20px rgba(26,95,173,0.08)"}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:16}}>
+                    <span style={{display:"flex",alignItems:"center",gap:9}}>
+                      <span style={{fontSize:20}}>📡</span>
+                      <span style={{fontSize:18,fontWeight:900,color:"#0F172A",letterSpacing:-0.4}}>{isEN?"Oracle AI Projection":"Proyección Oracle IA"}</span>
+                      <span style={{fontSize:10,fontWeight:800,color:"#7C3AED",background:"rgba(124,58,237,0.1)",borderRadius:20,padding:"2px 9px"}}>● IA</span>
+                    </span>
+                    <span style={{fontSize:11,color:"#94A3B8"}}>{isEN?"Updated":"Actualizado"}: {isEN?"today":"hoy"} {now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})} · {isEN?"Horizon":"Horizon"}: 12 {isEN?"months":"meses"}</span>
                   </div>
-                  {/* Price range bar */}
-                  <div style={{position:"relative",height:8,background:"rgba(255,255,255,0.05)",borderRadius:4,margin:"30px 0 22px"}}>
-                    <div style={{position:"absolute",left:0,width:currPct+"%",height:"100%",background:"rgba(255,77,106,0.28)",borderRadius:"4px 0 0 4px"}}/>
-                    <div style={{position:"absolute",left:currPct+"%",right:0,height:"100%",background:"rgba(0,210,106,0.18)",borderRadius:"0 4px 4px 0"}}/>
-                    {[
-                      {label:"STOP",price:stop,p:pctPos(stop),color:"#FF4D6A"},
-                      {label:"CON",price:cons,p:pctPos(cons),color:"#F59E0B"},
-                      {label:"BASE",price:base,p:pctPos(base),color:"#60A5FA"},
-                      {label:"BULL",price:bull,p:pctPos(bull),color:"#00D26A"},
-                    ].map(({label,price,p,color})=>(
-                      <div key={label} style={{position:"absolute",left:p+"%",top:"50%",transform:"translate(-50%,-50%)"}}>
-                        <div style={{position:"absolute",bottom:14,left:"50%",transform:"translateX(-50%)",whiteSpace:"nowrap",textAlign:"center"}}>
-                          <div style={{fontSize:8,color,fontWeight:800,letterSpacing:0.5}}>{label}</div>
-                          <div style={{fontSize:9,color:"#94A3B8",fontFamily:"monospace"}}>${price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-                        </div>
-                        <div style={{width:8,height:8,borderRadius:"50%",background:color,border:"2px solid rgba(10,14,26,0.9)",position:"relative",zIndex:2}}/>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:18}}>
+                    {scen.map(s=>(
+                      <div key={s.k} style={{background:s.bg,border:`2px solid ${s.bd}`,borderRadius:14,padding:"16px 14px",textAlign:"center"}}>
+                        <div style={{fontSize:22,marginBottom:4}}>{s.emo}</div>
+                        <div style={{fontSize:11,fontWeight:800,color:"#64748B",letterSpacing:0.8,marginBottom:6}}>{s.l}</div>
+                        <div style={{fontSize:30,fontWeight:900,color:s.c,letterSpacing:-1.5,lineHeight:1}}>{fmt$(s.v)}</div>
+                        <div style={{fontSize:11,color:"#94A3B8",marginTop:6,fontWeight:600}}>P: {s.p}%</div>
                       </div>
                     ))}
-                    <div style={{position:"absolute",left:currPct+"%",top:-18,transform:"translateX(-50%)",fontSize:8,color:"#94A3B8",fontWeight:800,whiteSpace:"nowrap"}}>
-                      NOW ${curr.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
+                  </div>
+                  <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"auto"}}>
+                    {[vMin,(vMin+vMax)/2,vMax].map((v,i)=>{ const y=yAt(v); return <g key={i}><line x1={PADL} y1={y} x2={W-PADR} y2={y} stroke="#EEF2F7" strokeWidth="1"/><text x={PADL-6} y={y+3} textAnchor="end" fontSize="9" fill="#94A3B8">${Math.round(v).toLocaleString("en-US")}</text></g>; })}
+                    <polyline points={Array.from({length:13}).map((_,i)=>xAt(i).toFixed(1)+","+yAt(totVal).toFixed(1)).join(" ")} fill="none" stroke="#CBD5E1" strokeWidth="1.5"/>
+                    <polyline points={lineTo(bear,1.1)} fill="none" stroke="#EF4444" strokeWidth="2" strokeDasharray="5 4"/>
+                    <polyline points={lineTo(base,1)} fill="none" stroke="#0EA5E9" strokeWidth="2.4"/>
+                    <polyline points={lineTo(bull,0.95)} fill="none" stroke="#10B981" strokeWidth="2.6"/>
+                    <circle cx={xAt(12)} cy={yAt(bull)} r="4" fill="#10B981"/>
+                    <text x={xAt(12)-4} y={yAt(bull)-8} textAnchor="end" fontSize="11" fontWeight="800" fill="#10B981">{fmt$(bull)}</text>
+                    {months.map((m,i)=> i%2===0 ? <text key={i} x={xAt(i)} y={H-8} textAnchor="middle" fontSize="9" fill="#94A3B8">{m}</text> : null)}
+                  </svg>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginTop:8}}>
+                    <div style={{display:"flex",gap:14,fontSize:11,flexWrap:"wrap"}}>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:14,height:3,background:"#10B981",borderRadius:2}}/>{isEN?"Bullish":"Alcista"}</span>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:14,height:3,background:"#0EA5E9",borderRadius:2}}/>Base</span>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:14,height:3,background:"#EF4444",borderRadius:2}}/>{isEN?"Bearish":"Bajista"}</span>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:14,height:3,background:"#CBD5E1",borderRadius:2}}/>{isEN?"Current":"Precio actual"}</span>
                     </div>
-                  </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginTop:10}}>
-                    {[
-                      {l:"Stop",v:"$"+stop.toFixed(2),c:"#FF4D6A",p:"-8%"},
-                      {l:isEN?"Conserv.":"Conser.",v:"$"+cons.toFixed(2),c:"#F59E0B",p:"+"+(((cons/curr)-1)*100).toFixed(0)+"%"},
-                      {l:"Base",v:"$"+base.toFixed(2),c:"#60A5FA",p:"+"+(((base/curr)-1)*100).toFixed(0)+"%"},
-                      {l:"Bull",v:"$"+bull.toFixed(2),c:"#00D26A",p:"+"+(((bull/curr)-1)*100).toFixed(0)+"%"},
-                    ].map(({l,v,c,p})=>(
-                      <div key={l} style={{background:"rgba(255,255,255,0.025)",borderRadius:8,padding:"6px",textAlign:"center"}}>
-                        <div style={{fontSize:9,color:"#334155",fontWeight:700,textTransform:"uppercase",letterSpacing:0.5,marginBottom:2}}>{l}</div>
-                        <div style={{fontFamily:"monospace",fontWeight:800,fontSize:11,color:c}}>{v}</div>
-                        <div style={{fontSize:9,color:c,opacity:0.75}}>{p}</div>
-                      </div>
-                    ))}
+                    <span style={{fontSize:11,color:"#B45309",fontWeight:600}}>⚠️ {isEN?"Not financial advice · Educational only":"No es consejo financiero · Solo educativo"}</span>
                   </div>
                 </div>
               );
-            })}
+            })()}
             <OracleIA positions={positions} livePrices={livePrices} isPremium={isPremium} onNeedPremium={onNeedPremium} isEN={isEN}/>
           </div>
         )}
