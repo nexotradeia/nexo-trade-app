@@ -10047,10 +10047,10 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
           <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
             <button onClick={()=>onNavigate&&onNavigate(43)}
               style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"9px 18px",fontWeight:800,fontSize:13,color:"#0B0E1A",cursor:"pointer",display:"flex",alignItems:"center",gap:7,boxShadow:"0 4px 16px rgba(0,229,143,0.3)"}}>
-              ⛶ Abrir Terminal Completa
+              ⛶ {isEN?"Open Full Terminal":"Abrir Terminal Completa"}
             </button>
           </div>
-          <PaperTrading user={user}/>
+          <PaperTrading user={user} lang={lang}/>
         </div>
       )}
 
@@ -10077,7 +10077,8 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
 
 // ── PAPER TRADING ────────────────────────────────────────────────────────────
 const PAPER_INITIAL = 100000;
-function PaperTrading({ user }){
+function PaperTrading({ user, lang="es" }){
+  const isEN=lang==="en";
   const KEY = `nexotrade_paper_${user?.id||"guest"}`;
   const load = ()=>{
     try{ const s=localStorage.getItem(KEY); return s?JSON.parse(s):{cash:PAPER_INITIAL,positions:{},trades:[]}; }
@@ -10140,7 +10141,7 @@ function PaperTrading({ user }){
     const sh=parseFloat(shares), tk=ticker.trim().toUpperCase();
     if(!sh||sh<=0||!liveQ||!tk) return;
     const cost=liveQ.price*sh;
-    if(cost>pf.cash){showMsg("❌ Efectivo insuficiente",false);return;}
+    if(cost>pf.cash){showMsg((isEN?"❌ Insufficient cash":"❌ Efectivo insuficiente"),false);return;}
     setPf(prev=>{
       const ex=prev.positions[tk];
       const newSh=(ex?.shares||0)+sh;
@@ -10159,7 +10160,7 @@ function PaperTrading({ user }){
   const sell=(tk,sh)=>{
     sh=parseFloat(sh);
     const pos=pf.positions[tk];
-    if(!pos||!sh||sh<=0||sh>pos.shares){showMsg("❌ Cantidad inválida",false);return;}
+    if(!pos||!sh||sh<=0||sh>pos.shares){showMsg((isEN?"❌ Invalid quantity":"❌ Cantidad inválida"),false);return;}
     const sellPrice=prices[tk]?.price||pos.avgCost;
     const rev=sellPrice*sh;
     setPf(prev=>{
@@ -10178,9 +10179,9 @@ function PaperTrading({ user }){
   };
 
   const resetPortfolio=()=>{
-    if(!window.confirm("¿Reiniciar cartera? Perderás todas las posiciones.")) return;
+    if(!window.confirm(isEN?"Reset portfolio? You will lose all positions.":"¿Reiniciar cartera? Perderás todas las posiciones.")) return;
     setPf({cash:PAPER_INITIAL,positions:{},trades:[]});
-    setPrices({}); showMsg("🔄 Cartera reiniciada con $100,000");
+    setPrices({}); showMsg((isEN?"🔄 Portfolio reset to $100,000":"🔄 Cartera reiniciada con $100,000"));
   };
 
   // Calcular métricas
@@ -10208,7 +10209,7 @@ function PaperTrading({ user }){
       <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",borderRadius:18,padding:"22px 24px",marginBottom:16,border:"1px solid rgba(15,76,129,0.15)"}}>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
-            <div style={{fontSize:11,color:"#64748B",fontWeight:700,letterSpacing:1,marginBottom:4}}>CARTERA TOTAL</div>
+            <div style={{fontSize:11,color:"#64748B",fontWeight:700,letterSpacing:1,marginBottom:4}}>{isEN?"TOTAL PORTFOLIO":"CARTERA TOTAL"}</div>
             <div style={{fontSize:32,fontWeight:900,color:"#fff",fontFamily:"monospace"}}>{fmtUSD(totalValue)}</div>
             <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
               <span style={{fontSize:14,fontWeight:800,color:isGain?"#00E58F":"#FF4D6A"}}>
@@ -10219,10 +10220,10 @@ function PaperTrading({ user }){
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end"}}>
             <div style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:10,padding:"8px 14px",textAlign:"right"}}>
-              <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>EFECTIVO</div>
+              <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>{isEN?"CASH":"EFECTIVO"}</div>
               <div style={{fontSize:18,fontWeight:800,color:"#0F4C81",fontFamily:"monospace"}}>{fmtUSD(pf.cash)}</div>
             </div>
-            <button onClick={resetPortfolio} style={{fontSize:10,color:"#64748B",background:"transparent",border:"1px solid rgba(255,255,255,0.08)",borderRadius:7,padding:"4px 10px",cursor:"pointer",fontWeight:600}}>↺ Reiniciar</button>
+            <button onClick={resetPortfolio} style={{fontSize:10,color:"#64748B",background:"transparent",border:"1px solid rgba(255,255,255,0.08)",borderRadius:7,padding:"4px 10px",cursor:"pointer",fontWeight:600}}>{isEN?"↺ Reset":"↺ Reiniciar"}</button>
           </div>
         </div>
         {/* Mini stat row */}
@@ -10260,8 +10261,8 @@ function PaperTrading({ user }){
           {positions.length===0?(
             <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(15,76,129,0.03)",border:"1px dashed rgba(15,76,129,0.2)",borderRadius:14}}>
               <div style={{fontSize:36,marginBottom:12}}>📭</div>
-              <div style={{fontWeight:700,color:"#0F172A",marginBottom:6}}>Cartera vacía</div>
-              <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>Tienes {fmtUSD(pf.cash)} de efectivo virtual.<br/>Ve a "Operar" y compra tu primera acción.</div>
+              <div style={{fontWeight:700,color:"#0F172A",marginBottom:6}}>{isEN?"Empty portfolio":"Cartera vacía"}</div>
+              <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>Tienes {fmtUSD(pf.cash)} de efectivo virtual.<br/>{isEN?'Go to "Trade" and buy your first stock.':'Ve a "Operar" y compra tu primera acción.'}</div>
               <button onClick={()=>setTab("operar")} style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"10px 24px",fontWeight:800,color:"#fff",cursor:"pointer",fontSize:14}}>💹 Ir a Operar</button>
             </div>
           ):(
@@ -10304,7 +10305,7 @@ function PaperTrading({ user }){
                           placeholder={`máx ${p.shares}`} type="number" min="0.01" step="0.01"
                           style={{width:70,border:"1px solid rgba(220,38,38,0.3)",borderRadius:7,padding:"5px 8px",fontSize:12,outline:"none"}}/>
                         <button onClick={()=>sell(p.tk,sellShares)}
-                          style={{background:"#DC2626",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>Vender</button>
+                          style={{background:"#DC2626",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>{isEN?"Sell":"Vender"}</button>
                         <button onClick={()=>setSellTicker(null)}
                           style={{background:"transparent",border:"1px solid #ccc",borderRadius:7,padding:"5px 8px",cursor:"pointer",fontSize:12,color:"#64748B"}}>✕</button>
                       </div>
@@ -10326,11 +10327,11 @@ function PaperTrading({ user }){
       {/* ── TAB: OPERAR ── */}
       {tab==="operar"&&(
         <div style={{background:"#fff",border:"1px solid rgba(0,0,0,0.07)",borderRadius:16,padding:"20px"}}>
-          <h3 style={{fontWeight:800,fontSize:15,color:"#0F172A",marginBottom:16}}>💹 Comprar acciones</h3>
+          <h3 style={{fontWeight:800,fontSize:15,color:"#0F172A",marginBottom:16}}>{isEN?"💹 Buy stocks":"💹 Comprar acciones"}</h3>
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
             {/* Quick picks */}
             <div>
-              <div style={{fontSize:10,fontWeight:700,color:"#64748B",marginBottom:6}}>ACCESO RÁPIDO</div>
+              <div style={{fontSize:10,fontWeight:700,color:"#64748B",marginBottom:6}}>{isEN?"QUICK ACCESS":"ACCESO RÁPIDO"}</div>
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {["BTC","ETH","SOL","XRP","DOGE","BNB","AAPL","NVDA","TSLA","MSFT","AMZN","META","GOOGL","SPY","QQQ","MELI","WMT","COST","UBER","SHOP"].map(t=>(
                   <button key={t} onClick={()=>{setTicker(t);setLiveQ(null);fetchQuote(t);}}
@@ -10342,7 +10343,7 @@ function PaperTrading({ user }){
             </div>
             {/* Ticker input */}
             <div>
-              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>TICKER DE LA ACCIÓN O CRYPTO</label>
+              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>{isEN?"STOCK OR CRYPTO TICKER":"TICKER DE LA ACCIÓN O CRYPTO"}</label>
               <div style={{display:"flex",gap:8}}>
                 <input value={ticker}
                   onChange={e=>{setTicker(e.target.value.toUpperCase());setLiveQ(null);}}
@@ -10378,7 +10379,7 @@ function PaperTrading({ user }){
 
             {/* Cantidad */}
             <div>
-              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>CANTIDAD DE ACCIONES</label>
+              <label style={{fontSize:11,fontWeight:700,color:"#64748B",display:"block",marginBottom:5}}>{isEN?"NUMBER OF SHARES":"CANTIDAD DE ACCIONES"}</label>
               <input value={shares} onChange={e=>setShares(e.target.value)}
                 type="number" min="0.01" step="0.01" placeholder="Ej: 10"
                 style={{width:"100%",border:"1.5px solid rgba(0,0,0,0.09)",borderRadius:10,padding:"10px 14px",fontSize:14,boxSizing:"border-box",outline:"none"}}/>
@@ -10392,7 +10393,7 @@ function PaperTrading({ user }){
                   <span style={{fontWeight:800,fontFamily:"monospace",fontSize:14,color:"#0F172A"}}>{fmtUSD(liveQ.price*parseFloat(shares))}</span>
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between"}}>
-                  <span style={{fontSize:12,color:"#64748B"}}>Efectivo restante</span>
+                  <span style={{fontSize:12,color:"#64748B"}}>{isEN?"Cash remaining":"Efectivo restante"}</span>
                   <span style={{fontWeight:800,fontFamily:"monospace",fontSize:14,
                     color:pf.cash-(liveQ.price*parseFloat(shares))>=0?"#16A34A":"#DC2626"
                   }}>{fmtUSD(pf.cash-(liveQ.price*parseFloat(shares)))}</span>
@@ -10416,11 +10417,11 @@ function PaperTrading({ user }){
       {tab==="historial"&&(
         <div style={{background:"#fff",border:"1px solid rgba(0,0,0,0.07)",borderRadius:16,overflow:"hidden"}}>
           <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(0,0,0,0.05)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontWeight:800,fontSize:14,color:"#0F172A"}}>📋 Historial de operaciones</span>
+            <span style={{fontWeight:800,fontSize:14,color:"#0F172A"}}>{isEN?"📋 Trade history":"📋 Historial de operaciones"}</span>
             <span style={{fontSize:12,color:"#64748B"}}>{pf.trades.length} ops.</span>
           </div>
           {pf.trades.length===0?(
-            <div style={{textAlign:"center",padding:"32px",color:"#94A3B8",fontSize:13}}>Sin operaciones todavía</div>
+            <div style={{textAlign:"center",padding:"32px",color:"#94A3B8",fontSize:13}}>{isEN?"No trades yet":"Sin operaciones todavía"}</div>
           ):(
             <div>
               {pf.trades.map((t,i)=>(
@@ -10459,7 +10460,8 @@ const TV_SYM_MAP={
 };
 const PAPER_CRYPTO_FULL={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT"};
 
-function PaperTradingFullPage({ user, onBack }){
+function PaperTradingFullPage({ user, onBack, lang="es" }){
+  const isEN=lang==="en";
   const PAPER_KEY = `nexotrade_paper_${user?.id||"guest"}`;
   const loadPF = ()=>{ try{ const s=localStorage.getItem(PAPER_KEY); return s?JSON.parse(s):{cash:100000,positions:{},trades:[]}; }catch{ return {cash:100000,positions:{},trades:[]}; } };
 
@@ -10518,9 +10520,9 @@ function PaperTradingFullPage({ user, onBack }){
 
   const buy=()=>{
     const sh=parseFloat(shares), tk=ticker.trim().toUpperCase()||chartTk;
-    if(!sh||sh<=0||!liveQ||!tk){showMsg("❌ Busca un ticker y elige cantidad",false);return;}
+    if(!sh||sh<=0||!liveQ||!tk){showMsg((isEN?"❌ Search a ticker and pick a quantity":"❌ Busca un ticker y elige cantidad"),false);return;}
     const cost=liveQ.price*sh;
-    if(cost>pf.cash){showMsg("❌ Efectivo insuficiente",false);return;}
+    if(cost>pf.cash){showMsg((isEN?"❌ Insufficient cash":"❌ Efectivo insuficiente"),false);return;}
     setPf(prev=>{
       const ex=prev.positions[tk];
       const newSh=(ex?.shares||0)+sh;
@@ -10535,7 +10537,7 @@ function PaperTradingFullPage({ user, onBack }){
   const sell=(tk,sh)=>{
     sh=parseFloat(sh);
     const pos=pf.positions[tk];
-    if(!pos||!sh||sh<=0||sh>pos.shares){showMsg("❌ Cantidad inválida",false);return;}
+    if(!pos||!sh||sh<=0||sh>pos.shares){showMsg((isEN?"❌ Invalid quantity":"❌ Cantidad inválida"),false);return;}
     const sellPrice=prices[tk]?.price||pos.avgCost;
     const rev=sellPrice*sh;
     setPf(prev=>{
@@ -10571,13 +10573,13 @@ function PaperTradingFullPage({ user, onBack }){
 
       {/* ── TOP BAR ── */}
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 16px",background:"#141722",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0,flexWrap:"wrap"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,padding:"6px 12px",color:"#94A3B8",fontSize:12,fontWeight:700,cursor:"pointer"}}>← Volver</button>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,padding:"6px 12px",color:"#94A3B8",fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"← Back":"← Volver"}</button>
         <div style={{width:1,height:20,background:"rgba(255,255,255,0.08)"}}/>
         <span style={{fontWeight:900,fontSize:15,color:"#00E58F",letterSpacing:0.5}}>🎮 Paper Trading</span>
         <span style={{fontSize:10,background:"rgba(0,229,143,0.1)",color:"#00E58F",border:"1px solid rgba(0,229,143,0.2)",borderRadius:20,padding:"2px 8px",fontWeight:700}}>SIMULADO</span>
         <div style={{marginLeft:"auto",display:"flex",gap:12,alignItems:"center"}}>
           <div style={{textAlign:"right"}}>
-            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>CARTERA TOTAL</div>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>{isEN?"TOTAL PORTFOLIO":"CARTERA TOTAL"}</div>
             <div style={{fontWeight:900,fontSize:16,fontFamily:"monospace",color:isGain?"#00E58F":"#FF4D6A"}}>{fmtUSD(totalValue)}</div>
           </div>
           <div style={{textAlign:"right"}}>
@@ -10585,7 +10587,7 @@ function PaperTradingFullPage({ user, onBack }){
             <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:isGain?"#00E58F":"#FF4D6A"}}>{isGain?"+":""}{fmtUSD(totalPnl)}</div>
           </div>
           <div style={{textAlign:"right"}}>
-            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>EFECTIVO</div>
+            <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>{isEN?"CASH":"EFECTIVO"}</div>
             <div style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:"#0F4C81"}}>{fmtUSD(pf.cash)}</div>
           </div>
         </div>
@@ -10675,7 +10677,7 @@ function PaperTradingFullPage({ user, onBack }){
                 </div>
 
                 <div>
-                  <label style={{fontSize:10,fontWeight:700,color:"#64748B",display:"block",marginBottom:4}}>CANTIDAD</label>
+                  <label style={{fontSize:10,fontWeight:700,color:"#64748B",display:"block",marginBottom:4}}>{isEN?"QUANTITY":"CANTIDAD"}</label>
                   <input value={shares} onChange={e=>setShares(e.target.value)}
                     type="number" min="0.01" step="0.01" placeholder="Ej: 10"
                     style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 12px",fontSize:13,color:"#E2E8F0",outline:"none",boxSizing:"border-box",fontFamily:"monospace"}}/>
@@ -10688,7 +10690,7 @@ function PaperTradingFullPage({ user, onBack }){
                       <span style={{fontFamily:"monospace",fontWeight:800,color:"#E2E8F0"}}>{fmtUSD(liveQ.price*parseFloat(shares))}</span>
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between"}}>
-                      <span style={{color:"#64748B"}}>Efectivo restante</span>
+                      <span style={{color:"#64748B"}}>{isEN?"Cash remaining":"Efectivo restante"}</span>
                       <span style={{fontFamily:"monospace",fontWeight:800,color:pf.cash-(liveQ.price*parseFloat(shares))>=0?"#00E58F":"#FF4D6A"}}>{fmtUSD(pf.cash-(liveQ.price*parseFloat(shares)))}</span>
                     </div>
                   </div>
@@ -10713,7 +10715,7 @@ function PaperTradingFullPage({ user, onBack }){
                           type="number" min="0.01" step="0.01" placeholder={`máx ${pf.positions[chartTk].shares}`}
                           style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:8,padding:"8px 10px",fontSize:12,color:"#E2E8F0",outline:"none"}}/>
                         <button onClick={()=>sell(chartTk,sellShares)}
-                          style={{background:"#DC2626",border:"none",borderRadius:8,padding:"8px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>Vender</button>
+                          style={{background:"#DC2626",border:"none",borderRadius:8,padding:"8px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>{isEN?"Sell":"Vender"}</button>
                         <button onClick={()=>setSellTicker(null)}
                           style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,padding:"8px",color:"#94A3B8",cursor:"pointer"}}>✕</button>
                       </div>
@@ -10736,8 +10738,8 @@ function PaperTradingFullPage({ user, onBack }){
                 {positions.length===0?(
                   <div style={{textAlign:"center",padding:"32px 16px",color:"#475569"}}>
                     <div style={{fontSize:32,marginBottom:10}}>📭</div>
-                    <div style={{fontSize:13}}>Sin posiciones abiertas</div>
-                    <div style={{fontSize:11,marginTop:6}}>Ve a "Orden" y compra tu primera acción</div>
+                    <div style={{fontSize:13}}>{isEN?"No open positions":"Sin posiciones abiertas"}</div>
+                    <div style={{fontSize:11,marginTop:6}}>{isEN?'Go to "Order" and buy your first stock':'Ve a "Orden" y compra tu primera acción'}</div>
                   </div>
                 ):(
                   <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -10769,7 +10771,7 @@ function PaperTradingFullPage({ user, onBack }){
             {tab==="historial"&&(
               <div>
                 {pf.trades.length===0?(
-                  <div style={{textAlign:"center",padding:"32px 16px",color:"#475569",fontSize:13}}>Sin operaciones todavía</div>
+                  <div style={{textAlign:"center",padding:"32px 16px",color:"#475569",fontSize:13}}>{isEN?"No trades yet":"Sin operaciones todavía"}</div>
                 ):(
                   <div style={{display:"flex",flexDirection:"column",gap:4}}>
                     {pf.trades.slice(0,50).map((t,i)=>(
@@ -23051,7 +23053,7 @@ export default function App(){
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
     if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
     if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
-    if(page===43) return <PaperTradingFullPage user={user} onBack={()=>setPage(0)}/>;
+    if(page===43) return <PaperTradingFullPage user={user} lang={lang} onBack={()=>setPage(0)}/>;
     if(page===44) return <RadarGlobalPage lang={lang}/>;
     if(page===45) return <PreMarketPage lang={lang} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===46) return <PivotCalc lang={lang}/>;
