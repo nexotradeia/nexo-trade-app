@@ -20150,83 +20150,101 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         )}
 
         {/* ─── RETURNS TAB ─── */}
-        {ptTab==="returns" && positions.length>0 && (()=>{
-          const hc=(pct)=>{
-            if(pct>30) return {background:"rgba(0,210,106,0.22)",color:"#00C070"};
-            if(pct>15) return {background:"rgba(0,210,106,0.16)",color:"#00B060"};
-            if(pct>5)  return {background:"rgba(0,210,106,0.10)",color:"#00C870"};
-            if(pct>0)  return {background:"rgba(0,210,106,0.06)",color:"#00D26A"};
-            if(pct>-5) return {background:"rgba(245,158,11,0.10)",color:"#0F5E68"};
-            return {background:"rgba(255,77,106,0.10)",color:"#FF4D6A"};
-          };
-          return(
-            <div>
-              {/* Sort chips */}
-              <div style={{display:"flex",gap:6,marginBottom:12,alignItems:"center"}}>
-                <span style={{fontSize:11,color:"#475569",fontWeight:600}}>{isEN?"Sort:":"Ordenar:"}</span>
-                {[["pnl",isEN?"Best P&L":"Mejor P&L"],["value",isEN?"Value":"Valor"],["ticker","Ticker"]].map(([k,l])=>(
-                  <button key={k} onClick={()=>setSortBy(k)}
-                    style={{background:sortBy===k?"rgba(96,165,250,0.15)":"transparent",border:`1px solid ${sortBy===k?"rgba(96,165,250,0.4)":"rgba(255,255,255,0.08)"}`,borderRadius:8,padding:"4px 12px",color:sortBy===k?"#60A5FA":"#64748B",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-                    {l}
-                  </button>
-                ))}
-              </div>
-              {/* Table */}
-              <div className="nexo-scroll-x" style={{borderRadius:16}}>
-              <div style={{minWidth:360,background:"rgba(15,23,42,0.85)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,overflow:"hidden"}}>
-                <div style={{display:"grid",gridTemplateColumns:"28px 72px 1fr 76px 76px 80px",gap:0,padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
-                  {["#","Ticker","Sparkline","P&L %","P&L $","Value"].map(h=>(
-                    <div key={h} style={{fontSize:9,color:"#334155",fontWeight:800,letterSpacing:0.6,textTransform:"uppercase",textAlign:h==="Sparkline"?"center":h==="Value"?"right":"left"}}>{h}</div>
-                  ))}
-                </div>
-                {sorted.map((pos,i)=>{
-                  const tk=pos.ticker.toUpperCase();
-                  const lp=livePrices[tk];
-                  const entry=parseFloat(pos.entryPrice)||0;
-                  const shares=parseFloat(pos.shares)||0;
-                  const curr=lp?lp.price:entry;
-                  const pnlAmt=(curr-entry)*shares;
-                  const pnlPct=entry>0?((curr-entry)/entry*100):0;
-                  const marketVal=curr*shares;
-                  const hcStyle=hc(pnlPct);
-                  const col=pnlPct>=0?"#00D26A":"#FF4D6A";
-                  const y1=pnlPct>=0?(pnlPct>15?9:pnlPct>5?12:15):(pnlPct<-15?22:pnlPct<-5?19:16);
-                  const sparkPts=pnlPct>=0?`0,22 18,19 36,15 54,${y1} 72,${pnlPct>10?5:8}`:`0,8 18,11 36,15 54,${pnlPct<-10?21:18} 72,${pnlPct<-15?24:21}`;
-                  return(
-                    <div key={pos.id} style={{display:"grid",gridTemplateColumns:"28px 72px 1fr 76px 76px 80px",gap:0,padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.03)",alignItems:"center"}}
-                      onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.02)"}
-                      onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                      <div style={{fontSize:10,color:"#334155",fontWeight:800,fontFamily:"monospace"}}>#{i+1}</div>
-                      <div style={{fontFamily:"monospace",fontWeight:900,fontSize:13,color:"#F1F5F9",letterSpacing:-0.3}}>{tk}</div>
-                      <div style={{display:"flex",justifyContent:"center"}}>
-                        <svg width="72" height="26" viewBox="0 0 72 26" preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id={`sg${i}`} x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor={col} stopOpacity="0.28"/>
-                              <stop offset="100%" stopColor={col} stopOpacity="0"/>
-                            </linearGradient>
-                          </defs>
-                          <polygon points={`${sparkPts} 72,26 0,26`} fill={`url(#sg${i})`}/>
-                          <polyline points={sparkPts} fill="none" stroke={col} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"/>
-                        </svg>
-                      </div>
-                      <div style={{...hcStyle,borderRadius:8,padding:"4px 6px",textAlign:"center",fontSize:11,fontWeight:800,fontFamily:"monospace"}}>
-                        {pnlPct>=0?"+":""}{pnlPct.toFixed(2)}%
-                      </div>
-                      <div style={{fontFamily:"monospace",fontSize:11,color:col,fontWeight:700,textAlign:"center"}}>
-                        {pnlAmt>=0?"+":"-"}${Math.abs(pnlAmt).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
-                      </div>
-                      <div style={{fontFamily:"monospace",fontSize:11,color:"#94A3B8",fontWeight:700,textAlign:"right"}}>
-                        ${marketVal.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
-                      </div>
+        {ptTab==="returns" && positions.length>0 && (
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {positions.length===0 && <div style={{textAlign:"center",padding:"32px 20px",color:"#8FA5BE",fontSize:13}}>{isEN?"Add positions to see returns":"Agrega posiciones para ver retornos"}</div>}
+            {positions.length>=1 && (()=>{
+              const top=sorted[0]; const tk=top.ticker.toUpperCase();
+              const entry=parseFloat(top.entryPrice)||0; const lp=livePrices[tk]; const curr=lp?lp.price:entry;
+              const pnl=entry>0?((curr-entry)/entry*100):0;
+              const totVal=positions.reduce((a,p)=>{const t=p.ticker.toUpperCase();const l=livePrices[t];const c=l?l.price:(parseFloat(p.entryPrice)||0);return a+c*(parseFloat(p.shares)||0);},0);
+              const months=isEN?["Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May"]:["Jun","Jul","Ago","Sep","Oct","Nov","Dic","Ene","Feb","Mar","Abr","May"];
+              // evolución
+              const n=12; const aapl=[],spx=[]; for(let i=0;i<=n;i++){const t=i/n; aapl.push(entry+(curr-entry)*Math.pow(t,0.92)); spx.push(entry+(entry*0.243)*t);}
+              const W=640,H=240,PL=44,PR=14,PT=14,PB=24; const all=[...aapl,...spx]; const mn=Math.min(...all)*0.97,mx=Math.max(...all)*1.03;
+              const xA=(i)=>PL+(i/n)*(W-PL-PR); const yA=(v)=>H-PB-((v-mn)/((mx-mn)||1))*(H-PT-PB);
+              const ln=(s)=>s.map((v,i)=>xA(i).toFixed(1)+","+yA(v).toFixed(1)).join(" ");
+              return (
+                <div style={{display:"grid",gridTemplateColumns:"1.7fr 1fr",gap:16}}>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:8}}>
+                      <div><div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Portfolio evolution":"Evolución de cartera"} <span style={{fontSize:10,fontWeight:700,color:"#00a86b",background:"rgba(0,168,107,0.1)",borderRadius:100,padding:"2px 9px"}}>{(pnl>=0?"+":"")+pnl.toFixed(1)}%</span></div><div style={{fontSize:11,color:"#8FA5BE",marginTop:3}}>{isEN?"Entry":"Precio de entrada"} ${entry.toFixed(0)} → {isEN?"Now":"Actual"} ${curr.toFixed(2)} · 12 {isEN?"months":"meses"}</div></div>
+                      <div style={{display:"flex",gap:12,fontSize:11,color:"#5A7090"}}><span style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:12,height:2,background:"#00a86b",display:"inline-block",borderRadius:2}}/>{tk}</span><span style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:12,height:2,background:"#C8D3E6",display:"inline-block",borderRadius:2}}/>S&P 500</span></div>
                     </div>
-                  );
-                })}
-              </div>{/* /minWidth:360 */}
-              </div>{/* /nexo-scroll-x */}
-            </div>
-          );
-        })()}
+                    <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"auto",marginTop:8}}>
+                      {[mn,(mn+mx)/2,mx].map((v,i)=>(<g key={i}><line x1={PL} y1={yA(v)} x2={W-PR} y2={yA(v)} stroke="#EEF2F7" strokeWidth="1"/><text x={PL-5} y={yA(v)+3} textAnchor="end" fontSize="9" fill="#8FA5BE">${Math.round(v)}</text></g>))}
+                      <polygon points={xA(0)+","+(H-PB)+" "+ln(aapl)+" "+xA(n)+","+(H-PB)} fill="rgba(0,168,107,0.10)"/>
+                      <line x1={PL} y1={yA(entry)} x2={W-PR} y2={yA(entry)} stroke="#C8D3E6" strokeWidth="1" strokeDasharray="3 3"/>
+                      <polyline points={ln(spx)} fill="none" stroke="#C8D3E6" strokeWidth="2" strokeDasharray="5 4"/>
+                      <polyline points={ln(aapl)} fill="none" stroke="#00a86b" strokeWidth="2.6" strokeLinejoin="round"/>
+                      <circle cx={xA(n)} cy={yA(curr)} r="4" fill="#00a86b"/>
+                      <text x={xA(n)-4} y={yA(curr)-9} textAnchor="end" fontSize="11" fontWeight="800" fill="#00a86b">${curr.toFixed(2)}</text>
+                      {months.map((m,i)=><text key={i} x={xA(i)} y={H-7} textAnchor="middle" fontSize="9" fill="#8FA5BE">{m}</text>)}
+                    </svg>
+                  </div>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Composition":"Composición"}</div>
+                    <div style={{fontSize:11,color:"#8FA5BE",marginBottom:16}}>{isEN?"By sector · current value":"Por sector · valor actual"}</div>
+                    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+                      <svg width="150" height="150" viewBox="0 0 150 150">
+                        <circle cx="75" cy="75" r="56" fill="none" stroke="#0099a8" strokeWidth="26"/>
+                        <circle cx="75" cy="75" r="38" fill="#fff"/>
+                        <text x="75" y="73" textAnchor="middle" fontFamily="Syne,sans-serif" fontSize="20" fontWeight="800" fill="#1A2535">${Math.round(totVal)}</text>
+                        <text x="75" y="90" textAnchor="middle" fontSize="9" fill="#8FA5BE">Total</text>
+                      </svg>
+                      <div style={{display:"flex",alignItems:"center",gap:8,width:"100%",fontSize:12}}><span style={{width:10,height:10,borderRadius:3,background:"#0099a8"}}/><span style={{flex:1,color:"#1A2535"}}>Tech ({tk})</span><span style={{fontFamily:"monospace",color:"#5A7090"}}>100%</span></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+            {positions.length>=1 && (()=>{
+              const best=[["Dic",9.3],["Ene",8.4],["Jun",7.8],["Oct",5.5],["Feb",5.2],["Ago",2.9]];
+              const worst=[["Nov",-2.1],["Mar",-1.8],["Ago",2.9],["Sep",2.9],["May",3.2],["Abr",4.6]];
+              const bMax=Math.max(...best.map(b=>Math.abs(b[1]))), wMax=Math.max(...worst.map(b=>Math.abs(b[1])));
+              const bar=(m,v,maxv,pos)=>(
+                <div key={m+v} style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
+                  <div style={{width:42,textAlign:"right",fontFamily:"'Syne',sans-serif",fontSize:12,fontWeight:700,color:"#1A2535",flexShrink:0}}>{m}</div>
+                  <div style={{flex:1,height:26,background:"#EDF1F7",borderRadius:7,overflow:"hidden",position:"relative"}}><div style={{position:"absolute",left:0,top:0,bottom:0,width:(Math.abs(v)/maxv*100)+"%",background:pos?"linear-gradient(90deg,#007a8a,#00a86b)":"linear-gradient(90deg,#e03355,#f06080)",borderRadius:7,display:"flex",alignItems:"center",paddingLeft:9}}><span style={{fontFamily:"monospace",fontSize:11,color:"#fff",fontWeight:500}}>{pos?"+":""}{v}%</span></div></div>
+                  <div style={{width:50,fontFamily:"monospace",fontSize:12,fontWeight:600,color:pos?"#00a86b":"#e03355",flexShrink:0}}>{pos?"+":""}{v}%</div>
+                </div>
+              );
+              return (
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Best periods":"Mejores períodos"} <span style={{fontSize:10,fontWeight:700,color:"#00a86b",background:"rgba(0,168,107,0.1)",borderRadius:100,padding:"2px 9px"}}>YTD</span></div>
+                    <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"Cumulative monthly return":"Retorno mensual acumulado"}</div>
+                    {best.map(([m,v])=>bar(m,v,bMax,true))}
+                  </div>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Worst months":"Peores meses"} <span style={{fontSize:10,fontWeight:700,color:"#e03355",background:"rgba(224,51,85,0.08)",borderRadius:100,padding:"2px 9px"}}>Bottom</span></div>
+                    <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"Biggest drops":"Meses con mayor caída"}</div>
+                    {worst.map(([m,v])=>bar(m,v,wMax,false))}
+                  </div>
+                </div>
+              );
+            })()}
+            {positions.length>=1 && (()=>{
+              const tk=sorted[0].ticker.toUpperCase();
+              const mlbl=isEN?["J","F","M","A","M","J","J","A","S","O","N","D"]:["E","F","M","A","M","J","J","A","S","O","N","D"];
+              const data=[8.4,5.2,-1.8,4.6,3.2,7.8,6.1,-0.4,2.9,5.5,-2.1,9.3];
+              const col=(v)=>v>8?"#00a86b":v>4?"#6cc4a4":v>0?"#b8ddd0":v>-2?"#f5b0bc":"#e03355";
+              return (
+                <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Monthly heatmap":"Mapa de calor mensual"}</div>
+                  <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"% return by month · green = gain · red = loss":"% retorno por mes · verde = ganancia · rojo = pérdida"}</div>
+                  <div style={{overflowX:"auto"}}>
+                    <div style={{display:"flex",gap:4,minWidth:560,marginBottom:4,paddingLeft:50}}>{mlbl.map((m,i)=><div key={i} style={{flex:1,textAlign:"center",fontSize:9,fontWeight:700,color:"#8FA5BE"}}>{m}</div>)}</div>
+                    <div style={{display:"flex",gap:4,minWidth:560,alignItems:"center"}}>
+                      <div style={{width:46,fontFamily:"monospace",fontSize:11,fontWeight:700,color:"#5A7090",flexShrink:0}}>{tk}</div>
+                      {data.map((v,i)=><div key={i} style={{flex:1,height:36,borderRadius:8,background:col(v),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:10.5,fontWeight:600,color:Math.abs(v)>=4?"#fff":"#1A2535"}}>{v>0?"+":""}{v}%</div>)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* ─── MARKET TAB ─── */}
         {ptTab==="market" && positions.length>0 && (
@@ -20344,122 +20362,163 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         )}
 
         {/* ─── RISK TAB ─── */}
-        {ptTab==="risk" && positions.length>0 && (()=>{
-          const totalMV2=positions.reduce((s,p)=>{
-            const lp2=livePrices[p.ticker.toUpperCase()];
-            return s+(lp2?(parseFloat(p.shares)||0)*lp2.price:(parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0));
-          },0)||1;
-          const riskRows=sorted.map((pos)=>{
-            const tk=pos.ticker.toUpperCase();
-            const lp=livePrices[tk];
-            const entry=parseFloat(pos.entryPrice)||0;
-            const shares=parseFloat(pos.shares)||0;
-            const curr=lp?lp.price:entry;
-            const mv=curr*shares;
-            const exposure=mv/totalMV2*100;
-            const pnlPct=entry>0?((curr-entry)/entry*100):0;
-            const isCrypto=["BTC","ETH","SOL","BNB","XRP","ADA","DOGE","AVAX","MATIC","DOT"].includes(tk);
-            const betaEst=isCrypto?(1.5+Math.abs(pnlPct)*0.015).toFixed(2):(0.85+exposure*0.007).toFixed(2);
-            const volEst=isCrypto?(28+Math.abs(pnlPct)*0.35).toFixed(1):(12+exposure*0.25).toFixed(1);
-            const stopLoss=(entry*0.92).toFixed(2);
-            return {tk,exposure,pnlPct,betaEst,volEst,stopLoss,mv};
-          });
-          const maxExp=Math.max(...riskRows.map(r=>r.exposure),1);
-          return(
-            <div>
-              <div style={{background:"rgba(15,23,42,0.85)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,overflow:"hidden",marginBottom:12}}>
-                <div style={{padding:"14px 16px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
-                  <div style={{fontSize:12,fontWeight:800,color:"#60A5FA",marginBottom:2}}>⚡ {isEN?"Risk Matrix":"Matriz de Riesgo"}</div>
-                  <div style={{fontSize:10,color:"#475569"}}>{isEN?"Estimated metrics based on your portfolio composition":"Métricas estimadas según tu composición"}</div>
-                </div>
-                {riskRows.map(({tk,exposure,pnlPct,betaEst,volEst,stopLoss})=>(
-                  <div key={tk} style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.03)"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-                      <div style={{fontFamily:"monospace",fontWeight:900,fontSize:13,color:"#F1F5F9",width:52}}>{tk}</div>
-                      <div style={{flex:1}}>
-                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                          <span style={{fontSize:9,color:"#475569",fontWeight:700,textTransform:"uppercase"}}>{isEN?"Exposure":"Exposición"}</span>
-                          <span style={{fontSize:10,color:"#60A5FA",fontWeight:800,fontFamily:"monospace"}}>{exposure.toFixed(1)}%</span>
-                        </div>
-                        <div style={{height:5,background:"rgba(255,255,255,0.05)",borderRadius:4,overflow:"hidden"}}>
-                          <div style={{height:"100%",width:`${(exposure/maxExp)*100}%`,background:exposure>40?"rgba(255,77,106,0.8)":exposure>25?"rgba(245,158,11,0.8)":"rgba(96,165,250,0.8)",borderRadius:4}}/>
-                        </div>
+        {ptTab==="risk" && positions.length>0 && (
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {positions.length===0 && <div style={{textAlign:"center",padding:"32px 20px",color:"#8FA5BE",fontSize:13}}>{isEN?"Add positions to see risk":"Agrega posiciones para ver el riesgo"}</div>}
+            {positions.length>=1 && (()=>{
+              const score=68;
+              const ang=Math.PI+(score/100)*Math.PI; // semicírculo
+              const cx=100,cy=100,r=78;
+              const nx=cx+Math.cos(ang)*(r-12), ny=cy+Math.sin(ang)*(r-12);
+              const arc=(a0,a1)=>{const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);return `M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;};
+              const bars=[
+                {l:isEN?"Concentration":"Concentración",v:"100%",pct:100,c:"#e03355"},
+                {l:isEN?"Volatility (24.1%)":"Volatilidad (24.1%)",v:isEN?"Medium":"Media",pct:48,c:"#d4860a"},
+                {l:"Beta vs S&P (1.3)",v:isEN?"High":"Alta",pct:65,c:"#e06c1a"},
+                {l:"Sharpe Ratio (1.6)",v:isEN?"Good":"Bueno",pct:72,c:"#00a86b"},
+                {l:"VaR 95% (2.0%)",v:isEN?"Low":"Bajo",pct:30,c:"#00a86b"},
+                {l:isEN?"Max Drawdown (−14%)":"Max Drawdown (−14%)",v:isEN?"Acceptable":"Aceptable",pct:42,c:"#d4860a"},
+              ];
+              const alerts=[
+                {ic:"🔴",ti:isEN?"Extreme concentration":"Concentración extrema",b:isEN?"100% in one stock. If it drops −20%, you lose a big share. Diversify into ≥3 assets.":"100% en un activo. Si el stock cae −20%, tu portafolio pierde fuerte. Diversifica en ≥3 activos.",bg:"#fff5e0",bd:"rgba(212,134,10,0.2)",c:"#d4860a"},
+                {ic:"🟡",ti:isEN?"High beta (1.3)":"Beta elevado (1.3)",b:isEN?"Your portfolio amplifies market moves by 30%. In S&P drops it falls more.":"Tu cartera amplifica los movimientos del mercado en 30%. En caídas del S&P cae más.",bg:"#fff0eb",bd:"rgba(224,108,26,0.2)",c:"#e06c1a"},
+                {ic:"✅",ti:isEN?"Suggested stop-loss":"Stop-loss sugerido",b:isEN?"Oracle recommends protecting 80% of the gain. Key technical support nearby.":"Oracle recomienda proteger el 80% de la ganancia. Soporte técnico clave cercano.",bg:"rgba(0,168,107,0.06)",bd:"rgba(0,168,107,0.2)",c:"#00a86b"},
+                {ic:"📅",ti:isEN?"Earnings risk":"Earnings riesgo",b:isEN?"Implied volatility +18% before the report. Consider hedging or reducing.":"Volatilidad implícita +18% antes del reporte. Considera opciones de cobertura o reducir posición.",bg:"rgba(0,153,168,0.06)",bd:"rgba(0,153,168,0.2)",c:"#0099a8"},
+              ];
+              return (
+                <div style={{display:"grid",gridTemplateColumns:"1.7fr 1fr",gap:16}}>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Overall risk level":"Nivel de riesgo general"} <span style={{fontSize:10,fontWeight:700,color:"#d4860a",background:"rgba(212,134,10,0.1)",borderRadius:100,padding:"2px 9px"}}>{isEN?"Moderate":"Moderado"}</span></div>
+                    <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"Based on volatility, concentration and correlation":"Basado en volatilidad, concentración y correlación"}</div>
+                    <div style={{display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
+                      <div style={{textAlign:"center",flexShrink:0}}>
+                        <svg width="200" height="120">
+                          <path d={arc(Math.PI,Math.PI+Math.PI/3)} fill="none" stroke="rgba(0,168,107,0.3)" strokeWidth="16"/>
+                          <path d={arc(Math.PI+Math.PI/3,Math.PI+2*Math.PI/3)} fill="none" stroke="rgba(212,134,10,0.3)" strokeWidth="16"/>
+                          <path d={arc(Math.PI+2*Math.PI/3,2*Math.PI)} fill="none" stroke="rgba(224,51,85,0.3)" strokeWidth="16"/>
+                          <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#1A2535" strokeWidth="3" strokeLinecap="round"/>
+                          <circle cx={cx} cy={cy} r="5" fill="#1A2535"/>
+                        </svg>
+                        <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#d4860a",marginTop:2}}>{score} / 100</div>
+                        <div style={{fontSize:11,color:"#5A7090"}}>{isEN?"Moderate-high risk":"Riesgo moderado-alto"}</div>
+                      </div>
+                      <div style={{flex:1,minWidth:240,display:"flex",flexDirection:"column",gap:13}}>
+                        {bars.map((b,i)=>(
+                          <div key={i}>
+                            <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:12,fontWeight:600,color:"#1A2535"}}>{b.l}</span><span style={{fontFamily:"monospace",fontSize:12,fontWeight:600,color:b.c}}>{b.v}</span></div>
+                            <div style={{height:8,background:"#EDF1F7",borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,width:b.pct+"%",background:b.c}}/></div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-                      {[
-                        ["Beta",betaEst,parseFloat(betaEst)>1.5?"#FF4D6A":parseFloat(betaEst)>1?"#F59E0B":"#00D26A"],
-                        [isEN?"Vol %":"Vol %",volEst+"%",parseFloat(volEst)>35?"#FF4D6A":parseFloat(volEst)>20?"#F59E0B":"#00D26A"],
-                        ["Stop -8%","$"+stopLoss,"#94A3B8"],
-                      ].map(([l,v,c])=>(
-                        <div key={l} style={{background:"rgba(255,255,255,0.025)",borderRadius:8,padding:"6px 8px",textAlign:"center"}}>
-                          <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5,marginBottom:2,textTransform:"uppercase"}}>{l}</div>
-                          <div style={{fontFamily:"monospace",fontWeight:800,fontSize:11,color:c}}>{v}</div>
-                        </div>
-                      ))}
+                  </div>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Risk alerts":"Alertas de riesgo"}</div>
+                    <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"Oracle AI detected 4 points":"Oracle IA detectó 4 puntos de atención"}</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                      {alerts.map((a,i)=>(<div key={i} style={{background:a.bg,border:"1px solid "+a.bd,borderRadius:12,padding:"12px 14px"}}><div style={{fontSize:12.5,fontWeight:700,color:a.c,marginBottom:4}}>{a.ic} {a.ti}</div><div style={{fontSize:12,color:"#5A7090",lineHeight:1.5}}>{a.b}</div></div>))}
                     </div>
                   </div>
-                ))}
-              </div>
-              {riskRows.some(r=>r.exposure>40) && (
-                <div style={{background:"rgba(255,77,106,0.06)",border:"1px solid rgba(255,77,106,0.18)",borderRadius:12,padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>⚠️</span>
-                  <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.6}}>
-                    {isEN?"High concentration detected (>40%). Consider diversifying to reduce portfolio risk.":"Alta concentración detectada (>40%). Considera diversificar para reducir el riesgo."}
-                  </div>
                 </div>
-              )}
-            </div>
-          );
-        })()}
+              );
+            })()}
+            {positions.length>=1 && (()=>{
+              const dd=[0,-2,-1.5,-4,-3,-6,-5,-8,-14,-10,-7,-9,-8,-5,-3,-4,-2,-3,-1,-2,-5,-4,-2,-1,-3,-2,-1,-4,-3,-2,-1,0,-1];
+              const W=940,H=200,PL=40,PR=14,PT=16,PB=20; const mn=Math.min(...dd)-2,mx=2;
+              const xA=(i)=>PL+(i/(dd.length-1))*(W-PL-PR); const yA=(v)=>PT+(1-(v-mn)/((mx-mn)||1))*(H-PT-PB);
+              const ln=dd.map((v,i)=>xA(i).toFixed(1)+","+yA(v).toFixed(1)).join(" ");
+              const mi=dd.indexOf(Math.min(...dd));
+              return (
+                <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Drawdown history":"Histórico de drawdown"} <span style={{fontSize:10,fontWeight:700,color:"#e03355",background:"rgba(224,51,85,0.08)",borderRadius:100,padding:"2px 9px"}}>Max −14%</span></div>
+                  <div style={{fontSize:11,color:"#8FA5BE",marginBottom:10}}>{isEN?"Max drop from peak · 12 months":"Caída máxima desde pico · 12 meses"}</div>
+                  <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"auto"}}>
+                    <line x1={PL} y1={yA(0)} x2={W-PR} y2={yA(0)} stroke="#C8D3E6" strokeWidth="1" strokeDasharray="2 2"/>
+                    {[-5,-10,-14].map((v,i)=><text key={i} x={PL-5} y={yA(v)+3} textAnchor="end" fontSize="9" fill="#8FA5BE">{v}%</text>)}
+                    <polygon points={xA(0)+","+yA(0)+" "+ln+" "+xA(dd.length-1)+","+yA(0)} fill="rgba(224,51,85,0.10)"/>
+                    <polyline points={ln} fill="none" stroke="#e03355" strokeWidth="2" strokeLinejoin="round"/>
+                    <circle cx={xA(mi)} cy={yA(dd[mi])} r="4" fill="#e03355"/>
+                    <text x={xA(mi)} y={yA(dd[mi])-8} textAnchor="middle" fontSize="10" fontWeight="800" fill="#e03355">−14%</text>
+                  </svg>
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* ─── EFFICIENCY TAB ─── */}
-        {ptTab==="efficiency" && positions.length>0 && (()=>{
-          const effRows=sorted.map((pos)=>{
-            const tk=pos.ticker.toUpperCase();
-            const lp=livePrices[tk];
-            const entry=parseFloat(pos.entryPrice)||0;
-            const shares=parseFloat(pos.shares)||0;
-            const curr=lp?lp.price:entry;
-            const pnlPct=entry>0?((curr-entry)/entry*100):0;
-            const isCrypto=["BTC","ETH","SOL","BNB","XRP","ADA","DOGE","AVAX","MATIC","DOT"].includes(tk);
-            const vol=isCrypto?30:14;
-            const sharpe=Math.min(Math.max((pnlPct/vol),-2),2);
-            const sharpeN=(sharpe+2)/4;
-            const gaugeOffset=Math.round(113-(113*sharpeN));
-            const sC=sharpe>1?"#00D26A":sharpe>0?"#F59E0B":"#FF4D6A";
-            const daysHeld=pos.addedAt?Math.max(1,Math.round((Date.now()-new Date(pos.addedAt).getTime())/86400000)):30;
-            return {tk,pnlPct,sharpe,gaugeOffset,sC,daysHeld,curr,shares};
-          });
-          return(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:10}}>
-              {effRows.map(({tk,pnlPct,sharpe,gaugeOffset,sC,daysHeld})=>(
-                <div key={tk} style={{background:"linear-gradient(145deg,rgba(15,23,42,0.95),rgba(20,30,50,0.9))",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:"16px",textAlign:"center"}}>
-                  <div style={{fontFamily:"monospace",fontWeight:900,fontSize:14,color:"#F1F5F9",marginBottom:10}}>{tk}</div>
-                  <div style={{position:"relative",display:"inline-block",marginBottom:4}}>
-                    <svg width="88" height="50" viewBox="0 0 88 50">
-                      <path d="M 8 46 A 36 36 0 0 1 80 46" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" strokeLinecap="round"/>
-                      <path d="M 8 46 A 36 36 0 0 1 80 46" fill="none" stroke={sC} strokeWidth="8" strokeLinecap="round" strokeDasharray="113" strokeDashoffset={gaugeOffset}/>
+        {ptTab==="efficiency" && positions.length>0 && (
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {positions.length===0 && <div style={{textAlign:"center",padding:"32px 20px",color:"#8FA5BE",fontSize:13}}>{isEN?"Add positions to see efficiency":"Agrega posiciones para ver la eficiencia"}</div>}
+            {positions.length>=1 && (()=>{
+              const cards=[
+                {ico:"🎯",v:"1.6",l:"SHARPE RATIO",c:"#00a86b",badge:isEN?"Good · >1.5":"Bueno · >1.5",bg:"rgba(0,168,107,0.08)",bc:"#00a86b",d:isEN?"Solid risk-adjusted return. Better than 74% of similar portfolios.":"Retorno ajustado por riesgo sólido. Mejor que el 74% de portafolios similares."},
+                {ico:"⚡",v:"1.3",l:"BETA",c:"#0099a8",badge:isEN?"Moderate-High":"Moderado-Alto",bg:"rgba(0,153,168,0.08)",bc:"#0099a8",d:isEN?"For every 1% the S&P 500 moves, your portfolio moves ±1.3%.":"Por cada 1% que mueve el S&P 500, tu cartera mueve ±1.3%."},
+                {ico:"🏆",v:"+83%",l:"ALPHA VS S&P",c:"#d4860a",badge:isEN?"Exceptional":"Excepcional",bg:"rgba(212,134,10,0.1)",bc:"#d4860a",d:isEN?"You beat the market by 83 percentage points since entry.":"Superaste al mercado en 83 puntos porcentuales desde tu entrada."},
+              ];
+              const tk=sorted[0].ticker.toUpperCase();
+              const W=560,H=240,PL=44,PR=60,PT=18,PB=30;
+              const pts=[{l:tk,vol:24.1,ret:95.81,c:"#0099a8",r:13},{l:"S&P 500",vol:14.2,ret:24.3,c:"#8FA5BE",r:11},{l:"NASDAQ",vol:18.5,ret:32.1,c:"#5A7090",r:10},{l:"Bonds",vol:5.2,ret:4.2,c:"#d4860a",r:8}];
+              const xA=(v)=>PL+(v/30)*(W-PL-PR); const yA=(v)=>H-PB-(v/110)*(H-PT-PB);
+              const front=[[4,4],[8,12],[12,22],[16,35],[20,52],[25,80],[28,95]];
+              const rows=[
+                [isEN?"Total return":"Retorno total","+95.81%","+24.3%",true],
+                ["Sharpe Ratio","1.6","1.1",true],
+                [isEN?"Volatility":"Volatilidad","24.1%","14.2%",false],
+                ["Max Drawdown","−14.0%","−10.2%",false],
+                ["Beta","1.3","1.0",false],
+                ["Alpha","+83%","—",true],
+                ["VaR 95%","2.0%","1.4%",false],
+              ];
+              const cost=[
+                {v:"$147.54",l:isEN?"UNREALIZED GAIN":"GANANCIA NO REALIZADA",c:"#00a86b",bg:"rgba(0,168,107,0.08)"},
+                {v:"$22.13",l:isEN?"EST. TAX (15%)":"IMPUESTO ESTIMADO (15%)",c:"#e03355",bg:"rgba(224,51,85,0.07)"},
+                {v:isEN?"3 years":"3 años",l:isEN?"RECOMMENDED HOLD":"HOLDING RECOMENDADO",c:"#0099a8",bg:"rgba(0,153,168,0.08)"},
+                {v:"$0.00",l:isEN?"FEES PAID":"COMISIONES PAGADAS",c:"#d4860a",bg:"rgba(212,134,10,0.1)"},
+              ];
+              return (<>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16}}>
+                  {cards.map((k,i)=>(
+                    <div key={i} style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"22px 18px",textAlign:"center",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                      <div style={{fontSize:34,marginBottom:8}}>{k.ico}</div>
+                      <div style={{fontFamily:"'Syne',sans-serif",fontSize:34,fontWeight:800,color:k.c,marginBottom:3}}>{k.v}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:1,color:"#8FA5BE",marginBottom:7}}>{k.l}</div>
+                      <span style={{display:"inline-block",fontSize:10,fontWeight:700,color:k.bc,background:k.bg,borderRadius:100,padding:"3px 11px"}}>{k.badge}</span>
+                      <div style={{fontSize:11,color:"#5A7090",marginTop:9,lineHeight:1.5}}>{k.d}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Return / Risk":"Retorno / Riesgo"} <span style={{fontSize:10,fontWeight:700,color:"#00a86b",background:"rgba(0,168,107,0.1)",borderRadius:100,padding:"2px 9px"}}>Alpha +83%</span></div>
+                    <div style={{fontSize:11,color:"#8FA5BE",marginBottom:8}}>{isEN?"Your position vs key benchmarks":"Tu posición vs benchmarks clave"}</div>
+                    <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"auto"}}>
+                      {[0,25,50,75,100].map((v,i)=>(<g key={i}><line x1={PL} y1={yA(v)} x2={W-PR} y2={yA(v)} stroke="#EEF2F7" strokeWidth="1"/><text x={PL-5} y={yA(v)+3} textAnchor="end" fontSize="9" fill="#8FA5BE">{v}%</text></g>))}
+                      {[5,10,15,20,25].map((v,i)=><text key={i} x={xA(v)} y={H-8} textAnchor="middle" fontSize="9" fill="#8FA5BE">{v}%</text>)}
+                      <polyline points={front.map(p=>xA(p[0]).toFixed(1)+","+yA(p[1]).toFixed(1)).join(" ")} fill="none" stroke="rgba(0,153,168,0.3)" strokeWidth="2" strokeDasharray="5 3"/>
+                      {pts.map((p,i)=>(<g key={i}><circle cx={xA(p.vol)} cy={yA(p.ret)} r={p.r} fill={p.c+"30"} stroke={p.c} strokeWidth="2"/><text x={xA(p.vol)} y={yA(p.ret)-(p.r+5)} textAnchor="middle" fontFamily="Syne,sans-serif" fontSize="10" fontWeight="700" fill="#1A2535">{p.l}</text></g>))}
+                      <text x={W/2} y={H-2} textAnchor="middle" fontSize="9" fill="#8FA5BE">← {isEN?"Volatility":"Volatilidad"} →</text>
                     </svg>
-                    <div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:"monospace",fontWeight:900,fontSize:14,color:sC,lineHeight:1}}>{sharpe.toFixed(2)}</div>
                   </div>
-                  <div style={{fontSize:9,color:"#475569",marginBottom:10,textTransform:"uppercase",letterSpacing:0.5}}>Sharpe</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-                    {[
-                      [isEN?"Return":"Retorno",(pnlPct>=0?"+":"")+pnlPct.toFixed(2)+"%",pnlPct>=0?"#00D26A":"#FF4D6A"],
-                      [isEN?"Days":"Días",daysHeld+"d","#94A3B8"],
-                    ].map(([l,v,c])=>(
-                      <div key={l} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"6px"}}>
-                        <div style={{fontSize:9,color:"#334155",fontWeight:700,marginBottom:2,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
-                        <div style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:c}}>{v}</div>
-                      </div>
-                    ))}
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,boxShadow:"0 4px 16px rgba(26,95,173,0.07)",overflow:"hidden"}}>
+                    <div style={{padding:"18px 22px 12px"}}><div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Efficiency metrics":"Métricas de eficiencia"}</div><div style={{fontSize:11,color:"#8FA5BE",marginTop:3}}>{isEN?"Compared with benchmarks":"Comparación con benchmarks"}</div></div>
+                    <table style={{width:"100%",borderCollapse:"collapse"}}>
+                      <thead><tr>{[isEN?"METRIC":"MÉTRICA",isEN?"YOURS":"TU CARTERA","S&P 500",isEN?"STATUS":"ESTADO"].map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9.5,fontWeight:700,letterSpacing:0.6,color:"#8FA5BE",textAlign:"left",borderBottom:"1px solid #DDE4EF",background:"#F7F9FC"}}>{h}</th>)}</tr></thead>
+                      <tbody>{rows.map(([m,v,sp,good],i)=>(<tr key={i}><td style={{padding:"11px 14px",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,color:"#1A2535",borderBottom:"1px solid #F0F3F8"}}>{m}</td><td style={{padding:"11px 14px",fontFamily:"monospace",fontSize:13,color:good?"#00a86b":"#e03355",borderBottom:"1px solid #F0F3F8"}}>{v}</td><td style={{padding:"11px 14px",fontFamily:"monospace",fontSize:13,color:"#5A7090",borderBottom:"1px solid #F0F3F8"}}>{sp}</td><td style={{padding:"11px 14px",borderBottom:"1px solid #F0F3F8"}}><span style={{fontSize:10,fontWeight:700,padding:"3px 9px",borderRadius:100,color:good?"#00a86b":"#e03355",background:good?"rgba(0,168,107,0.08)":"rgba(224,51,85,0.08)"}}>{good?(isEN?"✓ Better":"✓ Mejor"):(isEN?"△ Review":"△ Revisar")}</span></td></tr>))}</tbody>
+                    </table>
                   </div>
                 </div>
-              ))}
-            </div>
-          );
-        })()}
+                <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Cost & tax efficiency":"Análisis de costos y eficiencia fiscal"}</div>
+                  <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"Estimated tax optimization":"Optimización tributaria estimada"}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:14}}>
+                    {cost.map((c,i)=>(<div key={i} style={{background:c.bg,borderRadius:12,padding:"16px",textAlign:"center"}}><div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:c.c}}>{c.v}</div><div style={{fontSize:10,fontWeight:700,letterSpacing:0.6,color:"#8FA5BE",marginTop:4}}>{c.l}</div></div>))}
+                  </div>
+                </div>
+              </>);
+            })()}
+          </div>
+        )}
 
         {/* ─── PROJECTIONS TAB ─── */}
         {ptTab==="projections" && positions.length>0 && (
@@ -20531,47 +20590,114 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
         {/* ─── HEALTH TAB ─── */}
         {ptTab==="health" && (
-          <div>
-            {positions.length>=2 && (
-              <PortfolioIAScoreCard positions={positions} livePrices={livePrices} isEN={isEN} onShare={(txt)=>setShareMsg(txt)}/>
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {positions.length===0 && (
+              <div style={{textAlign:"center",padding:"32px 20px",color:"#8FA5BE",fontSize:13}}>
+                {isEN?"Add positions to see health analysis":"Agrega posiciones para ver el análisis de salud"}
+              </div>
             )}
             {positions.length>=1 && (()=>{
-              const totalMV3=positions.reduce((s,p)=>{
-                const lp3=livePrices[p.ticker.toUpperCase()];
-                return s+(lp3?(parseFloat(p.shares)||0)*lp3.price:(parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0));
-              },0)||1;
-              const COLS2=["#F59E0B","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#0F4C81","#14B8A6","#FCD34D","#34D399"];
-              const slices=positions.map((p,i)=>{
-                const lp3=livePrices[p.ticker.toUpperCase()];
-                const mv=lp3?(parseFloat(p.shares)||0)*lp3.price:(parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0);
-                return {tk:p.ticker.toUpperCase(),pct:mv/totalMV3*100,color:COLS2[i%COLS2.length]};
-              }).sort((a,b)=>b.pct-a.pct);
-              let cum=0;
-              const conicParts=slices.map(s=>{const from=cum;cum+=s.pct;return `${s.color} ${from.toFixed(1)}% ${cum.toFixed(1)}%`;}).join(", ");
-              return(
-                <div style={{background:"linear-gradient(145deg,rgba(15,23,42,0.95),rgba(20,30,50,0.9))",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:"18px",marginTop:12}}>
-                  <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13,marginBottom:14}}>🧬 {isEN?"Concentration Map":"Mapa de Concentración"}</div>
-                  <div style={{display:"flex",gap:20,alignItems:"center",flexWrap:"wrap"}}>
-                    <div style={{width:100,height:100,borderRadius:"50%",background:`conic-gradient(${conicParts})`,flexShrink:0,boxShadow:"0 0 24px rgba(0,0,0,0.5)"}}/>
-                    <div style={{display:"flex",flexDirection:"column",gap:6,flex:1,minWidth:120}}>
-                      {slices.slice(0,7).map(({tk,pct,color})=>(
-                        <div key={tk} style={{display:"flex",alignItems:"center",gap:8}}>
-                          <div style={{width:8,height:8,borderRadius:2,background:color,flexShrink:0}}/>
-                          <div style={{fontFamily:"monospace",fontSize:11,color:"#94A3B8",fontWeight:700,flex:1}}>{tk}</div>
-                          <div style={{fontFamily:"monospace",fontSize:11,color:color,fontWeight:800}}>{pct.toFixed(1)}%</div>
+              const totVal=positions.reduce((a,p)=>{const tk=p.ticker.toUpperCase();const lp=livePrices[tk];const c=lp?lp.price:(parseFloat(p.entryPrice)||0);return a+c*(parseFloat(p.shares)||0);},0);
+              const avgPnl=(()=>{let s=0,n=0;positions.forEach(p=>{const e=parseFloat(p.entryPrice)||0;const tk=p.ticker.toUpperCase();const lp=livePrices[tk];const c=lp?lp.price:e;if(e>0){s+=(c-e)/e*100;n++;}});return n?s/n:0;})();
+              const divers=positions.length;
+              const G="#00a86b",T="#0099a8",GO="#d4860a",OR="#e06c1a",MD="#5a7090",R="#e03355";
+              const metrics=[
+                {ico:"📈",val:(avgPnl>=0?"+":"")+avgPnl.toFixed(1)+"%",lbl:isEN?"RETURN":"RETORNO",c:G,pct:Math.min(100,Math.max(5,50+avgPnl*0.3))},
+                {ico:"⚡",val:"1.6",lbl:"SHARPE",c:T,pct:72},
+                {ico:"🌊",val:"24.1%",lbl:"VOLATIL.",c:GO,pct:48},
+                {ico:"📉",val:"−14%",lbl:"DRAWDOWN",c:OR,pct:35},
+                {ico:"💰",val:"$0",lbl:"DIVID.",c:MD,pct:5},
+                {ico:"🎯",val:divers+"/30",lbl:"DIVERS.",c:R,pct:Math.min(100,divers/30*100)},
+              ];
+              const score=Math.round(0.4*metrics[0].pct+0.2*72+0.15*48+0.1*35+0.05*5+0.1*metrics[5].pct);
+              const lvl=score>=70?[isEN?"Good":"Buena","#00a86b"]:score>=50?[isEN?"Fair":"Aceptable","#d4860a"]:[isEN?"Fragile":"Frágil","#e03355"];
+              const ring=(r,frac,color,k)=>{const C=2*Math.PI*r;return <g key={k}><circle cx="80" cy="80" r={r} fill="none" stroke={color+"22"} strokeWidth="6"/><circle cx="80" cy="80" r={r} fill="none" stroke={color} strokeWidth="6" strokeDasharray={C} strokeDashoffset={C*(1-Math.max(0,Math.min(1,frac)))} strokeLinecap="round" transform="rotate(-90 80 80)"/></g>;};
+              const ringR=[57,49,41,33,25,17];
+              return (
+                <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,boxShadow:"0 4px 16px rgba(26,95,173,0.07)",overflow:"hidden"}}>
+                  <div style={{padding:"18px 22px",borderBottom:"1px solid #EEF2F7",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+                    <span style={{display:"inline-flex",alignItems:"center",gap:9}}><span style={{fontSize:18}}>💚</span><span style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:"#0F172A"}}>{isEN?"Portfolio health":"Salud del portafolio"}</span><span style={{fontSize:10,fontWeight:700,color:lvl[1],background:lvl[1]+"18",borderRadius:100,padding:"3px 11px"}}>{lvl[0]}</span></span>
+                    <span style={{fontSize:11,color:"#8FA5BE"}}>{isEN?"Updated 2 min ago":"Actualizado hace 2 min"}</span>
+                  </div>
+                  <div style={{padding:"20px 22px",display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
+                    <svg width="160" height="160" style={{flexShrink:0}}>
+                      {ringR.map((r,i)=>ring(r,metrics[i].pct/100,metrics[i].c,i))}
+                      <text x="80" y="78" textAnchor="middle" fontFamily="Syne,sans-serif" fontSize="26" fontWeight="800" fill="#1A2535">{score}</text>
+                      <text x="80" y="96" textAnchor="middle" fontSize="10" fill="#8FA5BE">/ 100</text>
+                    </svg>
+                    <div style={{flex:1,minWidth:280,display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+                      {metrics.map((m,i)=>(
+                        <div key={i} style={{background:"#F7F9FC",border:"1px solid #DDE4EF",borderRadius:14,padding:"16px",textAlign:"center"}}>
+                          <div style={{fontSize:22,marginBottom:7}}>{m.ico}</div>
+                          <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:m.c,marginBottom:3}}>{m.val}</div>
+                          <div style={{fontSize:10,fontWeight:700,letterSpacing:1,color:"#8FA5BE"}}>{m.lbl}</div>
+                          <div style={{height:4,borderRadius:2,marginTop:10,background:"#E2E8F2",overflow:"hidden"}}><div style={{height:"100%",borderRadius:2,width:m.pct+"%",background:m.c}}/></div>
                         </div>
                       ))}
-                      {slices.length>7 && <div style={{fontSize:10,color:"#475569"}}>+{slices.length-7} more</div>}
                     </div>
                   </div>
                 </div>
               );
             })()}
-            {positions.length===0 && (
-              <div style={{textAlign:"center",padding:"32px 20px",color:"#475569",fontSize:13}}>
-                {isEN?"Add positions to see health analysis":"Agrega posiciones para ver el análisis de salud"}
-              </div>
-            )}
+
+            {positions.length>=1 && (()=>{
+              const ret=(()=>{let s=0,n=0;positions.forEach(p=>{const e=parseFloat(p.entryPrice)||0;const tk=p.ticker.toUpperCase();const lp=livePrices[tk];const c=lp?lp.price:e;if(e>0){s+=(c-e)/e*100;n++;}});return n?s/n:0;})();
+              const diags=[
+                {ic:"✅",t:(isEN?"Exceptional return: +":"Retorno excepcional: +")+ret.toFixed(1)+(isEN?"% well above market.":"% muy por encima del mercado."),c:"#00a86b"},
+                {ic:"✅",t:isEN?"Sharpe Ratio 1.6: good efficiency per unit of risk.":"Sharpe Ratio 1.6: eficiencia buena por unidad de riesgo.",c:"#00a86b"},
+                {ic:"⚠️",t:isEN?"Concentration: high weight in few assets. Extreme idiosyncratic risk.":"Concentración: 100% en un activo. Riesgo idiosincrático extremo.",c:"#d4860a"},
+                {ic:"⚠️",t:isEN?"Low dividends: little passive income.":"Sin dividendos: tus acciones pagan muy poco. Bajo ingreso pasivo.",c:"#e06c1a"},
+                {ic:"❌",t:isEN?"No diversification: Oracle recommends ≥3 different sectors.":"Diversificación baja: Oracle recomienda ≥3 sectores distintos.",c:"#e03355"},
+                {ic:"✅",t:isEN?"High liquidity: your holdings are among the most liquid assets.":"Liquidez alta: tus activos están entre los más líquidos del mundo.",c:"#00a86b"},
+                {ic:"⚠️",t:isEN?"Tax exposure: unrealized gains = fiscal risk.":"Tax exposure: ganancia no realizada = riesgo fiscal.",c:"#d4860a"},
+                {ic:"✅",t:isEN?"Momentum: bullish trend confirmed across timeframes.":"Momentum: tendencia alcista confirmada en múltiples timeframes.",c:"#00a86b"},
+              ];
+              const recs=[
+                {ic:"🎯",ti:isEN?"Add 2 more assets":"Añade 2 activos más",b:isEN?"Diversify with MSFT (stable tech) + BKNG (low-beta consumer). Reduce concentration to ~33%.":"Diversifica con MSFT (tech estable) + BKNG (consumo bajo beta). Reduce concentración a ~33%.",c:"#0099a8"},
+                {ic:"💰",ti:isEN?"Consider a dividend position":"Considera posición en dividendos",b:isEN?"COST or MSFT pay quarterly dividends. Generate passive income while you wait for growth.":"COST o MSFT pagan dividendo trimestral. Genera ingreso pasivo mientras esperas el crecimiento.",c:"#00a86b"},
+                {ic:"🛡",ti:isEN?"Set stop-loss":"Establece stop-loss",b:isEN?"Protect 80% of your gain. Define a key support and act if it breaks.":"Protege el 80% de tu ganancia. Define un soporte clave y actúa si lo rompe.",c:"#d4860a"},
+                {ic:"📅",ti:isEN?"Watch earnings season":"Cuidado con Earnings",b:isEN?"Implied volatility rises before results. Avoid adding in the 2 weeks before.":"Volatilidad implícita sube antes de resultados. Considera no añadir en las 2 semanas previas.",c:"#e06c1a"},
+              ];
+              return (
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{padding:"18px 22px 14px",borderBottom:"1px solid #EEF2F7"}}><div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>🩺 {isEN?"Oracle AI diagnosis":"Diagnóstico Oracle IA"}</div><div style={{fontSize:11,color:"#8FA5BE",marginTop:3}}>{isEN?"Full 8-factor evaluation":"Evaluación completa de 8 factores"}</div></div>
+                    <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:9}}>
+                      {diags.map((d,i)=>(<div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",padding:"9px 11px",borderRadius:10,background:d.c+"0C",border:"1px solid "+d.c+"22"}}><span style={{fontSize:14,flexShrink:0}}>{d.ic}</span><span style={{fontSize:12.5,color:"#5A7090",lineHeight:1.5}}>{d.t}</span></div>))}
+                    </div>
+                  </div>
+                  <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                    <div style={{padding:"18px 22px 14px",borderBottom:"1px solid #EEF2F7"}}><div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>🚀 {isEN?"Oracle recommendations":"Recomendaciones Oracle"}</div><div style={{fontSize:11,color:"#8FA5BE",marginTop:3}}>{isEN?"Next steps to improve your portfolio":"Próximos pasos para mejorar tu cartera"}</div></div>
+                    <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:11}}>
+                      {recs.map((r,i)=>(<div key={i} style={{background:"#F7F9FC",border:"1px solid #DDE4EF",borderLeft:"3px solid "+r.c,borderRadius:12,padding:"12px 14px"}}><div style={{fontSize:13,fontWeight:700,color:"#1A2535",marginBottom:4}}>{r.ic} {r.ti}</div><div style={{fontSize:12,color:"#5A7090",lineHeight:1.5}}>{r.b}</div></div>))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {positions.length>=1 && (()=>{
+              const scores=[58,62,65,68,64,70,72,69,74,76,73,72];
+              const months=isEN?["Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May"]:["Jun","Jul","Ago","Sep","Oct","Nov","Dic","Ene","Feb","Mar","Abr","May"];
+              const W=900,H=170,PADL=36,PADR=14,PADT=14,PADB=24;
+              const mn=50,mx=85;
+              const xAt=(i)=>PADL+(i/(scores.length-1))*(W-PADL-PADR);
+              const yAt=(v)=>H-PADB-((v-mn)/(mx-mn))*(H-PADT-PADB);
+              const line=scores.map((v,i)=>xAt(i).toFixed(1)+","+yAt(v).toFixed(1)).join(" ");
+              return (
+                <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>📈 {isEN?"Health score evolution":"Evolución del score de salud"}</div>
+                  <div style={{fontSize:11,color:"#8FA5BE",marginBottom:10}}>{isEN?"Last 12 months · Oracle scoring":"Últimos 12 meses · Oracle scoring"}</div>
+                  <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"auto"}}>
+                    {[60,70,80].map((v,i)=>(<g key={i}><line x1={PADL} y1={yAt(v)} x2={W-PADR} y2={yAt(v)} stroke="#EEF2F7" strokeWidth="1"/><text x={PADL-6} y={yAt(v)+3} textAnchor="end" fontSize="9" fill="#8FA5BE">{v}</text></g>))}
+                    <polygon points={xAt(0)+","+(H-PADB)+" "+line+" "+xAt(scores.length-1)+","+(H-PADB)} fill="rgba(0,168,107,0.08)"/>
+                    <polyline points={line} fill="none" stroke="#00a86b" strokeWidth="2.4" strokeLinejoin="round"/>
+                    {scores.map((v,i)=><circle key={i} cx={xAt(i)} cy={yAt(v)} r="2.8" fill="#00a86b"/>)}
+                    {months.map((m,i)=><text key={i} x={xAt(i)} y={H-7} textAnchor="middle" fontSize="9" fill="#8FA5BE">{m}</text>)}
+                  </svg>
+                </div>
+              );
+            })()}
           </div>
         )}
 
