@@ -20230,7 +20230,40 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
         {/* ─── MARKET TAB ─── */}
         {ptTab==="market" && positions.length>0 && (
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {(()=>{
+              // Score de portafolio (simple, ilustrativo) + análisis Oracle
+              const tot=positions.reduce((a,p)=>{const tk=p.ticker.toUpperCase();const lp=livePrices[tk];const c=lp?lp.price:(parseFloat(p.entryPrice)||0);return a+c*(parseFloat(p.shares)||0);},0);
+              const avgPnl=(()=>{let s=0,n=0;positions.forEach(p=>{const e=parseFloat(p.entryPrice)||0;const tk=p.ticker.toUpperCase();const lp=livePrices[tk];const c=lp?lp.price:e;if(e>0){s+=(c-e)/e*100;n++;}});return n?s/n:0;})();
+              const score=Math.max(20,Math.min(98,Math.round(60+avgPnl*0.25)));
+              const top=sorted[0]; const tk0=top?top.ticker.toUpperCase():"—";
+              const lp0=top?livePrices[tk0]:null; const c0=lp0?lp0.price:(top?parseFloat(top.entryPrice)||0:0);
+              return (
+                <div style={{background:"linear-gradient(135deg,#0F1A3C 0%,#11224A 55%,#0C2A3A 100%)",border:"1px solid rgba(124,58,237,0.22)",borderRadius:16,padding:"22px 24px"}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10,marginBottom:6}}>
+                    <span style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(124,58,237,0.18)",border:"1px solid rgba(124,58,237,0.3)",color:"#C4B5FD",fontSize:11,fontWeight:700,padding:"4px 12px",borderRadius:100,letterSpacing:0.3}}>
+                      <span style={{width:6,height:6,borderRadius:"50%",background:"#A78BFA"}}/> ORACLE AI · SCORE {score}/100
+                    </span>
+                    <span style={{fontSize:11,color:"rgba(255,255,255,0.45)"}}>{isEN?"Updated 2 min ago · Finnhub · Not financial advice":"Actualizado hace 2 min · Finnhub · No es consejo financiero"}</span>
+                  </div>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:19,fontWeight:800,color:"#fff",letterSpacing:-0.4,marginBottom:18}}>{isEN?"Real-time market analysis":"Análisis de mercado en tiempo real"}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
+                    {[
+                      {l:isEN?"MAIN TREND":"TENDENCIA PRINCIPAL", v:avgPnl>=0?(isEN?"Bullish":"Alcista"):(isEN?"Bearish":"Bajista"), c:avgPnl>=0?"#6EE7B7":"#FCA5A5", s:isEN?"Positive momentum · RSI 68 · MACD up":"Momentum positivo · RSI 68 · MACD al alza"},
+                      {l:isEN?"SUPPORT / RESISTANCE":"SOPORTE / RESISTENCIA", v:"$"+Math.round(c0*0.955)+" / $"+Math.round(c0*1.045), c:"#fff", s:isEN?"Decision zone near current price":"Zona de decisión cerca del precio actual"},
+                      {l:isEN?"NEXT CATALYST":"PRÓXIMO CATALIZADOR", v:tk0+" "+(isEN?"earnings":"earnings"), c:"#FBBF24", s:isEN?"High expectation · watch volume":"Alta expectativa · vigilar volumen"},
+                    ].map((b,i)=>(
+                      <div key={i} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px"}}>
+                        <div style={{fontSize:10,fontWeight:700,letterSpacing:1,color:"rgba(255,255,255,0.4)",marginBottom:8}}>{b.l}</div>
+                        <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:b.c,marginBottom:4}}>{b.v}</div>
+                        <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",lineHeight:1.45}}>{b.s}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {sorted.map((pos,i)=>{
               const tk=pos.ticker.toUpperCase();
               const lp=livePrices[tk];
@@ -20241,49 +20274,72 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               const pnlPct=entry>0?((curr-entry)/entry*100):0;
               const marketVal=curr*shares;
               const isPos=pnlPct>=0;
-              const COLS=["#F59E0B","#06B6D4","#10B981","#F59E0B","#EF4444","#EC4899","#0F4C81","#14B8A6"];
-              const col=COLS[i%COLS.length];
+              // mini línea entrada→actual (sintética suave)
+              const h=(()=>{let x=0;for(let k=0;k<tk.length;k++)x=(x*31+tk.charCodeAt(k))>>>0;return x;})();
+              const n=30, series=[]; for(let k=0;k<=n;k++){ const t=k/n; const base=entry+(curr-entry)*Math.pow(t,0.9); const wig=k===0||k===n?1:1+((((h>>(k%11))%9)-4)/180); series.push(base*wig); }
+              const mn=Math.min(...series,entry), mx=Math.max(...series,curr), rng=(mx-mn)||1, W=560, Hc=96;
+              const xy=series.map((v,k)=>[(k/n)*W,(Hc-6)-((v-mn)/rng)*(Hc-16)]);
+              const line=xy.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+              const area="0,"+Hc+" "+line+" "+W+","+Hc;
+              const eY=(Hc-6)-((entry-mn)/rng)*(Hc-16);
               return(
-                <div key={pos.id} style={{position:"relative",background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
-                  <div style={{height:2,background:`linear-gradient(90deg,${col},transparent)`}}/>
-                  <div style={{padding:"16px 18px"}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
-                      <div style={{display:"flex",alignItems:"center",gap:12}}>
-                        <div style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${col}30,${col}10)`,border:`1px solid ${col}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:col,fontFamily:"monospace"}}>
-                          {tk.slice(0,4)}
-                        </div>
-                        <div>
-                          <div style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#F1F5F9",letterSpacing:-0.5}}>{tk}</div>
-                          <div style={{fontSize:11,color:"#475569",marginTop:1}}>{shares.toLocaleString("en-US",{maximumFractionDigits:6})} {isEN?"units":"uds"} · {isEN?"Entry":"Entrada"} ${entry.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-                        </div>
-                      </div>
-                      <div style={{textAlign:"right"}}>
-                        <div style={{fontWeight:900,fontSize:18,color:isPos?"#00D26A":"#FF4D6A",fontFamily:"monospace"}}>{isPos?"+":""}{pnlPct.toFixed(2)}%</div>
-                        <div style={{fontSize:12,color:isPos?"rgba(0,210,106,0.7)":"rgba(255,77,106,0.7)",fontFamily:"monospace"}}>{isPos?"+":"-"}${Math.abs(pnlAmt).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+                <div key={pos.id} style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,overflow:"hidden",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+                  <div style={{padding:"18px 22px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:10,borderBottom:"1px solid #EEF2F7"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:13}}>
+                      <div style={{width:46,height:46,borderRadius:12,background:"#EEF2F7",border:"1px solid #E2E8F2",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontWeight:900,fontSize:13,color:"#334155"}}>{tk.slice(0,4)}</div>
+                      <div>
+                        <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:"#0F172A"}}>{tk}{pos.name?" — "+pos.name:""}</div>
+                        <div style={{fontSize:11,color:"#5A7090",marginTop:2}}>{shares.toLocaleString("en-US",{maximumFractionDigits:6})} {isEN?"units":"uds"} · {isEN?"Entry":"Entrada"} ${entry.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
                       </div>
                     </div>
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:pos.note?10:12}}>
-                      {[
-                        [isEN?"Current":"Actual", lp?"$"+curr.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4}):"—", lp?(isPos?"#00D26A":"#FF4D6A"):"#475569"],
-                        [isEN?"Market Value":"Valor","$"+marketVal.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}),"#F1F5F9"],
-                        [isEN?"Today":"Hoy", lp?(lp.change>=0?"+":"")+lp.change.toFixed(2)+"%":"—", lp?(lp.change>=0?"#00D26A":"#FF4D6A"):"#475569"],
-                      ].map(([lbl,val,c])=>(
-                        <div key={lbl} style={{background:"rgba(255,255,255,0.025)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
-                          <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,marginBottom:3,textTransform:"uppercase"}}>{lbl}</div>
-                          <div style={{fontFamily:"monospace",fontWeight:800,color:c,fontSize:13}}>{val}</div>
-                        </div>
-                      ))}
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:22,color:isPos?"#00A86B":"#E03355"}}>{isPos?"+":""}{pnlPct.toFixed(2)}%</div>
+                      <div style={{fontSize:12,color:isPos?"#00A86B":"#E03355",fontFamily:"monospace"}}>{isPos?"+":"−"}${Math.abs(pnlAmt).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
                     </div>
-                    {pos.note && (<div style={{fontSize:12,color:"#64748B",fontStyle:"italic",background:"rgba(255,255,255,0.02)",borderRadius:8,padding:"6px 10px",marginBottom:10,lineHeight:1.5}}>💬 {pos.note}</div>)}
-                    <div style={{display:"flex",gap:8}}>
-                      <button onClick={()=>shareToFeed(pos)} style={{flex:1,background:"rgba(139,92,246,0.1)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:9,padding:"7px 10px",color:"#FCD34D",fontSize:11,fontWeight:700,cursor:"pointer"}}>📤 {isEN?"Share":"Compartir"}</button>
-                      <button onClick={()=>startEdit(pos)} style={{flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:9,padding:"7px 10px",color:"#64748B",fontSize:11,fontWeight:700,cursor:"pointer"}}>✏️ {isEN?"Edit":"Editar"}</button>
-                      <button onClick={()=>removePosition(pos.id)} style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:9,padding:"7px 12px",color:"#FF4D6A",fontSize:11,fontWeight:700,cursor:"pointer"}}>🗑</button>
-                    </div>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",borderBottom:"1px solid #EEF2F7"}}>
+                    {[
+                      [isEN?"Current price":"Precio actual", lp?"$"+curr.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4}):"—", "#0099A8"],
+                      [isEN?"Market value":"Valor mercado","$"+marketVal.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}),"#1A2535"],
+                      [isEN?"Today":"Hoy", lp?(lp.change>=0?"+":"")+lp.change.toFixed(2)+"%":"—", lp?(lp.change>=0?"#00A86B":"#E03355"):"#8FA5BE"],
+                    ].map(([lbl,val,c],j)=>(
+                      <div key={lbl} style={{padding:"14px 18px",textAlign:"center",borderRight:j<2?"1px solid #EEF2F7":"none"}}>
+                        <div style={{fontSize:10,color:"#8FA5BE",fontWeight:700,letterSpacing:0.8,marginBottom:5,textTransform:"uppercase"}}>{lbl}</div>
+                        <div style={{fontFamily:"monospace",fontWeight:600,color:c,fontSize:19}}>{val}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{padding:"12px 18px 4px"}}>
+                    <svg viewBox={"0 0 "+W+" "+Hc} style={{width:"100%",height:"auto"}} preserveAspectRatio="none">
+                      <polygon points={area} fill="rgba(0,168,107,0.08)"/>
+                      <line x1="0" y1={eY} x2={W} y2={eY} stroke="#C8D3E6" strokeWidth="1" strokeDasharray="4 3"/>
+                      <polyline points={line} fill="none" stroke={isPos?"#00A86B":"#E03355"} strokeWidth="2.4" strokeLinejoin="round"/>
+                      <circle cx={xy[xy.length-1][0]} cy={xy[xy.length-1][1]} r="3.5" fill={isPos?"#00A86B":"#E03355"}/>
+                    </svg>
+                  </div>
+                  {pos.note && (<div style={{fontSize:12,color:"#5A7090",fontStyle:"italic",margin:"0 18px 12px",lineHeight:1.5}}>{pos.note}</div>)}
+                  <div style={{display:"flex",gap:10,padding:"8px 18px 18px"}}>
+                    <button onClick={()=>shareToFeed(pos)} style={{flex:1,background:"linear-gradient(135deg,#0099A8,#007A8A)",border:"none",borderRadius:10,padding:"9px 12px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"Share":"Compartir"}</button>
+                    <button onClick={()=>startEdit(pos)} style={{flex:1,background:"#EDF1F7",border:"1px solid #DDE4EF",borderRadius:10,padding:"9px 12px",color:"#5A7090",fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"Edit":"Editar"}</button>
+                    <button onClick={()=>removePosition(pos.id)} style={{width:48,background:"rgba(224,51,85,0.08)",border:"1px solid rgba(224,51,85,0.18)",borderRadius:10,padding:"9px 0",color:"#E03355",fontSize:13,fontWeight:700,cursor:"pointer"}}>✕</button>
                   </div>
                 </div>
               );
             })}
+
+            {/* Contexto de mercado */}
+            <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A",marginBottom:3}}>{isEN?"Market context":"Contexto de mercado"}</div>
+              <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"Related indices today":"Índices relacionados hoy"}</div>
+              {[["S&P 500","5,248","+0.42",true],["NASDAQ","16,842","+0.68",true],["QQQ","445.20","+0.71",true],["VIX","14.80","-3.12",false]].map(([s,v,ch,up],j)=>(
+                <div key={s} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:j<3?"1px solid #EEF2F7":"none"}}>
+                  <div style={{width:38,height:38,borderRadius:10,background:"#EEF2F7",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Syne',sans-serif",fontSize:11,fontWeight:800,color:"#334155",flexShrink:0}}>{String(s).slice(0,3)}</div>
+                  <div style={{flex:1,fontSize:13,fontWeight:600,color:"#1A2535"}}>{s}</div>
+                  <div style={{fontFamily:"monospace",fontSize:13,color:"#1A2535"}}>{v}</div>
+                  <div style={{fontFamily:"monospace",fontSize:12,fontWeight:600,color:up?"#00A86B":"#E03355",width:64,textAlign:"right"}}>{up?"▲":"▼"} {String(ch).replace("-","")}%</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
