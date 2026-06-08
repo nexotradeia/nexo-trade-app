@@ -17936,6 +17936,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [dataNote, setDataNote] = useState(null);
   const [sortCol, setSortCol] = useState(null);   // header (c.h) de la columna por la que se ordena
   const [sortDir, setSortDir] = useState("desc"); // "desc" = mayor a menor (default), "asc" = menor a mayor
+  const [perfPeriod, setPerfPeriod] = useState("y1"); // periodo de la sección Rendimiento
   const mockRef = useRef({});
   const [cloudSync, setCloudSync] = useState(user?.id ? "loading" : "off"); // off | loading | synced | error
   const cloudReadyRef = useRef(false);
@@ -18109,6 +18110,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     {id:"market",  l:"Market View"},
     {id:"risk",    l:"Risk"},
     {id:"returns", l:"Returns"},
+    {id:"performance", l:isEN?"📈 Performance":"📈 Rendimiento"},
     {id:"efficiency", l:"Efficiency"},
     {id:"projections",l:"Projections"},
     {id:"health",  l:"Health"},
@@ -18141,8 +18143,43 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   };
   const getMock = (tk) => { if(MOCK[tk]) return MOCK[tk]; if(mockRef.current[tk]) return mockRef.current[tk]; return (mockRef.current[tk] = {ytd:parseFloat((Math.random()*40-10).toFixed(1)),w52h:parseFloat((Math.random()*-30).toFixed(1)),w1:parseFloat((Math.random()*8-2).toFixed(1)),w2:parseFloat((Math.random()*10-2).toFixed(1)),w3:parseFloat((Math.random()*14-3).toFixed(1)),w4:parseFloat((Math.random()*18-4).toFixed(1)),m3:parseFloat((Math.random()*30-5).toFixed(1)),m6:parseFloat((Math.random()*50-8).toFixed(1)),beta:parseFloat((Math.random()*2+0.5).toFixed(2)),vol:parseFloat((Math.random()*40+15).toFixed(1)),pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:null}); };
 
+  // ── Retornos multi-periodo (curados, ilustrativos jun 2026) ──
+  // y1/y3/y5/life en %. null = el activo no existía ese periodo.
+  const RET = {
+    AAPL:{y1:22,y3:58,y5:240,life:1480}, MSFT:{y1:18,y3:72,y5:210,life:1120},
+    NVDA:{y1:95,y3:680,y5:2400,life:9800}, GOOG:{y1:28,y3:64,y5:190,life:640},
+    GOOGL:{y1:28,y3:64,y5:190,life:640}, AMZN:{y1:26,y3:48,y5:120,life:1320},
+    META:{y1:42,y3:165,y5:210,life:980}, TSLA:{y1:-8,y3:34,y5:680,life:1620},
+    AMD:{y1:12,y3:88,y5:320,life:780}, AVGO:{y1:58,y3:240,y5:520,life:1900},
+    ARM:{y1:46,y3:null,y5:null,life:92}, TSM:{y1:62,y3:180,y5:340,life:720},
+    CRWD:{y1:55,y3:140,y5:380,life:420}, PLTR:{y1:128,y3:420,y5:null,life:340},
+    NOW:{y1:22,y3:64,y5:180,life:1240}, JPM:{y1:34,y3:72,y5:120,life:280},
+    GS:{y1:38,y3:64,y5:140,life:210}, COIN:{y1:48,y3:120,y5:null,life:160},
+    MELI:{y1:32,y3:88,y5:240,life:1840}, NU:{y1:42,y3:160,y5:null,life:120},
+    SPY:{y1:14,y3:42,y5:96,life:380},
+    BTC:{y1:48,y3:380,y5:1100,life:18000}, ETH:{y1:24,y3:140,y5:680,life:9200},
+  };
+  const seedNum = (s) => { let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; };
+  const getRet = (tk) => {
+    if(RET[tk]) return RET[tk];
+    const h=seedNum(tk), r=(n)=>((h>>(n*4))%100)/100;
+    const y1=Math.round(r(1)*55-12), y3=Math.round(y1*2+r(2)*55),
+          y5=Math.round(y3*1.6+r(3)*110), life=Math.round(y5*2.1+r(4)*380);
+    return {y1,y3,y5,life};
+  };
+  const SECTOR_W = {AAPL:"Tecnología",MSFT:"Tecnología",NVDA:"Semiconductores",GOOG:"Tecnología",GOOGL:"Tecnología",AMZN:"Consumo",META:"Tecnología",TSLA:"Autos",AMD:"Semiconductores",AVGO:"Semiconductores",ARM:"Semiconductores",TSM:"Semiconductores",CRWD:"Software",PLTR:"Software",NOW:"Software",JPM:"Finanzas",GS:"Finanzas",V:"Finanzas",MA:"Finanzas",COIN:"Cripto",BTC:"Cripto",ETH:"Cripto",SOL:"Cripto",SPY:"ETF",QQQ:"ETF",GLD:"ETF/Oro",MELI:"Consumo",NU:"Finanzas",COST:"Consumo",BKNG:"Consumo",IREN:"Cripto",LHX:"Defensa",MET:"Finanzas"};
+  const getSector = (tk) => SECTOR_W[tk] || (RET[tk]||MOCK[tk]?"Otros":"Otros");
+  const SECTOR_COLORS = {"Tecnología":"#0047C2","Semiconductores":"#7C3AED","Software":"#0EA5E9","Consumo":"#F59E0B","Finanzas":"#10B981","Cripto":"#F7931A","ETF":"#64748B","ETF/Oro":"#CA8A04","Autos":"#EF4444","Defensa":"#475569","Otros":"#94A3B8"};
+  // periodo → función que da el retorno % de un ticker
+  const periodRet = (tk, p) => p==="ytd" ? getMock(tk).ytd : (getRet(tk)?.[p] ?? null);
+  const PERIODS = [{id:"ytd",l:"YTD"},{id:"y1",l:"1A"},{id:"y3",l:"3A"},{id:"y5",l:"5A"},{id:"life",l:"Toda la vida"}];
+
   const pctColor = v => v==null?"#64748B":v>=0?"#10B981":"#EF4444";
   const pctFmt  = v => v==null?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
+  const pctFmtBig = v => v==null?"—":(v>=0?"+":"")+Number(v).toLocaleString("en-US",{maximumFractionDigits:Math.abs(v)>=100?0:1})+"%";
+  const moneyFmt = v => (v>=0?"+":"−")+"$"+Math.abs(v).toLocaleString("en-US",{maximumFractionDigits:0});
+  // Celda "iluminada": fondo verde si positivo, rojo si negativo (como pidió la usuaria)
+  const retCell = (v, big=false) => <span style={{display:"inline-block",fontFamily:"monospace",fontWeight:700,fontSize:13,color:v==null?"#94A3B8":pctColor(v),background:v==null?"transparent":v>=0?"rgba(16,185,129,0.14)":"rgba(239,68,68,0.13)",borderRadius:6,padding:"3px 9px"}}>{big?pctFmtBig(v):pctFmt(v)}</span>;
   const numFmt  = v => v==null?"—":Number(v).toFixed(1);
   const upgBtn = (
     <button onClick={onNeedPremium} style={{
@@ -18194,13 +18231,12 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     returns:[
       {h:"Name",                    w:150, render:nm},
       {h:"Price",                   w:110, render:pr},
-      {h:"% from 52W High",         w:140, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:600,color:pctColor(m.w52h)}}>{pctFmt(m.w52h)}</span>},
-      {h:"YTD Return",              w:120, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:600,color:pctColor(m.ytd)}}>{pctFmt(m.ytd)}</span>},
-      {h:"1 Week Return",           w:130, render:(tk,d,m)=><span style={{fontFamily:"monospace",fontWeight:600,color:pctColor(m.w1)}}>{pctFmt(m.w1)}</span>},
-      {h:"2 Week Return",           w:130, render:(tk,d,m)=>vip(m.w2,"%")},
-      {h:"3 Week Return",           w:130, render:(tk,d,m)=>vip(m.w3,"%")},
-      {h:"4 Week Return",           w:130, render:(tk,d,m)=>vip(m.w4,"%")},
-      {h:"3 Month Return",          w:140, render:(tk,d,m)=>vip(m.m3,"%")},
+      {h:"% from 52W High",         w:140, render:(tk,d,m)=>retCell(m.w52h)},
+      {h:"YTD Return",              w:120, render:(tk,d,m)=>retCell(m.ytd)},
+      {h:"1Y Return",               w:110, render:(tk,d,m)=>retCell(getRet(tk)?.y1)},
+      {h:"3Y Return",               w:110, render:(tk,d,m)=>retCell(getRet(tk)?.y3,true)},
+      {h:"5Y Return",               w:110, render:(tk,d,m)=>retCell(getRet(tk)?.y5,true)},
+      {h:"All-Time",                w:120, render:(tk,d,m)=>retCell(getRet(tk)?.life,true)},
       {h:"6 Month Return",          w:140, render:(tk,d,m)=>vip(m.m6,"%")},
     ],
     efficiency:[
@@ -18260,6 +18296,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       case "Correlation SPY": return m.beta!=null?1.1-m.beta*0.08:null;
       case "% from 52W High": return m.w52h;
       case "YTD Return": return m.ytd;
+      case "1Y Return": return getRet(tk)?.y1;
+      case "3Y Return": return getRet(tk)?.y3;
+      case "5Y Return": return getRet(tk)?.y5;
+      case "All-Time": return getRet(tk)?.life;
       case "1 Week Return": return m.w1;
       case "2 Week Return": return m.w2;
       case "3 Week Return": return m.w3;
@@ -18349,6 +18389,162 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     };
     reader.onerror = () => { setImportMsg(isEN?"🚫 Could not read file":"🚫 No se pudo leer el archivo"); setTimeout(()=>setImportMsg(null),3500); };
     reader.readAsText(file);
+  };
+
+  // ════════ SECCIÓN RENDIMIENTO (gráficos de retorno) ════════
+  const renderPerf = () => {
+    const data = tickers.map(tk=>{
+      const ret = periodRet(tk, perfPeriod);
+      return { tk, name:TICKER_NAMES_W[tk]||tk, sector:getSector(tk), ret, money: ret==null?null:Math.round(1000*ret/100) };
+    }).filter(x=>x.ret!=null);
+    const sorted = [...data].sort((a,b)=>b.ret-a.ret);
+    const winners = sorted.slice(0,3);
+    const losers  = sorted.slice(-3).reverse().filter(l=>!winners.includes(l));
+    const maxAbs  = Math.max(...data.map(d=>Math.abs(d.ret)),1);
+    const perLabel = (PERIODS.find(p=>p.id===perfPeriod)||{}).l;
+
+    // Card contenedor
+    const Card = ({title, sub, children}) => (
+      <div style={{background:"#fff",border:"1px solid #DBEAFE",borderRadius:16,padding:"16px 18px",boxShadow:"0 4px 14px rgba(26,95,173,0.07)"}}>
+        <div style={{fontSize:14,fontWeight:800,color:"#0F172A",marginBottom:2}}>{title}</div>
+        {sub&&<div style={{fontSize:11,color:"#64748B",marginBottom:12}}>{sub}</div>}
+        {children}
+      </div>
+    );
+
+    // ── Serie de crecimiento de $1,000 (sintética, ilustrativa) ──
+    const growthSeries = (tk, ret) => {
+      const n=24, end=1+ret/100, h=seedNum(tk), pts=[];
+      for(let i=0;i<=n;i++){ const t=i/n; const base=Math.pow(end>0?end:0.01,t); const wig=i===0?1:1+((((h>>(i%9))%7)-3)/120); pts.push(1000*base*wig); }
+      return pts;
+    };
+    const top5 = sorted.slice(0,5);
+    const LINE_COLORS=["#0047C2","#10B981","#F59E0B","#7C3AED","#EF4444"];
+    const seriesAll = top5.map((d,idx)=>({...d, color:LINE_COLORS[idx%5], pts:growthSeries(d.tk,d.ret)}));
+    const maxY = Math.max(...seriesAll.flatMap(s=>s.pts),1100);
+    const W=620,H=240,PAD=38;
+    const xAt=(i,n)=>PAD+(i/n)*(W-2*PAD);
+    const yAt=(v)=>H-PAD-(v/maxY)*(H-2*PAD);
+
+    // ── Donut por sector ──
+    const bySector={};
+    data.forEach(d=>{ bySector[d.sector]=(bySector[d.sector]||0)+1; });
+    const secEntries=Object.entries(bySector).sort((a,b)=>b[1]-a[1]);
+    const totalN=data.length||1;
+    let acc=0;
+    const arcs=secEntries.map(([sec,cnt])=>{
+      const frac=cnt/totalN, a0=acc*2*Math.PI-Math.PI/2; acc+=frac; const a1=acc*2*Math.PI-Math.PI/2;
+      const R=80, r=48, cx=100, cy=100;
+      const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
+      const xi1=cx+r*Math.cos(a1), yi1=cy+r*Math.sin(a1), xi0=cx+r*Math.cos(a0), yi0=cy+r*Math.sin(a0);
+      const large=frac>0.5?1:0;
+      const dpath=`M ${x0} ${y0} A ${R} ${R} 0 ${large} 1 ${x1} ${y1} L ${xi1} ${yi1} A ${r} ${r} 0 ${large} 0 ${xi0} ${yi0} Z`;
+      return {sec,cnt,frac,dpath,color:SECTOR_COLORS[sec]||"#94A3B8"};
+    });
+
+    return (
+      <div style={{display:"flex",flexDirection:"column",gap:16}}>
+        {/* Selector de periodo */}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+          <span style={{fontSize:12,fontWeight:700,color:"#475569",marginRight:4}}>{isEN?"Period:":"Periodo:"}</span>
+          {PERIODS.map(p=>(
+            <button key={p.id} onClick={()=>setPerfPeriod(p.id)}
+              style={{background:perfPeriod===p.id?"linear-gradient(135deg,#0047C2,#0F4C81)":"#EBF3FF",color:perfPeriod===p.id?"#fff":"#1A5FAD",border:"1px solid #C5DEFF",borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:800,cursor:"pointer"}}>{p.l}</button>
+          ))}
+          <span style={{fontSize:11,color:"#94A3B8",marginLeft:"auto"}}>{isEN?"Illustrative · $1,000 invested in each":"Ilustrativo · $1,000 invertidos en cada una"}</span>
+        </div>
+
+        {/* Mejores y peores */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+          <Card title={isEN?`🏆 Top winners (${perLabel})`:`🏆 Mejores (${perLabel})`} sub={isEN?"Best performers and gain on $1,000":"Mejores y ganancia sobre $1,000"}>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {winners.map(w=>(
+                <div key={w.tk} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",background:"rgba(16,185,129,0.07)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:10}}>
+                  <span style={{fontFamily:"monospace",fontWeight:900,fontSize:14,color:"#0F172A",minWidth:54}}>{w.tk}</span>
+                  <span style={{fontSize:11,color:"#64748B",flex:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{w.name}</span>
+                  <span style={{fontFamily:"monospace",fontWeight:800,color:"#10B981",fontSize:13}}>{pctFmtBig(w.ret)}</span>
+                  <span style={{fontFamily:"monospace",fontWeight:700,color:"#059669",fontSize:12,minWidth:70,textAlign:"right"}}>{moneyFmt(w.money)}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <Card title={isEN?`📉 Top losers (${perLabel})`:`📉 Peores (${perLabel})`} sub={isEN?"Worst performers and loss on $1,000":"Peores y pérdida sobre $1,000"}>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {losers.length? losers.map(l=>(
+                <div key={l.tk} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",background:l.ret>=0?"rgba(100,116,139,0.06)":"rgba(239,68,68,0.07)",border:`1px solid ${l.ret>=0?"rgba(100,116,139,0.2)":"rgba(239,68,68,0.25)"}`,borderRadius:10}}>
+                  <span style={{fontFamily:"monospace",fontWeight:900,fontSize:14,color:"#0F172A",minWidth:54}}>{l.tk}</span>
+                  <span style={{fontSize:11,color:"#64748B",flex:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{l.name}</span>
+                  <span style={{fontFamily:"monospace",fontWeight:800,color:pctColor(l.ret),fontSize:13}}>{pctFmtBig(l.ret)}</span>
+                  <span style={{fontFamily:"monospace",fontWeight:700,color:pctColor(l.ret),fontSize:12,minWidth:70,textAlign:"right"}}>{moneyFmt(l.money)}</span>
+                </div>
+              )) : <div style={{fontSize:12,color:"#94A3B8",padding:"8px 0"}}>{isEN?"No data":"Sin datos"}</div>}
+            </div>
+          </Card>
+        </div>
+
+        {/* Ranking de barras */}
+        <Card title={isEN?`📊 Return ranking (${perLabel})`:`📊 Ranking de retorno (${perLabel})`} sub={isEN?"All your watchlist, high to low":"Toda tu watchlist, de mayor a menor"}>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {sorted.map(d=>(
+              <div key={d.tk} style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:"#0F172A",width:56,flexShrink:0}}>{d.tk}</span>
+                <div style={{flex:1,position:"relative",height:22,background:"#F1F5F9",borderRadius:5}}>
+                  <div style={{position:"absolute",left:"50%",top:0,bottom:0,width:1,background:"#CBD5E1"}}/>
+                  {d.ret>=0
+                    ? <div style={{position:"absolute",left:"50%",top:3,bottom:3,width:`${(d.ret/maxAbs)*50}%`,background:"linear-gradient(90deg,#10B981,#059669)",borderRadius:"0 4px 4px 0"}}/>
+                    : <div style={{position:"absolute",right:"50%",top:3,bottom:3,width:`${(-d.ret/maxAbs)*50}%`,background:"linear-gradient(90deg,#EF4444,#DC2626)",borderRadius:"4px 0 0 4px"}}/>}
+                </div>
+                <span style={{fontFamily:"monospace",fontWeight:800,fontSize:12,color:pctColor(d.ret),width:78,textAlign:"right",flexShrink:0}}>{pctFmtBig(d.ret)}</span>
+                <span style={{fontFamily:"monospace",fontWeight:600,fontSize:11,color:"#64748B",width:72,textAlign:"right",flexShrink:0}}>{moneyFmt(d.money)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:14}}>
+          {/* Crecimiento de $1,000 */}
+          <Card title={isEN?"💵 Growth of $1,000":"💵 Crecimiento de $1,000"} sub={isEN?"Top 5 by return — illustrative path":"Top 5 por retorno — trayectoria ilustrativa"}>
+            <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}>
+              {[0,0.25,0.5,0.75,1].map((g,i)=>{ const y=PAD+g*(H-2*PAD); return <line key={i} x1={PAD} y1={y} x2={W-PAD} y2={y} stroke="#EEF2F7" strokeWidth="1"/>; })}
+              <line x1={PAD} y1={yAt(1000)} x2={W-PAD} y2={yAt(1000)} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4 3"/>
+              {seriesAll.map(s=>(
+                <polyline key={s.tk} fill="none" stroke={s.color} strokeWidth="2.2" strokeLinejoin="round"
+                  points={s.pts.map((v,i)=>`${xAt(i,s.pts.length-1).toFixed(1)},${yAt(v).toFixed(1)}`).join(" ")}/>
+              ))}
+            </svg>
+            <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:8}}>
+              {seriesAll.map(s=>(
+                <div key={s.tk} style={{display:"flex",alignItems:"center",gap:5,fontSize:11}}>
+                  <span style={{width:10,height:10,borderRadius:3,background:s.color,display:"inline-block"}}/>
+                  <span style={{fontFamily:"monospace",fontWeight:700,color:"#0F172A"}}>{s.tk}</span>
+                  <span style={{fontFamily:"monospace",color:"#64748B"}}>${Math.round(s.pts[s.pts.length-1]).toLocaleString("en-US")}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Dónde está tu dinero (donut) */}
+          <Card title={isEN?"🧭 Where your money is":"🧭 Dónde está tu dinero"} sub={isEN?"By sector (equal weight)":"Por sector (peso igual)"}>
+            <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+              <svg viewBox="0 0 200 200" style={{width:160,height:160,flexShrink:0}}>
+                {arcs.map((a,i)=><path key={i} d={a.dpath} fill={a.color} stroke="#fff" strokeWidth="1.5"/>)}
+                <text x="100" y="96" textAnchor="middle" fontSize="13" fontWeight="800" fill="#0F172A">{totalN}</text>
+                <text x="100" y="112" textAnchor="middle" fontSize="9" fill="#64748B">{isEN?"assets":"activos"}</text>
+              </svg>
+              <div style={{display:"flex",flexDirection:"column",gap:5,flex:1,minWidth:120}}>
+                {arcs.map((a,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:11}}>
+                    <span style={{width:10,height:10,borderRadius:3,background:a.color,display:"inline-block",flexShrink:0}}/>
+                    <span style={{color:"#0F172A",fontWeight:600,flex:1}}>{a.sec}</span>
+                    <span style={{fontFamily:"monospace",color:"#64748B"}}>{Math.round(a.frac*100)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
   };
 
   return(
@@ -18530,8 +18726,12 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </span>
       </div>
 
-      {/* ── TABLE ── */}
-      {tickers.length===0?(
+      {/* ── TABLE / PERFORMANCE ── */}
+      {activeView==="performance" ? (
+        tickers.length===0
+          ? <div style={{textAlign:"center",padding:"40px 20px",color:"#64748B",fontSize:13}}>{isEN?"Add tickers to see performance charts":"Agrega tickers para ver los gráficos de rendimiento"}</div>
+          : renderPerf()
+      ) : tickers.length===0?(
         <div style={{textAlign:"center",padding:"50px 20px",border:"2px dashed #DBEAFE",borderRadius:16}}>
           <div style={{fontSize:40,marginBottom:12}}>👁</div>
           <div style={{fontWeight:700,fontSize:16,color:"#0F172A",marginBottom:6}}>{isEN?"Your watchlist is empty":"Tu watchlist está vacía"}</div>
