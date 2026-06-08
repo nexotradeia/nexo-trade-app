@@ -15764,7 +15764,7 @@ function BotPostCard({post,onTickerClick,lang}){
           </div>
           {/* Texto con $TICKERS clicables */}
           <p style={{margin:"0 0 10px",color:C.text,fontSize:13.5,lineHeight:1.65}}>
-            {renderBotText(post.text, onTickerClick)}
+            {renderBotText((isEN&&post.textEn)?post.textEn:post.text, onTickerClick)}
           </p>
           {post.tags?.length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>
