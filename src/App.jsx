@@ -6520,15 +6520,16 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               {/* Precio dinámico */}
               {billing==="annual" ? (
                 <div style={{marginBottom:4}}>
-                  <div style={{display:"flex",alignItems:"baseline",gap:4}}>
-                    <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${priceAnual}</span>
-                    <span style={{fontSize:13,color:"#64748B"}}>{isEN?"/yr":"/año"}</span>
-                    <span style={{fontSize:12,color:"#10B981",fontWeight:700,marginLeft:4}}>({lang==="en"?`$${(priceAnual/12).toFixed(2)}/mo`:`$${(priceAnual/12).toFixed(2)}/mes`})</span>
+                  <div style={{display:"flex",alignItems:"baseline",gap:4,flexWrap:"wrap"}}>
+                    <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${(priceAnual/12).toFixed(2)}</span>
+                    <span style={{fontSize:13,color:"#64748B"}}>{isEN?"/mo":"/mes"}</span>
+                    <span style={{fontSize:11,color:"#10B981",fontWeight:700,marginLeft:4}}>{isEN?`billed $${priceAnual}/yr`:`facturado $${priceAnual}/año`}</span>
                   </div>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                    <span style={{fontSize:12,color:"#475569",textDecoration:"line-through"}}>${(price*12).toFixed(0)}{isEN?"/yr":"/año"}</span>
-                    <span style={{background:"rgba(16,185,129,0.15)",color:"#10B981",border:"1px solid rgba(16,185,129,0.3)",borderRadius:6,fontSize:11,fontWeight:800,padding:"1px 7px"}}>🎉 Ahorras ${savingsAnual}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
+                    <span style={{fontSize:12,color:"#475569",textDecoration:"line-through"}}>${price.toFixed(2)}{isEN?"/mo":"/mes"}</span>
+                    <span style={{background:"rgba(16,185,129,0.15)",color:"#10B981",border:"1px solid rgba(16,185,129,0.3)",borderRadius:6,fontSize:11,fontWeight:800,padding:"1px 7px"}}>🎉 -{savingsPct}%</span>
                   </div>
+                  <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?`or $${price}/mo month-to-month`:`o $${price}/mes mes a mes`}</div>
                 </div>
               ) : (
                 <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
@@ -8027,8 +8028,8 @@ function EmailCaptureFeedCard({user, isPremium=false, lang="es"}){
   const [email,setEmail]=useState("");
   const [done,setDone]=useState(false);
   const [closed,setClosed]=useState(()=>{try{return sessionStorage.getItem("nexo-email-card-closed")==="1";}catch{return false;}});
-  // No mostrar a usuarios Premium ni si ya lo cerró/completó
-  if(isPremium||closed) return null;
+  // No mostrar a usuarios logueados (ya dieron su email), Premium, ni si ya lo cerró/completó
+  if(user||isPremium||closed) return null;
   const submit=()=>{
     if(!email.includes("@")) return;
     try{ supabase.from("newsletter_subscribers").upsert({email, source:"feed_card", created_at:new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
@@ -9807,13 +9808,13 @@ function SocialProofBar({user, onRegister, lang="es"}){
   return(
     <div style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 6px"}}>
       <div style={{background:"#FFFFFF",borderRadius:10,padding:"6px 14px",border:"1px solid #EEF2F7",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",justifyContent:"space-between"}}>
-        <div style={{display:"flex",gap:10,flexWrap:"wrap",flex:1}}>
+        <div style={{display:"flex",gap:10,flexWrap:"nowrap",flex:1,overflowX:"auto",scrollbarWidth:"none",msOverflowStyle:"none"}}>
           {items.map((s,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
+            <div key={i} style={{display:"flex",alignItems:"center",gap:5,flexShrink:0}}>
               <span style={{fontSize:11}}>{s.icon}</span>
               <div>
                 <span style={{color:s.highlight?"#0C6B3E":"#1A5FAD",fontWeight:800,fontSize:11}}>{s.value}</span>
-                <span style={{color:"#5B8DC7",fontSize:10,marginLeft:3}}>{s.label}</span>
+                <span className="nexo-hide-mobile" style={{color:"#5B8DC7",fontSize:10,marginLeft:3}}>{s.label}</span>
               </div>
               {i<items.length-1&&<div style={{width:1,height:12,background:"#C5DEFF",marginLeft:8}}/>}
             </div>
@@ -23356,7 +23357,7 @@ export default function App(){
         .nexo-admin-overview { grid-template-columns: 1fr !important; }
         .nexo-admin-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
         .nexo-left-sidebar { display: none !important; }
-        .nexo-mobile-affiliate-banner { display: flex !important; bottom: 58px !important; }
+        .nexo-mobile-affiliate-banner { display: flex !important; bottom: 68px !important; }
         body { padding-bottom: 122px; }
         /* Bottom nav móvil tipo Robinhood */
         .nexo-bottom-nav { display: flex !important; }
@@ -24492,10 +24493,10 @@ export default function App(){
       <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"#FFFFFF",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
         {[
           {ic:"🏠",l:lang==="en"?"Home":"Inicio",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
-          {ic:"🐋",l:"Smart $",on:()=>{setPage(20);setShowLanding(false);},active:page===20,gold:false},
-          {ic:"📊",l:lang==="en"?"Markets":"Mercados",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
-          {ic:"💎",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
-          {ic:"☰",l:lang==="en"?"Menu":"Menú",on:()=>setShowMobileMenu(true),active:false},
+          {ic:"🔥",l:"Feed",on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},active:false},
+          {ic:"🤖",l:"IA",on:()=>setShowAI(true),active:false},
+          {ic:"⚡",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
+          {ic:"👤",l:lang==="en"?"Profile":"Perfil",on:()=>{ user?setProfUser(user):setAuth("register"); },active:false},
         ].map((b,i)=>(
           <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0}}>
             <span style={{fontSize:19,lineHeight:1}}>{b.ic}</span>
