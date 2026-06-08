@@ -13317,11 +13317,11 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
   const [expandedId,setExpandedId]=useState(null);
   // ── Telegram Alert Config ──
   const [tgConfig,setTgConfig]=useState(()=>{
-    const DEFAULTS={enabled:true,minPrem:5e7,callsOnly:true,goldenOnly:false,aboveSMA200:true,highVol:true,_v:4};
+    const DEFAULTS={enabled:true,minPrem:5e6,callsOnly:false,goldenOnly:false,aboveSMA200:false,highVol:false,_v:5};
     try{
       const saved=JSON.parse(localStorage.getItem("nexo-tg-config")||"null");
-      // Si no tiene versión 4, descartar config vieja y usar nuevos defaults
-      if(!saved||!saved._v||saved._v<4) return DEFAULTS;
+      // Si no tiene versión 5, descartar config vieja y usar nuevos defaults (filtros menos estrictos)
+      if(!saved||!saved._v||saved._v<5) return DEFAULTS;
       return saved;
     }
     catch{ return DEFAULTS; }
