@@ -24490,9 +24490,9 @@ export default function App(){
       <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"#FFFFFF",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
         {[
           {ic:"🏠",l:lang==="en"?"Home":"Inicio",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
+          {ic:"🐋",l:"Smart $",on:()=>{setPage(20);setShowLanding(false);},active:page===20,gold:false},
           {ic:"📊",l:lang==="en"?"Markets":"Mercados",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
-          {ic:"🤖",l:"IA",on:()=>setShowAI(true),active:false},
-          {ic:"⭐",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
+          {ic:"💎",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
           {ic:"☰",l:lang==="en"?"Menu":"Menú",on:()=>setShowMobileMenu(true),active:false},
         ].map((b,i)=>(
           <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0}}>
