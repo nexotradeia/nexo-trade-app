@@ -5276,9 +5276,9 @@ function EarningsPage({lang}){
 
           {/* Table */}
           <div className="nexo-scroll-x" style={{borderRadius:14}}>
-          <div style={{minWidth:700,background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
+          <div style={{minWidth:820,background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
             {/* Header */}
-            <div style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
+            <div style={{display:"grid",gridTemplateColumns:"28px minmax(170px,1.6fr) 110px 100px 90px 80px minmax(130px,1fr) 52px",gap:8,padding:"10px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`}}>
               {["",isEN?"COMPANY":"EMPRESA",isEN?"TIME":"HORA","EPS EST.","MKT CAP",isEN?"IMPACT":"IMPACTO",isEN?"SENTIMENT":"SENTIMIENTO",""].map(h=>(
                 <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:0.6,textTransform:"uppercase"}}>{h}</div>
               ))}
@@ -5307,7 +5307,7 @@ function EarningsPage({lang}){
               return(
                 <div key={`${e.ticker}-${e.rawDate}`}
                   onClick={()=>setSelEarning(e)}
-                  style={{display:"grid",gridTemplateColumns:"28px 1fr 120px 100px 90px 80px 1fr 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default"}}
+                  style={{display:"grid",gridTemplateColumns:"28px minmax(170px,1.6fr) 110px 100px 90px 80px minmax(130px,1fr) 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default"}}
                   onMouseEnter={ev=>ev.currentTarget.style.background="rgba(15,76,129,0.04)"}
                   onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
                   {/* Star */}
