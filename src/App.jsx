@@ -20007,7 +20007,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
   return(
     <div style={ptFull
-      ?{position:"fixed",inset:0,zIndex:9960,background:"var(--c-bg)",overflowY:"auto",padding:"16px 18px 60px",fontFamily:"inherit"}
+      ?{position:"fixed",top:(typeof window!=="undefined"&&window.innerWidth<768)?54:64,left:0,right:0,bottom:0,zIndex:120,background:"var(--c-bg)",overflowY:"auto",padding:"16px 18px 60px",fontFamily:"inherit",borderTop:"1px solid var(--c-border, rgba(0,0,0,0.08))"}
       :{maxWidth:"100%",fontFamily:"inherit"}}>
 
       {/* Header — Portafolio Oracle IA */}
