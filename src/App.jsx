@@ -1245,6 +1245,7 @@ const fmtLivePrice = (ticker, price) => {
 
 // Banner que aparece SOLO en días de caída fuerte del mercado (engagement cuando más tráfico llega)
 function MarketCrisisBanner({lang="es", onCTA}){
+  return null; // ❌ Banner rojo de caída desactivado definitivamente a pedido de Maria
   const lp = useContext(PriceCtx);
   const [dismissed,setDismissed] = useState(()=>{ try{ return sessionStorage.getItem("nexo-crisis-dismissed")==="1"; }catch{ return false; } });
   const isEN = lang==="en";
@@ -22527,8 +22528,9 @@ export default function App(){
     return ()=>clearTimeout(t);
   },[user]);
 
-  // ── Social proof toasts cada 50-80 segundos ───────────────────────────────
+  // ── Social proof toasts DESACTIVADOS definitivamente a pedido de Maria ──────
   useEffect(()=>{
+    return; // ❌ Ya no se muestran los avisos falsos de "X se registró/se unió"
     const names=[
       {n:"Carlos M.",loc:"México"},    {n:"Valentina R.",loc:"Colombia"},
       {n:"Diego F.",loc:"Argentina"},  {n:"María L.",loc:"España"},
