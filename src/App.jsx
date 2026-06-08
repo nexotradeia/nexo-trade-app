@@ -23182,6 +23182,17 @@ export default function App(){
             {i===2 && <WatchlistFeedBanner user={user} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}} lang={lang}/>}
             {/* 📧 Captura de email — leads de usuarios free/anónimos (cerrable) */}
             {i===4 && <EmailCaptureFeedCard user={user} isPremium={effectivePremium} lang={lang}/>}
+            {/* 💎 En su lugar, a logueados free: empuje sutil a Premium (ya tenemos su email) */}
+            {i===4 && user && !effectivePremium && (
+              <div onClick={()=>{setPage(8);setShowLanding(false);}} style={{cursor:"pointer",background:"linear-gradient(135deg,rgba(224,182,75,0.13),rgba(200,144,31,0.05))",border:"1px solid rgba(224,182,75,0.38)",borderRadius:16,padding:"13px 16px",marginBottom:6,display:"flex",alignItems:"center",gap:12,boxShadow:"0 1px 10px rgba(200,144,31,0.10)"}}>
+                <div style={{width:38,height:38,borderRadius:11,background:"linear-gradient(135deg,#E0B64B,#C8901F)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,boxShadow:"0 3px 12px rgba(200,144,31,0.4)"}}>💎</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13.5,fontWeight:800,color:"var(--c-text)"}}>{lang==="en"?"Unlock Premium — live signals & AI picks":"Desbloquea Premium — señales en vivo y picks IA"}</div>
+                  <div style={{fontSize:11.5,color:"var(--c-muted)",marginTop:1}}>{lang==="en"?"From $6.58/mo · 7-day free trial":"Desde $6.58/mes · 7 días gratis"}</div>
+                </div>
+                <span style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontSize:12,fontWeight:900,borderRadius:20,padding:"7px 14px",flexShrink:0,whiteSpace:"nowrap"}}>{lang==="en"?"Upgrade →":"Mejorar →"}</span>
+              </div>
+            )}
             {/* 🔗 Referidos — visible en el feed para usuarios logueados */}
             {i===6 && user && <div style={{marginBottom:6}}><ReferralSection user={user}/></div>}
             {/* 🌍 Compartir viral — para todos (global) */}
