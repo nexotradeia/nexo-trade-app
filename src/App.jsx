@@ -8697,7 +8697,7 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
     {t:isEN?"📊 Investing Tools":"📊 Inversión", items:[
       ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
     {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
-      [isEN?"Live Markets":"Mercado en Vivo",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow",20]]},
+      [isEN?"Live Markets":"Mercado en Vivo",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20]]},
     {t:isEN?"📚 Education":"📚 Educación", items:[
       ["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
@@ -8738,7 +8738,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
     {t:isEN?"🧮 Calculators":"🧮 Calculadoras",items:[["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
     {t:isEN?"💱 Currencies":"💱 Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",51],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
     {t:isEN?"📊 Investing":"📊 Inversión",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
-    {t:isEN?"🌐 Markets":"🌐 Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Flow Premium",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
+    {t:isEN?"🌐 Markets":"🌐 Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
     {t:isEN?"📚 Education":"📚 Educación",items:[["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
   return(<>
@@ -9601,7 +9601,7 @@ function Footer({ setPage, onAuth, lang="es" }){
       title: isEN?"Paper Trading":"Paper Trading",
       items:[
         {label: isEN?"Stock Screener ✦":"Screener ✦",           page:17},
-        {label: isEN?"Institutional Flow ✦":"Flujo Inst. ✦",    page:20},
+        {label: isEN?"Smart Money ✦":"Smart Money ✦",    page:20},
         {label: isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",            page:19},
         {label: isEN?"Economic Calendar":"Cal. Económico",       page:14},
         {label: "IPOs 2026",                                     page:16},
@@ -13541,7 +13541,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
           <div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
               <span style={{fontSize:28}}>🐋</span>
-              <div style={{fontSize:20,fontWeight:900,color:"#0F172A",letterSpacing:-0.5}}>{isEN?"Institutional Flow":"Flujo Institucional"}</div>
+              <div style={{fontSize:20,fontWeight:900,color:"#0F172A",letterSpacing:-0.5}}>{isEN?"Smart Money":"Smart Money"}</div>
               <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800,display:"flex",alignItems:"center",gap:4}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
               </span>
@@ -17546,7 +17546,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:"💼 Portafolio Oracle IA",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
-  {label:isEN?"🐋 Flujo PREMIUM":"🐋 Flujo PREMIUM",idx:20,vip:true},
+  {label:"🐋 Smart Money",idx:20,vip:true},
   {label:isEN?"🎮 Paper Trading Sim":"🎮 Paper Trading Sim",idx:9,vip:true},
   {label:"✦ Premium",idx:8,premium:true},
   // ── Educación (último) ──
@@ -23815,7 +23815,7 @@ export default function App(){
           <span onClick={()=>{setPage(8);setShowLanding(false);}} style={{flexShrink:0,fontSize:11,fontWeight:800,letterSpacing:0.5,color:"#1B1303",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 14px",margin:"0 8px",whiteSpace:"nowrap",cursor:"pointer",transition:"all 0.15s",boxShadow:"0 2px 12px rgba(224,182,75,0.45)",display:"inline-flex",alignItems:"center",gap:5}} onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 18px rgba(224,182,75,0.7)"} onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 12px rgba(224,182,75,0.45)"}><NavIco name="star" size={13}/> PREMIUM</span>
           {[
             {label:lang==="en"?"Ideas Premium":"Ideas Premium",idx:21,locked:!effectivePremium,icon:"ideas"},
-            {label:lang==="en"?"Whale Flow":"Flujo Premium",idx:20,locked:!effectivePremium,icon:"whale"},
+            {label:"Smart Money",idx:20,locked:!effectivePremium,icon:"whale"},
             {label:"Wall St. & Capitol",idx:19,locked:!effectivePremium,icon:"capitol"},
             {label:lang==="en"?"Screener":"Screener",idx:36,locked:!effectivePremium,icon:"screener"},
             {label:lang==="en"?"Portfolio Oracle AI":"Portafolio Oracle IA",idx:37,locked:!effectivePremium,icon:"oracle"},
