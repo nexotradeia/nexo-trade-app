@@ -18181,12 +18181,24 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       m9: ip(m.m6,b.y1,0.6), y1:b.y1, y2: ip(b.y1,b.y3,0.45), y3:b.y3, y4: ip(b.y3,b.y5,0.5),
       y5:b.y5, y7: ip(b.y5,b.life,0.38), y10: ip(b.y5,b.life,0.62) };
   };
-  // [encabezado, clave en extRet, usarFormatoGrande]
+  // [encabezado completo (tipo terminal), clave en extRet, usarFormatoGrande, ancho]
   const RKEYS = [
-    ["52W High %","w52h",false],["YTD","ytd",false],["1 Week","w1",false],["2 Week","w2",false],
-    ["3 Week","w3",false],["4 Week","w4",false],["3 Month","m3",false],["6 Month","m6",false],
-    ["9 Month","m9",false],["1 Year","y1",true],["2 Year","y2",true],["3 Year","y3",true],
-    ["4 Year","y4",true],["5 Year","y5",true],["7 Year","y7",true],["10 Year","y10",true],
+    ["% Price Change from 52 Week High","w52h",false,150],
+    ["YTD Price Total Return","ytd",false,120],
+    ["1 Week Price Total Return","w1",false,120],
+    ["2 Week Price Total Return","w2",false,120],
+    ["3 Week Price Total Return","w3",false,120],
+    ["4 Week Price Total Return","w4",false,120],
+    ["3 Month Price Total Return","m3",false,120],
+    ["6 Month Price Total Return","m6",false,120],
+    ["9 Month Price Total Return","m9",false,120],
+    ["1 Year Price Total Return","y1",true,120],
+    ["2 Year Price Total Return","y2",true,120],
+    ["3 Year Price Total Return","y3",true,120],
+    ["4 Year Price Total Return","y4",true,120],
+    ["5 Year Price Total Return","y5",true,120],
+    ["7 Year Price Total Return","y7",true,120],
+    ["10 Year Price Total Return","y10",true,120],
   ];
   const RK_MAP = Object.fromEntries(RKEYS.map(([h,k])=>[h,k]));
 
@@ -18246,8 +18258,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     ],
     returns:[
       {h:"Name",  w:150, render:nm},
-      {h:"Price", w:110, render:pr},
-      ...RKEYS.map(([h,k,big])=>({ h, w: big?108:100, render:(tk,d,m)=>retCell(extRet(tk)[k], big) })),
+      {h:"Price, Current", w:120, render:pr},
+      ...RKEYS.map(([h,k,big,w])=>({ h, w, render:(tk,d,m)=>retCell(extRet(tk)[k], big) })),
     ],
     efficiency:[
       {h:"Name",       w:150, render:nm},
@@ -18291,7 +18303,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     if(RK_MAP[h]) return extRet(tk)[RK_MAP[h]]; // cualquier columna de retorno
     switch(h){
       case "Name": return tk;
-      case "Price": return d?.price;
+      case "Price":
+      case "Price, Current": return d?.price;
       case "Change %": return d?.change;
       case "Div. Yield":
       case "Dividend Yield": return m.div;
@@ -18356,7 +18369,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     return arr;
   })();
 
-  const thStyle = {fontSize:13,fontWeight:800,color:"#1A5FAD",padding:"12px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid #DBEAFE",background:"#EBF3FF",userSelect:"none"};
+  const thStyle = {fontSize:13,fontWeight:800,color:"#1A5FAD",padding:"12px 12px",textAlign:"left",whiteSpace:"normal",lineHeight:1.25,verticalAlign:"top",borderBottom:"2px solid #DBEAFE",background:"#EBF3FF",userSelect:"none"};
   const tdStyle = {padding:"11px 12px",borderBottom:"1px solid #DBEAFE",verticalAlign:"middle",whiteSpace:"nowrap"};
 
   // Export watchlist as CSV
@@ -18763,10 +18776,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                   return (
                     <th key={i} onClick={()=>handleSort(c.h)}
                       title={isEN?"Click to sort (high→low, click again for low→high)":"Clic para ordenar (mayor→menor, otra vez menor→mayor)"}
-                      style={{...thStyle,minWidth:c.w,cursor:"pointer",color:active?"#0047C2":thStyle.color}}>
-                      <span style={{display:"inline-flex",alignItems:"center",gap:4}}>
-                        {c.h}
-                        <span style={{fontSize:11,lineHeight:1,opacity:active?1:0.4,color:active?"#0047C2":"#94A3B8"}}>{active?(sortDir==="desc"?"▼":"▲"):"↕"}</span>
+                      style={{...thStyle,minWidth:c.w,maxWidth:c.w+20,cursor:"pointer",color:active?"#0047C2":thStyle.color}}>
+                      <span style={{display:"block"}}>
+                        {c.h}{" "}
+                        <span style={{fontSize:11,lineHeight:1,opacity:active?1:0.4,color:active?"#0047C2":"#94A3B8",whiteSpace:"nowrap"}}>{active?(sortDir==="desc"?"▼":"▲"):"↕"}</span>
                       </span>
                     </th>
                   );
