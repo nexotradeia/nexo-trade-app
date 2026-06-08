@@ -18523,11 +18523,22 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     ];
     const curPer = PER.find(p=>p.id===perfPeriod) || PER[3];
     const INVEST = 7080;
+    // ── Dividendos REALES desde la fuente de la app (DIV_FALLBACK: yield/divRate/quarterly/payDate) ──
+    const DIV_BY = {}; DIV_FALLBACK.forEach(d=>{ DIV_BY[d.ticker]=d; });
+    const divInfo = (tk) => {
+      const d = DIV_BY[tk];
+      if(!d || !(+d.yield>0)) return { y:0, annual:0, freq:null, next:null, has:false };
+      const q = parseFloat(d.quarterly)||0;
+      const perYear = q>0 ? Math.max(1,Math.round((+d.divRate)/q)) : 4;
+      const freq = perYear>=12?(isEN?"Monthly":"Mensual"): perYear>=4?(isEN?"Quarterly":"Trimestral"): perYear>=2?(isEN?"Semi-annual":"Semestral"):(isEN?"Annual":"Anual");
+      let pd = d.payDate ? new Date(d.payDate+"T12:00:00") : null; const today=new Date(); let guard=0;
+      while(pd && pd<today && guard++<24){ pd = new Date(pd.getFullYear(), pd.getMonth()+Math.round(12/perYear), pd.getDate()); }
+      return { y:+d.yield, annual:+d.divRate, freq, next: pd? pd.toLocaleDateString(isEN?"en-US":"es-ES",{month:"short",day:"numeric"}):null, has:true };
+    };
     const rows = tickers.map(tk=>{
-      const ret = curPer.k(tk), m = getMock(tk);
+      const ret = curPer.k(tk), m = getMock(tk), di = divInfo(tk);
       const value = ret==null? INVEST : INVEST*(1+ret/100);
-      const divY = m.div!=null? m.div : 0;
-      return { tk, name:TICKER_NAMES_W[tk]||tk, sector:getSector(tk), ret, invested:INVEST, value, gain:value-INVEST, vol:m.vol, divY, divAmt:INVEST*divY/100, ytd:m.ytd };
+      return { tk, name:TICKER_NAMES_W[tk]||tk, sector:getSector(tk), ret, invested:INVEST, value, gain:value-INVEST, vol:m.vol, divY:di.y, divAmt:INVEST*di.y/100, di, ytd:m.ytd };
     });
     const valid = rows.filter(r=>r.ret!=null);
     const totalInvested = rows.reduce((a,r)=>a+r.invested,0);
@@ -18599,9 +18610,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     const bx=(v)=>BPx+((Math.min(70,Math.max(10,v))-10)/60)*(BW-BPx-16);
     const by=(v)=>BH-BPy-((v-retMin)/((retMax-retMin)||1))*(BH-BPy-18);
 
-    const divCards=[...rows].sort((a,b)=>b.divY-a.divY).slice(0,6);
-    const freqOf=(tk)=> seedNum(tk)%5===0?(isEN?"Semi-annual":"Semestral"):(isEN?"Quarterly":"Trimestral");
-    const nextPay=(tk)=>{ const h=seedNum(tk); const d=new Date(2026,6+(h%4),1+(h%27)); return d.toLocaleDateString(isEN?"en-US":"es-ES",{month:"short",day:"numeric"}); };
+    const divPayers=rows.filter(r=>r.di.has).sort((a,b)=>b.divY-a.divY);
+    const divCards=divPayers.slice(0,6);
     const maxYield=Math.max(...rows.map(r=>r.divY),1);
 
     const ranking=sorted;
@@ -18684,18 +18694,20 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
 
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <Card><SecTitle icon="💰" title={isEN?"Dividends":"Dividendos"} sub={isEN?"Annual yield · Frequency · Next pay":"Yield anual · Frecuencia · Próximo pago"} tag={"$"+Math.round(totalDiv).toLocaleString("en-US")+(isEN?"/yr":"/año")} tagColor="#B45309"/>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            {divCards.length===0
+              ? <div style={{textAlign:"center",padding:"24px 12px",color:"#64748B",fontSize:12.5}}>{isEN?"None of your stocks pay a dividend right now.":"Ninguna de tus acciones paga dividendo ahora mismo."}</div>
+              : <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
               {divCards.map(r=>{ const col=SECTOR_COLORS[r.sector]||"#0EA5E9"; const R=15,C=2*Math.PI*R,f=Math.min(1,r.divY/maxYield); return (
                 <div key={r.tk} style={{border:"1px solid #E6EDF7",borderRadius:12,padding:"10px 12px",display:"flex",alignItems:"center",gap:10}}>
                   <svg width="40" height="40" style={{transform:"rotate(-90deg)",flexShrink:0}}><circle cx="20" cy="20" r={R} fill="none" stroke="#EEF2F7" strokeWidth="4"/><circle cx="20" cy="20" r={R} fill="none" stroke={col} strokeWidth="4" strokeDasharray={C} strokeDashoffset={C*(1-f)} strokeLinecap="round"/></svg>
                   <div style={{minWidth:0,flex:1}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontFamily:"monospace",fontWeight:900,fontSize:13,color:col}}>{r.tk}</span><span style={{fontSize:10,fontFamily:"monospace",color:"#64748B"}}>{r.divY.toFixed(2)}%</span></div>
-                    <div style={{fontSize:10,color:"#64748B",marginTop:2}}>${Math.round(r.divAmt)}{isEN?"/yr":"/año"} · {freqOf(r.tk)}</div>
-                    <div style={{fontSize:10,color:col,fontWeight:700,marginTop:1}}>{isEN?"Next":"Próximo"}: {nextPay(r.tk)}</div>
+                    <div style={{fontSize:10,color:"#64748B",marginTop:2}}>${(r.di.annual).toFixed(2)}{isEN?"/sh·yr":"/acc·año"} · {r.di.freq}</div>
+                    <div style={{fontSize:10,color:col,fontWeight:700,marginTop:1}}>{isEN?"Next":"Próximo"}: {r.di.next||"—"}</div>
                   </div>
                 </div>
               ); })}
-            </div>
+            </div>}
           </Card>
           <Card><SecTitle icon="🏅" title={isEN?"Performance ranking":"Ranking de rendimiento"} sub={(isEN?"Total return sorted — period: ":"Retorno total ordenado — período: ")+curPer.l}/>
             <div style={{display:"flex",flexDirection:"column"}}>
