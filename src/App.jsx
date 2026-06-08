@@ -20199,8 +20199,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               );
             })()}
             {positions.length>=1 && (()=>{
-              const best=[["Dic",9.3],["Ene",8.4],["Jun",7.8],["Oct",5.5],["Feb",5.2],["Ago",2.9]];
-              const worst=[["Nov",-2.1],["Mar",-1.8],["Ago",2.9],["Sep",2.9],["May",3.2],["Abr",4.6]];
+              const best=[];
+              const worst=[];
               const bMax=Math.max(...best.map(b=>Math.abs(b[1]))), wMax=Math.max(...worst.map(b=>Math.abs(b[1])));
               const bar=(m,v,maxv,pos)=>(
                 <div key={m+v} style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
@@ -20227,7 +20227,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             {positions.length>=1 && (()=>{
               const tk=sorted[0].ticker.toUpperCase();
               const mlbl=isEN?["J","F","M","A","M","J","J","A","S","O","N","D"]:["E","F","M","A","M","J","J","A","S","O","N","D"];
-              const data=[8.4,5.2,-1.8,4.6,3.2,7.8,6.1,-0.4,2.9,5.5,-2.1,9.3];
+              const data=new Array(12).fill(0);
               const col=(v)=>v>8?"#00a86b":v>4?"#6cc4a4":v>0?"#b8ddd0":v>-2?"#f5b0bc":"#e03355";
               return (
                 <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
@@ -20366,18 +20366,20 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
             {positions.length===0 && <div style={{textAlign:"center",padding:"32px 20px",color:"#8FA5BE",fontSize:13}}>{isEN?"Add positions to see risk":"Agrega posiciones para ver el riesgo"}</div>}
             {positions.length>=1 && (()=>{
-              const score=68;
+              const totMV=positions.reduce((a,p)=>{const t=p.ticker.toUpperCase();const l=livePrices[t];const c=l?l.price:(parseFloat(p.entryPrice)||0);return a+c*(parseFloat(p.shares)||0);},0)||1;
+              const conc=Math.max(0,...positions.map(p=>{const t=p.ticker.toUpperCase();const l=livePrices[t];const c=l?l.price:(parseFloat(p.entryPrice)||0);return c*(parseFloat(p.shares)||0)/totMV*100;}));
+              const score=0;
               const ang=Math.PI+(score/100)*Math.PI; // semicírculo
               const cx=100,cy=100,r=78;
               const nx=cx+Math.cos(ang)*(r-12), ny=cy+Math.sin(ang)*(r-12);
               const arc=(a0,a1)=>{const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);return `M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;};
               const bars=[
-                {l:isEN?"Concentration":"Concentración",v:"100%",pct:100,c:"#e03355"},
-                {l:isEN?"Volatility (24.1%)":"Volatilidad (24.1%)",v:isEN?"Medium":"Media",pct:48,c:"#d4860a"},
-                {l:"Beta vs S&P (1.3)",v:isEN?"High":"Alta",pct:65,c:"#e06c1a"},
-                {l:"Sharpe Ratio (1.6)",v:isEN?"Good":"Bueno",pct:72,c:"#00a86b"},
-                {l:"VaR 95% (2.0%)",v:isEN?"Low":"Bajo",pct:30,c:"#00a86b"},
-                {l:isEN?"Max Drawdown (−14%)":"Max Drawdown (−14%)",v:isEN?"Acceptable":"Aceptable",pct:42,c:"#d4860a"},
+                {l:isEN?"Concentration":"Concentración",v:conc.toFixed(0)+"%",pct:conc,c:conc>60?"#e03355":conc>40?"#d4860a":"#00a86b"},
+                {l:isEN?"Volatility":"Volatilidad",v:"—",pct:0,c:"#8FA5BE"},
+                {l:"Beta vs S&P",v:"—",pct:0,c:"#8FA5BE"},
+                {l:"Sharpe Ratio",v:"—",pct:0,c:"#8FA5BE"},
+                {l:"VaR 95%",v:"—",pct:0,c:"#8FA5BE"},
+                {l:"Max Drawdown",v:"—",pct:0,c:"#8FA5BE"},
               ];
               const alerts=[
                 {ic:"🔴",ti:isEN?"Extreme concentration":"Concentración extrema",b:isEN?"100% in one stock. If it drops −20%, you lose a big share. Diversify into ≥3 assets.":"100% en un activo. Si el stock cae −20%, tu portafolio pierde fuerte. Diversifica en ≥3 activos.",bg:"#fff5e0",bd:"rgba(212,134,10,0.2)",c:"#d4860a"},
@@ -20388,7 +20390,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               return (
                 <div style={{display:"grid",gridTemplateColumns:"1.7fr 1fr",gap:16}}>
                   <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"18px 22px",boxShadow:"0 4px 16px rgba(26,95,173,0.07)"}}>
-                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Overall risk level":"Nivel de riesgo general"} <span style={{fontSize:10,fontWeight:700,color:"#d4860a",background:"rgba(212,134,10,0.1)",borderRadius:100,padding:"2px 9px"}}>{isEN?"Moderate":"Moderado"}</span></div>
+                    <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#0F172A"}}>{isEN?"Overall risk level":"Nivel de riesgo general"} <span style={{fontSize:10,fontWeight:700,color:"#d4860a",background:"rgba(212,134,10,0.1)",borderRadius:100,padding:"2px 9px"}}>{isEN?"No data":"Sin datos"}</span></div>
                     <div style={{fontSize:11,color:"#8FA5BE",marginBottom:14}}>{isEN?"Based on volatility, concentration and correlation":"Basado en volatilidad, concentración y correlación"}</div>
                     <div style={{display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
                       <div style={{textAlign:"center",flexShrink:0}}>
@@ -20399,8 +20401,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                           <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#1A2535" strokeWidth="3" strokeLinecap="round"/>
                           <circle cx={cx} cy={cy} r="5" fill="#1A2535"/>
                         </svg>
-                        <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#d4860a",marginTop:2}}>{score} / 100</div>
-                        <div style={{fontSize:11,color:"#5A7090"}}>{isEN?"Moderate-high risk":"Riesgo moderado-alto"}</div>
+                        <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#d4860a",marginTop:2}}>— / 100</div>
+                        <div style={{fontSize:11,color:"#5A7090"}}>{isEN?"Insufficient data":"Datos insuficientes"}</div>
                       </div>
                       <div style={{flex:1,minWidth:240,display:"flex",flexDirection:"column",gap:13}}>
                         {bars.map((b,i)=>(
@@ -20423,7 +20425,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               );
             })()}
             {positions.length>=1 && (()=>{
-              const dd=[0,-2,-1.5,-4,-3,-6,-5,-8,-14,-10,-7,-9,-8,-5,-3,-4,-2,-3,-1,-2,-5,-4,-2,-1,-3,-2,-1,-4,-3,-2,-1,0,-1];
+              const dd=new Array(33).fill(0);
               const W=940,H=200,PL=40,PR=14,PT=16,PB=20; const mn=Math.min(...dd)-2,mx=2;
               const xA=(i)=>PL+(i/(dd.length-1))*(W-PL-PR); const yA=(v)=>PT+(1-(v-mn)/((mx-mn)||1))*(H-PT-PB);
               const ln=dd.map((v,i)=>xA(i).toFixed(1)+","+yA(v).toFixed(1)).join(" ");
@@ -20452,28 +20454,30 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             {positions.length===0 && <div style={{textAlign:"center",padding:"32px 20px",color:"#8FA5BE",fontSize:13}}>{isEN?"Add positions to see efficiency":"Agrega posiciones para ver la eficiencia"}</div>}
             {positions.length>=1 && (()=>{
               const cards=[
-                {ico:"🎯",v:"1.6",l:"SHARPE RATIO",c:"#00a86b",badge:isEN?"Good · >1.5":"Bueno · >1.5",bg:"rgba(0,168,107,0.08)",bc:"#00a86b",d:isEN?"Solid risk-adjusted return. Better than 74% of similar portfolios.":"Retorno ajustado por riesgo sólido. Mejor que el 74% de portafolios similares."},
-                {ico:"⚡",v:"1.3",l:"BETA",c:"#0099a8",badge:isEN?"Moderate-High":"Moderado-Alto",bg:"rgba(0,153,168,0.08)",bc:"#0099a8",d:isEN?"For every 1% the S&P 500 moves, your portfolio moves ±1.3%.":"Por cada 1% que mueve el S&P 500, tu cartera mueve ±1.3%."},
-                {ico:"🏆",v:"+83%",l:"ALPHA VS S&P",c:"#d4860a",badge:isEN?"Exceptional":"Excepcional",bg:"rgba(212,134,10,0.1)",bc:"#d4860a",d:isEN?"You beat the market by 83 percentage points since entry.":"Superaste al mercado en 83 puntos porcentuales desde tu entrada."},
+                {ico:"🎯",v:"—",l:"SHARPE RATIO",c:"#00a86b",badge:isEN?"Good · >1.5":"Bueno · >1.5",bg:"rgba(0,168,107,0.08)",bc:"#00a86b",d:isEN?"Solid risk-adjusted return. Better than 74% of similar portfolios.":"Retorno ajustado por riesgo sólido. Mejor que el 74% de portafolios similares."},
+                {ico:"⚡",v:"—",l:"BETA",c:"#0099a8",badge:isEN?"Moderate-High":"Moderado-Alto",bg:"rgba(0,153,168,0.08)",bc:"#0099a8",d:isEN?"For every 1% the S&P 500 moves, your portfolio moves ±1.3%.":"Por cada 1% que mueve el S&P 500, tu cartera mueve ±1.3%."},
+                {ico:"🏆",v:"—",l:"ALPHA VS S&P",c:"#d4860a",badge:isEN?"Exceptional":"Excepcional",bg:"rgba(212,134,10,0.1)",bc:"#d4860a",d:isEN?"You beat the market by 83 percentage points since entry.":"Superaste al mercado en 83 puntos porcentuales desde tu entrada."},
               ];
               const tk=sorted[0].ticker.toUpperCase();
               const W=560,H=240,PL=44,PR=60,PT=18,PB=30;
               const pts=[{l:tk,vol:24.1,ret:95.81,c:"#0099a8",r:13},{l:"S&P 500",vol:14.2,ret:24.3,c:"#8FA5BE",r:11},{l:"NASDAQ",vol:18.5,ret:32.1,c:"#5A7090",r:10},{l:"Bonds",vol:5.2,ret:4.2,c:"#d4860a",r:8}];
               const xA=(v)=>PL+(v/30)*(W-PL-PR); const yA=(v)=>H-PB-(v/110)*(H-PT-PB);
               const front=[[4,4],[8,12],[12,22],[16,35],[20,52],[25,80],[28,95]];
+              const _pnl=(()=>{let s2=0,n2=0;positions.forEach(p=>{const e=parseFloat(p.entryPrice)||0;const t=p.ticker.toUpperCase();const l=livePrices[t];const c=l?l.price:e;if(e>0){s2+=(c-e)/e*100;n2++;}});return n2?s2/n2:0;})();
               const rows=[
-                [isEN?"Total return":"Retorno total","+95.81%","+24.3%",true],
-                ["Sharpe Ratio","1.6","1.1",true],
-                [isEN?"Volatility":"Volatilidad","24.1%","14.2%",false],
-                ["Max Drawdown","−14.0%","−10.2%",false],
-                ["Beta","1.3","1.0",false],
-                ["Alpha","+83%","—",true],
-                ["VaR 95%","2.0%","1.4%",false],
+                [isEN?"Total return":"Retorno total",(_pnl>=0?"+":"")+_pnl.toFixed(2)+"%","—",_pnl>=0],
+                ["Sharpe Ratio","—","—",false],
+                [isEN?"Volatility":"Volatilidad","—","—",false],
+                ["Max Drawdown","—","—",false],
+                ["Beta","—","—",false],
+                ["Alpha","—","—",false],
+                ["VaR 95%","—","—",false],
               ];
+              const _gain=positions.reduce((a,p)=>{const e=parseFloat(p.entryPrice)||0;const t=p.ticker.toUpperCase();const l=livePrices[t];const c=l?l.price:e;return a+(c-e)*(parseFloat(p.shares)||0);},0);
               const cost=[
-                {v:"$147.54",l:isEN?"UNREALIZED GAIN":"GANANCIA NO REALIZADA",c:"#00a86b",bg:"rgba(0,168,107,0.08)"},
-                {v:"$22.13",l:isEN?"EST. TAX (15%)":"IMPUESTO ESTIMADO (15%)",c:"#e03355",bg:"rgba(224,51,85,0.07)"},
-                {v:isEN?"3 years":"3 años",l:isEN?"RECOMMENDED HOLD":"HOLDING RECOMENDADO",c:"#0099a8",bg:"rgba(0,153,168,0.08)"},
+                {v:(_gain>=0?"+$":"−$")+Math.abs(_gain).toLocaleString("en-US",{maximumFractionDigits:2}),l:isEN?"UNREALIZED GAIN":"GANANCIA NO REALIZADA",c:_gain>=0?"#00a86b":"#e03355",bg:"rgba(0,168,107,0.08)"},
+                {v:"$"+Math.max(0,_gain*0.15).toLocaleString("en-US",{maximumFractionDigits:2}),l:isEN?"EST. TAX (15%)":"IMPUESTO ESTIMADO (15%)",c:"#e03355",bg:"rgba(224,51,85,0.07)"},
+                {v:"—",l:isEN?"RECOMMENDED HOLD":"HOLDING RECOMENDADO",c:"#0099a8",bg:"rgba(0,153,168,0.08)"},
                 {v:"$0.00",l:isEN?"FEES PAID":"COMISIONES PAGADAS",c:"#d4860a",bg:"rgba(212,134,10,0.1)"},
               ];
               return (<>
@@ -20532,15 +20536,15 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               const fmt$=(v)=>"$"+Math.round(v).toLocaleString("en-US");
               const now=new Date();
               const months=[]; for(let i=0;i<=12;i++){ months.push(new Date(now.getFullYear(),now.getMonth()+i,1).toLocaleDateString(isEN?"en-US":"es-ES",{month:"short"})); }
-              const W=680,H=240,PADL=44,PADR=16,PADT=14,PADB=26;
+              const W=680,H=170,PADL=44,PADR=16,PADT=12,PADB=24;
               const allV=[bull,base,bear,totVal]; const vMax=Math.max(...allV)*1.03, vMin=Math.min(...allV)*0.97;
               const xAt=(i)=>PADL+(i/12)*(W-PADL-PADR);
               const yAt=(v)=>H-PADB-((v-vMin)/((vMax-vMin)||1))*(H-PADT-PADB);
               const lineTo=(end,curve)=>{ const pts=[]; for(let i=0;i<=12;i++){ const t=i/12; const e=Math.pow(t,curve); pts.push([xAt(i),yAt(totVal+(end-totVal)*e)]); } return pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "); };
               const scen=[
-                {k:"bull",emo:"🐂",l:isEN?"BULLISH":"ALCISTA",v:bull,p:pBull,c:"#10B981",bg:"rgba(16,185,129,0.06)",bd:"#10B981"},
-                {k:"base",emo:"⚖️",l:"BASE",v:base,p:pBase,c:"#0EA5E9",bg:"rgba(14,165,233,0.06)",bd:"#7DD3FC"},
-                {k:"bear",emo:"🐻",l:isEN?"BEARISH":"BAJISTA",v:bear,p:pBear,c:"#EF4444",bg:"rgba(239,68,68,0.06)",bd:"#FCA5A5"},
+                {k:"bull",emo:"▲",l:isEN?"BULLISH":"ALCISTA",v:bull,p:pBull,c:"#10B981",bg:"rgba(16,185,129,0.06)",bd:"#10B981"},
+                {k:"base",emo:"■",l:"BASE",v:base,p:pBase,c:"#0EA5E9",bg:"rgba(14,165,233,0.06)",bd:"#7DD3FC"},
+                {k:"bear",emo:"▼",l:isEN?"BEARISH":"BAJISTA",v:bear,p:pBear,c:"#EF4444",bg:"rgba(239,68,68,0.06)",bd:"#FCA5A5"},
               ];
               return (
                 <div style={{background:"#fff",border:"1px solid #E6EDF7",borderRadius:18,padding:"20px 22px",boxShadow:"0 6px 20px rgba(26,95,173,0.08)"}}>
@@ -20552,12 +20556,12 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                     </span>
                     <span style={{fontSize:11,color:"#94A3B8"}}>{isEN?"Updated":"Actualizado"}: {isEN?"today":"hoy"} {now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})} · {isEN?"Horizon":"Horizon"}: 12 {isEN?"months":"meses"}</span>
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:18}}>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
                     {scen.map(s=>(
-                      <div key={s.k} style={{background:s.bg,border:`2px solid ${s.bd}`,borderRadius:14,padding:"16px 14px",textAlign:"center"}}>
-                        <div style={{fontSize:22,marginBottom:4}}>{s.emo}</div>
+                      <div key={s.k} style={{background:s.bg,border:`2px solid ${s.bd}`,borderRadius:14,padding:"12px 12px",textAlign:"center"}}>
+                        <div style={{fontSize:18,marginBottom:6,color:s.c,fontWeight:900}}>{s.emo}</div>
                         <div style={{fontSize:11,fontWeight:800,color:"#64748B",letterSpacing:0.8,marginBottom:6}}>{s.l}</div>
-                        <div style={{fontSize:30,fontWeight:900,color:s.c,letterSpacing:-1.5,lineHeight:1}}>{fmt$(s.v)}</div>
+                        <div style={{fontSize:23,fontWeight:900,color:s.c,letterSpacing:-1,lineHeight:1}}>{fmt$(s.v)}</div>
                         <div style={{fontSize:11,color:"#94A3B8",marginTop:6,fontWeight:600}}>P: {s.p}%</div>
                       </div>
                     ))}
@@ -20603,10 +20607,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               const G="#00a86b",T="#0099a8",GO="#d4860a",OR="#e06c1a",MD="#5a7090",R="#e03355";
               const metrics=[
                 {ico:"📈",val:(avgPnl>=0?"+":"")+avgPnl.toFixed(1)+"%",lbl:isEN?"RETURN":"RETORNO",c:G,pct:Math.min(100,Math.max(5,50+avgPnl*0.3))},
-                {ico:"⚡",val:"1.6",lbl:"SHARPE",c:T,pct:72},
-                {ico:"🌊",val:"24.1%",lbl:"VOLATIL.",c:GO,pct:48},
-                {ico:"📉",val:"−14%",lbl:"DRAWDOWN",c:OR,pct:35},
-                {ico:"💰",val:"$0",lbl:"DIVID.",c:MD,pct:5},
+                {ico:"⚡",val:"—",lbl:"SHARPE",c:"#8FA5BE",pct:0},
+                {ico:"🌊",val:"—",lbl:"VOLATIL.",c:"#8FA5BE",pct:0},
+                {ico:"📉",val:"—",lbl:"DRAWDOWN",c:"#8FA5BE",pct:0},
+                {ico:"💰",val:"$0",lbl:"DIVID.",c:MD,pct:0},
                 {ico:"🎯",val:divers+"/30",lbl:"DIVERS.",c:R,pct:Math.min(100,divers/30*100)},
               ];
               const score=Math.round(0.4*metrics[0].pct+0.2*72+0.15*48+0.1*35+0.05*5+0.1*metrics[5].pct);
@@ -20677,7 +20681,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             })()}
 
             {positions.length>=1 && (()=>{
-              const scores=[58,62,65,68,64,70,72,69,74,76,73,72];
+              const scores=new Array(12).fill(0);
               const months=isEN?["Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May"]:["Jun","Jul","Ago","Sep","Oct","Nov","Dic","Ene","Feb","Mar","Abr","May"];
               const W=900,H=170,PADL=36,PADR=14,PADT=14,PADB=24;
               const mn=50,mx=85;
