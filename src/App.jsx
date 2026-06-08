@@ -17934,6 +17934,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [addViewOpen, setAddViewOpen] = useState(false);
   const [importMsg, setImportMsg] = useState(null);
   const [dataNote, setDataNote] = useState(null);
+  const [sortCol, setSortCol] = useState(null);   // header (c.h) de la columna por la que se ordena
+  const [sortDir, setSortDir] = useState("desc"); // "desc" = mayor a menor (default), "asc" = menor a mayor
+  const mockRef = useRef({});
   const [cloudSync, setCloudSync] = useState(user?.id ? "loading" : "off"); // off | loading | synced | error
   const cloudReadyRef = useRef(false);
 
@@ -18136,7 +18139,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     MELI:{ytd:22.4,w52h:-3.8,w1:2.8,w2:4.8,w3:7.4,w4:10.8,m3:18.4,m6:28.4,beta:1.44,vol:36.4,pe:52.4,pb:14.8,roe:22.4,roa:12.4,margin:14.8,target:2400,rating:"Buy",upside:14.8,analysts:32,eps:38.42,de:2.4,cr:1.4,qr:1.2,icov:8.4,fcf:28.4,div:0.0},
     NU:  {ytd:28.4,w52h:-8.4,w1:3.4,w2:6.8,w3:10.4,w4:14.8,m3:24.4,m6:38.4,beta:1.88,vol:48.4,pe:42.4,pb:6.8,roe:22.4,roa:4.8,margin:28.4,target:18,rating:"Buy",upside:22.4,analysts:22,eps:0.48,de:4.2,cr:null,qr:null,icov:null,fcf:0.28,div:0.0},
   };
-  const getMock = (tk) => MOCK[tk] || {ytd:parseFloat((Math.random()*40-10).toFixed(1)),w52h:parseFloat((Math.random()*-30).toFixed(1)),w1:parseFloat((Math.random()*8-2).toFixed(1)),w2:parseFloat((Math.random()*10-2).toFixed(1)),w3:parseFloat((Math.random()*14-3).toFixed(1)),w4:parseFloat((Math.random()*18-4).toFixed(1)),m3:parseFloat((Math.random()*30-5).toFixed(1)),m6:parseFloat((Math.random()*50-8).toFixed(1)),beta:parseFloat((Math.random()*2+0.5).toFixed(2)),vol:parseFloat((Math.random()*40+15).toFixed(1)),pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:null};
+  const getMock = (tk) => { if(MOCK[tk]) return MOCK[tk]; if(mockRef.current[tk]) return mockRef.current[tk]; return (mockRef.current[tk] = {ytd:parseFloat((Math.random()*40-10).toFixed(1)),w52h:parseFloat((Math.random()*-30).toFixed(1)),w1:parseFloat((Math.random()*8-2).toFixed(1)),w2:parseFloat((Math.random()*10-2).toFixed(1)),w3:parseFloat((Math.random()*14-3).toFixed(1)),w4:parseFloat((Math.random()*18-4).toFixed(1)),m3:parseFloat((Math.random()*30-5).toFixed(1)),m6:parseFloat((Math.random()*50-8).toFixed(1)),beta:parseFloat((Math.random()*2+0.5).toFixed(2)),vol:parseFloat((Math.random()*40+15).toFixed(1)),pe:null,pb:null,roe:null,roa:null,margin:null,target:null,rating:"—",upside:null,analysts:null,eps:null,de:null,cr:null,qr:null,icov:null,fcf:null,div:null}); };
 
   const pctColor = v => v==null?"#64748B":v>=0?"#10B981":"#EF4444";
   const pctFmt  = v => v==null?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
@@ -18235,7 +18238,74 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const cols = COLS[activeView]||COLS.returns;
   const totalW = cols.reduce((s,c)=>s+c.w, 0);
 
-  const thStyle = {fontSize:10,fontWeight:700,color:"#1A5FAD",padding:"10px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid #DBEAFE",background:"#EBF3FF",userSelect:"none"};
+  // ── Ordenamiento de columnas (mayor a menor / menor a mayor) ──
+  // Valor numérico/texto por columna según su encabezado, para poder ordenar.
+  const RATING_RANK = {"Strong Buy":4,"Buy":3,"Hold":2,"Sell":1};
+  const sortValue = (h, tk, d, m) => {
+    switch(h){
+      case "Name": return tk;
+      case "Price": return d?.price;
+      case "Change %": return d?.change;
+      case "Div. Yield":
+      case "Dividend Yield": return m.div;
+      case "Day High": return d?.high;
+      case "Day Low": return d?.low;
+      case "Beta": return m.beta;
+      case "Volatility %": return m.vol;
+      case "Open": return d?.open;
+      case "Prev Close": return d?.prev;
+      case "VaR (95%)": return m.vol!=null?m.vol*0.082:null;
+      case "Sharpe Ratio": return m.beta!=null?2.4-m.beta*0.6:null;
+      case "Max Drawdown": return m.vol!=null?-m.vol*0.58:null;
+      case "Correlation SPY": return m.beta!=null?1.1-m.beta*0.08:null;
+      case "% from 52W High": return m.w52h;
+      case "YTD Return": return m.ytd;
+      case "1 Week Return": return m.w1;
+      case "2 Week Return": return m.w2;
+      case "3 Week Return": return m.w3;
+      case "4 Week Return": return m.w4;
+      case "3 Month Return": return m.m3;
+      case "6 Month Return": return m.m6;
+      case "P/E Ratio": return m.pe;
+      case "P/B Ratio": return m.pb;
+      case "ROE %": return m.roe;
+      case "ROA %": return m.roa;
+      case "Net Margin": return m.margin;
+      case "FCF/Share":
+      case "FCF / Share": return m.fcf;
+      case "Price Target": return m.target;
+      case "Analyst Rating": return RATING_RANK[m.rating]||0;
+      case "Upside %": return m.upside;
+      case "# Analysts": return m.analysts;
+      case "EPS Estimate": return m.eps;
+      case "Debt / Equity": return m.de;
+      case "Current Ratio": return m.cr;
+      case "Quick Ratio": return m.qr;
+      case "Interest Cov.": return m.icov;
+      default: return null;
+    }
+  };
+  const handleSort = (h) => {
+    if(sortCol===h){ setSortDir(p=>p==="desc"?"asc":"desc"); }
+    else { setSortCol(h); setSortDir("desc"); } // primer clic = mayor a menor
+  };
+  const sortedTickers = (() => {
+    if(!sortCol) return tickers;
+    const arr=[...tickers];
+    arr.sort((a,b)=>{
+      const va=sortValue(sortCol,a,prices[a],getMock(a));
+      const vb=sortValue(sortCol,b,prices[b],getMock(b));
+      const na=(va==null||Number.isNaN(va)), nb=(vb==null||Number.isNaN(vb));
+      if(na&&nb) return 0; if(na) return 1; if(nb) return -1; // nulos siempre al final
+      if(typeof va==="string"||typeof vb==="string"){
+        const r=String(va).localeCompare(String(vb)); return sortDir==="asc"?r:-r;
+      }
+      return sortDir==="asc" ? va-vb : vb-va;
+    });
+    return arr;
+  })();
+
+  const thStyle = {fontSize:13,fontWeight:800,color:"#1A5FAD",padding:"12px 12px",textAlign:"left",whiteSpace:"nowrap",borderBottom:"2px solid #DBEAFE",background:"#EBF3FF",userSelect:"none"};
   const tdStyle = {padding:"11px 12px",borderBottom:"1px solid #DBEAFE",verticalAlign:"middle",whiteSpace:"nowrap"};
 
   // Export watchlist as CSV
@@ -18477,9 +18547,19 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
           <table style={{borderCollapse:"collapse",width:"100%",minWidth:totalW}}>
             <thead>
               <tr>
-                {cols.map((c,i)=>(
-                  <th key={i} style={{...thStyle,minWidth:c.w}}>{c.h}</th>
-                ))}
+                {cols.map((c,i)=>{
+                  const active = sortCol===c.h;
+                  return (
+                    <th key={i} onClick={()=>handleSort(c.h)}
+                      title={isEN?"Click to sort (high→low, click again for low→high)":"Clic para ordenar (mayor→menor, otra vez menor→mayor)"}
+                      style={{...thStyle,minWidth:c.w,cursor:"pointer",color:active?"#0047C2":thStyle.color}}>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:4}}>
+                        {c.h}
+                        <span style={{fontSize:11,lineHeight:1,opacity:active?1:0.4,color:active?"#0047C2":"#94A3B8"}}>{active?(sortDir==="desc"?"▼":"▲"):"↕"}</span>
+                      </span>
+                    </th>
+                  );
+                })}
                 <th style={{...thStyle,width:60}}>×</th>
               </tr>
               {/* Filter row */}
@@ -18493,7 +18573,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
               </tr>
             </thead>
             <tbody>
-              {tickers.map((tk,rowIdx)=>{
+              {sortedTickers.map((tk,rowIdx)=>{
                 const d = prices[tk];
                 const m = getMock(tk);
                 return(
