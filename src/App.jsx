@@ -17934,6 +17934,38 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [addViewOpen, setAddViewOpen] = useState(false);
   const [importMsg, setImportMsg] = useState(null);
   const [dataNote, setDataNote] = useState(null);
+  const [cloudSync, setCloudSync] = useState(user?.id ? "loading" : "off"); // off | loading | synced | error
+  const cloudReadyRef = useRef(false);
+
+  // ☁️ Cargar la watchlist desde la nube (Supabase) al iniciar sesión → disponible en cualquier dispositivo
+  useEffect(()=>{
+    if(!user?.id){ cloudReadyRef.current=false; setCloudSync("off"); return; }
+    let cancelled=false;
+    cloudReadyRef.current=false;
+    setCloudSync("loading");
+    (async()=>{
+      try{
+        const { data, error } = await supabase.from("user_watchlists").select("tickers").eq("user_id",user.id).maybeSingle();
+        if(cancelled) return;
+        if(error) throw error;
+        if(data && Array.isArray(data.tickers) && data.tickers.length>0){
+          setTickers(data.tickers);
+        } else {
+          // Primera vez en la nube: subir lo que tenga guardado localmente como semilla
+          let seed = tickers;
+          try { const s=JSON.parse(localStorage.getItem(LS_KEY)||"null"); if(s&&s.length) seed=s; } catch {}
+          await supabase.from("user_watchlists").upsert({ user_id:user.id, tickers:seed, updated_at:new Date().toISOString() });
+        }
+        cloudReadyRef.current=true;
+        if(!cancelled) setCloudSync("synced");
+      }catch(e){
+        console.warn("watchlist cloud load:",e?.message||e);
+        if(!cancelled){ cloudReadyRef.current=true; setCloudSync("error"); }
+      }
+    })();
+    return ()=>{ cancelled=true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[user?.id]);
 
   // Market status: compute NYSE open/closed/pre-market in real time
   const computeMarketStatus = () => {
@@ -17958,7 +17990,15 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
 
   useEffect(()=>{
     try { localStorage.setItem(LS_KEY, JSON.stringify(tickers)); } catch{}
-  },[tickers, LS_KEY]);
+    // ☁️ Guardar en la nube (solo tras la carga inicial, para no pisar lo guardado con los defaults)
+    if(user?.id && cloudReadyRef.current){
+      setCloudSync("saving");
+      supabase.from("user_watchlists")
+        .upsert({ user_id:user.id, tickers, updated_at:new Date().toISOString() })
+        .then(({error})=>{ setCloudSync(error?"error":"synced"); })
+        .catch(()=>setCloudSync("error"));
+    }
+  },[tickers, LS_KEY, user?.id]);
 
   // Mapeo de símbolos cripto → ids de CoinGecko (precio gratis y confiable, con cambio 24h)
   const CG_IDS = {
@@ -18278,6 +18318,19 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
               <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(26,95,173,0.08)",borderRadius:20,padding:"4px 12px",border:"1px solid #C5DEFF"}}>
                 <span style={{fontSize:11,color:"#1A5FAD"}}>{tickers.length} tickers</span>
               </div>
+              {(() => {
+                const sync = cloudSync==="synced" ? {t:isEN?"☁️ Synced to your account":"☁️ Guardada en tu cuenta",c:"#10B981",b:"rgba(16,185,129,0.12)",br:"rgba(16,185,129,0.32)"}
+                  : (cloudSync==="loading"||cloudSync==="saving") ? {t:isEN?"☁️ Syncing…":"☁️ Sincronizando…",c:"#818CF8",b:"rgba(129,140,248,0.12)",br:"rgba(129,140,248,0.32)"}
+                  : cloudSync==="error" ? {t:isEN?"⚠️ Saved on this device":"⚠️ Guardada en este equipo",c:"#F59E0B",b:"rgba(245,158,11,0.12)",br:"rgba(245,158,11,0.32)"}
+                  : {t:isEN?"💾 Sign in to sync across devices":"💾 Inicia sesión para sincronizar",c:"#94A3B8",b:"rgba(148,163,184,0.10)",br:"rgba(148,163,184,0.28)"};
+                return (
+                  <div onClick={()=>{ if(cloudSync==="off"&&onNeedAuth) onNeedAuth(); }}
+                    title={sync.t}
+                    style={{display:"flex",alignItems:"center",gap:5,background:sync.b,borderRadius:20,padding:"4px 12px",border:`1px solid ${sync.br}`,cursor:cloudSync==="off"?"pointer":"default"}}>
+                    <span style={{fontSize:11,fontWeight:600,color:sync.c}}>{sync.t}</span>
+                  </div>
+                );
+              })()}
               {lastUpdated&&(
                 <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.07)",borderRadius:20,padding:"4px 12px",border:"1px solid rgba(255,255,255,0.1)"}}>
                   <span style={{width:6,height:6,borderRadius:"50%",background:"#10B981",display:"inline-block",animation:"pulse 2s infinite"}}/>
