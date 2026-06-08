@@ -21697,7 +21697,7 @@ function AdminDashboard(){
 
   useEffect(()=>{
     // Mostrar UI de inmediato con ceros
-    setStats({totalUsers:0,newToday:0,newWeek:0,vipCount:0,postsHoy:0,totalPosts:0,totalSubs:0,activosHoy:0,logins:0,visitasMes:0,visitasAnon:0,visitantesUnicos:0});
+    setStats({totalUsers:0,newToday:0,newWeek:0,vipCount:0,postsHoy:0,totalPosts:0,totalSubs:0,activosHoy:0,logins:0,visitasMes:0,visitasAnon:0,visitantesUnicos:0,regVisitors:[]});
     setLoading(false);
 
     // Luego cargar datos reales en background con timeout de 8s por query
@@ -21765,17 +21765,26 @@ function AdminDashboard(){
       // (Antes usaba 3 consultas count:"exact" que con Supabase fallaban/devolvían null → el panel quedaba en 0.)
       const mes30 = new Date(); mes30.setDate(mes30.getDate()-30);
       const vRes = await withTimeout(
-        supabase.from("site_visits").select("visitor_id,is_registered,created_at").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),
+        supabase.from("site_visits").select("visitor_id,is_registered,created_at,username,is_admin").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),
         15000
       );
-      const vrows = vRes.data || [];
-      if(vrows.length || !vRes.error){
-        setStats(s=>({...s,
-          visitasMes: vrows.length,
-          visitasAnon: vrows.filter(x=>!x.is_registered).length,
-          visitantesUnicos: new Set(vrows.map(x=>x.visitor_id)).size,
-        }));
+      let vrows = vRes.data || [];
+      // Reintento sin columnas nuevas (por si la tabla aún no tiene username/is_admin)
+      if(vRes.error){
+        const vRes2 = await withTimeout(supabase.from("site_visits").select("visitor_id,is_registered,created_at").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),15000);
+        vrows = vRes2.data || [];
       }
+      // Excluir visitas del admin (tú) del conteo
+      const noAdmin = vrows.filter(x=>!x.is_admin);
+      // Últimos visitantes REGISTRADOS (con nombre), sin duplicar usuario, máx 20
+      const seen=new Set(); const regVisitors=[];
+      noAdmin.filter(x=>x.is_registered && x.username).forEach(x=>{ if(!seen.has(x.username)){ seen.add(x.username); regVisitors.push({username:x.username, created_at:x.created_at}); } });
+      setStats(s=>({...s,
+        visitasMes: noAdmin.length,
+        visitasAnon: noAdmin.filter(x=>!x.is_registered).length,
+        visitantesUnicos: new Set(noAdmin.map(x=>x.visitor_id)).size,
+        regVisitors: regVisitors.slice(0,20),
+      }));
     };
     loadData();
   },[]);
@@ -21870,6 +21879,23 @@ function AdminDashboard(){
               </div>
             </div>
           ))}
+        </div>
+
+        {/* ── QUIÉN ENTRÓ — visitantes registrados (sin contar admin) ── */}
+        <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:14,padding:"18px 22px",marginBottom:20,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>👥 Quién entró — miembros registrados (últimos 30 días)</div>
+          {(stats.regVisitors||[]).length>0 ? (
+            <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+              {stats.regVisitors.map((v,i)=>(
+                <span key={i} style={{display:"inline-flex",alignItems:"center",gap:6,background:"#F3F6FB",border:"1px solid #E2E8F0",borderRadius:20,padding:"5px 12px",fontSize:12,fontWeight:600,color:"#0F4C81"}}>
+                  <span style={{width:20,height:20,borderRadius:"50%",background:"#0F4C81",color:"#fff",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800}}>{(v.username||"?").slice(0,2).toUpperCase()}</span>
+                  @{v.username} <span style={{color:"#9CA3AF",fontWeight:500}}>· {fmtDateTime(v.created_at).ago}</span>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div style={{fontSize:13,color:"#9CA3AF"}}>Aún no hay visitantes registrados con nombre. Aparecerán aquí cuando miembros con cuenta entren (después de aplicar la migración 019). Los visitantes anónimos no se pueden identificar por privacidad — solo se cuentan arriba.</div>
+          )}
         </div>
 
         {/* Main grid: tabla + sidebar */}
@@ -22454,15 +22480,24 @@ export default function App(){
         vid = "v_"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
         localStorage.setItem("nexo-visitor-id", vid);
       }
-      const isReg  = !!_getSavedUser();
+      const su     = _getSavedUser();
+      const isReg  = !!su;
+      const isAdm  = ADMIN_EMAILS.includes((su?.email||"").toLowerCase());
       const device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "mobile" : "desktop";
-      supabase.from("site_visits").insert({
+      const base = {
         visitor_id: vid,
         is_registered: isReg,
         path: window.location.pathname || "/",
         referrer: (document.referrer||"").slice(0,300) || null,
         device,
-      }).then(()=>{},()=>{}); // fire-and-forget — si la tabla no existe aún, no pasa nada
+      };
+      // Intento con datos de quién entró (username/is_admin). Si esas columnas aún no existen
+      // en la tabla, reintenta con los campos básicos → nunca se pierde el registro de la visita.
+      const rich = { ...base, username: su?.username||su?.name||null, is_admin: isAdm };
+      supabase.from("site_visits").insert(rich).then(
+        r=>{ if(r&&r.error) supabase.from("site_visits").insert(base).then(()=>{},()=>{}); },
+        ()=>{ supabase.from("site_visits").insert(base).then(()=>{},()=>{}); }
+      );
     }catch(_){}
   },[]);
 
