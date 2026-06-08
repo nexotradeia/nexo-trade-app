@@ -17939,7 +17939,9 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [sortCol, setSortCol] = useState(null);   // header (c.h) de la columna por la que se ordena
   const [sortDir, setSortDir] = useState("desc"); // "desc" = mayor a menor (default), "asc" = menor a mayor
   const [perfPeriod, setPerfPeriod] = useState("y1"); // periodo de la sección Rendimiento
+  const [techData, setTechData] = useState({});       // {ticker: {signal, score, rsi, price, sma20, sma50, loading, error}}
   const mockRef = useRef({});
+  const techReqRef = useRef(0);
   const [cloudSync, setCloudSync] = useState(user?.id ? "loading" : "off"); // off | loading | synced | error
   const cloudReadyRef = useRef(false);
 
@@ -18083,6 +18085,34 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     return a || null;
   };
 
+  // ── Señales técnicas REALES (backend calcula RSI + medias + momentum sobre velas diarias) ──
+  useEffect(()=>{
+    if(activeView!=="technical" || !tickers.length) return;
+    const myReq = ++techReqRef.current;
+    setTechData(prev=>{ const n={...prev}; tickers.forEach(tk=>{ if(!n[tk]||n[tk].error){ n[tk]={...(n[tk]||{}),loading:true}; } }); return n; });
+    let cancelled=false;
+    const snapshot = techData;
+    (async()=>{
+      for(let i=0;i<tickers.length;i++){
+        if(cancelled || techReqRef.current!==myReq) return;
+        const tk=tickers[i];
+        if(snapshot[tk] && snapshot[tk].signal && !snapshot[tk].error) continue; // ya cacheado
+        try{
+          const r=await fetch(`/api/data?type=technical&symbol=${encodeURIComponent(tk)}`);
+          const j=await r.json();
+          if(cancelled || techReqRef.current!==myReq) return;
+          setTechData(prev=>({...prev,[tk]: (j && j.signal) ? {...j,loading:false} : {loading:false,error:true}}));
+        }catch(e){
+          if(cancelled) return;
+          setTechData(prev=>({...prev,[tk]:{loading:false,error:true}}));
+        }
+        await new Promise(res=>setTimeout(res,1200)); // escalonar por límite del proveedor gratis
+      }
+    })();
+    return ()=>{ cancelled=true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[activeView, tickers]);
+
   const addTicker = () => {
     const tk = input.trim().toUpperCase().replace(/[^A-Z0-9.]/g,"");
     if(!tk){ return; }
@@ -18124,6 +18154,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     {id:"risk",    l:"Risk"},
     {id:"returns", l:"Returns"},
     {id:"performance", l:isEN?"📈 Performance":"📈 Rendimiento"},
+    {id:"technical", l:isEN?"🔬 Technical":"🔬 Técnico"},
     {id:"efficiency", l:"Efficiency"},
     {id:"projections",l:"Projections"},
     {id:"health",  l:"Health"},
@@ -18584,6 +18615,75 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     );
   };
 
+  // ════════ SECCIÓN TÉCNICA (señales reales tipo Investing) ════════
+  const renderTech = () => {
+    const SIG = {
+      "Strong Buy":{l:isEN?"Strong Buy":"Compra Fuerte",c:"#047857",bg:"rgba(5,150,105,0.14)"},
+      "Buy":{l:isEN?"Buy":"Compra",c:"#10B981",bg:"rgba(16,185,129,0.12)"},
+      "Neutral":{l:"Neutral",c:"#64748B",bg:"rgba(100,116,139,0.10)"},
+      "Sell":{l:isEN?"Sell":"Venta",c:"#EF4444",bg:"rgba(239,68,68,0.11)"},
+      "Strong Sell":{l:isEN?"Strong Sell":"Venta Fuerte",c:"#B91C1C",bg:"rgba(185,28,28,0.13)"},
+    };
+    const chip = (sig) => {
+      const s=SIG[sig];
+      if(!s) return <span style={{color:"#94A3B8",fontSize:13}}>—</span>;
+      return <span style={{display:"inline-block",fontWeight:800,fontSize:13,color:s.c,background:s.bg,border:`1px solid ${s.c}33`,borderRadius:8,padding:"4px 12px"}}>{s.l}</span>;
+    };
+    const cmp = (price, ref) => {
+      if(price==null||ref==null) return <span style={{color:"#94A3B8"}}>—</span>;
+      const up=price>=ref;
+      return <span style={{fontFamily:"monospace",fontWeight:700,fontSize:12.5,color:up?"#10B981":"#EF4444"}}>{up?"▲ "+(isEN?"Above":"Encima"):"▼ "+(isEN?"Below":"Debajo")}</span>;
+    };
+    const rsiCell = (r) => {
+      if(r==null) return <span style={{color:"#94A3B8"}}>—</span>;
+      const c = r>=70?"#B91C1C": r>=55?"#10B981": r<=30?"#047857": r<45?"#EF4444":"#64748B";
+      const tag = r>=70?(isEN?"Overbought":"Sobrecompra"): r<=30?(isEN?"Oversold":"Sobreventa"):"";
+      return <span style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:c}}>{r.toFixed(0)}{tag&&<span style={{fontSize:9,fontWeight:700,color:"#94A3B8",marginLeft:4}}>{tag}</span>}</span>;
+    };
+    const thS={fontSize:13,fontWeight:800,color:"#1A5FAD",padding:"12px 14px",textAlign:"left",borderBottom:"2px solid #DBEAFE",background:"#EBF3FF",whiteSpace:"nowrap"};
+    const tdS={padding:"12px 14px",borderBottom:"1px solid #DBEAFE",whiteSpace:"nowrap"};
+    return (
+      <div>
+        <div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 4px 12px",flexWrap:"wrap"}}>
+          <span style={{fontSize:12,color:"#475569",fontWeight:600}}>{isEN?"Real signal computed from daily candles — RSI(14) + moving averages + momentum. Refreshes every ~6h.":"Señal real calculada de velas diarias — RSI(14) + medias móviles + momentum. Se actualiza cada ~6h."}</span>
+        </div>
+        <div style={{overflowX:"auto",border:"1px solid #DBEAFE",borderRadius:12,boxShadow:"0 4px 12px rgba(26,95,173,0.08)"}}>
+          <table style={{borderCollapse:"collapse",width:"100%",minWidth:760}}>
+            <thead><tr>
+              <th style={{...thS,minWidth:170}}>{isEN?"Name":"Nombre"}</th>
+              <th style={{...thS,minWidth:160}}>{isEN?"Signal · Daily":"Señal · Diario"}</th>
+              <th style={{...thS,minWidth:130}}>RSI (14)</th>
+              <th style={{...thS,minWidth:120}}>{isEN?"vs SMA 20":"vs SMA 20"}</th>
+              <th style={{...thS,minWidth:120}}>{isEN?"vs SMA 50":"vs SMA 50"}</th>
+              <th style={{...thS,minWidth:100}}>{isEN?"Price":"Precio"}</th>
+            </tr></thead>
+            <tbody>
+              {tickers.map((tk,i)=>{
+                const t=techData[tk]||{};
+                return (
+                  <tr key={tk} style={{background:i%2===0?"#F4F9FF":"#EBF3FF"}}>
+                    <td style={tdS}>
+                      <div style={{fontFamily:"monospace",fontWeight:900,fontSize:14,color:"#0F172A"}}>{tk}</div>
+                      <div style={{fontSize:10,color:"#64748B"}}>{TICKER_NAMES_W[tk]||tk}</div>
+                    </td>
+                    <td style={tdS}>{t.loading?<span style={{color:"#94A3B8",fontSize:12}}>⏳ {isEN?"Loading…":"Cargando…"}</span>: t.signal?chip(t.signal):<span style={{color:"#94A3B8",fontSize:12}}>{isEN?"No data":"Sin datos"}</span>}</td>
+                    <td style={tdS}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:rsiCell(t.rsi)}</td>
+                    <td style={tdS}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:cmp(t.price,t.sma20)}</td>
+                    <td style={tdS}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:cmp(t.price,t.sma50)}</td>
+                    <td style={tdS}><span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:"#334155"}}>{t.price!=null?"$"+Number(t.price).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):(priceOf(tk)?.price!=null?fmtPrice(priceOf(tk).price,tk):"—")}</span></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div style={{fontSize:11,color:"#5B8DC7",textAlign:"center",padding:"12px 0"}}>
+          {isEN?"Technical signals are algorithmic (not advice). Data: Twelve Data / CoinGecko.":"Señales técnicas algorítmicas (no es consejo). Datos: Twelve Data / CoinGecko."}
+        </div>
+      </div>
+    );
+  };
+
   return(
     <div style={{maxWidth:1380,margin:"0 auto",padding:"0 0 60px",fontFamily:"Inter,sans-serif"}}>
 
@@ -18763,11 +18863,15 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </span>
       </div>
 
-      {/* ── TABLE / PERFORMANCE ── */}
+      {/* ── TABLE / PERFORMANCE / TECHNICAL ── */}
       {activeView==="performance" ? (
         tickers.length===0
           ? <div style={{textAlign:"center",padding:"40px 20px",color:"#64748B",fontSize:13}}>{isEN?"Add tickers to see performance charts":"Agrega tickers para ver los gráficos de rendimiento"}</div>
           : renderPerf()
+      ) : activeView==="technical" ? (
+        tickers.length===0
+          ? <div style={{textAlign:"center",padding:"40px 20px",color:"#64748B",fontSize:13}}>{isEN?"Add tickers to see technical signals":"Agrega tickers para ver las señales técnicas"}</div>
+          : renderTech()
       ) : tickers.length===0?(
         <div style={{textAlign:"center",padding:"50px 20px",border:"2px dashed #DBEAFE",borderRadius:16}}>
           <div style={{fontSize:40,marginBottom:12}}>👁</div>
