@@ -20006,19 +20006,13 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   );
 
   return(
-    <div style={ptFull
-      ?{position:"fixed",top:(typeof window!=="undefined"&&window.innerWidth<768)?54:64,left:0,right:0,bottom:0,zIndex:120,background:"var(--c-bg)",overflowY:"auto",padding:"16px 18px 60px",fontFamily:"inherit",borderTop:"1px solid var(--c-border, rgba(0,0,0,0.08))"}
-      :{maxWidth:"100%",fontFamily:"inherit"}}>
+    <div style={{maxWidth:"100%",fontFamily:"inherit"}}>
 
       {/* Header — Portafolio Oracle IA */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
         <span style={{fontSize:20,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.4}}>💼 {isEN?"Portfolio Oracle AI":"Portafolio Oracle IA"}</span>
         <span style={{background:"linear-gradient(135deg,#C8901F,#8A5E10)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
-        {(()=>{ const s = pCloud==="synced"?{t:isEN?"☁️ Synced to your account":"☁️ Guardado en tu cuenta",c:"#10B981"} : (pCloud==="loading"||pCloud==="saving")?{t:isEN?"☁️ Syncing…":"☁️ Sincronizando…",c:"#818CF8"} : pCloud==="error"?{t:isEN?"⚠️ Saved on this device":"⚠️ Guardado en este equipo",c:"#F59E0B"} : {t:isEN?"💾 Sign in to sync":"💾 Inicia sesión para sincronizar",c:"#94A3B8"}; return <span onClick={()=>{ if(pCloud==="off"&&onNeedAuth) onNeedAuth(); }} title={s.t} style={{fontSize:11,fontWeight:700,color:s.c,background:s.c+"1A",border:`1px solid ${s.c}40`,borderRadius:20,padding:"3px 10px",cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
-        <button onClick={()=>setPtFull(f=>!f)}
-          style={{marginLeft:"auto",background:ptFull?"rgba(239,68,68,0.12)":"rgba(15,76,129,0.12)",border:`1px solid ${ptFull?"rgba(239,68,68,0.3)":"rgba(15,76,129,0.3)"}`,color:ptFull?"#EF4444":"#3B82F6",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
-          {ptFull?"✕":"⛶"} {ptFull?(isEN?"Exit":"Salir"):(isEN?"Full screen":"Pantalla completa")}
-        </button>
+        {(()=>{ const s = pCloud==="synced"?{t:isEN?"☁️ Synced to your account":"☁️ Guardado en tu cuenta",c:"#10B981"} : (pCloud==="loading"||pCloud==="saving")?{t:isEN?"☁️ Syncing…":"☁️ Sincronizando…",c:"#818CF8"} : pCloud==="error"?{t:isEN?"⚠️ Saved on this device":"⚠️ Guardado en este equipo",c:"#F59E0B"} : {t:isEN?"💾 Sign in to sync":"💾 Inicia sesión para sincronizar",c:"#94A3B8"}; return <span onClick={()=>{ if(pCloud==="off"&&onNeedAuth) onNeedAuth(); }} title={s.t} style={{marginLeft:"auto",fontSize:11,fontWeight:700,color:s.c,background:s.c+"1A",border:`1px solid ${s.c}40`,borderRadius:20,padding:"3px 10px",cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
       </div>
 
       {/* Share modal */}
