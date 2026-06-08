@@ -21697,7 +21697,7 @@ function AdminDashboard(){
 
   useEffect(()=>{
     // Mostrar UI de inmediato con ceros
-    setStats({totalUsers:0,newToday:0,newWeek:0,vipCount:0,postsHoy:0,totalPosts:0,totalSubs:0,activosHoy:0,logins:0,visitasMes:0,visitasAnon:0,visitantesUnicos:0,regVisitors:[]});
+    setStats({totalUsers:0,newToday:0,newWeek:0,vipCount:0,postsHoy:0,totalPosts:0,totalSubs:0,activosHoy:0,logins:0,visitasMes:0,visitasAnon:0,visitantesUnicos:0,regVisitors:[],sources:[]});
     setLoading(false);
 
     // Luego cargar datos reales en background con timeout de 8s por query
@@ -21765,13 +21765,13 @@ function AdminDashboard(){
       // (Antes usaba 3 consultas count:"exact" que con Supabase fallaban/devolvían null → el panel quedaba en 0.)
       const mes30 = new Date(); mes30.setDate(mes30.getDate()-30);
       const vRes = await withTimeout(
-        supabase.from("site_visits").select("visitor_id,is_registered,created_at,username,is_admin").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),
+        supabase.from("site_visits").select("visitor_id,is_registered,created_at,referrer,username,is_admin").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),
         15000
       );
       let vrows = vRes.data || [];
       // Reintento sin columnas nuevas (por si la tabla aún no tiene username/is_admin)
       if(vRes.error){
-        const vRes2 = await withTimeout(supabase.from("site_visits").select("visitor_id,is_registered,created_at").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),15000);
+        const vRes2 = await withTimeout(supabase.from("site_visits").select("visitor_id,is_registered,created_at,referrer").gte("created_at",mes30.toISOString()).order("created_at",{ascending:false}).limit(20000),15000);
         vrows = vRes2.data || [];
       }
       // Excluir visitas del admin (tú) del conteo
@@ -21779,11 +21779,29 @@ function AdminDashboard(){
       // Últimos visitantes REGISTRADOS (con nombre), sin duplicar usuario, máx 20
       const seen=new Set(); const regVisitors=[];
       noAdmin.filter(x=>x.is_registered && x.username).forEach(x=>{ if(!seen.has(x.username)){ seen.add(x.username); regVisitors.push({username:x.username, created_at:x.created_at}); } });
+      // De dónde vienen (referrer → canal)
+      const srcOf=(ref)=>{ if(!ref) return "Directo"; const r=String(ref).toLowerCase();
+        if(r.includes("google")) return "Google";
+        if(r.includes("t.co")||r.includes("twitter")||r.includes("x.com")) return "X / Twitter";
+        if(r.includes("whatsapp")||r.includes("wa.me")) return "WhatsApp";
+        if(r.includes("reddit")) return "Reddit";
+        if(r.includes("t.me")||r.includes("telegram")) return "Telegram";
+        if(r.includes("facebook")||r.includes("fb.")) return "Facebook";
+        if(r.includes("instagram")) return "Instagram";
+        if(r.includes("youtube")||r.includes("youtu.be")) return "YouTube";
+        if(r.includes("tiktok")) return "TikTok";
+        if(r.includes("bing")) return "Bing";
+        if(r.includes("nexotradeia.com")) return "Interno";
+        try{ return new URL(ref).hostname.replace(/^www\./,""); }catch{ return "Otro"; }
+      };
+      const srcMap={}; noAdmin.forEach(x=>{ const s=srcOf(x.referrer); srcMap[s]=(srcMap[s]||0)+1; });
+      const sources = Object.entries(srcMap).sort((a,b)=>b[1]-a[1]).map(([name,count])=>({name,count}));
       setStats(s=>({...s,
         visitasMes: noAdmin.length,
         visitasAnon: noAdmin.filter(x=>!x.is_registered).length,
         visitantesUnicos: new Set(noAdmin.map(x=>x.visitor_id)).size,
-        regVisitors: regVisitors.slice(0,20),
+        regVisitors: regVisitors.slice(0,200),
+        sources,
       }));
     };
     loadData();
@@ -21895,6 +21913,30 @@ function AdminDashboard(){
             </div>
           ) : (
             <div style={{fontSize:13,color:"#9CA3AF"}}>Aún no hay visitantes registrados con nombre. Aparecerán aquí cuando miembros con cuenta entren (después de aplicar la migración 019). Los visitantes anónimos no se pueden identificar por privacidad — solo se cuentan arriba.</div>
+          )}
+        </div>
+
+        {/* ── DE DÓNDE VIENEN — canales de tráfico (referrer) ── */}
+        <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:14,padding:"18px 22px",marginBottom:20,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>🌐 De dónde vienen — canales (últimos 30 días)</div>
+          {(stats.sources||[]).length>0 ? (
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {stats.sources.map((s,i)=>{
+                const max=stats.sources[0].count||1; const pct=Math.round(s.count/max*100);
+                const tot=(stats.sources||[]).reduce((a,b)=>a+b.count,0)||1; const share=Math.round(s.count/tot*100);
+                return(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:12}}>
+                    <span style={{width:110,flexShrink:0,fontSize:13,fontWeight:600,color:"#111827",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.name}</span>
+                    <div style={{flex:1,background:"#F1F5F9",borderRadius:6,height:18,overflow:"hidden"}}>
+                      <div style={{width:`${pct}%`,height:"100%",background:"linear-gradient(90deg,#0F4C81,#0066CC)",borderRadius:6}}/>
+                    </div>
+                    <span style={{width:78,flexShrink:0,textAlign:"right",fontSize:12,color:"#6B7280",fontWeight:600}}>{s.count} · {share}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{fontSize:13,color:"#9CA3AF"}}>Aún sin datos de origen. "Directo" = entraron escribiendo la URL o desde un link sin referrer (apps, marcadores).</div>
           )}
         </div>
 
