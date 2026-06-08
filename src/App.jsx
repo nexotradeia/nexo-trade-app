@@ -3761,7 +3761,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
             </div>
             {/* Fila 2: sentimiento + publicar — siempre en su propia línea */}
             <div style={{display:"flex",gap:6,alignItems:"center"}}>
-              {[{v:"bull",label:"▲",full:"Alcista",col:"#16A34A"},{v:"bear",label:"▼",full:"Bajista",col:"#DC2626"}].map(({v,label,full,col})=>{
+              {[{v:"bull",label:"▲",full:isEN?"Bullish":"Alcista",col:"#16A34A"},{v:"bear",label:"▼",full:isEN?"Bearish":"Bajista",col:"#DC2626"}].map(({v,label,full,col})=>{
                 const active=sent===v;
                 return(
                   <button key={v} onClick={()=>setSent(v)} title={full}
@@ -3771,7 +3771,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
                 );
               })}
               <Btn onClick={submit} style={{padding:"7px 20px",fontSize:13,opacity:posting?0.6:1,marginLeft:"auto",flexShrink:0}}>
-                {posting?"...":(user?t.publish:"Entrar")}
+                {posting?"...":(user?t.publish:(isEN?"Sign in":"Entrar"))}
               </Btn>
             </div>
           </div>
@@ -7394,7 +7394,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
             onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
             <span style={{fontSize:14,width:18,textAlign:"center"}}>{showMore?"▴":"▾"}</span>
             <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>
-              {showMore ? "Menos" : "Más secciones"}
+              {showMore ? (isEN?"Less":"Menos") : (isEN?"More sections":"Más secciones")}
             </span>
           </div>
 
