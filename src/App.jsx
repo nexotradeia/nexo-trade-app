@@ -19228,8 +19228,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </div>
       ):(
         <div style={{position:"relative"}}>
-        {!isPremium && cols.length>2 && (
-          <div onClick={onNeedPremium} style={{position:"absolute",right:0,top:0,bottom:0,width:"62%",zIndex:10,cursor:"pointer",background:"linear-gradient(90deg,transparent 0%,rgba(240,249,255,0.85) 18%,rgba(240,249,255,0.97) 50%)",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0"}}>
+        {!isPremium && cols.length>4 && (
+          <div onClick={onNeedPremium} style={{position:"absolute",right:0,top:0,bottom:0,width:"52%",zIndex:10,cursor:"pointer",background:"linear-gradient(90deg,transparent 0%,rgba(240,249,255,0.85) 12%,rgba(240,249,255,0.97) 40%)",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0"}}>
             <div style={{textAlign:"center",pointerEvents:"none",userSelect:"none"}}>
               <div style={{fontSize:28,marginBottom:6}}>🔒</div>
               <div style={{fontWeight:900,fontSize:13,color:"#0F172A",marginBottom:4}}>{isEN?"Unlock all columns":"Desbloquea todas las columnas"}</div>
@@ -19279,7 +19279,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.06)"}
                     onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#F4F9FF":"#EBF3FF"}>
                     {cols.map((c,i)=>{
-                      const locked = !isPremium && i>=2;
+                      const locked = !isPremium && i>=4;
                       return (
                         <td key={i} style={{...tdStyle, filter:locked?"blur(5px)":"none", userSelect:locked?"none":"auto", pointerEvents:locked?"none":"auto"}}>{c.render(tk,d,m)}</td>
                       );
