@@ -577,6 +577,8 @@ function showSection(sec,el){
     case'resources':renderResources();break;
     case'content':renderContent();break;
     case'admin':renderAdmin();break;
+    case'admin-payouts':renderAdminPayouts();break;
+    case'admin-analytics':renderAdminAnalytics();break;
   }
 }
 
@@ -857,7 +859,7 @@ function renderResources(){
           <div style="font-size:32px;margin-bottom:12px">${r.ico}</div>
           <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:6px">${r.title}</div>
           <div style="font-size:13px;color:var(--mid);margin-bottom:16px">${r.desc}</div>
-          <button style="padding:8px 16px;border-radius:8px;border:1px solid var(--br2);background:var(--bg3);color:var(--mid);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s" onclick="showToast('Coming soon — en producción')">${r.btn}</button>
+          <button style="padding:8px 16px;border-radius:8px;border:1px solid var(--br2);background:var(--bg3);color:var(--mid);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s" onclick="${r.btn==='Copiar'?`navigator.clipboard.writeText('https://nexotradeia.com/?ref=${currentAffiliate?.referral_code||'CODE'}').then(()=>showToast('✓ Link copied!'))`:`showToast('${r.btn} — coming soon')`}">${r.btn}</button>
         </div>
       `).join('')}
     </div>
@@ -881,7 +883,7 @@ function renderSettings(){
         <div class="form-field" style="grid-column:1/-1"><div class="fl">Bio / descripción</div><textarea class="fi" rows="3" style="resize:vertical">${a.bio||''}</textarea></div>
       </div>
       <div style="padding:0 20px 20px">
-        <button style="padding:11px 24px;border-radius:10px;border:none;background:var(--grn);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 14px var(--grn-glow)" onclick="showToast('✓ Cambios guardados')">Guardar cambios</button>
+        <button style="padding:11px 24px;border-radius:10px;border:none;background:var(--grn);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 14px var(--grn-glow)" onclick="saveSettings()">Save changes</button>
       </div>
     </div>
   `;
@@ -903,45 +905,129 @@ function renderContent(){
 }
 
 /* ADMIN */
-function renderAdmin(){
-  if(!isAdmin&&!isDemoMode){document.getElementById('mainContent').innerHTML='<div class="empty"><div class="empty-ico">🔒</div><div class="empty-t">Admin only</div></div>';return;}
-  const affiliates=[
-    {name:'Pepe García',code:'PEPE20',tier:'micro',platform:'instagram',followers:28400,clicks:847,signups:124,paying:38,earned:1842.40,pending:840,status:'active'},
-    {name:'María Rodríguez',code:'MARIA25',tier:'mid',platform:'tiktok',followers:142000,clicks:3240,signups:481,paying:94,earned:7420.80,pending:1975,status:'active'},
-    {name:'Carlos Invierte',code:'CARLOS20',tier:'micro',platform:'youtube',followers:67000,clicks:1820,signups:267,paying:71,earned:4218.40,pending:1580,status:'active'},
-    {name:'Ana Finanzas',code:'ANA20',tier:'nano',platform:'instagram',followers:18200,clicks:412,signups:58,paying:14,earned:742.00,pending:320,status:'active'},
-    {name:'Roberto Crypto',code:'ROBERTO20',tier:'nano',platform:'twitter',followers:9800,clicks:189,signups:21,paying:6,earned:284.40,pending:142,status:'active'},
-  ];
+async function renderAdmin(){
+  if(!isAdmin){document.getElementById('mainContent').innerHTML='<div class="empty"><div class="empty-ico">🔒</div><div class="empty-t">Admin only</div></div>';return;}
+
+  // Load real affiliates from Supabase
+  let affiliates = [];
+  if(sb){
+    const {data} = await sb.from('affiliates').select('*').order('total_earned',{ascending:false});
+    affiliates = data || [];
+  }
+
+  const totalPending = affiliates.reduce((s,a)=>s+(a.balance_pending||0),0);
+  const totalEarned  = affiliates.reduce((s,a)=>s+(a.total_earned||0),0);
+  const totalPaying  = affiliates.reduce((s,a)=>s+(a.total_paying||0),0);
+
   document.getElementById('mainContent').innerHTML=`
     <div class="sec-hdr">
-      <div class="sec-title"><div class="dot"></div>Todos los Afiliados</div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--dim)">Total pendiente: <strong style="color:var(--gold)">$4,857</strong></div>
+      <div class="sec-title"><div class="dot"></div>All Affiliates</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--dim)">Pending: <strong style="color:var(--gold)">$${totalPending.toFixed(0)}</strong></div>
     </div>
     <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
-      <div class="kpi grn"><div class="kpi-l">Total afiliados</div><div class="kpi-v grn">5</div><div class="kpi-s">3 activos hoy</div></div>
-      <div class="kpi gold"><div class="kpi-l">Total ganado (todos)</div><div class="kpi-v gold">$14,508</div><div class="kpi-s">Histórico</div></div>
-      <div class="kpi blue"><div class="kpi-l">Total referidos</div><div class="kpi-v blue">223</div><div class="kpi-s">Pagando ahora</div></div>
-      <div class="kpi purp"><div class="kpi-l">Pendiente de pago</div><div class="kpi-v purp">$4,857</div><div class="kpi-s">Para transferir</div></div>
+      <div class="kpi grn"><div class="kpi-l">Total affiliates</div><div class="kpi-v grn">${affiliates.length}</div><div class="kpi-s">registered</div></div>
+      <div class="kpi gold"><div class="kpi-l">Total earned</div><div class="kpi-v gold">$${totalEarned.toFixed(0)}</div><div class="kpi-s">all time</div></div>
+      <div class="kpi blue"><div class="kpi-l">Paying referrals</div><div class="kpi-v blue">${totalPaying}</div><div class="kpi-s">active subscribers</div></div>
+      <div class="kpi purp"><div class="kpi-l">Pending payout</div><div class="kpi-v purp">$${totalPending.toFixed(0)}</div><div class="kpi-s">to transfer</div></div>
     </div>
-    ${affiliates.map(a=>`
+    ${affiliates.length===0
+      ? '<div class="empty"><div class="empty-ico">👥</div><div class="empty-t">No affiliates yet</div><div class="empty-s">Affiliates who apply will appear here</div></div>'
+      : affiliates.map(a=>`
       <div class="aff-card">
-        <div class="aff-av" style="background:linear-gradient(135deg,#1a6c4a,#00e87a)">${a.name[0]}</div>
+        <div class="aff-av" style="background:linear-gradient(135deg,#1a6c4a,#00e87a)">${(a.name||'?')[0]}</div>
         <div class="aff-info">
           <div class="aff-name">
-            ${a.name}
-            <span class="tier-badge t-${a.tier}">${a.tier}</span>
-            <span style="font-size:11px;color:var(--mid)">${a.platform} · ${a.followers.toLocaleString()} seguidores</span>
+            ${a.name||a.username||'—'}
+            <span class="tier-badge t-${a.tier||'nano'}">${a.tier||'nano'}</span>
+            <span style="font-size:11px;color:var(--mid)">${a.platform||''} · ${(a.followers||0).toLocaleString()} followers</span>
           </div>
-          <div class="aff-code">/${a.code} · ${a.clicks} clicks · ${a.signups} signups</div>
+          <div class="aff-code">/${a.referral_code||''} · ${a.total_clicks||0} clicks · ${a.total_signups||0} signups</div>
         </div>
         <div class="aff-stats">
-          <div class="as-item"><div class="as-label">Pagando</div><div class="as-val" style="color:var(--grn)">${a.paying}</div></div>
-          <div class="as-item"><div class="as-label">Ganado</div><div class="as-val" style="color:var(--gold)">$${a.earned.toFixed(0)}</div></div>
-          <div class="as-item"><div class="as-label">Pendiente</div><div class="as-val" style="color:var(--cyan)">$${a.pending.toFixed(0)}</div></div>
-          <button style="padding:7px 14px;border-radius:8px;border:none;background:var(--grn);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer" onclick="showToast('Pago procesado para ${a.name}')">Pagar $${a.pending}</button>
+          <div class="as-item"><div class="as-label">Paying</div><div class="as-val" style="color:var(--grn)">${a.total_paying||0}</div></div>
+          <div class="as-item"><div class="as-label">Earned</div><div class="as-val" style="color:var(--gold)">$${(a.total_earned||0).toFixed(0)}</div></div>
+          <div class="as-item"><div class="as-label">Pending</div><div class="as-val" style="color:var(--cyan)">$${(a.balance_pending||0).toFixed(0)}</div></div>
+          <button style="padding:7px 14px;border-radius:8px;border:none;background:var(--grn);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer" onclick="showToast('Payment processed for ${(a.name||'affiliate')}')">Pay $${(a.balance_pending||0).toFixed(0)}</button>
         </div>
       </div>
     `).join('')}
+  `;
+}
+
+/* ADMIN PAYOUTS */
+async function renderAdminPayouts(){
+  if(!isAdmin){document.getElementById('mainContent').innerHTML='<div class="empty"><div class="empty-ico">🔒</div><div class="empty-t">Admin only</div></div>';return;}
+  let affiliates=[];
+  if(sb){const{data}=await sb.from('affiliates').select('*').gt('balance_pending',0).order('balance_pending',{ascending:false});affiliates=data||[];}
+  const total=affiliates.reduce((s,a)=>s+(a.balance_pending||0),0);
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr">
+      <div class="sec-title"><div class="dot"></div>Process Payouts</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--gold)">Total to pay: <strong>$${total.toFixed(2)}</strong></div>
+    </div>
+    ${affiliates.length===0
+      ?'<div class="empty"><div class="empty-ico">✅</div><div class="empty-t">No pending payouts</div><div class="empty-s">All affiliates are paid up</div></div>'
+      :affiliates.map(a=>`
+      <div class="card" style="margin-bottom:14px;padding:20px;display:flex;align-items:center;gap:20px">
+        <div class="aff-av" style="background:linear-gradient(135deg,#1a6c4a,#00e87a);flex-shrink:0">${(a.name||'?')[0]}</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700;color:var(--txt2)">${a.name||a.username}</div>
+          <div style="font-size:12px;color:var(--mid);margin-top:2px">${a.email||''} · ${a.paypal_email?'PayPal: '+a.paypal_email:'No PayPal configured'}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--grn)">$${(a.balance_pending||0).toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--mid);margin-bottom:8px">pending</div>
+          <button style="padding:8px 18px;border-radius:8px;border:none;background:var(--grn);color:var(--bg);font-size:12px;font-weight:700;cursor:pointer" onclick="markPaid('${a.id}','${a.name||a.username}',${a.balance_pending||0})">Mark as Paid →</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+async function markPaid(affiliateId, name, amount){
+  if(!sb){showToast(`✓ Marked $${amount.toFixed(2)} as paid for ${name}`);return;}
+  const{error}=await sb.from('affiliates').update({balance_pending:0,total_paid_out:sb.raw('total_paid_out + '+amount)}).eq('id',affiliateId);
+  if(error)showToast('Error: '+error.message);
+  else{showToast(`✓ $${amount.toFixed(2)} marked as paid for ${name}`);renderAdminPayouts();}
+}
+
+/* ADMIN ANALYTICS */
+async function renderAdminAnalytics(){
+  if(!isAdmin){document.getElementById('mainContent').innerHTML='<div class="empty"><div class="empty-ico">🔒</div><div class="empty-t">Admin only</div></div>';return;}
+  let affiliates=[], referrals=[];
+  if(sb){
+    const[a,r]=await Promise.all([
+      sb.from('affiliates').select('*'),
+      sb.from('referrals').select('*')
+    ]);
+    affiliates=a.data||[];referrals=r.data||[];
+  }
+  const paying=referrals.filter(r=>r.status==='paying').length;
+  const signups=referrals.filter(r=>r.status!=='click').length;
+  const clicks=referrals.length;
+  const cvr=clicks>0?((paying/clicks)*100).toFixed(1):0;
+  const totalEarned=affiliates.reduce((s,a)=>s+(a.total_earned||0),0);
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr"><div class="sec-title"><div class="dot"></div>Analytics Overview</div></div>
+    <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      <div class="kpi grn"><div class="kpi-l">Total clicks</div><div class="kpi-v grn">${clicks}</div><div class="kpi-s">all affiliates</div></div>
+      <div class="kpi blue"><div class="kpi-l">Signups</div><div class="kpi-v blue">${signups}</div><div class="kpi-s">from referrals</div></div>
+      <div class="kpi purp"><div class="kpi-l">Paying</div><div class="kpi-v purp">${paying}</div><div class="kpi-s">active subscribers</div></div>
+      <div class="kpi gold"><div class="kpi-l">Conversion</div><div class="kpi-v gold">${cvr}%</div><div class="kpi-s">click → paying</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Top affiliates by earnings</div></div>
+      <div style="padding:16px">
+        ${affiliates.sort((a,b)=>(b.total_earned||0)-(a.total_earned||0)).slice(0,10).map((a,i)=>`
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--br)">
+            <div style="font-family:var(--mono);font-size:12px;color:var(--dim);width:20px">#${i+1}</div>
+            <div style="flex:1;font-size:14px;font-weight:600;color:var(--txt2)">${a.name||a.username||'—'}</div>
+            <div style="font-family:var(--mono);font-size:13px;color:var(--gold)">$${(a.total_earned||0).toFixed(0)}</div>
+            <div style="font-size:11px;color:var(--mid)">${a.total_paying||0} paying</div>
+          </div>
+        `).join('')||'<div style="color:var(--mid);font-size:13px;padding:10px">No data yet</div>'}
+      </div>
+    </div>
   `;
 }
 
@@ -1064,7 +1150,27 @@ function copyLink(){
   showToast('✓ Link copiado al portapapeles');
 }
 
-function requestPayout(){showToast('✓ Solicitud enviada — pago en 5-7 días hábiles');}
+async function requestPayout(){
+  if(sb&&currentAffiliate?.id&&currentAffiliate.id!=='admin'){
+    await sb.from('payout_requests').insert({affiliate_id:currentAffiliate.id,amount:currentAffiliate.balance_pending,status:'pending',requested_at:new Date().toISOString()}).catch(()=>{});
+  }
+  showToast('✓ Payout requested — payment in 5-7 business days');
+}
+
+async function saveSettings(){
+  const fields={
+    name:document.querySelectorAll('.fi')[0]?.value||'',
+    paypal_email:document.querySelectorAll('.fi')[4]?.value||'',
+    followers:parseInt(document.querySelectorAll('.fi')[5]?.value)||0,
+    bio:document.querySelector('textarea.fi')?.value||''
+  };
+  if(sb&&currentAffiliate?.id&&currentAffiliate.id!=='admin'){
+    const{error}=await sb.from('affiliates').update(fields).eq('id',currentAffiliate.id);
+    if(error){showToast('Error saving: '+error.message);return;}
+  }
+  Object.assign(currentAffiliate,fields);
+  showToast('✓ Changes saved');
+}
 
 let toastTimer;
 function showToast(msg){
