@@ -50,6 +50,12 @@ def _load_service_role():
 
 
 def _load_vapid():
+    # 1) Variables de entorno (GitHub Actions / servidor) — no requiere archivo
+    pub = os.environ.get("VAPID_PUBLIC_KEY", "").strip()
+    priv = os.environ.get("VAPID_PRIVATE_KEY", "").strip()
+    if pub and priv:
+        return pub, priv
+    # 2) Archivo local .vapid.json (uso en el Mac)
     with open(os.path.join(HERE, ".vapid.json")) as f:
         d = json.load(f)
     return d["publicKey"], d["privateKey"]

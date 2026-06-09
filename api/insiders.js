@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=300");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const FMP_KEY = process.env.FMP_API_KEY;
+  const FMP_KEY = process.env.FMP_API_KEY || process.env.FMP_KEY;
 
   // ── 1. FMP API (datos reales completos: ticker, shares, precio, valor) ──
   if (FMP_KEY) {

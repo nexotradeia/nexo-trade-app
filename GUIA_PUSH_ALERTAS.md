@@ -44,16 +44,34 @@ python3 nexo_push_alert.py --test        # lee tus tablas reales e imprime qué 
 python3 nexo_push_alert.py               # de verdad: evalúa y ENVÍA los push que correspondan
 ```
 
-### 5) Automatizar con cron (cada 5 minutos)
+### 5) Automatizar 24/7 — RECOMENDADO: GitHub Actions (sin depender del Mac)
+El repo ya incluye el workflow `.github/workflows/push-alerts.yml`, que corre el cartero **cada 5
+minutos en la infraestructura de GitHub** (gratis). Tu Mac puede estar apagada.
+
+Para activarlo, define **3 secretos** en GitHub → tu repo `nexotradeia/nexo-trade-app` →
+**Settings → Secrets and variables → Actions → New repository secret**:
+
+| Nombre del secreto       | De dónde sale                                                        |
+|--------------------------|----------------------------------------------------------------------|
+| `SUPABASE_SERVICE_ROLE`  | Supabase → Project Settings → API → `service_role` secret            |
+| `VAPID_PUBLIC_KEY`       | el campo `publicKey` de tu `.vapid.json`                             |
+| `VAPID_PRIVATE_KEY`      | el campo `privateKey` de tu `.vapid.json`                           |
+
+Listo. En la pestaña **Actions** verás "Push Alerts (24/7)" corriendo cada 5 min; también puedes
+ejecutarlo a mano con **Run workflow**. (El estado anti-spam se conserva entre ejecuciones con el
+caché de Actions, así que las alertas "Una vez" no se repiten.)
+
+> Nota: GitHub a veces retrasa los cron unos minutos si hay carga, y pausa los workflows
+> programados si el repo queda 60 días sin actividad — con deploys regulares no es problema.
+
+### 5-bis) Alternativa: cron en tu Mac (si prefieres no usar GitHub Actions)
 ```
 crontab -e
 ```
-y añade esta línea:
+y añade esta línea (requiere la Mac encendida y con red):
 ```
 */5 * * * *  cd "/Users/mariangat26/Desktop/NEXO TRADE" && /usr/bin/python3 nexo_push_alert.py >> nexo_push_log.txt 2>&1
 ```
-(Tu Mac debe estar encendida y con red para que corra. Para un envío 24/7 sin depender del Mac,
-habría que mover el script a un servidor/función programada — opcional, más adelante.)
 
 ---
 
