@@ -492,24 +492,43 @@ async function signIn(){
 }
 
 async function applyAffiliate(){
-  const name = document.getElementById('ap-name').value.trim();
+  const name     = document.getElementById('ap-name').value.trim();
   const username = document.getElementById('ap-username').value.replace('@','').trim();
-  const email = document.getElementById('ap-email').value.trim();
+  const email    = document.getElementById('ap-email').value.trim().toLowerCase();
   const platform = document.getElementById('ap-platform').value;
-  const followers = parseInt(document.getElementById('ap-followers').value)||0;
-  const pass = document.getElementById('ap-password').value;
+  const followers= parseInt(document.getElementById('ap-followers').value)||0;
+  const pass     = document.getElementById('ap-password').value;
   if(!name||!email||!pass||!platform){showAuthError('Please fill all required fields');return;}
-  if(!sb){showAuthError('Supabase not configured. Use Demo mode.');return;}
+  if(!sb){showAuthError('Supabase not configured.');return;}
   try {
+    // Create Supabase auth account
     const {data,error} = await sb.auth.signUp({email,password:pass,options:{data:{name,username}}});
     if(error)throw error;
     // Insert affiliate record
     const code = username.toUpperCase().slice(0,8)+'20';
     const tier = followers>=500000?'mega':followers>=100000?'macro':followers>=20000?'mid':followers>=5000?'micro':'nano';
     const comm = tier==='mega'?30:tier==='macro'?28:tier==='mid'?25:20;
-    await sb.from('affiliates').insert({name,email,username,referral_code:code,platform:platform.toLowerCase(),followers,tier,commission_pct:comm,status:'pending',free_months:tier==='nano'?1:3});
-    showAuthError('Application submitted! We\'ll review it within 24h and email you.');
-  } catch(e){showAuthError(e.message||'Application failed');}
+    const {error:dbErr} = await sb.from('affiliates').insert({
+      name, email, username, referral_code:code,
+      platform:platform.toLowerCase(), followers, tier,
+      commission_pct:comm, status:'pending',
+      total_clicks:0, total_signups:0, total_paying:0,
+      total_earned:0, balance_pending:0, total_paid_out:0,
+      created_at:new Date().toISOString()
+    });
+    if(dbErr)console.warn('DB insert:',dbErr.message);
+    // Show success screen
+    document.getElementById('auth-screen').innerHTML=`
+      <div class="auth-card" style="text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">🎉</div>
+        <div style="font-size:22px;font-weight:800;color:var(--txt2);margin-bottom:10px">Application received!</div>
+        <div style="font-size:14px;color:var(--mid);line-height:1.6;margin-bottom:24px">
+          We'll review your application within 24h and email you at <strong style="color:var(--txt2)">${email}</strong>.<br><br>
+          Your referral code will be: <span style="font-family:var(--mono);color:var(--grn);font-size:16px">${code}</span>
+        </div>
+        <button class="auth-btn" onclick="location.reload()">Back to Sign In</button>
+      </div>`;
+  } catch(e){showAuthError(e.message||'Application failed. Try again.');}
 }
 
 function showAuthError(msg){
@@ -538,9 +557,29 @@ async function loadAffiliateData(){
       return;
     }
     const {data} = await sb.from('affiliates').select('*').eq('email',currentUser.email).single();
-    if(data){currentAffiliate=data;isAdmin=ADMIN_EMAILS.includes((data.email||'').toLowerCase());}
+    if(!data){
+      // Auth user exists but not in affiliates table
+      showAuthError('No affiliate account found for this email.');
+      return;
+    }
+    if(data.status==='pending'){
+      // Pending review — show waiting screen
+      document.getElementById('auth-screen').innerHTML=`
+        <div class="auth-card" style="text-align:center">
+          <div style="font-size:48px;margin-bottom:16px">⏳</div>
+          <div style="font-size:20px;font-weight:800;color:var(--txt2);margin-bottom:10px">Application under review</div>
+          <div style="font-size:14px;color:var(--mid);line-height:1.6;margin-bottom:24px">
+            Hi ${data.name||''}! Your application is being reviewed.<br>
+            We'll email you at <strong style="color:var(--txt2)">${data.email}</strong> within 24h.
+          </div>
+          <button class="auth-btn" onclick="logout()">Sign out</button>
+        </div>`;
+      return;
+    }
+    currentAffiliate=data;
+    isAdmin=ADMIN_EMAILS.includes((data.email||'').toLowerCase());
     showApp();
-  } catch(e){console.error(e);loadDemo();}
+  } catch(e){console.error(e);showAuthError('Error loading your account. Try again.');}
 }
 
 function showApp(){
@@ -986,7 +1025,10 @@ async function renderAdminPayouts(){
 
 async function markPaid(affiliateId, name, amount){
   if(!sb){showToast(`✓ Marked $${amount.toFixed(2)} as paid for ${name}`);return;}
-  const{error}=await sb.from('affiliates').update({balance_pending:0,total_paid_out:sb.raw('total_paid_out + '+amount)}).eq('id',affiliateId);
+  // Fetch current total_paid_out first to add correctly
+  const{data:cur}=await sb.from('affiliates').select('total_paid_out').eq('id',affiliateId).single();
+  const newPaidOut=(cur?.total_paid_out||0)+amount;
+  const{error}=await sb.from('affiliates').update({balance_pending:0,total_paid_out:newPaidOut}).eq('id',affiliateId);
   if(error)showToast('Error: '+error.message);
   else{showToast(`✓ $${amount.toFixed(2)} marked as paid for ${name}`);renderAdminPayouts();}
 }
