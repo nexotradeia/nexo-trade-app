@@ -20506,7 +20506,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               {l:"P&L Total",v:m$(totalPnl),c:totalPnl>=0?T.grn:T.red,d:(ytdPct>=0?"▲ +":"▼ ")+ytdPct.toFixed(1)+"% YTD",dc:ytdPct>=0?T.grn:T.red,acc:T.grn},
               {l:"Valor Cartera",v:"$"+Math.round(totalValue).toLocaleString("en-US"),c:T.blue,d:positions.length+" posiciones",dc:T.dim,acc:T.blue},
               {l:"P&L Hoy",v:m$(todayPnl),c:T.gold,d:(todayPnl>=0?"▲ +":"▼ ")+(totalValue>0?(todayPnl/totalValue*100).toFixed(2):"0")+"%",dc:todayPnl>=0?T.grn:T.red,acc:T.gold},
-              {l:"Exposición",v:"87.3%",c:T.red,d:"$"+Math.round(totalValue).toLocaleString("en-US")+" invertido",dc:T.dim,acc:T.red},
+              {l:(isEN?"Exposure":"Exposición"),v:"87.3%",c:T.red,d:"$"+Math.round(totalValue).toLocaleString("en-US")+" invertido",dc:T.dim,acc:T.red},
               {l:"Win Rate",v:"74.2%",c:T.purp,d:"89 / 120 trades",dc:T.dim,acc:T.purp},
             ].map((k,i)=>(
               <div key={i} style={{padding:"14px 16px",borderRight:i<4?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}>
@@ -20542,11 +20542,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {/* positions table */}
           <div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,display:"flex",alignItems:"center",gap:8}}><span style={{width:5,height:5,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`}}/>POSICIONES ABIERTAS</div>
+              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,display:"flex",alignItems:"center",gap:8}}><span style={{width:5,height:5,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`}}/>{isEN?"OPEN POSITIONS":"POSICIONES ABIERTAS"}</div>
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
-                <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","UNIDADES","ENTRADA","PRECIO ACT.","MKT VALUE","P&L $","P&L %","HOY","SEÑAL",""].map((h,i)=><th key={i} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                <thead><tr style={{background:T.bg2}}>{(isEN?["SYMBOL","UNITS","ENTRY","CUR. PRICE","MKT VALUE","P&L $","P&L %","TODAY","SIGNAL",""]:["SÍMBOLO","UNIDADES","ENTRADA","PRECIO ACT.","MKT VALUE","P&L $","P&L %","HOY","SEÑAL",""]).map((h,i)=><th key={i} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
                 <tbody>
                   {sortedRows.map((r,i)=>{ const sg=sig(r); const tp=r.today>=0; return (
                     <tr key={r.p.id} style={{borderBottom:"1px solid #111820"}}>
@@ -20604,7 +20604,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {navView==="orders" && (
             <div style={{padding:"70px 24px",textAlign:"center"}}>
               <div style={{fontSize:30,marginBottom:12}}>◎</div>
-              <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt,letterSpacing:.5,marginBottom:8}}>Sin órdenes abiertas</div>
+              <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt,letterSpacing:.5,marginBottom:8}}>{isEN?"No open orders":"Sin órdenes abiertas"}</div>
               <div style={{fontFamily:SANS,fontSize:12,color:T.mid,maxWidth:420,margin:"0 auto",lineHeight:1.6}}>Este terminal es un <b style={{color:T.txt}}>tracker de tu cartera</b>, no un bróker — no envía órdenes al mercado. Registra tus entradas y salidas como posiciones, y documenta tu plan en el Journal.</div>
               <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18,flexWrap:"wrap"}}>
                 <button onClick={()=>{setNavView("positions");setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:700,cursor:"pointer"}}>+ Añadir posición</button>
@@ -20616,11 +20616,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {/* ── HISTORY (actividad real desde addedAt) ── */}
           {navView==="history" && (()=>{ const hist=[...positions].filter(p=>p.addedAt).sort((a,b)=>new Date(b.addedAt)-new Date(a.addedAt)); return (
             <div>
-              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2}}>HISTORIAL DE ACTIVIDAD</div>
+              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2}}>{isEN?"ACTIVITY HISTORY":"HISTORIAL DE ACTIVIDAD"}</div>
               {hist.length? hist.map((p,i)=>{ const d=new Date(p.addedAt); const tk=(p.ticker||"").toUpperCase(); return (
                 <div key={p.id||i} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 18px",borderBottom:"1px solid #111820"}}>
                   <div style={{width:30,height:30,borderRadius:6,background:avatarBg(tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt,flexShrink:0}}>{tk.slice(0,2)}</div>
-                  <div style={{flex:1,minWidth:0}}><div style={{fontFamily:MONO,fontSize:12,color:T.txt}}><span style={{color:T.grn,fontWeight:700}}>AÑADIDA</span> {p.shares} uds de <b>{tk}</b> @ ${parseFloat(p.entryPrice).toLocaleString("en-US")}</div>{p.note&&<div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginTop:2}}>{p.note}</div>}</div>
+                  <div style={{flex:1,minWidth:0}}><div style={{fontFamily:MONO,fontSize:12,color:T.txt}}><span style={{color:T.grn,fontWeight:700}}>{isEN?"ADDED":"AÑADIDA"}</span> {p.shares} uds de <b>{tk}</b> @ ${parseFloat(p.entryPrice).toLocaleString("en-US")}</div>{p.note&&<div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginTop:2}}>{p.note}</div>}</div>
                   <div style={{fontFamily:MONO,fontSize:10,color:T.dim,textAlign:"right",flexShrink:0}}>{d.toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})}<br/>{d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}</div>
                 </div>
               ); }) : <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim,fontSize:12}}>Sin actividad todavía · agrega tu primera posición</div>}
@@ -20644,14 +20644,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                     </div>
                   ); })}
                 </div>
-              </>) : <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim,fontSize:12}}>Sin posiciones para analizar</div>}
+              </>) : <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim,fontSize:12}}>{isEN?"No positions to analyze":"Sin posiciones para analizar"}</div>}
             </div>
           ); })()}
 
           {/* ── RISK MATRIX ── */}
           {navView==="risk" && (
             <div>
-              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2,display:"flex",alignItems:"center",gap:8}}>MATRIZ DE RIESGO <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>ILUSTRATIVO</span></div>
+              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2,display:"flex",alignItems:"center",gap:8}}>{isEN?"RISK MATRIX":"MATRIZ DE RIESGO"} <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>ILUSTRATIVO</span></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,padding:18}}>{RISK.map((r,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"16px 12px",textAlign:"center",position:"relative",overflow:"hidden"}}><div style={{fontFamily:MONO,fontSize:22,fontWeight:700,color:r[2],lineHeight:1,marginBottom:6}}>{r[0]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>{r[1]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:3,background:r[2]}}/></div>))}</div>
               <div style={{fontFamily:SANS,fontSize:11,color:T.dim,padding:"0 18px 18px",lineHeight:1.6}}>Métricas de riesgo de referencia. Para cálculos en vivo sobre tus posiciones reales (Sharpe, Beta y VaR con datos de mercado) se requiere un plan de datos de pago.</div>
             </div>
@@ -20668,8 +20668,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{padding:"0 12px 12px"}}>
               <div style={{display:"flex",alignItems:"center",gap:12,background:T.bg3,border:`1px solid rgba(0,255,135,.15)`,borderRadius:6,padding:12,marginBottom:10}}><div><div style={{fontFamily:MONO,fontSize:30,fontWeight:700,color:T.grn,lineHeight:1,textShadow:"0 0 20px rgba(0,255,135,.35)"}}>82</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginTop:2}}>PORTFOLIO SCORE</div></div><div><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.grn}}>MUY BUENO</div><div style={{fontFamily:MONO,fontSize:10,color:T.dim,marginTop:4}}>Top 26% traders</div></div></div>
               <div style={{display:"flex",gap:6,marginBottom:8}}><div style={{flex:1,padding:"7px 8px",borderRadius:4,fontFamily:MONO,fontSize:10,fontWeight:700,textAlign:"center",background:"rgba(240,180,41,.08)",border:`1px solid rgba(240,180,41,.2)`,color:T.gold}}>◆ HOLD</div><div style={{flex:1,padding:"7px 8px",borderRadius:4,fontFamily:MONO,fontSize:10,fontWeight:700,textAlign:"center",background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.25)`,color:T.grn}}>▲ TARGET $340</div></div>
-              <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"10px 11px",marginBottom:6}}><div style={{...lbl,marginBottom:5}}>Análisis técnico</div><div style={{fontSize:11,color:T.mid,lineHeight:1.5,fontFamily:SANS}}>RSI <strong style={{color:T.txt}}>68</strong> — fuerza sin sobrecompra. MACD cruzado al alza. Soporte <strong style={{color:T.txt}}>$288</strong>.</div></div>
-              <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"10px 11px"}}><div style={{...lbl,marginBottom:5}}>Catalizador próximo</div><div style={{fontSize:11,color:T.mid,lineHeight:1.5,fontFamily:SANS}}><strong style={{color:T.txt}}>WWDC Jun 9</strong> · Earnings <strong style={{color:T.txt}}>Jul 31</strong>.</div></div>
+              <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"10px 11px",marginBottom:6}}><div style={{...lbl,marginBottom:5}}>{isEN?"Technical analysis":"Análisis técnico"}</div><div style={{fontSize:11,color:T.mid,lineHeight:1.5,fontFamily:SANS}}>RSI <strong style={{color:T.txt}}>68</strong> — fuerza sin sobrecompra. MACD cruzado al alza. Soporte <strong style={{color:T.txt}}>$288</strong>.</div></div>
+              <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"10px 11px"}}><div style={{...lbl,marginBottom:5}}>{isEN?"Next catalyst":"Catalizador próximo"}</div><div style={{fontSize:11,color:T.mid,lineHeight:1.5,fontFamily:SANS}}><strong style={{color:T.txt}}>WWDC Jun 9</strong> · Earnings <strong style={{color:T.txt}}>Jul 31</strong>.</div></div>
             </div>
           </div>
           <div style={{borderBottom:`1px solid ${T.br}`}}>
@@ -20803,14 +20803,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
               {[["Origen",scOrigin,setScOrigin,["Todas","Portfolio","Watchlist"]],["Filtro",scReturn,setScReturn,["Cualquiera","Ganadoras (hoy)","Perdedoras (hoy)"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
-              <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>Buscar</span><input value={scQuery} onChange={e=>setScQuery(e.target.value)} placeholder="AAPL, TSLA…" style={{...selStyle,width:120}}/></div>
+              <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{isEN?"Search":"Buscar"}</span><input value={scQuery} onChange={e=>setScQuery(e.target.value)} placeholder="AAPL, TSLA…" style={{...selStyle,width:120}}/></div>
               <button onClick={()=>setScRan(true)} style={{background:T.grn,color:T.bg,border:"none",fontFamily:MONO,fontSize:11,fontWeight:700,padding:"7px 14px",borderRadius:5,cursor:"pointer",letterSpacing:.5,boxShadow:"0 0 14px rgba(0,255,135,.3)"}}>▶ EJECUTAR SCAN</button>
               <button onClick={()=>{setScQuery("");setScOrigin("Todas");setScReturn("Cualquiera");setScRan(false);}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
               <span style={{marginLeft:"auto",fontFamily:MONO,fontSize:11,color:scRan?T.grn:T.dim}}>{scRan?list.length:0} resultados</span>
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:12}}>
-                <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","PRECIO","HOY %","ORIGEN"].map((h,i)=><th key={i} style={{padding:"9px 16px",fontSize:9,fontWeight:600,letterSpacing:1.2,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                <thead><tr style={{background:T.bg2}}>{(isEN?["SYMBOL","PRICE","TODAY %","SOURCE"]:["SÍMBOLO","PRECIO","HOY %","ORIGEN"]).map((h,i)=><th key={i} style={{padding:"9px 16px",fontSize:9,fontWeight:600,letterSpacing:1.2,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
                 <tbody>{list.map((r,i)=>(
                   <tr key={i} style={{borderBottom:"1px solid #111820",cursor:"pointer"}}>
                     <td style={{padding:"11px 16px"}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:30,height:30,borderRadius:6,background:avatarBg(r.tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r.tk.slice(0,2)}</div><div><div style={{fontSize:13,fontWeight:700,color:T.txt}}>{r.tk}</div><div style={{fontSize:10,color:T.dim}}>{r.name}</div></div></div></td>
@@ -20821,7 +20821,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 ))}</tbody>
               </table>
               {!scRan && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>🔍</div><div style={{fontSize:13,color:T.mid,letterSpacing:.5}}>Pulsa <span style={{color:T.grn}}>▶ EJECUTAR SCAN</span> para ver tus acciones</div><div style={{fontSize:11,marginTop:6}}>{uni.length} en tu universo ({nPos} portfolio · {nWl} watchlist)</div></div>}
-              {scRan && list.length===0 && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>∅</div><div style={{fontSize:13,color:T.mid}}>{uni.length===0?"No tienes acciones todavía":"Sin coincidencias para ese filtro"}</div><div style={{fontSize:11,marginTop:6}}>{uni.length===0?"Agrégalas en tu Portfolio o Watchlist":"Ajusta el filtro o pulsa ↻ Reset"}</div></div>}
+              {scRan && list.length===0 && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>∅</div><div style={{fontSize:13,color:T.mid}}>{uni.length===0?(isEN?"You have no stocks yet":"No tienes acciones todavía"):(isEN?"No matches for this filter":"Sin coincidencias para ese filtro")}</div><div style={{fontSize:11,marginTop:6}}>{uni.length===0?"Agrégalas en tu Portfolio o Watchlist":"Ajusta el filtro o pulsa ↻ Reset"}</div></div>}
             </div>
           </div>
           {/* RIGHT */}
@@ -20833,7 +20833,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </div>
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px"}}>Filtros rápidos</div>
+              <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"Quick filters":"Filtros rápidos"}</div>
               <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:6}}>
                 {[["💼","Solo Portfolio","Portfolio",T.grn],["👁","Solo Watchlist","Watchlist",T.blue],["▲","Ganadoras hoy",null,T.grn],["▼","Perdedoras hoy",null,T.red]].map((s,i)=>(<div key={i} onClick={()=>{ if(s[2]!==undefined&&s[2]!==null){setScOrigin(s[2]);setScReturn("Cualquiera");} else {setScReturn(s[0]==="▲"?"Ganadoras (hoy)":"Perdedoras (hoy)");setScOrigin("Todas");} setScRan(true); }} style={{display:"flex",alignItems:"center",gap:9,background:T.bg3,border:`1px solid ${s[3]}33`,borderRadius:6,padding:"9px 11px",cursor:"pointer"}}><span style={{fontSize:13,color:s[3]}}>{s[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:s[3]}}>{s[1]}</span></div>))}
               </div>
@@ -20881,12 +20881,12 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 {a.note && <div style={{fontFamily:SANS,fontSize:11,color:T.dim,fontStyle:"italic",marginTop:3}}>"{a.note}"</div>}
                 <div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginTop:4}}>Creada {rel(a.created)}</div>
               </div>
-            )) : <div style={{padding:"50px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:26,marginBottom:10}}>🔔</div><div style={{fontSize:12,color:T.mid}}>{alItems.length?"Sin alertas en este filtro":"No tienes alertas todavía"}</div><div style={{fontSize:10,marginTop:6}}>Créala con el formulario →</div></div>}</div>
+            )) : <div style={{padding:"50px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:26,marginBottom:10}}>🔔</div><div style={{fontSize:12,color:T.mid}}>{alItems.length?(isEN?"No alerts for this filter":"Sin alertas en este filtro"):(isEN?"You have no alerts yet":"No tienes alertas todavía")}</div><div style={{fontSize:10,marginTop:6}}>Créala con el formulario →</div></div>}</div>
           </div>
           {/* RIGHT — crear */}
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 20px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-              <span style={{...lbl,padding:0,fontSize:10}}>Crear Alerta</span>
+              <span style={{...lbl,padding:0,fontSize:10}}>{isEN?"Create Alert":"Crear Alerta"}</span>
               {notifPerm==="granted"
                 ? <span style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10,color:T.grn}}><span style={{width:6,height:6,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`}}/>🔔 Notificaciones activas</span>
                 : notifPerm==="denied"
@@ -20902,17 +20902,17 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </div>
             ); })()}
             <div style={{padding:"18px 22px",maxWidth:820}}>
-              <div style={{...lbl,marginBottom:8}}>Tipo de condición</div>
+              <div style={{...lbl,marginBottom:8}}>{isEN?"Condition type":"Tipo de condición"}</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>{COND.map((c)=>{const sel=alType===c[0];return (<div key={c[0]} onClick={()=>setAlType(c[0])} style={{background:sel?c[4]+"14":T.bg3,border:`1px solid ${sel?c[4]+"66":T.br}`,borderRadius:8,padding:"16px 10px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:22,marginBottom:8}}>{c[1]}</div><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:sel?c[4]:T.mid,letterSpacing:.5}}>{c[2]}</div></div>);})}</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
-                <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input value={alForm.symbol} onChange={e=>setAlForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="AAPL" style={inStyle}/></div>
+                <div><div style={{...lbl,marginBottom:5}}>{isEN?"Symbol":"Símbolo"}</div><input value={alForm.symbol} onChange={e=>setAlForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="AAPL" style={inStyle}/></div>
                 <div><div style={{...lbl,marginBottom:5}}>{tgtLabel}</div><input value={alForm.target} onChange={e=>setAlForm(f=>({...f,target:e.target.value}))} placeholder={tgtPh} style={inStyle}/></div>
-                <div><div style={{...lbl,marginBottom:5}}>Frecuencia</div><select value={alForm.freq} onChange={e=>setAlForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Una vez</option><option style={{background:T.bg2}}>Cada vez</option><option style={{background:T.bg2}}>Diaria</option></select></div>
-                <div><div style={{...lbl,marginBottom:5}}>Notificación</div><select value={alForm.notif} onChange={e=>setAlForm(f=>({...f,notif:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Push + Email</option><option style={{background:T.bg2}}>Solo Push</option><option style={{background:T.bg2}}>Solo Email</option></select></div>
+                <div><div style={{...lbl,marginBottom:5}}>{isEN?"Frequency":"Frecuencia"}</div><select value={alForm.freq} onChange={e=>setAlForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Una vez</option><option style={{background:T.bg2}}>{isEN?"Every time":"Cada vez"}</option><option style={{background:T.bg2}}>{isEN?"Daily":"Diaria"}</option></select></div>
+                <div><div style={{...lbl,marginBottom:5}}>{isEN?"Notification":"Notificación"}</div><select value={alForm.notif} onChange={e=>setAlForm(f=>({...f,notif:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Push + Email</option><option style={{background:T.bg2}}>Solo Push</option><option style={{background:T.bg2}}>Solo Email</option></select></div>
               </div>
               <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Nota (opcional)</div><input value={alForm.note} onChange={e=>setAlForm(f=>({...f,note:e.target.value}))} placeholder="Resistencia clave, considerar toma de ganancias…" style={inStyle}/></div>
               <button onClick={create} style={{width:"100%",background:`linear-gradient(90deg,${T.grn2},${T.grn})`,color:T.bg,border:"none",borderRadius:8,padding:"13px",fontFamily:MONO,fontSize:13,fontWeight:800,letterSpacing:1,cursor:(alForm.symbol&&alForm.target)?"pointer":"not-allowed",opacity:(alForm.symbol&&alForm.target)?1:0.5,boxShadow:"0 0 18px rgba(0,255,135,.35)"}}>⚡ CREAR ALERTA</button>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",margin:"22px 0 10px"}}><div style={{...lbl}}>Historial de disparos</div>{alFired.length>0&&<button onClick={()=>setAlFired([])} style={{background:"transparent",border:`1px solid ${T.br}`,color:T.dim,fontFamily:MONO,fontSize:9,padding:"3px 8px",borderRadius:4,cursor:"pointer"}}>Limpiar</button>}</div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",margin:"22px 0 10px"}}><div style={{...lbl}}>{isEN?"Trigger history":"Historial de disparos"}</div>{alFired.length>0&&<button onClick={()=>setAlFired([])} style={{background:"transparent",border:`1px solid ${T.br}`,color:T.dim,fontFamily:MONO,fontSize:9,padding:"3px 8px",borderRadius:4,cursor:"pointer"}}>{isEN?"Clear":"Limpiar"}</button>}</div>
               {alFired.length? <div style={{display:"flex",flexDirection:"column",gap:8}}>{alFired.map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"11px 14px"}}><span style={{width:8,height:8,borderRadius:"50%",background:T.grn,flexShrink:0}}/><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{f.sym} ⚡ disparada</div><div style={{fontFamily:SANS,fontSize:11,color:T.mid,marginTop:1}}>{f.cond}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.grn}}>${(f.price||0).toFixed(2)}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{relF(f.at)}</div></div></div>))}</div>
               : <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"22px",textAlign:"center",fontFamily:MONO,fontSize:11,color:T.dim}}>Sin disparos todavía · cuando una alerta de precio se cumpla, aparecerá aquí y te llegará la notificación</div>}
             </div>
@@ -20922,7 +20922,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       })()}
       {/* ── JOURNAL VIEW (tu diario real) ── */}
       {termTab==="journal" && (()=>{
-        const EMO=[["🧠","ENFOCADO"],["😤","FRUSTRADO"],["😰","ANSIOSO"],["😎","CONFIADO"],["🎯","EN FLOW"],["😴","CANSADO"],["😡","REVENGE"],["⚡","EUFÓRICO"]];
+        const EMO=(isEN?[["🧠","FOCUSED"],["😤","FRUSTRATED"],["😰","ANXIOUS"],["😎","CONFIDENT"],["🎯","IN FLOW"],["😴","TIRED"],["😡","REVENGE"],["⚡","EUPHORIC"]]:[["🧠","ENFOCADO"],["😤","FRUSTRADO"],["😰","ANSIOSO"],["😎","CONFIADO"],["🎯","EN FLOW"],["😴","CANSADO"],["😡","REVENGE"],["⚡","EUFÓRICO"]]);
         const now=new Date(); const yr=now.getFullYear(), mo=now.getMonth(), today=now.getDate();
         const todayISO=`${yr}-${String(mo+1).padStart(2,"0")}-${String(today).padStart(2,"0")}`;
         const monthName=now.toLocaleDateString("es-ES",{month:"long",year:"numeric"}).replace(/^./,c=>c.toUpperCase());
@@ -20959,9 +20959,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 {Array.from({length:firstDow}).map((_,i)=><div key={"b"+i}/>)}
                 {Array.from({length:dim}).map((_,i)=>{const d=i+1;const iso=`${yr}-${String(mo+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;const isToday=d===today;const has=byDate[iso]!==undefined;const dot=has?(byDate[iso]>0?T.grn:byDate[iso]<0?T.red:T.gold):null;return (<div key={d} style={{textAlign:"center",padding:"4px 0",borderRadius:5,position:"relative",background:isToday?"rgba(0,255,135,.12)":"transparent",border:isToday?`1px solid rgba(0,255,135,.4)`:"1px solid transparent"}}><span style={{fontFamily:MONO,fontSize:11,color:isToday?T.grn:d<=today?T.mid:T.dim2||T.dim}}>{d}</span>{dot&&<span style={{position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)",width:4,height:4,borderRadius:"50%",background:dot}}/>}</div>);})}
               </div>
-              <div style={{display:"flex",gap:12,marginTop:10,fontFamily:MONO,fontSize:9,color:T.dim}}><span>● <span style={{color:T.grn}}>Ganancia</span></span><span>● <span style={{color:T.red}}>Pérdida</span></span></div>
+              <div style={{display:"flex",gap:12,marginTop:10,fontFamily:MONO,fontSize:9,color:T.dim}}><span>● <span style={{color:T.grn}}>Ganancia</span></span><span>● <span style={{color:T.red}}>{isEN?"Loss":"Pérdida"}</span></span></div>
             </div>
-            <div>{sorted.length? sorted.map(e=>{const pnl=parseFloat(e.pnl)||0;const isSel=sel&&sel.id===e.id;return (<div key={e.id} onClick={()=>setJrSel(e.id)} style={{padding:"11px 14px",borderBottom:`1px solid ${T.br}`,borderLeft:isSel?`2px solid ${T.grn}`:"2px solid transparent",background:isSel?"rgba(0,255,135,.04)":"transparent",cursor:"pointer"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginBottom:3}}>{fmtDate(e.date)}</div><div style={{fontFamily:SANS,fontSize:12,fontWeight:700,color:T.txt,marginBottom:2}}>{e.title}</div>{e.summary&&<div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginBottom:5,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.summary}</div>}<div style={{display:"flex",gap:8,fontFamily:MONO,fontSize:9}}><span style={{color:e.pnl===""||e.pnl==null?T.dim:pnl>=0?T.grn:T.red,fontWeight:700}}>{e.pnl===""||e.pnl==null?"—":m$(pnl)}</span><span style={{color:T.dim}}>{e.trades||0} trades</span>{e.emotion&&<span style={{color:T.dim}}>{emoOf(e.emotion)[0]}</span>}</div></div>);}) : <div style={{padding:"40px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:24,marginBottom:8}}>📓</div><div style={{fontSize:11,color:T.mid}}>Sin entradas aún</div></div>}</div>
+            <div>{sorted.length? sorted.map(e=>{const pnl=parseFloat(e.pnl)||0;const isSel=sel&&sel.id===e.id;return (<div key={e.id} onClick={()=>setJrSel(e.id)} style={{padding:"11px 14px",borderBottom:`1px solid ${T.br}`,borderLeft:isSel?`2px solid ${T.grn}`:"2px solid transparent",background:isSel?"rgba(0,255,135,.04)":"transparent",cursor:"pointer"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginBottom:3}}>{fmtDate(e.date)}</div><div style={{fontFamily:SANS,fontSize:12,fontWeight:700,color:T.txt,marginBottom:2}}>{e.title}</div>{e.summary&&<div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginBottom:5,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.summary}</div>}<div style={{display:"flex",gap:8,fontFamily:MONO,fontSize:9}}><span style={{color:e.pnl===""||e.pnl==null?T.dim:pnl>=0?T.grn:T.red,fontWeight:700}}>{e.pnl===""||e.pnl==null?"—":m$(pnl)}</span><span style={{color:T.dim}}>{e.trades||0} trades</span>{e.emotion&&<span style={{color:T.dim}}>{emoOf(e.emotion)[0]}</span>}</div></div>);}) : <div style={{padding:"40px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:24,marginBottom:8}}>📓</div><div style={{fontSize:11,color:T.mid}}>{isEN?"No entries yet":"Sin entradas aún"}</div></div>}</div>
           </div>
           {/* CENTER */}
           <div style={{minWidth:0,padding:"16px 22px"}}>
@@ -20969,9 +20969,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{fontFamily:MONO,fontSize:10,color:T.dim,letterSpacing:1,marginBottom:8}}>{fmtDate(sel.date).toUpperCase()}</div>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}><div style={{fontFamily:SANS,fontSize:20,fontWeight:800,color:T.txt}}>{sel.title}</div><button onClick={()=>setJrItems(p=>p.filter(x=>x.id!==sel.id))} style={{marginLeft:"auto",background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontFamily:MONO,fontSize:10,fontWeight:600,padding:"5px 10px",borderRadius:5,cursor:"pointer"}}>✕ Borrar</button></div>
               <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:18}}>{[(sel.pnl!==""&&sel.pnl!=null)&&[m$(pnl)+" P&L",pnl>=0?T.grn:T.red],tr&&[tr+" trades",T.blue],wr!=null&&["Win Rate: "+wr+"%",T.gold],sel.emotion&&["Emoción: "+em[0]+" "+sel.emotion,T.purp]].filter(Boolean).map((c,i)=>(<span key={i} style={{fontFamily:MONO,fontSize:10,fontWeight:700,color:c[1],background:c[1]+"1a",border:`1px solid ${c[1]}33`,borderRadius:5,padding:"4px 10px"}}>{c[0]}</span>))}</div>
-              {sel.summary && <><div style={{...lbl,marginBottom:8}}>Resumen del día</div><div style={{fontFamily:SANS,fontSize:13,color:T.mid,lineHeight:1.7,marginBottom:20,whiteSpace:"pre-wrap"}}>{sel.summary}</div></>}
-              {sel.emotion && <><div style={{...lbl,marginBottom:8}}>Estado emocional</div><div style={{display:"inline-flex",alignItems:"center",gap:10,background:"rgba(0,255,135,.06)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:8,padding:"12px 18px",marginBottom:20}}><span style={{fontSize:24}}>{em[0]}</span><span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.grn,letterSpacing:.5}}>{sel.emotion}</span></div></>}
-              {sel.errors && <><div style={{...lbl,marginBottom:8}}>Errores y aprendizajes</div><div style={{display:"flex",gap:11,background:"rgba(255,61,90,.06)",border:`1px solid rgba(255,61,90,.25)`,borderRadius:8,padding:"13px 15px"}}><span style={{fontSize:16}}>❌</span><div style={{fontFamily:SANS,fontSize:12,color:T.mid,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{sel.errors}</div></div></>}
+              {sel.summary && <><div style={{...lbl,marginBottom:8}}>{isEN?"Day summary":"Resumen del día"}</div><div style={{fontFamily:SANS,fontSize:13,color:T.mid,lineHeight:1.7,marginBottom:20,whiteSpace:"pre-wrap"}}>{sel.summary}</div></>}
+              {sel.emotion && <><div style={{...lbl,marginBottom:8}}>{isEN?"Emotional state":"Estado emocional"}</div><div style={{display:"inline-flex",alignItems:"center",gap:10,background:"rgba(0,255,135,.06)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:8,padding:"12px 18px",marginBottom:20}}><span style={{fontSize:24}}>{em[0]}</span><span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.grn,letterSpacing:.5}}>{sel.emotion}</span></div></>}
+              {sel.errors && <><div style={{...lbl,marginBottom:8}}>{isEN?"Mistakes & lessons":"Errores y aprendizajes"}</div><div style={{display:"flex",gap:11,background:"rgba(255,61,90,.06)",border:`1px solid rgba(255,61,90,.25)`,borderRadius:8,padding:"13px 15px"}}><span style={{fontSize:16}}>❌</span><div style={{fontFamily:SANS,fontSize:12,color:T.mid,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{sel.errors}</div></div></>}
             </>);})() : (
               <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:34,marginBottom:12}}>📓</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>Tu diario está vacío</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.grn}}>+ Entrada</span> para registrar tu primer día de trading</div><button onClick={openNew} style={{marginTop:18,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>+ Nueva entrada</button></div>
             )}
@@ -20984,7 +20984,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             </div>
             <div style={{padding:"12px 0"}}>
               <div style={{...lbl,padding:"0 14px 8px"}}>P&L Mensual</div>
-              {monKeys.length? <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:7}}>{monKeys.map((k,i)=>{const v=monMap[k];const pos=v>=0;const lbl2=new Date(k+"-01T00:00").toLocaleDateString("es-ES",{month:"short"});return (<div key={i} style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontFamily:MONO,fontSize:10,color:T.dim,width:30}}>{lbl2}</span><div style={{flex:1,height:13,background:T.bg3,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:Math.abs(v)/monMax*100+"%",background:pos?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)",borderRadius:3}}/></div><span style={{fontFamily:MONO,fontSize:10,fontWeight:700,color:pos?T.grn:T.red,width:52,textAlign:"right"}}>{m$(v)}</span></div>);})}</div> : <div style={{padding:"20px 14px",fontFamily:MONO,fontSize:11,color:T.dim,textAlign:"center"}}>Sin datos todavía</div>}
+              {monKeys.length? <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:7}}>{monKeys.map((k,i)=>{const v=monMap[k];const pos=v>=0;const lbl2=new Date(k+"-01T00:00").toLocaleDateString("es-ES",{month:"short"});return (<div key={i} style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontFamily:MONO,fontSize:10,color:T.dim,width:30}}>{lbl2}</span><div style={{flex:1,height:13,background:T.bg3,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:Math.abs(v)/monMax*100+"%",background:pos?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)",borderRadius:3}}/></div><span style={{fontFamily:MONO,fontSize:10,fontWeight:700,color:pos?T.grn:T.red,width:52,textAlign:"right"}}>{m$(v)}</span></div>);})}</div> : <div style={{padding:"20px 14px",fontFamily:MONO,fontSize:11,color:T.dim,textAlign:"center"}}>{isEN?"No data yet":"Sin datos todavía"}</div>}
             </div>
           </div>
 
@@ -20994,20 +20994,20 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:10,padding:22,width:"100%",maxWidth:480,maxHeight:"88vh",overflowY:"auto"}}>
                 <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>+ NUEVA ENTRADA</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-                  <div><div style={{...lbl,marginBottom:5}}>Fecha</div><input type="date" value={jrForm.date} onChange={e=>setJrForm(f=>({...f,date:e.target.value}))} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Date":"Fecha"}</div><input type="date" value={jrForm.date} onChange={e=>setJrForm(f=>({...f,date:e.target.value}))} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>P&L del día ($)</div><input value={jrForm.pnl} onChange={e=>setJrForm(f=>({...f,pnl:e.target.value}))} placeholder="1248 o -82" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                 </div>
                 <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:5}}>Título</div><input value={jrForm.title} onChange={e=>setJrForm(f=>({...f,title:e.target.value}))} placeholder="Día de alta volatilidad — NVDA breakout" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
-                <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:5}}>Resumen del día</div><textarea value={jrForm.summary} onChange={e=>setJrForm(f=>({...f,summary:e.target.value}))} rows={3} placeholder="Qué pasó, qué hiciste bien…" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
+                <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:5}}>{isEN?"Day summary":"Resumen del día"}</div><textarea value={jrForm.summary} onChange={e=>setJrForm(f=>({...f,summary:e.target.value}))} rows={3} placeholder={isEN?"What happened, what you did well…":"Qué pasó, qué hiciste bien…"} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
                   <div><div style={{...lbl,marginBottom:5}}># Trades</div><input value={jrForm.trades} onChange={e=>setJrForm(f=>({...f,trades:e.target.value}))} placeholder="3" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                   <div><div style={{...lbl,marginBottom:5}}># Ganadoras</div><input value={jrForm.wins} onChange={e=>setJrForm(f=>({...f,wins:e.target.value}))} placeholder="2" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                 </div>
                 <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:6}}>¿Cómo te sentiste?</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>{EMO.map((e,i)=>{const s=jrEmotion===e[1];return (<div key={i} onClick={()=>setJrEmotion(e[1])} style={{background:s?"rgba(0,255,135,.08)":T.bg3,border:`1px solid ${s?"rgba(0,255,135,.35)":T.br}`,borderRadius:6,padding:"8px 4px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:17}}>{e[0]}</div><div style={{fontFamily:MONO,fontSize:7.5,fontWeight:700,color:s?T.grn:T.dim,marginTop:3}}>{e[1]}</div></div>);})}</div></div>
-                <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Errores y aprendizajes</div><textarea value={jrForm.errors} onChange={e=>setJrForm(f=>({...f,errors:e.target.value}))} rows={2} placeholder="Qué harías distinto…" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
+                <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>{isEN?"Mistakes & lessons":"Errores y aprendizajes"}</div><textarea value={jrForm.errors} onChange={e=>setJrForm(f=>({...f,errors:e.target.value}))} rows={2} placeholder={isEN?"What you would do differently…":"Qué harías distinto…"} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
                 <div style={{display:"flex",gap:8}}>
-                  <button onClick={()=>setJrShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
-                  <button onClick={()=>{ const t=jrForm.title.trim(); if(!t)return; const it={id:Date.now()+"",date:jrForm.date||todayISO,title:t,summary:jrForm.summary.trim(),pnl:jrForm.pnl,trades:jrForm.trades,wins:jrForm.wins,emotion:jrEmotion,errors:jrForm.errors.trim()}; setJrItems(p=>[it,...p]); setJrSel(it.id); setJrShow(false); }} style={{flex:1,background:"rgba(0,255,135,.15)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:jrForm.title.trim()?"pointer":"not-allowed",opacity:jrForm.title.trim()?1:0.5}}>Guardar entrada</button>
+                  <button onClick={()=>setJrShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>{isEN?"Cancel":"Cancelar"}</button>
+                  <button onClick={()=>{ const t=jrForm.title.trim(); if(!t)return; const it={id:Date.now()+"",date:jrForm.date||todayISO,title:t,summary:jrForm.summary.trim(),pnl:jrForm.pnl,trades:jrForm.trades,wins:jrForm.wins,emotion:jrEmotion,errors:jrForm.errors.trim()}; setJrItems(p=>[it,...p]); setJrSel(it.id); setJrShow(false); }} style={{flex:1,background:"rgba(0,255,135,.15)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:jrForm.title.trim()?"pointer":"not-allowed",opacity:jrForm.title.trim()?1:0.5}}>{isEN?"Save entry":"Guardar entrada"}</button>
                 </div>
               </div>
             </div>
@@ -21027,7 +21027,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const KPI=[
           ["P&L Opciones", optItems.length?m$(totalPnl):"—", totalPnl>=0?T.grn:T.red, optItems.length?(totalPnl>=0?"en ganancia":"en pérdida"):"sin posiciones"],
           ["Posiciones Abiertas", String(optItems.length), T.purp, nCalls+" calls · "+nPuts+" puts"],
-          ["Prima Cobrada", optItems.length?"$"+Math.round(prima).toLocaleString("en-US"):"—", T.gold, "ventas (SHORT)"],
+          [(isEN?"Premium Collected":"Prima Cobrada"), optItems.length?"$"+Math.round(prima).toLocaleString("en-US"):"—", T.gold, "ventas (SHORT)"],
           ["Capital en Juego", optItems.length?"$"+Math.round(capital).toLocaleString("en-US"):"—", T.blue, "compras (LONG)"],
           ["Ganadoras", optItems.length?winners+"/"+optItems.length:"—", T.grn, optItems.length?Math.round(winners/optItems.length*100)+"% win":"—"],
         ];
@@ -21045,7 +21045,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {optItems.length? (
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11,minWidth:760}}>
-                <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","TIPO","LADO","STRIKE","VENC.","DTE","CONTRATOS","PRIMA ENT","PRIMA ACT","P&L",""].map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                <thead><tr style={{background:T.bg2}}>{(isEN?["SYMBOL","TYPE","SIDE","STRIKE","EXP.","DTE","CONTRACTS","ENTRY PREM","CUR PREM","P&L",""]:["SÍMBOLO","TIPO","LADO","STRIKE","VENC.","DTE","CONTRATOS","PRIMA ENT","PRIMA ACT","P&L",""]).map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
                 <tbody>{optItems.map(o=>{const p=opPnl(o);const d=dte(o);const kc=o.kind==="CALL"?T.grn:T.red;return (
                   <tr key={o.id} style={{borderBottom:"1px solid #111820"}}>
                     <td style={{padding:"11px 14px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(o.symbol),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{o.symbol.slice(0,2)}</div><span style={{fontSize:13,fontWeight:700,color:T.txt}}>{o.symbol}</span></div></td>
@@ -21072,18 +21072,18 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:10,padding:22,width:"100%",maxWidth:460}}>
                 <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>+ NUEVA OPCIÓN</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-                  <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input value={optForm.symbol} onChange={e=>setOptForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="AAPL" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Symbol":"Símbolo"}</div><input value={optForm.symbol} onChange={e=>setOptForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="AAPL" style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>Strike ($)</div><input value={optForm.strike} onChange={e=>setOptForm(f=>({...f,strike:e.target.value}))} placeholder="305" style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>Tipo</div><select value={optForm.kind} onChange={e=>setOptForm(f=>({...f,kind:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>CALL</option><option style={{background:T.bg2}}>PUT</option></select></div>
-                  <div><div style={{...lbl,marginBottom:5}}>Lado</div><select value={optForm.side} onChange={e=>setOptForm(f=>({...f,side:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>LONG</option><option style={{background:T.bg2}}>SHORT</option></select></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Side":"Lado"}</div><select value={optForm.side} onChange={e=>setOptForm(f=>({...f,side:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>LONG</option><option style={{background:T.bg2}}>SHORT</option></select></div>
                   <div><div style={{...lbl,marginBottom:5}}>Vencimiento</div><input type="date" value={optForm.expiry} onChange={e=>setOptForm(f=>({...f,expiry:e.target.value}))} style={inStyle}/></div>
-                  <div><div style={{...lbl,marginBottom:5}}>Contratos</div><input value={optForm.contracts} onChange={e=>setOptForm(f=>({...f,contracts:e.target.value}))} placeholder="1" style={inStyle}/></div>
-                  <div><div style={{...lbl,marginBottom:5}}>Prima entrada</div><input value={optForm.entry} onChange={e=>setOptForm(f=>({...f,entry:e.target.value}))} placeholder="4.20" style={inStyle}/></div>
-                  <div><div style={{...lbl,marginBottom:5}}>Prima actual</div><input value={optForm.current} onChange={e=>setOptForm(f=>({...f,current:e.target.value}))} placeholder="4.00" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Contracts":"Contratos"}</div><input value={optForm.contracts} onChange={e=>setOptForm(f=>({...f,contracts:e.target.value}))} placeholder="1" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Entry premium":"Prima entrada"}</div><input value={optForm.entry} onChange={e=>setOptForm(f=>({...f,entry:e.target.value}))} placeholder="4.20" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Current premium":"Prima actual"}</div><input value={optForm.current} onChange={e=>setOptForm(f=>({...f,current:e.target.value}))} placeholder="4.00" style={inStyle}/></div>
                 </div>
                 <div style={{display:"flex",gap:8,marginTop:6}}>
-                  <button onClick={()=>setOptShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
-                  <button onClick={()=>{ const sym=optForm.symbol.trim().toUpperCase(); if(!sym||!(parseFloat(optForm.contracts)>0))return; const it={id:Date.now()+"",symbol:sym,kind:optForm.kind,side:optForm.side,strike:optForm.strike,expiry:optForm.expiry,contracts:optForm.contracts,entry:optForm.entry||"0",current:optForm.current||optForm.entry||"0"}; setOptItems(p=>[it,...p]); setOptShow(false); }} style={{flex:1,background:"rgba(77,166,255,.18)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>Guardar</button>
+                  <button onClick={()=>setOptShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>{isEN?"Cancel":"Cancelar"}</button>
+                  <button onClick={()=>{ const sym=optForm.symbol.trim().toUpperCase(); if(!sym||!(parseFloat(optForm.contracts)>0))return; const it={id:Date.now()+"",symbol:sym,kind:optForm.kind,side:optForm.side,strike:optForm.strike,expiry:optForm.expiry,contracts:optForm.contracts,entry:optForm.entry||"0",current:optForm.current||optForm.entry||"0"}; setOptItems(p=>[it,...p]); setOptShow(false); }} style={{flex:1,background:"rgba(77,166,255,.18)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"Save":"Guardar"}</button>
                 </div>
               </div>
             </div>
@@ -21102,9 +21102,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const nextPay=future[0];
         const fmtShort=(iso)=>{ try{ return new Date(iso+"T00:00").toLocaleDateString("es-ES",{day:"2-digit",month:"short"}); }catch{ return iso; } };
         const KPI=[
-          ["Ingreso Anual Proyectado", divItems.length?"$"+Math.round(ingresoAnual).toLocaleString("en-US"):"—", T.gold, divItems.length?"de "+divItems.length+" tickers":"sin tickers"],
+          [(isEN?"Projected Annual Income":"Ingreso Anual Proyectado"), divItems.length?"$"+Math.round(ingresoAnual).toLocaleString("en-US"):"—", T.gold, divItems.length?"de "+divItems.length+" tickers":"sin tickers"],
           ["Tickers con Dividendo", String(divItems.length), T.grn, "en seguimiento"],
-          ["Próximo Pago", nextPay?fmtShort(nextPay.d.payDate):"—", T.blue, nextPay?nextPay.d.symbol+" · $"+proxOf(nextPay.d).toFixed(2):"—"],
+          [(isEN?"Next Payment":"Próximo Pago"), nextPay?fmtShort(nextPay.d.payDate):"—", T.blue, nextPay?nextPay.d.symbol+" · $"+proxOf(nextPay.d).toFixed(2):"—"],
           ["DRIP Activo", divItems.length?dripOn+" tickers":"—", T.purp, "reinversión automática"],
         ];
         // calendario próximos 6 meses
@@ -21145,7 +21145,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               {divItems.length? (
                 <div style={{overflowX:"auto"}}>
                   <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11,minWidth:780}}>
-                    <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","ACCIONES","DIV/ACC","FRECUENCIA","EX-DATE","PAY DATE","PRÓX. COBRO","ANUAL","DRIP",""].map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                    <thead><tr style={{background:T.bg2}}>{(isEN?["SYMBOL","SHARES","DIV/SH","FREQUENCY","EX-DATE","PAY DATE","NEXT PAY","ANNUAL","DRIP",""]:["SÍMBOLO","ACCIONES","DIV/ACC","FRECUENCIA","EX-DATE","PAY DATE","PRÓX. COBRO","ANUAL","DRIP",""]).map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
                     <tbody>{divItems.map(d=>{const on=!!divDrip[d.symbol];return (
                       <tr key={d.id} style={{borderBottom:"1px solid #111820"}}>
                         <td style={{padding:"11px 14px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(d.symbol),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{d.symbol.slice(0,2)}</div><span style={{fontSize:13,fontWeight:700,color:T.txt}}>{d.symbol}</span></div></td>
@@ -21169,7 +21169,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             {/* RIGHT */}
             <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
               <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>Próximos Pagos</div>
+                <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"Upcoming Payments":"Próximos Pagos"}</div>
                 {future.length? <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:8}}>{future.slice(0,8).map((x,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${i===0?"rgba(240,180,41,.3)":T.br}`,borderRadius:8,padding:"10px 12px"}}><div style={{textAlign:"center",flexShrink:0,width:34}}><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt}}>{new Date(x.d.payDate+"T00:00").getDate()}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>{new Date(x.d.payDate+"T00:00").toLocaleDateString("es-ES",{month:"short"}).toUpperCase()}</div></div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{x.d.symbol}{i===0&&<span style={{color:T.gold,fontSize:9}}> ⚡</span>}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,marginTop:1}}>{x.d.freq} · ${x.d.divShare}/acc</div></div><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.gold}}>${proxOf(x.d).toFixed(2)}</div></div>))}</div>
                 : <div style={{padding:"20px 14px",fontFamily:MONO,fontSize:11,color:T.dim,textAlign:"center"}}>Agrega dividendos con fecha de pago</div>}
               </div>
@@ -21188,16 +21188,16 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:10,padding:22,width:"100%",maxWidth:460}}>
                 <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>+ NUEVO DIVIDENDO</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-                  <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input value={divForm.symbol} onChange={e=>setDivForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="MSFT" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Symbol":"Símbolo"}</div><input value={divForm.symbol} onChange={e=>setDivForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="MSFT" style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>Acciones</div><input value={divForm.shares} onChange={e=>setDivForm(f=>({...f,shares:e.target.value}))} placeholder="8" style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>Div / acción ($)</div><input value={divForm.divShare} onChange={e=>setDivForm(f=>({...f,divShare:e.target.value}))} placeholder="0.83" style={inStyle}/></div>
-                  <div><div style={{...lbl,marginBottom:5}}>Frecuencia</div><select value={divForm.freq} onChange={e=>setDivForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Mensual</option><option style={{background:T.bg2}}>Trimestral</option><option style={{background:T.bg2}}>Semestral</option><option style={{background:T.bg2}}>Anual</option></select></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Frequency":"Frecuencia"}</div><select value={divForm.freq} onChange={e=>setDivForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>{isEN?"Monthly":"Mensual"}</option><option style={{background:T.bg2}}>Trimestral</option><option style={{background:T.bg2}}>Semestral</option><option style={{background:T.bg2}}>{isEN?"Annual":"Anual"}</option></select></div>
                   <div><div style={{...lbl,marginBottom:5}}>Ex-date</div><input type="date" value={divForm.exDate} onChange={e=>setDivForm(f=>({...f,exDate:e.target.value}))} style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>Pay date</div><input type="date" value={divForm.payDate} onChange={e=>setDivForm(f=>({...f,payDate:e.target.value}))} style={inStyle}/></div>
                 </div>
                 <div style={{display:"flex",gap:8,marginTop:6}}>
-                  <button onClick={()=>setDivShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
-                  <button onClick={()=>{ const sym=divForm.symbol.trim().toUpperCase(); if(!sym||!(parseFloat(divForm.shares)>0)||!(parseFloat(divForm.divShare)>0))return; const it={id:Date.now()+"",symbol:sym,shares:divForm.shares,divShare:divForm.divShare,freq:divForm.freq,exDate:divForm.exDate,payDate:divForm.payDate}; setDivItems(p=>[it,...p]); setDivShow(false); }} style={{flex:1,background:"rgba(240,180,41,.18)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>Guardar</button>
+                  <button onClick={()=>setDivShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>{isEN?"Cancel":"Cancelar"}</button>
+                  <button onClick={()=>{ const sym=divForm.symbol.trim().toUpperCase(); if(!sym||!(parseFloat(divForm.shares)>0)||!(parseFloat(divForm.divShare)>0))return; const it={id:Date.now()+"",symbol:sym,shares:divForm.shares,divShare:divForm.divShare,freq:divForm.freq,exDate:divForm.exDate,payDate:divForm.payDate}; setDivItems(p=>[it,...p]); setDivShow(false); }} style={{flex:1,background:"rgba(240,180,41,.18)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"Save":"Guardar"}</button>
                 </div>
               </div>
             </div>
@@ -22063,7 +22063,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
 
   // Export CSV
   const exportCSV=()=>{
-    const rows=[["Ticker","Empresa","Precio","Chg%","RSI","Volumen","Mkt Cap","Patrón","Score"].join(","),
+    const rows=[(isEN?["Ticker","Company","Price","Chg%","RSI","Volume","Mkt Cap","Pattern","Score"]:["Ticker","Empresa","Precio","Chg%","RSI","Volumen","Mkt Cap","Patrón","Score"]).join(","),
       ...data.map(r=>[r.s,r.n,r.p?.toFixed(2),r.chg?.toFixed(2),r.rsi||"",r.vol||"",r.mkt||"",r.pattern||"",r.score].join(","))];
     const a=document.createElement("a");
     a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(rows.join("\n"));
@@ -22205,7 +22205,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                 <div style={{width:`${selectedRow.score}%`,height:"100%",background:`linear-gradient(90deg,${scoreColor(selectedRow.score)},${scoreColor(selectedRow.score)}aa)`,borderRadius:999,transition:"width 0.5s"}}/>
               </div>
               <div style={{fontSize:11,color:scoreColor(selectedRow.score),marginTop:6,fontWeight:700,textAlign:"right"}}>
-                {selectedRow.score>=90?"⭐ Excelente":selectedRow.score>=75?"👍 Muy bueno":selectedRow.score>=60?"📊 Bueno":"⚠️ Precaución"}
+                {selectedRow.score>=90?(isEN?"⭐ Excellent":"⭐ Excelente"):selectedRow.score>=75?(isEN?"👍 Very good":"👍 Muy bueno"):selectedRow.score>=60?(isEN?"📊 Good":"📊 Bueno"):(isEN?"⚠️ Caution":"⚠️ Precaución")}
               </div>
             </div>
 
@@ -22308,7 +22308,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           {/* PATRÓN */}
           <select value={filterPat} onChange={e=>setFilterPat(e.target.value)}
             style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"7px 10px",color:C.text,fontSize:12,fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
-            <option value="Todos">Patrón: Todos</option>
+            <option value="Todos">{isEN?"Pattern: All":"Patrón: Todos"}</option>
             {PATTERNS_AVAILABLE.map(p=><option key={p} value={p}>{PATTERN_ICON[p]||"📊"} {p}</option>)}
           </select>
           {/* MKT CAP */}
@@ -22353,7 +22353,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           {/* Stocks header */}
           {tab==="stocks"&&(
             <div style={{display:"grid",gridTemplateColumns:"80px 100px 105px 85px 65px 95px 105px 130px 1fr 72px 88px",padding:"9px 16px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:10,alignItems:"center"}}>
-              {[["s","Ticker"],["spark","Tendencia"],["p","Precio"],["chg","Chg%"],["rsi","RSI"],["vol","Volumen"],["mkt","Mkt Cap"],["pattern","Patrón"],["setup","Setup IA"],["score","Score"],["actions",""]].map(([col,lbl])=>(
+              {[["s","Ticker"],["spark",isEN?"Trend":"Tendencia"],["p",isEN?"Price":"Precio"],["chg","Chg%"],["rsi","RSI"],["vol",isEN?"Volume":"Volumen"],["mkt","Mkt Cap"],["pattern",isEN?"Pattern":"Patrón"],["setup","Setup IA"],["score","Score"],["actions",""]].map(([col,lbl])=>(
                 col==="spark"||col==="setup"||col==="actions"
                   ? <span key={col} style={{fontSize:10,fontWeight:700,color:C.muted2,textTransform:"uppercase",letterSpacing:0.8}}>{lbl}</span>
                   : <SortBtn key={col} col={col} label={lbl}/>
