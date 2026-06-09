@@ -19149,17 +19149,21 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
 
         {/* ── VIEW TABS (inside header) ── */}
         <div style={{display:"flex",gap:2,marginTop:16,borderTop:"1px solid rgba(255,255,255,0.07)",paddingTop:14,flexWrap:"wrap"}}>
-          {VIEWS.map(v=>(
-            <button key={v.id} onClick={()=>setActiveView(v.id)}
-              style={{background:activeView===v.id?"rgba(26,95,173,0.12)":"transparent",border:"none",borderRadius:8,padding:"6px 16px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#1A5FAD":"#5B8DC7",cursor:"pointer",whiteSpace:"nowrap",borderBottom:activeView===v.id?"2px solid #1A5FAD":"2px solid transparent",transition:"all 0.15s"}}>
-              {v.l}
-            </button>
-          ))}
+          {VIEWS.map(v=>{
+            const isLocked = !isPremium && v.id!=="performance";
+            return (
+              <button key={v.id} onClick={()=>setActiveView(v.id)}
+                style={{background:activeView===v.id?"rgba(26,95,173,0.12)":"transparent",border:"none",borderRadius:8,padding:"6px 16px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#1A5FAD":isLocked?"#94A3B8":"#5B8DC7",cursor:"pointer",whiteSpace:"nowrap",borderBottom:activeView===v.id?"2px solid #1A5FAD":"2px solid transparent",transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}>
+                {isLocked && <span style={{fontSize:10}}>🔒</span>}
+                {v.l}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* ── TARJETAS-RESUMEN (look profesional) ── */}
-      {["market","risk","returns"].includes(activeView) && tickers.length>0 && renderSummaryCards()}
+      {["market","risk","returns"].includes(activeView) && tickers.length>0 && isPremium && renderSummaryCards()}
 
       {/* ── BODY (light section) ── */}
       <div style={{background:"#F4F9FF",borderRadius:16,padding:"16px 16px 8px",marginTop:12,border:"1px solid #DBEAFE"}}>
@@ -19199,6 +19203,12 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         tickers.length===0
           ? <div style={{textAlign:"center",padding:"40px 20px",color:"#64748B",fontSize:13}}>{isEN?"Add tickers to see performance charts":"Agrega tickers para ver los gráficos de rendimiento"}</div>
           : renderPerf()
+      ) : !isPremium ? (
+        <PremiumGate lang={isEN?"en":"es"} icon="📊"
+          title={isEN?"Premium Analytics":"Análisis Premium"}
+          desc={isEN?"Unlock all Watchlist views: multi-period returns, RSI & SMA signals, risk analysis, projections and more.":"Desbloquea todas las vistas de tu Watchlist: retornos multi-período, señales RSI & SMA, análisis de riesgo, proyecciones y más."}
+          bullets={isEN?["📈 Multi-period returns","🔬 RSI & SMA signals","⚡ Risk & volatility","📊 Portfolio projections"]:["📈 Retornos multi-período","🔬 Señales RSI & SMA","⚡ Riesgo y volatilidad","📊 Proyecciones de cartera"]}
+          onPlans={onNeedPremium}/>
       ) : activeView==="technical" ? (
         tickers.length===0
           ? <div style={{textAlign:"center",padding:"40px 20px",color:"#64748B",fontSize:13}}>{isEN?"Add tickers to see technical signals":"Agrega tickers para ver las señales técnicas"}</div>
