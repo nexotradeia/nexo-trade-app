@@ -2399,7 +2399,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
           <div style={{background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:10,padding:"12px 14px",marginBottom:16,fontSize:12.5,lineHeight:1.6}}>
             <div style={{fontWeight:800,color:"#B45309",marginBottom:6}}>📧 Email no confirmado</div>
             <div style={{color:"#92400E",marginBottom:10}}>
-              Cuando creaste tu cuenta, Supabase envió un email de verificación a <strong>{email}</strong>. Debes hacer clic en ese link para activar tu cuenta.
+              {lang==="en"?"When you created your account, Supabase sent a verification email to ":"Cuando creaste tu cuenta, Supabase envió un email de verificación a "}<strong>{email}</strong>{lang==="en"?". You must click that link to activate your account.":". Debes hacer clic en ese link para activar tu cuenta."}
             </div>
             <button onClick={async()=>{
               try{
@@ -20660,7 +20660,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div>
               <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2,display:"flex",alignItems:"center",gap:8}}>{isEN?"RISK MATRIX":"MATRIZ DE RIESGO"} <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>ILUSTRATIVO</span></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,padding:18}}>{RISK.map((r,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"16px 12px",textAlign:"center",position:"relative",overflow:"hidden"}}><div style={{fontFamily:MONO,fontSize:22,fontWeight:700,color:r[2],lineHeight:1,marginBottom:6}}>{r[0]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>{r[1]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:3,background:r[2]}}/></div>))}</div>
-              <div style={{fontFamily:SANS,fontSize:11,color:T.dim,padding:"0 18px 18px",lineHeight:1.6}}>Métricas de riesgo de referencia. Para cálculos en vivo sobre tus posiciones reales (Sharpe, Beta y VaR con datos de mercado) se requiere un plan de datos de pago.</div>
+              <div style={{fontFamily:SANS,fontSize:11,color:T.dim,padding:"0 18px 18px",lineHeight:1.6}}>{isEN?"Reference risk metrics. Live calculations on your real positions (Sharpe, Beta and VaR with market data) require a paid data plan.":"Métricas de riesgo de referencia. Para cálculos en vivo sobre tus posiciones reales (Sharpe, Beta y VaR con datos de mercado) se requiere un plan de datos de pago."}</div>
             </div>
           )}
         </div>
@@ -20846,7 +20846,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </div>
             </div>
             <div style={{padding:"12px 14px"}}>
-              <div style={{fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.6}}>El Screener escanea <span style={{color:T.mid}}>tus acciones reales</span> del Portfolio y la Watchlist. Para agregar o quitar, usa esas páginas.</div>
+              <div style={{fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.6}}>{isEN?"The Screener scans ":"El Screener escanea "}<span style={{color:T.mid}}>{isEN?"your real stocks":"tus acciones reales"}</span>{isEN?" from your Portfolio and Watchlist. To add or remove, use those pages.":" del Portfolio y la Watchlist. Para agregar o quitar, usa esas páginas."}</div>
             </div>
           </div>
         </div>
@@ -25249,7 +25249,7 @@ export default function App(){
       )}
       {!user && newsletterDone && (
         <div style={{background:"linear-gradient(90deg,#052e16,#14532d)",borderBottom:"1px solid rgba(0,200,100,0.2)",padding:"10px 16px",textAlign:"center",color:"#86efac",fontSize:13,fontWeight:700}}>
-          ✅ ¡Listo! Te avisaremos cada lunes con el análisis de la semana.
+          {isEN?"✅ Done! We will notify you every Monday with the week\u2019s analysis.":"✅ ¡Listo! Te avisaremos cada lunes con el análisis de la semana."}
         </div>
       )}
 
