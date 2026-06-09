@@ -3993,19 +3993,19 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
 }
 
 // ── TICKER PAGE (página completa de una acción) ───────────────────────────────
-function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
+function SentimentHistoryPremium({ticker, isPremium, onNeedPremium, lang="es"}){
   const [open, setOpen] = useState(false); // colapsado por defecto
   const seed=ticker.split("").reduce((a,c)=>a+c.charCodeAt(0),0);
   const rnd=(offset,min,max)=>Math.min(max,Math.max(min,Math.round(50+Math.sin((seed+offset)*0.9)*20+Math.cos((seed+offset)*0.5)*12)));
 
   // Periodos: 1 día siempre visible, el resto premium
   const periods=[
-    {label:"Hace 24h",    key:"1d",  bull:rnd(1,35,75), free:true},
-    {label:"Hace 1 sem",  key:"1w",  bull:rnd(2,30,78), free:false},
-    {label:"Hace 1 mes",  key:"1m",  bull:rnd(3,28,80), free:false},
-    {label:"Hace 3 meses",key:"3m",  bull:rnd(5,25,82), free:false},
-    {label:"Hace 6 meses",key:"6m",  bull:rnd(8,22,85), free:false},
-    {label:"Hace 1 año",  key:"1y",  bull:rnd(13,20,85),free:false},
+    {label:(lang==="en"?"24h ago":"Hace 24h"),    key:"1d",  bull:rnd(1,35,75), free:true},
+    {label:(lang==="en"?"1 wk ago":"Hace 1 sem"),  key:"1w",  bull:rnd(2,30,78), free:false},
+    {label:(lang==="en"?"1 mo ago":"Hace 1 mes"),  key:"1m",  bull:rnd(3,28,80), free:false},
+    {label:(lang==="en"?"3 mo ago":"Hace 3 meses"),key:"3m",  bull:rnd(5,25,82), free:false},
+    {label:(lang==="en"?"6 mo ago":"Hace 6 meses"),key:"6m",  bull:rnd(8,22,85), free:false},
+    {label:(lang==="en"?"1 yr ago":"Hace 1 año"),  key:"1y",  bull:rnd(13,20,85),free:false},
   ];
 
   return(
@@ -4071,7 +4071,7 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
           </div>
           {!isPremium&&(
             <div style={{padding:"12px 18px",background:"linear-gradient(135deg,rgba(15,94,104,0.06),rgba(245,158,11,0.04))",borderTop:`1px solid ${C.border}`,textAlign:"center"}}>
-              <span style={{fontSize:12,color:C.muted}}>Desbloquea el sentimiento histórico completo con </span>
+              <span style={{fontSize:12,color:C.muted}}>{lang==="en"?"Unlock the full sentiment history with ":"Desbloquea el sentimiento histórico completo con "}</span>
               <span onClick={onNeedPremium} style={{fontSize:12,color:"#0F5E68",fontWeight:800,cursor:"pointer"}}>NexoTrade PREMIUM ✦</span>
             </div>
           )}
@@ -4082,7 +4082,7 @@ function SentimentHistoryPremium({ticker, isPremium, onNeedPremium}){
 }
 
 // ── CHART — SVG nativo, prueba proxy luego Yahoo Finance directo ──────────────
-function TVChart({ticker}){
+function TVChart({ticker,lang="es"}){
   const [candles, setCandles] = useState([]);
   const [status,  setStatus]  = useState("loading");
 
@@ -4177,7 +4177,7 @@ function TVChart({ticker}){
       <div style={{display:"flex",alignItems:"center",gap:12,padding:"8px 14px 4px",borderBottom:"1px solid #f1f5f9"}}>
         <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#0f172a"}}>{closes[closes.length-1]?.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
         <span style={{background:isUp?"rgba(34,197,94,0.1)":"rgba(239,68,68,0.1)",color:col,fontWeight:700,fontSize:12,padding:"2px 8px",borderRadius:6}}>{isUp?"+":""}{pct}%</span>
-        <span style={{color:"#94a3b8",fontSize:11,marginLeft:"auto"}}>Últimos 90 días</span>
+        <span style={{color:"#94a3b8",fontSize:11,marginLeft:"auto"}}>{lang==="en"?"Last 90 days":"Últimos 90 días"}</span>
       </div>
       {/* SVG */}
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:230,display:"block"}}>
@@ -4296,6 +4296,7 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
       {/* Sentimiento Histórico — Premium */}
       <SentimentHistoryPremium
         ticker={ticker}
+        lang={lang}
         isPremium={isPremium}
         onNeedPremium={onNeedPremium||onNeedAuth}
       />
@@ -4358,7 +4359,7 @@ const TOPS_TICKERS=[
   {ticker:"SPY",name:"S&P 500 ETF"},{ticker:"QQQ",name:"Nasdaq ETF"},
 ];
 
-function TopsPage({posts=[]}){
+function TopsPage({posts=[],lang="es"}){
   const [tab,setTab]=useState("activas");
   const [quotes,setQuotes]=useState([]);
   const [loading,setLoading]=useState(true);
@@ -4464,7 +4465,7 @@ function TopsPage({posts=[]}){
             const medals=["🥇","🥈","🥉"];
             if(lb.length===0) return <div style={{textAlign:"center",padding:40,color:C.muted}}>
               <div style={{fontSize:32,marginBottom:8}}>🏆</div>
-              <div>¡Publica tu primer análisis para aparecer aquí!</div>
+              <div>{lang==="en"?"Post your first analysis to show up here!":"¡Publica tu primer análisis para aparecer aquí!"}</div>
             </div>;
             return lb.map((u,i)=>{
               const lvl=getLevel(u.pts);
@@ -4962,7 +4963,7 @@ function MediaNetBannerSidebar(){
 // ── FIN MEDIA.NET ─────────────────────────────────────────────────────────────
 
 // ── SIDEBAR TICKER WIDGET — precios reales via PriceCtx (WebSocket Finnhub) ───
-function SidebarTickerWidget(){
+function SidebarTickerWidget({lang="es"}){
   const lp = useContext(PriceCtx);
   const isLive = Object.keys(lp).length > 0;
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -5005,7 +5006,7 @@ function SidebarTickerWidget(){
       ))}
       <div style={{padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <a href="https://www.tradingview.com/pricing/?aff_id=167149&aff_sub=nexotrade&source=nexotrade" target="_blank" rel="noopener noreferrer"
-          style={{color:"#0F4C81",fontSize:11,fontWeight:600,textDecoration:"none"}}>Ver gráficos →</a>
+          style={{color:"#0F4C81",fontSize:11,fontWeight:600,textDecoration:"none"}}>{lang==="en"?"View charts →":"Ver gráficos →"}</a>
         {lastUpdate&&<span style={{color:"#334155",fontSize:9}}>
           {lastUpdate.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})}
         </span>}
@@ -6191,7 +6192,7 @@ function SponsoredPostCard({sp}){
 }
 
 // ── VIP POP-UP MODAL (aparece a los 30s para no-premium) ──────────────────────
-function VipPopup({onClose, onGoVIP}){
+function VipPopup({onClose, onGoVIP, lang="es"}){
   return(
     <div style={{
       position:"fixed",inset:0,zIndex:9999,
@@ -6218,20 +6219,20 @@ function VipPopup({onClose, onGoVIP}){
 
         {/* Título */}
         <div style={{textAlign:"center",fontWeight:900,color:"#fff",fontSize:22,marginBottom:6,letterSpacing:-0.5}}>
-          Únete a NEXO PREMIUM
+          {lang==="en"?"Join NEXO PREMIUM":"Únete a NEXO PREMIUM"}
         </div>
         <div style={{textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:20,lineHeight:1.5}}>
-          Los mejores traders ya están adentro. Accede a picks, señales y la sala privada.
+          {lang==="en"?"The best traders are already inside. Get picks, signals and the private room.":"Los mejores traders ya están adentro. Accede a picks, señales y la sala privada."}
         </div>
 
         {/* Beneficios */}
         <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:22}}>
           {[
-            {icon:"📊", text:"Picks PREMIUM semanales con entrada, target y stop"},
-            {icon:"🔔", text:"Alertas de precio en tiempo real"},
-            {icon:"💬", text:"Sala privada solo para miembros PREMIUM"},
-            {icon:"📅", text:"Earnings calendar con análisis previo"},
-            {icon:"🏆", text:"Badge PREMIUM exclusivo en tu perfil"},
+            {icon:"📊", text:lang==="en"?"Weekly PREMIUM picks with entry, target and stop":"Picks PREMIUM semanales con entrada, target y stop"},
+            {icon:"🔔", text:lang==="en"?"Real-time price alerts":"Alertas de precio en tiempo real"},
+            {icon:"💬", text:lang==="en"?"Private room for PREMIUM members only":"Sala privada solo para miembros PREMIUM"},
+            {icon:"📅", text:lang==="en"?"Earnings calendar with pre-analysis":"Earnings calendar con análisis previo"},
+            {icon:"🏆", text:lang==="en"?"Exclusive PREMIUM badge on your profile":"Badge PREMIUM exclusivo en tu perfil"},
           ].map(({icon,text})=>(
             <div key={text} style={{display:"flex",alignItems:"center",gap:10}}>
               <span style={{fontSize:16,flexShrink:0}}>{icon}</span>
@@ -6242,9 +6243,9 @@ function VipPopup({onClose, onGoVIP}){
 
         {/* Precio + CTA */}
         <div style={{textAlign:"center",marginBottom:10}}>
-          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",textDecoration:"line-through"}}>$29/mes</span>
+          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",textDecoration:"line-through"}}>{lang==="en"?"$29/mo":"$29/mes"}</span>
           <span style={{fontSize:28,fontWeight:900,color:"#FCD34D",marginLeft:8}}>$15.99</span>
-          <span style={{fontSize:12,color:"rgba(255,255,255,0.4)"}}>/mes</span>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.4)"}}>{lang==="en"?"/mo":"/mes"}</span>
         </div>
 
         <div onClick={onGoVIP} style={{
@@ -6254,10 +6255,10 @@ function VipPopup({onClose, onGoVIP}){
           boxShadow:"0 4px 20px rgba(15,94,104,0.5)",
           letterSpacing:0.2,
         }}>
-          ✦ Empezar ahora →
+          {lang==="en"?"✦ Start now →":"✦ Empezar ahora →"}
         </div>
         <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"rgba(255,255,255,0.25)"}}>
-          Cancela cuando quieras · Sin compromisos
+          {lang==="en"?"Cancel anytime · No commitment":"Cancela cuando quieras · Sin compromisos"}
         </div>
       </div>
     </div>
@@ -24529,7 +24530,7 @@ export default function App(){
 
   const renderPage = () => {
     if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} onRepost={handleRepost}/>;
-    if(page===1) return <TopsPage posts={posts}/>;
+    if(page===1) return <TopsPage posts={posts} lang={lang}/>;
     if(page===2) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="performance"/>;
     if(page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
@@ -25853,7 +25854,7 @@ export default function App(){
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
-            <SidebarTickerWidget/>
+            <SidebarTickerWidget lang={lang}/>
             <PolymarketWidget/>
           </div>
         </div>
@@ -25869,6 +25870,7 @@ export default function App(){
       {/* VIP POP-UP */}
       {showVipPopup && !effectivePremium && (
         <VipPopup
+          lang={lang}
           onClose={()=>setVipPopup(false)}
           onGoVIP={()=>{ setVipPopup(false); setPage(8); setShowLanding(false); }}
         />
