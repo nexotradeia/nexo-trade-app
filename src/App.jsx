@@ -19895,6 +19895,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [alItems, setAlItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(AL_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
   const [alType, setAlType] = useState("price_above");
   const [alForm, setAlForm] = useState({symbol:"",target:"",freq:"Una vez",notif:"Push + Email",note:""});
+  const [alFired, setAlFired] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(AL_KEY+"_fired")||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
+  const [notifPerm, setNotifPerm] = useState(()=>{ try{ return (typeof Notification!=="undefined")?Notification.permission:"default"; }catch{ return "default"; } });
+  const alItemsRef = useRef(alItems); alItemsRef.current = alItems;
+  const askNotif = ()=>{ try{ if(typeof Notification!=="undefined"){ Notification.requestPermission().then(p=>setNotifPerm(p)); } }catch{} };
   const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
   const JR_KEY = `nexo_journal_${user?.id||"guest"}`;
   const [jrItems, setJrItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(JR_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
@@ -19950,6 +19954,47 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
   useEffect(()=>{ try{ localStorage.setItem(AL_KEY, JSON.stringify(alItems)); }catch{} },[alItems, AL_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(JR_KEY, JSON.stringify(jrItems)); }catch{} },[jrItems, JR_KEY]);
+  useEffect(()=>{ try{ localStorage.setItem(AL_KEY+"_fired", JSON.stringify(alFired)); }catch{} },[alFired, AL_KEY]);
+
+  // ⚡ Motor de alertas: vigila precios reales y dispara notificaciones (mientras la app esté abierta)
+  const alSig = alItems.filter(a=>a.on && /^(price_above|price_below|pct_change)$/.test(a.type)).map(a=>a.id+":"+a.target+":"+a.type+":"+a.freq).join("|");
+  useEffect(()=>{
+    if(!alSig) return;
+    let stop=false;
+    const cmap={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",DOGE:"BINANCE:DOGEUSDT",ADA:"BINANCE:ADAUSDT"};
+    const check=async()=>{
+      const items=(alItemsRef.current||[]).filter(a=>a.on && /^(price_above|price_below|pct_change)$/.test(a.type));
+      if(!items.length) return;
+      const syms=[...new Set(items.map(a=>a.sym))];
+      const quotes={};
+      await Promise.all(syms.map(async s=>{ const sym=cmap[s]||s; try{ const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`); const d=await r.json(); if(d&&d.c>0) quotes[s]={c:d.c,dp:d.dp||0}; }catch{} }));
+      if(stop) return;
+      const fires=[]; const now=Date.now();
+      const next=(alItemsRef.current||[]).map(a=>{
+        if(!a.on || !/^(price_above|price_below|pct_change)$/.test(a.type)) return a;
+        const q=quotes[a.sym]; if(!q) return a;
+        const tgt=parseFloat(a.target); if(isNaN(tgt)) return a;
+        let met=false;
+        if(a.type==="price_above") met=q.c>tgt;
+        else if(a.type==="price_below") met=q.c<tgt;
+        else if(a.type==="pct_change") met=Math.abs(q.dp)>=tgt;
+        if(!met) return a;
+        if(a.freq!=="Una vez" && a.lastFired){ if(a.freq==="Diaria"){ if(new Date(a.lastFired).toDateString()===new Date(now).toDateString()) return a; } else if(now-a.lastFired<10*60*1000) return a; }
+        fires.push({id:a.id,sym:a.sym,cond:a.cond,price:q.c,at:now});
+        return a.freq==="Una vez" ? {...a,on:false,lastFired:now,status:"Disparada"} : {...a,lastFired:now,status:"Disparada"};
+      });
+      if(fires.length){
+        setAlItems(next);
+        setAlFired(prev=>[...fires,...prev].slice(0,40));
+        fires.forEach(f=>{ try{ if(typeof Notification!=="undefined" && Notification.permission==="granted") new Notification("🔔 NEXO · "+f.sym, {body:f.cond+" — ahora $"+f.price.toFixed(2)}); }catch{} });
+        try{ playAlertSound("price"); }catch{}
+      }
+    };
+    check();
+    const id=setInterval(check, 45000);
+    return ()=>{ stop=true; clearInterval(id); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[alSig]);
 
   // Fetch live prices for all tickers
   useEffect(()=>{
@@ -20501,7 +20546,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const list=alItems.filter(a=> alFilter==="Activas"?a.on : alFilter==="Inactivas"?!a.on : true);
         const nActive=alItems.filter(a=>a.on).length;
         const Toggle=({on,onClick})=>(<div onClick={onClick} style={{width:34,height:18,borderRadius:9,background:on?"rgba(0,255,135,.3)":T.bg4,border:`1px solid ${on?"rgba(0,255,135,.5)":T.br2}`,position:"relative",cursor:"pointer",flexShrink:0}}><div style={{position:"absolute",top:1,left:on?17:1,width:14,height:14,borderRadius:"50%",background:on?T.grn:T.dim,transition:"left .15s"}}/></div>);
-        const create=()=>{ const sym=alForm.symbol.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,""); const tgt=alForm.target.trim(); if(!sym||!tgt){ return; } const it={id:Date.now()+""+Math.random().toString(36).slice(2,5),sym,type:alType,badge:meta[3],color:meta[4],cond:condText(alType,tgt),note:alForm.note.trim(),on:true,created:Date.now()}; setAlItems(p=>[it,...p]); setAlForm(f=>({...f,symbol:"",target:"",note:""})); };
+        const create=()=>{ const sym=alForm.symbol.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,""); const tgt=alForm.target.trim(); if(!sym||!tgt){ return; } const it={id:Date.now()+""+Math.random().toString(36).slice(2,5),sym,type:alType,target:tgt,freq:alForm.freq,badge:meta[3],color:meta[4],cond:condText(alType,tgt),note:alForm.note.trim(),on:true,created:Date.now()}; setAlItems(p=>[it,...p]); setAlForm(f=>({...f,symbol:"",target:"",note:""})); askNotif(); };
+        const relF=(ts)=>{ if(!ts)return ""; const d=Math.floor((Date.now()-ts)/1000); if(d<60)return "ahora"; if(d<3600)return Math.floor(d/60)+"m"; if(d<86400)return Math.floor(d/3600)+"h"; return Math.floor(d/86400)+"d"; };
         const inStyle={width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"};
         return (
         <div style={{display:"grid",gridTemplateColumns:"360px 1fr",alignItems:"stretch"}}>
@@ -20530,7 +20576,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 20px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
               <span style={{...lbl,padding:0,fontSize:10}}>Crear Alerta</span>
-              <span style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10}}><span style={{fontSize:8,fontWeight:700,color:T.grn,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:3,padding:"2px 6px"}}>GUARDADO</span><span style={{color:T.mid}}>Tus alertas quedan guardadas</span></span>
+              {notifPerm==="granted"
+                ? <span style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10,color:T.grn}}><span style={{width:6,height:6,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`}}/>🔔 Notificaciones activas</span>
+                : notifPerm==="denied"
+                ? <span style={{fontFamily:MONO,fontSize:10,color:T.red}}>🔕 Notificaciones bloqueadas — actívalas en el navegador</span>
+                : <button onClick={askNotif} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>🔔 Activar notificaciones</button>}
             </div>
             <div style={{padding:"18px 22px",maxWidth:820}}>
               <div style={{...lbl,marginBottom:8}}>Tipo de condición</div>
@@ -20543,8 +20593,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </div>
               <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Nota (opcional)</div><input value={alForm.note} onChange={e=>setAlForm(f=>({...f,note:e.target.value}))} placeholder="Resistencia clave, considerar toma de ganancias…" style={inStyle}/></div>
               <button onClick={create} style={{width:"100%",background:`linear-gradient(90deg,${T.grn2},${T.grn})`,color:T.bg,border:"none",borderRadius:8,padding:"13px",fontFamily:MONO,fontSize:13,fontWeight:800,letterSpacing:1,cursor:(alForm.symbol&&alForm.target)?"pointer":"not-allowed",opacity:(alForm.symbol&&alForm.target)?1:0.5,boxShadow:"0 0 18px rgba(0,255,135,.35)"}}>⚡ CREAR ALERTA</button>
-              <div style={{...lbl,margin:"22px 0 10px"}}>Historial de disparos</div>
-              <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"22px",textAlign:"center",fontFamily:MONO,fontSize:11,color:T.dim}}>Sin disparos todavía · cuando una alerta se cumpla, aparecerá aquí</div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",margin:"22px 0 10px"}}><div style={{...lbl}}>Historial de disparos</div>{alFired.length>0&&<button onClick={()=>setAlFired([])} style={{background:"transparent",border:`1px solid ${T.br}`,color:T.dim,fontFamily:MONO,fontSize:9,padding:"3px 8px",borderRadius:4,cursor:"pointer"}}>Limpiar</button>}</div>
+              {alFired.length? <div style={{display:"flex",flexDirection:"column",gap:8}}>{alFired.map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"11px 14px"}}><span style={{width:8,height:8,borderRadius:"50%",background:T.grn,flexShrink:0}}/><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{f.sym} ⚡ disparada</div><div style={{fontFamily:SANS,fontSize:11,color:T.mid,marginTop:1}}>{f.cond}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.grn}}>${(f.price||0).toFixed(2)}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{relF(f.at)}</div></div></div>))}</div>
+              : <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"22px",textAlign:"center",fontFamily:MONO,fontSize:11,color:T.dim}}>Sin disparos todavía · cuando una alerta de precio se cumpla, aparecerá aquí y te llegará la notificación</div>}
             </div>
           </div>
         </div>
