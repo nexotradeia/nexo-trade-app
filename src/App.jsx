@@ -20289,8 +20289,87 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         );
       })()}
+      {/* ── SCREENER VIEW ── */}
+      {termTab==="screener" && (()=>{
+        const SC=[
+          ["AAPL","Apple Inc.","$301.54","+1.89","+18.3","+22.1","64.2M","$4.58T","31.4","1.6",82,"HOLD"],
+          ["NVDA","NVIDIA Corp.","$208.3","+2.41","+41.2","+68.4","48.8M","$5.12T","68.2","1.4",91,"BUY"],
+          ["MSFT","Microsoft Corp.","$412.8","+0.92","+12.1","+18.3","22.4M","$3.07T","36.8","2.2",88,"HOLD"],
+          ["META","Meta Platforms","$589.1","-0.87","+28.7","+42.6","18.2M","$1.49T","28.4","2.1",79,"HOLD"],
+          ["TSLA","Tesla Inc.","$408.7","+4.53","+22.4","+35.8","94.6M","$1.31T","78.1","0.9",61,"WATCH"],
+          ["AMZN","Amazon.com","$244.8","+1.24","+14.8","+21.4","36.8M","$2.58T","44.2","1.8",84,"BUY"],
+          ["GOOG","Alphabet Inc.","$362.4","+0.66","+11.8","+16.2","24.2M","$2.21T","26.8","1.8",80,"WATCH"],
+          ["COST","Costco Wholesale","$973.38","-0.3","-3.4","+8.2","3.2M","$432B","54.8","1.7",72,"HOLD"],
+          ["BTC","Bitcoin","$63,844","+1.92","+38.2","+52.4","$28B","$1.26T","—","1.3",74,"BUY"],
+        ];
+        const q=scQuery.trim().toUpperCase();
+        const list=q? SC.filter(r=>r[0].includes(q)||r[1].toUpperCase().includes(q)) : SC;
+        const scoreC=(s)=> s>=85?T.grn:s>=70?T.gold:T.red;
+        const shC=(v)=>{const n=parseFloat(v); return n>=2?T.grn:n>=1.5?T.gold:T.red;};
+        const sigC={BUY:[T.grn,"▲ BUY"],HOLD:[T.gold,"◆ HOLD"],WATCH:[T.blue,"◎ WATCH"]};
+        const SCANS=[["🚀","Momentum alcista","23",T.grn],["📊","Volatilidad baja","41",T.blue],["💰","Dividendos altos","18",T.gold],["📉","Sobrevendidos RSI","9",T.red],["🔮","Oracle AI Top Picks","7",T.purp]];
+        const DONUT=[["Tech",58,T.grn],["Consumo",14,T.blue],["Finanzas",12,T.gold],["Salud",9,T.purp],["Otro",7,T.mid]];
+        let acc=0; const circ=2*Math.PI*42;
+        const selStyle={background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"6px 9px",color:T.txt,fontFamily:MONO,fontSize:11,outline:"none",cursor:"pointer"};
+        return (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
+          <div style={{minWidth:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
+              {[["Mercado",scMarket,setScMarket,["NYSE + NASDAQ","NYSE","NASDAQ","Crypto"]],["Sector",scSector,setScSector,["Todos","Tech","Consumo","Finanzas","Salud","Energía"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
+              {["Retorno","Volumen","Mkt Cap"].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f}</span><select style={selStyle}><option style={{background:T.bg2}}>Cualquiera</option></select></div>))}
+              <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>Buscar</span><input value={scQuery} onChange={e=>setScQuery(e.target.value)} placeholder="AAPL, TSLA…" style={{...selStyle,width:120}}/></div>
+              <button style={{background:T.grn,color:T.bg,border:"none",fontFamily:MONO,fontSize:11,fontWeight:700,padding:"7px 14px",borderRadius:5,cursor:"pointer",letterSpacing:.5,boxShadow:"0 0 14px rgba(0,255,135,.3)"}}>▶ EJECUTAR SCAN</button>
+              <button onClick={()=>{setScQuery("");setScMarket("NYSE + NASDAQ");setScSector("Todos");}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
+              <span style={{marginLeft:"auto",fontFamily:MONO,fontSize:11,color:T.dim}}>{list.length} resultados</span>
+            </div>
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
+                <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","PRECIO","HOY %","3M %","YTD %","VOLUMEN","MKT CAP","P/E","SHARPE","SCORE ORACLE","SEÑAL"].map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1.2,color:i===1?T.grn:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}{i===1?" ↑":""}</th>)}</tr></thead>
+                <tbody>{list.map((r,i)=>{const tp=r[3].startsWith("+");const sg=sigC[r[11]];return (
+                  <tr key={i} style={{borderBottom:"1px solid #111820",cursor:"pointer"}}>
+                    <td style={{padding:"10px 14px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:30,height:30,borderRadius:6,background:avatarBg(r[0]),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r[0].slice(0,2)}</div><div><div style={{fontSize:13,fontWeight:700,color:T.txt}}>{r[0]}</div><div style={{fontSize:10,color:T.dim}}>{r[1]}</div></div></div></td>
+                    <td style={{padding:"10px 14px",color:T.txt,fontWeight:600}}>{r[2]}</td>
+                    <td style={{padding:"10px 14px",color:tp?T.grn:T.red,fontWeight:600}}>{r[3]}%</td>
+                    <td style={{padding:"10px 14px",color:r[4].startsWith("-")?T.red:T.grn}}>{r[4]}%</td>
+                    <td style={{padding:"10px 14px",color:r[5].startsWith("-")?T.red:T.grn}}>{r[5]}%</td>
+                    <td style={{padding:"10px 14px",color:T.mid}}>{r[6]}</td>
+                    <td style={{padding:"10px 14px",color:T.mid}}>{r[7]}</td>
+                    <td style={{padding:"10px 14px",color:T.mid}}>{r[8]}</td>
+                    <td style={{padding:"10px 14px",color:shC(r[9]),fontWeight:600}}>{r[9]}</td>
+                    <td style={{padding:"10px 14px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:60,height:6,background:T.bg4,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:r[10]+"%",background:scoreC(r[10]),borderRadius:3}}/></div><span style={{color:scoreC(r[10]),fontWeight:700}}>{r[10]}</span></div></td>
+                    <td style={{padding:"10px 14px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:sg[0],background:sg[0]+"1a",border:`1px solid ${sg[0]}33`,borderRadius:3,padding:"3px 8px"}}>{sg[1]}</span></td>
+                  </tr>
+                );})}</tbody>
+              </table>
+              <div style={{padding:"8px 16px",fontFamily:MONO,fontSize:9,color:T.dim}}>Precio y % hoy = datos de mercado · Score Oracle y señales = <span style={{color:T.gold}}>DEMO</span></div>
+            </div>
+          </div>
+          {/* RIGHT */}
+          <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px"}}>Scans Predefinidos</div>
+              <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:6}}>{SCANS.map((s,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:9,background:T.bg3,border:`1px solid ${s[3]}33`,borderRadius:6,padding:"9px 11px",cursor:"pointer"}}><span style={{fontSize:14}}>{s[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:s[3],flex:1}}>{s[1]}</span><span style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.mid}}>{s[2]}</span></div>))}</div>
+            </div>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>Distribución Sector <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{display:"flex",alignItems:"center",gap:14,padding:"4px 14px"}}>
+                <svg width="110" height="110" viewBox="0 0 110 110">
+                  <g transform="rotate(-90 55 55)">{DONUT.map((d,i)=>{const len=d[1]/100*circ;const el=<circle key={i} cx="55" cy="55" r="42" fill="none" stroke={d[2]} strokeWidth="14" strokeDasharray={len+" "+(circ-len)} strokeDashoffset={-acc}/>;acc+=len;return el;})}</g>
+                  <circle cx="55" cy="55" r="30" fill={T.bg2}/>
+                </svg>
+                <div style={{display:"flex",flexDirection:"column",gap:4}}>{DONUT.map((d,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10}}><span style={{width:8,height:8,borderRadius:2,background:d[2]}}/><span style={{color:T.mid}}>{d[0]}</span><span style={{color:T.txt,fontWeight:600}}>{d[1]}%</span></div>))}</div>
+              </div>
+            </div>
+            <div style={{padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px"}}>Mis Scans Guardados</div>
+              <div style={{padding:"0 14px"}}><div style={{fontFamily:MONO,fontSize:11,color:T.dim,lineHeight:1.6,marginBottom:10}}>No tienes scans guardados.<br/>Ejecuta un scan y guárdalo.</div><button style={{width:"100%",background:T.bg3,border:`1px dashed ${T.br2}`,color:T.mid,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"9px",borderRadius:6,cursor:"pointer"}}>+ Guardar scan actual</button></div>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
       {/* ── PLACEHOLDER tabs (en construcción) ── */}
-      {(termTab==="screener"||termTab==="alerts"||termTab==="journal") && (
+      {(termTab==="alerts"||termTab==="journal") && (
         <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}>
           <div style={{fontSize:28,marginBottom:10}}>{termTab==="screener"?"🔍":termTab==="alerts"?"🔔":"📓"}</div>
           <div style={{fontSize:14,color:T.mid,letterSpacing:1}}>{termTab.toUpperCase()} · EN CONSTRUCCIÓN</div>
