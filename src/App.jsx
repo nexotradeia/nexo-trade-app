@@ -6410,56 +6410,67 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 </div>
               </>
             : <>
-                {/* Founder offer banner — sin contador numérico */}
-                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,rgba(245,158,11,0.14),rgba(180,83,9,0.10))",border:"1px solid rgba(245,158,11,0.45)",borderRadius:20,padding:"6px 16px",marginBottom:14}}>
-                  <span style={{width:7,height:7,borderRadius:"50%",background:"#F59E0B",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
-                  <span style={{color:"#FBBF24",fontSize:12,fontWeight:800,letterSpacing:0.4}}>✦ {lang==="en"?"Founder offer — first 500 members only":"Oferta de fundador — solo primeros 500 miembros"}</span>
+                <style dangerouslySetInnerHTML={{__html:`
+                  @keyframes npp-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,232,122,.5)}70%{box-shadow:0 0 0 10px rgba(0,232,122,0)}}
+                  @keyframes npp-glow{0%,100%{box-shadow:0 4px 30px rgba(0,232,122,.4)}50%{box-shadow:0 4px 55px rgba(0,232,122,.7)}}
+                  @keyframes npp-shine{0%{left:-100%}100%{left:200%}}
+                `}}/>
+                {/* Founder offer badge */}
+                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,232,122,.12)",border:"1px solid rgba(0,232,122,.35)",borderRadius:20,padding:"6px 16px",marginBottom:14,animation:"npp-pulse 2.5s ease-in-out infinite"}}>
+                  <span style={{width:7,height:7,borderRadius:"50%",background:"#00e87a",display:"inline-block"}}/>
+                  <span style={{color:"#00e87a",fontSize:12,fontWeight:800,letterSpacing:0.4}}>{lang==="en"?"🔒 Founder offer — first 500 members only":"🔒 Oferta fundadores — solo primeros 500 miembros"}</span>
                 </div>
-                <h1 style={{margin:"0 0 10px",color:"#fff",fontSize:"clamp(22px,4vw,30px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Take your trading to the next level":"Lleva tu trading al siguiente nivel"}</h1>
-                <p style={{margin:"0 auto 20px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, unlimited AI, email alerts and exclusive education.":"Señales en tiempo real, IA sin límites, alertas por email y formación exclusiva."}</p>
+                <h1 style={{margin:"0 0 6px",color:"#fff",fontSize:"clamp(24px,4vw,34px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Trade Smarter with":"Opera más inteligente con"} <span style={{color:"#00e87a"}}>NexoTrade Pro</span></h1>
+                <p style={{margin:"0 auto 16px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, institutional flow, AI picks and 52 guru portfolios — all in one platform.":"Señales en tiempo real, flujo institucional, picks IA y 52 gurús — todo en una plataforma."}</p>
+
+                {/* Price hero */}
+                <div style={{display:"inline-flex",alignItems:"baseline",gap:8,marginBottom:16,background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:16,padding:"10px 24px"}}>
+                  <span style={{fontSize:44,fontWeight:900,color:"#00e87a",fontFamily:"monospace",lineHeight:1}}>$6.58</span>
+                  <span style={{fontSize:14,color:"#64748b"}}>/mo · billed $79/year</span>
+                  <span style={{background:"#00e87a",color:"#000",fontSize:10,fontWeight:900,padding:"2px 8px",borderRadius:6,marginLeft:4}}>-59%</span>
+                </div>
+
                 {/* Toggle mensual / anual */}
                 <div style={{display:"inline-flex",background:"rgba(0,0,0,0.3)",borderRadius:14,padding:4,gap:4,marginBottom:16,border:"1px solid rgba(255,255,255,0.08)"}}>
                   <button onClick={()=>setBilling("monthly")}
                     style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:700,transition:"all 0.2s",
-                      background: billing==="monthly" ? "rgba(15,76,129,0.3)" : "transparent",
+                      background: billing==="monthly" ? "rgba(255,255,255,.1)" : "transparent",
                       color: billing==="monthly" ? "#fff" : "#64748B"}}>
                     {lang==="en"?"Monthly":"Mensual"} <span style={{opacity:0.7}}>$15.99</span>
                   </button>
                   <button onClick={()=>setBilling("annual")}
                     style={{padding:"8px 20px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:800,transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,
-                      background: billing==="annual" ? "linear-gradient(135deg,#C8901F,#8A5E10)" : "transparent",
-                      color: billing==="annual" ? "#fff" : "#64748B",
-                      boxShadow: billing==="annual" ? "0 2px 12px rgba(15,94,104,0.4)" : "none"}}>
+                      background: billing==="annual" ? "linear-gradient(135deg,#00e87a,#00b85e)" : "transparent",
+                      color: billing==="annual" ? "#000" : "#64748B",
+                      boxShadow: billing==="annual" ? "0 2px 12px rgba(0,232,122,0.4)" : "none"}}>
                     {lang==="en"?"Annual":"Anual"} <span style={{opacity:0.9}}>$79</span>
-                    <span style={{background:"#10B981",color:"#fff",fontSize:9,fontWeight:900,padding:"1px 6px",borderRadius:6}}>
+                    <span style={{background:"rgba(0,0,0,.3)",color:"#000",fontSize:9,fontWeight:900,padding:"1px 6px",borderRadius:6}}>
                       -{savingsPct}%
                     </span>
                   </button>
                 </div>
 
-                {/* CTA prominente en el hero */}
-                <div style={{marginBottom:12}}>
+                {/* CTA */}
+                <div style={{marginBottom:8}}>
                   <button onClick={()=>handleSubscribe()}
-                    style={{background:"linear-gradient(135deg,#C8901F,#8A5E10)",border:"none",borderRadius:14,padding:"16px 36px",fontSize:16,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 32px rgba(200,144,31,0.55)",display:"inline-flex",alignItems:"center",gap:8,transition:"transform 0.15s, box-shadow 0.15s"}}
-                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 40px rgba(15,94,104,0.75)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 32px rgba(15,94,104,0.6)";}}>
+                    style={{position:"relative",overflow:"hidden",animation:"npp-glow 2s ease-in-out infinite",background:"linear-gradient(135deg,#00e87a,#00b85e)",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:900,color:"#000",cursor:"pointer",boxShadow:"0 4px 32px rgba(0,232,122,.45)",display:"inline-flex",alignItems:"center",gap:8}}
+                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";}}>
+                    <div style={{position:"absolute",top:0,bottom:0,width:"40%",background:"rgba(255,255,255,.25)",filter:"blur(10px)",animation:"npp-shine 2.5s ease-in-out infinite",transform:"skewX(-20deg)"}}/>
                     {billing==="annual"
-                      ? (lang==="en" ? `✦ Get PREMIUM Annual — $79/year` : `✦ Obtener PREMIUM Anual — $79/año`)
-                      : (lang==="en" ? `✦ Start free 7 days — $15.99/mo` : `✦ Empieza gratis 7 días — $15.99/mes`)
+                      ? (lang==="en" ? "🎉 Get Annual Premium — $79/year →" : "🎉 Obtener Premium Anual — $79/año →")
+                      : (lang==="en" ? "🚀 Start Monthly — $15.99/mo →" : "🚀 Empezar Mensual — $15.99/mes →")
                     }
                   </button>
                 </div>
-                {billing==="annual"
-                  ? <div style={{fontSize:12,color:"#10B981",marginBottom:8,fontWeight:700}}>🎉 {lang==="en"?`You save $${savingsAnual}/year vs monthly`:`Ahorras $${savingsAnual} al año vs mensual`}</div>
-                  : null
-                }
-                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"No card required · Cancel anytime · 🔥 Launch price, going up to $29 soon":"Sin tarjeta requerida · Cancela cuando quieras · 🔥 Precio de lanzamiento, sube a $29 pronto"}</div>
+                {billing==="annual" && <div style={{fontSize:12,color:"#00e87a",marginBottom:8,fontWeight:700}}>🎉 {lang==="en"?`Save $${savingsAnual}/year vs monthly`:`Ahorras $${savingsAnual} al año vs mensual`}</div>}
+                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"✓ Instant access · ✓ Cancel anytime · ✓ Secure via Stripe":"✓ Acceso inmediato · ✓ Cancela cuando quieras · ✓ Pago seguro Stripe"}</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {(lang==="en"
                     ?["💡 Ideas PREMIUM","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
                     :["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","📅 Calendarios"]
                   ).map(b=>(
-                    <span key={b} style={{background:"#ffffff15",border:"1px solid #ffffff22",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
+                    <span key={b} style={{background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
                   ))}
                 </div>
               </>
