@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NexoTrade — La plataforma de inversión en español</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070a;--surface:#111115;--border:#1c1c20;--border2:#27272a;
+  --text:#ffffff;--muted:#71717a;--hint:#3f3f46;
+  --green:#00d97e;--gdim:rgba(0,217,126,.11);--gborder:rgba(0,217,126,.26);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,7,10,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;height:56px;gap:32px}
+.nav-logo{font-size:15px;font-weight:900;letter-spacing:-.3px;flex-shrink:0}.nav-logo span{color:var(--green)}
+.nav-links{display:flex;gap:24px;flex:1}
+.nav-links a{font-size:13px;color:var(--muted);transition:color .15s;cursor:pointer}.nav-links a:hover{color:var(--text)}
+.nav-ctas{display:flex;gap:10px;align-items:center;flex-shrink:0}
+.btn-ghost{font-size:13px;color:var(--muted);cursor:pointer;padding:7px 14px;border-radius:8px;border:none;background:transparent;transition:color .15s}.btn-ghost:hover{color:var(--text)}
+.btn-green{font-size:13px;font-weight:700;color:#001a0d;background:var(--green);border:none;border-radius:10px;padding:8px 18px;cursor:pointer;transition:filter .15s}.btn-green:hover{filter:brightness(1.08)}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 80px;position:relative;overflow:hidden}
+
+/* stars */
+#stars-canvas{position:absolute;inset:0;pointer-events:none}
+
+/* countdown */
+.countdown{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:32px;position:relative;z-index:1}
+.countdown .dot{width:7px;height:7px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.cd-num{color:var(--text);font-weight:800;font-variant-numeric:tabular-nums}
+
+.hero-eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:16px;position:relative;z-index:1}
+.hero-h1{font-size:clamp(38px,7vw,72px);font-weight:900;line-height:1.04;letter-spacing:-1.5px;margin-bottom:18px;position:relative;z-index:1}
+.hero-h1 em{color:var(--green);font-style:normal;text-decoration:underline;text-decoration-color:rgba(0,217,126,.4);text-underline-offset:6px}
+.hero-sub{font-size:16px;color:var(--muted);max-width:520px;margin:0 auto 40px;line-height:1.65;position:relative;z-index:1}
+.hero-sub strong{color:var(--text)}
+
+.hero-form{display:flex;gap:10px;max-width:420px;margin:0 auto 20px;flex-wrap:wrap;position:relative;z-index:1}
+.hero-input{flex:1;min-width:200px;background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:12px;padding:14px 18px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s}
+.hero-input:focus{border-color:var(--green)}
+.hero-input::placeholder{color:var(--hint)}
+.hero-btn{background:var(--green);color:#001a0d;font-size:14px;font-weight:800;padding:14px 28px;border-radius:12px;border:none;cursor:pointer;white-space:nowrap;transition:filter .15s}
+.hero-btn:hover{filter:brightness(1.08)}
+.hero-social{display:flex;align-items:center;gap:10px;justify-content:center;font-size:13px;color:var(--muted);position:relative;z-index:1}
+.avatars{display:flex}.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a3a2a,#0a1f13);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;margin-left:-8px;color:var(--green);flex-shrink:0}
+.hero-social strong{color:var(--text)}
+
+/* ─── STATS ─── */
+.stats-bar{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,.015);padding:32px 24px}
+.stats-inner{max-width:860px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center}
+@media(max-width:580px){.stats-inner{grid-template-columns:repeat(2,1fr)}}
+.stat-val{font-size:28px;font-weight:900;color:var(--green);letter-spacing:-.5px}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* ─── SECTION COMMON ─── */
+.section{max-width:900px;margin:0 auto;padding:80px 24px}
+.sec-eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--green);font-weight:700;text-align:center;margin-bottom:12px}
+.sec-h2{font-size:clamp(26px,4vw,40px);font-weight:900;text-align:center;margin-bottom:10px;line-height:1.15}
+.sec-sub{font-size:15px;color:var(--muted);text-align:center;margin-bottom:52px;max-width:480px;margin-left:auto;margin-right:auto}
+
+/* ─── FEATURE GRID ─── */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.feat-grid{grid-template-columns:1fr}}
+
+/* feature card */
+.fc{border-radius:20px;overflow:hidden;border:1px solid var(--border);position:relative;min-height:300px}
+.fc.full{grid-column:1/-1}
+.fc-preview{width:100%;pointer-events:none;user-select:none;filter:blur(5px) brightness(.38);transform:scale(1.04);transform-origin:top center}
+.fc-glass{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(7,7,10,.5)}
+.fc-card{background:rgba(15,15,18,.9);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:24px 22px 20px;text-align:center;width:min(280px,86%);backdrop-filter:blur(18px)}
+.fc-icon{font-size:26px;margin-bottom:9px;display:block}
+.fc-hook{font-size:17px;font-weight:800;line-height:1.2;margin-bottom:6px}
+.fc-sub{font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.fc-price{display:inline-flex;align-items:baseline;gap:2px;border:1px solid rgba(255,255,255,.09);border-radius:100px;padding:5px 14px;margin-bottom:14px;background:rgba(255,255,255,.03);font-size:12px;color:var(--muted)}
+.fc-price strong{font-size:18px;font-weight:900;color:var(--text);margin-right:2px}
+.fc-cta{display:block;width:100%;padding:12px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;border:none;transition:filter .15s;margin-bottom:8px}
+.fc-cta:hover{filter:brightness(1.1)}
+.fc-free{font-size:11.5px;color:var(--hint);cursor:pointer;transition:color .15s}.fc-free:hover{color:var(--muted)}
+.cta-gold{background:linear-gradient(135deg,#c8901f,#f5c842,#b8780e);color:#1a0e00}
+.cta-blue{background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:#fff}
+.cta-purple{background:linear-gradient(135deg,#6d28d9,#a855f7);color:#fff}
+.cta-green{background:var(--green);color:#001a0d}
+
+/* preview atoms */
+.ticker-bar{display:flex;gap:24px;padding:12px 18px;background:#0c0c0f;border-bottom:1px solid #111115;overflow:hidden;white-space:nowrap}
+.t{font-size:12px;font-family:monospace}.t b{color:#fff;font-weight:800}.g{color:var(--green);margin-left:5px}.r{color:#ef4444;margin-left:5px}
+.flow-row{padding:10px 18px;border-bottom:1px solid #0f0f12;display:flex;align-items:center;gap:9px}
+.fs{font-size:10px;font-weight:800;letter-spacing:.5px;width:28px}
+.famt{font-size:13px;font-weight:900;min-width:55px}
+.fmeta{font-size:11px;color:#52525b;flex:1}
+.ftime{font-size:9.5px;color:#3f3f46}
+.bull{background:rgba(0,217,126,.12);color:var(--green);border:1px solid rgba(0,217,126,.25);padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:800}
+.bear{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.22);padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:800}
+.pt{width:100%;border-collapse:collapse}
+.pt th{padding:9px 14px;font-size:10px;color:#52525b;text-align:left;border-bottom:1px solid #18181b;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.pt td{padding:10px 14px;font-size:12.5px;border-bottom:1px solid #0f0f12;color:#d4d4d8}
+.sym{font-family:monospace;font-weight:900;color:var(--green)}
+.bw{width:64px;height:4px;background:#1f1f23;border-radius:2px;display:inline-block;vertical-align:middle}
+.bf{height:100%;border-radius:2px}
+.kpis{display:flex;gap:8px;padding:14px 18px 0}
+.kpi{flex:1;background:#111115;border-radius:10px;padding:11px;border:1px solid #1a1a1f}
+.kpil{font-size:9px;color:#52525b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;font-weight:700}
+.kpiv{font-size:18px;font-weight:900}
+.chart-wrap{padding:10px 18px 14px;display:flex;gap:8px}
+.chart-main{flex:1;background:#0d0d10;border-radius:9px;padding:10px;border:1px solid #18181b}
+.chart-side{width:100px;background:#0d0d10;border-radius:9px;padding:10px;border:1px solid #18181b}
+.wlr{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.globe-wrap{height:240px;background:radial-gradient(ellipse at 50% 60%,#0b1f12 0%,var(--bg) 68%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.globe-body{width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 36% 32%,#133020,#0b1c11 55%,#09130b);border:1px solid rgba(0,217,126,.18);position:relative;box-shadow:0 0 50px rgba(0,217,126,.06)}
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(0,217,126,.14)}
+.dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.lbl{position:absolute;background:rgba(0,217,126,.07);border:1px solid rgba(0,217,126,.2);border-radius:7px;padding:4px 9px;font-size:10px;font-weight:700;white-space:nowrap}
+.ds{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:3px;vertical-align:middle}
+.oracle-area{padding:16px 18px;display:flex;gap:16px;align-items:flex-start}
+.oracle-ring{flex-shrink:0;position:relative;width:110px;height:110px}
+.oracle-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.on{font-size:28px;font-weight:900;color:#a855f7}
+.ot{font-size:8.5px;color:#52525b;letter-spacing:.8px;text-transform:uppercase}
+.oracle-insights{flex:1;display:flex;flex-direction:column;gap:7px}
+.ins{border-left:2px solid #6d28d9;border-radius:0 7px 7px 0;background:#0f0a1a;padding:7px 10px}
+.ins-t{font-size:11px;font-weight:700;color:#d4d4d8}
+.ins-s{font-size:10px;color:#52525b;margin-top:1px}
+
+/* ─── TESTIMONIALS ─── */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:640px){.testi-grid{grid-template-columns:1fr}}
+.testi{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px}
+.stars{color:#f59e0b;font-size:13px;margin-bottom:12px;letter-spacing:1px}
+.testi-q{font-size:13.5px;color:#d4d4d8;line-height:1.65;margin-bottom:16px}
+.testi-q strong{color:var(--text)}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.testi-name{font-size:13px;font-weight:700}
+.testi-loc{font-size:11px;color:var(--muted)}
+
+/* ─── PRICING ─── */
+.pricing-wrap{max-width:860px;margin:0 auto;padding:0 24px 80px}
+.price-header{text-align:center;margin-bottom:48px}
+.price-hero-row{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-bottom:8px}
+.price-big{font-size:52px;font-weight:900;color:var(--green);line-height:1}
+.price-meta{padding-bottom:7px}.price-meta span{display:block;font-size:13px;color:var(--muted)}.price-meta small{font-size:11px;color:var(--hint)}
+.price-compare{font-size:13px;color:var(--hint);margin-bottom:28px}
+.price-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.pb-main{background:var(--green);color:#001a0d;font-size:14px;font-weight:800;padding:14px 32px;border-radius:100px;cursor:pointer;border:none;transition:filter .15s}
+.pb-main:hover{filter:brightness(1.08)}
+.pb-free{background:transparent;color:var(--muted);font-size:13px;padding:14px 24px;border-radius:100px;cursor:pointer;border:1px solid var(--border2);transition:all .15s}
+.pb-free:hover{color:var(--text);border-color:var(--border2)}
+
+/* comparison table */
+.comp{width:100%;border-collapse:collapse;margin-top:48px}
+.comp .cat td{background:rgba(255,255,255,.022);padding:7px 16px;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--hint);border-top:1px solid var(--border)}
+.comp .hd th{padding:13px 16px;font-size:12px;font-weight:700;text-align:center;border-bottom:2px solid var(--border2);color:var(--muted)}
+.comp .hd th:first-child{text-align:left;color:var(--text)}
+.comp tr.row td{padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px;text-align:center;vertical-align:middle}
+.comp tr.row td:first-child{text-align:left}
+.comp tr.row:hover td{background:rgba(255,255,255,.018)}
+.ck{color:var(--green);font-size:16px;font-weight:900}
+.da{color:var(--hint);font-size:15px}
+.pa{font-size:11.5px;color:var(--muted);font-weight:600}
+.fn{font-size:13px}.fn small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.col-f{color:var(--muted);font-size:12.5px;font-weight:600}
+.col-p{color:var(--green);font-size:12.5px;font-weight:800}
+.bp{background:var(--gdim);color:var(--green);border:1px solid var(--gborder);font-size:10px;font-weight:800;padding:2px 8px;border-radius:100px}
+
+/* ─── FAQ ─── */
+.faq-wrap{max-width:680px;margin:0 auto;padding:0 24px 80px}
+.faq-list{display:flex;flex-direction:column;gap:2px}
+.faq-item{border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.faq-item.open{border-color:var(--border2)}
+.faq-q{width:100%;background:transparent;border:none;padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;text-align:left}
+.faq-qt{font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
+.faq-ic{width:22px;height:22px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);font-size:13px;transition:transform .2s,background .2s;font-weight:700}
+.faq-item.open .faq-ic{transform:rotate(45deg);background:var(--gdim);color:var(--green);border-color:var(--gborder)}
+.faq-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-item.open .faq-body{max-height:260px}
+.faq-bi{padding:0 20px 16px;font-size:13.5px;color:var(--muted);line-height:1.7}
+.faq-bi strong{color:var(--text)}
+
+/* ─── CTA FINAL ─── */
+.cta-final{max-width:680px;margin:0 auto 80px;padding:0 24px}
+.cta-box{border:1px solid var(--gborder);border-radius:24px;padding:52px 40px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,217,126,.07),transparent 65%);position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:55%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.cta-ey{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;color:var(--green);margin-bottom:12px}
+.cta-h{font-size:clamp(22px,4vw,34px);font-weight:900;line-height:1.2;margin-bottom:10px}
+.cta-s{font-size:14px;color:var(--muted);margin-bottom:30px}
+.cta-form{display:flex;gap:10px;max-width:400px;margin:0 auto 14px;flex-wrap:wrap}
+.cta-inp{flex:1;min-width:180px;background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:11px;padding:13px 16px;font-size:13.5px;color:var(--text);outline:none;transition:border-color .2s}
+.cta-inp:focus{border-color:var(--green)}
+.cta-inp::placeholder{color:var(--hint)}
+.cta-btn{background:var(--green);color:#001a0d;font-size:14px;font-weight:800;padding:13px 26px;border-radius:11px;border:none;cursor:pointer;transition:filter .15s;white-space:nowrap}
+.cta-btn:hover{filter:brightness(1.08)}
+.cta-micro{font-size:11.5px;color:var(--hint)}
+.cta-gu{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11.5px;color:var(--hint);margin-top:18px}
+
+/* ─── FOOTER ─── */
+footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center}
+.footer-logo{font-size:14px;font-weight:900;margin-bottom:8px}.footer-logo span{color:var(--green)}
+footer p{font-size:12px;color:var(--hint)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">NEXO<span>TRADE</span></div>
+  <div class="nav-links">
+    <a onclick="scroll2('features')">Herramientas</a>
+    <a onclick="scroll2('pricing')">Precios</a>
+    <a onclick="scroll2('faq')">FAQ</a>
+  </div>
+  <div class="nav-ctas">
+    <button class="btn-ghost">Iniciar sesión</button>
+    <button class="btn-green" onclick="scroll2('cta-final')">Empezar gratis</button>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <canvas id="stars-canvas"></canvas>
+
+  <div class="countdown">
+    <span class="dot"></span>
+    <span>🔥 Precio fundador termina en</span>
+    <span class="cd-num" id="cd-h">23</span>:
+    <span class="cd-num" id="cd-m">45</span>:
+    <span class="cd-num" id="cd-s">11</span>
+  </div>
+
+  <p class="hero-eyebrow">La plataforma #1 de inversión en español</p>
+  <h1 class="hero-h1">El mercado no espera.<br>Tú <em>tampoco deberías.</em></h1>
+  <p class="hero-sub"><strong>2,847 inversores</strong> ya usan NexoTrade para rastrear señales institucionales, picks de IA y flujo de mercado en tiempo real — antes que nadie.</p>
+
+  <form class="hero-form" onsubmit="handleHero(event)">
+    <input class="hero-input" type="email" placeholder="tu@email.com" required autocomplete="email" id="hero-email">
+    <button type="submit" class="hero-btn">Obtener acceso gratis →</button>
+  </form>
+
+  <div class="hero-social">
+    <div class="avatars">
+      <div class="avatar">JL</div><div class="avatar">MR</div><div class="avatar">AS</div><div class="avatar">PG</div><div class="avatar">CI</div>
+    </div>
+    <span>+<strong>2,847 traders</strong> activos hoy · <strong style="color:var(--green)">85 online ahora</strong></span>
+  </div>
+</section>
+
+<!-- ─── STATS ─── -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div><div class="stat-val">2,847</div><div class="stat-label">Traders registrados</div></div>
+    <div><div class="stat-val">$127K</div><div class="stat-label">En ganancias reportadas</div></div>
+    <div><div class="stat-val">14,203</div><div class="stat-label">Análisis publicados</div></div>
+    <div><div class="stat-val">50+</div><div class="stat-label">Mercados en tiempo real</div></div>
+  </div>
+</div>
+
+<!-- ─── FEATURES ─── -->
+<section class="section" id="features">
+  <p class="sec-eyebrow">Qué obtienes</p>
+  <h2 class="sec-h2">Herramientas pro.<br>Para todos.</h2>
+  <p class="sec-sub">Todo lo que encontrarás dentro de NexoTrade desde el primer día.</p>
+
+  <div class="feat-grid">
+
+    <!-- Smart Money -->
+    <div class="fc full">
+      <div class="fc-preview">
+        <div class="ticker-bar">
+          <span class="t"><b>NVDA</b><span class="g">+2.41%</span></span><span class="t"><b>AAPL</b><span class="g">+0.87%</span></span><span class="t"><b>META</b><span class="g">+1.32%</span></span><span class="t"><b>TSLA</b><span class="r">-1.10%</span></span><span class="t"><b>BTC</b><span class="g">+3.21%</span></span><span class="t"><b>SPY</b><span class="g">+0.42%</span></span>
+        </div>
+        <div class="flow-row"><span class="fs" style="color:var(--green)">BUY</span><span class="famt" style="color:var(--green)">$4.2M</span><span class="fmeta">NVDA · SWEEP · 42 contracts · OTM Call</span><span class="bull">BULLISH</span><span class="ftime">2m</span></div>
+        <div class="flow-row"><span class="fs" style="color:var(--green)">BUY</span><span class="famt" style="color:var(--green)">$2.8M</span><span class="fmeta">AAPL · BLOCK · 280 contracts · ATM Call</span><span class="bull">BULLISH</span><span class="ftime">7m</span></div>
+        <div class="flow-row"><span class="fs" style="color:#ef4444">SELL</span><span class="famt" style="color:#ef4444">$1.6M</span><span class="fmeta">TSLA · PUT · 180 contracts · OTM Put</span><span class="bear">BEARISH</span><span class="ftime">12m</span></div>
+        <div class="flow-row"><span class="fs" style="color:var(--green)">BUY</span><span class="famt" style="color:var(--green)">$3.1M</span><span class="fmeta">META · CALL · 310 contracts · ITM Call</span><span class="bull">BULLISH</span><span class="ftime">19m</span></div>
+        <div class="flow-row"><span class="fs" style="color:var(--green)">BUY</span><span class="famt" style="color:var(--green)">$12.4M</span><span class="fmeta">BTC · WHALE · spot accumulation</span><span class="bull">BULLISH</span><span class="ftime">31m</span></div>
+      </div>
+      <div class="fc-glass">
+        <div class="fc-card">
+          <span class="fc-icon">📡</span>
+          <p class="fc-hook">Ve dónde mueve el dinero grande</p>
+          <p class="fc-sub">Dark pool flows, sweeps y whale alerts en tiempo real.</p>
+          <div class="fc-price"><strong>$6.58</strong>/mes · anual</div>
+          <button class="fc-cta cta-gold">Unlock Smart Money</button>
+          <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screener -->
+    <div class="fc">
+      <div class="fc-preview">
+        <div style="padding:12px 14px 8px;display:flex;gap:6px;flex-wrap:wrap">
+          <span style="background:rgba(0,217,126,.1);color:var(--green);border:1px solid rgba(0,217,126,.25);font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px">Score &gt;75</span>
+          <span style="background:rgba(0,217,126,.1);color:var(--green);border:1px solid rgba(0,217,126,.25);font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px">Strong Buy</span>
+        </div>
+        <table class="pt"><thead><tr><th>Ticker</th><th>Oracle AI</th><th>Señal</th><th>%</th></tr></thead><tbody>
+          <tr><td><span class="sym">NVDA</span></td><td><div style="display:flex;align-items:center;gap:6px"><span style="font-weight:900;color:var(--green);font-family:monospace;font-size:12px">91</span><div class="bw"><div class="bf" style="width:91%;background:var(--green)"></div></div></div></td><td><span class="bull">Strong Buy</span></td><td style="color:var(--green);font-family:monospace;font-size:12px">+2.41%</td></tr>
+          <tr><td><span class="sym">AAPL</span></td><td><div style="display:flex;align-items:center;gap:6px"><span style="font-weight:900;color:var(--green);font-family:monospace;font-size:12px">82</span><div class="bw"><div class="bf" style="width:82%;background:var(--green)"></div></div></div></td><td><span class="bull">Buy</span></td><td style="color:var(--green);font-family:monospace;font-size:12px">+0.87%</td></tr>
+          <tr><td><span class="sym">META</span></td><td><div style="display:flex;align-items:center;gap:6px"><span style="font-weight:900;color:#f59e0b;font-family:monospace;font-size:12px">79</span><div class="bw"><div class="bf" style="width:79%;background:#f59e0b"></div></div></div></td><td><span class="bull">Buy</span></td><td style="color:var(--green);font-family:monospace;font-size:12px">+1.32%</td></tr>
+          <tr><td><span class="sym">TSLA</span></td><td><div style="display:flex;align-items:center;gap:6px"><span style="font-weight:900;color:#ef4444;font-family:monospace;font-size:12px">61</span><div class="bw"><div class="bf" style="width:61%;background:#ef4444"></div></div></div></td><td><span class="bear">Neutral</span></td><td style="color:#ef4444;font-family:monospace;font-size:12px">-1.10%</td></tr>
+        </tbody></table>
+      </div>
+      <div class="fc-glass">
+        <div class="fc-card">
+          <span class="fc-icon">🔬</span>
+          <p class="fc-hook">Scan 5,000+ stocks<br>en segundos</p>
+          <p class="fc-sub">Oracle AI score · señales · filtros avanzados.</p>
+          <div class="fc-price"><strong>$6.58</strong>/mes</div>
+          <button class="fc-cta cta-gold">Unlock Screener</button>
+          <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Radar -->
+    <div class="fc">
+      <div class="fc-preview">
+        <div class="globe-wrap">
+          <div style="position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center">
+            <div class="ring" style="width:260px;height:260px;top:-10px;left:-10px"></div>
+            <div class="ring" style="width:310px;height:310px;top:-35px;left:-35px;border-color:rgba(0,217,126,.07)"></div>
+            <div class="globe-body">
+              <div class="dot" style="top:28%;left:18%"></div>
+              <div class="dot" style="top:22%;left:63%;background:#f59e0b;box-shadow:0 0 8px #f59e0b"></div>
+              <div class="dot" style="top:52%;left:44%"></div>
+              <div class="dot" style="top:60%;left:13%;background:#ef4444;box-shadow:0 0 8px #ef4444"></div>
+              <div class="dot" style="top:38%;left:72%"></div>
+            </div>
+            <div class="lbl" style="top:16%;left:-50%"><span class="ds" style="background:var(--green)"></span>NYSE <span style="color:var(--green)">+0.42%</span></div>
+            <div class="lbl" style="top:10%;right:-46%"><span class="ds" style="background:#f59e0b"></span>Nikkei <span style="color:#f59e0b">+1.18%</span></div>
+            <div class="lbl" style="bottom:30%;left:-48%"><span class="ds" style="background:#ef4444"></span>FTSE <span style="color:#ef4444">-0.34%</span></div>
+            <div class="lbl" style="bottom:14%;right:-42%"><span class="ds" style="background:var(--green)"></span>DAX <span style="color:var(--green)">+0.72%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-glass">
+        <div class="fc-card">
+          <span class="fc-icon">🌐</span>
+          <p class="fc-hook">50+ mercados.<br>Un solo globo.</p>
+          <p class="fc-sub">NYSE, London, Tokyo, Shanghai — en tiempo real.</p>
+          <div class="fc-price"><strong>$6.58</strong>/mes</div>
+          <button class="fc-cta cta-blue">Unlock Radar Global</button>
+          <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal -->
+    <div class="fc full">
+      <div class="fc-preview">
+        <div class="ticker-bar">
+          <span class="t"><b>AAPL</b><span class="g">$307 +1.96%</span></span><span class="t"><b>BTC</b><span class="g">$63,844 +1.92%</span></span><span class="t"><b>NVDA</b><span class="r">$208 -0.20%</span></span><span class="t"><b>META</b><span class="g">$593 +2.10%</span></span>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="kpil">P&amp;L Total</div><div class="kpiv" style="color:var(--green)">+$24,830</div></div>
+          <div class="kpi"><div class="kpil">Win Rate</div><div class="kpiv" style="color:var(--green)">74.2%</div></div>
+          <div class="kpi"><div class="kpil">Sharpe</div><div class="kpiv" style="color:#a855f7">1.6</div></div>
+          <div class="kpi"><div class="kpil">Posiciones</div><div class="kpiv" style="color:#d4d4d8">12</div></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-main">
+            <div style="font-size:9px;color:#52525b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">AAPL · 1D</div>
+            <svg viewBox="0 0 200 50" style="width:100%;height:42px"><defs><linearGradient id="cg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#00d97e" stop-opacity=".2"/><stop offset="100%" stop-color="#00d97e" stop-opacity="0"/></linearGradient></defs><path d="M0,48 C28,40 50,36 72,28 S108,16 138,10 S172,5 200,3" stroke="#00d97e" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M0,48 C28,40 50,36 72,28 S108,16 138,10 S172,5 200,3 L200,50 L0,50Z" fill="url(#cg)"/></svg>
+          </div>
+          <div class="chart-side">
+            <div style="font-size:9px;color:#52525b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Watchlist</div>
+            <div class="wlr"><span style="color:#d4d4d8;font-weight:700;font-family:monospace;font-size:11px">NVDA</span><span style="color:var(--green);font-family:monospace;font-size:11px">$208</span></div>
+            <div class="wlr"><span style="color:#d4d4d8;font-weight:700;font-family:monospace;font-size:11px">AAPL</span><span style="color:var(--green);font-family:monospace;font-size:11px">$307</span></div>
+            <div class="wlr" style="opacity:.35"><span style="color:#71717a;font-size:10px">🔒 +9 Pro</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-glass">
+        <div class="fc-card">
+          <span class="fc-icon">📊</span>
+          <p class="fc-hook">Tu Bloomberg.<br>Fracción del precio.</p>
+          <p class="fc-sub">P&amp;L en vivo · Greeks · Screener · Journal de trades.</p>
+          <div class="fc-price"><strong>$6.58</strong>/mes · anual</div>
+          <button class="fc-cta cta-gold">Unlock Terminal Pro</button>
+          <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Oracle AI -->
+    <div class="fc full">
+      <div class="fc-preview">
+        <div class="oracle-area">
+          <div class="oracle-ring">
+            <svg viewBox="0 0 110 110" width="110" height="110"><circle cx="55" cy="55" r="46" fill="none" stroke="#1a0a2e" stroke-width="9"/><circle cx="55" cy="55" r="46" fill="none" stroke="#a855f7" stroke-width="9" stroke-dasharray="289" stroke-dashoffset="52" stroke-linecap="round" transform="rotate(-90 55 55)" opacity=".9"/></svg>
+            <div class="oracle-inner"><span class="on">82</span><span class="ot">AAPL</span></div>
+          </div>
+          <div class="oracle-insights">
+            <div class="ins"><div class="ins-t">📈 Momentum fuerte</div><div class="ins-s">RSI 64 · sobre SMA50 · volumen +22%</div></div>
+            <div class="ins"><div class="ins-t">🎯 Target: $341</div><div class="ins-s">Upside +11% · 18 analistas Bull</div></div>
+            <div class="ins"><div class="ins-t">⚡ Catalizador: Jun 14</div><div class="ins-s">WWDC — IA features anunciadas</div></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;padding:0 18px 14px">
+          <div style="flex:1;background:#0d0a1a;border:1px solid #2d1a4a;border-radius:9px;padding:9px 11px"><div style="font-size:9px;color:#7c3aed;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;font-weight:700">Estrategia</div><div style="font-size:12px;font-weight:800;color:#d4d4d8">Bull Call Spread</div><div style="font-size:10px;color:#52525b;margin-top:2px">R/R 1:3.2</div></div>
+          <div style="flex:1;background:#0d0a1a;border:1px solid #2d1a4a;border-radius:9px;padding:9px 11px"><div style="font-size:9px;color:#7c3aed;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;font-weight:700">Strike</div><div style="font-size:12px;font-weight:800;color:#d4d4d8">310C · Jul 21</div><div style="font-size:10px;color:#52525b;margin-top:2px">IV 28% · Δ 0.52</div></div>
+          <div style="flex:1;background:#0d0a1a;border:1px solid #2d1a4a;border-radius:9px;padding:9px 11px"><div style="font-size:9px;color:#7c3aed;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;font-weight:700">Entrada</div><div style="font-size:12px;font-weight:800;color:#d4d4d8">$308.40</div><div style="font-size:10px;color:#52525b;margin-top:2px">Stop: $301</div></div>
+        </div>
+      </div>
+      <div class="fc-glass" style="background:rgba(7,7,10,.52)">
+        <div class="fc-card" style="border-color:rgba(168,85,247,.18)">
+          <span class="fc-icon">🔮</span>
+          <p class="fc-hook">IA que piensa como<br>un trader pro.</p>
+          <p class="fc-sub">Score, insights y estrategias de opciones — por acción.</p>
+          <div class="fc-price" style="border-color:rgba(168,85,247,.18)"><strong>$6.58</strong>/mes</div>
+          <button class="fc-cta cta-purple">Unlock Oracle AI</button>
+          <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ─── -->
+<section class="section" style="padding-top:0">
+  <p class="sec-eyebrow">Lo que dicen los traders</p>
+  <h2 class="sec-h2">Traders reales. Resultados reales.</h2>
+  <p class="sec-sub" style="margin-bottom:40px">Más de 2,800 inversores confían en NexoTrade.</p>
+  <div class="testi-grid">
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <p class="testi-q">"Llevo 3 meses usando NexoTrade y mi win rate pasó de <strong>48% a 71%</strong>. Las señales de IA son lo mejor que he visto."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:#1a3a2a;color:var(--green)">JL</div>
+        <div><div class="testi-name">Jorge L.</div><div class="testi-loc">Miami, FL 🇺🇸</div></div>
+      </div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <p class="testi-q">"El Radar Global me ayudó a detectar una oportunidad en Asia que generó <strong>+$4,200 en una semana</strong>."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:#3a1a3a;color:#a855f7">MR</div>
+        <div><div class="testi-name">María R.</div><div class="testi-loc">Bogotá, CO 🇨🇴</div></div>
+      </div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <p class="testi-q">"Pagaba $300/mes por Bloomberg. NexoTrade me da <strong>el mismo nivel de datos</strong> a una fracción del precio."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:#1a2a3a;color:#60a5fa">AS</div>
+        <div><div class="testi-name">Andrés S.</div><div class="testi-loc">Buenos Aires, AR 🇦🇷</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─── -->
+<div class="pricing-wrap" id="pricing">
+  <div class="price-header">
+    <p class="sec-eyebrow">Planes</p>
+    <h2 class="sec-h2" style="margin-bottom:0">Empieza gratis.<br>Escala cuando estés listo.</h2>
+    <p style="font-size:14px;color:var(--muted);margin:10px 0 24px">Sin tarjeta · Cancela cuando quieras</p>
+    <div class="price-hero-row">
+      <span class="price-big">$6.58</span>
+      <div class="price-meta"><span>/mes Premium</span><small>facturado anual · $79/año</small></div>
+    </div>
+    <p class="price-compare">O $9.99/mes · <s style="opacity:.5">Bloomberg: $340/mes</s></p>
+    <div class="price-btns">
+      <button class="pb-main" onclick="scroll2('cta-final')">⚡ Empezar Premium — $6.58/mes</button>
+      <button class="pb-free" onclick="scroll2('cta-final')">Empezar gratis</button>
+    </div>
+  </div>
+
+  <table class="comp">
+    <thead><tr class="hd"><th>Feature</th><th><span class="col-f">Free</span></th><th><span class="col-p">Premium <span class="bp">⚡</span></span></th></tr></thead>
+    <tbody>
+      <tr class="cat"><td colspan="3">Acceso base</td></tr>
+      <tr class="row"><td class="fn">Feed social en tiempo real</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Precios de mercado<small>Diferido 15 min / RT crypto</small></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Paper Trading</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Market Overview<small>Índices, sectores, crypto</small></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+
+      <tr class="cat"><td colspan="3">Watchlist inteligente</td></tr>
+      <tr class="row"><td class="fn">Tickers en watchlist</td><td><span class="pa">Máx 15</span></td><td><span class="ck">✓ 30</span></td></tr>
+      <tr class="row"><td class="fn">Vistas Market, Risk, Returns, Technical</td><td><span class="pa">4 cols</span></td><td><span class="ck">✓ Todo</span></td></tr>
+      <tr class="row"><td class="fn">Vistas Efficiency, Projections, Health</td><td><span class="pa">4 cols</span></td><td><span class="ck">✓ Todo</span></td></tr>
+      <tr class="row"><td class="fn">Portfolio Evolution + Allocation</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Best/Worst · Heatmap · Ranking</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Análisis VaR, Sharpe, Max Drawdown</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+
+      <tr class="cat"><td colspan="3">Smart Money · Flujo institucional</td></tr>
+      <tr class="row"><td class="fn">Whale Flow · Dark Pool en vivo</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Formularios 13F — grandes fondos<small>Berkshire, Bridgewater, Citadel…</small></td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">SEC Insiders — compras de directivos</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Portafolio ARK Invest actualizado</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+
+      <tr class="cat"><td colspan="3">Oracle AI · Inteligencia artificial</td></tr>
+      <tr class="row"><td class="fn">Score Oracle AI por acción (0–100)</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Insights: momentum, target, catalizador</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Estrategias de opciones con IA<small>Calls, Puts, Spreads, Greeks</small></td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Opciones crypto (BTC, ETH, SOL)</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+
+      <tr class="cat"><td colspan="3">Herramientas Pro</td></tr>
+      <tr class="row"><td class="fn">Screener avanzado Oracle AI<small>5,000+ acciones · filtros personalizados</small></td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Terminal Pro Trader<small>P&amp;L en vivo · Greeks · Journal</small></td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Radar Global 3D<small>50+ bolsas · sweep en vivo</small></td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Picks VIP semanales · Acceso a gurús</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+      <tr class="row"><td class="fn">Alertas de precio + señales push</td><td><span class="da">—</span></td><td><span class="ck">✓</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ─── FAQ ─── -->
+<div class="faq-wrap" id="faq">
+  <p class="sec-eyebrow" style="text-align:center;margin-bottom:28px">Preguntas frecuentes</p>
+  <div class="faq-list">
+    <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)"><span class="faq-qt">¿Es gratis de verdad? ¿Hay trampa?</span><span class="faq-ic">+</span></button><div class="faq-body"><div class="faq-bi">Sí, el plan gratis es permanente y no requiere tarjeta. Acceso real al feed, precios, paper trading y las primeras columnas del Watchlist. <strong>No hay trampa</strong> — el free existe para que conozcas la plataforma antes de pagar.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)"><span class="faq-qt">¿Puedo cancelar cuando quiera?</span><span class="faq-ic">+</span></button><div class="faq-body"><div class="faq-bi">Sí. Cancelas desde tu perfil con un clic, sin llamadas ni formularios. Si cancelas el plan anual, sigues con acceso hasta que venza el período pagado. <strong>Sin penalizaciones, sin letra chica.</strong></div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)"><span class="faq-qt">¿Qué pasa si el precio sube?</span><span class="faq-ic">+</span></button><div class="faq-body"><div class="faq-bi">Si te suscribes ahora al precio de fundador, <strong>ese precio se congela para ti</strong> mientras mantengas la suscripción activa. El aumento solo aplica a nuevos usuarios.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)"><span class="faq-qt">¿Qué es Oracle AI exactamente?</span><span class="faq-ic">+</span></button><div class="faq-body"><div class="faq-bi">Nuestro motor de análisis propio. Para cada acción calcula un score 0–100 basado en RSI, medias móviles, flujo de opciones, momentum y fundamentales. Genera <strong>3 insights concretos</strong> y sugiere estrategias de opciones con Greeks. Un analista de Wall Street trabajando 24/7 para ti.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)"><span class="faq-qt">¿Funciona para crypto y opciones?</span><span class="faq-ic">+</span></button><div class="faq-body"><div class="faq-bi">Sí a ambas. <strong>Crypto</strong>: precios RT de BTC, ETH, SOL y 200+ tokens, whale alerts, opciones crypto. <strong>Opciones</strong>: Oracle AI sugiere estrategias (Calls, Puts, Spreads) con strike, vencimiento, delta y R/R calculado.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)"><span class="faq-qt">¿Cómo funciona la garantía de 30 días?</span><span class="faq-ic">+</span></button><div class="faq-body"><div class="faq-bi">Si en los primeros 30 días no estás satisfecho, te devolvemos el <strong>100% sin preguntas</strong>. Escríbenos a soporte y procesamos el reembolso en menos de 48 horas.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)"><span class="faq-qt">¿Cuándo y cómo me cobran?</span><span class="faq-ic">+</span></button><div class="faq-body"><div class="faq-bi">El plan anual ($79) se cobra una sola vez al suscribirte. El mensual ($9.99) cada mes en la misma fecha. Aceptamos Visa, Mastercard, Amex y PayPal. Pago seguro vía <strong>Stripe — nunca almacenamos tu tarjeta.</strong></div></div></div>
+  </div>
+</div>
+
+<!-- ─── CTA FINAL ─── -->
+<div class="cta-final" id="cta-final">
+  <div class="cta-box">
+    <p class="cta-ey">Empieza hoy</p>
+    <h2 class="cta-h">Precio de fundador.<br>Por tiempo limitado.</h2>
+    <p class="cta-s">Entra antes de que suba. Sin tarjeta, sin compromiso.</p>
+    <form class="cta-form" onsubmit="handleCta(event)">
+      <input class="cta-inp" id="cta-email" type="email" placeholder="tu@email.com" required autocomplete="email">
+      <button type="submit" class="cta-btn">Empezar por $6.58 →</button>
+    </form>
+    <p class="cta-micro">Al continuar aceptas los Términos · Plan gratis siempre disponible</p>
+    <p class="cta-gu">🛡 Garantía de reembolso 30 días · Sin preguntas</p>
+  </div>
+</div>
+
+<footer>
+  <p class="footer-logo">NEXO<span>TRADE</span></p>
+  <p>© 2025 NexoTrade · nexotradeia.com · <a href="mailto:soporte@nexotradeia.com" style="color:var(--muted)">soporte@nexotradeia.com</a></p>
+</footer>
+
+<script>
+/* ── Stars ── */
+(function(){
+  const c=document.getElementById('stars-canvas');
+  const ctx=c.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=c.width=c.offsetWidth;H=c.height=c.offsetHeight;init()}
+  function init(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.3,a:Math.random(),da:(Math.random()*.006+.002)*(Math.random()<.5?1:-1)})}
+  function draw(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{s.a=Math.max(.08,Math.min(1,s.a+s.da));if(s.a>=1||s.a<=.08)s.da*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill()});requestAnimationFrame(draw)}
+  window.addEventListener('resize',resize);resize();draw();
+})();
+
+/* ── Countdown ── */
+(function(){
+  let total=23*3600+45*60+11;
+  function tick(){total=Math.max(0,total-1);const h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;document.getElementById('cd-h').textContent=String(h).padStart(2,'0');document.getElementById('cd-m').textContent=String(m).padStart(2,'0');document.getElementById('cd-s').textContent=String(s).padStart(2,'0')}
+  setInterval(tick,1000);
+})();
+
+/* ── Scroll ── */
+function scroll2(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}
+
+/* ── FAQ ── */
+function faqToggle(btn){const item=btn.closest('.faq-item'),open=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!open)item.classList.add('open')}
+
+/* ── Forms ── */
+function handleHero(e){e.preventDefault();const em=document.getElementById('hero-email').value;window.location='https://nexotradeia.com/signup?email='+encodeURIComponent(em)}
+function handleCta(e){e.preventDefault();const em=document.getElementById('cta-email').value;window.location='https://nexotradeia.com/signup?email='+encodeURIComponent(em)}
+</script>
+</body>
+</html>
