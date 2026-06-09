@@ -1546,9 +1546,9 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
           {/* Stats row */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0,padding:"0"}}>
             {[
-              {label:"Tendencia",value:tape.change>=0?"📈 Alcista":"📉 Bajista",col:tape.change>=0?C.bull:C.bear},
-              {label:"Volumen",value:"Alto",col:"#0F4C81"},
-              {label:"Señal",value:tape.change>=1.5?"🔥 Fuerte":tape.change>=0?"✅ Normal":"⚠️ Débil",col:"#F59E0B"},
+              {label:"Trend",value:tape.change>=0?"📈 Bullish":"📉 Bearish",col:tape.change>=0?C.bull:C.bear},
+              {label:"Volume",value:"High",col:"#0F4C81"},
+              {label:"Signal",value:tape.change>=1.5?"🔥 Strong":tape.change>=0?"✅ Normal":"⚠️ Weak",col:"#F59E0B"},
             ].map(({label,value,col},i)=>(
               <div key={i} style={{padding:"10px 14px",borderRight:i<2?"1px solid rgba(0,0,0,0.06)":"none",borderTop:"1px solid rgba(0,0,0,0.06)"}}>
                 <div style={{fontSize:10,color:"#94A3B8",fontWeight:600,marginBottom:3,letterSpacing:0.5}}>{label.toUpperCase()}</div>
@@ -1568,8 +1568,8 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}
           <div style={{fontSize:22,marginBottom:6}}>📊</div>
           <div style={{fontWeight:700,fontSize:13,color:"#0F172A",fontFamily:"monospace"}}>${selected}</div>
           <div style={{fontSize:12,color:"#64748B",marginTop:4}}>{NAMES[selected]||"Ticker"}</div>
-          <div style={{fontSize:11,color:"#94A3B8",marginTop:8}}>Datos en tiempo real disponibles al registrarte</div>
-          <button onClick={()=>setSelected(null)} style={{marginTop:10,background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.accent,fontWeight:600}}>Cerrar</button>
+          <div style={{fontSize:11,color:"#94A3B8",marginTop:8}}>Real-time data available after sign up</div>
+          <button onClick={()=>setSelected(null)} style={{marginTop:10,background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.accent,fontWeight:600}}>Close</button>
         </div>
       )}
     </div>
@@ -4148,14 +4148,14 @@ function TVChart({ticker,lang="es"}){
   if(status==="loading") return(
     <div style={{height:260,display:"flex",alignItems:"center",justifyContent:"center",background:"#f8fafc",gap:10}}>
       <div style={{width:20,height:20,border:"2.5px solid #e2e8f0",borderTopColor:"#0F4C81",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
-      <span style={{color:"#94a3b8",fontSize:12}}>Cargando {ticker}...</span>
+      <span style={{color:"#94a3b8",fontSize:12}}>Loading {ticker}...</span>
     </div>
   );
 
   if(status==="error"||!candles.length) return(
     <div style={{height:260,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#f8fafc"}}>
       <span style={{fontSize:36}}>📊</span>
-      <span style={{color:"#64748b",fontSize:13,fontWeight:600}}>Sin datos para {ticker}</span>
+      <span style={{color:"#64748b",fontSize:13,fontWeight:600}}>No data for {ticker}</span>
       <a href={`https://finance.yahoo.com/quote/${ticker}`} target="_blank" rel="noopener noreferrer"
         style={{color:"#0F4C81",fontSize:12,fontWeight:700,textDecoration:"none",background:"rgba(15,76,129,0.08)",padding:"7px 18px",borderRadius:8,border:"1px solid rgba(15,76,129,0.2)"}}>
         Ver en Yahoo Finance →
@@ -4453,7 +4453,7 @@ function TopsPage({posts=[],lang="es"}){
       {loading?(
         <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>
           <div style={{fontSize:28,marginBottom:8}}>⏳</div>
-          <div>Cargando datos en vivo...</div>
+          <div>Loading live data...</div>
         </div>
       ):(
         <>
@@ -4561,7 +4561,7 @@ function NoticiasPage({lang}){
             </span>
           : loading
             ? <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(148,163,184,0.1)",color:"#64748b",border:"1px solid rgba(148,163,184,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
-                <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>Cargando
+                <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>Loading
               </span>
             : <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(148,163,184,0.1)",color:"#64748b",border:"1px solid rgba(148,163,184,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
                 <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>Finnhub
@@ -5974,7 +5974,7 @@ function TrendingPage({posts=[],lang="es"}){
         </button>
         <span style={{marginLeft:"auto",fontSize:11,color:"#22c55e",fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
           <span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>
-          {loading&&!refreshing?"Cargando…":`En vivo · ${lastUpdate||"--:--"}`}
+          {loading&&!refreshing?"Loading…":`Live · ${lastUpdate||"--:--"}`}
         </span>
       </div>
 
@@ -6594,7 +6594,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                           onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 24px rgba(16,185,129,0.45)";}}>
                           🎉 {isEN?"Get Annual PREMIUM — $79/yr →":"Obtener PREMIUM Anual — $79/año →"}
                         </button>
-                        <div style={{textAlign:"center",fontSize:11,color:"#10B981",fontWeight:700,marginBottom:4}}>Ahorras ${savingsAnual} vs mensual · Acceso inmediato</div>
+                        <div style={{textAlign:"center",fontSize:11,color:"#10B981",fontWeight:700,marginBottom:4}}>Save ${savingsAnual} vs monthly · Instant access</div>
                         <div style={{textAlign:"center",fontSize:10,color:"#334155",cursor:"pointer",textDecoration:"underline"}} onClick={()=>setBilling("monthly")}>
                           {isEN?"Or continue monthly at $15.99/mo →":"O continúa mensual por $15.99/mes →"}
                         </div>
@@ -6608,11 +6608,11 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                           style={{width:"100%",background:"linear-gradient(135deg,#C8901F,#8A5E10)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(200,144,31,0.5)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
                           onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 36px rgba(15,94,104,0.7)";}}
                           onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 28px rgba(15,94,104,0.55)";}}>
-                          ✦ Comenzar prueba gratis →
+                          ✦ Start free trial →
                         </button>
-                        <div style={{textAlign:"center",fontSize:11,color:"#475569",marginBottom:4}}>Sin tarjeta · Cancela cuando quieras · Acceso inmediato</div>
+                        <div style={{textAlign:"center",fontSize:11,color:"#475569",marginBottom:4}}>No card · Cancel anytime · Instant access</div>
                         <div style={{textAlign:"center",fontSize:10,color:"#10B981",fontWeight:700,cursor:"pointer"}} onClick={()=>setBilling("annual")}>
-                          💡 O ahorra ${savingsAnual} con el plan anual →
+                          💡 Or save ${savingsAnual} with annual plan →
                         </div>
                       </>
                     )}
@@ -6667,7 +6667,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             <div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>{isEN?"Monitor your credit score, protect your identity and improve your finances. Start free — no credit card.":"Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas. Empieza gratis — sin tarjeta de crédito."}</div>
           </div>
           <div style={{background:"linear-gradient(135deg,#0F4C81,#10B981)",borderRadius:11,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap",boxShadow:"0 4px 16px rgba(15,76,129,0.35)"}}>
-            Empezar gratis →
+            Start free →
           </div>
         </a>
       </>}
@@ -6988,13 +6988,13 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             <div style={{padding:"12px 8px",textAlign:"center",color:C.accent,fontSize:12,fontWeight:800}}>⭐ PREMIUM</div>
           </div>
           {[
-            ["Alertas de precio","3 alertas","Ilimitadas"],
-            ["Alertas de earnings","❌","✅"],
-            ["Alertas de trending","❌","✅"],
-            ["Alertas de volumen","❌","✅"],
+            ["Price alerts","3 alerts","Unlimited"],
+            ["Earnings alerts","❌","✅"],
+            ["Trending alerts","❌","✅"],
+            ["Volume alerts","❌","✅"],
             ["Breaking news","❌","✅"],
-            ["Frecuencia","15 min delay","Tiempo real"],
-            ["Email instantáneo","✅","✅"],
+            ["Frequency","15 min delay","Real-time"],
+            ["Instant email","✅","✅"],
           ].map(([feat,free,prem],i)=>(
             <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",borderBottom:i<6?`1px solid ${C.border}`:"none",transition:"background 0.1s"}}
               onMouseEnter={e=>e.currentTarget.style.background=C.card2}
@@ -7133,7 +7133,7 @@ function OnlineUsersWidget({ onlineUsers = [] }) {
                   {u.username || "Trader"}
                 </div>
                 <div style={{ fontSize: 10, color: "#5B8DC7" }}>
-                  🔗 {u.loginCount || 1} {u.loginCount === 1 ? "sesión" : "sesiones"}
+                  🔗 {u.loginCount || 1} {u.loginCount === 1 ? "session" : "sessions"}
                 </div>
               </div>
               <div style={{
@@ -7184,7 +7184,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🚀", label:"IPOs 2026",                                   idx:16},
     {icon:"⛏️", label:isEN?"Commodities":"Commodities",              idx:18},
     {icon:"🔍", label:isEN?"Screener":"Screener",                    idx:17, vip:true},
-    {icon:"💼", label:"Portafolio Terminal Oracle IA",   idx:37, vip:true},
+    {icon:"💼", label:"Portfolio Terminal Oracle AI",   idx:37, vip:true},
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
     {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
     {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
@@ -7576,10 +7576,10 @@ const AFFILIATES = [
     name:"Bybit",
     color:"#F7A600",
     bg:"linear-gradient(135deg,#0D0900,#1A1200)",
-    tagline:"Hasta 30% de comisiones + $100 bienvenida",
-    sub:"Futuros · Spot · Copy trading · 600+ pares",
-    cta:"Ganar $100 de bienvenida →",
-    badge:"30% COMISIÓN",
+    tagline:"Up to 30% commission + $100 welcome bonus",
+    sub:"Futures · Spot · Copy trading · 600+ pairs",
+    cta:"Get $100 welcome bonus →",
+    badge:"30% COMMISSION",
     badgeColor:"#F7A600",
     url:"https://www.bybit.com/invite?ref=NEXOTRADE",
     tickers:["BTC","ETH","SOL","BNB","DOGE","SHIB","AVAX","LINK","MATIC"],
@@ -7590,9 +7590,9 @@ const AFFILIATES = [
     name:"eToro",
     color:"#6DCC74",
     bg:"linear-gradient(135deg,#051A08,#092B0D)",
-    tagline:"$200 por cada cliente calificado",
-    sub:"Copy Trading · 3,000+ activos · 30M de usuarios",
-    cta:"Unirse al copy trading →",
+    tagline:"$200 per qualified client",
+    sub:"Copy Trading · 3,000+ assets · 30M users",
+    cta:"Join copy trading →",
     badge:"$200 CPA",
     badgeColor:"#6DCC74",
     url:"https://www.etoro.com/es/trading/account/",
@@ -7604,10 +7604,10 @@ const AFFILIATES = [
     name:"Coinbase",
     color:"#0052FF",
     bg:"linear-gradient(135deg,#000B2E,#001A6B)",
-    tagline:"50% de comisiones durante 3 meses",
-    sub:"La exchange de crypto más confiable de EE.UU. · NASDAQ: COIN",
-    cta:"Ganar $10 en BTC gratis →",
-    badge:"50% COMISIÓN",
+    tagline:"50% commission for 3 months",
+    sub:"America's most trusted crypto exchange · NASDAQ: COIN",
+    cta:"Get $10 in BTC free →",
+    badge:"50% COMMISSION",
     badgeColor:"#0052FF",
     url:"https://coinbase.com/join/nexotrade",
     tickers:["BTC","ETH","SOL","DOGE","SHIB","LINK","UNI","AAVE"],
@@ -7618,10 +7618,10 @@ const AFFILIATES = [
     name:"Finviz Elite",
     color:"#E8C84A",
     bg:"linear-gradient(135deg,#0D0D0D,#1A1500)",
-    tagline:"El screener #1 de Wall Street",
-    sub:"Alertas en tiempo real · Heatmaps · Backtesting · Noticias",
-    cta:"Probar Finviz Elite gratis →",
-    badge:"30% RECURRENTE",
+    tagline:"The #1 Wall Street screener",
+    sub:"Real-time alerts · Heatmaps · Backtesting · News",
+    cta:"Try Finviz Elite free →",
+    badge:"30% RECURRING",
     badgeColor:"#E8C84A",
     url:"https://finviz.com/?affilId=764863650",
     tickers:["SPY","QQQ","NVDA","AAPL","MSFT","TSLA","AMD","AMZN","META"],
@@ -7632,10 +7632,10 @@ const AFFILIATES = [
     name:"FTMO",
     color:"#00C896",
     bg:"linear-gradient(135deg,#001A12,#002B1E)",
-    tagline:"Hasta 20% comisión por cada trader referido",
-    sub:"Funded accounts hasta $200k · Pago semanal · Programa gratuito",
-    cta:"Unirse al programa FTMO →",
-    badge:"HASTA 20% CPA",
+    tagline:"Up to 20% commission per referred trader",
+    sub:"Funded accounts up to $200k · Weekly payout · Free program",
+    cta:"Join the FTMO program →",
+    badge:"UP TO 20% CPA",
     badgeColor:"#00C896",
     url:"https://ftmo.com/en/affiliate-programme/",
     tickers:["EURUSD","GBPUSD","XAUUSD","SPY","NAS100"],
@@ -7646,10 +7646,10 @@ const AFFILIATES = [
     name:"Topstep",
     color:"#0F4C81",
     bg:"linear-gradient(135deg,#00091A,#001530)",
-    tagline:"$50–$150 por cada trader que financies",
-    sub:"Funded accounts · Futuros · Forex · Se paga vía PayPal",
-    cta:"Referir traders a Topstep →",
-    badge:"$150 POR REFERIDO",
+    tagline:"$50–$150 per funded trader",
+    sub:"Funded accounts · Futures · Forex · Paid via PayPal",
+    cta:"Refer traders to Topstep →",
+    badge:"$150 PER REFERRAL",
     badgeColor:"#0F4C81",
     url:"https://www.topstep.com/affiliates/",
     tickers:["ES","NQ","GC","CL","YM"],
@@ -7660,10 +7660,10 @@ const AFFILIATES = [
     name:"Apex Trader Funding",
     color:"#FF6B00",
     bg:"linear-gradient(135deg,#1A0800,#2D1200)",
-    tagline:"10% comisión por cada challenge vendido",
-    sub:"Hasta $300k funded · Retiro cada 7 días · Sin drawdown mensual",
-    cta:"Referir a Apex →",
-    badge:"10% POR VENTA",
+    tagline:"10% commission per challenge sold",
+    sub:"Up to $300k funded · Withdraw every 7 days · No monthly drawdown",
+    cta:"Refer to Apex →",
+    badge:"10% PER SALE",
     badgeColor:"#FF6B00",
     url:"https://apextraderfunding.com/member/aff/go/nexotrade",
     tickers:["MES","MNQ","MGC","MCL"],
@@ -11417,7 +11417,7 @@ function AdminPicksModal({onClose}){
             <div style={{fontWeight:900,color:"#F1F5F9",fontSize:18}}>🛠️ Admin — Picks Semanales</div>
             <div style={{fontSize:11,color:"#64748B",marginTop:2}}>Solo visible para administradores</div>
           </div>
-          <button onClick={onClose} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"#94A3B8",cursor:"pointer",fontSize:13}}>✕ Cerrar</button>
+          <button onClick={onClose} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"#94A3B8",cursor:"pointer",fontSize:13}}>✕ Close</button>
         </div>
 
         {/* Categoría */}
@@ -15787,7 +15787,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           {congLoad ? (
             <div style={{textAlign:"center",padding:"50px",color:C.muted}}>
               <div style={{width:32,height:32,borderRadius:"50%",border:"3px solid rgba(15,94,104,0.2)",borderTopColor:"#818CF8",animation:"spin 1s linear infinite",margin:"0 auto 10px"}}/>
-              <div style={{fontSize:13}}>Cargando datos del Congreso...</div>
+              <div style={{fontSize:13}}>Loading Congress data...</div>
             </div>
           ) : congress.length===0 ? (
             <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(255,255,255,0.01)",borderRadius:16,border:"1px dashed rgba(255,255,255,0.06)"}}>
@@ -16693,11 +16693,11 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
       <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:"18px 18px 0 0",padding:"14px 20px",display:"flex",alignItems:"center",gap:12,borderBottom:"none"}}>
         <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#F59E0B,#B45309)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>💬</div>
         <div>
-          <div style={{fontSize:16,fontWeight:900,color:C.text,letterSpacing:"-0.3px"}}>Mensajes Privados</div>
+          <div style={{fontSize:16,fontWeight:900,color:C.text,letterSpacing:"-0.3px"}}>Private Messages</div>
           <div style={{fontSize:11,color:C.muted,marginTop:1}}>
             {mutuals.length > 0
-              ? <span><span style={{color:"#10B981",fontWeight:700}}>{mutuals.length}</span> conexión{mutuals.length!==1?"es":""} mutua{mutuals.length!==1?"s":""}</span>
-              : "Solo entre usuarios que se siguen mutuamente"}
+              ? <span><span style={{color:"#10B981",fontWeight:700}}>{mutuals.length}</span> mutual connection{mutuals.length!==1?"s":""}</span>
+              : "Only between users who follow each other"}
           </div>
         </div>
         <button onClick={()=>{setNewDM(true);setSelConv(null);}}
@@ -20319,11 +20319,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [scMarket, setScMarket] = useState("NYSE + NASDAQ");
   const [scSector, setScSector] = useState("Todos");
   const [scQuery, setScQuery] = useState("");
-  const [scReturn, setScReturn] = useState("Cualquiera");
-  const [scVolume, setScVolume] = useState("Cualquiera");
-  const [scCap, setScCap] = useState("Cualquiera");
+  const [scReturn, setScReturn] = useState("Any");
+  const [scVolume, setScVolume] = useState("Any");
+  const [scCap, setScCap] = useState("Any");
   const [scRan, setScRan] = useState(false);
-  const [scOrigin, setScOrigin] = useState("Todas"); // Todas | Portfolio | Watchlist
+  const [scOrigin, setScOrigin] = useState("All"); // All | Portfolio | Watchlist
   const [optTicker, setOptTicker] = useState("AAPL");
   const [optExpiry, setOptExpiry] = useState("Jul 5");
   const OPT_KEY = `nexo_options_${user?.id||"guest"}`;
@@ -20336,7 +20336,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [divForm, setDivForm] = useState({symbol:"",shares:"",divShare:"",freq:"Trimestral",exDate:"",payDate:""});
   const [divMsg, setDivMsg] = useState(null);
   const [divDrip, setDivDrip] = useState({});
-  const [alFilter, setAlFilter] = useState("Todas");
+  const [alFilter, setAlFilter] = useState("All");
   const [alToggles, setAlToggles] = useState({});
   const AL_KEY = `nexo_alerts_${user?.id||"guest"}`;
   const [alItems, setAlItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(AL_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
@@ -20566,7 +20566,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       });
       return Object.values(map);
     });
-    setImpMsg({type:"ok",text:`✓ ${parsed.length} ${parsed.length===1?"posición importada":"posiciones importadas"}.`});
+    setImpMsg({type:"ok",text:`✓ ${parsed.length} ${parsed.length===1?"position imported":"positions imported"}.`});
   };
   const parseCSV = (text) => {
     const first=text.split("\n")[0]||"";
@@ -20591,7 +20591,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       }catch(err){ setImpMsg({type:"err",text:"Error leyendo el archivo."}); } };
       if(window.XLSX){ run(); }
       else {
-        setImpMsg({type:"ok",text:"Cargando lector de Excel…"});
+        setImpMsg({type:"ok",text:"Loading Excel reader…"});
         const s=document.createElement("script");
         s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
         s.onload=run; s.onerror=()=>setImpMsg({type:"err",text:"No pude cargar el lector de Excel. Guarda el archivo como CSV y arrástralo."});
@@ -20836,12 +20836,12 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <div style={{display:"flex",justifyContent:"space-between",marginTop:3,fontFamily:MONO,fontSize:9,color:T.dim}}><span>{r.shares} × ${r.price.toFixed(2)}</span><span style={{color:r.pnl>=0?T.grn:T.red}}>{(r.pnlPct>=0?"+":"")+r.pnlPct.toFixed(1)}%</span></div>
               </div>
             ))}
-            {!rows.length&&<div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>Sin posiciones</div>}
+            {!rows.length&&<div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>No positions</div>}
           </div>
           <div style={{padding:"12px 0"}}>
             <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>Watchlist</span><span style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{watchTks.length}</span></div>
             {watchTks.length? watchTks.map((tk,i)=>{ const lp=livePrices[tk]; const ch=lp?lp.change:null; return (
-              <div key={tk} onClick={()=>{ setChSel(tk); setTermTab("charts"); }} title={"Ver "+tk+" en CHARTS"} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 14px",fontFamily:MONO,fontSize:11,cursor:"pointer",borderLeft:"2px solid transparent",transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(0,255,135,.05)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <div key={tk} onClick={()=>{ setChSel(tk); setTermTab("charts"); }} title={"View "+tk+" in CHARTS"} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 14px",fontFamily:MONO,fontSize:11,cursor:"pointer",borderLeft:"2px solid transparent",transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(0,255,135,.05)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 <span style={{width:46,fontWeight:700,color:T.txt}}>{tk}</span>
                 <span style={{flex:1,color:T.mid,fontSize:10,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lp?("$"+lp.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})):(NAMES[tk]||"")}</span>
                 {ch!=null? <span style={{fontSize:10,fontWeight:600,color:ch>=0?T.grn:T.red}}>{ch>=0?"▲":"▼"}{Math.abs(ch).toFixed(2)}%</span> : <span style={{fontSize:9,color:T.dim}}>—</span>}
@@ -20915,7 +20915,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                       <td style={{padding:"9px 14px"}}><div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(r.p.id);setForm({ticker:r.tk,shares:String(r.shares),entryPrice:String(r.entry),note:r.p.note||"",broker:r.p.broker||""});setShowAdd(true);}} style={{width:24,height:24,borderRadius:3,background:T.bg4,border:`1px solid ${T.br}`,color:T.mid,fontSize:11,cursor:"pointer"}}>✎</button><button onClick={()=>setPositions(prev=>prev.filter(x=>x.id!==r.p.id))} style={{width:24,height:24,borderRadius:3,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></div></td>
                     </tr>
                   ); })}
-                  {!rows.length&&<tr><td colSpan={10} style={{padding:"40px",textAlign:"center",color:T.dim,fontFamily:MONO}}>Sin posiciones · usa "+ AÑADIR" arriba</td></tr>}
+                  {!rows.length&&<tr><td colSpan={10} style={{padding:"40px",textAlign:"center",color:T.dim,fontFamily:MONO}}>No positions · use "+ ADD" above</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -20946,7 +20946,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                         <td style={{padding:"9px 14px"}}><div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(r.p.id);setForm({ticker:r.tk,shares:String(r.shares),entryPrice:String(r.entry),note:r.p.note||"",broker:r.p.broker||""});setShowAdd(true);}} style={{width:24,height:24,borderRadius:3,background:T.bg4,border:`1px solid ${T.br}`,color:T.mid,fontSize:11,cursor:"pointer"}}>✎</button><button onClick={()=>setPositions(prev=>prev.filter(x=>x.id!==r.p.id))} style={{width:24,height:24,borderRadius:3,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></div></td>
                       </tr>
                     ); })}
-                    {!rows.length&&<tr><td colSpan={9} style={{padding:"40px",textAlign:"center",color:T.dim,fontFamily:MONO}}>Sin posiciones · usa "+ AÑADIR"</td></tr>}
+                    {!rows.length&&<tr><td colSpan={9} style={{padding:"40px",textAlign:"center",color:T.dim,fontFamily:MONO}}>No positions · use "+ ADD"</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -21049,9 +21049,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const _o=cp.entry||0,_p=cp.price||0,_hi=Math.max(_o,_p)*1.008,_lo=Math.min(_o,_p)*0.992;
         const _f2=(v)=>"$"+(v||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
         const ohlv=[["O",_f2(_o),T.mid],["H",_f2(_hi),T.grn],["L",_f2(_lo),T.red],["V","—",T.mid]];
-        const STATS=[["Apertura","$295.20",T.txt],["Máximo 52S","$310.80",T.grn],["Mínimo 52S","$164.08",T.red],["Volumen hoy","64.2M",T.txt],["Vol. prom 10D","58.4M",T.txt],["Market Cap","$4.58T",T.txt],["P/E Ratio","31.4x",T.txt],["EPS","$9.59",T.txt],["Beta","1.3",T.txt],["Dividend Yield","0.44%",T.txt]];
-        const INDS=[["RSI (14)","68.2","Fuerza",T.grn],["MACD","+2.14","Alcista ↑",T.grn],["BB Upper","$308","Alejando",T.gold],["BB Lower","$294","Soporte",T.blue],["MA 20","$296","Por encima ✓",T.grn],["MA 50","$281","Por encima ✓",T.grn],["Stoch RSI","0.82","Sobrecomprado",T.gold],["ATR (14)","$4.82","Vol. normal",T.mid]];
-        const LVLS=[["Target Oracle","$340",T.grn],["Resistencia","$308",T.gold],["Soporte 1","$288",T.blue],["Soporte 2","$264",T.blue],["Stop sugerido","$281",T.red]];
+        const STATS=[["Open","$295.20",T.txt],["52W High","$310.80",T.grn],["52W Low","$164.08",T.red],["Volume today","64.2M",T.txt],["Avg vol 10D","58.4M",T.txt],["Market Cap","$4.58T",T.txt],["P/E Ratio","31.4x",T.txt],["EPS","$9.59",T.txt],["Beta","1.3",T.txt],["Dividend Yield","0.44%",T.txt]];
+        const INDS=[["RSI (14)","68.2","Strength",T.grn],["MACD","+2.14","Bullish ↑",T.grn],["BB Upper","$308","Widening",T.gold],["BB Lower","$294","Support",T.blue],["MA 20","$296","Above ✓",T.grn],["MA 50","$281","Above ✓",T.grn],["Stoch RSI","0.82","Overbought",T.gold],["ATR (14)","$4.82","Normal vol.",T.mid]];
+        const LVLS=[["Oracle Target","$340",T.grn],["Resistance","$308",T.gold],["Support 1","$288",T.blue],["Support 2","$264",T.blue],["Suggested stop","$281",T.red]];
         const IDX=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["DXY","104.32","-0.24",0]];
         const CRY=[["BTC","$63,844","+1.92",1],["ETH","$3,482","-0.54",0]];
         const end=cp.price||100; const cShare=(TF_SHARE[chPer]!=null?TF_SHARE[chPer]:0.5); const base=end-((end-(cp.entry||100))*cShare);
@@ -21076,7 +21076,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
               <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"My Positions":"Mis Posiciones"}</div>
-              {sortedRows.length? sortedRows.map((r,i)=>{ const act=chSel?r.tk===chSel:i===0; return (<div key={i} onClick={()=>setChSel(r.tk)} title={"Ver gráfico de "+r.tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.grn}`:"3px solid transparent",background:act?"rgba(0,255,135,.08)":"transparent",cursor:"pointer",transition:"background .12s"}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.grn:T.txt}}>{r.tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:r.today>=0?T.grn:T.red}}>{(r.today>=0?"+":"")+r.today.toFixed(2)}%</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>Sin posiciones</div>}
+              {sortedRows.length? sortedRows.map((r,i)=>{ const act=chSel?r.tk===chSel:i===0; return (<div key={i} onClick={()=>setChSel(r.tk)} title={"View chart for "+r.tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.grn}`:"3px solid transparent",background:act?"rgba(0,255,135,.08)":"transparent",cursor:"pointer",transition:"background .12s"}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.grn:T.txt}}>{r.tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:r.today>=0?T.grn:T.red}}>{(r.today>=0?"+":"")+r.today.toFixed(2)}%</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>No positions</div>}
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
               <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>{isEN?"My Watchlist":"Mi Watchlist"}</span><span style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{watchTks.length}</span></div>
@@ -21143,8 +21143,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const filtered=uni.filter(r=>{
           if(scOrigin==="Portfolio" && !r.inPos) return false;
           if(scOrigin==="Watchlist" && r.inPos) return false;
-          if(scReturn==="Ganadoras (hoy)" && !(r.today>0)) return false;
-          if(scReturn==="Perdedoras (hoy)" && !(r.today<0)) return false;
+          if(scReturn==="Winners (today)" && !(r.today>0)) return false;
+          if(scReturn==="Losers (today)" && !(r.today<0)) return false;
           if(q && !(r.tk.includes(q)||r.name.toUpperCase().includes(q))) return false;
           return true;
         }).sort((a,b)=>(b.today||-999)-(a.today||-999));
@@ -21155,11 +21155,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"1fr 280px",alignItems:"stretch"}}>
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-              {[["Origen",scOrigin,setScOrigin,["Todas","Portfolio","Watchlist"]],["Filtro",scReturn,setScReturn,["Cualquiera","Ganadoras (hoy)","Perdedoras (hoy)"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
-              <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{isEN?"Search":"Buscar"}</span><input value={scQuery} onChange={e=>setScQuery(e.target.value)} placeholder="AAPL, TSLA…" style={{...selStyle,width:120}}/></div>
-              <button onClick={()=>setScRan(true)} style={{background:T.grn,color:T.bg,border:"none",fontFamily:MONO,fontSize:11,fontWeight:700,padding:"7px 14px",borderRadius:5,cursor:"pointer",letterSpacing:.5,boxShadow:"0 0 14px rgba(0,255,135,.3)"}}>▶ EJECUTAR SCAN</button>
-              <button onClick={()=>{setScQuery("");setScOrigin("Todas");setScReturn("Cualquiera");setScRan(false);}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
-              <span style={{marginLeft:"auto",fontFamily:MONO,fontSize:11,color:scRan?T.grn:T.dim}}>{scRan?list.length:0} resultados</span>
+              {[["Source",scOrigin,setScOrigin,["All","Portfolio","Watchlist"]],["Filter",scReturn,setScReturn,["Any","Winners (today)","Losers (today)"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
+              <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>Search</span><input value={scQuery} onChange={e=>setScQuery(e.target.value)} placeholder="AAPL, TSLA…" style={{...selStyle,width:120}}/></div>
+              <button onClick={()=>setScRan(true)} style={{background:T.grn,color:T.bg,border:"none",fontFamily:MONO,fontSize:11,fontWeight:700,padding:"7px 14px",borderRadius:5,cursor:"pointer",letterSpacing:.5,boxShadow:"0 0 14px rgba(0,255,135,.3)"}}>▶ RUN SCAN</button>
+              <button onClick={()=>{setScQuery("");setScOrigin("All");setScReturn("Any");setScRan(false);}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
+              <span style={{marginLeft:"auto",fontFamily:MONO,fontSize:11,color:scRan?T.grn:T.dim}}>{scRan?list.length:0} results</span>
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:12}}>
@@ -21188,7 +21188,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
               <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"Quick filters":"Filtros rápidos"}</div>
               <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:6}}>
-                {[["💼","Solo Portfolio","Portfolio",T.grn],["👁","Solo Watchlist","Watchlist",T.blue],["▲","Ganadoras hoy",null,T.grn],["▼","Perdedoras hoy",null,T.red]].map((s,i)=>(<div key={i} onClick={()=>{ if(s[2]!==undefined&&s[2]!==null){setScOrigin(s[2]);setScReturn("Cualquiera");} else {setScReturn(s[0]==="▲"?"Ganadoras (hoy)":"Perdedoras (hoy)");setScOrigin("Todas");} setScRan(true); }} style={{display:"flex",alignItems:"center",gap:9,background:T.bg3,border:`1px solid ${s[3]}33`,borderRadius:6,padding:"9px 11px",cursor:"pointer"}}><span style={{fontSize:13,color:s[3]}}>{s[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:s[3]}}>{s[1]}</span></div>))}
+                {[["💼","Portfolio only","Portfolio",T.grn],["👁","Watchlist only","Watchlist",T.blue],["▲","Winners today",null,T.grn],["▼","Losers today",null,T.red]].map((s,i)=>(<div key={i} onClick={()=>{ if(s[2]!==undefined&&s[2]!==null){setScOrigin(s[2]);setScReturn("Any");} else {setScReturn(s[0]==="▲"?"Winners (today)":"Losers (today)");setScOrigin("All");} setScRan(true); }} style={{display:"flex",alignItems:"center",gap:9,background:T.bg3,border:`1px solid ${s[3]}33`,borderRadius:6,padding:"9px 11px",cursor:"pointer"}}><span style={{fontSize:13,color:s[3]}}>{s[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:s[3]}}>{s[1]}</span></div>))}
               </div>
             </div>
             <div style={{padding:"12px 14px"}}>
@@ -21200,14 +21200,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       })()}
       {/* ── ALERTS VIEW (tus alertas reales) ── */}
       {termTab==="alerts" && (()=>{
-        const COND=[["price_above","📈","PRICE >","PRECIO",T.grn],["price_below","📉","PRICE <","PRECIO",T.grn],["pct_change","🎯","% CHANGE","% CAMBIO",T.gold],["volume","📊","VOLUME","VOLUMEN",T.blue],["rsi","🌡️","RSI CROSS","RSI",T.purp],["oracle","🔮","ORACLE AI","ORACLE",T.purp]];
+        const COND=[["price_above","📈","PRICE >","PRICE",T.grn],["price_below","📉","PRICE <","PRICE",T.grn],["pct_change","🎯","% CHANGE","% CHANGE",T.gold],["volume","📊","VOLUME","VOLUME",T.blue],["rsi","🌡️","RSI CROSS","RSI",T.purp],["oracle","🔮","ORACLE AI","ORACLE",T.purp]];
         const meta=COND.find(c=>c[0]===alType)||COND[0];
-        const condText=(t,v)=> t==="price_above"?`Disparar cuando > $${v}` : t==="price_below"?`Disparar cuando < $${v}` : t==="pct_change"?`Disparar cuando > +${v}% en 1D` : t==="volume"?`Disparar cuando Volumen > ${v}x promedio` : t==="rsi"?`Disparar cuando RSI < ${v}` : `Disparar cuando Score Oracle < ${v}`;
-        const tgtLabel = alType==="price_above"||alType==="price_below"?"Precio target ($)" : alType==="pct_change"?"% de cambio" : alType==="volume"?"Múltiplo de volumen" : alType==="rsi"?"Nivel RSI" : "Score Oracle";
+        const condText=(t,v)=> t==="price_above"?`Trigger when > $${v}` : t==="price_below"?`Trigger when < $${v}` : t==="pct_change"?`Trigger when > +${v}% in 1D` : t==="volume"?`Trigger when Volume > ${v}x avg` : t==="rsi"?`Trigger when RSI < ${v}` : `Trigger when Oracle Score < ${v}`;
+        const tgtLabel = alType==="price_above"||alType==="price_below"?"Target price ($)" : alType==="pct_change"?"% change" : alType==="volume"?"Volume multiplier" : alType==="rsi"?"RSI level" : "Oracle Score";
         const tgtPh = alType==="price_above"?"310" : alType==="price_below"?"60000" : alType==="pct_change"?"5" : alType==="volume"?"2" : alType==="rsi"?"30" : "70";
-        const rel=(ts)=>{ if(!ts)return ""; const d=Math.floor((Date.now()-ts)/1000); if(d<60)return "hace un momento"; if(d<3600)return "hace "+Math.floor(d/60)+" min"; if(d<86400)return "hace "+Math.floor(d/3600)+"h"; return "hace "+Math.floor(d/86400)+" días"; };
-        const FILTERS=["Todas","Activas","Inactivas"];
-        const list=alItems.filter(a=> alFilter==="Activas"?a.on : alFilter==="Inactivas"?!a.on : true);
+        const rel=(ts)=>{ if(!ts)return ""; const d=Math.floor((Date.now()-ts)/1000); if(d<60)return "just now"; if(d<3600)return Math.floor(d/60)+" min ago"; if(d<86400)return Math.floor(d/3600)+"h ago"; return Math.floor(d/86400)+"d ago"; };
+        const FILTERS=["All","Active","Inactive"];
+        const list=alItems.filter(a=> alFilter==="Active"?a.on : alFilter==="Inactive"?!a.on : true);
         const nActive=alItems.filter(a=>a.on).length;
         const Toggle=({on,onClick})=>(<div onClick={onClick} style={{width:34,height:18,borderRadius:9,background:on?"rgba(0,255,135,.3)":T.bg4,border:`1px solid ${on?"rgba(0,255,135,.5)":T.br2}`,position:"relative",cursor:"pointer",flexShrink:0}}><div style={{position:"absolute",top:1,left:on?17:1,width:14,height:14,borderRadius:"50%",background:on?T.grn:T.dim,transition:"left .15s"}}/></div>);
         const create=()=>{ const sym=alForm.symbol.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,""); const tgt=alForm.target.trim(); if(!sym||!tgt){ return; } const it={id:Date.now()+""+Math.random().toString(36).slice(2,5),sym,type:alType,target:tgt,freq:alForm.freq,badge:meta[3],color:meta[4],cond:condText(alType,tgt),note:alForm.note.trim(),on:true,created:Date.now()}; setAlItems(p=>[it,...p]); setAlForm(f=>({...f,symbol:"",target:"",note:""})); askNotif(); };
@@ -21218,8 +21218,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {/* LEFT — lista real */}
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
-              <span style={{...lbl,padding:0}}>Alertas · {nActive} activas</span>
-              <button onClick={()=>setAlForm(f=>({...f,symbol:"",target:"",note:""}))} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ Nueva</button>
+              <span style={{...lbl,padding:0}}>Alerts · {nActive} active</span>
+              <button onClick={()=>setAlForm(f=>({...f,symbol:"",target:"",note:""}))} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ New</button>
             </div>
             <div style={{display:"flex",gap:6,padding:"10px 14px",borderBottom:`1px solid ${T.br}`}}>{FILTERS.map(f=>(<button key={f} onClick={()=>setAlFilter(f)} style={{padding:"4px 10px",borderRadius:4,fontFamily:MONO,fontSize:10,fontWeight:600,cursor:"pointer",border:"none",background:alFilter===f?"rgba(0,255,135,.12)":"transparent",color:alFilter===f?T.grn:T.dim}}>{f}</button>))}</div>
             <div>{list.length? list.map(a=>(
@@ -21263,11 +21263,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <div><div style={{...lbl,marginBottom:5}}>{isEN?"Frequency":"Frecuencia"}</div><select value={alForm.freq} onChange={e=>setAlForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Una vez</option><option style={{background:T.bg2}}>{isEN?"Every time":"Cada vez"}</option><option style={{background:T.bg2}}>{isEN?"Daily":"Diaria"}</option></select></div>
                 <div><div style={{...lbl,marginBottom:5}}>{isEN?"Notification":"Notificación"}</div><select value={alForm.notif} onChange={e=>setAlForm(f=>({...f,notif:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Push + Email</option><option style={{background:T.bg2}}>Solo Push</option><option style={{background:T.bg2}}>Solo Email</option></select></div>
               </div>
-              <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Nota (opcional)</div><input value={alForm.note} onChange={e=>setAlForm(f=>({...f,note:e.target.value}))} placeholder="Resistencia clave, considerar toma de ganancias…" style={inStyle}/></div>
-              <button onClick={create} style={{width:"100%",background:`linear-gradient(90deg,${T.grn2},${T.grn})`,color:T.bg,border:"none",borderRadius:8,padding:"13px",fontFamily:MONO,fontSize:13,fontWeight:800,letterSpacing:1,cursor:(alForm.symbol&&alForm.target)?"pointer":"not-allowed",opacity:(alForm.symbol&&alForm.target)?1:0.5,boxShadow:"0 0 18px rgba(0,255,135,.35)"}}>⚡ CREAR ALERTA</button>
+              <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Note (optional)</div><input value={alForm.note} onChange={e=>setAlForm(f=>({...f,note:e.target.value}))} placeholder="Key resistance, consider taking profits…" style={inStyle}/></div>
+              <button onClick={create} style={{width:"100%",background:`linear-gradient(90deg,${T.grn2},${T.grn})`,color:T.bg,border:"none",borderRadius:8,padding:"13px",fontFamily:MONO,fontSize:13,fontWeight:800,letterSpacing:1,cursor:(alForm.symbol&&alForm.target)?"pointer":"not-allowed",opacity:(alForm.symbol&&alForm.target)?1:0.5,boxShadow:"0 0 18px rgba(0,255,135,.35)"}}>⚡ CREATE ALERT</button>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",margin:"22px 0 10px"}}><div style={{...lbl}}>{isEN?"Trigger history":"Historial de disparos"}</div>{alFired.length>0&&<button onClick={()=>setAlFired([])} style={{background:"transparent",border:`1px solid ${T.br}`,color:T.dim,fontFamily:MONO,fontSize:9,padding:"3px 8px",borderRadius:4,cursor:"pointer"}}>{isEN?"Clear":"Limpiar"}</button>}</div>
-              {alFired.length? <div style={{display:"flex",flexDirection:"column",gap:8}}>{alFired.map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"11px 14px"}}><span style={{width:8,height:8,borderRadius:"50%",background:T.grn,flexShrink:0}}/><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{f.sym} ⚡ disparada</div><div style={{fontFamily:SANS,fontSize:11,color:T.mid,marginTop:1}}>{f.cond}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.grn}}>${(f.price||0).toFixed(2)}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{relF(f.at)}</div></div></div>))}</div>
-              : <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"22px",textAlign:"center",fontFamily:MONO,fontSize:11,color:T.dim}}>Sin disparos todavía · cuando una alerta de precio se cumpla, aparecerá aquí y te llegará la notificación</div>}
+              {alFired.length? <div style={{display:"flex",flexDirection:"column",gap:8}}>{alFired.map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"11px 14px"}}><span style={{width:8,height:8,borderRadius:"50%",background:T.grn,flexShrink:0}}/><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{f.sym} ⚡ triggered</div><div style={{fontFamily:SANS,fontSize:11,color:T.mid,marginTop:1}}>{f.cond}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.grn}}>${(f.price||0).toFixed(2)}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{relF(f.at)}</div></div></div>))}</div>
+              : <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"22px",textAlign:"center",fontFamily:MONO,fontSize:11,color:T.dim}}>No triggers yet · when a price alert fires, it will appear here and you'll get notified</div>}
             </div>
           </div>
         </div>
@@ -21296,14 +21296,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const monMax=Math.max(1,...monKeys.map(k=>Math.abs(monMap[k])));
         const emoOf=(n)=>(EMO.find(e=>e[1]===n)||["",""]);
         const openNew=()=>{ setJrForm({date:todayISO,title:"",summary:"",pnl:"",trades:"",wins:"",errors:""}); setJrEmotion("ENFOCADO"); setJrShow(true); };
-        const ST=[["Total P&L",m$(totalPnlJ),totalPnlJ>=0?T.grn:T.red],["Entradas",String(jrItems.length),T.txt],["Trades",String(totalTrades),T.txt],["Win Rate",totalTrades?winRate.toFixed(0)+"%":"—",T.grn],["Best día",jrItems.length?m$(best):"—",T.grn],["Peor día",jrItems.length?m$(worst):"—",T.red]];
+        const ST=[["Total P&L",m$(totalPnlJ),totalPnlJ>=0?T.grn:T.red],["Entries",String(jrItems.length),T.txt],["Trades",String(totalTrades),T.txt],["Win Rate",totalTrades?winRate.toFixed(0)+"%":"—",T.grn],["Best day",jrItems.length?m$(best):"—",T.grn],["Worst day",jrItems.length?m$(worst):"—",T.red]];
         return (
         <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"320px 1fr 300px",alignItems:"stretch"}}>
           {/* LEFT */}
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
               <span style={{...lbl,padding:0}}>Trading Journal</span>
-              <button onClick={openNew} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ Entrada</button>
+              <button onClick={openNew} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ Entry</button>
             </div>
             <div style={{padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{monthName}</span></div>
@@ -21354,7 +21354,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:5}}>{isEN?"Day summary":"Resumen del día"}</div><textarea value={jrForm.summary} onChange={e=>setJrForm(f=>({...f,summary:e.target.value}))} rows={3} placeholder={isEN?"What happened, what you did well…":"Qué pasó, qué hiciste bien…"} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
                   <div><div style={{...lbl,marginBottom:5}}># Trades</div><input value={jrForm.trades} onChange={e=>setJrForm(f=>({...f,trades:e.target.value}))} placeholder="3" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
-                  <div><div style={{...lbl,marginBottom:5}}># Ganadoras</div><input value={jrForm.wins} onChange={e=>setJrForm(f=>({...f,wins:e.target.value}))} placeholder="2" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}># Winners</div><input value={jrForm.wins} onChange={e=>setJrForm(f=>({...f,wins:e.target.value}))} placeholder="2" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                 </div>
                 <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:6}}>{isEN?"How did you feel?":"¿Cómo te sentiste?"}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>{EMO.map((e,i)=>{const s=jrEmotion===e[1];return (<div key={i} onClick={()=>setJrEmotion(e[1])} style={{background:s?"rgba(0,255,135,.08)":T.bg3,border:`1px solid ${s?"rgba(0,255,135,.35)":T.br}`,borderRadius:6,padding:"8px 4px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:17}}>{e[0]}</div><div style={{fontFamily:MONO,fontSize:7.5,fontWeight:700,color:s?T.grn:T.dim,marginTop:3}}>{e[1]}</div></div>);})}</div></div>
                 <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>{isEN?"Mistakes & lessons":"Errores y aprendizajes"}</div><textarea value={jrForm.errors} onChange={e=>setJrForm(f=>({...f,errors:e.target.value}))} rows={2} placeholder={isEN?"What you would do differently…":"Qué harías distinto…"} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
@@ -21378,11 +21378,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const capital=optItems.filter(o=>o.side==="LONG").reduce((a,o)=>a+(parseFloat(o.entry)||0)*(parseFloat(o.contracts)||0)*100,0);
         const winners=optItems.filter(o=>opPnl(o)>0).length;
         const KPI=[
-          ["P&L Opciones", optItems.length?m$(totalPnl):"—", totalPnl>=0?T.grn:T.red, optItems.length?(totalPnl>=0?"en ganancia":"en pérdida"):"sin posiciones"],
-          ["Posiciones Abiertas", String(optItems.length), T.purp, nCalls+" calls · "+nPuts+" puts"],
+          ["Options P&L", optItems.length?m$(totalPnl):"—", totalPnl>=0?T.grn:T.red, optItems.length?(totalPnl>=0?"in profit":"at a loss"):"no positions"],
+          ["Open Positions", String(optItems.length), T.purp, nCalls+" calls · "+nPuts+" puts"],
           [(isEN?"Premium Collected":"Prima Cobrada"), optItems.length?"$"+Math.round(prima).toLocaleString("en-US"):"—", T.gold, "ventas (SHORT)"],
-          ["Capital en Juego", optItems.length?"$"+Math.round(capital).toLocaleString("en-US"):"—", T.blue, "compras (LONG)"],
-          ["Ganadoras", optItems.length?winners+"/"+optItems.length:"—", T.grn, optItems.length?Math.round(winners/optItems.length*100)+"% win":"—"],
+          ["Capital at Risk", optItems.length?"$"+Math.round(capital).toLocaleString("en-US"):"—", T.blue, "buys (LONG)"],
+          ["Winners", optItems.length?winners+"/"+optItems.length:"—", T.grn, optItems.length?Math.round(winners/optItems.length*100)+"% win":"—"],
         ];
         const openNew=()=>{ setOptForm({symbol:"",kind:"CALL",side:"LONG",strike:"",expiry:"",contracts:"",entry:"",current:""}); setOptShow(true); };
         const inStyle={width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"};
@@ -21455,10 +21455,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const nextPay=future[0];
         const fmtShort=(iso)=>{ try{ return new Date(iso+"T00:00").toLocaleDateString("es-ES",{day:"2-digit",month:"short"}); }catch{ return iso; } };
         const KPI=[
-          [(isEN?"Projected Annual Income":"Ingreso Anual Proyectado"), divItems.length?"$"+Math.round(ingresoAnual).toLocaleString("en-US"):"—", T.gold, divItems.length?"de "+divItems.length+" tickers":"sin tickers"],
-          ["Tickers con Dividendo", String(divItems.length), T.grn, "en seguimiento"],
+          [(isEN?"Projected Annual Income":"Ingreso Anual Proyectado"), divItems.length?"$"+Math.round(ingresoAnual).toLocaleString("en-US"):"—", T.gold, divItems.length?divItems.length+" tickers":"no tickers"],
+          ["Dividend Tickers", String(divItems.length), T.grn, "tracked"],
           [(isEN?"Next Payment":"Próximo Pago"), nextPay?fmtShort(nextPay.d.payDate):"—", T.blue, nextPay?nextPay.d.symbol+" · $"+proxOf(nextPay.d).toFixed(2):"—"],
-          ["DRIP Activo", divItems.length?dripOn+" tickers":"—", T.purp, "reinversión automática"],
+          ["DRIP Active", divItems.length?dripOn+" tickers":"—", T.purp, "auto-reinvestment"],
         ];
         // calendario próximos 6 meses
         const now=new Date(); const months=[];
@@ -23747,7 +23747,7 @@ function AdminDashboard(){
   if(loading) return(
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:320,gap:12}}>
       <div style={{width:22,height:22,border:"2.5px solid #EBEBEB",borderTopColor:"#0F4C81",borderRadius:"50%",animation:"nexo-spin 0.8s linear infinite"}}/>
-      <span style={{color:C.muted,fontSize:14}}>Cargando dashboard...</span>
+      <span style={{color:C.muted,fontSize:14}}>Loading dashboard...</span>
     </div>
   );
 
@@ -25812,7 +25812,7 @@ export default function App(){
           <button onClick={()=>setTrialDaysLeft(null)} style={{
             background:"transparent",border:"none",color:"rgba(255,255,255,0.7)",
             cursor:"pointer",fontSize:16,lineHeight:1,padding:"0 4px",flexShrink:0
-          }} title="Cerrar">×</button>
+          }} title="Close">×</button>
         </div>
       )}
 
@@ -26271,49 +26271,49 @@ export default function App(){
                   color:"#475569",bg:"#0f172a",border:"#1e293b",btnBg:"transparent",btnBorder:"#334155",
                   features:[
                     {t:"Feed de traders en tiempo real",ok:true},
-                    {t:"Watchlist hasta 5 acciones",ok:true},
-                    {t:"Paper trading $100k virtuales",ok:true},
-                    {t:"Leaderboard de la comunidad",ok:true},
-                    {t:"IA NEXO básico (10 consultas/día)",ok:true},
-                    {t:"Picks PREMIUM semanales",ok:false},
-                    {t:"Señales de trading en vivo",ok:false},
-                    {t:"Alertas de precio",ok:false},
-                    {t:"Descuentos en webinars",ok:false},
+                    {t:"Watchlist up to 5 stocks",ok:true},
+                    {t:"Paper trading $100k virtual",ok:true},
+                    {t:"Community leaderboard",ok:true},
+                    {t:"Basic NEXO AI (10 queries/day)",ok:true},
+                    {t:"Weekly PREMIUM picks",ok:false},
+                    {t:"Live trading signals",ok:false},
+                    {t:"Price alerts",ok:false},
+                    {t:"Webinar discounts",ok:false},
                   ],
-                  cta:"Empezar gratis",action:()=>setAuth("register")
+                  cta:"Start free",action:()=>setAuth("register")
                 },
                 {
-                  plan:"PREMIUM ✦",badge:"⚡ MÁS POPULAR",
+                  plan:"PREMIUM ✦",badge:"⚡ MOST POPULAR",
                   precio:"$15.99",periodo:"/mes · o $79/año",
                   color:"#E0B64B",bg:"linear-gradient(135deg,#1c1606,#241b07)",border:"#C8901F",btnBg:"linear-gradient(135deg,#C8901F,#8A5E10)",btnBorder:"#C8901F",
                   featured:true,
                   features:[
-                    {t:"Todo lo del plan Free",ok:true},
-                    {t:"10 picks PREMIUM semanales (lunes 9am)",ok:true},
-                    {t:"Señales de trading en vivo",ok:true},
-                    {t:"Alertas de precio ilimitadas",ok:true},
-                    {t:"50% OFF en webinars y cursos",ok:true},
-                    {t:"Badge PREMIUM en tu perfil",ok:true},
-                    {t:"IA NEXO ilimitado",ok:true},
-                    {t:"Herramientas PREMIUM exclusivas",ok:true},
+                    {t:"Everything in Free",ok:true},
+                    {t:"10 weekly PREMIUM picks (Mon 9am)",ok:true},
+                    {t:"Live trading signals",ok:true},
+                    {t:"Unlimited price alerts",ok:true},
+                    {t:"50% OFF on webinars & courses",ok:true},
+                    {t:"PREMIUM badge on your profile",ok:true},
+                    {t:"Unlimited NEXO AI",ok:true},
+                    {t:"Exclusive PREMIUM tools",ok:true},
                   ],
-                  cta:"Probar PREMIUM",action:()=>setAuth("register")
+                  cta:"Try PREMIUM",action:()=>setAuth("register")
                 },
                 {
-                  plan:"PRO 🚀",badge:"Para traders serios",
+                  plan:"PRO 🚀",badge:"For serious traders",
                   precio:"$24.99",periodo:"/mes",
                   color:"#0F4C81",bg:"linear-gradient(135deg,#061828,#082038)",border:"#0F4C81",btnBg:"linear-gradient(135deg,#0F4C81,#0066CC)",btnBorder:"#0F4C81",
                   features:[
-                    {t:"Todo lo del plan PREMIUM",ok:true},
-                    {t:"Señales PRO con R:R detallado",ok:true},
-                    {t:"Acceso anticipado a picks (dom 8pm)",ok:true},
-                    {t:"Análisis técnico IA sin límite",ok:true},
-                    {t:"Screener de acciones avanzado",ok:true},
-                    {t:"Dashboard de portafolio PRO",ok:true},
-                    {t:"Soporte prioritario 1:1",ok:true},
-                    {t:"Webinars mensuales exclusivos PRO",ok:true},
+                    {t:"Everything in PREMIUM",ok:true},
+                    {t:"PRO signals with detailed R:R",ok:true},
+                    {t:"Early access to picks (Sun 8pm)",ok:true},
+                    {t:"Unlimited AI technical analysis",ok:true},
+                    {t:"Advanced stock screener",ok:true},
+                    {t:"PRO portfolio dashboard",ok:true},
+                    {t:"Priority 1:1 support",ok:true},
+                    {t:"Exclusive monthly PRO webinars",ok:true},
                   ],
-                  cta:"Empezar PRO",action:()=>setAuth("register")
+                  cta:"Start PRO",action:()=>setAuth("register")
                 },
               ].map((p,i)=>(
                 <div key={i} style={{background:p.bg,border:`2px solid ${p.border}`,borderRadius:22,padding:"30px 26px",position:"relative",boxShadow:p.featured?"0 0 50px #C8901F33":p.color==="#0F4C81"?"0 0 30px #0F4C8111":"none",transition:"transform 0.2s"}}
