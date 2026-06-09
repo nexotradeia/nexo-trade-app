@@ -19873,6 +19873,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   });
   const [livePrices, setLivePrices] = useState({});
   const [loading, setLoading] = useState(false);
+  const WATCH_KEY = `nexo_watchlist_${user?.id||"guest"}`;
+  const readWatch = ()=>{ try{ const s=JSON.parse(localStorage.getItem(WATCH_KEY)||"null"); return Array.isArray(s)?[...new Set(s.map(x=>String(x).toUpperCase()).filter(Boolean))]:[]; }catch{ return []; } };
+  const [watchTks, setWatchTks] = useState(readWatch);
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ticker:"",shares:"",entryPrice:"",note:""});
@@ -20017,11 +20020,21 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[alSig]);
 
-  // Fetch live prices for all tickers
+  // Mantener la watchlist fresca (editada en la página Watchlist / otra pestaña)
   useEffect(()=>{
-    if(!positions.length) return;
+    const sync=()=>setWatchTks(prev=>{ const n=readWatch(); return (n.length===prev.length && n.every((t,i)=>t===prev[i]))?prev:n; });
+    sync();
+    window.addEventListener("focus",sync);
+    window.addEventListener("storage",sync);
+    return ()=>{ window.removeEventListener("focus",sync); window.removeEventListener("storage",sync); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[user?.id]);
+
+  // Fetch live prices for all tickers (posiciones + watchlist)
+  useEffect(()=>{
+    if(!positions.length && !watchTks.length) return;
     const cryptoMap={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT"};
-    const tickers=[...new Set(positions.map(p=>p.ticker.toUpperCase()))];
+    const tickers=[...new Set([...positions.map(p=>p.ticker.toUpperCase()),...watchTks])];
     setLoading(true);
     Promise.all(tickers.map(async tk=>{
       const sym=cryptoMap[tk]||tk;
@@ -20037,7 +20050,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       setLivePrices(map);
       setLoading(false);
     });
-  },[positions]);
+  },[positions,watchTks]);
 
   const totalCost   = positions.reduce((s,p)=>(s + (parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0)),0);
   const totalValue  = positions.reduce((s,p)=>{
@@ -20226,9 +20239,13 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const best=sortedRows[0];
     const ytdPct=totalPnlPct;
     const avatarBg=(tk)=>{let h=0;for(let i=0;i<tk.length;i++)h=(h*31+tk.charCodeAt(i))>>>0;const arr=["#1e3a28","#1e2a3a","#1a2a3e","#2a1e38","#1a2e2a","#2a2a1a","#1e2e1e","#2e2218","#2a1e1a"];return arr[h%arr.length];};
-    // chart synthetic price path of selected position (fallback: top position)
-    const cpRow=(chSel&&sortedRows.find(r=>r.tk===chSel))||best;
-    const cp=cpRow||{entry:100,price:100,tk:"—"};
+    // chart synthetic price path of selected ticker (posición o watchlist; fallback: top position)
+    let cp;
+    if(chSel){
+      const inPos=sortedRows.find(r=>r.tk===chSel);
+      if(inPos) cp=inPos;
+      else { const lp=livePrices[chSel]; const price=lp?lp.price:100; cp={tk:chSel,entry:price,price,pnl:0,pnlPct:0,today:lp?(lp.change||0):0,mv:0,shares:0,name:NAMES[chSel]||chSel}; }
+    } else cp=best||{entry:100,price:100,tk:"—"};
     // ── etiquetas del eje X según timeframe ──
     const tfLabels=(rk,K=6)=>{ const out=[],now=new Date();
       if(rk==="1D"||rk==="1m"||rk==="5m"||rk==="15m"||rk==="1H"){ const span={"1D":6.5,"1H":3,"15m":1.2,"5m":0.5,"1m":0.12}[rk]||6.5; for(let i=0;i<K;i++){ const h=16-(1-i/(K-1))*span; const hh=Math.floor(h); const mm=Math.round((h-hh)*60); out.push(hh+":"+String(mm).padStart(2,"0")); } return out; }
@@ -20313,8 +20330,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             {!rows.length&&<div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>Sin posiciones</div>}
           </div>
           <div style={{padding:"12px 0"}}>
-            <div style={{...lbl,padding:"0 14px 8px"}}>Watchlist</div>
-            {WL.map((w,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 14px",fontFamily:MONO,fontSize:11}}><span style={{width:42,fontWeight:600,color:T.txt}}>{w[0]}</span><span style={{flex:1,color:T.mid}}>{w[1]}</span><span style={{fontSize:10,fontWeight:600,color:w[3]?T.grn:T.red}}>{w[3]?"▲":"▼"}{w[2].replace("-","").replace("+","")}%</span></div>))}
+            <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>Watchlist</span><span style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{watchTks.length}</span></div>
+            {watchTks.length? watchTks.map((tk,i)=>{ const lp=livePrices[tk]; const ch=lp?lp.change:null; return (
+              <div key={tk} onClick={()=>{ setChSel(tk); setTermTab("charts"); }} title={"Ver "+tk+" en CHARTS"} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 14px",fontFamily:MONO,fontSize:11,cursor:"pointer",borderLeft:"2px solid transparent",transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(0,255,135,.05)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <span style={{width:46,fontWeight:700,color:T.txt}}>{tk}</span>
+                <span style={{flex:1,color:T.mid,fontSize:10,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lp?("$"+lp.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})):(NAMES[tk]||"")}</span>
+                {ch!=null? <span style={{fontSize:10,fontWeight:600,color:ch>=0?T.grn:T.red}}>{ch>=0?"▲":"▼"}{Math.abs(ch).toFixed(2)}%</span> : <span style={{fontSize:9,color:T.dim}}>—</span>}
+              </div>
+            ); }) : <div style={{padding:"6px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>Vacía · agrégala en la página Watchlist</div>}
           </div>
         </div>
         {/* MAIN */}
