@@ -175,7 +175,7 @@ export default function UpgradeModal({ open, onClose, reason = 'default' }: Upgr
             fontFamily:   'inherit',
           }}
         >
-          Quizás después
+          Maybe later
         </button>
 
         <p style={{

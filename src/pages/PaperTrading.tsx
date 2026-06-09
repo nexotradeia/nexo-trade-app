@@ -1,5 +1,5 @@
 // ============================================================
-// NEXO TRADE — Página: Paper Trading Simulator
+// NEXO TRADE — Page: Paper Trading Simulator
 // ============================================================
 import { useState, useRef } from 'react'
 import { usePaperTrading } from '../hooks/usePaperTrading'
@@ -54,7 +54,7 @@ export default function PaperTrading() {
     setQuote(null)
     setTradeMsg(null)
     const q = await getQuote(searchTicker.trim())
-    if (!q) setQuoteError(`No se encontró "${searchTicker.toUpperCase()}"`)
+    if (!q) setQuoteError(`"${searchTicker.toUpperCase()}" not found`)
     else setQuote(q)
     setQuoteLoading(false)
   }
@@ -63,7 +63,7 @@ export default function PaperTrading() {
     e.preventDefault()
     if (!quote || !sharesInput) return
     const shares = parseFloat(sharesInput)
-    if (isNaN(shares) || shares <= 0) { setTradeMsg({ ok: false, text: 'Cantidad inválida' }); return }
+    if (isNaN(shares) || shares <= 0) { setTradeMsg({ ok: false, text: 'Invalid quantity' }); return }
 
     setTradeLoading(true)
     setTradeMsg(null)
@@ -77,11 +77,11 @@ export default function PaperTrading() {
     } else {
       const total = fmtUSD((res as any).total ?? 0)
       if (tradeType === 'buy') {
-        setTradeMsg({ ok: true, text: `✓ Compraste ${shares} acciones de ${quote.ticker} por ${total}` })
+        setTradeMsg({ ok: true, text: `✓ Bought ${shares} shares of ${quote.ticker} for ${total}` })
       } else {
         const pnl = (res as any).pnl ?? 0
         const sign = pnl >= 0 ? '+' : ''
-        setTradeMsg({ ok: pnl >= 0, text: `✓ Vendiste ${shares} acciones · P&L: ${sign}${fmtUSD(pnl)}` })
+        setTradeMsg({ ok: pnl >= 0, text: `✓ Sold ${shares} shares · P&L: ${sign}${fmtUSD(pnl)}` })
       }
       setSharesInput('')
     }
@@ -90,7 +90,7 @@ export default function PaperTrading() {
 
   const position = quote ? positions.find(p => p.ticker === quote.ticker) : null
 
-  // ── Estilos comunes ──────────────────────────────────────
+  // ── Common styles ──────────────────────────────────────
   const card: React.CSSProperties = {
     background: c.surface, border: `1px solid ${c.border}`,
     borderRadius: '16px', padding: '20px',
@@ -123,7 +123,7 @@ export default function PaperTrading() {
         <div style={{ display: 'flex', gap: '8px' }}>
           {['portfolio', 'trade', 'history'].map(t => (
             <button key={t} style={tabBtn(tab === t)} onClick={() => setTab(t as any)}>
-              {t === 'portfolio' ? '💼 Portafolio' : t === 'trade' ? '🔄 Operar' : '📋 Historial'}
+              {t === 'portfolio' ? '💼 Portfolio' : t === 'trade' ? '🔄 Trade' : '📋 History'}
             </button>
           ))}
         </div>
@@ -135,18 +135,18 @@ export default function PaperTrading() {
         {!loading && summary && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '28px' }}>
             <div style={statCard()}>
-              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>VALOR TOTAL</div>
+              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>TOTAL VALUE</div>
               <div style={{ fontSize: '22px', fontWeight: '700', color: c.text }}>{fmtUSD(totalValue)}</div>
             </div>
             <div style={statCard(totalPnl >= 0 ? c.green : c.red)}>
-              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>P&L TOTAL</div>
+              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>TOTAL P&L</div>
               <div style={{ fontSize: '22px', fontWeight: '700', color: totalPnl >= 0 ? c.green : c.red }}>
                 {totalPnl >= 0 ? '+' : ''}{fmtUSD(totalPnl)}
                 <span style={{ fontSize: '13px', marginLeft: '6px' }}>({totalPnlPct >= 0 ? '+' : ''}{fmt(totalPnlPct)}%)</span>
               </div>
             </div>
             <div style={statCard()}>
-              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>EFECTIVO</div>
+              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>CASH</div>
               <div style={{ fontSize: '22px', fontWeight: '700', color: c.text }}>{fmtUSD(summary.cash)}</div>
             </div>
             <div style={statCard()}>
@@ -155,34 +155,34 @@ export default function PaperTrading() {
               <div style={{ fontSize: '11px', color: c.muted }}>{summary.winning_trades}W / {summary.losing_trades}L</div>
             </div>
             <div style={statCard()}>
-              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>OPERACIONES</div>
+              <div style={{ fontSize: '11px', color: c.muted, marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>TRADES</div>
               <div style={{ fontSize: '22px', fontWeight: '700', color: c.text }}>{summary.total_trades}</div>
-              <div style={{ fontSize: '11px', color: c.muted }}>{summary.open_positions} posición{summary.open_positions !== 1 ? 'es' : ''} abierta{summary.open_positions !== 1 ? 's' : ''}</div>
+              <div style={{ fontSize: '11px', color: c.muted }}>{summary.open_positions} open position{summary.open_positions !== 1 ? 's' : ''}</div>
             </div>
           </div>
         )}
 
-        {/* ── TAB: PORTAFOLIO ── */}
+        {/* ── TAB: PORTFOLIO ── */}
         {tab === 'portfolio' && (
           <div style={card}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '700' }}>Posiciones abiertas</h2>
+              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '700' }}>Open positions</h2>
               <button onClick={() => setShowReset(true)} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: c.red, borderRadius: '8px', padding: '6px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                Resetear cuenta
+                Reset account
               </button>
             </div>
 
             {positions.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '48px 0', color: c.muted }}>
                 <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
-                <div style={{ fontSize: '15px', marginBottom: '8px' }}>No tienes posiciones abiertas</div>
-                <div style={{ fontSize: '13px' }}>Ve a "Operar" para comprar tu primera acción</div>
+                <div style={{ fontSize: '15px', marginBottom: '8px' }}>No open positions</div>
+                <div style={{ fontSize: '13px' }}>Go to "Trade" to buy your first stock</div>
               </div>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${c.border}` }}>
-                    {['Ticker', 'Acciones', 'Precio Promedio', 'Valor Est.', 'Costo', 'Fecha'].map(h => (
+                    {['Ticker', 'Shares', 'Avg Price', 'Est. Value', 'Cost', 'Date'].map(h => (
                       <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: '11px', color: c.muted, fontWeight: '600', letterSpacing: '0.5px' }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -198,7 +198,7 @@ export default function PaperTrading() {
                       <td style={{ padding: '14px 12px', fontSize: '14px', fontWeight: '600' }}>{fmtUSD(p.shares * p.avg_price)}</td>
                       <td style={{ padding: '14px 12px', fontSize: '14px' }}>{fmtUSD(p.shares * p.avg_price)}</td>
                       <td style={{ padding: '14px 12px', fontSize: '12px', color: c.muted }}>
-                        {postTimestamp(p.created_at, 'es').label}
+                        {postTimestamp(p.created_at, 'en').label}
                       </td>
                     </tr>
                   ))}
@@ -208,13 +208,13 @@ export default function PaperTrading() {
           </div>
         )}
 
-        {/* ── TAB: OPERAR ── */}
+        {/* ── TAB: TRADE ── */}
         {tab === 'trade' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
 
-            {/* Búsqueda */}
+            {/* Search */}
             <div style={card}>
-              <h2 style={{ margin: '0 0 18px', fontSize: '16px', fontWeight: '700' }}>Buscar acción</h2>
+              <h2 style={{ margin: '0 0 18px', fontSize: '16px', fontWeight: '700' }}>Search stock</h2>
               <form onSubmit={handleSearch}>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                   <input
@@ -234,7 +234,7 @@ export default function PaperTrading() {
                     borderRadius: '10px', padding: '10px 18px', color: c.green,
                     fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit',
                   }}>
-                    {quoteLoading ? '...' : 'Buscar'}
+                    {quoteLoading ? '...' : 'Search'}
                   </button>
                 </div>
               </form>
@@ -261,9 +261,9 @@ export default function PaperTrading() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                     {[
-                      ['Apertura', fmtUSD(quote.open)],
-                      ['Máximo', fmtUSD(quote.high)],
-                      ['Mínimo', fmtUSD(quote.low)],
+                      ['Open', fmtUSD(quote.open)],
+                      ['High', fmtUSD(quote.high)],
+                      ['Low', fmtUSD(quote.low)],
                     ].map(([label, val]) => (
                       <div key={label} style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '10px', color: c.muted, marginBottom: '2px' }}>{label}</div>
@@ -273,16 +273,16 @@ export default function PaperTrading() {
                   </div>
                   {position && (
                     <div style={{ marginTop: '12px', padding: '8px 12px', background: 'rgba(0,210,106,0.08)', border: '1px solid rgba(0,210,106,0.2)', borderRadius: '8px', fontSize: '12px', color: c.green }}>
-                      Tienes {fmt(position.shares, 4)} acciones · Promedio {fmtUSD(position.avg_price)}
+                      You hold {fmt(position.shares, 4)} shares · Avg {fmtUSD(position.avg_price)}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Tickers sugeridos */}
+              {/* Suggested tickers */}
               {!quote && (
                 <div>
-                  <div style={{ fontSize: '11px', color: c.muted, marginBottom: '10px', fontWeight: '600' }}>POPULARES</div>
+                  <div style={{ fontSize: '11px', color: c.muted, marginBottom: '10px', fontWeight: '600' }}>POPULAR</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {['AAPL','TSLA','NVDA','MSFT','AMZN','META','GOOGL','SPY','QQQ','BTC-USD'].map(t => (
                       <button key={t} onClick={() => { setSearchTicker(t); searchRef.current?.focus() }} style={{
@@ -297,18 +297,18 @@ export default function PaperTrading() {
               )}
             </div>
 
-            {/* Formulario de operación */}
+            {/* Trade form */}
             <div style={card}>
-              <h2 style={{ margin: '0 0 18px', fontSize: '16px', fontWeight: '700' }}>Ejecutar operación</h2>
+              <h2 style={{ margin: '0 0 18px', fontSize: '16px', fontWeight: '700' }}>Execute trade</h2>
 
               {!quote ? (
                 <div style={{ textAlign: 'center', padding: '48px 0', color: c.muted }}>
                   <div style={{ fontSize: '36px', marginBottom: '12px' }}>🔍</div>
-                  <div>Busca una acción primero</div>
+                  <div>Search for a stock first</div>
                 </div>
               ) : (
                 <form onSubmit={handleTrade}>
-                  {/* Tipo */}
+                  {/* Type */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
                     {(['buy', 'sell'] as const).map(t => (
                       <button key={t} type="button" onClick={() => setTradeType(t)} style={{
@@ -321,21 +321,21 @@ export default function PaperTrading() {
                         fontSize: '14px', fontWeight: '700',
                         cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
                       }}>
-                        {t === 'buy' ? '📈 Comprar' : '📉 Vender'}
+                        {t === 'buy' ? '📈 Buy' : '📉 Sell'}
                       </button>
                     ))}
                   </div>
 
-                  {/* Cantidad */}
+                  {/* Quantity */}
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={{ fontSize: '12px', color: c.muted, fontWeight: '600', display: 'block', marginBottom: '6px' }}>CANTIDAD DE ACCIONES</label>
+                    <label style={{ fontSize: '12px', color: c.muted, fontWeight: '600', display: 'block', marginBottom: '6px' }}>NUMBER OF SHARES</label>
                     <input
                       type="number"
                       step="0.001"
                       min="0.001"
                       value={sharesInput}
                       onChange={e => setSharesInput(e.target.value)}
-                      placeholder="Ej: 10"
+                      placeholder="e.g. 10"
                       style={{
                         width: '100%', background: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                         border: `1px solid ${c.border}`, borderRadius: '10px',
@@ -345,22 +345,22 @@ export default function PaperTrading() {
                     />
                   </div>
 
-                  {/* Resumen */}
+                  {/* Summary */}
                   {sharesInput && parseFloat(sharesInput) > 0 && (
                     <div style={{ background: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)', borderRadius: '10px', padding: '12px', marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                        <span style={{ color: c.muted }}>Precio actual</span>
+                        <span style={{ color: c.muted }}>Current price</span>
                         <span style={{ fontWeight: '600' }}>{fmtUSD(quote.price)}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: '700', borderTop: `1px solid ${c.border}`, paddingTop: '8px' }}>
-                        <span>Total estimado</span>
+                        <span>Estimated total</span>
                         <span style={{ color: tradeType === 'buy' ? c.red : c.green }}>
                           {tradeType === 'buy' ? '-' : '+'}{fmtUSD(parseFloat(sharesInput) * quote.price)}
                         </span>
                       </div>
                       {summary && tradeType === 'buy' && (
                         <div style={{ fontSize: '11px', color: c.muted, marginTop: '4px' }}>
-                          Efectivo disponible: {fmtUSD(summary.cash)}
+                          Available cash: {fmtUSD(summary.cash)}
                         </div>
                       )}
                     </div>
@@ -388,7 +388,7 @@ export default function PaperTrading() {
                     cursor: 'pointer', fontFamily: 'inherit',
                     opacity: (!sharesInput || tradeLoading) ? 0.6 : 1,
                   }}>
-                    {tradeLoading ? 'Procesando...' : tradeType === 'buy' ? `Comprar ${quote.ticker}` : `Vender ${quote.ticker}`}
+                    {tradeLoading ? 'Processing...' : tradeType === 'buy' ? `Buy ${quote.ticker}` : `Sell ${quote.ticker}`}
                   </button>
                 </form>
               )}
@@ -396,20 +396,20 @@ export default function PaperTrading() {
           </div>
         )}
 
-        {/* ── TAB: HISTORIAL ── */}
+        {/* ── TAB: HISTORY ── */}
         {tab === 'history' && (
           <div style={card}>
-            <h2 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: '700' }}>Historial de operaciones</h2>
+            <h2 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: '700' }}>Trade history</h2>
             {trades.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '48px 0', color: c.muted }}>
                 <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
-                <div>Aún no has realizado operaciones</div>
+                <div>No trades yet</div>
               </div>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${c.border}` }}>
-                    {['Tipo','Ticker','Acciones','Precio','Total','P&L','Fecha'].map(h => (
+                    {['Type','Ticker','Shares','Price','Total','P&L','Date'].map(h => (
                       <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: '11px', color: c.muted, fontWeight: '600', letterSpacing: '0.5px' }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -423,7 +423,7 @@ export default function PaperTrading() {
                           border: `1px solid ${t.type === 'buy' ? 'rgba(0,210,106,0.3)' : 'rgba(239,68,68,0.3)'}`,
                           color: t.type === 'buy' ? c.green : c.red,
                           borderRadius: '6px', padding: '3px 10px', fontSize: '11px', fontWeight: '700',
-                        }}>{t.type === 'buy' ? 'COMPRA' : 'VENTA'}</span>
+                        }}>{t.type === 'buy' ? 'BUY' : 'SELL'}</span>
                       </td>
                       <td style={{ padding: '12px', fontWeight: '700', color: c.green }}>{t.ticker}</td>
                       <td style={{ padding: '12px', fontSize: '13px' }}>{fmt(t.shares, 4)}</td>
@@ -438,7 +438,7 @@ export default function PaperTrading() {
                         }
                       </td>
                       <td style={{ padding: '12px', fontSize: '11px', color: c.muted }}>
-                        {postTimestamp(t.created_at, 'es').label}
+                        {postTimestamp(t.created_at, 'en').label}
                       </td>
                     </tr>
                   ))}
@@ -449,16 +449,16 @@ export default function PaperTrading() {
         )}
       </div>
 
-      {/* Modal Reset */}
+      {/* Reset Modal */}
       {showReset && (
         <div onClick={() => setShowReset(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: '20px', padding: '28px', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>⚠️</div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '18px' }}>Resetear cuenta</h3>
-            <p style={{ color: c.muted, fontSize: '14px', margin: '0 0 24px' }}>Esto cerrará todas tus posiciones y borrará tu historial. Empezarás de nuevo con $10,000.</p>
+            <h3 style={{ margin: '0 0 8px', fontSize: '18px' }}>Reset account</h3>
+            <p style={{ color: c.muted, fontSize: '14px', margin: '0 0 24px' }}>This will close all your positions and clear your history. You'll start fresh with $10,000.</p>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => setShowReset(false)} style={{ flex: 1, background: 'transparent', border: `1px solid ${c.border}`, borderRadius: '10px', padding: '12px', color: c.muted, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
-              <button onClick={async () => { await resetAccount(); setShowReset(false) }} style={{ flex: 1, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px', color: c.red, cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' }}>Sí, resetear</button>
+              <button onClick={() => setShowReset(false)} style={{ flex: 1, background: 'transparent', border: `1px solid ${c.border}`, borderRadius: '10px', padding: '12px', color: c.muted, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+              <button onClick={async () => { await resetAccount(); setShowReset(false) }} style={{ flex: 1, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px', color: c.red, cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' }}>Yes, reset</button>
             </div>
           </div>
         </div>
