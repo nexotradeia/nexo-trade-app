@@ -19873,7 +19873,7 @@ const RADAR_V2_CAPITAL_FLOWS = [
   {route:'Global → BTC',   amount:'+$3.1B', pos:true,  pct:95},
 ];
 
-function RadarGlobalPage({lang="es"}){
+function RadarGlobalPage({lang="es",onBack}){
   const isEN=lang==="en";
   // v2: keep old refs for backward compat but we don't use Three.js in v2
   const cvsRef=useRef(null);
@@ -20216,11 +20216,12 @@ function RadarGlobalPage({lang="es"}){
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div style={{position:'fixed',top:52,left:0,right:0,bottom:0,zIndex:50,background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'}}>
+    <div style={{position:'fixed',inset:0,zIndex:200,background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'}}>
       <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
       {/* ── TOPBAR ── */}
       <div style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 20px',gap:12,zIndex:100}}>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
+          {onBack&&<button onClick={onBack} style={{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:7,border:`1px solid ${C.br2}`,background:'rgba(0,240,144,.08)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:C.grn,cursor:'pointer',letterSpacing:'.5px'}}>← Back</button>}
           <div style={{display:'flex',alignItems:'center',gap:8}}>
             <div style={{width:26,height:26,background:C.grn,clipPath:'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:900,color:'#020408'}}>N</div>
             <div style={{fontFamily:MONO2,fontSize:12,fontWeight:700,letterSpacing:2,color:C.txt}}>NEXO<span style={{color:C.grn}}>TRADE</span></div>
@@ -25386,7 +25387,7 @@ export default function App(){
     if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
     if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===43) return <PaperTradingFullPage user={user} lang={lang} onBack={()=>setPage(0)}/>;
-    if(page===44) return <RadarGlobalPage lang={lang}/>;
+    if(page===44) return <RadarGlobalPage lang={lang} onBack={()=>setPage(0)}/>;
     if(page===45) return <PreMarketPage lang={lang} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===46) return <PivotCalc lang={lang}/>;
     if(page===47) return <ProfitCalc lang={lang}/>;
