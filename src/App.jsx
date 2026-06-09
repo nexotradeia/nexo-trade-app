@@ -10023,10 +10023,66 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
 
   // ── GATE VIP ──
   if(!isPremium) return(
-    <PremiumGate lang={lang} icon="🎮" onPlans={onNeedPremium}
-      title={isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}
-      desc={isEN?"Simulate trades with $100k virtual, Sharpe Ratio, win streak tracker, price alerts and more.":"Simula con $100k virtual, Sharpe Ratio, racha de ganancias, alertas de precio y más."}
-      bullets={isEN?["🎮 $100k virtual portfolio","📐 Sharpe Ratio & metrics","🔥 Win streak tracker","🔔 Price alerts"]:["🎮 Portafolio virtual $100k","📐 Sharpe Ratio y métricas","🔥 Racha de ganancias","🔔 Alertas de precio"]}/>
+    <div style={{position:"relative",borderRadius:20,overflow:"hidden",minHeight:560,background:"#060c12",border:"1px solid rgba(251,191,36,.22)",maxWidth:980,margin:"20px auto",boxShadow:"0 0 60px rgba(251,191,36,.06)"}}>
+      <style dangerouslySetInnerHTML={{__html:`
+        @keyframes npt-pulse{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,.5)}70%{box-shadow:0 0 0 10px rgba(251,191,36,0)}}
+        @keyframes npt-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes npt-glow{0%,100%{box-shadow:0 4px 30px rgba(251,191,36,.35)}50%{box-shadow:0 4px 50px rgba(251,191,36,.65)}}
+      `}}/>
+      <div aria-hidden style={{position:"absolute",inset:0,filter:"blur(6px)",opacity:.38,userSelect:"none",pointerEvents:"none",overflow:"hidden"}}>
+        <svg style={{position:"absolute",bottom:0,left:0,right:0,width:"100%",height:"55%"}} viewBox="0 0 900 220" preserveAspectRatio="none">
+          <defs><linearGradient id="ptg2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#fbbf24" stopOpacity="0.3"/><stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/></linearGradient></defs>
+          <path d="M0 180 C80 160 150 140 220 120 S350 80 420 70 S560 55 640 45 S780 30 900 20 L900 220 L0 220Z" fill="url(#ptg2)"/>
+          <path d="M0 180 C80 160 150 140 220 120 S350 80 420 70 S560 55 640 45 S780 30 900 20" fill="none" stroke="#fbbf24" strokeWidth="2.5"/>
+        </svg>
+        <div style={{padding:"16px 20px"}}>
+          <div style={{display:"flex",gap:12,marginBottom:12}}>
+            {[["💰 Virtual Balance","$103,580","#fbbf24"],["📈 Total P&L","+$3,580","#00e87a"],["🏆 Win Rate","73%","#00e87a"],["🔥 Streak","8W","#f97316"]].map(([l,v,c])=>(
+              <div key={l} style={{flex:1,background:"rgba(255,255,255,.05)",borderRadius:10,padding:"10px 12px",border:"1px solid rgba(255,255,255,.08)"}}>
+                <div style={{fontSize:10,color:"#94a3b8",marginBottom:4}}>{l}</div>
+                <div style={{fontSize:18,fontWeight:800,color:c,fontFamily:"monospace"}}>{v}</div>
+              </div>
+            ))}
+          </div>
+          {[["AAPL","10 shares","$1,840","+12.4%","#00e87a"],["NVDA","5 shares","$5,921","+38.2%","#00e87a"],["TSLA","8 shares","$1,384","-4.1%","#ef4444"],["META","12 shares","$7,368","+21.7%","#00e87a"],["BTC","0.5","$47,850","+8.9%","#00e87a"]].map(([t,q,v,p,c])=>(
+            <div key={t} style={{display:"flex",alignItems:"center",gap:12,padding:"8px 10px",marginBottom:4,background:"rgba(255,255,255,.04)",borderRadius:8}}>
+              <span style={{fontWeight:800,fontSize:13,color:"#e0eaf8",width:48}}>{t}</span>
+              <span style={{fontSize:11,color:"#64748b",flex:1}}>{q}</span>
+              <span style={{fontFamily:"monospace",fontWeight:700,color:"#e0eaf8",fontSize:13}}>{v}</span>
+              <span style={{fontFamily:"monospace",fontWeight:800,color:c,fontSize:13,width:52,textAlign:"right"}}>{p}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,#fbbf24,#f59e0b,transparent)"}}/>
+      <div style={{position:"relative",zIndex:10,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:560,padding:"40px 24px",textAlign:"center",background:"linear-gradient(180deg,rgba(6,12,18,.82) 0%,rgba(6,12,18,.92) 100%)"}}>
+        <div style={{animation:"npt-float 3s ease-in-out infinite",fontSize:52,marginBottom:12}}>📈</div>
+        <div style={{animation:"npt-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(251,191,36,.15)",border:"1px solid rgba(251,191,36,.4)",borderRadius:20,padding:"4px 16px",fontSize:11,fontWeight:800,color:"#fbbf24",letterSpacing:2,marginBottom:16}}>PREMIUM FEATURE</div>
+        <h2 style={{fontSize:28,fontWeight:900,color:"#e0eaf8",margin:"0 0 8px",lineHeight:1.2}}>Paper Trade Like a <span style={{color:"#fbbf24"}}>Pro</span></h2>
+        <p style={{fontSize:14,color:"#94a3b8",margin:"0 0 24px",maxWidth:420,lineHeight:1.6}}>Start with <strong style={{color:"#fbbf24"}}>$100,000 virtual</strong> — practice real strategies risk-free with AI-powered insights and professional metrics.</p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",maxWidth:460,marginBottom:28}}>
+          {[["🎮","$100k Virtual Portfolio","Trade any stock, ETF or crypto"],["📐","Sharpe Ratio & Metrics","Pro-grade performance analysis"],["🔥","Win Streak Tracker","See your consistency over time"],["🔔","Price Alerts","Never miss your entry price"],["🤖","AI Trade Signals","Get AI-powered setups"],["📊","Risk/Reward Calc","Size positions like a fund manager"]].map(([ic,t,d])=>(
+            <div key={t} style={{background:"rgba(251,191,36,.07)",border:"1px solid rgba(251,191,36,.15)",borderRadius:10,padding:"10px 12px",textAlign:"left"}}>
+              <div style={{fontSize:16,marginBottom:4}}>{ic}</div>
+              <div style={{fontSize:12,fontWeight:700,color:"#e0eaf8",marginBottom:2}}>{t}</div>
+              <div style={{fontSize:10,color:"#64748b"}}>{d}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{background:"rgba(251,191,36,.1)",border:"1px solid rgba(251,191,36,.25)",borderRadius:14,padding:"14px 28px",marginBottom:20,textAlign:"center"}}>
+          <div style={{fontSize:11,color:"#94a3b8",marginBottom:4}}>ANNUAL PLAN — BEST VALUE</div>
+          <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8}}>
+            <span style={{fontSize:42,fontWeight:900,color:"#fbbf24",fontFamily:"monospace"}}>$6.58</span>
+            <span style={{fontSize:14,color:"#94a3b8"}}>/mo · billed $79/year</span>
+          </div>
+          <div style={{fontSize:12,color:"#00e87a",fontWeight:700,marginTop:4}}>Save $113 vs monthly · Cancel anytime</div>
+        </div>
+        <button onClick={onNeedPremium} style={{animation:"npt-glow 2s ease-in-out infinite",background:"linear-gradient(135deg,#fbbf24,#f59e0b)",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:800,color:"#000",cursor:"pointer",letterSpacing:.5,boxShadow:"0 4px 30px rgba(251,191,36,.4)"}}>
+          🚀 Start Paper Trading — $79/year →
+        </button>
+        <div style={{marginTop:12,fontSize:11,color:"#475569"}}>✓ Instant access &nbsp;✓ Cancel anytime &nbsp;✓ Secure via Stripe</div>
+      </div>
+    </div>
   );
 
   const TOOLS = isEN ? [
@@ -13158,10 +13214,62 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
   const back     = ()=>{ setSelected(null); setView("grid"); };
 
   if(!isPremium) return(
-    <PremiumGate icon="🏛️" onPlans={onNeedPremium}
-      title="Super Inversores"
-      desc="Ve qué están comprando Warren Buffett, Cathie Wood, Michael Burry y más — actualizado con datos SEC 13F."
-      bullets={["🏛️ 52 gurús de Wall Street","📄 Datos oficiales SEC 13F","📊 Posiciones y cambios","🔔 Nuevas compras detectadas"]}/>
+    <div style={{position:"relative",borderRadius:20,overflow:"hidden",minHeight:560,background:"#080610",border:"1px solid rgba(168,85,247,.22)",maxWidth:980,margin:"20px auto",boxShadow:"0 0 60px rgba(168,85,247,.06)"}}>
+      <style dangerouslySetInnerHTML={{__html:`
+        @keyframes ngr-pulse{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.5)}70%{box-shadow:0 0 0 10px rgba(168,85,247,0)}}
+        @keyframes ngr-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes ngr-tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        @keyframes ngr-glow{0%,100%{box-shadow:0 4px 30px rgba(168,85,247,.35)}50%{box-shadow:0 4px 50px rgba(168,85,247,.65)}}
+      `}}/>
+      <div aria-hidden style={{position:"absolute",inset:"32px 0 0",filter:"blur(6px)",opacity:.35,userSelect:"none",pointerEvents:"none",padding:"16px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+          {[["W.B","Berkshire","AAPL · BAC · OXY","$350B","#f59e0b"],["C.W","ARK Invest","TSLA · COIN · ROKU","$8B","#ec4899"],["M.B","Scion Capital","SPY · JNJ · puts","$800M","#ef4444"],["S.P","Pershing Sq","HLT · CMG · QSR","$18B","#8b5cf6"],["R.D","Bridgewater","GLD · VWO · SPY","$124B","#06b6d4"],["B.A","Third Point","AMZN · META","$3.2B","#22c55e"],["D.T","Duquesne","MSFT · NVDA","$2.8B","#f97316"],["J.S","Tudor BVI","BTC · NVDA","$4.1B","#a855f7"],["K.G","Citadel","SPY · QQQ","$220B","#00e87a"]].map(([n,f,t,aum,c])=>(
+            <div key={n} style={{background:"rgba(255,255,255,.05)",borderRadius:12,padding:"12px",border:`1px solid ${c}33`}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <div style={{width:36,height:36,borderRadius:"50%",background:`${c}33`,border:`2px solid ${c}`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:13,color:c}}>{n}</div>
+                <div><div style={{fontWeight:700,fontSize:12,color:"#e0eaf8"}}>{f}</div><div style={{fontSize:10,color:"#64748b"}}>AUM {aum}</div></div>
+              </div>
+              <div style={{fontSize:10,color:"#94a3b8"}}>{t}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{position:"absolute",top:0,left:0,right:0,overflow:"hidden",height:32,background:"rgba(168,85,247,.12)",borderBottom:"1px solid rgba(168,85,247,.2)",zIndex:3}}>
+        <div style={{display:"flex",animation:"ngr-tick 22s linear infinite",whiteSpace:"nowrap",paddingTop:7}}>
+          {["🐋 Buffett added $2.1B AAPL  ","⚡ Burry SHORTED SPY $340M  ","📈 Wood bought TSLA $180M  ","🏛️ Ackman enters PSQ $400M  ","💎 Druckenmiller adds NVDA $600M  ","🔥 Tepper buys AMZN $230M  ","🐋 Buffett added $2.1B AAPL  ","⚡ Burry SHORTED SPY $340M  ","📈 Wood bought TSLA $180M  ","🏛️ Ackman enters PSQ $400M  "].map((t,i)=>(
+            <span key={i} style={{padding:"0 24px",fontSize:11,fontWeight:600,color:"#c4b5fd",borderRight:"1px solid rgba(168,85,247,.2)"}}>{t}</span>
+          ))}
+        </div>
+      </div>
+      <div style={{position:"absolute",bottom:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,#a855f7,#7c3aed,transparent)"}}/>
+      <div style={{position:"relative",zIndex:10,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:560,padding:"60px 24px 40px",textAlign:"center",background:"linear-gradient(180deg,rgba(8,6,16,.85) 0%,rgba(8,6,16,.93) 100%)"}}>
+        <div style={{animation:"ngr-float 3.5s ease-in-out infinite",fontSize:52,marginBottom:12}}>🏛️</div>
+        <div style={{animation:"ngr-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(168,85,247,.15)",border:"1px solid rgba(168,85,247,.45)",borderRadius:20,padding:"4px 16px",fontSize:11,fontWeight:800,color:"#c4b5fd",letterSpacing:2,marginBottom:16}}>PREMIUM FEATURE</div>
+        <h2 style={{fontSize:28,fontWeight:900,color:"#e0eaf8",margin:"0 0 8px",lineHeight:1.2}}>Track <span style={{color:"#a855f7"}}>Wall Street{"'"}s Elite</span></h2>
+        <p style={{fontSize:14,color:"#94a3b8",margin:"0 0 24px",maxWidth:440,lineHeight:1.6}}>See exactly what <strong style={{color:"#c4b5fd"}}>52 legendary investors</strong> are buying and selling — updated from official SEC 13F filings.</p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",maxWidth:460,marginBottom:28}}>
+          {[["🏛️","52 Legendary Investors","Buffett, Burry, Wood & more"],["📄","Official SEC 13F Data","Government-mandated filings"],["📊","Full Portfolio Positions","Every stock they hold"],["🔔","New Trade Alerts","Get notified of major moves"],["💎","Insider Buying Signals","Smart money indicators"],["🤖","AI Pattern Detection","Spot trends before they move"]].map(([ic,t,d])=>(
+            <div key={t} style={{background:"rgba(168,85,247,.08)",border:"1px solid rgba(168,85,247,.18)",borderRadius:10,padding:"10px 12px",textAlign:"left"}}>
+              <div style={{fontSize:16,marginBottom:4}}>{ic}</div>
+              <div style={{fontSize:12,fontWeight:700,color:"#e0eaf8",marginBottom:2}}>{t}</div>
+              <div style={{fontSize:10,color:"#64748b"}}>{d}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{background:"rgba(168,85,247,.1)",border:"1px solid rgba(168,85,247,.28)",borderRadius:14,padding:"14px 28px",marginBottom:20}}>
+          <div style={{fontSize:11,color:"#94a3b8",marginBottom:4}}>ANNUAL PLAN — BEST VALUE</div>
+          <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8}}>
+            <span style={{fontSize:42,fontWeight:900,color:"#a855f7",fontFamily:"monospace"}}>$6.58</span>
+            <span style={{fontSize:14,color:"#94a3b8"}}>/mo · billed $79/year</span>
+          </div>
+          <div style={{fontSize:12,color:"#00e87a",fontWeight:700,marginTop:4}}>Save $113 vs monthly · Cancel anytime</div>
+        </div>
+        <button onClick={onNeedPremium} style={{animation:"ngr-glow 2s ease-in-out infinite",background:"linear-gradient(135deg,#a855f7,#7c3aed)",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:800,color:"#fff",cursor:"pointer",letterSpacing:.5,boxShadow:"0 4px 30px rgba(168,85,247,.4)"}}>
+          🏛️ Unlock Super Investors — $79/year →
+        </button>
+        <div style={{marginTop:12,fontSize:11,color:"#475569"}}>✓ Instant access &nbsp;✓ Cancel anytime &nbsp;✓ Secure via Stripe</div>
+      </div>
+    </div>
   );
 
   /* ── GRID VIEW ── */
@@ -13511,10 +13619,64 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
   },[paused,isPremium,realFlow]);
 
   if(!isPremium) return(
-    <PremiumGate lang={lang} icon="🐋" onPlans={onNeedPremium}
-      title={isEN?"Institutional Flow PREMIUM":"Flujo Institucional PREMIUM"}
-      desc={isEN?"See in real time what hedge funds, institutions and whales are buying — options, dark pool and sweeps with real CBOE data.":"Ve en tiempo real qué están comprando los hedge funds, instituciones y ballenas — opciones, dark pool y sweeps con datos reales de CBOE."}
-      bullets={isEN?["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Urgent sweeps","💰 Premium ≥ $1M","🎯 Live sentiment"]:["🐋 Dark Pool prints","⚡ Golden Sweeps","📊 Call & Put Blocks","🔁 Sweeps urgentes","💰 Premium ≥ $1M","🎯 Sentimiento en vivo"]}/>
+    <div style={{position:"relative",borderRadius:20,overflow:"hidden",minHeight:560,background:"#04090f",border:"1px solid rgba(0,150,255,.2)",maxWidth:980,margin:"20px auto",boxShadow:"0 0 60px rgba(0,150,255,.06)"}}>
+      <style dangerouslySetInnerHTML={{__html:`
+        @keyframes nwf-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,150,255,.5)}70%{box-shadow:0 0 0 10px rgba(0,150,255,0)}}
+        @keyframes nwf-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes nwf-scroll{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+        @keyframes nwf-live{0%,100%{opacity:1}50%{opacity:.15}}
+        @keyframes nwf-glow{0%,100%{box-shadow:0 4px 30px rgba(0,150,255,.35)}50%{box-shadow:0 4px 50px rgba(0,150,255,.65)}}
+      `}}/>
+      <div aria-hidden style={{position:"absolute",inset:0,overflow:"hidden",filter:"blur(5px)",opacity:.38,userSelect:"none",pointerEvents:"none"}}>
+        <div style={{display:"flex",padding:"8px 16px",borderBottom:"1px solid rgba(255,255,255,.06)",fontSize:10,color:"#475569",fontWeight:700,gap:0,background:"rgba(0,0,0,.4)"}}>
+          <span style={{width:60}}>TIME</span><span style={{width:56}}>TICKER</span><span style={{flex:1}}>TYPE</span><span style={{width:92}}>PREMIUM</span><span style={{width:88}}>SENTIMENT</span><span style={{width:72}}>SIDE</span>
+        </div>
+        <div style={{animation:"nwf-scroll 9s linear infinite"}}>
+          {[...Array(2)].flatMap((_,ri)=>[["09:31","NVDA","🟣 GOLDEN SWEEP","$4.2M","🔥 BULLISH","CALL"],["09:33","AAPL","🌊 DARK POOL","$8.7M","🐂 BULLISH","BLOCK"],["09:35","SPY","⚡ SWEEP","$12.1M","🔥 BULLISH","PUT"],["09:37","TSLA","💎 UNUSUAL OPT","$2.8M","🐻 BEARISH","PUT"],["09:40","MSFT","🟣 GOLDEN SWEEP","$5.5M","🔥 BULLISH","CALL"],["09:42","META","🌊 DARK POOL","$15.3M","🐂 BULLISH","BLOCK"],["09:45","AMD","⚡ SWEEP","$3.1M","🔥 BULLISH","CALL"],["09:47","QQQ","🌊 DARK POOL","$22.0M","🐂 BULLISH","BLOCK"]].map(([t,tk,tp,pr,s,side],i)=>(
+            <div key={`${ri}-${i}`} style={{display:"flex",alignItems:"center",gap:0,padding:"7px 16px",borderBottom:"1px solid rgba(255,255,255,.04)",fontSize:11}}>
+              <span style={{width:60,color:"#475569",fontFamily:"monospace"}}>{t}</span>
+              <span style={{width:56,fontWeight:800,color:"#e0eaf8"}}>{tk}</span>
+              <span style={{flex:1,color:"#94a3b8"}}>{tp}</span>
+              <span style={{width:92,fontWeight:800,color:"#00e87a",fontFamily:"monospace"}}>{pr}</span>
+              <span style={{width:88,fontSize:10}}>{s}</span>
+              <span style={{width:72,padding:"2px 8px",borderRadius:4,background:side==="CALL"||side==="BLOCK"?"rgba(0,232,122,.15)":"rgba(239,68,68,.15)",color:side==="CALL"||side==="BLOCK"?"#00e87a":"#ef4444",fontWeight:700,textAlign:"center",fontSize:10}}>{side}</span>
+            </div>
+          )))}
+        </div>
+      </div>
+      <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,#0096ff,#00e87a,transparent)"}}/>
+      <div style={{position:"absolute",top:12,right:16,display:"flex",alignItems:"center",gap:6,background:"rgba(0,232,122,.12)",border:"1px solid rgba(0,232,122,.3)",borderRadius:20,padding:"4px 12px",zIndex:5}}>
+        <div style={{width:7,height:7,borderRadius:"50%",background:"#00e87a",animation:"nwf-live 1s ease-in-out infinite"}}/>
+        <span style={{fontSize:10,fontWeight:800,color:"#00e87a",letterSpacing:1}}>LIVE</span>
+      </div>
+      <div style={{position:"relative",zIndex:10,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:560,padding:"40px 24px",textAlign:"center",background:"linear-gradient(180deg,rgba(4,9,15,.82) 0%,rgba(4,9,15,.93) 100%)"}}>
+        <div style={{animation:"nwf-float 3s ease-in-out infinite",fontSize:52,marginBottom:12}}>🐋</div>
+        <div style={{animation:"nwf-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(0,150,255,.15)",border:"1px solid rgba(0,150,255,.4)",borderRadius:20,padding:"4px 16px",fontSize:11,fontWeight:800,color:"#60a5fa",letterSpacing:2,marginBottom:16}}>PREMIUM FEATURE</div>
+        <h2 style={{fontSize:28,fontWeight:900,color:"#e0eaf8",margin:"0 0 8px",lineHeight:1.2}}>Follow the <span style={{color:"#0096ff"}}>Smart Money</span></h2>
+        <p style={{fontSize:14,color:"#94a3b8",margin:"0 0 24px",maxWidth:440,lineHeight:1.6}}>See <strong style={{color:"#60a5fa"}}>real-time institutional flow</strong> — the exact options, dark pool prints and sweeps that hedge funds use to move markets.</p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",maxWidth:460,marginBottom:28}}>
+          {[["🐋","Dark Pool Prints","Massive hidden block trades"],["⚡","Golden Sweeps ≥ $1M","Urgent multi-exchange sweeps"],["📊","Call & Put Blocks","Large options positioning"],["🔁","Unusual Options Activity","Before earnings catalysts"],["💰","Premium ≥ $1M Filter","Only significant moves"],["🎯","Live Sentiment Score","Bullish vs Bearish bias"]].map(([ic,t,d])=>(
+            <div key={t} style={{background:"rgba(0,150,255,.07)",border:"1px solid rgba(0,150,255,.15)",borderRadius:10,padding:"10px 12px",textAlign:"left"}}>
+              <div style={{fontSize:16,marginBottom:4}}>{ic}</div>
+              <div style={{fontSize:12,fontWeight:700,color:"#e0eaf8",marginBottom:2}}>{t}</div>
+              <div style={{fontSize:10,color:"#64748b"}}>{d}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{background:"rgba(0,150,255,.1)",border:"1px solid rgba(0,150,255,.25)",borderRadius:14,padding:"14px 28px",marginBottom:20}}>
+          <div style={{fontSize:11,color:"#94a3b8",marginBottom:4}}>ANNUAL PLAN — BEST VALUE</div>
+          <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8}}>
+            <span style={{fontSize:42,fontWeight:900,color:"#0096ff",fontFamily:"monospace"}}>$6.58</span>
+            <span style={{fontSize:14,color:"#94a3b8"}}>/mo · billed $79/year</span>
+          </div>
+          <div style={{fontSize:12,color:"#00e87a",fontWeight:700,marginTop:4}}>Save $113 vs monthly · Cancel anytime</div>
+        </div>
+        <button onClick={onNeedPremium} style={{animation:"nwf-glow 2s ease-in-out infinite",background:"linear-gradient(135deg,#0096ff,#0060cc)",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:800,color:"#fff",cursor:"pointer",letterSpacing:.5,boxShadow:"0 4px 30px rgba(0,150,255,.4)"}}>
+          🐋 Unlock Smart Money Flow — $79/year →
+        </button>
+        <div style={{marginTop:12,fontSize:11,color:"#475569"}}>✓ Instant access &nbsp;✓ Cancel anytime &nbsp;✓ Secure via Stripe</div>
+      </div>
+    </div>
   );
 
   const fmt$=(v)=>v>=1e9?`$${(v/1e9).toFixed(1)}B`:v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1e3?`$${(v/1e3).toFixed(0)}K`:`$${v}`;
