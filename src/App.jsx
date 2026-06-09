@@ -19873,6 +19873,16 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [sortBy, setSortBy] = useState("pnl"); // pnl | ticker | value
   const [ptTab, setPtTab] = useState("returns"); // returns | market | risk | efficiency | projections | health
   const [ptFull, setPtFull] = useState(false); // inline como las demás páginas (overlay opcional con el botón)
+  const [termTab, setTermTab] = useState("portfolio"); // portfolio | charts | screener | alerts | journal
+  const [chType, setChType] = useState("candle"); // candle | line | area | bar
+  const [chPer, setChPer] = useState("1D");
+  const [chMA, setChMA] = useState(true);
+  const [chVol, setChVol] = useState(true);
+  const [scMarket, setScMarket] = useState("NYSE + NASDAQ");
+  const [scSector, setScSector] = useState("Todos");
+  const [scQuery, setScQuery] = useState("");
+  const [alFilter, setAlFilter] = useState("Todas");
+  const [alToggles, setAlToggles] = useState({});
   const [pCloud, setPCloud] = useState(user?.id ? "loading" : "off"); // off | loading | synced | saving | error
   const pCloudReady = useRef(false);
 
@@ -20054,15 +20064,21 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{width:26,height:26,background:T.grn,clipPath:"polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:T.bg}}>N</div>
           <div><div style={{fontFamily:MONO,fontSize:13,fontWeight:700,letterSpacing:3,textTransform:"uppercase"}}>NEXO<span style={{color:T.grn}}>TERMINAL</span></div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>PRO TRADER · v4.2.1</div></div>
         </div>
+        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+          {[["portfolio","PORTFOLIO"],["charts","CHARTS"],["screener","SCREENER"],["alerts","ALERTS"],["journal","JOURNAL"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setTermTab(k)} style={{padding:"5px 12px",borderRadius:4,fontFamily:MONO,fontSize:11,fontWeight:500,letterSpacing:.5,cursor:"pointer",border:termTab===k?`1px solid rgba(0,255,135,.3)`:`1px solid ${T.br2}`,background:termTab===k?"rgba(0,255,135,.12)":"transparent",color:termTab===k?T.grn:T.mid}}>{l}</button>
+          ))}
+        </div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:11}}><span style={{width:6,height:6,borderRadius:"50%",background:mkt.color||T.grn,boxShadow:`0 0 8px ${mkt.color||T.grn}`,animation:"nxtBl 2s ease-in-out infinite"}}/><span style={{color:mkt.color||T.grn,letterSpacing:.5}}>{(mkt.label||"MARKET").toUpperCase()}</span><span style={{color:T.dim}}>· {mkt.sub||""}</span></div>
           <div style={{width:1,height:20,background:T.br2}}/>
           <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:totalPnl>=0?T.grn:T.red,textShadow:`0 0 12px ${totalPnl>=0?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)"}`}}>{m$(totalPnl)}</div>
           {(()=>{ const s = pCloud==="synced"?{t:"☁ SYNCED",c:T.grn}:(pCloud==="loading"||pCloud==="saving")?{t:"☁ SYNC…",c:T.blue}:pCloud==="error"?{t:"⚠ LOCAL",c:T.gold}:{t:"☁ SIGN IN",c:T.dim}; return <span onClick={()=>{if(pCloud==="off"&&onNeedAuth)onNeedAuth();}} style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:s.c,border:`1px solid ${s.c}40`,borderRadius:3,padding:"3px 8px",letterSpacing:.5,cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
-          <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>+ AÑADIR</button>
+          {termTab==="portfolio" && <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>+ AÑADIR</button>}
         </div>
       </div>
-      {/* LAYOUT */}
+      {/* LAYOUT — PORTFOLIO */}
+      {termTab==="portfolio" && (
       <div style={{display:"grid",gridTemplateColumns:"210px 1fr 280px",alignItems:"stretch"}}>
         {/* LEFT */}
         <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
@@ -20191,6 +20207,96 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           </div>
         </div>
       </div>
+      )}
+      {/* ── CHARTS VIEW ── */}
+      {termTab==="charts" && (()=>{
+        const ohlv=[["O","$295.20",T.mid],["H","$303.10",T.grn],["L","$293.80",T.red],["V","64.2M",T.mid]];
+        const STATS=[["Apertura","$295.20",T.txt],["Máximo 52S","$310.80",T.grn],["Mínimo 52S","$164.08",T.red],["Volumen hoy","64.2M",T.txt],["Vol. prom 10D","58.4M",T.txt],["Market Cap","$4.58T",T.txt],["P/E Ratio","31.4x",T.txt],["EPS","$9.59",T.txt],["Beta","1.3",T.txt],["Dividend Yield","0.44%",T.txt]];
+        const INDS=[["RSI (14)","68.2","Fuerza",T.grn],["MACD","+2.14","Alcista ↑",T.grn],["BB Upper","$308","Alejando",T.gold],["BB Lower","$294","Soporte",T.blue],["MA 20","$296","Por encima ✓",T.grn],["MA 50","$281","Por encima ✓",T.grn],["Stoch RSI","0.82","Sobrecomprado",T.gold],["ATR (14)","$4.82","Vol. normal",T.mid]];
+        const LVLS=[["Target Oracle","$340",T.grn],["Resistencia","$308",T.gold],["Soporte 1","$288",T.blue],["Soporte 2","$264",T.blue],["Stop sugerido","$281",T.red]];
+        const IDX=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["DXY","104.32","-0.24",0]];
+        const CRY=[["BTC","$63,844","+1.92",1],["ETH","$3,482","-0.54",0]];
+        const NC=46, base=cp.entry||100, end=cp.price||100;
+        const cdl=(()=>{ const a=[]; let pr=base; for(let i=0;i<NC;i++){ const t=i/(NC-1); const tgt=base+(end-base)*Math.pow(t,0.9); const n=Math.sin(i*1.3)*0.6+Math.cos(i*0.7)*0.4; const o=pr; const c=o+(tgt-o)*0.55+n*end*0.004; const hi=Math.max(o,c)+Math.abs(n)*end*0.006+end*0.0014; const lo=Math.min(o,c)-Math.abs(n)*end*0.006-end*0.0014; a.push({o,c,hi,lo,vol:40+Math.abs(n)*34+(i%7)*3,up:c>=o}); pr=c; } return a; })();
+        const W=920,H=430,PL=8,PR=66,PT=18,MH=320,VT=350,VH=64;
+        const minP=Math.min(...cdl.map(c=>c.lo))*0.999, maxP=Math.max(...cdl.map(c=>c.hi))*1.001;
+        const xC=(i)=>PL+(i+0.5)/NC*(W-PL-PR), yP=(v)=>PT+(1-(v-minP)/((maxP-minP)||1))*MH;
+        const bw=Math.max(2,(W-PL-PR)/NC*0.6);
+        const maxVol=Math.max(...cdl.map(c=>c.vol));
+        const ma=cdl.map((_,i)=>{ const s=Math.max(0,i-19); const w=cdl.slice(s,i+1); return w.reduce((q,c)=>q+c.c,0)/w.length; });
+        const maPts=ma.map((v,i)=>xC(i).toFixed(1)+","+yP(v).toFixed(1)).join(" ");
+        const closeLine=cdl.map((c,i)=>xC(i).toFixed(1)+","+yP(c.c).toFixed(1)).join(" ");
+        const last=cdl[NC-1];
+        const gridV=[minP,(minP+maxP)/2,maxP];
+        const btn=(active)=>({padding:"4px 10px",borderRadius:3,fontFamily:MONO,fontSize:10,fontWeight:600,cursor:"pointer",border:active?`1px solid rgba(0,255,135,.3)`:`1px solid ${T.br}`,background:active?"rgba(0,255,135,.12)":"transparent",color:active?T.grn:T.dim,letterSpacing:.5});
+        const sideRow=(w,i)=>(<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"7px 14px",fontFamily:MONO,fontSize:11,cursor:"pointer"}}><span style={{fontWeight:600,color:T.txt}}>{w[0]}</span><div style={{textAlign:"right"}}><div style={{color:w[3]?T.grn:T.red,fontSize:11,fontWeight:600}}>{w[3]?"▲":"▼"}{w[2].replace("-","").replace("+","")}%</div><div style={{color:T.mid,fontSize:10}}>{w[1]}</div></div></div>);
+        return (
+        <div style={{display:"grid",gridTemplateColumns:"210px 1fr 300px",alignItems:"stretch"}}>
+          {/* LEFT */}
+          <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px"}}>Mis Posiciones</div>
+              {sortedRows.length? sortedRows.map((r,i)=>(<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,background:i===0?"rgba(0,255,135,.05)":"transparent",cursor:"pointer"}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{r.tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:r.today>=0?T.grn:T.red}}>{(r.today>=0?"+":"")+r.today.toFixed(2)}%</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div></div>)) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>Sin posiciones</div>}
+            </div>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Índices</div>{IDX.map(sideRow)}</div>
+            <div style={{padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Crypto</div>{CRY.map(sideRow)}</div>
+          </div>
+          {/* CENTER */}
+          <div style={{minWidth:0,display:"flex",flexDirection:"column"}}>
+            <div style={{padding:"10px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+              <span style={{fontFamily:MONO,fontSize:16,fontWeight:700,letterSpacing:1}}>{cp.tk}</span>
+              <span style={{fontFamily:MONO,fontSize:20,fontWeight:700,color:cp.price>=cp.entry?T.grn:T.red,letterSpacing:-.5}}>${(cp.price||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+              <span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:cp.pnlPct>=0?T.grn:T.red}}>{cp.pnlPct>=0?"▲ +":"▼ "}{(cp.pnlPct||0).toFixed(2)}%</span>
+              <div style={{display:"flex",gap:10,fontFamily:MONO,fontSize:10}}>{ohlv.map((o,i)=>(<span key={i} style={{color:T.dim}}>{o[0]} <span style={{color:o[2]}}>{o[1]}</span></span>))}</div>
+              <div style={{marginLeft:"auto",display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                <div style={{display:"flex",gap:2,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:4,padding:2}}>{["candle","line","area","bar"].map(ct=>(<button key={ct} onClick={()=>setChType(ct)} style={btn(chType===ct)}>{ct==="candle"?"CANDLE":ct==="line"?"LINE":ct==="area"?"AREA":"BAR"}</button>))}</div>
+                <button onClick={()=>setChMA(v=>!v)} style={{...btn(chMA),color:chMA?T.purp:T.dim,border:chMA?`1px solid rgba(167,139,250,.4)`:`1px solid ${T.br}`,background:chMA?"rgba(167,139,250,.12)":"transparent"}}>MA</button>
+                <button onClick={()=>setChVol(v=>!v)} style={btn(chVol)}>VOL</button>
+                <div style={{display:"flex",gap:2,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:4,padding:2}}>{["1m","5m","15m","1H","1D","1W"].map(p=>(<button key={p} onClick={()=>setChPer(p)} style={btn(chPer===p)}>{p}</button>))}</div>
+              </div>
+            </div>
+            <div style={{padding:0,flex:1}}>
+              <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"auto",display:"block",background:T.bg2}}>
+                {gridV.map((v,i)=>(<g key={i}><line x1={PL} y1={yP(v)} x2={W-PR} y2={yP(v)} stroke="#1a2436" strokeWidth="1"/><text x={W-PR+4} y={yP(v)+3} fontFamily={MONO} fontSize="9" fill={T.dim}>${v.toFixed(2)}</text></g>))}
+                {chType==="area" && <polygon points={xC(0)+","+(PT+MH)+" "+closeLine+" "+xC(NC-1)+","+(PT+MH)} fill="rgba(0,255,135,.10)"/>}
+                {(chType==="line"||chType==="area") && <polyline points={closeLine} fill="none" stroke={T.grn} strokeWidth="2" strokeLinejoin="round"/>}
+                {chType==="candle" && cdl.map((c,i)=>(<g key={i}><line x1={xC(i)} y1={yP(c.hi)} x2={xC(i)} y2={yP(c.lo)} stroke={c.up?T.grn2:T.red2} strokeWidth="1"/><rect x={xC(i)-bw/2} y={yP(Math.max(c.o,c.c))} width={bw} height={Math.max(1,Math.abs(yP(c.o)-yP(c.c)))} fill={c.up?"rgba(0,255,135,.55)":"rgba(255,61,90,.5)"} stroke={c.up?T.grn:T.red} strokeWidth="1"/></g>))}
+                {chType==="bar" && cdl.map((c,i)=>(<g key={i} stroke={c.up?T.grn:T.red} strokeWidth="1.4"><line x1={xC(i)} y1={yP(c.hi)} x2={xC(i)} y2={yP(c.lo)}/><line x1={xC(i)-bw/2} y1={yP(c.o)} x2={xC(i)} y2={yP(c.o)}/><line x1={xC(i)} y1={yP(c.c)} x2={xC(i)+bw/2} y2={yP(c.c)}/></g>))}
+                {chMA && <polyline points={maPts} fill="none" stroke={T.purp} strokeWidth="1.6" strokeLinejoin="round" opacity="0.9"/>}
+                <line x1={PL} y1={yP(last.c)} x2={W-PR} y2={yP(last.c)} stroke={T.grn} strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
+                <rect x={W-PR+1} y={yP(last.c)-9} width={PR-2} height={18} fill={T.bg3} stroke={T.grn} strokeWidth="1"/>
+                <text x={W-PR+1+(PR-2)/2} y={yP(last.c)+4} textAnchor="middle" fontFamily={MONO} fontSize="10" fontWeight="700" fill={T.grn}>${last.c.toFixed(2)}</text>
+                {chVol && cdl.map((c,i)=>{ const bh=(c.vol/maxVol)*VH; return <rect key={i} x={xC(i)-bw/2} y={VT+VH-bh} width={bw} height={bh} fill={c.up?"rgba(0,255,135,.28)":"rgba(255,61,90,.24)"}/>; })}
+                {["Abr","Abr 15","May","May 15","Jun","Jun 8"].map((mm,i)=><text key={i} x={PL+(i/5)*(W-PL-PR)} y={H-4} fontFamily={MONO} fontSize="8" fill={T.dim} textAnchor="middle">{mm}</text>)}
+              </svg>
+            </div>
+          </div>
+          {/* RIGHT */}
+          <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px"}}>Estadísticas {cp.tk}</div>
+              {STATS.map((s,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 14px",fontFamily:MONO,fontSize:11}}><span style={{color:T.dim}}>{s[0]}</span><span style={{color:s[2],fontWeight:600}}>{s[1]}</span></div>))}
+            </div>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>Indicadores Técnicos <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:5}}>{INDS.map((it,i)=>(<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"7px 10px"}}><span style={{fontFamily:MONO,fontSize:11,color:T.mid}}>{it[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{it[1]}</span><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:it[3],background:it[3]+"1a",border:`1px solid ${it[3]}33`,borderRadius:3,padding:"2px 7px"}}>{it[2]}</span></div>))}</div>
+            </div>
+            <div style={{padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>Niveles Clave <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:5}}>{LVLS.map((l,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:T.bg3,border:`1px solid ${l[2]}33`,borderRadius:5,padding:"8px 10px"}}><span style={{fontFamily:MONO,fontSize:11,color:T.mid}}>{l[0]}</span><span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:l[2]}}>{l[1]}</span></div>))}</div>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
+      {/* ── PLACEHOLDER tabs (en construcción) ── */}
+      {(termTab==="screener"||termTab==="alerts"||termTab==="journal") && (
+        <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}>
+          <div style={{fontSize:28,marginBottom:10}}>{termTab==="screener"?"🔍":termTab==="alerts"?"🔔":"📓"}</div>
+          <div style={{fontSize:14,color:T.mid,letterSpacing:1}}>{termTab.toUpperCase()} · EN CONSTRUCCIÓN</div>
+          <div style={{fontSize:11,marginTop:6}}>Este tab se está construyendo · disponible muy pronto</div>
+        </div>
+      )}
       {/* BOTTOM BAR */}
       <div style={{display:"flex",alignItems:"center",gap:16,padding:"6px 20px",background:T.bg2,borderTop:`1px solid ${T.br}`,fontFamily:MONO,fontSize:10,color:T.dim}}>
         <span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:4,height:4,borderRadius:"50%",background:T.grn}}/>Finnhub <strong style={{color:T.txt}}>CONNECTED</strong></span>
