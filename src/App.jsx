@@ -23670,14 +23670,14 @@ function AdminDashboard(){
       if(r8.data) setPosts(r8.data);
       if(r7.data) setSubs(r7.data);
 
-      // Referidos de influencers
-      const rRef = await withTimeout(supabase.from("influencer_referrals").select("ref_code,user_email,created_at").order("created_at",{ascending:false}).limit(500));
+      // Referidos de influencers — carga todos los rows para drill-down
+      const rRef = await withTimeout(supabase.from("influencer_referrals").select("ref_code,user_email,user_id,source,created_at").order("created_at",{ascending:false}).limit(2000));
       if(rRef.data){
-        // Agrupar por ref_code
         const grouped={};
         rRef.data.forEach(row=>{
-          if(!grouped[row.ref_code]) grouped[row.ref_code]={ref_code:row.ref_code,count:0,last:row.created_at};
+          if(!grouped[row.ref_code]) grouped[row.ref_code]={ref_code:row.ref_code,count:0,last:row.created_at,rows:[]};
           grouped[row.ref_code].count++;
+          grouped[row.ref_code].rows.push(row);
         });
         setReferrals(Object.values(grouped).sort((a,b)=>b.count-a.count));
       }
@@ -24160,62 +24160,148 @@ function AdminDashboard(){
         </div>
       )}
 
-      {tab==="influencers" && (
+      {tab==="influencers" && (()=>{
+        const [newName,setNewName_inf]=window._infState||(window._infState=window._infState||[null,null]);
+        // Usamos un truco: guardamos el estado del generador y el influencer expandido en refs del componente padre
+        // Para esto usamos window temporales — se resetean al recargar (OK para admin)
+        if(!window._inf) window._inf={gen:"",expanded:null,copied:null};
+        const inf = window._inf;
+
+        const totalRef = referrals.reduce((s,r)=>s+r.count,0);
+        const copyLink=(name)=>{
+          try{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${name.toLowerCase().trim()}`);}catch{}
+          inf.copied=name; setTimeout(()=>{ inf.copied=null; }, 2000);
+        };
+
+        return(
         <div style={{display:"flex",flexDirection:"column",gap:20}}>
-          {/* Header + instrucciones */}
-          <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
-            <div style={{fontWeight:800,fontSize:15,color:"#111827",marginBottom:10}}>🤝 Links de Influencers</div>
-            <div style={{fontSize:13,color:"#6B7280",lineHeight:1.7}}>
-              Dale a cada influencer su propio link personalizado:<br/>
-              <code style={{background:"#F3F4F6",padding:"2px 8px",borderRadius:6,fontFamily:"monospace",fontSize:12,color:"#0F4C81"}}>
-                https://nexotradeia.com?ref=NOMBRE
-              </code><br/>
-              <span style={{fontSize:12,color:"#9CA3AF",marginTop:6,display:"block"}}>
-                El link guarda el código automáticamente. Al registrarse, queda rastreado en esta tabla.
-              </span>
-            </div>
-            {/* Tabla de ejemplos */}
-            <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:6}}>
-              {["carlos","sofia","mateo","ana"].map(name=>(
-                <div key={name} style={{display:"flex",alignItems:"center",gap:12,background:"#F9FAFB",borderRadius:8,padding:"8px 12px"}}>
-                  <span style={{fontSize:12,fontWeight:700,color:"#0F4C81",minWidth:70}}>@{name}</span>
-                  <code style={{fontSize:11,color:"#374151",flex:1,overflowX:"auto",fontFamily:"monospace"}}>nexotradeia.com?ref={name}</code>
-                  <button onClick={()=>{ try{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${name}`);}catch{} }}
-                    style={{background:"transparent",border:"1px solid #E5E7EB",borderRadius:6,padding:"3px 10px",fontSize:11,color:"#374151",cursor:"pointer"}}>
-                    Copiar
-                  </button>
-                </div>
-              ))}
-            </div>
+
+          {/* KPIs rápidos */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+            {[
+              {l:"Total referidos",v:totalRef,icon:"🔗",color:"#0F4C81"},
+              {l:"Influencers activos",v:referrals.length,icon:"🤝",color:"#0F5E68"},
+              {l:"Mejor influencer",v:referrals[0]?`@${referrals[0].ref_code}`:"—",icon:"🥇",color:"#B45309"},
+            ].map((k,i)=>(
+              <div key={i} style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:14,padding:"16px 18px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+                <div style={{fontSize:22,marginBottom:4}}>{k.icon}</div>
+                <div style={{fontWeight:900,fontSize:22,color:k.color,lineHeight:1}}>{k.v}</div>
+                <div style={{fontSize:11,color:"#9CA3AF",marginTop:4}}>{k.l}</div>
+              </div>
+            ))}
           </div>
 
-          {/* Stats de referidos */}
-          <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
-            <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:16}}>
-              📊 Registros por influencer ({referrals.reduce((s,r)=>s+r.count,0)} total)
+          {/* Generador de links */}
+          <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"20px 24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+            <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:12}}>🔗 Generar link de influencer</div>
+            <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+              <input
+                defaultValue={inf.gen}
+                onChange={e=>{ inf.gen=e.target.value; }}
+                placeholder="Nombre del influencer (ej: pepe, sofia...)"
+                style={{flex:1,minWidth:200,border:"1px solid #E5E7EB",borderRadius:8,padding:"9px 13px",fontSize:13,outline:"none",fontFamily:"inherit"}}
+              />
+              <button onClick={()=>{
+                if(!inf.gen.trim()) return;
+                copyLink(inf.gen);
+              }} style={{background:"#0F4C81",color:"#fff",border:"none",borderRadius:8,padding:"9px 18px",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                📋 Copiar link
+              </button>
             </div>
+            {inf.gen.trim() && (
+              <div style={{marginTop:10,background:"#F3F4F6",borderRadius:8,padding:"8px 12px",fontFamily:"monospace",fontSize:12,color:"#374151",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span>nexotradeia.com?ref={inf.gen.toLowerCase().trim()}</span>
+                <span style={{fontSize:11,color:inf.copied===inf.gen?"#0F5E68":"#9CA3AF",fontWeight:700,transition:"color 0.2s"}}>
+                  {inf.copied===inf.gen?"✅ Copiado!":"← click para copiar"}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Tabla completa de influencers */}
+          <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div style={{fontWeight:800,fontSize:14,color:"#111827"}}>
+                📊 Base de datos de influencers ({referrals.length} influencers · {totalRef} registros)
+              </div>
+              <button onClick={()=>{
+                const rows=referrals.flatMap(r=>r.rows.map(row=>({influencer:r.ref_code,email:row.user_email||"—",fecha:new Date(row.created_at).toLocaleDateString("es-MX"),source:row.source||"—"})));
+                const csv="influencer,email,fecha,fuente\n"+rows.map(r=>`${r.influencer},${r.email},${r.fecha},${r.source}`).join("\n");
+                const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="influencers_nexotrade.csv";a.click();
+              }} style={{background:"rgba(15,76,129,0.07)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"6px 14px",color:"#0F4C81",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                ⬇️ Exportar CSV
+              </button>
+            </div>
+
             {referrals.length===0 ? (
-              <div style={{color:"#9CA3AF",fontSize:13,textAlign:"center",padding:"24px 0"}}>
-                Sin registros todavía. Comparte los links con influencers.
+              <div style={{color:"#9CA3AF",fontSize:13,textAlign:"center",padding:"32px 0"}}>
+                Sin registros todavía — comparte los links con influencers y aquí verás los resultados.
               </div>
             ) : (
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
                 {referrals.map((r,i)=>{
                   const pct = referrals[0].count ? Math.round(r.count/referrals[0].count*100) : 0;
+                  const isOpen = inf.expanded===r.ref_code;
                   return(
-                    <div key={r.ref_code} style={{background:"#F9FAFB",borderRadius:10,padding:"12px 14px"}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                        <span style={{fontWeight:700,fontSize:13,color:"#111827"}}>
-                          {i===0?"🥇":i===1?"🥈":i===2?"🥉":"  "} @{r.ref_code}
-                        </span>
-                        <span style={{fontWeight:800,fontSize:15,color:"#0F5E68"}}>{r.count} {r.count===1?"registro":"registros"}</span>
+                    <div key={r.ref_code} style={{border:"1px solid #E5E7EB",borderRadius:12,overflow:"hidden"}}>
+                      {/* Fila principal */}
+                      <div
+                        onClick={()=>{ inf.expanded=isOpen?null:r.ref_code; }}
+                        style={{display:"flex",alignItems:"center",gap:12,padding:"13px 16px",cursor:"pointer",background:isOpen?"#F0F7FF":"#FAFAFA",transition:"background 0.15s"}}
+                      >
+                        <div style={{fontSize:20,minWidth:28,textAlign:"center"}}>
+                          {i===0?"🥇":i===1?"🥈":i===2?"🥉":`#${i+1}`}
+                        </div>
+                        <div style={{flex:1}}>
+                          <div style={{fontWeight:800,fontSize:14,color:"#111827"}}>@{r.ref_code}</div>
+                          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:5}}>
+                            <div style={{background:"#E5E7EB",borderRadius:99,height:5,flex:1,overflow:"hidden"}}>
+                              <div style={{background:"linear-gradient(90deg,#0F4C81,#0F5E68)",width:`${pct}%`,height:"100%",borderRadius:99}}/>
+                            </div>
+                            <span style={{fontSize:11,color:"#9CA3AF",whiteSpace:"nowrap"}}>{pct}% del máx.</span>
+                          </div>
+                        </div>
+                        <div style={{textAlign:"right",minWidth:80}}>
+                          <div style={{fontWeight:900,fontSize:18,color:"#0F5E68"}}>{r.count}</div>
+                          <div style={{fontSize:10,color:"#9CA3AF"}}>{r.count===1?"registro":"registros"}</div>
+                        </div>
+                        <div style={{display:"flex",gap:6}}>
+                          <button onClick={e=>{e.stopPropagation();copyLink(r.ref_code);}}
+                            style={{background:"transparent",border:"1px solid #E5E7EB",borderRadius:7,padding:"5px 10px",fontSize:11,color:"#0F4C81",cursor:"pointer",whiteSpace:"nowrap",fontWeight:700}}>
+                            {inf.copied===r.ref_code?"✅":"📋"} Copiar link
+                          </button>
+                          <div style={{padding:"5px 8px",fontSize:12,color:isOpen?"#0F4C81":"#9CA3AF",fontWeight:700}}>
+                            {isOpen?"▲":"▼"}
+                          </div>
+                        </div>
                       </div>
-                      <div style={{background:"#E5E7EB",borderRadius:99,height:6,overflow:"hidden"}}>
-                        <div style={{background:"linear-gradient(90deg,#0F4C81,#0F5E68)",width:`${pct}%`,height:"100%",borderRadius:99,transition:"width 0.4s"}}/>
-                      </div>
-                      <div style={{fontSize:11,color:"#9CA3AF",marginTop:4}}>
-                        Último: {new Date(r.last).toLocaleDateString("es-MX")}
-                      </div>
+
+                      {/* Detalle: lista de registros */}
+                      {isOpen && (
+                        <div style={{borderTop:"1px solid #E5E7EB"}}>
+                          <div style={{padding:"10px 16px",background:"#F8FAFC",display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:8,fontSize:11,fontWeight:700,color:"#6B7280",textTransform:"uppercase",letterSpacing:"0.05em"}}>
+                            <span>Email</span><span>Fecha de registro</span><span>Fuente</span>
+                          </div>
+                          <div style={{maxHeight:280,overflowY:"auto"}}>
+                            {r.rows.map((row,j)=>(
+                              <div key={j} style={{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:8,padding:"10px 16px",borderTop:"1px solid #F3F4F6",alignItems:"center",background:j%2===0?"#FFFFFF":"#FAFAFA"}}>
+                                <span style={{fontSize:12,color:"#111827",fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                                  {row.user_email||<span style={{color:"#9CA3AF"}}>— (anon)</span>}
+                                </span>
+                                <span style={{fontSize:11,color:"#6B7280"}}>
+                                  {new Date(row.created_at).toLocaleString("es-MX",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+                                </span>
+                                <span style={{fontSize:10,background:"#EFF6FF",color:"#0F4C81",borderRadius:6,padding:"2px 8px",fontWeight:700,whiteSpace:"nowrap"}}>
+                                  {row.source||"signup"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{padding:"8px 16px",background:"#F8FAFC",borderTop:"1px solid #E5E7EB",fontSize:11,color:"#9CA3AF"}}>
+                            Último registro: {new Date(r.last).toLocaleString("es-MX",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -24223,7 +24309,8 @@ function AdminDashboard(){
             )}
           </div>
         </div>
-      )}
+        );
+      })()}
 
     </div>
   );
