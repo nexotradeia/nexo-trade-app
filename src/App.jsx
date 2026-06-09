@@ -12647,11 +12647,51 @@ function IpoCalendarPage() {
   const [lastUp,  setLastUp]  = useState("");
   const today = new Date().toISOString().split("T")[0];
 
+  // 🔔 Recordatorios de IPO (por navegador)
+  const IPO_REM_KEY = "nexo_ipo_reminders";
+  const [reminders, setReminders] = useState(()=>{ try{ return JSON.parse(localStorage.getItem(IPO_REM_KEY)||"{}")||{}; }catch{ return {}; } });
+  useEffect(()=>{ try{ localStorage.setItem(IPO_REM_KEY, JSON.stringify(reminders)); }catch{} },[reminders]);
+  const remKey = (ipo)=> (ipo.ticker&&ipo.ticker!=="—"&&ipo.ticker!=="TBD") ? ipo.ticker : (ipo.company||"").slice(0,40);
+  const isReminded = (ipo)=> !!reminders[remKey(ipo)];
+  const [remToast, setRemToast] = useState(null);
+  const toggleRemind = (ipo)=>{
+    const k = remKey(ipo);
+    setReminders(prev=>{
+      const n={...prev};
+      if(n[k]){ delete n[k]; setRemToast({type:"off",text:(isEN?"Reminder removed for ":"Aviso quitado de ")+k}); }
+      else {
+        n[k]={ticker:ipo.ticker||"",company:ipo.company||"",date:ipo.date||"",notified:""};
+        setRemToast({type:"on",text:(isEN?"We'll remind you when ":"Te avisaremos cuando ")+(ipo.company||k)+(isEN?" goes public.":" salga a bolsa.")});
+        // pide permiso de notificación si aún no lo tiene
+        try{ if(typeof Notification!=="undefined" && Notification.permission==="default") Notification.requestPermission(); }catch{}
+      }
+      return n;
+    });
+    setTimeout(()=>setRemToast(null), 3800);
+  };
+  // dispara notificación local el día que sale a bolsa (app abierta)
+  useEffect(()=>{
+    try{
+      if(typeof Notification==="undefined" || Notification.permission!=="granted") return;
+      let changed=false; const n={...reminders};
+      Object.keys(n).forEach(k=>{
+        const r=n[k]; if(r && r.date && r.date===today && r.notified!==today){
+          new Notification("📢 NexoTrade · IPO", {body:(r.company||k)+(isEN?" goes public today!":" sale hoy a la bolsa!"), icon:"/favicon.svg"});
+          r.notified=today; changed=true;
+        }
+      });
+      if(changed) setReminders(n);
+    }catch{}
+  // eslint-disable-next-line
+  },[ipos]);
+
+  const daysUntil = (date)=>{ if(!date||date.includes("Q")||date.includes("+")) return null; const d=new Date(date+"T12:00:00"); const diff=Math.ceil((d-new Date())/(1000*60*60*24)); return Number.isNaN(diff)?null:diff; };
+
   const STATUS = {
     upcoming:{color:C.accent,              bg:C.accentDim,              label:"Upcoming"},
     priced:  {color:C.purple,              bg:C.purpleBg,               label:"Priced"},
     trading: {color:C.bull,                bg:C.bullBg,                  label:"Trading"},
-    expected:{color:"#F59E0B",             bg:"rgba(245,158,11,0.1)",   label:"Esperado"},
+    expected:{color:"#F59E0B",             bg:"rgba(245,158,11,0.1)",   label:isEN?"Expected":"Esperado"},
     rumored: {color:"#94A3B8",             bg:"rgba(148,163,184,0.1)", label:"Rumor"},
   };
 
@@ -12721,15 +12761,15 @@ function IpoCalendarPage() {
 
   const YEAR_TABS=[
     {k:"2026", label:"2026", sub:"Live", color:C.accent},
-    {k:"2027", label:"2027", sub:"Esperados", color:"#F59E0B"},
-    {k:"2028+",label:"2028+",sub:"Rumores",   color:"#94A3B8"},
+    {k:"2027", label:"2027", sub:isEN?"Expected":"Esperados", color:"#F59E0B"},
+    {k:"2028+",label:"2028+",sub:isEN?"Rumors":"Rumores",   color:"#94A3B8"},
   ];
 
   const filterBtns = yearTab==="2026"
-    ? [{k:"all",l:`Todos (${counts.all})`},{k:"upcoming",l:`🔜 Upcoming (${counts.upcoming})`},{k:"priced",l:`💜 Priced (${counts.priced})`},{k:"trading",l:`✅ Trading (${counts.trading})`}]
+    ? [{k:"all",l:`${isEN?"All":"Todos"} (${counts.all})`},{k:"upcoming",l:`🔜 Upcoming (${counts.upcoming})`},{k:"priced",l:`💜 Priced (${counts.priced})`},{k:"trading",l:`✅ Trading (${counts.trading})`}]
     : yearTab==="2027"
-      ? [{k:"all",l:`Todos (${counts.all})`},{k:"expected",l:`⭐ Esperado (${counts.expected})`}]
-      : [{k:"all",l:`Todos (${counts.all})`},{k:"rumored",l:`💭 Rumor (${counts.rumored})`}];
+      ? [{k:"all",l:`${isEN?"All":"Todos"} (${counts.all})`},{k:"expected",l:`⭐ ${isEN?"Expected":"Esperado"} (${counts.expected})`}]
+      : [{k:"all",l:`${isEN?"All":"Todos"} (${counts.all})`},{k:"rumored",l:`💭 Rumor (${counts.rumored})`}];
 
   return(
     <div style={{maxWidth:920,margin:"0 auto"}}>
@@ -12747,7 +12787,7 @@ function IpoCalendarPage() {
               {lastUp && yearTab==="2026" && <span style={{fontSize:10,color:C.muted2}}>· {lastUp}</span>}
               {yearTab==="2026" && <span style={{fontSize:10,fontWeight:700,color:"#10B981",background:"rgba(16,185,129,0.08)",borderRadius:10,padding:"2px 8px"}}>↻ Auto 5min</span>}
             </div>
-            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Ofertas públicas — precios, fechas, sectores y estado en tiempo real</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>{isEN?"Public offerings — prices, dates, sectors and live status":"Ofertas públicas — precios, fechas, sectores y estado en tiempo real"}</div>
           </div>
           {yearTab==="2026" && (
             <button onClick={fetch2026} disabled={loading}
@@ -12755,7 +12795,7 @@ function IpoCalendarPage() {
               onMouseEnter={e=>{if(!loading){e.currentTarget.style.background=C.accent;e.currentTarget.style.color="#fff";}}}
               onMouseLeave={e=>{e.currentTarget.style.background=C.accentDim;e.currentTarget.style.color=C.accent;}}>
               <span style={{fontSize:16,display:"inline-block",animation:loading?"spin 1s linear infinite":"none"}}>⟳</span>
-              {loading?"Actualizando...":"Refresh"}
+              {loading?(isEN?"Updating...":"Actualizando..."):"Refresh"}
             </button>
           )}
         </div>
@@ -12786,6 +12826,32 @@ function IpoCalendarPage() {
         </div>
       </div>
 
+      {yearTab==="2026" && (()=>{
+        const soon = ipos.map(ip=>({ip,d:daysUntil(ip.date)})).filter(x=>x.d!=null && x.d>=0 && x.d<=30).sort((a,b)=>a.d-b.d).slice(0,12);
+        if(!soon.length) return null;
+        return (
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 18px",marginBottom:12,boxShadow:C.shadow}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+              <span style={{fontSize:15,fontWeight:900,color:C.text}}>⏳ {isEN?"Upcoming IPOs":"Próximas IPOs"}</span>
+              <span style={{fontSize:11,color:C.muted2}}>· {isEN?"next 30 days":"próximos 30 días"}</span>
+            </div>
+            <div className="nexo-scroll-x" style={{display:"flex",gap:10,overflowX:"auto",paddingBottom:4}}>
+              {soon.map(({ip,d},i)=>(
+                <div key={i} style={{flex:"0 0 auto",width:172,background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                    <LogoBadge sym={(ip.ticker&&ip.ticker!=="—"&&ip.ticker!=="TBD")?ip.ticker:ip.company} col={C.accent} size={24} radius={6}/>
+                    <div style={{fontWeight:800,fontSize:13,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ip.company}</div>
+                  </div>
+                  <div style={{fontSize:22,fontWeight:900,color:C.accent,lineHeight:1}}>{d===0?(isEN?"Today":"Hoy"):d+"d"}</div>
+                  <div style={{fontSize:10,color:C.muted2,marginBottom:8}}>{d===0?(isEN?"goes public":"sale a bolsa"):(isEN?"to debut":"para salir")}</div>
+                  <button onClick={()=>toggleRemind(ip)} style={{width:"100%",padding:"6px 0",borderRadius:8,border:`1.5px solid ${isReminded(ip)?C.bull:C.accent}`,background:isReminded(ip)?C.bullBg:"transparent",color:isReminded(ip)?C.bull:C.accent,fontSize:11,fontWeight:800,cursor:"pointer"}}>{isReminded(ip)?(isEN?"🔔 Reminded":"🔔 Avisado"):(isEN?"🔔 Remind me":"🔔 Avísame")}</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <div style={{display:"grid",gap:10}}>
         {rows.length===0 && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>{isEN?"No IPOs for this filter.":"Sin IPOs con ese filtro."}</div>}
         {rows.map((ipo,i)=>{
@@ -12806,8 +12872,8 @@ function IpoCalendarPage() {
                 {ipo.desc && <div style={{fontSize:12,color:C.muted,marginBottom:6,lineHeight:1.5}}>{ipo.desc}</div>}
                 <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
                   {ipo.sector && ipo.sector!=="Mercado" && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Sector:</b> {ipo.sector}</span>}
-                  {ipo.raise  && ipo.raise!=="—"  && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Recaudación:</b> {ipo.raise}</span>}
-                  {ipo.valuation && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Valoración:</b> {ipo.valuation}</span>}
+                  {ipo.raise  && ipo.raise!=="—"  && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>{isEN?"Raised:":"Recaudación:"}</b> {ipo.raise}</span>}
+                  {ipo.valuation && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>{isEN?"Valuation:":"Valoración:"}</b> {ipo.valuation}</span>}
                   {ipo.shares && ipo.shares!=="—" && <span style={{fontSize:12,color:C.muted}}>{ipo.shares}</span>}
                 </div>
               </div>
@@ -12815,7 +12881,7 @@ function IpoCalendarPage() {
                 {ipo.range && ipo.range!=="Por definir" && ipo.range!=="TBD" && (
                   <>
                     <div style={{fontSize:20,fontWeight:900,color:C.text,marginBottom:2}}>{ipo.range}</div>
-                    <div style={{fontSize:10,color:C.muted2,marginBottom:6}}>precio/acción</div>
+                    <div style={{fontSize:10,color:C.muted2,marginBottom:6}}>{isEN?"price/share":"precio/acción"}</div>
                   </>
                 )}
                 {ipo.date && ipo.date!=="—" && (
@@ -12826,8 +12892,14 @@ function IpoCalendarPage() {
                 {ipo.url && (
                   <a href={ipo.url} target="_blank" rel="noopener noreferrer"
                     style={{fontSize:11,color:C.accent,textDecoration:"none",display:"block",marginTop:4}}>
-                    Ver prospecto →
+                    {isEN?"View prospectus →":"Ver prospecto →"}
                   </a>
+                )}
+                {ipo.status!=="trading" && (
+                  <button onClick={()=>toggleRemind(ipo)}
+                    style={{marginTop:8,padding:"5px 12px",borderRadius:9,border:`1.5px solid ${isReminded(ipo)?C.bull:C.accent}`,background:isReminded(ipo)?C.bullBg:"transparent",color:isReminded(ipo)?C.bull:C.accent,fontSize:11,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>
+                    {isReminded(ipo)?(isEN?"🔔 Reminded":"🔔 Avisado"):(isEN?"🔔 Remind me":"🔔 Avísame")}
+                  </button>
                 )}
               </div>
             </div>
@@ -12836,10 +12908,15 @@ function IpoCalendarPage() {
       </div>
       <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
         {yearTab==="2026"
-          ? (source==="live" ? "⚡ Datos en tiempo real via FMP" : "📋 Lista curada — agrega FMP_API_KEY en Vercel para tiempo real")
-          : yearTab==="2027" ? "⭐ Empresas con alta probabilidad de IPO en 2027 según analistas" : "💭 Rumores y expectativas del mercado — sin fecha confirmada"}
-        {" · "}Siempre verifica en SEC EDGAR antes de invertir
+          ? (source==="live" ? (isEN?"⚡ Live data via FMP":"⚡ Datos en tiempo real via FMP") : (isEN?"📋 Curated list — add FMP_API_KEY in Vercel for live data":"📋 Lista curada — agrega FMP_API_KEY en Vercel para tiempo real"))
+          : yearTab==="2027" ? (isEN?"⭐ Companies with high IPO probability in 2027 per analysts":"⭐ Empresas con alta probabilidad de IPO en 2027 según analistas") : (isEN?"💭 Market rumors and expectations — no confirmed date":"💭 Rumores y expectativas del mercado — sin fecha confirmada")}
+        {" · "}{isEN?"Always verify on SEC EDGAR before investing":"Siempre verifica en SEC EDGAR antes de invertir"}
       </div>
+      {remToast && (
+        <div style={{position:"fixed",left:"50%",bottom:24,transform:"translateX(-50%)",zIndex:10000,background:remToast.type==="on"?C.bull:C.muted,color:"#fff",padding:"11px 18px",borderRadius:10,fontSize:13,fontWeight:700,boxShadow:"0 8px 28px rgba(0,0,0,0.25)",maxWidth:"90vw",textAlign:"center"}}>
+          {remToast.text}
+        </div>
+      )}
     </div>
   );
 }
@@ -18165,6 +18242,36 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     setRemoving(null);
   };
 
+  // ⭐ Favoritas (se fijan arriba) — persistidas por usuario
+  const FAV_KEY = `nexo_watchfav_${user?.id||"guest"}`;
+  const [favs, setFavs] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(FAV_KEY)||"[]"); return new Set(Array.isArray(s)?s:[]); }catch{ return new Set(); } });
+  useEffect(()=>{ try{ localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); }catch{} },[favs, FAV_KEY]);
+  const toggleFav = (tk)=> setFavs(prev=>{ const n=new Set(prev); n.has(tk)?n.delete(tk):n.add(tk); return n; });
+
+  // ➕ Traer una acción de la watchlist al Portafolio (local + nube)
+  const [portMsg, setPortMsg] = useState(null);
+  const addToPortfolio = async (tk) => {
+    const d = priceOf(tk);
+    const px = (d && d.price) ? d.price : 0;
+    const ans = window.prompt(isEN?`How many shares/units of ${tk}? (you can edit later in Portfolio)`:`¿Cuántas acciones/unidades de ${tk}? (puedes ajustarlo luego en el Portafolio)`, "1");
+    if(ans===null) return;
+    const sh = parseFloat(String(ans).replace(",","."));
+    if(!(sh>0)){ setPortMsg({type:"err",text:isEN?"Enter a valid number of shares.":"Escribe un número de acciones válido."}); return; }
+    const pos = {id:Date.now()+"", ticker:tk, shares:sh, entryPrice:px||0, note:"", broker:"", addedAt:new Date().toISOString()};
+    const PKEY = `nexo_portfolio_${user?.id||"guest"}`;
+    let cur=[]; try{ cur=JSON.parse(localStorage.getItem(PKEY)||"[]"); if(!Array.isArray(cur)) cur=[]; }catch{}
+    try{ localStorage.setItem(PKEY, JSON.stringify([...cur,pos])); }catch{}
+    if(user?.id){
+      try{
+        const { data } = await supabase.from("user_portfolios").select("positions").eq("user_id",user.id).maybeSingle();
+        const cloudCur=(data&&Array.isArray(data.positions))?data.positions:[];
+        await supabase.from("user_portfolios").upsert({ user_id:user.id, positions:[...cloudCur,pos], updated_at:new Date().toISOString() });
+      }catch(e){ /* se conserva en local */ }
+    }
+    setPortMsg({type:"ok",text:isEN?`${tk} added to your Portfolio (${sh} sh${px?` @ $${px.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`:""}).`:`${tk} añadido a tu Portafolio (${sh} ud${px?` @ $${px.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`:""}).`});
+    setTimeout(()=>setPortMsg(null), 4000);
+  };
+
   // get top posts for ticker
   const topPost = (tk) => posts.filter(p=>p.ticker===tk).sort((a,b)=>b.likes-a.likes)[0]||null;
 
@@ -18473,18 +18580,21 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     else { setSortCol(h); setSortDir("desc"); } // primer clic = mayor a menor
   };
   const sortedTickers = (() => {
-    if(!sortCol) return tickers;
     const arr=[...tickers];
-    arr.sort((a,b)=>{
-      const va=sortValue(sortCol,a,priceOf(a),getMock(a));
-      const vb=sortValue(sortCol,b,priceOf(b),getMock(b));
-      const na=(va==null||Number.isNaN(va)), nb=(vb==null||Number.isNaN(vb));
-      if(na&&nb) return 0; if(na) return 1; if(nb) return -1; // nulos siempre al final
-      if(typeof va==="string"||typeof vb==="string"){
-        const r=String(va).localeCompare(String(vb)); return sortDir==="asc"?r:-r;
-      }
-      return sortDir==="asc" ? va-vb : vb-va;
-    });
+    if(sortCol){
+      arr.sort((a,b)=>{
+        const va=sortValue(sortCol,a,priceOf(a),getMock(a));
+        const vb=sortValue(sortCol,b,priceOf(b),getMock(b));
+        const na=(va==null||Number.isNaN(va)), nb=(vb==null||Number.isNaN(vb));
+        if(na&&nb) return 0; if(na) return 1; if(nb) return -1; // nulos siempre al final
+        if(typeof va==="string"||typeof vb==="string"){
+          const r=String(va).localeCompare(String(vb)); return sortDir==="asc"?r:-r;
+        }
+        return sortDir==="asc" ? va-vb : vb-va;
+      });
+    }
+    // ⭐ favoritas siempre arriba (estable, conserva el orden anterior dentro de cada grupo)
+    arr.sort((a,b)=>(favs.has(a)?0:1)-(favs.has(b)?0:1));
     return arr;
   })();
 
@@ -19140,17 +19250,33 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                       <td key={i} style={tdStyle}>{c.render(tk,d,m)}</td>
                     ))}
                     <td style={tdStyle}>
-                      <button onClick={()=>removeTicker(tk)}
-                        title={isEN?`Remove ${tk}`:`Quitar ${tk}`}
-                        style={{background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.30)",color:"#EF4444",fontSize:14,fontWeight:800,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}
-                        onMouseEnter={e=>{e.currentTarget.style.background="#EF4444";e.currentTarget.style.color="#fff";}}
-                        onMouseLeave={e=>{e.currentTarget.style.background="rgba(239,68,68,0.10)";e.currentTarget.style.color="#EF4444";}}>🗑</button>
+                      <div style={{display:"inline-flex",gap:6,alignItems:"center"}}>
+                        <button onClick={()=>toggleFav(tk)}
+                          title={favs.has(tk)?(isEN?`Unpin ${tk}`:`Quitar de favoritas ${tk}`):(isEN?`Pin ${tk} to top`:`Fijar ${tk} arriba`)}
+                          style={{background:favs.has(tk)?"rgba(245,158,11,0.15)":"rgba(148,163,184,0.10)",border:`1px solid ${favs.has(tk)?"rgba(245,158,11,0.45)":"rgba(148,163,184,0.30)"}`,color:favs.has(tk)?"#F59E0B":"#94A3B8",fontSize:14,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}>{favs.has(tk)?"★":"☆"}</button>
+                        <button onClick={()=>addToPortfolio(tk)}
+                          title={isEN?`Add ${tk} to Portfolio`:`Añadir ${tk} al Portafolio`}
+                          style={{background:"rgba(5,150,105,0.10)",border:"1px solid rgba(5,150,105,0.30)",color:"#059669",fontSize:14,fontWeight:800,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}
+                          onMouseEnter={e=>{e.currentTarget.style.background="#059669";e.currentTarget.style.color="#fff";}}
+                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(5,150,105,0.10)";e.currentTarget.style.color="#059669";}}>＋</button>
+                        <button onClick={()=>removeTicker(tk)}
+                          title={isEN?`Remove ${tk}`:`Quitar ${tk}`}
+                          style={{background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.30)",color:"#EF4444",fontSize:14,fontWeight:800,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}
+                          onMouseEnter={e=>{e.currentTarget.style.background="#EF4444";e.currentTarget.style.color="#fff";}}
+                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(239,68,68,0.10)";e.currentTarget.style.color="#EF4444";}}>🗑</button>
+                      </div>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {portMsg && (
+        <div style={{position:"fixed",left:"50%",bottom:24,transform:"translateX(-50%)",zIndex:10000,background:portMsg.type==="ok"?"#059669":"#DC2626",color:"#fff",padding:"11px 18px",borderRadius:10,fontSize:13,fontWeight:700,boxShadow:"0 8px 28px rgba(0,0,0,0.25)",maxWidth:"90vw",textAlign:"center"}}>
+          {portMsg.type==="ok"?"✅ ":"⚠️ "}{portMsg.text}
         </div>
       )}
 
@@ -19896,7 +20022,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [watchTks, setWatchTks] = useState(readWatch);
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ticker:"",shares:"",entryPrice:"",note:""});
+  const [form, setForm] = useState({ticker:"",shares:"",entryPrice:"",note:"",broker:""});
+  const BROKERS = ["Interactive Brokers","eToro","Robinhood","Trading 212","XTB","Webull","Charles Schwab","Fidelity","Trade Republic","DEGIRO","Binance","Coinbase","Bitget","Kraken","Otro"];
   const [shareMsg, setShareMsg] = useState(null);
   const [sortBy, setSortBy] = useState("pnl"); // pnl | ticker | value
   const [ptTab, setPtTab] = useState("returns"); // returns | market | risk | efficiency | projections | health
@@ -20204,12 +20331,12 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const ep = parseFloat(form.entryPrice);
     if(!tk||!sh||!ep||sh<=0||ep<=0) return;
     if(editId) {
-      setPositions(prev=>prev.map(p=>p.id===editId?{...p,ticker:tk,shares:sh,entryPrice:ep,note:form.note.trim()}:p));
+      setPositions(prev=>prev.map(p=>p.id===editId?{...p,ticker:tk,shares:sh,entryPrice:ep,note:form.note.trim(),broker:(form.broker||"").trim()}:p));
       setEditId(null);
     } else {
-      setPositions(prev=>[...prev,{id:Date.now()+"",ticker:tk,shares:sh,entryPrice:ep,note:form.note.trim(),addedAt:new Date().toISOString()}]);
+      setPositions(prev=>[...prev,{id:Date.now()+"",ticker:tk,shares:sh,entryPrice:ep,note:form.note.trim(),broker:(form.broker||"").trim(),addedAt:new Date().toISOString()}]);
     }
-    setForm({ticker:"",shares:"",entryPrice:"",note:""});
+    setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});
     setShowAdd(false);
   };
 
@@ -20219,7 +20346,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   };
 
   const startEdit = (p) => {
-    setEditId(p.id); setForm({ticker:p.ticker,shares:String(p.shares),entryPrice:String(p.entryPrice),note:p.note||""});
+    setEditId(p.id); setForm({ticker:p.ticker,shares:String(p.shares),entryPrice:String(p.entryPrice),note:p.note||"",broker:p.broker||""});
     setShowAdd(true);
   };
 
@@ -20315,12 +20442,12 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
       </div>
       {/* TOPBAR */}
-      <div style={{height:48,background:T.bg2,borderBottom:`1px solid ${T.br}`,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 18px"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
+      <div className="nexo-term-top" style={{height:48,background:T.bg2,borderBottom:`1px solid ${T.br}`,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 18px"}}>
+        <div className="nexo-term-brand" style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:26,height:26,background:T.grn,clipPath:"polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:T.bg}}>N</div>
           <div><div style={{fontFamily:MONO,fontSize:12.5,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap"}}>PORTAFOLIO TERMINAL <span style={{color:T.grn,textShadow:"0 0 12px rgba(0,255,135,.5)"}}>ORACLE IA</span></div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>PRO TRADER · v4.2.1</div></div>
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+        <div className="nexo-term-tabs" style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
           {[["portfolio","PORTFOLIO"],["charts","CHARTS"],["screener","SCREENER"],["alerts","ALERTS"],["journal","JOURNAL"]].map(([k,l])=>(
             <button key={k} onClick={()=>setTermTab(k)} style={{padding:"5px 12px",borderRadius:4,fontFamily:MONO,fontSize:11,fontWeight:500,letterSpacing:.5,cursor:"pointer",border:termTab===k?`1px solid rgba(0,255,135,.3)`:`1px solid ${T.br2}`,background:termTab===k?"rgba(0,255,135,.12)":"transparent",color:termTab===k?T.grn:T.mid}}>{l}</button>
           ))}
@@ -20328,12 +20455,12 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <button onClick={()=>setTermTab("options")} style={{padding:"5px 12px",borderRadius:4,fontFamily:MONO,fontSize:11,fontWeight:500,letterSpacing:.5,cursor:"pointer",border:termTab==="options"?`1px solid rgba(77,166,255,.4)`:`1px solid ${T.br2}`,background:termTab==="options"?"rgba(77,166,255,.12)":"transparent",color:termTab==="options"?T.blue:T.mid}}>⬡ OPTIONS</button>
           <button onClick={()=>setTermTab("dividends")} style={{padding:"5px 12px",borderRadius:4,fontFamily:MONO,fontSize:11,fontWeight:500,letterSpacing:.5,cursor:"pointer",border:termTab==="dividends"?`1px solid rgba(240,180,41,.4)`:`1px solid ${T.br2}`,background:termTab==="dividends"?"rgba(240,180,41,.12)":"transparent",color:termTab==="dividends"?T.gold:T.mid}}>💰 DIVIDENDS</button>
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <div className="nexo-term-status" style={{display:"flex",alignItems:"center",gap:12}}>
           <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:11}}><span style={{width:6,height:6,borderRadius:"50%",background:mkt.color||T.grn,boxShadow:`0 0 8px ${mkt.color||T.grn}`,animation:"nxtBl 2s ease-in-out infinite"}}/><span style={{color:mkt.color||T.grn,letterSpacing:.5}}>{(mkt.label||"MARKET").toUpperCase()}</span><span style={{color:T.dim}}>· {mkt.sub||""}</span></div>
           <div style={{width:1,height:20,background:T.br2}}/>
           <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:totalPnl>=0?T.grn:T.red,textShadow:`0 0 12px ${totalPnl>=0?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)"}`}}>{m$(totalPnl)}</div>
           {(()=>{ const s = pCloud==="synced"?{t:"☁ SYNCED",c:T.grn}:(pCloud==="loading"||pCloud==="saving")?{t:"☁ SYNC…",c:T.blue}:pCloud==="error"?{t:"⚠ LOCAL",c:T.gold}:{t:"☁ SIGN IN",c:T.dim}; return <span onClick={()=>{if(pCloud==="off"&&onNeedAuth)onNeedAuth();}} style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:s.c,border:`1px solid ${s.c}40`,borderRadius:3,padding:"3px 8px",letterSpacing:.5,cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
-          {termTab==="portfolio" && <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setImpMsg(null);setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>+ AÑADIR</button>}
+          {termTab==="portfolio" && <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setImpMsg(null);setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>{isEN?"+ ADD":"+ AÑADIR"}</button>}
         </div>
       </div>
       {/* LAYOUT — PORTFOLIO */}
@@ -20365,6 +20492,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <span style={{width:46,fontWeight:700,color:T.txt}}>{tk}</span>
                 <span style={{flex:1,color:T.mid,fontSize:10,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lp?("$"+lp.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})):(NAMES[tk]||"")}</span>
                 {ch!=null? <span style={{fontSize:10,fontWeight:600,color:ch>=0?T.grn:T.red}}>{ch>=0?"▲":"▼"}{Math.abs(ch).toFixed(2)}%</span> : <span style={{fontSize:9,color:T.dim}}>—</span>}
+                <button onClick={(e)=>{ e.stopPropagation(); const p=livePrices[tk]; setEditId(null); setForm({ticker:tk,shares:"",entryPrice:p?String(p.price):"",note:"",broker:""}); setShowAdd(true); }} title={isEN?"Add to portfolio":"Añadir al portafolio"} style={{flexShrink:0,width:20,height:20,borderRadius:4,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontSize:12,fontWeight:800,lineHeight:1,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>＋</button>
               </div>
             ); }) : <div style={{padding:"6px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>Vacía · agrégala en la página Watchlist</div>}
           </div>
@@ -20431,7 +20559,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                       <td style={{padding:"9px 14px",color:r.pnlPct>=0?T.grn:T.red,fontWeight:600}}>{(r.pnlPct>=0?"+":"")+r.pnlPct.toFixed(1)}%</td>
                       <td style={{padding:"9px 14px",color:tp?T.grn:T.red}}>{tp?"▲":"▼"}{Math.abs(r.today).toFixed(2)}%</td>
                       <td style={{padding:"9px 14px"}}><span style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:3,fontSize:9,fontWeight:700,letterSpacing:.5,color:sg[1],background:sg[2],border:`1px solid ${sg[1]}33`}}>{sg[0]}</span></td>
-                      <td style={{padding:"9px 14px"}}><div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(r.p.id);setForm({ticker:r.tk,shares:String(r.shares),entryPrice:String(r.entry),note:r.p.note||""});setShowAdd(true);}} style={{width:24,height:24,borderRadius:3,background:T.bg4,border:`1px solid ${T.br}`,color:T.mid,fontSize:11,cursor:"pointer"}}>✎</button><button onClick={()=>setPositions(prev=>prev.filter(x=>x.id!==r.p.id))} style={{width:24,height:24,borderRadius:3,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></div></td>
+                      <td style={{padding:"9px 14px"}}><div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(r.p.id);setForm({ticker:r.tk,shares:String(r.shares),entryPrice:String(r.entry),note:r.p.note||"",broker:r.p.broker||""});setShowAdd(true);}} style={{width:24,height:24,borderRadius:3,background:T.bg4,border:`1px solid ${T.br}`,color:T.mid,fontSize:11,cursor:"pointer"}}>✎</button><button onClick={()=>setPositions(prev=>prev.filter(x=>x.id!==r.p.id))} style={{width:24,height:24,borderRadius:3,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></div></td>
                     </tr>
                   ); })}
                   {!rows.length&&<tr><td colSpan={10} style={{padding:"40px",textAlign:"center",color:T.dim,fontFamily:MONO}}>Sin posiciones · usa "+ AÑADIR" arriba</td></tr>}
@@ -20445,16 +20573,16 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {navView==="positions" && (()=>{ const tot=Math.max(1,totalValue); return (
             <div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-                <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid}}>POSICIONES · {positions.length}</div>
-                <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:5,padding:"5px 12px",fontFamily:MONO,fontSize:10,fontWeight:700,cursor:"pointer"}}>+ AÑADIR</button>
+                <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid}}>{isEN?"POSITIONS":"POSICIONES"} · {positions.length}</div>
+                <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:5,padding:"5px 12px",fontFamily:MONO,fontSize:10,fontWeight:700,cursor:"pointer"}}>{isEN?"+ ADD":"+ AÑADIR"}</button>
               </div>
               <div style={{overflowX:"auto"}}>
                 <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
-                  <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","UNIDADES","ENTRADA","PRECIO ACT.","MKT VALUE","% CARTERA","P&L $","P&L %",""].map((h,i)=><th key={i} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                  <thead><tr style={{background:T.bg2}}>{(isEN?["SYMBOL","UNITS","ENTRY","CUR. PRICE","MKT VALUE","% PORT.","P&L $","P&L %",""]:["SÍMBOLO","UNIDADES","ENTRADA","PRECIO ACT.","MKT VALUE","% CARTERA","P&L $","P&L %",""]).map((h,i)=><th key={i} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
                   <tbody>
                     {[...sortedRows].sort((a,b)=>b.mv-a.mv).map((r)=>{ const pct=r.mv/tot*100; return (
                       <tr key={r.p.id} style={{borderBottom:"1px solid #111820"}}>
-                        <td style={{padding:"9px 14px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(r.tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r.tk.slice(0,2)}</div><div><div style={{fontSize:12,fontWeight:700,color:T.txt}}>{r.tk}</div><div style={{fontSize:9,color:T.dim}}>{r.name}</div></div></div></td>
+                        <td style={{padding:"9px 14px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(r.tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r.tk.slice(0,2)}</div><div><div style={{fontSize:12,fontWeight:700,color:T.txt}}>{r.tk}</div><div style={{fontSize:9,color:T.dim}}>{r.name}</div>{r.p.broker?<div style={{fontSize:8,color:T.blue,marginTop:2,display:"inline-block",border:`1px solid ${T.blue}33`,borderRadius:3,padding:"1px 5px"}}>🏦 {r.p.broker}</div>:null}</div></div></td>
                         <td style={{padding:"9px 14px",color:T.txt}}>{r.shares}</td>
                         <td style={{padding:"9px 14px",color:T.mid}}>${r.entry.toLocaleString("en-US")}</td>
                         <td style={{padding:"9px 14px",color:T.txt,fontWeight:600}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
@@ -20462,7 +20590,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                         <td style={{padding:"9px 14px"}}><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:46,height:6,background:T.bg4,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:Math.min(100,pct)+"%",background:T.blue}}/></div><span style={{color:T.mid,fontSize:10}}>{pct.toFixed(1)}%</span></div></td>
                         <td style={{padding:"9px 14px",color:r.pnl>=0?T.grn:T.red,fontWeight:700}}>{m$(r.pnl)}</td>
                         <td style={{padding:"9px 14px",color:r.pnlPct>=0?T.grn:T.red,fontWeight:600}}>{(r.pnlPct>=0?"+":"")+r.pnlPct.toFixed(1)}%</td>
-                        <td style={{padding:"9px 14px"}}><div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(r.p.id);setForm({ticker:r.tk,shares:String(r.shares),entryPrice:String(r.entry),note:r.p.note||""});setShowAdd(true);}} style={{width:24,height:24,borderRadius:3,background:T.bg4,border:`1px solid ${T.br}`,color:T.mid,fontSize:11,cursor:"pointer"}}>✎</button><button onClick={()=>setPositions(prev=>prev.filter(x=>x.id!==r.p.id))} style={{width:24,height:24,borderRadius:3,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></div></td>
+                        <td style={{padding:"9px 14px"}}><div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(r.p.id);setForm({ticker:r.tk,shares:String(r.shares),entryPrice:String(r.entry),note:r.p.note||"",broker:r.p.broker||""});setShowAdd(true);}} style={{width:24,height:24,borderRadius:3,background:T.bg4,border:`1px solid ${T.br}`,color:T.mid,fontSize:11,cursor:"pointer"}}>✎</button><button onClick={()=>setPositions(prev=>prev.filter(x=>x.id!==r.p.id))} style={{width:24,height:24,borderRadius:3,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></div></td>
                       </tr>
                     ); })}
                     {!rows.length&&<tr><td colSpan={9} style={{padding:"40px",textAlign:"center",color:T.dim,fontFamily:MONO}}>Sin posiciones · usa "+ AÑADIR"</td></tr>}
@@ -20479,7 +20607,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt,letterSpacing:.5,marginBottom:8}}>Sin órdenes abiertas</div>
               <div style={{fontFamily:SANS,fontSize:12,color:T.mid,maxWidth:420,margin:"0 auto",lineHeight:1.6}}>Este terminal es un <b style={{color:T.txt}}>tracker de tu cartera</b>, no un bróker — no envía órdenes al mercado. Registra tus entradas y salidas como posiciones, y documenta tu plan en el Journal.</div>
               <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18,flexWrap:"wrap"}}>
-                <button onClick={()=>{setNavView("positions");setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:700,cursor:"pointer"}}>+ Añadir posición</button>
+                <button onClick={()=>{setNavView("positions");setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:700,cursor:"pointer"}}>+ Añadir posición</button>
                 <button onClick={()=>setTermTab("journal")} style={{background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:600,cursor:"pointer"}}>Abrir Journal →</button>
               </div>
             </div>
@@ -20557,7 +20685,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:4,padding:"0 12px 12px"}}>{SECT.map((s,i)=>{const pos=s[2];const inten=Math.min(Math.abs(parseFloat(s[1]))/3,1);return (<div key={i} style={{borderRadius:4,padding:"7px 8px",background:pos?`rgba(0,255,135,${0.08+inten*0.25})`:`rgba(255,61,90,${0.08+inten*0.25})`,border:`1px solid ${pos?`rgba(0,255,135,${0.15+inten*0.2})`:`rgba(255,61,90,${0.15+inten*0.2})`}`}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:"#fff",marginBottom:2}}>{s[0]}</div><div style={{fontFamily:MONO,fontSize:10,fontWeight:600,color:pos?T.grn:T.red}}>{pos?"+":""}{s[1]}%</div></div>);})}</div>
           </div>
           <div>
-            <div style={{...lbl,padding:"12px 14px 8px"}}>Últimos Trades</div>
+            <div style={{...lbl,padding:"12px 14px 8px"}}>{isEN?"Recent Trades":"Últimos Trades"}</div>
             <div style={{padding:"0 12px 12px"}}>{TRADES.map((t,i)=>{const pos=t[3].startsWith("+");return (<div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<TRADES.length-1?`1px solid ${T.bg3}`:"none"}}><div style={{width:28,height:28,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,background:t[0]==="B"?"rgba(0,255,135,.12)":"rgba(255,61,90,.08)",color:t[0]==="B"?T.grn:T.red,border:`1px solid ${t[0]==="B"?"rgba(0,255,135,.2)":"rgba(255,61,90,.2)"}`}}>{t[0]==="B"?"BUY":"SELL"}</div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>{t[1]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginTop:1}}>{t[2]}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:pos?T.grn:T.red}}>{t[3]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{t[4]}</div></div></div>);})}</div>
           </div>
         </div>
@@ -20594,11 +20722,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {/* LEFT */}
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px"}}>Mis Posiciones</div>
+              <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"My Positions":"Mis Posiciones"}</div>
               {sortedRows.length? sortedRows.map((r,i)=>{ const act=chSel?r.tk===chSel:i===0; return (<div key={i} onClick={()=>setChSel(r.tk)} title={"Ver gráfico de "+r.tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.grn}`:"3px solid transparent",background:act?"rgba(0,255,135,.08)":"transparent",cursor:"pointer",transition:"background .12s"}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.grn:T.txt}}>{r.tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:r.today>=0?T.grn:T.red}}>{(r.today>=0?"+":"")+r.today.toFixed(2)}%</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>Sin posiciones</div>}
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>Mi Watchlist</span><span style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{watchTks.length}</span></div>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>{isEN?"My Watchlist":"Mi Watchlist"}</span><span style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{watchTks.length}</span></div>
               {watchTks.length? watchTks.map((tk)=>{ const act=chSel===tk; const lp=livePrices[tk]; const ch=lp?lp.change:null; return (<div key={tk} onClick={()=>setChSel(tk)} title={"Ver gráfico de "+tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.blue}`:"3px solid transparent",background:act?"rgba(77,166,255,.10)":"transparent",cursor:"pointer",transition:"background .12s"}} onMouseEnter={e=>{if(!act)e.currentTarget.style.background="rgba(77,166,255,.05)";}} onMouseLeave={e=>{if(!act)e.currentTarget.style.background="transparent";}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.blue:T.txt}}>{tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:ch==null?T.dim:(ch>=0?T.grn:T.red)}}>{ch==null?"—":(ch>=0?"+":"")+ch.toFixed(2)+"%"}</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>{lp?"$"+lp.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):(NAMES[tk]||"—")}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>Vacía · agrégala en la página Watchlist</div>}
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Índices</div>{IDX.map(sideRow)}</div>
@@ -20637,15 +20765,15 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {/* RIGHT */}
           <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px"}}>Estadísticas {cp.tk}</div>
+              <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"Stats":"Estadísticas"} {cp.tk}</div>
               {STATS.map((s,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 14px",fontFamily:MONO,fontSize:11}}><span style={{color:T.dim}}>{s[0]}</span><span style={{color:s[2],fontWeight:600}}>{s[1]}</span></div>))}
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>Indicadores Técnicos <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>{isEN?"Technical Indicators":"Indicadores Técnicos"} <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
               <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:5}}>{INDS.map((it,i)=>(<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"7px 10px"}}><span style={{fontFamily:MONO,fontSize:11,color:T.mid}}>{it[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{it[1]}</span><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:it[3],background:it[3]+"1a",border:`1px solid ${it[3]}33`,borderRadius:3,padding:"2px 7px"}}>{it[2]}</span></div>))}</div>
             </div>
             <div style={{padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>Niveles Clave <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>{isEN?"Key Levels":"Niveles Clave"} <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
               <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:5}}>{LVLS.map((l,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:T.bg3,border:`1px solid ${l[2]}33`,borderRadius:5,padding:"8px 10px"}}><span style={{fontFamily:MONO,fontSize:11,color:T.mid}}>{l[0]}</span><span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:l[2]}}>{l[1]}</span></div>))}</div>
             </div>
           </div>
@@ -21091,7 +21219,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       {showAdd && (
         <div onClick={(e)=>{if(e.target===e.currentTarget){setShowAdd(false);setImpMsg(null);}}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
           <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:8,padding:22,width:"100%",maxWidth:420}}>
-            <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>{editId?"EDITAR POSICIÓN":"+ NUEVA POSICIÓN"}</div>
+            <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>{editId?(isEN?"EDIT POSITION":"EDITAR POSICIÓN"):(isEN?"+ NEW POSITION":"+ NUEVA POSICIÓN")}</div>
             {!editId && (
               <div style={{marginBottom:16}}>
                 <div
@@ -21101,23 +21229,28 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                   onClick={()=>{ const inp=document.getElementById("nxt-imp-input"); if(inp) inp.click(); }}
                   style={{border:`2px dashed ${impDrag?T.grn:T.br2}`,borderRadius:10,padding:"22px 14px",textAlign:"center",cursor:"pointer",background:impDrag?"rgba(0,255,135,.07)":T.bg3,transition:"all .15s"}}>
                   <div style={{fontSize:26,marginBottom:6}}>📁</div>
-                  <div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:impDrag?T.grn:T.txt,letterSpacing:.3}}>Arrastra tu archivo aquí</div>
-                  <div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginTop:4,lineHeight:1.5}}>CSV · Excel · TXT con: <span style={{color:T.mid}}>Ticker, Acciones, Precio</span><br/>o haz clic para buscarlo</div>
+                  <div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:impDrag?T.grn:T.txt,letterSpacing:.3}}>{isEN?"Drag your file here":"Arrastra tu archivo aquí"}</div>
+                  <div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginTop:4,lineHeight:1.5}}>CSV · Excel · TXT con: <span style={{color:T.mid}}>Ticker, Acciones, Precio</span><br/>{isEN?"or click to browse":"o haz clic para buscarlo"}</div>
                   <input id="nxt-imp-input" type="file" accept=".csv,.txt,.xlsx,.xls" style={{display:"none"}} onChange={(e)=>{ const f=e.target.files&&e.target.files[0]; if(f) importFile(f); e.target.value=""; }}/>
                 </div>
                 {impMsg && <div style={{marginTop:8,fontFamily:MONO,fontSize:11,fontWeight:600,color:impMsg.type==="ok"?T.grn:T.red,background:(impMsg.type==="ok"?"rgba(0,255,135,.08)":"rgba(255,61,90,.08)"),border:`1px solid ${impMsg.type==="ok"?"rgba(0,255,135,.25)":"rgba(255,61,90,.25)"}`,borderRadius:6,padding:"8px 10px"}}>{impMsg.text}</div>}
                 <div style={{display:"flex",alignItems:"center",gap:10,margin:"14px 0 4px"}}><div style={{flex:1,height:1,background:T.br}}/><span style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>O UNA A UNA</span><div style={{flex:1,height:1,background:T.br}}/></div>
               </div>
             )}
-            {[["Ticker","ticker","AAPL","text"],["Unidades","shares","10","number"],["Precio entrada","entryPrice","154.00","number"]].map(([l,k,ph,tp])=>(
+            {[[isEN?"Ticker":"Ticker","ticker","AAPL","text"],[isEN?"Units":"Unidades","shares","10","number"],[isEN?"Entry price":"Precio entrada","entryPrice","154.00","number"]].map(([l,k,ph,tp])=>(
               <div key={k} style={{marginBottom:10}}>
                 <div style={{...lbl,marginBottom:5}}>{l}</div>
                 <input value={form[k]} onChange={e=>setForm(f=>({...f,[k]:k==="ticker"?e.target.value.toUpperCase():e.target.value}))} placeholder={ph} type={tp} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/>
               </div>
             ))}
+            <div style={{marginBottom:10}}>
+              <div style={{...lbl,marginBottom:5}}>{isEN?"Broker (optional)":"Broker (opcional)"}</div>
+              <input list="nxt-broker-list" value={form.broker||""} onChange={e=>setForm(f=>({...f,broker:e.target.value}))} placeholder={isEN?"e.g. Interactive Brokers":"ej. Interactive Brokers"} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/>
+              <datalist id="nxt-broker-list">{BROKERS.map(b=><option key={b} value={b}/>)}</datalist>
+            </div>
             <div style={{display:"flex",gap:8,marginTop:6}}>
-              <button onClick={()=>{setShowAdd(false);setImpMsg(null);}} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:5,padding:"9px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>{impMsg&&impMsg.type==="ok"?"Cerrar":"Cancelar"}</button>
-              <button onClick={()=>{ const tk=form.ticker.trim().toUpperCase(); const sh=parseFloat(form.shares); const ep=parseFloat(form.entryPrice); if(!tk||!(sh>0)||!(ep>0))return; if(editId){ setPositions(prev=>prev.map(x=>x.id===editId?{...x,ticker:tk,shares:sh,entryPrice:ep,note:form.note||""}:x)); } else { setPositions(prev=>[...prev,{id:Date.now()+"",ticker:tk,shares:sh,entryPrice:ep,note:form.note||"",addedAt:new Date().toISOString()}]); } setShowAdd(false); setEditId(null); setForm({ticker:"",shares:"",entryPrice:"",note:""}); }} style={{flex:1,background:"rgba(0,255,135,.15)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:5,padding:"9px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>{editId?"Guardar":"Añadir"}</button>
+              <button onClick={()=>{setShowAdd(false);setImpMsg(null);}} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:5,padding:"9px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>{impMsg&&impMsg.type==="ok"?(isEN?"Close":"Cerrar"):(isEN?"Cancel":"Cancelar")}</button>
+              <button onClick={()=>{ const tk=form.ticker.trim().toUpperCase(); const sh=parseFloat(form.shares); const ep=parseFloat(form.entryPrice); const br=(form.broker||"").trim(); if(!tk||!(sh>0)||!(ep>0))return; if(editId){ setPositions(prev=>prev.map(x=>x.id===editId?{...x,ticker:tk,shares:sh,entryPrice:ep,note:form.note||"",broker:br}:x)); } else { setPositions(prev=>[...prev,{id:Date.now()+"",ticker:tk,shares:sh,entryPrice:ep,note:form.note||"",broker:br,addedAt:new Date().toISOString()}]); } setShowAdd(false); setEditId(null); setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""}); }} style={{flex:1,background:"rgba(0,255,135,.15)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:5,padding:"9px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>{editId?(isEN?"Save":"Guardar"):(isEN?"Add":"Añadir")}</button>
             </div>
           </div>
         </div>
@@ -24920,8 +25053,23 @@ export default function App(){
               se apilan en 1 columna en móvil para no desbordar Safari iPhone.
               Bordes laterales → inferior para que el stack se vea limpio ── */
         .nexo-term-grid { grid-template-columns: 1fr !important; }
-        .nexo-term-grid > div { border-left: none !important; border-right: none !important; }
+        .nexo-term-grid > div { border-left: none !important; border-right: none !important; min-width: 0 !important; }
         .nexo-term-grid > div:not(:last-child) { border-bottom: 1px solid #1e2a38 !important; }
+        /* tablas/contenido ancho dentro del terminal hacen scroll-x propio, no rompen la página */
+        .nexo-term-grid table { display: block !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; white-space: nowrap !important; }
+
+        /* ── TERMINAL topbar: apilar en móvil y pestañas en una fila deslizable ── */
+        .nexo-term-top { height: auto !important; flex-wrap: wrap !important; padding: 8px 10px !important; gap: 8px !important; row-gap: 8px !important; }
+        .nexo-term-brand { flex: 1 1 auto !important; min-width: 0 !important; }
+        .nexo-term-status { flex-wrap: wrap !important; gap: 8px !important; }
+        .nexo-term-tabs {
+          order: 3 !important; width: 100% !important; flex-wrap: nowrap !important;
+          overflow-x: auto !important; -webkit-overflow-scrolling: touch !important;
+          scrollbar-width: none !important; padding-bottom: 2px !important;
+        }
+        .nexo-term-tabs::-webkit-scrollbar { display: none !important; }
+        .nexo-term-tabs > button { flex: 0 0 auto !important; }
+        .nexo-term-tabs > div { flex: 0 0 auto !important; }
 
         /* ── WIN STREAK TRACKER — 2 col → 1 col ── */
         .nexo-winstreak-layout { grid-template-columns: 1fr !important; }
