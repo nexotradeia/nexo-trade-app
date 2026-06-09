@@ -16188,6 +16188,8 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
   const RISK_COLOR   = { 1:"#10B981", 2:"#F59E0B", 3:"#EF4444" };
 
   const IdeaCard = ({ idea }) => {
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     const live       = livePx[idea.ticker];
     const curPrice   = live?.price || idea.entry;
     const change     = live?.change || 0;
@@ -16205,6 +16207,48 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
     const pctStop   = ((idea.stop   - lo) / (hi - lo) * 100).toFixed(1);
     const pctCur    = Math.max(0, Math.min(100, ((curPrice - lo) / (hi - lo) * 100))).toFixed(1);
     const daysPub   = Math.floor((new Date() - new Date(idea.published)) / 86400000);
+
+    // ── MÓVIL: tarjeta compacta con expand (#15) ─────────────────────────────
+    if (isMobile) {
+      return (
+        <div style={{background:"linear-gradient(145deg,rgba(10,14,26,0.98),rgba(15,22,40,0.96))",border:`1px solid ${sc}30`,borderRadius:14,overflow:"hidden",transition:"all 0.22s",position:"relative",boxShadow:`0 2px 12px rgba(0,0,0,0.3)`}}>
+          <div style={{height:3,background:`linear-gradient(90deg,${sc},${sc}30)`}}/>
+          {/* Compact row */}
+          <div onClick={()=>setMobileExpanded(e=>!e)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",cursor:"pointer"}}>
+            <div style={{width:32,height:32,borderRadius:9,background:`${sc}18`,border:`1px solid ${sc}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{idea.icon}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontFamily:"monospace",fontWeight:900,fontSize:14,color:sc}}>{idea.ticker}</span>
+                <span style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:12,padding:"2px 7px",fontSize:10,fontWeight:800,color:sc}}>{SIGNAL_ICON[idea.signal]} {isEN?(idea.signal==="COMPRA"?"BUY":idea.signal==="VENTA"?"SELL":"HOLD"):idea.signal}</span>
+              </div>
+              <div style={{fontSize:10,color:"#475569",marginTop:1}}>{idea.name}</div>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0}}>
+              <div style={{fontSize:13,fontWeight:900,color:upsidePos?sc:"#EF4444"}}>{upsidePos?"+":"-"}{upsideAbs}%</div>
+              <div style={{fontSize:9,color:"#475569"}}>{isEN?"upside":"potencial"}</div>
+            </div>
+            <button onClick={e=>{e.stopPropagation();setSelIdea(idea);}} style={{flexShrink:0,background:`${sc}18`,border:`1px solid ${sc}40`,borderRadius:8,padding:"6px 10px",color:sc,fontSize:11,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>
+              {isEN?"View →":"Ver →"}
+            </button>
+            <span style={{fontSize:14,color:"#475569",flexShrink:0,marginLeft:2}}>{mobileExpanded?"▲":"▼"}</span>
+          </div>
+          {/* Expandable detail */}
+          {mobileExpanded && (
+            <div style={{padding:"0 12px 12px",borderTop:`1px solid rgba(255,255,255,0.05)`}}>
+              <div style={{display:"flex",gap:8,marginTop:10,marginBottom:8}}>
+                {[{l:isEN?"Entry":"Entrada",v:`$${idea.entry}`,c:"#94a3b8"},{l:isEN?"Target":"Target",v:`$${idea.target}`,c:sc},{l:"Stop",v:`$${idea.stop_loss||idea.stop}`,c:"#EF4444"}].map(({l,v,c})=>(
+                  <div key={l} style={{flex:1,textAlign:"center",background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 4px"}}>
+                    <div style={{fontSize:9,color:"#475569",fontWeight:700}}>{l}</div>
+                    <div style={{fontSize:12,fontWeight:800,color:c,fontFamily:"monospace"}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{fontSize:11,color:"#64748b",lineHeight:1.5}}>{isEN&&idea.razonEn?idea.razonEn:idea.razon}</div>
+            </div>
+          )}
+        </div>
+      );
+    }
 
     return (
       <div onClick={() => setSelIdea(idea)}
@@ -24995,8 +25039,8 @@ export default function App(){
             {i===1 && SHOW_TOP_TRADERS && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={()=>{setPage(8);setShowLanding(false);}}/>}
             {/* 👁 Banner Watchlist Premium — entre posts (cerrable) */}
             {i===2 && <WatchlistFeedBanner user={user} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}} lang={lang}/>}
-            {/* 📧 Captura de email — leads de usuarios free/anónimos (cerrable) */}
-            {i===4 && <EmailCaptureFeedCard user={user} isPremium={effectivePremium} lang={lang}/>}
+            {/* 📧 Captura de email — SOLO visitantes no registrados */}
+            {i===4 && !user && <EmailCaptureFeedCard user={user} isPremium={effectivePremium} lang={lang}/>}
             {/* 💎 En su lugar, a logueados free: empuje sutil a Premium (ya tenemos su email) */}
             {i===4 && user && !effectivePremium && (
               <div onClick={()=>{setPage(8);setShowLanding(false);}} style={{cursor:"pointer",background:"linear-gradient(135deg,rgba(224,182,75,0.13),rgba(200,144,31,0.05))",border:"1px solid rgba(224,182,75,0.38)",borderRadius:16,padding:"13px 16px",marginBottom:6,display:"flex",alignItems:"center",gap:12,boxShadow:"0 1px 10px rgba(200,144,31,0.10)"}}>
@@ -25510,6 +25554,10 @@ export default function App(){
         0%,100% { box-shadow:0 0 10px rgba(245,158,11,0.35); transform:scale(1); }
         50%     { box-shadow:0 0 26px rgba(245,158,11,0.75), 0 0 50px rgba(245,158,11,0.25); transform:scale(1.045); }
       }
+      @keyframes nexoPremiumPulse {
+        0%,100% { box-shadow:-10px 0 14px 6px #0B1F3F, 0 3px 16px rgba(224,182,75,0.55); transform:scale(1); }
+        50%     { box-shadow:-10px 0 14px 6px #0B1F3F, 0 3px 28px rgba(224,182,75,0.85), 0 0 0 4px rgba(224,182,75,0.18); transform:scale(1.05); }
+      }
     `}</style>
     <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s",overflowX:"hidden"}}>
       {/* 📧 Email gate obligatorio en primera visita (no usuarios logueados) */}
@@ -25741,8 +25789,8 @@ export default function App(){
             );
           })}
           <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{flexShrink:0,position:"sticky",right:6,zIndex:6,margin:"0 6px 0 14px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"5px 15px",cursor:"pointer",color:"#1B1303",fontSize:11.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",boxShadow:"-10px 0 14px 6px #0B1F3F, 0 2px 12px rgba(224,182,75,0.45)",animation:effectivePremium?"none":"nexoPremiumGlow 2.2s ease-in-out infinite"}}>
-            {effectivePremium ? "✦ Premium" : (lang==="en"?"⭐ Go Premium":"⭐ Ir Premium")}
+            style={{flexShrink:0,position:"sticky",right:6,zIndex:6,margin:"0 6px 0 10px",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:16,padding:"8px 20px",cursor:"pointer",color:"#1B1303",fontSize:13,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,transition:"all 0.2s",boxShadow:"-10px 0 14px 6px #0B1F3F, 0 3px 16px rgba(224,182,75,0.55)",animation:effectivePremium?"none":"nexoPremiumPulse 1.8s ease-in-out infinite"}}>
+            {effectivePremium ? "✦ Premium" : (lang==="en"?"⭐ Premium — $6.58/mo →":"⭐ Premium — $6.58/mes →")}
           </button>
         </div>
       </nav>
@@ -26149,15 +26197,16 @@ export default function App(){
       )}
 
 
-      {/* PREDICCIÓN DEL DÍA */}
-      {page===0 && !showLanding && page!==99 && <PredictionBanner lang={lang} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>}
+      {/* PREDICCIÓN DEL DÍA — oculta en móvil (#9) */}
+      {page===0 && !showLanding && page!==99 && <div className="nexo-hide-mobile"><PredictionBanner lang={lang} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
+</div>}
 
-      {/* SOCIAL PROOF STATS BAR — visible a todos */}
-      {page===0 && !showLanding && page!==99 && <SocialProofBar user={user} onRegister={()=>setAuth("register")} lang={lang}/>}
+      {/* SOCIAL PROOF STATS BAR — oculta en móvil (#9) */}
+      {page===0 && !showLanding && page!==99 && <div className="nexo-hide-mobile"><SocialProofBar user={user} onRegister={()=>setAuth("register")} lang={lang}/></div>}
 
-      {/* MARKETS MINI WIDGET — Mercados / Predicciones / Tendencias */}
+      {/* MARKETS MINI WIDGET — oculto en móvil (#9) */}
       {page===0 && !showLanding && page!==99 && (
-        <div style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
+        <div className="nexo-hide-mobile" style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
           <MarketsMiniWidget lang={lang}/>
         </div>
       )}
