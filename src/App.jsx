@@ -19887,6 +19887,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [chVol, setChVol] = useState(true);
   const [chSel, setChSel] = useState(null); // ticker seleccionado para CHARTS (null = top position)
   const [ovRange, setOvRange] = useState("1M"); // rango del gráfico overview (PORTFOLIO)
+  const [navView, setNavView] = useState("overview"); // NAVIGATION: overview|positions|orders|history|analytics|risk
   const [scMarket, setScMarket] = useState("NYSE + NASDAQ");
   const [scSector, setScSector] = useState("Todos");
   const [scQuery, setScQuery] = useState("");
@@ -20296,9 +20297,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
           <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
             <div style={{...lbl,padding:"0 14px 8px"}}>Navigation</div>
-            {[["◈","Overview","LIVE",T.grn],["◉","Positions",String(positions.length),T.dim],["◎","Orders","",""],["◌","History","",""],["◐","Analytics","",""],["⊕","Risk Matrix","",""]].map((it,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:9,padding:"7px 14px",fontSize:12,fontWeight:500,color:i===0?T.grn:T.mid,background:i===0?"rgba(0,255,135,.07)":"transparent",borderRight:i===0?`2px solid ${T.grn}`:"none",cursor:"pointer",fontFamily:SANS}}><span style={{fontSize:13,width:16,textAlign:"center"}}>{it[0]}</span>{it[1]}{it[2]&&<span style={{marginLeft:"auto",fontFamily:MONO,fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:3,background:i===0?"rgba(0,255,135,.12)":T.bg4,color:it[3]||T.dim}}>{it[2]}</span>}</div>
-            ))}
+            {[["◈","Overview","overview","LIVE",T.grn],["◉","Positions","positions",String(positions.length),T.dim],["◎","Orders","orders","",""],["◌","History","history",String(positions.length),T.dim],["◐","Analytics","analytics","",""],["⊕","Risk Matrix","risk","",""]].map((it,i)=>{ const a=navView===it[2]; return (
+              <div key={i} onClick={()=>setNavView(it[2])} style={{display:"flex",alignItems:"center",gap:9,padding:"7px 14px",fontSize:12,fontWeight:500,color:a?T.grn:T.mid,background:a?"rgba(0,255,135,.07)":"transparent",borderRight:a?`2px solid ${T.grn}`:"2px solid transparent",cursor:"pointer",fontFamily:SANS,transition:"all .12s"}}><span style={{fontSize:13,width:16,textAlign:"center"}}>{it[0]}</span>{it[1]}{it[3]&&<span style={{marginLeft:"auto",fontFamily:MONO,fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:3,background:a?"rgba(0,255,135,.12)":T.bg4,color:it[4]||T.dim}}>{it[3]}</span>}</div>
+            ); })}
           </div>
           <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
             <div style={{...lbl,padding:"0 14px 8px"}}>Open Positions</div>
@@ -20318,6 +20319,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         {/* MAIN */}
         <div style={{minWidth:0}}>
+          {navView==="overview" && (<>
           {/* overview strip */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",borderBottom:`1px solid ${T.br}`}}>
             {[
@@ -20385,6 +20387,95 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </table>
             </div>
           </div>
+          </>)}
+
+          {/* ── POSITIONS ── */}
+          {navView==="positions" && (()=>{ const tot=Math.max(1,totalValue); return (
+            <div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
+                <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid}}>POSICIONES · {positions.length}</div>
+                <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:5,padding:"5px 12px",fontFamily:MONO,fontSize:10,fontWeight:700,cursor:"pointer"}}>+ AÑADIR</button>
+              </div>
+              <div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
+                  <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","UNIDADES","ENTRADA","PRECIO ACT.","MKT VALUE","% CARTERA","P&L $","P&L %",""].map((h,i)=><th key={i} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                  <tbody>
+                    {[...sortedRows].sort((a,b)=>b.mv-a.mv).map((r)=>{ const pct=r.mv/tot*100; return (
+                      <tr key={r.p.id} style={{borderBottom:"1px solid #111820"}}>
+                        <td style={{padding:"9px 14px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(r.tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r.tk.slice(0,2)}</div><div><div style={{fontSize:12,fontWeight:700,color:T.txt}}>{r.tk}</div><div style={{fontSize:9,color:T.dim}}>{r.name}</div></div></div></td>
+                        <td style={{padding:"9px 14px",color:T.txt}}>{r.shares}</td>
+                        <td style={{padding:"9px 14px",color:T.mid}}>${r.entry.toLocaleString("en-US")}</td>
+                        <td style={{padding:"9px 14px",color:T.txt,fontWeight:600}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                        <td style={{padding:"9px 14px",color:T.mid}}>${Math.round(r.mv).toLocaleString("en-US")}</td>
+                        <td style={{padding:"9px 14px"}}><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:46,height:6,background:T.bg4,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:Math.min(100,pct)+"%",background:T.blue}}/></div><span style={{color:T.mid,fontSize:10}}>{pct.toFixed(1)}%</span></div></td>
+                        <td style={{padding:"9px 14px",color:r.pnl>=0?T.grn:T.red,fontWeight:700}}>{m$(r.pnl)}</td>
+                        <td style={{padding:"9px 14px",color:r.pnlPct>=0?T.grn:T.red,fontWeight:600}}>{(r.pnlPct>=0?"+":"")+r.pnlPct.toFixed(1)}%</td>
+                        <td style={{padding:"9px 14px"}}><div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(r.p.id);setForm({ticker:r.tk,shares:String(r.shares),entryPrice:String(r.entry),note:r.p.note||""});setShowAdd(true);}} style={{width:24,height:24,borderRadius:3,background:T.bg4,border:`1px solid ${T.br}`,color:T.mid,fontSize:11,cursor:"pointer"}}>✎</button><button onClick={()=>setPositions(prev=>prev.filter(x=>x.id!==r.p.id))} style={{width:24,height:24,borderRadius:3,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></div></td>
+                      </tr>
+                    ); })}
+                    {!rows.length&&<tr><td colSpan={9} style={{padding:"40px",textAlign:"center",color:T.dim,fontFamily:MONO}}>Sin posiciones · usa "+ AÑADIR"</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ); })()}
+
+          {/* ── ORDERS (tracker honesto, no bróker) ── */}
+          {navView==="orders" && (
+            <div style={{padding:"70px 24px",textAlign:"center"}}>
+              <div style={{fontSize:30,marginBottom:12}}>◎</div>
+              <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt,letterSpacing:.5,marginBottom:8}}>Sin órdenes abiertas</div>
+              <div style={{fontFamily:SANS,fontSize:12,color:T.mid,maxWidth:420,margin:"0 auto",lineHeight:1.6}}>Este terminal es un <b style={{color:T.txt}}>tracker de tu cartera</b>, no un bróker — no envía órdenes al mercado. Registra tus entradas y salidas como posiciones, y documenta tu plan en el Journal.</div>
+              <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18,flexWrap:"wrap"}}>
+                <button onClick={()=>{setNavView("positions");setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:700,cursor:"pointer"}}>+ Añadir posición</button>
+                <button onClick={()=>setTermTab("journal")} style={{background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:600,cursor:"pointer"}}>Abrir Journal →</button>
+              </div>
+            </div>
+          )}
+
+          {/* ── HISTORY (actividad real desde addedAt) ── */}
+          {navView==="history" && (()=>{ const hist=[...positions].filter(p=>p.addedAt).sort((a,b)=>new Date(b.addedAt)-new Date(a.addedAt)); return (
+            <div>
+              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2}}>HISTORIAL DE ACTIVIDAD</div>
+              {hist.length? hist.map((p,i)=>{ const d=new Date(p.addedAt); const tk=(p.ticker||"").toUpperCase(); return (
+                <div key={p.id||i} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 18px",borderBottom:"1px solid #111820"}}>
+                  <div style={{width:30,height:30,borderRadius:6,background:avatarBg(tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt,flexShrink:0}}>{tk.slice(0,2)}</div>
+                  <div style={{flex:1,minWidth:0}}><div style={{fontFamily:MONO,fontSize:12,color:T.txt}}><span style={{color:T.grn,fontWeight:700}}>AÑADIDA</span> {p.shares} uds de <b>{tk}</b> @ ${parseFloat(p.entryPrice).toLocaleString("en-US")}</div>{p.note&&<div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginTop:2}}>{p.note}</div>}</div>
+                  <div style={{fontFamily:MONO,fontSize:10,color:T.dim,textAlign:"right",flexShrink:0}}>{d.toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})}<br/>{d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}</div>
+                </div>
+              ); }) : <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim,fontSize:12}}>Sin actividad todavía · agrega tu primera posición</div>}
+            </div>
+          ); })()}
+
+          {/* ── ANALYTICS (asignación real por posición + chart) ── */}
+          {navView==="analytics" && (()=>{ const tot=Math.max(1,totalValue); const alloc=[...rows].sort((a,b)=>b.mv-a.mv); const COLORS=[T.grn,T.blue,T.gold,T.purp,T.red,"#22d3ee","#f472b6","#a3e635"]; return (
+            <div>
+              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2}}>ASIGNACIÓN DE CARTERA · % por posición</div>
+              {alloc.length? (<>
+                <div style={{height:14,display:"flex",margin:"14px 18px 4px",borderRadius:4,overflow:"hidden",border:`1px solid ${T.br}`}}>{alloc.map((r,i)=>(<div key={r.p.id} title={r.tk+" "+(r.mv/tot*100).toFixed(1)+"%"} style={{width:(r.mv/tot*100)+"%",background:COLORS[i%COLORS.length]}}/>))}</div>
+                <div style={{padding:"6px 18px 14px"}}>
+                  {alloc.map((r,i)=>{ const pct=r.mv/tot*100; return (
+                    <div key={r.p.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #111820"}}>
+                      <span style={{width:9,height:9,borderRadius:2,background:COLORS[i%COLORS.length],flexShrink:0}}/>
+                      <span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt,width:62}}>{r.tk}</span>
+                      <div style={{flex:1,height:8,background:T.bg4,borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",width:Math.min(100,pct)+"%",background:COLORS[i%COLORS.length]}}/></div>
+                      <span style={{fontFamily:MONO,fontSize:11,color:T.mid,width:52,textAlign:"right"}}>{pct.toFixed(1)}%</span>
+                      <span style={{fontFamily:MONO,fontSize:11,color:r.pnl>=0?T.grn:T.red,width:80,textAlign:"right"}}>{m$(r.pnl)}</span>
+                    </div>
+                  ); })}
+                </div>
+              </>) : <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim,fontSize:12}}>Sin posiciones para analizar</div>}
+            </div>
+          ); })()}
+
+          {/* ── RISK MATRIX ── */}
+          {navView==="risk" && (
+            <div>
+              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2,display:"flex",alignItems:"center",gap:8}}>MATRIZ DE RIESGO <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>ILUSTRATIVO</span></div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,padding:18}}>{RISK.map((r,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"16px 12px",textAlign:"center",position:"relative",overflow:"hidden"}}><div style={{fontFamily:MONO,fontSize:22,fontWeight:700,color:r[2],lineHeight:1,marginBottom:6}}>{r[0]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>{r[1]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:3,background:r[2]}}/></div>))}</div>
+              <div style={{fontFamily:SANS,fontSize:11,color:T.dim,padding:"0 18px 18px",lineHeight:1.6}}>Métricas de riesgo de referencia. Para cálculos en vivo sobre tus posiciones reales (Sharpe, Beta y VaR con datos de mercado) se requiere un plan de datos de pago.</div>
+            </div>
+          )}
         </div>
         {/* RIGHT */}
         <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
