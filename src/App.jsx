@@ -2203,6 +2203,16 @@ function AuthModal({mode,onClose,onAuth,lang}){
           });
         }catch(e){}
         try{ localStorage.removeItem("nexo-ref"); }catch{}
+        // Registrar referido de influencer (fire-and-forget)
+        if(refId){
+          try{
+            fetch("/api/track-ref",{
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({ref_code:refId, user_email:email, user_id:data.user?.id||null, source:"signup"}),
+            }).catch(()=>{});
+          }catch(e){}
+        }
         // Email de bienvenida via Edge Function (no bloquea el flujo)
         try{
           supabase.functions.invoke("send-welcome",{body:{email,name:finalUsername}});
@@ -3512,7 +3522,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
                 style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",border:"none",borderRadius:24,padding:"10px 24px",fontSize:13,fontWeight:900,letterSpacing:0.3,cursor:"pointer",boxShadow:"0 6px 20px rgba(200,144,31,0.45)",display:"flex",alignItems:"center",gap:7}}>
                 <span style={{fontSize:15}}>🔓</span>{isEN?"Unlock with Premium":"Desbloquear con Premium"}
               </button>
-              <span style={{fontSize:10.5,fontWeight:700,color:"#B45309",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"2px 10px"}}>✦ {isEN?"$15.99/mo · or $79/yr · 7-day free trial":"$15.99/mes · o $79/año · 7 días gratis"}</span>
+              <span style={{fontSize:10.5,fontWeight:700,color:"#B45309",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.35)",borderRadius:20,padding:"2px 10px"}}>✦ {isEN?"$15.99/mo · or $79/yr · 3-day free trial":"$15.99/mes · o $79/año · 3 días gratis"}</span>
             </div>
           )}
           </div>
@@ -7790,7 +7800,7 @@ function MiniSpark({seed=1, up=true, width=48, height=20}){
   );
 }
 
-// ── Modal Paywall — 7 días gratis + beneficios ───────────────────────────────
+// ── Modal Paywall — 3 días gratis + beneficios ───────────────────────────────
 function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"}){
   if(!open) return null;
   const isEN=lang==="en";
@@ -7823,7 +7833,7 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
             {isEN?"Unlock everything":"Desbloquea todo"}
           </div>
           <div style={{fontSize:13,color:"rgba(255,255,255,0.85)",lineHeight:1.5}}>
-            {isEN?"Start your 7-day free trial today":"Empieza tus 7 días gratis hoy"}
+            {isEN?"Start your 3-day free trial today":"Empieza tus 3 días gratis hoy"}
           </div>
         </div>
         {/* Body */}
@@ -7846,7 +7856,7 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
             <span style={{fontSize:30,fontWeight:900,color:"#0F172A",letterSpacing:-1}}>$15.99</span>
             <span style={{fontSize:13,color:"#94A3B8",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
             <div style={{fontSize:11,color:"#B45309",fontWeight:800,marginTop:3}}>{isEN?"🔥 Launch price — going up to $29 soon":"🔥 Precio de lanzamiento — sube a $29 pronto"}</div>
-            <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:2}}>{isEN?"7 days free · cancel anytime":"7 días gratis · cancela cuando quieras"}</div>
+            <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:2}}>{isEN?"3 days free · cancel anytime":"3 días gratis · cancela cuando quieras"}</div>
           </div>
           <button onClick={onUpgrade}
             style={{width:"100%",background:"linear-gradient(135deg,#0F4C81,#0F5E68)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontWeight:800,fontSize:14.5,cursor:"pointer",boxShadow:"0 6px 20px rgba(15,76,129,0.35)",fontFamily:"inherit"}}>
@@ -9511,7 +9521,7 @@ function ReferralSection({ user }) {
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}}>
         {[
           {icon:"🎁",title:isEN?"You earn":"Tú ganas",val:isEN?"1 month PREMIUM free":"1 mes PREMIUM gratis",sub:isEN?"per PREMIUM referral":"por cada referido PREMIUM"},
-          {icon:"🤝",title:isEN?"Your friend gets":"Tu amigo gana",val:isEN?"7 days free":"7 días gratis",sub:isEN?"on PREMIUM signup":"al suscribirse PREMIUM"},
+          {icon:"🤝",title:isEN?"Your friend gets":"Tu amigo gana",val:isEN?"3 days free":"3 días gratis",sub:isEN?"on PREMIUM signup":"al suscribirse PREMIUM"},
         ].map((r,i)=>(
           <div key={i} style={{background:"rgba(255,255,255,0.5)",border:"1px solid rgba(0,0,0,0.06)",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
             <div style={{fontSize:16,marginBottom:2}}>{r.icon}</div>
@@ -15205,7 +15215,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                             style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:900,cursor:"pointer",width:"100%",boxShadow:"0 4px 16px rgba(200,144,31,0.4)"}}>
                             ✦ {isEN?"See all gurus":"Ver todos los gurús"}
                           </button>
-                          <div style={{fontSize:10,color:"#94a3b8",marginTop:5}}>{isEN?"$15.99/mo or $79/yr · 7-day free trial":"$15.99/mes o $79/año · 7 días gratis"}</div>
+                          <div style={{fontSize:10,color:"#94a3b8",marginTop:5}}>{isEN?"$15.99/mo or $79/yr · 3-day free trial":"$15.99/mes o $79/año · 3 días gratis"}</div>
                         </div>
                       </div>
                     )}
@@ -23589,6 +23599,7 @@ function AdminDashboard(){
   const [search,setSearch]   = useState("");
   const [recentSignups,setRecentSignups] = useState([]);
   const [onlineNow,setOnlineNow]         = useState([]);
+  const [referrals,setReferrals]         = useState([]);
   const adminChRef = useRef(null);
   useEffect(()=>{ window.scrollTo({top:0,behavior:"instant"}); },[]);
 
@@ -23659,6 +23670,18 @@ function AdminDashboard(){
       if(r8.data) setPosts(r8.data);
       if(r7.data) setSubs(r7.data);
 
+      // Referidos de influencers
+      const rRef = await withTimeout(supabase.from("influencer_referrals").select("ref_code,user_email,created_at").order("created_at",{ascending:false}).limit(500));
+      if(rRef.data){
+        // Agrupar por ref_code
+        const grouped={};
+        rRef.data.forEach(row=>{
+          if(!grouped[row.ref_code]) grouped[row.ref_code]={ref_code:row.ref_code,count:0,last:row.created_at};
+          grouped[row.ref_code].count++;
+        });
+        setReferrals(Object.values(grouped).sort((a,b)=>b.count-a.count));
+      }
+
       // Counts finales
       const [r1,r2,r3,r5,r6] = await Promise.all([
         withTimeout(supabase.from("profiles").select("*",{count:"exact",head:true})),
@@ -23728,7 +23751,7 @@ function AdminDashboard(){
     </div>
   );
 
-  const TABS=[{k:"dashboard",l:"Dashboard"},{k:"usuarios",l:"Usuarios"},{k:"actividad",l:"Actividad"},{k:"reportes",l:"Reportes"}];
+  const TABS=[{k:"dashboard",l:"Dashboard"},{k:"usuarios",l:"Usuarios"},{k:"actividad",l:"Actividad"},{k:"reportes",l:"Reportes"},{k:"influencers",l:"🤝 Influencers"}];
   const maxLogins = Math.max(...users.map(u=>u.logins),1);
   const filtered = users.filter(u=>!search||u.username?.toLowerCase().includes(search.toLowerCase()));
   const top4 = [...users].slice(0,4);
@@ -24133,6 +24156,71 @@ function AdminDashboard(){
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {tab==="influencers" && (
+        <div style={{display:"flex",flexDirection:"column",gap:20}}>
+          {/* Header + instrucciones */}
+          <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+            <div style={{fontWeight:800,fontSize:15,color:"#111827",marginBottom:10}}>🤝 Links de Influencers</div>
+            <div style={{fontSize:13,color:"#6B7280",lineHeight:1.7}}>
+              Dale a cada influencer su propio link personalizado:<br/>
+              <code style={{background:"#F3F4F6",padding:"2px 8px",borderRadius:6,fontFamily:"monospace",fontSize:12,color:"#0F4C81"}}>
+                https://nexotradeia.com?ref=NOMBRE
+              </code><br/>
+              <span style={{fontSize:12,color:"#9CA3AF",marginTop:6,display:"block"}}>
+                El link guarda el código automáticamente. Al registrarse, queda rastreado en esta tabla.
+              </span>
+            </div>
+            {/* Tabla de ejemplos */}
+            <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:6}}>
+              {["carlos","sofia","mateo","ana"].map(name=>(
+                <div key={name} style={{display:"flex",alignItems:"center",gap:12,background:"#F9FAFB",borderRadius:8,padding:"8px 12px"}}>
+                  <span style={{fontSize:12,fontWeight:700,color:"#0F4C81",minWidth:70}}>@{name}</span>
+                  <code style={{fontSize:11,color:"#374151",flex:1,overflowX:"auto",fontFamily:"monospace"}}>nexotradeia.com?ref={name}</code>
+                  <button onClick={()=>{ try{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${name}`);}catch{} }}
+                    style={{background:"transparent",border:"1px solid #E5E7EB",borderRadius:6,padding:"3px 10px",fontSize:11,color:"#374151",cursor:"pointer"}}>
+                    Copiar
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats de referidos */}
+          <div style={{background:"#FFFFFF",border:"1px solid #EBEBEB",borderRadius:16,padding:"24px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
+            <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:16}}>
+              📊 Registros por influencer ({referrals.reduce((s,r)=>s+r.count,0)} total)
+            </div>
+            {referrals.length===0 ? (
+              <div style={{color:"#9CA3AF",fontSize:13,textAlign:"center",padding:"24px 0"}}>
+                Sin registros todavía. Comparte los links con influencers.
+              </div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                {referrals.map((r,i)=>{
+                  const pct = referrals[0].count ? Math.round(r.count/referrals[0].count*100) : 0;
+                  return(
+                    <div key={r.ref_code} style={{background:"#F9FAFB",borderRadius:10,padding:"12px 14px"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                        <span style={{fontWeight:700,fontSize:13,color:"#111827"}}>
+                          {i===0?"🥇":i===1?"🥈":i===2?"🥉":"  "} @{r.ref_code}
+                        </span>
+                        <span style={{fontWeight:800,fontSize:15,color:"#0F5E68"}}>{r.count} {r.count===1?"registro":"registros"}</span>
+                      </div>
+                      <div style={{background:"#E5E7EB",borderRadius:99,height:6,overflow:"hidden"}}>
+                        <div style={{background:"linear-gradient(90deg,#0F4C81,#0F5E68)",width:`${pct}%`,height:"100%",borderRadius:99,transition:"width 0.4s"}}/>
+                      </div>
+                      <div style={{fontSize:11,color:"#9CA3AF",marginTop:4}}>
+                        Último: {new Date(r.last).toLocaleDateString("es-MX")}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -25048,7 +25136,7 @@ export default function App(){
                 <div style={{width:38,height:38,borderRadius:11,background:"linear-gradient(135deg,#E0B64B,#C8901F)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0,boxShadow:"0 3px 12px rgba(200,144,31,0.4)"}}>💎</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13.5,fontWeight:800,color:"var(--c-text)"}}>{lang==="en"?"Unlock Premium — live signals & AI picks":"Desbloquea Premium — señales en vivo y picks IA"}</div>
-                  <div style={{fontSize:11.5,color:"var(--c-muted)",marginTop:1}}>{lang==="en"?"From $6.58/mo · 7-day free trial":"Desde $6.58/mes · 7 días gratis"}</div>
+                  <div style={{fontSize:11.5,color:"var(--c-muted)",marginTop:1}}>{lang==="en"?"From $6.58/mo · 3-day free trial":"Desde $6.58/mes · 3 días gratis"}</div>
                 </div>
                 <span style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontSize:12,fontWeight:900,borderRadius:20,padding:"7px 14px",flexShrink:0,whiteSpace:"nowrap"}}>{lang==="en"?"Upgrade →":"Mejorar →"}</span>
               </div>
