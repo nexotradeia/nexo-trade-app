@@ -6410,9 +6410,9 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             ? <>
                 <div style={{fontSize:48,marginBottom:12}}>⭐</div>
                 <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"You are a Premium member!":"¡Eres miembro Premium!"}</h1>
-                <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>Tienes acceso completo a todas las funciones exclusivas.</p>
+                <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>{isEN?"You have full access to all exclusive features.":"Tienes acceso completo a todas las funciones exclusivas."}</p>
                 <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-                  {["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","🔍 Insiders SEC"].map(b=>(
+                  {(isEN?["💡 PREMIUM Ideas","🏛️ 13F Gurus","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","🔍 SEC Insiders"]:["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","🔍 Insiders SEC"]).map(b=>(
                     <span key={b} style={{background:C.bull+"22",color:C.bull,border:`1px solid ${C.bull}44`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700}}>{b}</span>
                   ))}
                 </div>
@@ -6570,7 +6570,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
               <div style={{marginTop:24}}>
                 {isPremium
-                  ? <div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>✅ Plan activo — ¡Gracias por ser PREMIUM!</div>
+                  ? <div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>{isEN?"✅ Active plan — thanks for being PREMIUM!":"✅ Plan activo — ¡Gracias por ser PREMIUM!"}</div>
                   : <>
                     {billing==="annual" ? (
                       <>
@@ -6648,9 +6648,9 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           <div style={{flex:1,minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
               <span style={{fontWeight:900,fontSize:15,color:C.text}}>SmartCredit</span>
-              <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.22)",borderRadius:20,padding:"1px 9px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
+              <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.22)",borderRadius:20,padding:"1px 9px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{isEN?"Sponsored":"Patrocinado"}</span>
             </div>
-            <div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas. Empieza gratis — sin tarjeta de crédito.</div>
+            <div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>{isEN?"Monitor your credit score, protect your identity and improve your finances. Start free — no credit card.":"Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas. Empieza gratis — sin tarjeta de crédito."}</div>
           </div>
           <div style={{background:"linear-gradient(135deg,#0F4C81,#10B981)",borderRadius:11,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0,whiteSpace:"nowrap",boxShadow:"0 4px 16px rgba(15,76,129,0.35)"}}>
             Empezar gratis →
@@ -6773,7 +6773,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                         <span style={{fontSize:11,color: isUrgent ? "#ef4444" : C.muted, fontWeight: isUrgent ? 700 : 400}}>
                           {isSoldOut ? (isEN?"❌ Sold out":"❌ Agotado") : isUrgent ? (isEN?`🔥 Only ${w.spotsLeft} seats!`:`🔥 ¡Solo ${w.spotsLeft} plazas!`) : (isEN?`👥 ${w.spotsLeft} of ${w.spots} seats`:`👥 ${w.spotsLeft} de ${w.spots} plazas`)}
                         </span>
-                        <span style={{fontSize:11,color:C.muted2}}>{spotsPercent}% disponible</span>
+                        <span style={{fontSize:11,color:C.muted2}}>{spotsPercent}% {isEN?"available":"disponible"}</span>
                       </div>
                       <div style={{background:C.border,borderRadius:20,height:5,overflow:"hidden"}}>
                         <div style={{height:"100%",borderRadius:20,width:`${spotsPercent}%`,background: isUrgent ? "linear-gradient(90deg,#ef4444,#f59e0b)" : `linear-gradient(90deg,${C.accent},#4D94FF)`,transition:"width 0.5s"}}/>
@@ -6885,7 +6885,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               </div>
             </div>
             <div style={{fontSize:11,color:"#64748B",lineHeight:1.6,marginBottom:12}}>
-              Webinars en vivo y grabados sobre stocks, opciones, ETFs y estrategias de inversión. Para todos los niveles.
+              {isEN?"Live and recorded webinars on stocks, options, ETFs and investment strategies. For all levels.":"Webinars en vivo y grabados sobre stocks, opciones, ETFs y estrategias de inversión. Para todos los niveles."}
             </div>
             {["Investing for Beginners","Options Strategies Live","Market Outlook Q2 2026","Retirement Planning 101"].map(t=>(
               <div key={t} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 0",borderBottom:"1px solid rgba(0,0,0,0.04)"}}>
@@ -6908,7 +6908,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               </div>
             </div>
             <div style={{fontSize:11,color:"#64748B",lineHeight:1.6,marginBottom:12}}>
-              Análisis de mercado en vivo, divisas, commodities y sesiones interactivas con traders profesionales.
+              {isEN?"Live market analysis, forex, commodities and interactive sessions with professional traders.":"Análisis de mercado en vivo, divisas, commodities y sesiones interactivas con traders profesionales."}
             </div>
             {["Weekly Market Outlook","EUR/USD Live Analysis","Gold & Oil Trading","Fed Minutes Breakdown"].map(t=>(
               <div key={t} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 0",borderBottom:"1px solid rgba(0,0,0,0.04)"}}>
@@ -11690,10 +11690,10 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
         /* ── Estado vacío: no hay picks publicados aún ── */
         <div style={{textAlign:"center",padding:"48px 20px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,marginBottom:16}}>
           <div style={{fontSize:48,marginBottom:16}}>📅</div>
-          <div style={{fontWeight:800,color:"#F1F5F9",fontSize:18,marginBottom:8}}>Picks en preparación</div>
+          <div style={{fontWeight:800,color:"#F1F5F9",fontSize:18,marginBottom:8}}>{isEN?"Picks in preparation":"Picks en preparación"}</div>
           <div style={{color:"#64748B",fontSize:14,lineHeight:1.7,maxWidth:340,margin:"0 auto 20px"}}>
-            Nuestro equipo está analizando el mercado esta semana.<br/>
-            <strong style={{color:"#FCD34D"}}>Los picks se publican cada lunes a las 9AM</strong> (hora EST).
+            {isEN?"Our team is analyzing the market this week.":"Nuestro equipo está analizando el mercado esta semana."}<br/>
+            <strong style={{color:"#FCD34D"}}>{isEN?"New picks are published every Monday at 9AM":"Los picks se publican cada lunes a las 9AM"}</strong> ({isEN?"EST":"hora EST"}).
           </div>
           <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.2)",borderRadius:12,padding:"12px 20px",display:"inline-block"}}>
             <div style={{fontSize:12,color:"#FCD34D",fontWeight:700}}>Próxima publicación</div>
@@ -20494,7 +20494,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 {ch!=null? <span style={{fontSize:10,fontWeight:600,color:ch>=0?T.grn:T.red}}>{ch>=0?"▲":"▼"}{Math.abs(ch).toFixed(2)}%</span> : <span style={{fontSize:9,color:T.dim}}>—</span>}
                 <button onClick={(e)=>{ e.stopPropagation(); const p=livePrices[tk]; setEditId(null); setForm({ticker:tk,shares:"",entryPrice:p?String(p.price):"",note:"",broker:""}); setShowAdd(true); }} title={isEN?"Add to portfolio":"Añadir al portafolio"} style={{flexShrink:0,width:20,height:20,borderRadius:4,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontSize:12,fontWeight:800,lineHeight:1,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>＋</button>
               </div>
-            ); }) : <div style={{padding:"6px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>Vacía · agrégala en la página Watchlist</div>}
+            ); }) : <div style={{padding:"6px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>{isEN?"Empty · add it on the Watchlist page":"Vacía · agrégala en la página Watchlist"}</div>}
           </div>
         </div>
         {/* MAIN */}
@@ -20727,7 +20727,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
               <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>{isEN?"My Watchlist":"Mi Watchlist"}</span><span style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{watchTks.length}</span></div>
-              {watchTks.length? watchTks.map((tk)=>{ const act=chSel===tk; const lp=livePrices[tk]; const ch=lp?lp.change:null; return (<div key={tk} onClick={()=>setChSel(tk)} title={"Ver gráfico de "+tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.blue}`:"3px solid transparent",background:act?"rgba(77,166,255,.10)":"transparent",cursor:"pointer",transition:"background .12s"}} onMouseEnter={e=>{if(!act)e.currentTarget.style.background="rgba(77,166,255,.05)";}} onMouseLeave={e=>{if(!act)e.currentTarget.style.background="transparent";}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.blue:T.txt}}>{tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:ch==null?T.dim:(ch>=0?T.grn:T.red)}}>{ch==null?"—":(ch>=0?"+":"")+ch.toFixed(2)+"%"}</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>{lp?"$"+lp.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):(NAMES[tk]||"—")}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>Vacía · agrégala en la página Watchlist</div>}
+              {watchTks.length? watchTks.map((tk)=>{ const act=chSel===tk; const lp=livePrices[tk]; const ch=lp?lp.change:null; return (<div key={tk} onClick={()=>setChSel(tk)} title={"Ver gráfico de "+tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.blue}`:"3px solid transparent",background:act?"rgba(77,166,255,.10)":"transparent",cursor:"pointer",transition:"background .12s"}} onMouseEnter={e=>{if(!act)e.currentTarget.style.background="rgba(77,166,255,.05)";}} onMouseLeave={e=>{if(!act)e.currentTarget.style.background="transparent";}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.blue:T.txt}}>{tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:ch==null?T.dim:(ch>=0?T.grn:T.red)}}>{ch==null?"—":(ch>=0?"+":"")+ch.toFixed(2)+"%"}</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>{lp?"$"+lp.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):(NAMES[tk]||"—")}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>{isEN?"Empty · add it on the Watchlist page":"Vacía · agrégala en la página Watchlist"}</div>}
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Índices</div>{IDX.map(sideRow)}</div>
             <div style={{padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Crypto</div>{CRY.map(sideRow)}</div>
