@@ -515,11 +515,21 @@ function loadDemo(){
   showApp();
 }
 
+const ADMIN_EMAILS = ['mariagalarraga2013@gmail.com','admin@nexotrade.com'];
+
 async function loadAffiliateData(){
   if(!sb)return loadDemo();
   try {
+    // Admin bypass — no need to be in affiliates table
+    if(ADMIN_EMAILS.includes((currentUser?.email||'').toLowerCase())){
+      isAdmin=true;
+      currentAffiliate={name:'Admin',email:currentUser.email,referral_code:'ADMIN',tier:'admin',total_signups:0,commission_pct:0};
+      showApp();
+      showSection('admin',document.querySelector('.sb-item'));
+      return;
+    }
     const {data} = await sb.from('affiliates').select('*').eq('email',currentUser.email).single();
-    if(data){currentAffiliate=data;isAdmin=data.email==='admin@nexotrade.com';}
+    if(data){currentAffiliate=data;isAdmin=ADMIN_EMAILS.includes((data.email||'').toLowerCase());}
     showApp();
   } catch(e){console.error(e);loadDemo();}
 }
@@ -533,9 +543,9 @@ function showApp(){
 
 function updateTopbar(){
   const a=currentAffiliate;
-  document.getElementById('tb-name').textContent=a.name;
-  document.getElementById('tb-av').textContent=a.name[0].toUpperCase();
-  document.getElementById('tb-tier').textContent=(a.tier||'nano').toUpperCase()+' AFFILIATE';
+  document.getElementById('tb-name').textContent=a.name||'Admin';
+  document.getElementById('tb-av').textContent=(a.name||'A')[0].toUpperCase();
+  document.getElementById('tb-tier').textContent=isAdmin?'🛡️ ADMIN':(a.tier||'nano').toUpperCase()+' AFFILIATE';
   document.getElementById('ref-link-display').textContent=`nexotradeia.com/?ref=${a.referral_code}`;
   document.getElementById('sb-ref-count').textContent=a.total_signups||0;
   if(isAdmin)document.getElementById('admin-section').style.display='block';
