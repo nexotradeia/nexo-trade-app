@@ -20636,7 +20636,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {/* ── ANALYTICS (asignación real por posición + chart) ── */}
           {navView==="analytics" && (()=>{ const tot=Math.max(1,totalValue); const alloc=[...rows].sort((a,b)=>b.mv-a.mv); const COLORS=[T.grn,T.blue,T.gold,T.purp,T.red,"#22d3ee","#f472b6","#a3e635"]; return (
             <div>
-              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2}}>ASIGNACIÓN DE CARTERA · % por posición</div>
+              <div style={{...lbl,fontSize:10,letterSpacing:2,color:T.mid,padding:"12px 18px 8px",borderBottom:`1px solid ${T.br}`,background:T.bg2}}>{isEN?"PORTFOLIO ALLOCATION · % per position":"ASIGNACIÓN DE CARTERA · % por posición"}</div>
               {alloc.length? (<>
                 <div style={{height:14,display:"flex",margin:"14px 18px 4px",borderRadius:4,overflow:"hidden",border:`1px solid ${T.br}`}}>{alloc.map((r,i)=>(<div key={r.p.id} title={r.tk+" "+(r.mv/tot*100).toFixed(1)+"%"} style={{width:(r.mv/tot*100)+"%",background:COLORS[i%COLORS.length]}}/>))}</div>
                 <div style={{padding:"6px 18px 14px"}}>
@@ -20887,7 +20887,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 {a.note && <div style={{fontFamily:SANS,fontSize:11,color:T.dim,fontStyle:"italic",marginTop:3}}>"{a.note}"</div>}
                 <div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginTop:4}}>Creada {rel(a.created)}</div>
               </div>
-            )) : <div style={{padding:"50px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:26,marginBottom:10}}>🔔</div><div style={{fontSize:12,color:T.mid}}>{alItems.length?(isEN?"No alerts for this filter":"Sin alertas en este filtro"):(isEN?"You have no alerts yet":"No tienes alertas todavía")}</div><div style={{fontSize:10,marginTop:6}}>Créala con el formulario →</div></div>}</div>
+            )) : <div style={{padding:"50px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:26,marginBottom:10}}>🔔</div><div style={{fontSize:12,color:T.mid}}>{alItems.length?(isEN?"No alerts for this filter":"Sin alertas en este filtro"):(isEN?"You have no alerts yet":"No tienes alertas todavía")}</div><div style={{fontSize:10,marginTop:6}}>{isEN?"Create it with the form →":"Créala con el formulario →"}</div></div>}</div>
           </div>
           {/* RIGHT — crear */}
           <div style={{minWidth:0}}>
@@ -20896,7 +20896,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               {notifPerm==="granted"
                 ? <span style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10,color:T.grn}}><span style={{width:6,height:6,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`}}/>🔔 Notificaciones activas</span>
                 : notifPerm==="denied"
-                ? <span style={{fontFamily:MONO,fontSize:10,color:T.red}}>🔕 Notificaciones bloqueadas — actívalas en el navegador</span>
+                ? <span style={{fontFamily:MONO,fontSize:10,color:T.red}}>{isEN?"🔕 Notifications blocked — enable them in your browser":"🔕 Notificaciones bloqueadas — actívalas en el navegador"}</span>
                 : <button onClick={askNotif} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>🔔 Activar notificaciones</button>}
             </div>
             {(()=>{ const hint=pushDeviceHint(); if(!hint) return null; return (
@@ -20979,13 +20979,13 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               {sel.emotion && <><div style={{...lbl,marginBottom:8}}>{isEN?"Emotional state":"Estado emocional"}</div><div style={{display:"inline-flex",alignItems:"center",gap:10,background:"rgba(0,255,135,.06)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:8,padding:"12px 18px",marginBottom:20}}><span style={{fontSize:24}}>{em[0]}</span><span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.grn,letterSpacing:.5}}>{sel.emotion}</span></div></>}
               {sel.errors && <><div style={{...lbl,marginBottom:8}}>{isEN?"Mistakes & lessons":"Errores y aprendizajes"}</div><div style={{display:"flex",gap:11,background:"rgba(255,61,90,.06)",border:`1px solid rgba(255,61,90,.25)`,borderRadius:8,padding:"13px 15px"}}><span style={{fontSize:16}}>❌</span><div style={{fontFamily:SANS,fontSize:12,color:T.mid,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{sel.errors}</div></div></>}
             </>);})() : (
-              <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:34,marginBottom:12}}>📓</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>Tu diario está vacío</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.grn}}>+ Entrada</span> para registrar tu primer día de trading</div><button onClick={openNew} style={{marginTop:18,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>+ Nueva entrada</button></div>
+              <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:34,marginBottom:12}}>📓</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>{isEN?"Your journal is empty":"Tu diario está vacío"}</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.grn}}>+ Entrada</span> {isEN?"to log your first trading day":"para registrar tu primer día de trading"}</div><button onClick={openNew} style={{marginTop:18,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>+ Nueva entrada</button></div>
             )}
           </div>
           {/* RIGHT */}
           <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px"}}>Estadísticas</div>
+              <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"Statistics":"Estadísticas"}</div>
               {ST.map((s,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 14px",fontFamily:MONO,fontSize:11}}><span style={{color:T.dim}}>{s[0]}</span><span style={{color:s[2],fontWeight:700}}>{s[1]}</span></div>))}
             </div>
             <div style={{padding:"12px 0"}}>
@@ -21001,15 +21001,15 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>+ NUEVA ENTRADA</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
                   <div><div style={{...lbl,marginBottom:5}}>{isEN?"Date":"Fecha"}</div><input type="date" value={jrForm.date} onChange={e=>setJrForm(f=>({...f,date:e.target.value}))} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
-                  <div><div style={{...lbl,marginBottom:5}}>P&L del día ($)</div><input value={jrForm.pnl} onChange={e=>setJrForm(f=>({...f,pnl:e.target.value}))} placeholder="1248 o -82" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Day P&L ($)":"P&L del día ($)"}</div><input value={jrForm.pnl} onChange={e=>setJrForm(f=>({...f,pnl:e.target.value}))} placeholder="1248 o -82" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                 </div>
-                <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:5}}>Título</div><input value={jrForm.title} onChange={e=>setJrForm(f=>({...f,title:e.target.value}))} placeholder="Día de alta volatilidad — NVDA breakout" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
+                <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:5}}>{isEN?"Title":"Título"}</div><input value={jrForm.title} onChange={e=>setJrForm(f=>({...f,title:e.target.value}))} placeholder="Día de alta volatilidad — NVDA breakout" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                 <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:5}}>{isEN?"Day summary":"Resumen del día"}</div><textarea value={jrForm.summary} onChange={e=>setJrForm(f=>({...f,summary:e.target.value}))} rows={3} placeholder={isEN?"What happened, what you did well…":"Qué pasó, qué hiciste bien…"} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
                   <div><div style={{...lbl,marginBottom:5}}># Trades</div><input value={jrForm.trades} onChange={e=>setJrForm(f=>({...f,trades:e.target.value}))} placeholder="3" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                   <div><div style={{...lbl,marginBottom:5}}># Ganadoras</div><input value={jrForm.wins} onChange={e=>setJrForm(f=>({...f,wins:e.target.value}))} placeholder="2" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:12,outline:"none"}}/></div>
                 </div>
-                <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:6}}>¿Cómo te sentiste?</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>{EMO.map((e,i)=>{const s=jrEmotion===e[1];return (<div key={i} onClick={()=>setJrEmotion(e[1])} style={{background:s?"rgba(0,255,135,.08)":T.bg3,border:`1px solid ${s?"rgba(0,255,135,.35)":T.br}`,borderRadius:6,padding:"8px 4px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:17}}>{e[0]}</div><div style={{fontFamily:MONO,fontSize:7.5,fontWeight:700,color:s?T.grn:T.dim,marginTop:3}}>{e[1]}</div></div>);})}</div></div>
+                <div style={{marginBottom:10}}><div style={{...lbl,marginBottom:6}}>{isEN?"How did you feel?":"¿Cómo te sentiste?"}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>{EMO.map((e,i)=>{const s=jrEmotion===e[1];return (<div key={i} onClick={()=>setJrEmotion(e[1])} style={{background:s?"rgba(0,255,135,.08)":T.bg3,border:`1px solid ${s?"rgba(0,255,135,.35)":T.br}`,borderRadius:6,padding:"8px 4px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:17}}>{e[0]}</div><div style={{fontFamily:MONO,fontSize:7.5,fontWeight:700,color:s?T.grn:T.dim,marginTop:3}}>{e[1]}</div></div>);})}</div></div>
                 <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>{isEN?"Mistakes & lessons":"Errores y aprendizajes"}</div><textarea value={jrForm.errors} onChange={e=>setJrForm(f=>({...f,errors:e.target.value}))} rows={2} placeholder={isEN?"What you would do differently…":"Qué harías distinto…"} style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:SANS,fontSize:12,outline:"none",resize:"vertical"}}/></div>
                 <div style={{display:"flex",gap:8}}>
                   <button onClick={()=>setJrShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>{isEN?"Cancel":"Cancelar"}</button>
@@ -21046,7 +21046,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           </div>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
             <div style={{...lbl,padding:0,display:"flex",alignItems:"center",gap:8}}><span style={{width:5,height:5,borderRadius:"50%",background:T.grn}}/>Mis Posiciones de Opciones</div>
-            <button onClick={openNew} style={{background:"rgba(77,166,255,.14)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>+ Añadir opción</button>
+            <button onClick={openNew} style={{background:"rgba(77,166,255,.14)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>{isEN?"+ Add option":"+ Añadir opción"}</button>
           </div>
           {optItems.length? (
             <div style={{overflowX:"auto"}}>
@@ -21070,7 +21070,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </table>
             </div>
           ) : (
-            <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:34,marginBottom:12}}>⬡</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>No tienes opciones registradas</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.blue}}>+ Añadir opción</span> para registrar tus calls y puts</div><button onClick={openNew} style={{marginTop:18,background:"rgba(77,166,255,.14)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>+ Añadir opción</button></div>
+            <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:34,marginBottom:12}}>⬡</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>No tienes opciones registradas</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.blue}}>{isEN?"+ Add option":"+ Añadir opción"}</span> para registrar tus calls y puts</div><button onClick={openNew} style={{marginTop:18,background:"rgba(77,166,255,.14)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>{isEN?"+ Add option":"+ Añadir opción"}</button></div>
           )}
 
           {optShow && (
@@ -21127,7 +21127,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
             <div style={{minWidth:0}}>
               {divItems.length>0 && <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.br}`}}>
-                <div style={{...lbl,marginBottom:10}}>Calendario de Pagos · próximos 6 meses</div>
+                <div style={{...lbl,marginBottom:10}}>{isEN?"Payment Calendar · next 6 months":"Calendario de Pagos · próximos 6 meses"}</div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>{months.map((m,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 11px"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginBottom:6}}>{m.label}</div><div style={{fontFamily:MONO,fontSize:16,fontWeight:700,color:m.sum>0?T.gold:T.dim}}>{m.sum>0?"$"+Math.round(m.sum):"—"}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim,marginTop:4,lineHeight:1.4,minHeight:20}}>{m.items.join(" · ")}</div></div>))}</div>
               </div>}
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`,flexWrap:"wrap",gap:8}}>
@@ -21145,7 +21145,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                     if(add.length){ setDivItems(prev=>[...add,...prev]); setDivMsg("✓ "+add.length+(add.length===1?" agregada":" agregadas")+(usedLive?" · datos reales":"")); }
                     else { const anyMatch=positions.some(p=>DIV_BY[p.ticker.toUpperCase()]||live[p.ticker.toUpperCase()]); setDivMsg(anyMatch?"Ya estaban todas":"Ninguna de tus acciones paga dividendo conocido"); }
                     setTimeout(()=>setDivMsg(null),4000); }} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 12px",borderRadius:5,cursor:"pointer"}}>⟳ Sincronizar Portfolio</button>
-                  <button onClick={openNew} style={{background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>+ Añadir dividendo</button>
+                  <button onClick={openNew} style={{background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>{isEN?"+ Add dividend":"+ Añadir dividendo"}</button>
                 </div>
               </div>
               {divItems.length? (
@@ -21169,7 +21169,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                   </table>
                 </div>
               ) : (
-                <div style={{padding:"70px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:32,marginBottom:12}}>💰</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>No tienes dividendos registrados</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.gold}}>+ Añadir dividendo</span> para seguir tus ingresos pasivos</div><button onClick={openNew} style={{marginTop:18,background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>+ Añadir dividendo</button></div>
+                <div style={{padding:"70px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:32,marginBottom:12}}>💰</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>No tienes dividendos registrados</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.gold}}>{isEN?"+ Add dividend":"+ Añadir dividendo"}</span> para seguir tus ingresos pasivos</div><button onClick={openNew} style={{marginTop:18,background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>{isEN?"+ Add dividend":"+ Añadir dividendo"}</button></div>
               )}
             </div>
             {/* RIGHT */}
@@ -21196,7 +21196,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
                   <div><div style={{...lbl,marginBottom:5}}>{isEN?"Symbol":"Símbolo"}</div><input value={divForm.symbol} onChange={e=>setDivForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="MSFT" style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>Acciones</div><input value={divForm.shares} onChange={e=>setDivForm(f=>({...f,shares:e.target.value}))} placeholder="8" style={inStyle}/></div>
-                  <div><div style={{...lbl,marginBottom:5}}>Div / acción ($)</div><input value={divForm.divShare} onChange={e=>setDivForm(f=>({...f,divShare:e.target.value}))} placeholder="0.83" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>{isEN?"Div / share ($)":"Div / acción ($)"}</div><input value={divForm.divShare} onChange={e=>setDivForm(f=>({...f,divShare:e.target.value}))} placeholder="0.83" style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>{isEN?"Frequency":"Frecuencia"}</div><select value={divForm.freq} onChange={e=>setDivForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>{isEN?"Monthly":"Mensual"}</option><option style={{background:T.bg2}}>Trimestral</option><option style={{background:T.bg2}}>Semestral</option><option style={{background:T.bg2}}>{isEN?"Annual":"Anual"}</option></select></div>
                   <div><div style={{...lbl,marginBottom:5}}>Ex-date</div><input type="date" value={divForm.exDate} onChange={e=>setDivForm(f=>({...f,exDate:e.target.value}))} style={inStyle}/></div>
                   <div><div style={{...lbl,marginBottom:5}}>Pay date</div><input type="date" value={divForm.payDate} onChange={e=>setDivForm(f=>({...f,payDate:e.target.value}))} style={inStyle}/></div>
