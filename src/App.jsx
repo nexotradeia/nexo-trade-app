@@ -19608,13 +19608,16 @@ function RadarGlobalPage({lang="es"}){
   const [dataSrc,setDataSrc]=useState('');
   const [sessions,setSessions]=useState([]);        // estado de las 4 bolsas (NYSE/Londres/Tokio/HK)
   const [opsN,setOpsN]=useState(0);                 // operaciones por segundo (efecto wow)
-  // ── Sesiones de mercado (horas UTC) ──
+  // ── Sesiones de mercado (horas LOCALES de cada bolsa, con timezone real) ──
   const SESSIONS=[
-    {name:'NYSE',  city:isEN?'New York':'Nueva York', o:14.5, c:21,    flag:'🇺🇸'},
-    {name:'LSE',   city:isEN?'London':'Londres',      o:8,    c:16.5,  flag:'🇬🇧'},
-    {name:'TSE',   city:isEN?'Tokyo':'Tokio',         o:0,    c:6,     flag:'🇯🇵'},
-    {name:'HKEX',  city:'Hong Kong',                  o:1.5,  c:8,     flag:'🇭🇰'},
+    {name:'NYSE',  city:isEN?'New York':'Nueva York', tz:'America/New_York', o:9.5,  c:16,   flag:'🇺🇸'},
+    {name:'LSE',   city:isEN?'London':'Londres',      tz:'Europe/London',    o:8,    c:16.5, flag:'🇬🇧'},
+    {name:'TSE',   city:isEN?'Tokyo':'Tokio',         tz:'Asia/Tokyo',       o:9,    c:15.5, flag:'🇯🇵'},
+    {name:'HKEX',  city:'Hong Kong',                  tz:'Asia/Hong_Kong',   o:9.5,  c:16,   flag:'🇭🇰'},
   ];
+  // Hora decimal local de una timezone (respeta DST automáticamente)
+  const getLocalH=(tz)=>{try{const p=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());return +p.find(x=>x.type==='hour').value + +p.find(x=>x.type==='minute').value/60;}catch{return new Date().getUTCHours()+new Date().getUTCMinutes()/60;}};
+  const getLocalDay=(tz)=>{try{return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].indexOf(new Intl.DateTimeFormat('en-US',{timeZone:tz,weekday:'long'}).format(new Date()));}catch{return new Date().getUTCDay();}};
   const isOpenR=(m)=>{
     const now=new Date(),day=now.getUTCDay();
     if(day===0||day===6)return false;
@@ -19640,17 +19643,18 @@ function RadarGlobalPage({lang="es"}){
     const ivTime=setInterval(()=>{
       const n=new Date();
       setUtcStr(`UTC ${n.getUTCHours().toString().padStart(2,'0')}:${n.getUTCMinutes().toString().padStart(2,'0')}`);
-      // ── Reloj de sesiones: estado de las 4 bolsas ──
-      const h=n.getUTCHours()+n.getUTCMinutes()/60;
-      const wknd=[0,6].includes(n.getUTCDay());
-      const fmt=(hrs)=>{let x=hrs;if(x<0)x+=24;const H=Math.floor(x),M=Math.round((x-H)*60);return `${H}h ${M}m`;};
+      // ── Reloj de sesiones: estado de las 4 bolsas (timezone real, DST automático) ──
+      const fmt=(hrs)=>{const x=Math.abs(hrs);const H=Math.floor(x),M=Math.round((x-H)*60);return `${H}h ${M>0?` ${M}m`:''}`.trim();};
       setSessions(SESSIONS.map(s=>{
-        const isOpen = !wknd && h>=s.o && h<s.c;
+        const lh=getLocalH(s.tz);
+        const ld=getLocalDay(s.tz);
+        const wknd=ld===0||ld===6;
+        const isOpen=!wknd&&lh>=s.o&&lh<s.c;
         return {
           flag:s.flag, name:s.name, city:s.city, open:isOpen,
           label: wknd ? (isEN?'Closed (weekend)':'Cerrada (fin de sem.)')
-                : isOpen ? `${isEN?'closes in':'cierra en'} ${fmt(s.c-h)}`
-                : `${isEN?'opens in':'abre en'} ${fmt(s.o-h)}`
+                : isOpen ? `${isEN?'OPEN closes in':'ABIERTO cierra en'} ${fmt(s.c-lh)}`
+                : `${isEN?'opens in':'abre en'} ${fmt(s.o-lh)}`
         };
       }));
     },1000);
