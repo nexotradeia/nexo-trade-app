@@ -19891,6 +19891,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [divDrip, setDivDrip] = useState({});
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
+  const AL_KEY = `nexo_alerts_${user?.id||"guest"}`;
+  const [alItems, setAlItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(AL_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
+  const [alType, setAlType] = useState("price_above");
+  const [alForm, setAlForm] = useState({symbol:"",target:"",freq:"Una vez",notif:"Push + Email",note:""});
   const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
   const [impDrag, setImpDrag] = useState(false);
   const [impMsg, setImpMsg] = useState(null); // {type:"ok"|"err", text}
@@ -19938,6 +19942,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         .catch(()=>setPCloud("error"));
     }
   },[positions, LS_KEY, user?.id]);
+
+  useEffect(()=>{ try{ localStorage.setItem(AL_KEY, JSON.stringify(alItems)); }catch{} },[alItems, AL_KEY]);
 
   // Fetch live prices for all tickers
   useEffect(()=>{
@@ -20477,69 +20483,62 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         );
       })()}
-      {/* ── ALERTS VIEW ── */}
+      {/* ── ALERTS VIEW (tus alertas reales) ── */}
       {termTab==="alerts" && (()=>{
-        const ALC={PRECIO:T.grn,"% CAMBIO":T.gold,RSI:T.purp,ORACLE:T.purp,VOLUMEN:T.blue};
-        const AL=[
-          ["AAPL","PRECIO","Pendiente","Disparar cuando > $310.00","Resistencia — toma parcial","Creada hace 2h",true],
-          ["NVDA","PRECIO","Pendiente","Disparar cuando > $220.00","Breakout confirmado","Creada hace 1h",true],
-          ["TSLA","% CAMBIO","Disparada 10:24","Disparar cuando > +5% en 1D","Seguimiento momentum","Hoy 10:24 AM",true],
-          ["META","RSI","Pendiente","Disparar cuando RSI < 30","Entrada en oversold","Creada ayer",true],
-          ["BTC","PRECIO","Pendiente","Disparar cuando < $60,000","Nivel psicológico","Creada hace 3 días",false],
-          ["MSFT","ORACLE","Inactiva","Disparar cuando Score Oracle < 70","","Creada hace 1 semana",false],
-          ["SPY","VOLUMEN","Disparada 09:35","Disparar cuando Volumen > 2x promedio","Señal institucional","Hoy 09:35 AM",true],
-          ["AMZN","PRECIO","Pendiente","Disparar cuando > $250.00","Continuación tendencia","Creada hace 5h",true],
-        ];
-        const stC=(s)=> s.startsWith("Disparada")?T.grn:s==="Inactiva"?T.dim:T.gold;
-        const FILTERS=["Todas","Activas","Disparadas","Inactivas"];
-        const passes=(a)=> alFilter==="Todas"?true: alFilter==="Activas"?a[2].startsWith("Pendiente"): alFilter==="Disparadas"?a[2].startsWith("Disparada"): a[2]==="Inactiva";
-        const list=AL.map((a,i)=>({a,i})).filter(({a})=>passes(a));
-        const COND=[["📈","PRICE >"],["📉","PRICE <"],["🎯","% CHANGE"],["📊","VOLUME"],["🌡️","RSI CROSS"],["🔮","ORACLE AI"]];
-        const HIST=[[T.grn,"TSLA","Subió +5.2% — target alcanzado","+$620","Hoy 10:24"],[T.blue,"SPY","Volumen 2.4x promedio detectado","Info","Hoy 09:35"],[T.grn,"NVDA","Breakout $205 confirmado","+$380","Ayer"]];
+        const COND=[["price_above","📈","PRICE >","PRECIO",T.grn],["price_below","📉","PRICE <","PRECIO",T.grn],["pct_change","🎯","% CHANGE","% CAMBIO",T.gold],["volume","📊","VOLUME","VOLUMEN",T.blue],["rsi","🌡️","RSI CROSS","RSI",T.purp],["oracle","🔮","ORACLE AI","ORACLE",T.purp]];
+        const meta=COND.find(c=>c[0]===alType)||COND[0];
+        const condText=(t,v)=> t==="price_above"?`Disparar cuando > $${v}` : t==="price_below"?`Disparar cuando < $${v}` : t==="pct_change"?`Disparar cuando > +${v}% en 1D` : t==="volume"?`Disparar cuando Volumen > ${v}x promedio` : t==="rsi"?`Disparar cuando RSI < ${v}` : `Disparar cuando Score Oracle < ${v}`;
+        const tgtLabel = alType==="price_above"||alType==="price_below"?"Precio target ($)" : alType==="pct_change"?"% de cambio" : alType==="volume"?"Múltiplo de volumen" : alType==="rsi"?"Nivel RSI" : "Score Oracle";
+        const tgtPh = alType==="price_above"?"310" : alType==="price_below"?"60000" : alType==="pct_change"?"5" : alType==="volume"?"2" : alType==="rsi"?"30" : "70";
+        const rel=(ts)=>{ if(!ts)return ""; const d=Math.floor((Date.now()-ts)/1000); if(d<60)return "hace un momento"; if(d<3600)return "hace "+Math.floor(d/60)+" min"; if(d<86400)return "hace "+Math.floor(d/3600)+"h"; return "hace "+Math.floor(d/86400)+" días"; };
+        const FILTERS=["Todas","Activas","Inactivas"];
+        const list=alItems.filter(a=> alFilter==="Activas"?a.on : alFilter==="Inactivas"?!a.on : true);
+        const nActive=alItems.filter(a=>a.on).length;
         const Toggle=({on,onClick})=>(<div onClick={onClick} style={{width:34,height:18,borderRadius:9,background:on?"rgba(0,255,135,.3)":T.bg4,border:`1px solid ${on?"rgba(0,255,135,.5)":T.br2}`,position:"relative",cursor:"pointer",flexShrink:0}}><div style={{position:"absolute",top:1,left:on?17:1,width:14,height:14,borderRadius:"50%",background:on?T.grn:T.dim,transition:"left .15s"}}/></div>);
+        const create=()=>{ const sym=alForm.symbol.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,""); const tgt=alForm.target.trim(); if(!sym||!tgt){ return; } const it={id:Date.now()+""+Math.random().toString(36).slice(2,5),sym,type:alType,badge:meta[3],color:meta[4],cond:condText(alType,tgt),note:alForm.note.trim(),on:true,created:Date.now()}; setAlItems(p=>[it,...p]); setAlForm(f=>({...f,symbol:"",target:"",note:""})); };
+        const inStyle={width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"};
         return (
         <div style={{display:"grid",gridTemplateColumns:"360px 1fr",alignItems:"stretch"}}>
-          {/* LEFT LIST */}
+          {/* LEFT — lista real */}
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
-              <span style={{...lbl,padding:0}}>Alertas · {AL.filter(a=>a[6]).length} activas</span>
-              <button style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ Nueva</button>
+              <span style={{...lbl,padding:0}}>Alertas · {nActive} activas</span>
+              <button onClick={()=>setAlForm(f=>({...f,symbol:"",target:"",note:""}))} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ Nueva</button>
             </div>
             <div style={{display:"flex",gap:6,padding:"10px 14px",borderBottom:`1px solid ${T.br}`}}>{FILTERS.map(f=>(<button key={f} onClick={()=>setAlFilter(f)} style={{padding:"4px 10px",borderRadius:4,fontFamily:MONO,fontSize:10,fontWeight:600,cursor:"pointer",border:"none",background:alFilter===f?"rgba(0,255,135,.12)":"transparent",color:alFilter===f?T.grn:T.dim}}>{f}</button>))}</div>
-            <div>{list.map(({a,i})=>{ const on=alToggles[i]!==undefined?alToggles[i]:a[6]; return (
-              <div key={i} style={{padding:"12px 14px",borderBottom:`1px solid ${T.br}`,borderLeft:`2px solid ${stC(a[2])}`}}>
+            <div>{list.length? list.map(a=>(
+              <div key={a.id} style={{padding:"12px 14px",borderBottom:`1px solid ${T.br}`,borderLeft:`2px solid ${a.on?a.color:T.dim2||T.dim}`}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                  <span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt}}>{a[0]}</span>
-                  <span style={{fontFamily:MONO,fontSize:8,fontWeight:700,color:ALC[a[1]],background:ALC[a[1]]+"1a",border:`1px solid ${ALC[a[1]]}33`,borderRadius:3,padding:"2px 6px"}}>{a[1]}</span>
-                  <span style={{fontFamily:MONO,fontSize:10,color:stC(a[2])}}>{a[2].startsWith("Disparada")?"⚡ ":""}{a[2]}</span>
-                  <span style={{marginLeft:"auto"}}><Toggle on={on} onClick={()=>setAlToggles(t=>({...t,[i]:!on}))}/></span>
+                  <span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt}}>{a.sym}</span>
+                  <span style={{fontFamily:MONO,fontSize:8,fontWeight:700,color:a.color,background:a.color+"1a",border:`1px solid ${a.color}33`,borderRadius:3,padding:"2px 6px"}}>{a.badge}</span>
+                  <span style={{fontFamily:MONO,fontSize:10,color:a.on?T.gold:T.dim}}>{a.on?"Pendiente":"Inactiva"}</span>
+                  <span style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}><Toggle on={a.on} onClick={()=>setAlItems(p=>p.map(x=>x.id===a.id?{...x,on:!x.on}:x))}/><button onClick={()=>setAlItems(p=>p.filter(x=>x.id!==a.id))} style={{width:22,height:22,borderRadius:4,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></span>
                 </div>
-                <div style={{fontFamily:MONO,fontSize:12,color:T.mid}}>{a[3].replace(/(\$[\d,\.]+|<\s*\d+|>\s*[+\d][\d,\.%]*|RSI < 30|2x promedio|Score Oracle < 70)/,m=>m)}</div>
-                {a[4] && <div style={{fontFamily:SANS,fontSize:11,color:T.dim,fontStyle:"italic",marginTop:3}}>"{a[4]}"</div>}
-                <div style={{fontFamily:MONO,fontSize:9,color:T.dim2||T.dim,marginTop:4}}>{a[5]}</div>
+                <div style={{fontFamily:MONO,fontSize:12,color:T.mid}}>{a.cond}</div>
+                {a.note && <div style={{fontFamily:SANS,fontSize:11,color:T.dim,fontStyle:"italic",marginTop:3}}>"{a.note}"</div>}
+                <div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginTop:4}}>Creada {rel(a.created)}</div>
               </div>
-            );})}</div>
+            )) : <div style={{padding:"50px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:26,marginBottom:10}}>🔔</div><div style={{fontSize:12,color:T.mid}}>{alItems.length?"Sin alertas en este filtro":"No tienes alertas todavía"}</div><div style={{fontSize:10,marginTop:6}}>Créala con el formulario →</div></div>}</div>
           </div>
-          {/* RIGHT FORM */}
+          {/* RIGHT — crear */}
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 20px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-              <span style={{...lbl,padding:0,fontSize:10}}>Crear / Editar Alerta</span>
-              <span style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10}}><span style={{fontSize:8,fontWeight:700,color:T.grn,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:3,padding:"2px 6px"}}>REAL</span><span style={{color:T.mid}}>Conectado a precios en tiempo real</span></span>
+              <span style={{...lbl,padding:0,fontSize:10}}>Crear Alerta</span>
+              <span style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10}}><span style={{fontSize:8,fontWeight:700,color:T.grn,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:3,padding:"2px 6px"}}>GUARDADO</span><span style={{color:T.mid}}>Tus alertas quedan guardadas</span></span>
             </div>
             <div style={{padding:"18px 22px",maxWidth:820}}>
-              <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>⚡ NUEVA ALERTA DE PRECIO</div>
               <div style={{...lbl,marginBottom:8}}>Tipo de condición</div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>{COND.map((c,i)=>(<div key={i} style={{background:i===0?"rgba(0,255,135,.06)":T.bg3,border:`1px solid ${i===0?"rgba(0,255,135,.3)":T.br}`,borderRadius:8,padding:"18px 10px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:22,marginBottom:8}}>{c[0]}</div><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:i===0?T.grn:T.mid,letterSpacing:.5}}>{c[1]}</div></div>))}</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>{COND.map((c)=>{const sel=alType===c[0];return (<div key={c[0]} onClick={()=>setAlType(c[0])} style={{background:sel?c[4]+"14":T.bg3,border:`1px solid ${sel?c[4]+"66":T.br}`,borderRadius:8,padding:"16px 10px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:22,marginBottom:8}}>{c[1]}</div><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:sel?c[4]:T.mid,letterSpacing:.5}}>{c[2]}</div></div>);})}</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
-                <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input defaultValue="AAPL" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/></div>
-                <div><div style={{...lbl,marginBottom:5}}>Precio target</div><input defaultValue="310.00" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/></div>
-                <div><div style={{...lbl,marginBottom:5}}>Frecuencia</div><select style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}><option style={{background:T.bg2}}>Una vez</option><option style={{background:T.bg2}}>Cada vez</option><option style={{background:T.bg2}}>Diaria</option></select></div>
-                <div><div style={{...lbl,marginBottom:5}}>Notificación</div><select style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}><option style={{background:T.bg2}}>Push + Email</option><option style={{background:T.bg2}}>Solo Push</option><option style={{background:T.bg2}}>Solo Email</option></select></div>
+                <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input value={alForm.symbol} onChange={e=>setAlForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="AAPL" style={inStyle}/></div>
+                <div><div style={{...lbl,marginBottom:5}}>{tgtLabel}</div><input value={alForm.target} onChange={e=>setAlForm(f=>({...f,target:e.target.value}))} placeholder={tgtPh} style={inStyle}/></div>
+                <div><div style={{...lbl,marginBottom:5}}>Frecuencia</div><select value={alForm.freq} onChange={e=>setAlForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Una vez</option><option style={{background:T.bg2}}>Cada vez</option><option style={{background:T.bg2}}>Diaria</option></select></div>
+                <div><div style={{...lbl,marginBottom:5}}>Notificación</div><select value={alForm.notif} onChange={e=>setAlForm(f=>({...f,notif:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Push + Email</option><option style={{background:T.bg2}}>Solo Push</option><option style={{background:T.bg2}}>Solo Email</option></select></div>
               </div>
-              <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Nota (opcional)</div><input placeholder="Resistencia clave, considerar toma de ganancias…" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/></div>
-              <button style={{width:"100%",background:`linear-gradient(90deg,${T.grn2},${T.grn})`,color:T.bg,border:"none",borderRadius:8,padding:"13px",fontFamily:MONO,fontSize:13,fontWeight:800,letterSpacing:1,cursor:"pointer",boxShadow:"0 0 18px rgba(0,255,135,.35)"}}>⚡ CREAR ALERTA</button>
-              <div style={{...lbl,margin:"22px 0 10px",display:"flex",alignItems:"center",gap:6}}>Historial de disparos <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>{HIST.map((h,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"12px 14px"}}><span style={{width:8,height:8,borderRadius:"50%",background:h[0],flexShrink:0}}/><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{h[1]}</div><div style={{fontFamily:SANS,fontSize:11,color:T.mid,marginTop:1}}>{h[2]}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:h[3]==="Info"?T.blue:T.grn}}>{h[3]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{h[4]}</div></div></div>))}</div>
+              <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Nota (opcional)</div><input value={alForm.note} onChange={e=>setAlForm(f=>({...f,note:e.target.value}))} placeholder="Resistencia clave, considerar toma de ganancias…" style={inStyle}/></div>
+              <button onClick={create} style={{width:"100%",background:`linear-gradient(90deg,${T.grn2},${T.grn})`,color:T.bg,border:"none",borderRadius:8,padding:"13px",fontFamily:MONO,fontSize:13,fontWeight:800,letterSpacing:1,cursor:(alForm.symbol&&alForm.target)?"pointer":"not-allowed",opacity:(alForm.symbol&&alForm.target)?1:0.5,boxShadow:"0 0 18px rgba(0,255,135,.35)"}}>⚡ CREAR ALERTA</button>
+              <div style={{...lbl,margin:"22px 0 10px"}}>Historial de disparos</div>
+              <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"22px",textAlign:"center",fontFamily:MONO,fontSize:11,color:T.dim}}>Sin disparos todavía · cuando una alerta se cumpla, aparecerá aquí</div>
             </div>
           </div>
         </div>
