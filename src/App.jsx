@@ -25031,7 +25031,12 @@ export default function App(){
                 {(()=>{ const mo=n.idx===20&&nexoMktOpenET(); return(<>
                   {n.locked?<NavIco name="lock" size={13}/>:<NavIco name={n.icon}/>}
                   {mo&&<span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 7px #22c55e",animation:"nexo-pulse 1.3s infinite",display:"inline-block",flexShrink:0}}/>}
-                  <span style={mo?{color:"#22c55e",fontWeight:800,textShadow:"0 0 9px rgba(34,197,94,0.55)"}:undefined}>{stripEmoji(n.label)}</span>
+                  {n.idx===37
+                    ? <span style={{display:"inline-flex",flexDirection:"column",alignItems:"flex-start",lineHeight:1.02}}>
+                        <span style={{fontSize:10.5,fontWeight:700,letterSpacing:0.3,color:active?"#E0B64B":"#EAF1FA"}}>{lang==="en"?"Portfolio Terminal":"Portafolio Terminal"}</span>
+                        <span style={{fontSize:11,fontWeight:800,color:"#2BE38A",borderBottom:"2px solid #2BE38A",lineHeight:1.25,textShadow:"0 0 8px rgba(43,227,138,0.55)"}}>{lang==="en"?"Oracle AI":"Oracle IA"}</span>
+                      </span>
+                    : <span style={mo?{color:"#22c55e",fontWeight:800,textShadow:"0 0 9px rgba(34,197,94,0.55)"}:undefined}>{stripEmoji(n.label)}</span>}
                 </>);})()}
               </button>
             );
