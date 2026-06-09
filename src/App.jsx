@@ -25549,7 +25549,7 @@ export default function App(){
                   <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#0088cc,#006699)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>✈️</div>
                   <div>
                     <div style={{fontWeight:800,color:"#29B6F6",fontSize:12}}>NEXO TRADE</div>
-                    <div style={{fontSize:10,color:"#475569"}}>🐋 Whale Alert · ahora</div>
+                    <div style={{fontSize:10,color:"#475569"}}>🐋 Whale Alert · {isEN?"now":"ahora"}</div>
                   </div>
                   <div style={{marginLeft:"auto",width:8,height:8,borderRadius:"50%",background:"#00D26A",boxShadow:"0 0 8px #00D26A"}}/>
                 </div>
@@ -25557,12 +25557,12 @@ export default function App(){
                   <div>📈 <strong>NVDA</strong> · Golden Sweep</div>
                   <div>💰 Premium: <span style={{color:"#00D26A",fontWeight:700}}>$127.4M</span></div>
                   <div>🎯 Strike $890 · Jun 21 · Calls</div>
-                  <div style={{color:"#F59E0B",marginTop:4,fontSize:11}}>⭐ Señal institucional · Sobre SMA200</div>
+                  <div style={{color:"#F59E0B",marginTop:4,fontSize:11}}>{isEN?"⭐ Institutional signal · Above SMA200":"⭐ Señal institucional · Sobre SMA200"}</div>
                 </div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:6,paddingLeft:4}}>
                 <div style={{width:6,height:6,borderRadius:"50%",background:"#00D26A",flexShrink:0}}/>
-                <span style={{fontSize:10,color:"#475569"}}>Llegó hace 43s · Telegram</span>
+                <span style={{fontSize:10,color:"#475569"}}>{isEN?"Arrived 43s ago · Telegram":"Llegó hace 43s · Telegram"}</span>
               </div>
             </div>
             {/* Texto */}
