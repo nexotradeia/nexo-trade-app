@@ -19888,6 +19888,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [scOrigin, setScOrigin] = useState("Todas"); // Todas | Portfolio | Watchlist
   const [optTicker, setOptTicker] = useState("AAPL");
   const [optExpiry, setOptExpiry] = useState("Jul 5");
+  const OPT_KEY = `nexo_options_${user?.id||"guest"}`;
+  const [optItems, setOptItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(OPT_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
+  const [optShow, setOptShow] = useState(false);
+  const [optForm, setOptForm] = useState({symbol:"",kind:"CALL",side:"LONG",strike:"",expiry:"",contracts:"",entry:"",current:""});
+  const DIV_KEY = `nexo_divs_${user?.id||"guest"}`;
+  const [divItems, setDivItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(DIV_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
+  const [divShow, setDivShow] = useState(false);
+  const [divForm, setDivForm] = useState({symbol:"",shares:"",divShare:"",freq:"Trimestral",exDate:"",payDate:""});
   const [divDrip, setDivDrip] = useState({});
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
@@ -19955,6 +19963,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   useEffect(()=>{ try{ localStorage.setItem(AL_KEY, JSON.stringify(alItems)); }catch{} },[alItems, AL_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(JR_KEY, JSON.stringify(jrItems)); }catch{} },[jrItems, JR_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(AL_KEY+"_fired", JSON.stringify(alFired)); }catch{} },[alFired, AL_KEY]);
+  useEffect(()=>{ try{ localStorage.setItem(OPT_KEY, JSON.stringify(optItems)); }catch{} },[optItems, OPT_KEY]);
+  useEffect(()=>{ try{ localStorage.setItem(DIV_KEY, JSON.stringify(divItems)); }catch{} },[divItems, DIV_KEY]);
 
   // ⚡ Motor de alertas: vigila precios reales y dispara notificaciones (mientras la app esté abierta)
   const alSig = alItems.filter(a=>a.on && /^(price_above|price_below|pct_change)$/.test(a.type)).map(a=>a.id+":"+a.target+":"+a.type+":"+a.freq).join("|");
@@ -20696,264 +20706,179 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         );
       })()}
-      {/* ── OPTIONS VIEW ── */}
+      {/* ── OPTIONS VIEW (tus opciones reales) ── */}
       {termTab==="options" && (()=>{
-        const cyan="#22d3ee";
+        const opPnl=(o)=>{ const e=parseFloat(o.entry)||0,c=parseFloat(o.current)||0,n=(parseFloat(o.contracts)||0)*100; return o.side==="LONG"?(c-e)*n:(e-c)*n; };
+        const dte=(o)=>{ if(!o.expiry) return null; const d=Math.ceil((new Date(o.expiry+"T00:00")-new Date())/86400000); return d; };
+        const totalPnl=optItems.reduce((a,o)=>a+opPnl(o),0);
+        const nCalls=optItems.filter(o=>o.kind==="CALL").length, nPuts=optItems.filter(o=>o.kind==="PUT").length;
+        const prima=optItems.filter(o=>o.side==="SHORT").reduce((a,o)=>a+(parseFloat(o.entry)||0)*(parseFloat(o.contracts)||0)*100,0);
+        const capital=optItems.filter(o=>o.side==="LONG").reduce((a,o)=>a+(parseFloat(o.entry)||0)*(parseFloat(o.contracts)||0)*100,0);
+        const winners=optItems.filter(o=>opPnl(o)>0).length;
         const KPI=[
-          ["P&L Opciones","+$4,264",T.grn,"▲ +32.4% en 30D",T.grn],
-          ["Posiciones Abiertas","12",T.purp,"8 calls · 4 puts",T.dim],
-          ["Prima Cobrada (30D)","$1,840",T.gold,"Covered calls + CSP",T.dim],
-          ["Delta Neta","+0.42",T.blue,"Sesgo alcista moderado",T.dim],
-          ["Theta Diaria","−$48",T.red,"Decay: $48/día",T.dim],
-          ["IV Implícita Media","28.4%",cyan,"vs HV 30D: 22.1%",T.dim],
+          ["P&L Opciones", optItems.length?m$(totalPnl):"—", totalPnl>=0?T.grn:T.red, optItems.length?(totalPnl>=0?"en ganancia":"en pérdida"):"sin posiciones"],
+          ["Posiciones Abiertas", String(optItems.length), T.purp, nCalls+" calls · "+nPuts+" puts"],
+          ["Prima Cobrada", optItems.length?"$"+Math.round(prima).toLocaleString("en-US"):"—", T.gold, "ventas (SHORT)"],
+          ["Capital en Juego", optItems.length?"$"+Math.round(capital).toLocaleString("en-US"):"—", T.blue, "compras (LONG)"],
+          ["Ganadoras", optItems.length?winners+"/"+optItems.length:"—", T.grn, optItems.length?Math.round(winners/optItems.length*100)+"% win":"—"],
         ];
-        const CAD=[["AAPL","$301.54","28.4","64",T.gold],["NVDA","$208.3","42.1","",T.red],["MSFT","$412.8","22.8","",T.grn],["META","$589.1","35.6","",T.red],["TSLA","$408.7","58.2","",T.red]];
-        const GK=[["Δ","+0.38",T.grn,76],["Γ","0.028",T.blue,40],["θ","−$12",T.red,30],["ν","$18",T.blue,55],["ρ","$4.2",T.purp,20]];
-        const EXPO=[["Covered Calls",35,T.grn],["CSP",28,T.gold],["Spreads",22,T.blue],["Naked Puts",15,T.purp]];
-        const EXPS=["Jun 21","Jun 28","Jul 5","Jul 19","Aug 16"];
-        const CH=[
-          [280,"22.40","22.60","1.6K","14.2K","32.1","0.82","-0.18","30.4","3.2K","0.3K","0.32","0.28"],
-          [285,"17.60","17.80","2.1K","18.6K","30.4","0.76","-0.24","29.2","5.8K","0.4K","0.58","0.52"],
-          [290,"13.20","13.40","3.4K","24.8K","29.2","0.68","-0.32","28.6","8.4K","0.7K","1.04","0.96"],
-          [295,"9.40","9.60","4.8K","31.2K","28.8","0.59","-0.41","28.2","12.0K","0.9K","1.72","1.60"],
-          [300,"6.20","6.40","8.2K","48.6K","28.4","0.49","-0.51","27.8","22.0K","1.8K","2.96","2.80"],
-          [305,"3.80","4.00","6.4K","38.4K","28.2","0.38","-0.62","28.0","18.4K","1.2K","4.80","4.60"],
-          [310,"2.10","2.24","4.2K","28.8K","28.6","0.28","-0.72","28.4","12.8K","0.7K","7.00","6.80"],
-          [315,"1.08","1.16","2.8K","18.2K","29.2","0.19","-0.81","28.8","8.0K","0.4K","9.80","9.60"],
-          [320,"0.52","0.58","1.6K","10.4K","30.1","0.12","-0.88","29.4","4.8K","0.2K","13.40","13.20"],
-          [325,"0.24","0.28","0.8K","5.2K","31.4","0.07","-0.93","30.2","2.4K","0.1K","17.20","17.00"],
-        ];
-        const spotK=300;
-        const pK=(s)=>parseFloat(String(s).replace(/[^0-9.]/g,""))*(/K/.test(s)?1000:1);
-        const maxOI=Math.max(...CH.map(r=>Math.max(pK(r[4]),pK(r[9]))));
-        const POS=[
-          ["LONG","CALL",T.grn,"AAPL $305 Jul 19","Debit Spread · +2 contratos · Δ 0.38 · θ −12/día","$4.20","$4.00","41","−$40","−4.8%",false],
-          ["SHORT","CALL",T.grn,"AAPL $310 Jul 19","Debit Spread · −2 contratos · Δ 0.28 · θ 8/día","$2.40","$2.24","41","+$32","+6.7%",true],
-          ["SHORT","PUT",T.red,"NVDA $195 Jun 21","Cash Secured Put · −1 contrato · Δ −0.18 · θ 22/día","$2.10","$0.84","13","+$126","+60.0%",true],
-          ["SHORT","CALL",T.grn,"MSFT $420 Jul 5","Covered Call · −2 contratos · Δ 0.24 · θ 14/día","$3.80","$2.20","27","+$320","+42.0%",true],
-        ];
-        const GKD=[["Delta","+0.38",T.grn,"Por cada $1 que sube AAPL, la opción sube $0.38"],["Gamma","0.028",T.blue,"Velocidad de cambio del delta"],["Theta","−$12",T.red,"Pierdes $12 de valor por día"],["Vega","$18",T.blue,"Por cada 1pt de IV, ganas $18"]];
-        let acc=0; const circ=2*Math.PI*30;
-        // payoff bull call spread 305/310
-        const PW=260,PH=150,ppl=8,ppr=40,ppt=14,ppb=22; const xs=295,xe=320;
-        const payoff=(s)=>{ const long=Math.max(0,s-305), short=Math.max(0,s-310); return (long-short-1.8)*100; }; // debit 1.8
-        const pys=[]; for(let i=0;i<=50;i++){ const s=xs+(xe-xs)*i/50; pys.push([s,payoff(s)]); }
-        const pmin=-200,pmax=350;
-        const xP=(s)=>ppl+(s-xs)/(xe-xs)*(PW-ppl-ppr), yP=(v)=>ppt+(1-(v-pmin)/(pmax-pmin))*(PH-ppt-ppb);
-        const payLine=pys.map(p=>xP(p[0]).toFixed(1)+","+yP(p[1]).toFixed(1)).join(" ");
-        const Demo=()=><span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px",marginLeft:6}}>DEMO</span>;
-        return (
-        <div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",borderBottom:`1px solid ${T.br}`}}>
-            {KPI.map((k,i)=>(<div key={i} style={{padding:"13px 14px",borderRight:i<5?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:k[4],marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"180px 1fr 280px",alignItems:"stretch"}}>
-            {/* LEFT */}
-            <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
-              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>Cadenas de Opciones</div>
-                {CAD.map((c,i)=>(<div key={i} onClick={()=>setOptTicker(c[0])} style={{display:"flex",alignItems:"center",gap:9,padding:"9px 14px",borderLeft:optTicker===c[0]?`2px solid ${cyan}`:"2px solid transparent",background:optTicker===c[0]?"rgba(34,211,238,.06)":"transparent",cursor:"pointer"}}><div style={{width:26,height:26,borderRadius:5,background:avatarBg(c[0]),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{c[0].slice(0,2)}</div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{c[0]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{c[1]}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:c[4]}}>IV {c[2]}%</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>IV Rank</div></div></div>))}
-              </div>
-              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>Griegos · {optTicker} <Demo/></div>
-                <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:9}}>{GK.map((g,i)=>(<div key={i}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3,fontFamily:MONO,fontSize:11}}><span style={{color:g[2]}}>{g[0]}</span><span style={{color:T.txt,fontWeight:600}}>{g[1]}</span></div><div style={{height:4,background:T.bg3,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:g[3]+"%",background:g[2],borderRadius:2}}/></div></div>))}</div>
-              </div>
-              <div style={{padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>Exposición por Tipo <Demo/></div>
-                <div style={{display:"flex",alignItems:"center",gap:12,padding:"4px 14px"}}>
-                  <svg width="84" height="84" viewBox="0 0 84 84"><g transform="rotate(-90 42 42)">{EXPO.map((d,i)=>{const len=d[1]/100*circ;const el=<circle key={i} cx="42" cy="42" r="30" fill="none" stroke={d[2]} strokeWidth="11" strokeDasharray={len+" "+(circ-len)} strokeDashoffset={-acc}/>;acc+=len;return el;})}</g><circle cx="42" cy="42" r="21" fill={T.bg2}/></svg>
-                  <div style={{display:"flex",flexDirection:"column",gap:3}}>{EXPO.map((d,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:5,fontFamily:MONO,fontSize:9}}><span style={{width:7,height:7,borderRadius:2,background:d[2]}}/><span style={{color:T.mid}}>{d[0]}</span><span style={{color:T.txt,fontWeight:600}}>{d[1]}%</span></div>))}</div>
-                </div>
-              </div>
-            </div>
-            {/* CENTER */}
-            <div style={{minWidth:0}}>
-              <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-                <span style={{fontFamily:MONO,fontSize:16,fontWeight:700,letterSpacing:1}}>{optTicker}</span>
-                <span style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:cyan}}>$301.54</span>
-                <span style={{fontFamily:MONO,fontSize:11,color:T.mid}}>IV: <span style={{color:T.gold}}>28.4%</span> · HV: 22.1% · IV Rank <span style={{color:T.gold}}>64</span> · IV Pct 72%</span>
-                <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{...lbl,padding:0}}>Vencimiento</span>{EXPS.map(e=>(<button key={e} onClick={()=>setOptExpiry(e)} style={{padding:"4px 9px",borderRadius:3,fontFamily:MONO,fontSize:10,fontWeight:600,cursor:"pointer",border:optExpiry===e?`1px solid rgba(34,211,238,.4)`:`1px solid ${T.br}`,background:optExpiry===e?"rgba(34,211,238,.12)":"transparent",color:optExpiry===e?cyan:T.dim}}>{e}</button>))}</div>
-              </div>
-              <div style={{overflowX:"auto"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:10.5,minWidth:880}}>
-                  <thead>
-                    <tr style={{background:T.bg2}}>
-                      <th colSpan={7} style={{padding:"5px 0",textAlign:"center",color:T.grn,fontSize:9,fontWeight:700,letterSpacing:2,borderBottom:`1px solid ${T.br}`,borderRight:`1px solid ${T.br2}`}}>CALLS</th>
-                      <th style={{borderBottom:`1px solid ${T.br}`}}></th>
-                      <th colSpan={7} style={{padding:"5px 0",textAlign:"center",color:T.red,fontSize:9,fontWeight:700,letterSpacing:2,borderBottom:`1px solid ${T.br}`,borderLeft:`1px solid ${T.br2}`}}>PUTS</th>
-                    </tr>
-                    <tr style={{background:T.bg2}}>{["BID","ASK","VOL","OI","IV%","Δ","",  "STRIKE",  "","Δ","IV%","OI","VOL","ASK","BID"].map((h,i)=><th key={i} style={{padding:"6px 8px",fontSize:8,fontWeight:600,letterSpacing:.8,color:i===7?cyan:T.dim,textAlign:i===7?"center":"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr>
-                  </thead>
-                  <tbody>{CH.map((r,i)=>{const k=r[0];const callItm=k<spotK;const putItm=k>spotK;const atm=k===spotK;const oiC=(pK(r[4])/maxOI*100).toFixed(0),oiP=(pK(r[9])/maxOI*100).toFixed(0);return (
-                    <tr key={i} style={{borderBottom:"1px solid #0d1117",background:atm?"rgba(34,211,238,.06)":"transparent"}}>
-                      <td style={{padding:"7px 8px",color:T.grn,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[1]}</td>
-                      <td style={{padding:"7px 8px",color:T.mid,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[2]}</td>
-                      <td style={{padding:"7px 8px",color:T.mid,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[3]}</td>
-                      <td style={{padding:"7px 8px",background:callItm?"rgba(0,255,135,.04)":"transparent"}}><div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:30,height:4,background:T.bg4,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:oiC+"%",background:"rgba(0,255,135,.4)"}}/></div><span style={{color:T.dim,fontSize:9}}>{r[4]}</span></div></td>
-                      <td style={{padding:"7px 8px",color:T.grn,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[5]}%</td>
-                      <td style={{padding:"7px 8px",color:T.grn,fontWeight:600,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[6]}</td>
-                      <td style={{padding:"7px 8px",background:callItm?"rgba(0,255,135,.04)":"transparent"}}><span style={{fontSize:8,fontWeight:700,color:callItm?T.grn:T.dim}}>{callItm?"▶ ITM":"OTM"}</span></td>
-                      <td style={{padding:"7px 8px",textAlign:"center",background:atm?"rgba(34,211,238,.12)":T.bg3,borderLeft:`1px solid ${T.br2}`,borderRight:`1px solid ${T.br2}`}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:cyan}}>${k}</div>{atm&&<div style={{fontSize:7,color:cyan,letterSpacing:1}}>ATM</div>}</td>
-                      <td style={{padding:"7px 8px",background:putItm?"rgba(255,61,90,.04)":"transparent"}}><span style={{fontSize:8,fontWeight:700,color:putItm?T.red:T.dim}}>{putItm?"▶ ITM":"OTM"}</span></td>
-                      <td style={{padding:"7px 8px",color:T.red,fontWeight:600,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[7]}</td>
-                      <td style={{padding:"7px 8px",color:T.blue,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[8]}%</td>
-                      <td style={{padding:"7px 8px",background:putItm?"rgba(255,61,90,.04)":"transparent"}}><div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:30,height:4,background:T.bg4,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:oiP+"%",background:"rgba(255,61,90,.35)"}}/></div><span style={{color:T.dim,fontSize:9}}>{r[9]}</span></div></td>
-                      <td style={{padding:"7px 8px",color:T.mid,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[10]}</td>
-                      <td style={{padding:"7px 8px",color:T.mid,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[11]}</td>
-                      <td style={{padding:"7px 8px",color:T.red,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[12]}</td>
-                    </tr>
-                  );})}</tbody>
-                </table>
-              </div>
-              <div style={{padding:"12px 16px",borderTop:`1px solid ${T.br}`}}>
-                <div style={{...lbl,marginBottom:10}}>⬡ Mis Posiciones de Opciones <Demo/></div>
-                <div style={{display:"flex",flexDirection:"column",gap:8}}>{POS.map((p,i)=>{const tp=p[8].startsWith("+");const dteAlert=parseInt(p[7])<15;return (
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:T.bg3,border:`1px solid ${T.br}`,borderLeft:`3px solid ${p[2]}`,borderRadius:8,padding:"11px 14px",flexWrap:"wrap"}}>
-                    <span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:p[0]==="LONG"?T.grn:T.gold,background:(p[0]==="LONG"?"rgba(0,255,135,.12)":"rgba(240,180,41,.12)"),border:`1px solid ${(p[0]==="LONG"?T.grn:T.gold)}33`,borderRadius:3,padding:"3px 7px"}}>{p[0]}</span>
-                    <span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:p[2],background:p[2]+"1a",border:`1px solid ${p[2]}33`,borderRadius:3,padding:"3px 7px"}}>{p[1]}</span>
-                    <div style={{flex:1,minWidth:160}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{p[3]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginTop:1}}>{p[4]}</div></div>
-                    <div style={{textAlign:"right",fontFamily:MONO,fontSize:9,color:T.dim}}><div>Entrada</div><div style={{color:T.mid,fontSize:11}}>{p[5]}</div></div>
-                    <div style={{textAlign:"right",fontFamily:MONO,fontSize:9,color:T.dim}}><div>Actual</div><div style={{color:T.mid,fontSize:11}}>{p[6]}</div></div>
-                    <div style={{textAlign:"right",fontFamily:MONO,fontSize:9,color:T.dim}}><div>DTE</div><div style={{color:dteAlert?T.red:T.mid,fontSize:11,fontWeight:dteAlert?700:400}}>{p[7]}</div></div>
-                    <div style={{textAlign:"right",minWidth:60}}><div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:tp?T.grn:T.red}}>{p[8]}</div><div style={{fontFamily:MONO,fontSize:9,color:tp?T.grn:T.red}}>{p[9]}</div></div>
-                  </div>
-                );})}</div>
-              </div>
-            </div>
-            {/* RIGHT */}
-            <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
-              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>P&L Diagrama · Bull Spread <Demo/></div>
-                <div style={{padding:"0 10px"}}><svg viewBox={"0 0 "+PW+" "+PH} style={{width:"100%",height:"auto"}}>
-                  <line x1={ppl} y1={yP(0)} x2={PW-ppr} y2={yP(0)} stroke={T.br2} strokeWidth="1" strokeDasharray="2 2"/>
-                  <text x={PW-ppr+3} y={yP(0)+3} fontFamily={MONO} fontSize="8" fill={T.dim}>$0</text>
-                  <text x={PW-ppr+3} y={yP(320)+3} fontFamily={MONO} fontSize="8" fill={T.grn}>+$320</text>
-                  <text x={PW-ppr+3} y={yP(-180)+3} fontFamily={MONO} fontSize="8" fill={T.red}>−$180</text>
-                  <line x1={xP(305)} y1={ppt} x2={xP(305)} y2={PH-ppb} stroke={T.dim2||T.dim} strokeWidth="0.5" strokeDasharray="2 2"/>
-                  <line x1={xP(310)} y1={ppt} x2={xP(310)} y2={PH-ppb} stroke={T.dim2||T.dim} strokeWidth="0.5" strokeDasharray="2 2"/>
-                  <polyline points={payLine} fill="none" stroke={T.grn} strokeWidth="2" strokeLinejoin="round"/>
-                  <circle cx={xP(301.54)} cy={yP(payoff(301.54))} r="3.5" fill={T.gold}/>
-                  <text x={xP(301.54)} y={yP(payoff(301.54))-7} fontFamily={MONO} fontSize="8" fill={T.gold} textAnchor="middle">Actual</text>
-                  <text x={xP(305)} y={PH-6} fontFamily={MONO} fontSize="8" fill={cyan} textAnchor="middle">$305</text>
-                  <text x={xP(310)} y={PH-6} fontFamily={MONO} fontSize="8" fill={cyan} textAnchor="middle">$310</text>
-                </svg></div>
-              </div>
-              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>Griegos Detallados <Demo/></div>
-                <div style={{padding:"0 12px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{GKD.map((g,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 11px",position:"relative",overflow:"hidden"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>{g[0]}</div><div style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:g[2],margin:"3px 0 5px"}}>{g[1]}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,lineHeight:1.4}}>{g[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:g[2]}}/></div>))}
-                  <div style={{gridColumn:"1 / -1",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 11px",position:"relative",overflow:"hidden"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>Rho</div><div style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:T.purp,margin:"3px 0 5px"}}>$4.2</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim}}>Sensibilidad a tasa de interés</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:T.purp}}/></div>
-                </div>
-              </div>
-              <div style={{padding:"12px 14px"}}>
-                <div style={{...lbl,marginBottom:8}}>Oracle AI · Opciones <Demo/></div>
-                <div style={{background:T.bg3,border:`1px solid rgba(0,255,135,.15)`,borderRadius:8,padding:12}}>
-                  <div style={{display:"flex",alignItems:"baseline",gap:6,marginBottom:8}}><span style={{fontFamily:MONO,fontSize:26,fontWeight:700,color:T.grn}}>78</span><span style={{fontFamily:MONO,fontSize:11,color:T.dim}}>/100 · Análisis IV</span></div>
-                  <div style={{fontFamily:SANS,fontSize:11,color:T.mid,lineHeight:1.6,marginBottom:10}}>IV (28.4%) por encima de HV (22.1%) — favorece <strong style={{color:T.txt}}>vender prima</strong>. IV Rank 64 = elevado.</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:5}}>{[["Covered Call $310 Jul19",T.grn],["Cash Secured Put $290",T.gold],["Bull Put Spread $295/$290",T.blue],["Iron Condor $290/$315",T.purp]].map((s,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:8,background:T.bg2,border:`1px solid ${s[1]}33`,borderRadius:5,padding:"7px 10px",cursor:"pointer"}}><span style={{width:6,height:6,borderRadius:"50%",background:s[1]}}/><span style={{fontFamily:MONO,fontSize:10,color:s[1],fontWeight:600}}>{s[0]}</span></div>))}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        );
-      })()}
-      {/* ── DIVIDENDS VIEW ── */}
-      {termTab==="dividends" && (()=>{
-        const Demo=()=><span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px",marginLeft:6}}>DEMO</span>;
-        const Real=()=><span style={{fontSize:8,color:T.grn,border:`1px solid ${T.grn}55`,borderRadius:3,padding:"1px 5px",marginLeft:6}}>REAL</span>;
-        const KPI=[
-          ["Ingreso Anual Proyectado","$3,240",T.gold,"▲ +12% vs 2025",T.grn],
-          ["Yield Medio Ponderado","2.14%",T.grn,"sobre valor cartera",T.dim],
-          ["Próximo Pago","Jul 15",T.blue,"AVGO · $0.53/acc",T.dim],
-          ["DRIP Activo","4 tickers",T.blue,"reinversión automática",T.dim],
-          ["Streak de Cobros","18 meses",T.purp,"consecutivos",T.dim],
-        ];
-        const CAL=[["JUN 2026","Sin pagos","",T.dim],["JUL 2026","$184","AVGO $184",T.gold],["AGO 2026","$336","AAPL $72 · MSFT $264",T.gold],["SEP 2026","$96","GOOG $96",T.gold],["OCT 2026","$139","COST $139",T.gold],["NOV 2026","$184","AVGO $184",T.gold]];
-        const ROWS=[
-          ["AAPL","Apple Inc.",0.44,"$0.25","Trimestral","Aug 8","Aug 15","$2.50","$72","+4.8",12,false,false],
-          ["MSFT","Microsoft Corp.",0.72,"$0.83","Trimestral","Aug 12","Sep 12","$6.64","$264","+10.2",16,true,false],
-          ["AVGO","Broadcom Inc.",1.2,"$1.15","Trimestral","Jul 15","Jul 31","$4.60","$184","+22.4",14,true,true],
-          ["COST","Costco Wholesale",0.58,"$1.16","Semestral","Oct 1","Oct 15","$2.32","$139","+12.8",20,false,false],
-          ["GOOG","Alphabet Inc.",0.5,"$0.20","Trimestral","Sep 5","Sep 19","$1.20","$96","0",2,true,false],
-        ];
-        const NEXT=[["15","JUL","AVGO","Dividendo trimestral","$1.15 × 4 acc","$4.60",true],["08","AGO","AAPL","Dividendo trimestral","$0.25 × 10 acc","$2.50",false],["12","AGO","MSFT","Dividendo trimestral","$0.83 × 8 acc","$6.64",false],["05","SEP","GOOG","Dividendo trimestral","$0.20 × 6 acc","$1.20",false]];
-        const MON=[["Ene",0],["Feb",0],["Mar",0],["Abr",264],["May",0],["Jun",0],["Jul",184],["Ago",336],["Sep",96],["Oct",139],["Nov",184],["Dic",336]]; const maxM=336;
-        const ring=(y,col)=>{const r=9,c=2*Math.PI*r,frac=Math.min(y/1.5,1);return (<svg width="26" height="26" viewBox="0 0 26 26"><circle cx="13" cy="13" r={r} fill="none" stroke={T.bg4} strokeWidth="3.5"/><circle cx="13" cy="13" r={r} fill="none" stroke={col} strokeWidth="3.5" strokeDasharray={frac*c+" "+c} strokeLinecap="round" transform="rotate(-90 13 13)"/></svg>);};
-        const Toggle=({on,onClick})=>(<div onClick={onClick} style={{display:"inline-flex",alignItems:"center",gap:5,cursor:"pointer"}}><div style={{width:30,height:16,borderRadius:8,background:on?"rgba(0,255,135,.3)":T.bg4,border:`1px solid ${on?"rgba(0,255,135,.5)":T.br2}`,position:"relative"}}><div style={{position:"absolute",top:1,left:on?15:1,width:12,height:12,borderRadius:"50%",background:on?T.grn:T.dim}}/></div><span style={{fontFamily:MONO,fontSize:8,fontWeight:700,color:on?T.grn:T.dim}}>{on?"ON":"OFF"}</span></div>);
-        // proyección 10 años
-        const PW=256,PH=120,ql=8,qr=34,qt=12,qb=18; let wd=3240,nd=3240; const W10=[],N10=[];
-        for(let yr=0;yr<=10;yr++){ W10.push(wd); N10.push(nd); wd=wd*1.12+wd*0.085; nd=nd*1.04; } // con DRIP compone, sin DRIP solo crece div
-        // simplificado: recomputar limpio
-        const wA=[],nA=[]; let w=3240,n=3240; for(let yr=0;yr<=10;yr++){ wA.push(w); nA.push(n); w=w*1.14; n=n*1.05; }
-        const mx=Math.max(...wA),mn=3000;
-        const qx=(i)=>ql+i/10*(PW-ql-qr), qy=(v)=>qt+(1-(v-mn)/((mx-mn)||1))*(PH-qt-qb);
-        const wLine=wA.map((v,i)=>qx(i).toFixed(1)+","+qy(v).toFixed(1)).join(" ");
-        const nLine=nA.map((v,i)=>qx(i).toFixed(1)+","+qy(v).toFixed(1)).join(" ");
+        const openNew=()=>{ setOptForm({symbol:"",kind:"CALL",side:"LONG",strike:"",expiry:"",contracts:"",entry:"",current:""}); setOptShow(true); };
+        const inStyle={width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"};
         return (
         <div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",borderBottom:`1px solid ${T.br}`}}>
-            {KPI.map((k,i)=>(<div key={i} style={{padding:"13px 16px",borderRight:i<4?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:19,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:k[4],marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
+            {KPI.map((k,i)=>(<div key={i} style={{padding:"14px 16px",borderRight:i<4?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:19,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:T.dim,marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
+          </div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
+            <div style={{...lbl,padding:0,display:"flex",alignItems:"center",gap:8}}><span style={{width:5,height:5,borderRadius:"50%",background:T.grn}}/>Mis Posiciones de Opciones</div>
+            <button onClick={openNew} style={{background:"rgba(77,166,255,.14)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>+ Añadir opción</button>
+          </div>
+          {optItems.length? (
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11,minWidth:760}}>
+                <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","TIPO","LADO","STRIKE","VENC.","DTE","CONTRATOS","PRIMA ENT","PRIMA ACT","P&L",""].map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                <tbody>{optItems.map(o=>{const p=opPnl(o);const d=dte(o);const kc=o.kind==="CALL"?T.grn:T.red;return (
+                  <tr key={o.id} style={{borderBottom:"1px solid #111820"}}>
+                    <td style={{padding:"11px 14px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(o.symbol),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{o.symbol.slice(0,2)}</div><span style={{fontSize:13,fontWeight:700,color:T.txt}}>{o.symbol}</span></div></td>
+                    <td style={{padding:"11px 14px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:kc,background:kc+"1a",border:`1px solid ${kc}33`,borderRadius:3,padding:"3px 7px"}}>{o.kind}</span></td>
+                    <td style={{padding:"11px 14px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:o.side==="LONG"?T.grn:T.gold,background:(o.side==="LONG"?"rgba(0,255,135,.1)":"rgba(240,180,41,.1)"),border:`1px solid ${(o.side==="LONG"?T.grn:T.gold)}33`,borderRadius:3,padding:"3px 7px"}}>{o.side}</span></td>
+                    <td style={{padding:"11px 14px",color:T.txt,fontWeight:600}}>${o.strike||"—"}</td>
+                    <td style={{padding:"11px 14px",color:T.mid}}>{o.expiry||"—"}</td>
+                    <td style={{padding:"11px 14px",color:d!=null&&d<15?T.red:T.mid,fontWeight:d!=null&&d<15?700:400}}>{d!=null?d:"—"}</td>
+                    <td style={{padding:"11px 14px",color:T.mid}}>{o.contracts}</td>
+                    <td style={{padding:"11px 14px",color:T.mid}}>${o.entry}</td>
+                    <td style={{padding:"11px 14px",color:T.mid}}>${o.current}</td>
+                    <td style={{padding:"11px 14px",color:p>=0?T.grn:T.red,fontWeight:700}}>{m$(p)}</td>
+                    <td style={{padding:"11px 14px"}}><button onClick={()=>setOptItems(prev=>prev.filter(x=>x.id!==o.id))} style={{width:24,height:24,borderRadius:4,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></td>
+                  </tr>
+                );})}</tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:34,marginBottom:12}}>⬡</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>No tienes opciones registradas</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.blue}}>+ Añadir opción</span> para registrar tus calls y puts</div><button onClick={openNew} style={{marginTop:18,background:"rgba(77,166,255,.14)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>+ Añadir opción</button></div>
+          )}
+
+          {optShow && (
+            <div onClick={(e)=>e.target===e.currentTarget&&setOptShow(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+              <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:10,padding:22,width:"100%",maxWidth:460}}>
+                <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>+ NUEVA OPCIÓN</div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+                  <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input value={optForm.symbol} onChange={e=>setOptForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="AAPL" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Strike ($)</div><input value={optForm.strike} onChange={e=>setOptForm(f=>({...f,strike:e.target.value}))} placeholder="305" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Tipo</div><select value={optForm.kind} onChange={e=>setOptForm(f=>({...f,kind:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>CALL</option><option style={{background:T.bg2}}>PUT</option></select></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Lado</div><select value={optForm.side} onChange={e=>setOptForm(f=>({...f,side:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>LONG</option><option style={{background:T.bg2}}>SHORT</option></select></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Vencimiento</div><input type="date" value={optForm.expiry} onChange={e=>setOptForm(f=>({...f,expiry:e.target.value}))} style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Contratos</div><input value={optForm.contracts} onChange={e=>setOptForm(f=>({...f,contracts:e.target.value}))} placeholder="1" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Prima entrada</div><input value={optForm.entry} onChange={e=>setOptForm(f=>({...f,entry:e.target.value}))} placeholder="4.20" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Prima actual</div><input value={optForm.current} onChange={e=>setOptForm(f=>({...f,current:e.target.value}))} placeholder="4.00" style={inStyle}/></div>
+                </div>
+                <div style={{display:"flex",gap:8,marginTop:6}}>
+                  <button onClick={()=>setOptShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
+                  <button onClick={()=>{ const sym=optForm.symbol.trim().toUpperCase(); if(!sym||!(parseFloat(optForm.contracts)>0))return; const it={id:Date.now()+"",symbol:sym,kind:optForm.kind,side:optForm.side,strike:optForm.strike,expiry:optForm.expiry,contracts:optForm.contracts,entry:optForm.entry||"0",current:optForm.current||optForm.entry||"0"}; setOptItems(p=>[it,...p]); setOptShow(false); }} style={{flex:1,background:"rgba(77,166,255,.18)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>Guardar</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        );
+      })()}
+      {/* ── DIVIDENDS VIEW (tus dividendos reales) ── */}
+      {termTab==="dividends" && (()=>{
+        const perYear={Mensual:12,Trimestral:4,Semestral:2,Anual:1};
+        const annualOf=(d)=>(parseFloat(d.divShare)||0)*(perYear[d.freq]||4)*(parseFloat(d.shares)||0);
+        const proxOf=(d)=>(parseFloat(d.divShare)||0)*(parseFloat(d.shares)||0);
+        const ingresoAnual=divItems.reduce((a,d)=>a+annualOf(d),0);
+        const dripOn=divItems.filter(d=>divDrip[d.symbol]).length;
+        const future=divItems.filter(d=>d.payDate).map(d=>({d,t:new Date(d.payDate+"T00:00").getTime()})).filter(x=>x.t>=Date.now()-86400000).sort((a,b)=>a.t-b.t);
+        const nextPay=future[0];
+        const fmtShort=(iso)=>{ try{ return new Date(iso+"T00:00").toLocaleDateString("es-ES",{day:"2-digit",month:"short"}); }catch{ return iso; } };
+        const KPI=[
+          ["Ingreso Anual Proyectado", divItems.length?"$"+Math.round(ingresoAnual).toLocaleString("en-US"):"—", T.gold, divItems.length?"de "+divItems.length+" tickers":"sin tickers"],
+          ["Tickers con Dividendo", String(divItems.length), T.grn, "en seguimiento"],
+          ["Próximo Pago", nextPay?fmtShort(nextPay.d.payDate):"—", T.blue, nextPay?nextPay.d.symbol+" · $"+proxOf(nextPay.d).toFixed(2):"—"],
+          ["DRIP Activo", divItems.length?dripOn+" tickers":"—", T.purp, "reinversión automática"],
+        ];
+        // calendario próximos 6 meses
+        const now=new Date(); const months=[];
+        for(let i=0;i<6;i++){ const dt=new Date(now.getFullYear(),now.getMonth()+i,1); const key=dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0"); let sum=0,items=[]; divItems.forEach(d=>{ if((d.payDate||"").slice(0,7)===key){ sum+=proxOf(d); items.push(d.symbol+" $"+Math.round(proxOf(d))); } }); months.push({label:dt.toLocaleDateString("es-ES",{month:"short",year:"2-digit"}).toUpperCase(),sum,items}); }
+        const openNew=()=>{ setDivForm({symbol:"",shares:"",divShare:"",freq:"Trimestral",exDate:"",payDate:""}); setDivShow(true); };
+        const inStyle={width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"};
+        const Toggle=({on,onClick})=>(<div onClick={onClick} style={{display:"inline-flex",alignItems:"center",gap:5,cursor:"pointer"}}><div style={{width:30,height:16,borderRadius:8,background:on?"rgba(0,255,135,.3)":T.bg4,border:`1px solid ${on?"rgba(0,255,135,.5)":T.br2}`,position:"relative"}}><div style={{position:"absolute",top:1,left:on?15:1,width:12,height:12,borderRadius:"50%",background:on?T.grn:T.dim}}/></div><span style={{fontFamily:MONO,fontSize:8,fontWeight:700,color:on?T.grn:T.dim}}>{on?"ON":"OFF"}</span></div>);
+        return (
+        <div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",borderBottom:`1px solid ${T.br}`}}>
+            {KPI.map((k,i)=>(<div key={i} style={{padding:"14px 16px",borderRight:i<3?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:19,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:T.dim,marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
             <div style={{minWidth:0}}>
-              {/* calendario */}
-              <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.br}`}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><div style={{...lbl,padding:0}}>Calendario de Pagos <Demo/></div><span style={{fontFamily:MONO,fontSize:10,color:T.dim}}>2026 · próximos 6 meses</span></div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>{CAL.map((m,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 11px"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginBottom:6}}>{m[0]}</div><div style={{fontFamily:MONO,fontSize:17,fontWeight:700,color:m[3]}}>{m[1]}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim,marginTop:4,lineHeight:1.4,minHeight:22}}>{m[2]}</div></div>))}</div>
+              {divItems.length>0 && <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.br}`}}>
+                <div style={{...lbl,marginBottom:10}}>Calendario de Pagos · próximos 6 meses</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>{months.map((m,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 11px"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginBottom:6}}>{m.label}</div><div style={{fontFamily:MONO,fontSize:16,fontWeight:700,color:m.sum>0?T.gold:T.dim}}>{m.sum>0?"$"+Math.round(m.sum):"—"}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim,marginTop:4,lineHeight:1.4,minHeight:20}}>{m.items.join(" · ")}</div></div>))}</div>
+              </div>}
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
+                <div style={{...lbl,padding:0}}>Mis Dividendos</div>
+                <button onClick={openNew} style={{background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>+ Añadir dividendo</button>
               </div>
-              {/* tabla */}
-              <div style={{overflowX:"auto"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11,minWidth:920}}>
-                  <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","YIELD","DIV/ACC","FRECUENCIA","EX-DATE","PAY DATE","PRÓXIMO COBRO","ANUAL PROYECT.","CRECIM. 5A","STREAK","DRIP"].map((h,i)=><th key={i} style={{padding:"9px 12px",fontSize:8.5,fontWeight:600,letterSpacing:1,color:i===1?T.grn:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}{i===1?" ↑":""}</th>)}</tr></thead>
-                  <tbody>{ROWS.map((r,i)=>{const on=divDrip[r[0]]!==undefined?divDrip[r[0]]:r[11];const yCol=r[2]>=1?T.grn:r[2]>=0.6?T.grn:T.gold;const gw=Math.min(parseFloat(r[9])/25*100,100);return (
-                    <tr key={i} style={{borderBottom:"1px solid #111820"}}>
-                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(r[0]),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{r[0].slice(0,2)}</div><div><div style={{fontSize:12,fontWeight:700,color:T.txt}}>{r[0]}</div><div style={{fontSize:9,color:T.dim}}>{r[1]}</div></div></div></td>
-                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:7}}>{ring(r[2],yCol)}<span style={{color:yCol,fontWeight:700}}>{r[2]}%</span></div></td>
-                      <td style={{padding:"11px 12px",color:T.txt,fontWeight:600}}>{r[3]}</td>
-                      <td style={{padding:"11px 12px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:600,color:r[4]==="Semestral"?T.purp:T.blue,border:`1px solid ${(r[4]==="Semestral"?T.purp:T.blue)}40`,borderRadius:4,padding:"3px 8px"}}>{r[4]}</span></td>
-                      <td style={{padding:"11px 12px",color:T.mid}}>{r[5]}{r[0]==="AVGO"&&<span style={{color:T.gold,fontSize:9}}> ⚡37d</span>}</td>
-                      <td style={{padding:"11px 12px",color:T.mid}}>{r[6]}</td>
-                      <td style={{padding:"11px 12px",color:T.gold,fontWeight:700}}>{r[7]}</td>
-                      <td style={{padding:"11px 12px",color:T.txt,fontWeight:600}}>{r[8]}</td>
-                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:46,height:5,background:T.bg4,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:gw+"%",background:parseFloat(r[9])>0?T.gold:T.dim,borderRadius:3}}/></div><span style={{color:parseFloat(r[9])>0?T.grn:T.dim,fontSize:10}}>{r[9]}%</span></div></td>
-                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:3}}>{Array.from({length:8}).map((_,d)=><span key={d} style={{width:4,height:4,borderRadius:"50%",background:d<Math.min(8,Math.round(r[10]/3))?T.gold:T.bg4}}/>)}<span style={{color:T.dim,fontSize:9,marginLeft:4}}>{r[10]}Q</span></div></td>
-                      <td style={{padding:"11px 12px"}}><Toggle on={on} onClick={()=>setDivDrip(d=>({...d,[r[0]]:!on}))}/></td>
-                    </tr>
-                  );})}</tbody>
-                </table>
-                <div style={{padding:"8px 16px",fontFamily:MONO,fontSize:9,color:T.dim}}>Próximo cobro = yield × tus acciones · datos de dividendos <span style={{color:T.gold}}>ilustrativos</span></div>
-              </div>
+              {divItems.length? (
+                <div style={{overflowX:"auto"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11,minWidth:780}}>
+                    <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","ACCIONES","DIV/ACC","FRECUENCIA","EX-DATE","PAY DATE","PRÓX. COBRO","ANUAL","DRIP",""].map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                    <tbody>{divItems.map(d=>{const on=!!divDrip[d.symbol];return (
+                      <tr key={d.id} style={{borderBottom:"1px solid #111820"}}>
+                        <td style={{padding:"11px 14px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(d.symbol),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{d.symbol.slice(0,2)}</div><span style={{fontSize:13,fontWeight:700,color:T.txt}}>{d.symbol}</span></div></td>
+                        <td style={{padding:"11px 14px",color:T.mid}}>{d.shares}</td>
+                        <td style={{padding:"11px 14px",color:T.txt,fontWeight:600}}>${d.divShare}</td>
+                        <td style={{padding:"11px 14px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:600,color:T.blue,border:`1px solid ${T.blue}40`,borderRadius:4,padding:"3px 8px"}}>{d.freq}</span></td>
+                        <td style={{padding:"11px 14px",color:T.mid}}>{d.exDate?fmtShort(d.exDate):"—"}</td>
+                        <td style={{padding:"11px 14px",color:T.mid}}>{d.payDate?fmtShort(d.payDate):"—"}</td>
+                        <td style={{padding:"11px 14px",color:T.gold,fontWeight:700}}>${proxOf(d).toFixed(2)}</td>
+                        <td style={{padding:"11px 14px",color:T.txt,fontWeight:600}}>${Math.round(annualOf(d)).toLocaleString("en-US")}</td>
+                        <td style={{padding:"11px 14px"}}><Toggle on={on} onClick={()=>setDivDrip(p=>({...p,[d.symbol]:!on}))}/></td>
+                        <td style={{padding:"11px 14px"}}><button onClick={()=>setDivItems(prev=>prev.filter(x=>x.id!==d.id))} style={{width:24,height:24,borderRadius:4,background:"rgba(255,61,90,.08)",border:`1px solid rgba(255,61,90,.25)`,color:T.red,fontSize:11,cursor:"pointer"}}>✕</button></td>
+                      </tr>
+                    );})}</tbody>
+                  </table>
+                </div>
+              ) : (
+                <div style={{padding:"70px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:32,marginBottom:12}}>💰</div><div style={{fontSize:15,color:T.mid,letterSpacing:.5}}>No tienes dividendos registrados</div><div style={{fontSize:12,marginTop:8}}>Pulsa <span style={{color:T.gold}}>+ Añadir dividendo</span> para seguir tus ingresos pasivos</div><button onClick={openNew} style={{marginTop:18,background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:12,fontWeight:700,padding:"9px 18px",borderRadius:6,cursor:"pointer"}}>+ Añadir dividendo</button></div>
+              )}
             </div>
             {/* RIGHT */}
             <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
               <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>Próximos Pagos <Real/></div>
-                <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:8}}>{NEXT.map((p,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${p[6]?"rgba(240,180,41,.3)":T.br}`,borderRadius:8,padding:"10px 12px"}}><div style={{textAlign:"center",flexShrink:0}}><div style={{fontFamily:MONO,fontSize:15,fontWeight:700,color:T.txt}}>{p[0]}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>{p[1]}</div></div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{p[2]}{p[6]&&<span style={{color:T.gold,fontSize:9}}> ⚡ PRÓXIMO</span>}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,marginTop:1}}>{p[3]} · {p[4]}</div></div><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.gold}}>{p[5]}</div></div>))}</div>
+                <div style={{...lbl,padding:"0 14px 8px"}}>Próximos Pagos</div>
+                {future.length? <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:8}}>{future.slice(0,8).map((x,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${i===0?"rgba(240,180,41,.3)":T.br}`,borderRadius:8,padding:"10px 12px"}}><div style={{textAlign:"center",flexShrink:0,width:34}}><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt}}>{new Date(x.d.payDate+"T00:00").getDate()}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>{new Date(x.d.payDate+"T00:00").toLocaleDateString("es-ES",{month:"short"}).toUpperCase()}</div></div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{x.d.symbol}{i===0&&<span style={{color:T.gold,fontSize:9}}> ⚡</span>}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,marginTop:1}}>{x.d.freq} · ${x.d.divShare}/acc</div></div><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.gold}}>${proxOf(x.d).toFixed(2)}</div></div>))}</div>
+                : <div style={{padding:"20px 14px",fontFamily:MONO,fontSize:11,color:T.dim,textAlign:"center"}}>Agrega dividendos con fecha de pago</div>}
               </div>
-              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-                <div style={{...lbl,padding:"0 14px 8px"}}>Ingreso Mensual <Demo/></div>
-                <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:4}}>{MON.map((m,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontFamily:MONO,fontSize:9,color:T.dim,width:22}}>{m[0]}</span><div style={{flex:1,height:11,background:T.bg3,borderRadius:2,overflow:"hidden"}}>{m[1]>0&&<div style={{height:"100%",width:m[1]/maxM*100+"%",background:"rgba(240,180,41,.45)",borderRadius:2}}/>}</div><span style={{fontFamily:MONO,fontSize:9,fontWeight:600,color:m[1]>0?T.gold:T.dim,width:38,textAlign:"right"}}>{m[1]>0?"$"+m[1]:"—"}</span></div>))}</div>
-              </div>
-              <div style={{padding:"12px 14px"}}>
-                <div style={{...lbl,marginBottom:8}}>Proyección 10 años · DRIP <Demo/></div>
-                <svg viewBox={"0 0 "+PW+" "+PH} style={{width:"100%",height:"auto"}}>
-                  <polyline points={nLine} fill="none" stroke={T.blue} strokeWidth="1.8" strokeLinejoin="round"/>
-                  <polyline points={wLine} fill="none" stroke={T.gold} strokeWidth="2" strokeLinejoin="round"/>
-                  <circle cx={qx(10)} cy={qy(wA[10])} r="3" fill={T.gold}/>
-                  <circle cx={qx(10)} cy={qy(nA[10])} r="3" fill={T.blue}/>
-                  <text x={qx(10)-2} y={qy(wA[10])-5} fontFamily={MONO} fontSize="9" fontWeight="700" fill={T.gold} textAnchor="end">${(wA[10]/1000).toFixed(1)}K</text>
-                  <text x={qx(10)-2} y={qy(nA[10])+11} fontFamily={MONO} fontSize="9" fontWeight="700" fill={T.blue} textAnchor="end">${(nA[10]/1000).toFixed(1)}K</text>
-                  <text x={ql} y={PH-4} fontFamily={MONO} fontSize="8" fill={T.dim}>Hoy</text>
-                  <text x={qx(10)} y={PH-4} fontFamily={MONO} fontSize="8" fill={T.dim} textAnchor="end">2036</text>
-                </svg>
-                <div style={{display:"flex",gap:14,marginTop:6,fontFamily:MONO,fontSize:9}}><span style={{color:T.gold}}>● Con DRIP</span><span style={{color:T.blue}}>● Sin DRIP</span></div>
-                <div style={{marginTop:10,background:T.bg3,border:`1px solid rgba(0,255,135,.15)`,borderRadius:8,padding:11}}>
-                  <div style={{...lbl,marginBottom:5}}>Oracle AI 🔮</div>
-                  <div style={{fontFamily:SANS,fontSize:11,color:T.mid,lineHeight:1.6}}>Añade <strong style={{color:T.txt}}>$O (Realty Income)</strong> — yield 5.4%, paga mensual. Activa <strong style={{color:T.txt}}>DRIP en MSFT</strong> para componer +$1.2K en 10 años.</div>
+              <div style={{padding:"14px"}}>
+                <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:12}}>
+                  <div style={{...lbl,marginBottom:6}}>Ingreso mensual estimado</div>
+                  <div style={{fontFamily:MONO,fontSize:22,fontWeight:700,color:T.gold}}>${divItems.length?Math.round(ingresoAnual/12).toLocaleString("en-US"):"0"}</div>
+                  <div style={{fontFamily:SANS,fontSize:10,color:T.dim,marginTop:4}}>promedio · ${divItems.length?Math.round(ingresoAnual).toLocaleString("en-US"):"0"}/año proyectado</div>
                 </div>
               </div>
             </div>
           </div>
+
+          {divShow && (
+            <div onClick={(e)=>e.target===e.currentTarget&&setDivShow(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+              <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:10,padding:22,width:"100%",maxWidth:460}}>
+                <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>+ NUEVO DIVIDENDO</div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+                  <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input value={divForm.symbol} onChange={e=>setDivForm(f=>({...f,symbol:e.target.value.toUpperCase()}))} placeholder="MSFT" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Acciones</div><input value={divForm.shares} onChange={e=>setDivForm(f=>({...f,shares:e.target.value}))} placeholder="8" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Div / acción ($)</div><input value={divForm.divShare} onChange={e=>setDivForm(f=>({...f,divShare:e.target.value}))} placeholder="0.83" style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Frecuencia</div><select value={divForm.freq} onChange={e=>setDivForm(f=>({...f,freq:e.target.value}))} style={inStyle}><option style={{background:T.bg2}}>Mensual</option><option style={{background:T.bg2}}>Trimestral</option><option style={{background:T.bg2}}>Semestral</option><option style={{background:T.bg2}}>Anual</option></select></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Ex-date</div><input type="date" value={divForm.exDate} onChange={e=>setDivForm(f=>({...f,exDate:e.target.value}))} style={inStyle}/></div>
+                  <div><div style={{...lbl,marginBottom:5}}>Pay date</div><input type="date" value={divForm.payDate} onChange={e=>setDivForm(f=>({...f,payDate:e.target.value}))} style={inStyle}/></div>
+                </div>
+                <div style={{display:"flex",gap:8,marginTop:6}}>
+                  <button onClick={()=>setDivShow(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
+                  <button onClick={()=>{ const sym=divForm.symbol.trim().toUpperCase(); if(!sym||!(parseFloat(divForm.shares)>0)||!(parseFloat(divForm.divShare)>0))return; const it={id:Date.now()+"",symbol:sym,shares:divForm.shares,divShare:divForm.divShare,freq:divForm.freq,exDate:divForm.exDate,payDate:divForm.payDate}; setDivItems(p=>[it,...p]); setDivShow(false); }} style={{flex:1,background:"rgba(240,180,41,.18)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,borderRadius:6,padding:"10px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>Guardar</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         );
       })()}
