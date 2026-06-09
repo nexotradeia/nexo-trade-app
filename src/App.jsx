@@ -19987,41 +19987,47 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   };
   const ingestRows = (rows) => {
     let clean = rows.map(r=>r.map(c=>(c==null?"":String(c).trim()))).filter(r=>r.some(c=>c!==""));
-    // filas de una sola celda con espacios → dividir (ej "AAPL 10 154")
-    clean = clean.map(r=> (r.length===1 && /\s/.test(r[0])) ? r[0].split(/\s+/) : r);
     if(!clean.length){ setImpMsg({type:"err",text:"El archivo está vacío."}); return; }
-    const h0=clean[0].map(c=>c.toLowerCase());
-    const hasHeader = h0.some(c=>/tick|symbol|s[ií]mbol|acc|share|qty|cant|unid|precio|price|entry|costo|avg/.test(c));
-    let iT=-1,iS=-1,iP=-1, start=0;
-    if(hasHeader){
-      start=1;
-      const find=(re)=>h0.findIndex(c=>re.test(c));
-      iT=find(/tick|symbol|s[ií]mbol/); iS=find(/acc|share|qty|cant|unid/); iP=find(/precio|price|entry|costo|avg/);
+    // 1) localizar la fila de ENCABEZADOS (Symbol + Qty/Price/Cost) — Fidelity, Schwab, etc. traen título arriba
+    const isHdr=(row)=>{ const L=row.map(c=>c.toLowerCase()); return row.length>=2 && L.some(c=>/tick|symbol|s[ií]mbol/.test(c)) && L.some(c=>/qty|quantity|acc|share|cant|unid|precio|price|cost|costo|entry|avg/.test(c)); };
+    let hdrIdx=-1;
+    for(let i=0;i<Math.min(clean.length,12);i++){ if(isHdr(clean[i])){ hdrIdx=i; break; } }
+    let iT=-1,iS=-1,iAvg=-1,iCost=-1,iPrice=-1, start=0;
+    if(hdrIdx>=0){
+      const H=clean[hdrIdx].map(c=>c.toLowerCase());
+      const find=(re)=>H.findIndex(c=>re.test(c));
+      iT=find(/tick|symbol|s[ií]mbol/);
+      iS=find(/qty|quantity|acc|share|cant|unid/);
+      iAvg=find(/avg.*cost|average.*cost|cost.*\/?.*share|precio.*prom|costo.*prom|avg.*price|entry|entrada/);
+      iCost=find(/cost basis|costo|coste|book value|libro/);
+      iPrice=find(/price|precio|last|actual/);
+      start=hdrIdx+1;
+    } else {
+      // sin encabezados: "AAPL 10 154" o columnas posicionales
+      clean = clean.map(r=> (r.length===1 && /^["']?[A-Za-z.\-]{1,6}["']?[\s,]+[\d]/.test(r[0])) ? r[0].split(/[\s,]+/) : r);
+      const ncols=Math.max(1,...clean.map(r=>r.length));
+      let best=0,bs=-1; for(let c=0;c<ncols;c++){ let sc=0; clean.forEach(r=>{ const v=r[c]||""; if(v&&/[A-Za-z]/.test(v)&&isNaN(numVal(v))) sc++; }); if(sc>bs){bs=sc;best=c;} } iT=best;
+      const numCols=[]; for(let c=0;c<ncols;c++){ if(c===iT) continue; let cnt=0; clean.forEach(r=>{ if(!isNaN(numVal(r[c]))) cnt++; }); if(cnt>0) numCols.push(c); }
+      iS = numCols.length?numCols[0]:iT+1;
+      const alt=numCols.find(c=>c!==iS); iPrice=(alt!=null)?alt:iS+1;
     }
-    const body=clean.slice(start);
-    const ncols=Math.max(1,...body.map(r=>r.length));
-    if(iT<0){ // columna más "texto" (no numérica) = ticker
-      let best=0,bestScore=-1;
-      for(let c=0;c<ncols;c++){ let sc=0; body.forEach(r=>{ const v=r[c]||""; if(v && /[A-Za-z]/.test(v) && isNaN(numVal(v))) sc++; }); if(sc>bestScore){bestScore=sc;best=c;} }
-      iT=best;
-    }
-    const numCols=[];
-    for(let c=0;c<ncols;c++){ if(c===iT) continue; let cnt=0; body.forEach(r=>{ if(!isNaN(numVal(r[c]))) cnt++; }); if(cnt>0) numCols.push(c); }
-    if(iS<0) iS = numCols.length?numCols[0]:iT+1;
-    if(iP<0){ const alt=numCols.find(c=>c!==iS); iP = (alt!=null)?alt:iS+1; }
     const parsed=[]; let sawTicker=0;
     for(let i=start;i<clean.length;i++){
       const r=clean[i];
       const tk=(r[iT]||"").toUpperCase().replace(/[^A-Z0-9.\-]/g,"");
       if(tk) sawTicker++;
-      const sh=numVal(r[iS]); const ep=numVal(r[iP]);
-      if(tk && sh>0 && ep>0) parsed.push({ticker:tk,shares:sh,entryPrice:ep});
+      const sh=numVal(r[iS]);
+      let ep=NaN;
+      if(iAvg>=0) ep=numVal(r[iAvg]);                               // precio promedio si existe
+      if(!(ep>0) && iCost>=0 && sh>0){ const cb=numVal(r[iCost]); if(cb>0) ep=cb/sh; } // Cost Basis ÷ Qty
+      if(!(ep>0) && iPrice>=0) ep=numVal(r[iPrice]);                // si no, precio actual
+      if(tk && sh>0 && ep>0) parsed.push({ticker:tk,shares:sh,entryPrice:Math.round(ep*1e4)/1e4});
     }
     if(!parsed.length){
       const sample=((clean[start]||clean[0]||[]).join(" | ")).slice(0,64);
       setImpMsg({type:"err",text: sawTicker
-        ? `Leí ${clean.length-start} fila(s) pero faltan Acciones y/o Precio válidos. El Portfolio necesita 3 columnas: Ticker, Acciones, Precio. Tu primera fila: "${sample}". (Para solo símbolos usa la Watchlist.)`
-        : `No pude leer columnas. Usa 3 columnas: Ticker, Acciones, Precio — ej: AAPL,10,154` });
+        ? `Leí ${clean.length-start} fila(s) pero no pude sacar Acciones + Precio. Necesito columnas Ticker, Acciones y Precio (o Cost Basis). Tu fila: "${sample}".`
+        : `No pude leer columnas. Usa Ticker, Acciones, Precio — ej: AAPL,10,154` });
       return;
     }
     setPositions(prev=>{
