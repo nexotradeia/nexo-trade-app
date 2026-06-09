@@ -19883,6 +19883,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [scQuery, setScQuery] = useState("");
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
+  const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
   const [pCloud, setPCloud] = useState(user?.id ? "loading" : "off"); // off | loading | synced | saving | error
   const pCloudReady = useRef(false);
 
@@ -20436,14 +20437,81 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         );
       })()}
-      {/* ── PLACEHOLDER tabs (en construcción) ── */}
-      {(termTab==="journal") && (
-        <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}>
-          <div style={{fontSize:28,marginBottom:10}}>{termTab==="screener"?"🔍":termTab==="alerts"?"🔔":"📓"}</div>
-          <div style={{fontSize:14,color:T.mid,letterSpacing:1}}>{termTab.toUpperCase()} · EN CONSTRUCCIÓN</div>
-          <div style={{fontSize:11,marginTop:6}}>Este tab se está construyendo · disponible muy pronto</div>
+      {/* ── JOURNAL VIEW ── */}
+      {termTab==="journal" && (()=>{
+        const now=new Date(); const yr=now.getFullYear(), mo=now.getMonth(), today=now.getDate();
+        const monthName=now.toLocaleDateString("es-ES",{month:"long",year:"numeric"}).replace(/^./,c=>c.toUpperCase());
+        const firstDow=(new Date(yr,mo,1).getDay()+6)%7;
+        const dim=new Date(yr,mo+1,0).getDate();
+        const dotPat=[T.grn,T.grn,T.red,T.grn,T.gold,T.grn,T.red];
+        const dayName=now.toLocaleDateString("es-ES",{weekday:"long"}).toUpperCase();
+        const dateLong=now.toLocaleDateString("es-ES",{day:"2-digit",month:"long",year:"numeric"}).toUpperCase();
+        const wk=Math.ceil((((now-new Date(yr,0,1))/86400000)+new Date(yr,0,1).getDay()+1)/7);
+        const CHIPS=[["+$1,248 P&L",T.grn],["1 pérdida",T.red],["3 trades",T.blue],["Win Rate: 67%",T.gold],["Emoción: Disciplinado",T.purp]];
+        const LOG=[["BUY",T.grn,"NVDA","$203.20","$208.30","5","+$25.50","2.8R","Ganancia",true],["SELL",T.red,"BKNG","$163.27","$161.15","2","−$82.40","−1.2R","Pérdida",false],["BUY",T.grn,"TSLA","$404.20","$408.70","7","+$31.50","1.6R","Ganancia",true]];
+        const EMO=[["🧠","ENFOCADO"],["😤","FRUSTRADO"],["😰","ANSIOSO"],["😎","CONFIADO"],["🎯","EN FLOW"],["😴","CANSADO"],["😡","REVENGE"],["⚡","EUFÓRICO"]];
+        const ENTRIES=[["Lun 08 Jun 2026","Alta volatilidad — NVDA breakout","Jornada con alta volatilidad. NVDA rompió resi…","+$1,248","3 trades","WR 67%",true],["Vie 05 Jun 2026","Día de consolidación — MSFT earnings","Sesión tranquila post-earnings. Mantuve posici…","+$480","2 trades","WR 100%",false],["Jue 04 Jun 2026","Error de sizing — Lección importante","Cometí error de position sizing en TSLA. El trad…","−$220","4 trades","WR 50%",false],["Mié 03 Jun 2026","Momentum trade perfecto — AMZN","Setup ideal en AMZN pre-earnings. Entré con c…","+$890","2 trades","WR 100%",false],["Mar 02 Jun 2026","Sesión de análisis — sin trades","Día dedicado a revisión de setups. Identifiqué …","—","0 trades","—",false]];
+        const MON=[["Ene","+$1,840",1840],["Feb","+$3,200",3200],["Mar","−$820",-820],["Abr","+$4,100",4100],["May","+$2,680",2680],["Jun","+$1,248",1248]]; const maxM=4100;
+        const ST30=[["Total P&L","+$12,248",T.grn],["Trades","47",T.txt],["Win Rate","74.2%",T.grn],["Avg Win","+$420",T.grn],["Avg Loss","−$180",T.red],["Profit Factor","2.3x",T.txt],["Best día","+$2,840",T.grn],["Peor día","−$420",T.red]];
+        const PROF=[["Disciplina",74,T.grn],["Control emocional",68,T.gold],["Paciencia",82,T.grn],["Risk Management",77,T.grn],["FOMO",32,T.grn],["Revenge Trading",15,T.grn]];
+        return (
+        <div style={{display:"grid",gridTemplateColumns:"320px 1fr 320px",alignItems:"stretch"}}>
+          {/* LEFT */}
+          <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
+              <span style={{...lbl,padding:0}}>Trading Journal</span>
+              <button style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ Entrada</button>
+            </div>
+            <div style={{padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><span style={{fontFamily:MONO,fontSize:12,color:T.dim,cursor:"pointer"}}>‹</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{monthName}</span><span style={{fontFamily:MONO,fontSize:12,color:T.dim,cursor:"pointer"}}>›</span></div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3}}>
+                {["L","M","M","J","V","S","D"].map((d,i)=><div key={"h"+i} style={{textAlign:"center",fontFamily:MONO,fontSize:9,color:T.dim,padding:"2px 0"}}>{d}</div>)}
+                {Array.from({length:firstDow}).map((_,i)=><div key={"b"+i}/>)}
+                {Array.from({length:dim}).map((_,i)=>{const d=i+1;const isToday=d===today;const dot=d<today?dotPat[d%7]:null;return (<div key={d} style={{textAlign:"center",padding:"4px 0",borderRadius:5,position:"relative",background:isToday?"rgba(0,255,135,.12)":"transparent",border:isToday?`1px solid rgba(0,255,135,.4)`:"1px solid transparent"}}><span style={{fontFamily:MONO,fontSize:11,color:isToday?T.grn:d<=today?T.mid:T.dim2||T.dim,fontWeight:isToday?700:400}}>{d}</span>{dot&&<span style={{position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)",width:4,height:4,borderRadius:"50%",background:dot}}/>}</div>);})}
+              </div>
+              <div style={{display:"flex",gap:12,marginTop:10,fontFamily:MONO,fontSize:9,color:T.dim}}><span>● <span style={{color:T.grn}}>Ganancia</span></span><span>● <span style={{color:T.red}}>Pérdida</span></span><span>● <span style={{color:T.gold}}>Mixto</span></span></div>
+            </div>
+            <div>{ENTRIES.map((e,i)=>{const pos=e[3].startsWith("+");return (<div key={i} style={{padding:"11px 14px",borderBottom:`1px solid ${T.br}`,borderLeft:e[6]?`2px solid ${T.grn}`:"2px solid transparent",background:e[6]?"rgba(0,255,135,.04)":"transparent",cursor:"pointer"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginBottom:3}}>{e[0]}</div><div style={{fontFamily:SANS,fontSize:12,fontWeight:700,color:T.txt,marginBottom:2}}>{e[1]}</div><div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginBottom:5,lineHeight:1.4}}>{e[2]}</div><div style={{display:"flex",gap:8,fontFamily:MONO,fontSize:9}}><span style={{color:e[3]==="—"?T.dim:pos?T.grn:T.red,fontWeight:700}}>{e[3]}</span><span style={{color:T.dim}}>{e[4]}</span><span style={{color:T.dim}}>{e[5]}</span></div></div>);})}</div>
+          </div>
+          {/* CENTER */}
+          <div style={{minWidth:0,padding:"16px 22px"}}>
+            <div style={{fontFamily:MONO,fontSize:10,color:T.dim,letterSpacing:1,marginBottom:8}}>{dayName} · {dateLong} · SEMANA {wk}</div>
+            <div style={{fontFamily:SANS,fontSize:20,fontWeight:800,color:T.txt,marginBottom:12}}>Día de alta volatilidad — NVDA breakout + error en BKNG</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:18}}>{CHIPS.map((c,i)=>(<span key={i} style={{fontFamily:MONO,fontSize:10,fontWeight:700,color:c[1],background:c[1]+"1a",border:`1px solid ${c[1]}33`,borderRadius:5,padding:"4px 10px"}}>{c[0]}</span>))}</div>
+            <div style={{...lbl,marginBottom:8}}>Resumen del día</div>
+            <div style={{fontFamily:SANS,fontSize:13,color:T.mid,lineHeight:1.7,marginBottom:20}}>Jornada con alta volatilidad desde apertura. <strong style={{color:T.txt}}>NVDA rompió resistencia $205</strong> con volumen 40% sobre promedio — señal clara que había identificado la semana pasada. Entré en $203.20 y salí parcialmente en $208. <strong style={{color:T.txt}}>Error principal:</strong> cerré BKNG prematuramente por nerviosismo ante el movimiento del VIX, perdiendo $82 que no debería haber perdido si hubiera respetado el stop original.</div>
+            <div style={{...lbl,marginBottom:8}}>Log de trades del día</div>
+            <div style={{overflowX:"auto",marginBottom:20}}><table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}><thead><tr style={{background:T.bg2}}>{["LADO","SYM","ENTRADA","SALIDA","QTY","P&L","RR","RESULTADO"].map((h,i)=><th key={i} style={{padding:"8px 12px",fontSize:9,fontWeight:600,letterSpacing:1,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`}}>{h}</th>)}</tr></thead><tbody>{LOG.map((t,i)=>(<tr key={i} style={{borderBottom:"1px solid #111820"}}><td style={{padding:"10px 12px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:t[1],background:t[1]+"1a",border:`1px solid ${t[1]}33`,borderRadius:3,padding:"3px 8px"}}>{t[0]}</span></td><td style={{padding:"10px 12px",color:T.txt,fontWeight:700}}>{t[2]}</td><td style={{padding:"10px 12px",color:T.mid}}>{t[3]}</td><td style={{padding:"10px 12px",color:T.mid}}>{t[4]}</td><td style={{padding:"10px 12px",color:T.mid}}>{t[5]}</td><td style={{padding:"10px 12px",color:t[9]?T.grn:T.red,fontWeight:700}}>{t[6]}</td><td style={{padding:"10px 12px",color:t[9]?T.grn:T.red}}>{t[7]}</td><td style={{padding:"10px 12px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:t[9]?T.grn:T.red,background:(t[9]?T.grn:T.red)+"1a",border:`1px solid ${(t[9]?T.grn:T.red)}33`,borderRadius:3,padding:"3px 8px"}}>{t[9]?"✓ ":"✗ "}{t[8]}</span></td></tr>))}</tbody></table></div>
+            <div style={{...lbl,marginBottom:8}}>Estado emocional durante el día</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>{EMO.map((e,i)=>{const sel=jrEmotion===e[1];return (<div key={i} onClick={()=>setJrEmotion(e[1])} style={{background:sel?"rgba(0,255,135,.07)":T.bg3,border:`1px solid ${sel?"rgba(0,255,135,.35)":T.br}`,borderRadius:8,padding:"16px 8px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:24,marginBottom:8,filter:sel?"none":"grayscale(0.4)",opacity:sel?1:0.7}}>{e[0]}</div><div style={{fontFamily:MONO,fontSize:10,fontWeight:700,color:sel?T.grn:T.dim,letterSpacing:.5}}>{e[1]}</div></div>);})}</div>
+            <div style={{...lbl,marginBottom:8}}>Errores y aprendizajes</div>
+            <div style={{display:"flex",gap:11,background:"rgba(255,61,90,.06)",border:`1px solid rgba(255,61,90,.25)`,borderRadius:8,padding:"13px 15px"}}><span style={{fontSize:16}}>❌</span><div style={{fontFamily:SANS,fontSize:12,color:T.mid,lineHeight:1.6}}><strong style={{color:T.txt}}>Salida prematura en BKNG:</strong> Cerré por miedo al VIX, no por razones técnicas. El setup original era válido. Pérdida innecesaria de $82.</div></div>
+          </div>
+          {/* RIGHT */}
+          <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>P&L Mensual <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:7}}>{MON.map((m,i)=>{const pos=m[2]>=0;return (<div key={i} style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontFamily:MONO,fontSize:10,color:T.dim,width:24}}>{m[0]}</span><div style={{flex:1,height:14,background:T.bg3,borderRadius:3,overflow:"hidden",position:"relative"}}><div style={{height:"100%",width:Math.abs(m[2])/maxM*100+"%",background:pos?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)",borderRadius:3}}/></div><span style={{fontFamily:MONO,fontSize:10,fontWeight:700,color:pos?T.grn:T.red,width:52,textAlign:"right"}}>{m[1]}</span></div>);})}</div>
+            </div>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px"}}>Estadísticas 30 días</div>
+              {ST30.map((s,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 14px",fontFamily:MONO,fontSize:11}}><span style={{color:T.dim}}>{s[0]}</span><span style={{color:s[2],fontWeight:700}}>{s[1]}</span></div>))}
+            </div>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>Perfil Psicológico <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:9}}>{PROF.map((p,i)=>(<div key={i}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3,fontFamily:MONO,fontSize:10}}><span style={{color:T.mid}}>{p[0]}</span><span style={{color:p[2],fontWeight:700}}>{p[1]}%</span></div><div style={{height:5,background:T.bg3,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:p[1]+"%",background:p[2],borderRadius:3}}/></div></div>))}</div>
+            </div>
+            <div style={{padding:"12px 14px"}}>
+              <div style={{...lbl,marginBottom:8,display:"flex",alignItems:"center",gap:6}}>Oracle AI · Comportamiento <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{background:T.bg3,border:`1px solid rgba(0,255,135,.15)`,borderRadius:8,padding:12}}>
+                <div style={{display:"flex",alignItems:"baseline",gap:6,marginBottom:8}}><span style={{fontFamily:MONO,fontSize:28,fontWeight:700,color:T.grn,textShadow:"0 0 18px rgba(0,255,135,.3)"}}>74</span><span style={{fontFamily:MONO,fontSize:11,color:T.dim}}>/100</span></div>
+                <div style={{fontFamily:SANS,fontSize:11,color:T.mid,lineHeight:1.6}}>Disciplina sólida. Tu mayor fuga: cerrar ganadores temprano por ansiedad (visto en BKNG hoy). Trabaja en <strong style={{color:T.txt}}>dejar correr los winners</strong>.</div>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+        );
+      })()}
       {/* BOTTOM BAR */}
       <div style={{display:"flex",alignItems:"center",gap:16,padding:"6px 20px",background:T.bg2,borderTop:`1px solid ${T.br}`,fontFamily:MONO,fontSize:10,color:T.dim}}>
         <span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:4,height:4,borderRadius:"50%",background:T.grn}}/>Finnhub <strong style={{color:T.txt}}>CONNECTED</strong></span>
