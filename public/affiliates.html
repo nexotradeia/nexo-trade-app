@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexoTrade Affiliate Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ═══ TOKENS ═══ */
+:root{
+  --bg:#06080e; --bg2:#0d1117; --bg3:#111820; --bg4:#161e2a; --bg5:#1a2436;
+  --br:#1e2a38; --br2:#253447; --br3:#2e3f56;
+  --grn:#00e87a; --grn-d:rgba(0,232,122,.08); --grn-d2:rgba(0,232,122,.14); --grn-glow:rgba(0,232,122,.25);
+  --red:#ff3355; --red-d:rgba(255,51,85,.08);
+  --gold:#f0b400; --gold-d:rgba(240,180,0,.09);
+  --blue:#4da6ff; --blue-d:rgba(77,166,255,.09);
+  --purp:#a78bfa; --purp-d:rgba(167,139,250,.09);
+  --cyan:#00d4ff; --cyan-d:rgba(0,212,255,.08);
+  --txt:#d0e0f0; --txt2:#f0f6ff;
+  --mid:#6888a8; --dim:#3c5470; --dim2:#243444;
+  --mono:'IBM Plex Mono',monospace; --sans:'Inter',sans-serif;
+  --shadow:0 4px 24px rgba(0,0,0,.4); --shadow-lg:0 12px 48px rgba(0,0,0,.6);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:var(--sans);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--br2);border-radius:2px;}
+input,select,textarea{font-family:var(--sans);}
+button{font-family:var(--sans);cursor:pointer;}
+
+/* ═══ SUPABASE CONFIG ═══ */
+/* 🔧 REPLACE WITH YOUR ACTUAL KEYS from supabase.com/dashboard → Settings → API */
+/* const SUPABASE_URL = 'https://glvrzrtatekuuhwtzzhd.supabase.co' */
+/* const SUPABASE_KEY = 'sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl' */
+
+/* ═══ AUTH SCREEN ═══ */
+.auth-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,232,122,.07) 0%,transparent 60%);
+  padding:24px;
+}
+.auth-card{
+  background:var(--bg2);border:1px solid var(--br);border-radius:24px;
+  padding:40px 36px;max-width:440px;width:100%;
+  box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
+}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--grn),var(--cyan),transparent);}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center;}
+.auth-hex{width:36px;height:36px;background:var(--grn);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--bg);}
+.auth-name{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--txt2);}
+.auth-name span{color:var(--grn);}
+.auth-title{font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--txt2);text-align:center;margin-bottom:6px;}
+.auth-sub{font-size:14px;color:var(--mid);text-align:center;margin-bottom:28px;}
+.auth-tabs{display:flex;background:var(--bg3);border:1px solid var(--br);border-radius:12px;padding:4px;gap:2px;margin-bottom:24px;}
+.auth-tab{flex:1;padding:8px;border-radius:9px;font-size:13px;font-weight:600;color:var(--mid);background:transparent;border:none;cursor:pointer;transition:all .2s;}
+.auth-tab.on{background:var(--bg5);color:var(--txt2);}
+.form-field{margin-bottom:16px;}
+.fl{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--br);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--txt2);outline:none;transition:all .2s;}
+.fi:focus{border-color:var(--grn-d2);box-shadow:0 0 0 3px var(--grn-d);}
+.fi::placeholder{color:var(--dim);}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.auth-btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--grn);color:var(--bg);font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px var(--grn-glow);transition:all .2s;margin-top:4px;}
+.auth-btn:hover{box-shadow:0 6px 28px var(--grn-glow);transform:translateY(-1px);}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;font-size:12px;color:var(--dim);}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--br);}
+.demo-btn{width:100%;padding:11px;border-radius:10px;border:1px solid var(--br2);background:var(--bg3);color:var(--mid);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.demo-btn:hover{border-color:var(--br3);color:var(--txt);}
+.auth-error{background:var(--red-d);border:1px solid rgba(255,51,85,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none;}
+
+/* ═══ MAIN APP ═══ */
+.app{display:none;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;}
+.tb-left{display:flex;align-items:center;gap:14px;}
+.tb-hex{width:28px;height:28px;background:var(--grn);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--bg);}
+.tb-brand{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:2px;color:var(--txt);}
+.tb-brand span{color:var(--grn);}
+.tb-pill{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.5px;padding:3px 10px;border-radius:4px;background:var(--grn-d2);color:var(--grn);border:1px solid var(--grn-d2);}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.tb-live{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--grn);}
+.tb-live-dot{width:5px;height:5px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-user{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--br);font-size:13px;font-weight:600;color:var(--txt);}
+.tb-av{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--grn),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bg);}
+.logout-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--br);background:transparent;color:var(--mid);font-size:12px;transition:all .15s;}
+.logout-btn:hover{color:var(--red);border-color:rgba(255,51,85,.3);}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;height:calc(100vh - 54px);}
+.sidebar{background:var(--bg2);border-right:1px solid var(--br);padding:16px 0;overflow-y:auto;}
+.main{overflow-y:auto;padding:28px;}
+
+/* SIDEBAR NAV */
+.sb-section{padding:0 10px;margin-bottom:20px;}
+.sb-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--dim);padding:0 8px;margin-bottom:8px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .15s;margin-bottom:2px;}
+.sb-item:hover{background:var(--bg3);color:var(--txt);}
+.sb-item.active{background:var(--grn-d2);color:var(--grn);border:1px solid var(--grn-d2);}
+.sb-item .ico{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--grn-d2);color:var(--grn);}
+
+/* REFERRAL LINK BOX */
+.reflink-box{margin:0 10px 16px;background:var(--bg3);border:1px solid var(--grn-d2);border-radius:10px;padding:12px;}
+.rl-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--grn);margin-bottom:7px;}
+.rl-link{font-family:var(--mono);font-size:11px;color:var(--txt);background:var(--bg4);border:1px solid var(--br);border-radius:6px;padding:7px 10px;word-break:break-all;cursor:pointer;transition:all .2s;}
+.rl-link:hover{border-color:var(--grn-d2);}
+.rl-copy{width:100%;margin-top:7px;padding:7px;border-radius:6px;border:none;background:var(--grn);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;}
+.rl-copy:hover{box-shadow:0 3px 12px var(--grn-glow);}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+.kpi{background:var(--bg2);border:1px solid var(--br);border-radius:14px;padding:18px 18px 14px;position:relative;overflow:hidden;transition:all .2s;}
+.kpi:hover{border-color:var(--br2);transform:translateY(-2px);}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 14px 14px;}
+.kpi.grn::after{background:linear-gradient(90deg,var(--grn),transparent);}
+.kpi.gold::after{background:linear-gradient(90deg,var(--gold),transparent);}
+.kpi.blue::after{background:linear-gradient(90deg,var(--blue),transparent);}
+.kpi.purp::after{background:linear-gradient(90deg,var(--purp),transparent);}
+.kpi.cyan::after{background:linear-gradient(90deg,var(--cyan),transparent);}
+.kpi-l{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.kpi-v{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;margin-bottom:4px;}
+.kpi-v.grn{color:var(--grn);text-shadow:0 0 16px var(--grn-glow);}
+.kpi-v.gold{color:var(--gold);}
+.kpi-v.blue{color:var(--blue);}
+.kpi-v.purp{color:var(--purp);}
+.kpi-v.cyan{color:var(--cyan);}
+.kpi-s{font-family:var(--mono);font-size:11px;color:var(--dim);}
+
+/* SECTION HEADERS */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.sec-title{font-size:16px;font-weight:700;color:var(--txt2);letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
+.sec-title .dot{width:6px;height:6px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);}
+.sec-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--grn-d);color:var(--grn);border:1px solid var(--grn-d2);}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--br);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--br);background:var(--bg3);}
+.card-title{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);}
+
+/* REFERRALS TABLE */
+.ref-table{width:100%;border-collapse:collapse;}
+.ref-table th{padding:9px 14px;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);text-align:left;border-bottom:1px solid var(--br);background:var(--bg3);}
+.ref-table td{padding:11px 14px;border-bottom:1px solid var(--bg3);vertical-align:middle;}
+.ref-table tr:hover td{background:var(--bg3);}
+.ref-table tr:last-child td{border-bottom:none;}
+
+/* Person cell */
+.person-cell{display:flex;align-items:center;gap:10px;}
+.person-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.person-name{font-size:13px;font-weight:600;color:var(--txt2);}
+.person-email{font-size:11px;color:var(--dim);margin-top:1px;}
+
+/* Status badge */
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.s-click{background:var(--blue-d);color:var(--blue);border:1px solid rgba(77,166,255,.15);}
+.s-signup{background:var(--purp-d);color:var(--purp);border:1px solid rgba(167,139,250,.15);}
+.s-trial{background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,255,.15);}
+.s-paying{background:var(--grn-d2);color:var(--grn);border:1px solid var(--grn-d2);}
+.s-churned{background:var(--red-d);color:var(--red);border:1px solid rgba(255,51,85,.15);}
+
+/* Journey progress bar */
+.journey{display:flex;align-items:center;gap:3px;}
+.j-step{height:4px;flex:1;border-radius:2px;background:var(--br2);}
+.j-step.done{background:var(--grn);}
+.j-step.current{background:var(--gold);}
+
+/* Commission amount */
+.comm-amt{font-family:var(--mono);font-size:13px;font-weight:700;}
+.comm-paid{color:var(--grn);}
+.comm-pending{color:var(--gold);}
+.comm-zero{color:var(--dim);}
+
+/* AFFILIATE CARD (admin view) */
+.aff-card{background:var(--bg2);border:1px solid var(--br);border-radius:14px;padding:18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:all .2s;cursor:pointer;}
+.aff-card:hover{border-color:var(--br2);transform:translateY(-1px);}
+.aff-av{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;}
+.aff-info{flex:1;}
+.aff-name{font-size:14px;font-weight:700;color:var(--txt2);display:flex;align-items:center;gap:7px;}
+.aff-code{font-family:var(--mono);font-size:11px;color:var(--mid);}
+.tier-badge{font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.5px;text-transform:uppercase;}
+.t-nano{background:var(--blue-d);color:var(--blue);}
+.t-micro{background:var(--purp-d);color:var(--purp);}
+.t-mid{background:var(--cyan-d);color:var(--cyan);}
+.t-macro{background:var(--gold-d);color:var(--gold);}
+.t-mega{background:var(--grn-d2);color:var(--grn);}
+.aff-stats{display:flex;gap:20px;}
+.as-item{text-align:right;}
+.as-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.5px;}
+.as-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt2);}
+
+/* CHARTS */
+.bar-chart{display:flex;flex-direction:column;gap:8px;padding:16px;}
+.bc-row{display:flex;align-items:center;gap:10px;}
+.bc-label{font-family:var(--mono);font-size:11px;color:var(--mid);min-width:80px;text-align:right;flex-shrink:0;}
+.bc-track{flex:1;height:20px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative;}
+.bc-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-family:var(--mono);font-size:10px;font-weight:600;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.bc-val{font-family:var(--mono);font-size:11px;color:var(--mid);min-width:50px;text-align:right;flex-shrink:0;}
+
+/* MINI SPARKLINE */
+.spark{width:80px;height:28px;flex-shrink:0;}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--br);background:var(--bg3);font-family:var(--mono);font-size:10px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .15s;letter-spacing:.5px;}
+.filter-btn:hover{color:var(--txt);border-color:var(--br2);}
+.filter-btn.on{background:var(--grn-d2);color:var(--grn);border-color:var(--grn-d2);}
+.filter-search{flex:1;max-width:240px;background:var(--bg3);border:1px solid var(--br);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--txt);outline:none;transition:all .2s;}
+.filter-search:focus{border-color:var(--grn-d2);}
+.filter-search::placeholder{color:var(--dim);}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 20px;}
+.empty-ico{font-size:40px;margin-bottom:12px;}
+.empty-t{font-size:15px;font-weight:600;color:var(--mid);margin-bottom:6px;}
+.empty-s{font-size:13px;color:var(--dim);}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--dim);font-size:13px;}
+.spin{width:16px;height:16px;border:2px solid var(--br2);border-top-color:var(--grn);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--br);border-radius:20px;padding:28px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-size:18px;font-weight:700;color:var(--txt2);}
+.modal-close{width:28px;height:28px;border-radius:6px;background:var(--bg3);border:1px solid var(--br);color:var(--mid);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.modal-close:hover{color:var(--txt);}
+
+/* DATE */
+.date-txt{font-family:var(--mono);font-size:11px;color:var(--dim);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--grn-d2);border-radius:12px;padding:13px 18px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--txt);box-shadow:var(--shadow-lg);transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:999;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* RESPONSIVE */
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.kpi-strip{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.kpi-strip{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ═══ AUTH SCREEN ═══ -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-hex">N</div>
+      <div class="auth-name">NEXO<span>TRADE</span></div>
+    </div>
+    <div class="auth-title">Affiliate Hub</div>
+    <div class="auth-sub">Track your referrals, earnings and payouts in real time</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab on" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-apply" onclick="switchAuthTab('apply')">Apply as Affiliate</button>
+    </div>
+
+    <div id="auth-error" class="auth-error"></div>
+
+    <!-- SIGN IN -->
+    <div id="form-signin">
+      <div class="form-field">
+        <div class="fl">Email</div>
+        <input class="fi" id="si-email" type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-field">
+        <div class="fl">Password</div>
+        <input class="fi" id="si-password" type="password" placeholder="••••••••">
+      </div>
+      <button class="auth-btn" onclick="signIn()">Sign In →</button>
+      <div class="auth-divider">or</div>
+      <button class="demo-btn" onclick="loadDemo()">👀 View Demo (no account needed)</button>
+    </div>
+
+    <!-- APPLY -->
+    <div id="form-apply" style="display:none">
+      <div class="fi-row">
+        <div class="form-field">
+          <div class="fl">Full name</div>
+          <input class="fi" id="ap-name" placeholder="Pepe García">
+        </div>
+        <div class="form-field">
+          <div class="fl">Username</div>
+          <input class="fi" id="ap-username" placeholder="@pepegarcia">
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="fl">Email</div>
+        <input class="fi" id="ap-email" type="email" placeholder="pepe@gmail.com">
+      </div>
+      <div class="fi-row">
+        <div class="form-field">
+          <div class="fl">Main platform</div>
+          <select class="fi" id="ap-platform">
+            <option value="">Select...</option>
+            <option>Instagram</option>
+            <option>TikTok</option>
+            <option>YouTube</option>
+            <option>Twitter / X</option>
+            <option>Facebook</option>
+            <option>Podcast</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <div class="fl">Followers</div>
+          <input class="fi" id="ap-followers" type="number" placeholder="25000">
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="fl">Password</div>
+        <input class="fi" id="ap-password" type="password" placeholder="Create a password">
+      </div>
+      <button class="auth-btn" onclick="applyAffiliate()">Submit Application →</button>
+      <div style="margin-top:12px;text-align:center;font-size:12px;color:var(--dim)">We review all applications within 24h · Free premium access upon approval</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div class="app" id="mainApp">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-hex">N</div>
+      <div class="tb-brand">NEXO<span>TRADE</span></div>
+      <div class="tb-pill" id="tb-tier">MICRO AFFILIATE</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-live"><div class="tb-live-dot"></div>Live data</div>
+      <div class="tb-user">
+        <div class="tb-av" id="tb-av">P</div>
+        <span id="tb-name">Pepe García</span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <!-- Referral link -->
+      <div class="reflink-box">
+        <div class="rl-label">Your referral link</div>
+        <div class="rl-link" id="ref-link-display" onclick="copyLink()">nexotradeia.com/?ref=PEPE20</div>
+        <button class="rl-copy" id="copy-btn" onclick="copyLink()">📋 Copy link</button>
+      </div>
+
+      <!-- Nav -->
+      <div class="sb-section">
+        <div class="sb-label">Overview</div>
+        <div class="sb-item active" onclick="showSection('dashboard',this)"><span class="ico">📊</span> Dashboard</div>
+        <div class="sb-item" onclick="showSection('referrals',this)"><span class="ico">👥</span> My Referrals <span class="sb-badge" id="sb-ref-count">0</span></div>
+        <div class="sb-item" onclick="showSection('earnings',this)"><span class="ico">💰</span> Earnings</div>
+        <div class="sb-item" onclick="showSection('content',this)"><span class="ico">📱</span> My Content</div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Account</div>
+        <div class="sb-item" onclick="showSection('payouts',this)"><span class="ico">💳</span> Payouts</div>
+        <div class="sb-item" onclick="showSection('settings',this)"><span class="ico">⚙️</span> Settings</div>
+        <div class="sb-item" onclick="showSection('resources',this)"><span class="ico">🎨</span> Marketing Kit</div>
+      </div>
+      <!-- Admin section (only visible to admin) -->
+      <div class="sb-section" id="admin-section" style="display:none">
+        <div class="sb-label">Admin</div>
+        <div class="sb-item" onclick="showSection('admin',this)"><span class="ico">🛡</span> All Affiliates</div>
+        <div class="sb-item" onclick="showSection('admin-payouts',this)"><span class="ico">💸</span> Process Payouts</div>
+        <div class="sb-item" onclick="showSection('admin-analytics',this)"><span class="ico">📈</span> Analytics</div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main" id="mainContent">
+      <div class="loading"><div class="spin"></div> Loading your dashboard...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REFERRAL DETAIL MODAL -->
+<div class="modal-overlay" id="refModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">Referral Detail</div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   SUPABASE CONFIG — Replace with your real keys
+   Go to: supabase.com/dashboard → Settings → API
+═══════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://glvrzrtatekuuhwtzzhd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl';
+
+let sb = null;
+try {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) {
+  console.log('Supabase not configured — running in demo mode');
+}
+
+/* ═══ STATE ═══ */
+let currentUser = null;
+let currentAffiliate = null;
+let isAdmin = false;
+let isDemoMode = false;
+
+/* ═══ DEMO DATA ═══ */
+const DEMO = {
+  affiliate: {
+    id: 'demo-1',
+    name: 'Pepe García',
+    email: 'pepe@gmail.com',
+    username: 'pepegarcia',
+    referral_code: 'PEPE20',
+    tier: 'micro',
+    commission_pct: 20,
+    platform: 'instagram',
+    followers: 28400,
+    status: 'active',
+    total_clicks: 847,
+    total_signups: 124,
+    total_paying: 38,
+    total_earned: 1842.40,
+    balance_pending: 840.00,
+    total_paid_out: 1002.40,
+    last_signup_at: new Date(Date.now() - 86400000).toISOString()
+  },
+  referrals: [
+    {id:'r1',referred_name:'Jorge López',referred_email:'jorge@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:true,clicked_at:new Date(Date.now()-12*864e5).toISOString(),signed_up_at:new Date(Date.now()-11*864e5).toISOString(),first_payment_at:new Date(Date.now()-10*864e5).toISOString(),country:'US',device_type:'mobile'},
+    {id:'r2',referred_name:'Sofía Martínez',referred_email:'sofia@email.com',status:'paying',plan_type:'monthly',plan_amount:15.99,commission_earned:3.20,commission_paid:true,clicked_at:new Date(Date.now()-9*864e5).toISOString(),signed_up_at:new Date(Date.now()-9*864e5).toISOString(),first_payment_at:new Date(Date.now()-8*864e5).toISOString(),country:'MX',device_type:'desktop'},
+    {id:'r3',referred_name:'Luis Hernández',referred_email:'luis@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:true,clicked_at:new Date(Date.now()-8*864e5).toISOString(),signed_up_at:new Date(Date.now()-7*864e5).toISOString(),first_payment_at:new Date(Date.now()-7*864e5).toISOString(),country:'ES',device_type:'mobile'},
+    {id:'r4',referred_name:'Carmen Vega',referred_email:'carmen@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:false,clicked_at:new Date(Date.now()-6*864e5).toISOString(),signed_up_at:new Date(Date.now()-5*864e5).toISOString(),first_payment_at:new Date(Date.now()-5*864e5).toISOString(),country:'AR',device_type:'desktop'},
+    {id:'r5',referred_name:'Miguel Torres',referred_email:'miguel@email.com',status:'paying',plan_type:'monthly',plan_amount:15.99,commission_earned:3.20,commission_paid:false,clicked_at:new Date(Date.now()-5*864e5).toISOString(),signed_up_at:new Date(Date.now()-4*864e5).toISOString(),first_payment_at:new Date(Date.now()-4*864e5).toISOString(),country:'US',device_type:'mobile'},
+    {id:'r6',referred_name:'Isabella Cruz',referred_email:'isa@email.com',status:'signup',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-4*864e5).toISOString(),signed_up_at:new Date(Date.now()-3*864e5).toISOString(),first_payment_at:null,country:'CO',device_type:'mobile'},
+    {id:'r7',referred_name:'Pedro Ramírez',referred_email:'pedro@email.com',status:'trial',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-3*864e5).toISOString(),signed_up_at:new Date(Date.now()-2*864e5).toISOString(),first_payment_at:null,country:'PE',device_type:'desktop'},
+    {id:'r8',referred_name:'Valentina Soto',referred_email:'vale@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:false,clicked_at:new Date(Date.now()-2*864e5).toISOString(),signed_up_at:new Date(Date.now()-2*864e5).toISOString(),first_payment_at:new Date(Date.now()-1*864e5).toISOString(),country:'CL',device_type:'mobile'},
+    {id:'r9',referred_name:'Alejandro Díaz',referred_email:'alex@email.com',status:'click',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-864e5).toISOString(),signed_up_at:null,first_payment_at:null,country:'US',device_type:'mobile'},
+    {id:'r10',referred_name:'Gabriela Moreno',referred_email:'gabi@email.com',status:'signup',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-43200000).toISOString(),signed_up_at:new Date(Date.now()-36000000).toISOString(),first_payment_at:null,country:'MX',device_type:'desktop'},
+  ],
+  monthlyEarnings: [
+    {month:'Ene 2026',earned:0,sales:0},
+    {month:'Feb 2026',earned:0,sales:0},
+    {month:'Mar 2026',earned:142.40,sales:8},
+    {month:'Abr 2026',earned:380.00,sales:14},
+    {month:'May 2026',earned:680.00,sales:22},
+    {month:'Jun 2026',earned:640.00,sales:18},
+  ]
+};
+
+/* ═══ AUTH ═══ */
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+tab).classList.add('on');
+  document.getElementById('form-signin').style.display = tab==='signin'?'block':'none';
+  document.getElementById('form-apply').style.display  = tab==='apply' ?'block':'none';
+}
+
+async function signIn(){
+  const email = document.getElementById('si-email').value.trim();
+  const pass  = document.getElementById('si-password').value;
+  if(!email||!pass){showAuthError('Please enter email and password');return;}
+  if(!sb){showAuthError('Supabase not configured. Use Demo mode.');return;}
+  try {
+    const {data,error} = await sb.auth.signInWithPassword({email,password:pass});
+    if(error)throw error;
+    currentUser = data.user;
+    await loadAffiliateData();
+  } catch(e){showAuthError(e.message||'Sign in failed');}
+}
+
+async function applyAffiliate(){
+  const name = document.getElementById('ap-name').value.trim();
+  const username = document.getElementById('ap-username').value.replace('@','').trim();
+  const email = document.getElementById('ap-email').value.trim();
+  const platform = document.getElementById('ap-platform').value;
+  const followers = parseInt(document.getElementById('ap-followers').value)||0;
+  const pass = document.getElementById('ap-password').value;
+  if(!name||!email||!pass||!platform){showAuthError('Please fill all required fields');return;}
+  if(!sb){showAuthError('Supabase not configured. Use Demo mode.');return;}
+  try {
+    const {data,error} = await sb.auth.signUp({email,password:pass,options:{data:{name,username}}});
+    if(error)throw error;
+    // Insert affiliate record
+    const code = username.toUpperCase().slice(0,8)+'20';
+    const tier = followers>=500000?'mega':followers>=100000?'macro':followers>=20000?'mid':followers>=5000?'micro':'nano';
+    const comm = tier==='mega'?30:tier==='macro'?28:tier==='mid'?25:20;
+    await sb.from('affiliates').insert({name,email,username,referral_code:code,platform:platform.toLowerCase(),followers,tier,commission_pct:comm,status:'pending',free_months:tier==='nano'?1:3});
+    showAuthError('Application submitted! We\'ll review it within 24h and email you.');
+  } catch(e){showAuthError(e.message||'Application failed');}
+}
+
+function showAuthError(msg){
+  const el=document.getElementById('auth-error');
+  el.textContent=msg;el.style.display='block';
+  setTimeout(()=>el.style.display='none',5000);
+}
+
+function loadDemo(){
+  isDemoMode=true;
+  currentAffiliate=DEMO.affiliate;
+  showApp();
+}
+
+async function loadAffiliateData(){
+  if(!sb)return loadDemo();
+  try {
+    const {data} = await sb.from('affiliates').select('*').eq('email',currentUser.email).single();
+    if(data){currentAffiliate=data;isAdmin=data.email==='admin@nexotrade.com';}
+    showApp();
+  } catch(e){console.error(e);loadDemo();}
+}
+
+function showApp(){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  updateTopbar();
+  renderDashboard();
+}
+
+function updateTopbar(){
+  const a=currentAffiliate;
+  document.getElementById('tb-name').textContent=a.name;
+  document.getElementById('tb-av').textContent=a.name[0].toUpperCase();
+  document.getElementById('tb-tier').textContent=(a.tier||'nano').toUpperCase()+' AFFILIATE';
+  document.getElementById('ref-link-display').textContent=`nexotradeia.com/?ref=${a.referral_code}`;
+  document.getElementById('sb-ref-count').textContent=a.total_signups||0;
+  if(isAdmin)document.getElementById('admin-section').style.display='block';
+}
+
+function logout(){currentUser=null;currentAffiliate=null;isDemoMode=false;document.getElementById('mainApp').style.display='none';document.getElementById('authScreen').style.display='flex';}
+
+/* ═══ NAVIGATION ═══ */
+let currentSection='dashboard';
+function showSection(sec,el){
+  currentSection=sec;
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el)el.classList.add('active');
+  switch(sec){
+    case'dashboard':renderDashboard();break;
+    case'referrals':renderReferrals();break;
+    case'earnings':renderEarnings();break;
+    case'payouts':renderPayouts();break;
+    case'settings':renderSettings();break;
+    case'resources':renderResources();break;
+    case'content':renderContent();break;
+    case'admin':renderAdmin();break;
+  }
+}
+
+/* ═══ SECTIONS ═══ */
+
+/* DASHBOARD */
+function renderDashboard(){
+  const a=currentAffiliate;
+  const refs=isDemoMode?DEMO.referrals:[];
+  const convRate=a.total_clicks>0?((a.total_signups/a.total_clicks)*100).toFixed(1):0;
+  const payRate=a.total_signups>0?((a.total_paying/a.total_signups)*100).toFixed(1):0;
+
+  document.getElementById('mainContent').innerHTML=`
+    <!-- KPIs -->
+    <div class="kpi-strip">
+      <div class="kpi grn">
+        <div class="kpi-l">Balance pendiente</div>
+        <div class="kpi-v grn" id="kpi-balance">$${a.balance_pending.toFixed(2)}</div>
+        <div class="kpi-s">Disponible para cobrar</div>
+      </div>
+      <div class="kpi gold">
+        <div class="kpi-l">Ganado total</div>
+        <div class="kpi-v gold">$${a.total_earned.toFixed(2)}</div>
+        <div class="kpi-s">Comisiones acumuladas</div>
+      </div>
+      <div class="kpi blue">
+        <div class="kpi-l">Referidos pagando</div>
+        <div class="kpi-v blue">${a.total_paying}</div>
+        <div class="kpi-s">${payRate}% de signups</div>
+      </div>
+      <div class="kpi purp">
+        <div class="kpi-l">Signups totales</div>
+        <div class="kpi-v purp">${a.total_signups}</div>
+        <div class="kpi-s">De ${a.total_clicks} clicks</div>
+      </div>
+      <div class="kpi cyan">
+        <div class="kpi-l">Conversión</div>
+        <div class="kpi-v cyan">${convRate}%</div>
+        <div class="kpi-s">Clicks → Signup</div>
+      </div>
+    </div>
+
+    <!-- Recent referrals -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">Últimos referidos</div>
+        <button class="filter-btn on" onclick="showSection('referrals',null)" style="padding:4px 12px;font-size:10px">Ver todos →</button>
+      </div>
+      <table class="ref-table">
+        <thead><tr>
+          <th>Persona</th><th>Estado</th><th>Plan</th><th>Comisión</th><th>Fecha</th>
+        </tr></thead>
+        <tbody>
+          ${refs.slice(0,6).map(r=>refRow(r)).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Earnings chart -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">Ganancias mensuales</div>
+        <div class="sec-badge">${a.commission_pct}% comisión</div>
+      </div>
+      <div class="bar-chart" id="earningsChart"></div>
+    </div>
+
+    <!-- Performance stats -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">Tu progreso de tier</div></div>
+        <div style="padding:18px">${renderTierProgress(a)}</div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">Tips para ganar más</div></div>
+        <div style="padding:16px">${renderTips(a)}</div>
+      </div>
+    </div>
+  `;
+
+  renderBarChart('earningsChart', isDemoMode?DEMO.monthlyEarnings:[]);
+}
+
+function refRow(r){
+  const statusClass={click:'s-click',signup:'s-signup',trial:'s-trial',paying:'s-paying',churned:'s-churned'}[r.status]||'s-click';
+  const statusLabel={click:'Click',signup:'Signup',trial:'Trial',paying:'Paying ✓',churned:'Churned'}[r.status]||r.status;
+  const steps=['click','signup','trial','paying'];
+  const stepIdx=steps.indexOf(r.status);
+  const journey=steps.map((s,i)=>`<div class="j-step ${i<stepIdx?'done':i===stepIdx?'current':''}"></div>`).join('');
+  const commClass=r.commission_paid?'comm-paid':r.commission_earned>0?'comm-pending':'comm-zero';
+  const commTxt=r.commission_earned>0?`${r.commission_paid?'✓':'⏳'} $${r.commission_earned.toFixed(2)}`:'—';
+  const colors=['#1a6c4a','#1a3a6c','#6c1a4a','#6c4a1a','#2a1a6c','#1a4a4a','#4a1a1a','#3a4a1a','#4a3a1a','#1a4a3a'];
+  const color=colors[Math.abs(r.referred_name.charCodeAt(0))%colors.length];
+  return`<tr style="cursor:pointer" onclick='openRefModal(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+    <td><div class="person-cell">
+      <div class="person-av" style="background:linear-gradient(135deg,${color},${color}cc)">${r.referred_name?r.referred_name[0]:''}</div>
+      <div>
+        <div class="person-name">${r.referred_name||'Anónimo'}</div>
+        <div class="person-email">${r.referred_email||''}</div>
+      </div>
+    </div></td>
+    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--mid)">${r.plan_type?r.plan_type.charAt(0).toUpperCase()+r.plan_type.slice(1):'—'}</td>
+    <td><span class="comm-amt ${commClass}">${commTxt}</span></td>
+    <td class="date-txt">${fmtDate(r.clicked_at)}</td>
+  </tr>`;
+}
+
+/* REFERRALS PAGE */
+function renderReferrals(filter='all',search=''){
+  let refs=isDemoMode?DEMO.referrals:[];
+  if(filter!=='all')refs=refs.filter(r=>r.status===filter);
+  if(search)refs=refs.filter(r=>(r.referred_name||'').toLowerCase().includes(search.toLowerCase())||(r.referred_email||'').toLowerCase().includes(search.toLowerCase()));
+
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr">
+      <div class="sec-title"><div class="dot"></div>Mis Referidos <span style="font-size:14px;color:var(--mid);font-weight:400">(${refs.length})</span></div>
+    </div>
+    <div class="filters">
+      <input class="filter-search" placeholder="🔍 Buscar por nombre o email..." oninput="renderReferrals('${filter}',this.value)" value="${search}">
+      ${['all','click','signup','trial','paying','churned'].map(f=>`
+        <button class="filter-btn ${filter===f?'on':''}" onclick="renderReferrals('${f}','${search}')">${{all:'Todos',click:'Clicks',signup:'Signups',trial:'Trial',paying:'Pagando ✓',churned:'Perdidos'}[f]}</button>
+      `).join('')}
+    </div>
+    <div class="card">
+      <table class="ref-table">
+        <thead><tr>
+          <th>Persona</th><th>Journey</th><th>Estado</th>
+          <th>Plan</th><th>País</th><th>Dispositivo</th>
+          <th>Comisión</th><th>Fechas</th>
+        </tr></thead>
+        <tbody>
+          ${refs.length===0?`<tr><td colspan="8"><div class="empty"><div class="empty-ico">👥</div><div class="empty-t">No hay referidos en esta categoría</div></div></td></tr>`:
+            refs.map(r=>{
+              const statusClass={click:'s-click',signup:'s-signup',trial:'s-trial',paying:'s-paying',churned:'s-churned'}[r.status]||'s-click';
+              const statusLabel={click:'Click',signup:'Signup',trial:'Trial',paying:'Paying ✓',churned:'Churned'}[r.status]||r.status;
+              const steps=['click','signup','trial','paying'];
+              const stepIdx=steps.indexOf(r.status);
+              const journey=steps.map((s,i)=>`<div class="j-step ${i<stepIdx?'done':i===stepIdx?'current':''}"></div>`).join('');
+              const commClass=r.commission_paid?'comm-paid':r.commission_earned>0?'comm-pending':'comm-zero';
+              const commTxt=r.commission_earned>0?`${r.commission_paid?'✓':'⏳'} $${r.commission_earned.toFixed(2)}`:'—';
+              const colors=['#1a6c4a','#1a3a6c','#6c1a4a','#6c4a1a','#2a1a6c','#1a4a4a','#4a1a1a','#3a4a1a'];
+              const color=colors[Math.abs((r.referred_name||'').charCodeAt(0))%colors.length];
+              return`<tr style="cursor:pointer" onclick='openRefModal(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+                <td><div class="person-cell">
+                  <div class="person-av" style="background:linear-gradient(135deg,${color},${color}cc)">${(r.referred_name||'?')[0]}</div>
+                  <div><div class="person-name">${r.referred_name||'Anónimo'}</div><div class="person-email">${r.referred_email||''}</div></div>
+                </div></td>
+                <td><div class="journey">${journey}</div></td>
+                <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--mid)">${r.plan_type?r.plan_type.charAt(0).toUpperCase()+r.plan_type.slice(1):'—'}</td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--dim)">${r.country||'—'}</td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--dim)">${r.device_type||'—'}</td>
+                <td><span class="comm-amt ${commClass}">${commTxt}</span></td>
+                <td class="date-txt">${fmtDate(r.clicked_at)}</td>
+              </tr>`;
+            }).join('')
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* EARNINGS */
+function renderEarnings(){
+  const a=currentAffiliate;
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr">
+      <div class="sec-title"><div class="dot"></div>Ganancias & Comisiones</div>
+      <div class="sec-badge">${a.commission_pct}% comisión</div>
+    </div>
+
+    <div class="kpi-strip" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi grn">
+        <div class="kpi-l">Balance disponible</div>
+        <div class="kpi-v grn">$${a.balance_pending.toFixed(2)}</div>
+        <div class="kpi-s">Listo para cobrar</div>
+      </div>
+      <div class="kpi gold">
+        <div class="kpi-l">Total ganado</div>
+        <div class="kpi-v gold">$${a.total_earned.toFixed(2)}</div>
+        <div class="kpi-s">Histórico acumulado</div>
+      </div>
+      <div class="kpi blue">
+        <div class="kpi-l">Total cobrado</div>
+        <div class="kpi-v blue">$${a.total_paid_out.toFixed(2)}</div>
+        <div class="kpi-s">Ya en tu cuenta</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Ganancias mensuales</div></div>
+      <div class="bar-chart" id="earnChart2"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Calculadora de proyección</div></div>
+      <div style="padding:20px">
+        <div style="font-size:14px;color:var(--mid);margin-bottom:16px">Si aumentas tus referidos de pago:</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          ${[10,25,50,100].map(n=>{
+            const monthly=n*15.99*a.commission_pct/100;
+            const annual=n*79*a.commission_pct/100;
+            return`<div style="background:var(--bg3);border:1px solid var(--br);border-radius:12px;padding:16px;text-align:center">
+              <div style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--txt2)">${n}</div>
+              <div style="font-size:11px;color:var(--dim);margin-bottom:12px">referidos</div>
+              <div style="font-size:11px;color:var(--mid);margin-bottom:4px">Mensual</div>
+              <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--gold)">$${monthly.toFixed(0)}/mo</div>
+              <div style="font-size:11px;color:var(--mid);margin-top:8px;margin-bottom:4px">Anual</div>
+              <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--grn)">$${annual.toFixed(0)}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  renderBarChart('earnChart2', isDemoMode?DEMO.monthlyEarnings:[]);
+}
+
+/* PAYOUTS */
+function renderPayouts(){
+  const a=currentAffiliate;
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr">
+      <div class="sec-title"><div class="dot"></div>Cobrar mis ganancias</div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div style="padding:28px;text-align:center">
+        <div style="font-family:var(--mono);font-size:48px;font-weight:700;color:var(--grn);text-shadow:0 0 20px var(--grn-glow)">$${a.balance_pending.toFixed(2)}</div>
+        <div style="font-size:14px;color:var(--mid);margin-top:6px;margin-bottom:24px">disponible para cobrar</div>
+        ${a.balance_pending>=50?`
+          <button style="padding:14px 36px;border-radius:12px;border:none;background:var(--grn);color:var(--bg);font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px var(--grn-glow)" onclick="requestPayout()">
+            💳 Solicitar pago →
+          </button>
+          <div style="font-size:12px;color:var(--dim);margin-top:10px">Mínimo $50 · Pago en 5-7 días hábiles</div>
+        `:
+          `<div style="background:var(--bg3);border:1px solid var(--br);border-radius:10px;padding:14px;font-size:13px;color:var(--mid)">
+            Mínimo $50 para solicitar pago. Te faltan $${(50-a.balance_pending).toFixed(2)}.
+          </div>`
+        }
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Métodos de pago</div></div>
+      <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--bg3);border:1px solid var(--grn-d2);border-radius:12px;padding:16px;cursor:pointer">
+          <div style="font-size:20px;margin-bottom:8px">💰</div>
+          <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:4px">PayPal</div>
+          <div style="font-size:12px;color:var(--mid)">Pago en 2-3 días hábiles</div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--grn)">✓ Configurado</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--br);border-radius:12px;padding:16px;cursor:pointer;opacity:.6">
+          <div style="font-size:20px;margin-bottom:8px">🏦</div>
+          <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:4px">Transferencia bancaria</div>
+          <div style="font-size:12px;color:var(--mid)">5-7 días hábiles</div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim)">→ Configurar</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* RESOURCES */
+function renderResources(){
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr"><div class="sec-title"><div class="dot"></div>Marketing Kit</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      ${[
+        {ico:'🖼',title:'Banners Instagram',desc:'Stories y posts 1080×1080 y 1080×1920',btn:'Descargar'},
+        {ico:'🎬',title:'Videos TikTok',desc:'15s y 30s con overlay de resultados',btn:'Descargar'},
+        {ico:'📝',title:'Textos listos',desc:'Captions, hashtags y CTAs optimizados',btn:'Ver textos'},
+        {ico:'🎨',title:'Logos NexoTrade',desc:'PNG transparente en todos los tamaños',btn:'Descargar'},
+        {ico:'📊',title:'Stats cards',desc:'Tarjetas con tus estadísticas para compartir',btn:'Generar'},
+        {ico:'🔗',title:'Tu link personalizado',desc:`nexotradeia.com/?ref=${currentAffiliate?.referral_code||'CODE'}`,btn:'Copiar'},
+      ].map(r=>`
+        <div style="background:var(--bg2);border:1px solid var(--br);border-radius:14px;padding:20px;transition:all .2s" onmouseover="this.style.borderColor='var(--br2)'" onmouseout="this.style.borderColor='var(--br)'">
+          <div style="font-size:32px;margin-bottom:12px">${r.ico}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:6px">${r.title}</div>
+          <div style="font-size:13px;color:var(--mid);margin-bottom:16px">${r.desc}</div>
+          <button style="padding:8px 16px;border-radius:8px;border:1px solid var(--br2);background:var(--bg3);color:var(--mid);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s" onclick="showToast('Coming soon — en producción')">${r.btn}</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* SETTINGS */
+function renderSettings(){
+  const a=currentAffiliate||{};
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr"><div class="sec-title"><div class="dot"></div>Configuración</div></div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Perfil de afiliado</div></div>
+      <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-field"><div class="fl">Nombre completo</div><input class="fi" value="${a.name||''}"></div>
+        <div class="form-field"><div class="fl">Username</div><input class="fi" value="@${a.username||''}"></div>
+        <div class="form-field"><div class="fl">Email</div><input class="fi" type="email" value="${a.email||''}"></div>
+        <div class="form-field"><div class="fl">Plataforma principal</div><input class="fi" value="${a.platform||''}"></div>
+        <div class="form-field"><div class="fl">PayPal email</div><input class="fi" placeholder="paypal@email.com" value="${a.paypal_email||''}"></div>
+        <div class="form-field"><div class="fl">Seguidores</div><input class="fi" type="number" value="${a.followers||0}"></div>
+        <div class="form-field" style="grid-column:1/-1"><div class="fl">Bio / descripción</div><textarea class="fi" rows="3" style="resize:vertical">${a.bio||''}</textarea></div>
+      </div>
+      <div style="padding:0 20px 20px">
+        <button style="padding:11px 24px;border-radius:10px;border:none;background:var(--grn);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 14px var(--grn-glow)" onclick="showToast('✓ Cambios guardados')">Guardar cambios</button>
+      </div>
+    </div>
+  `;
+}
+
+/* CONTENT */
+function renderContent(){
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr">
+      <div class="sec-title"><div class="dot"></div>Mi Contenido</div>
+      <button style="padding:8px 16px;border-radius:8px;border:none;background:var(--grn);color:var(--bg);font-size:12px;font-weight:700;cursor:pointer" onclick="showToast('Agregar contenido — próximamente')">+ Agregar post</button>
+    </div>
+    <div class="empty">
+      <div class="empty-ico">📱</div>
+      <div class="empty-t">Agrega tus posts y videos aquí</div>
+      <div class="empty-s">Rastrea qué contenido genera más clicks y conversiones</div>
+    </div>
+  `;
+}
+
+/* ADMIN */
+function renderAdmin(){
+  if(!isAdmin&&!isDemoMode){document.getElementById('mainContent').innerHTML='<div class="empty"><div class="empty-ico">🔒</div><div class="empty-t">Admin only</div></div>';return;}
+  const affiliates=[
+    {name:'Pepe García',code:'PEPE20',tier:'micro',platform:'instagram',followers:28400,clicks:847,signups:124,paying:38,earned:1842.40,pending:840,status:'active'},
+    {name:'María Rodríguez',code:'MARIA25',tier:'mid',platform:'tiktok',followers:142000,clicks:3240,signups:481,paying:94,earned:7420.80,pending:1975,status:'active'},
+    {name:'Carlos Invierte',code:'CARLOS20',tier:'micro',platform:'youtube',followers:67000,clicks:1820,signups:267,paying:71,earned:4218.40,pending:1580,status:'active'},
+    {name:'Ana Finanzas',code:'ANA20',tier:'nano',platform:'instagram',followers:18200,clicks:412,signups:58,paying:14,earned:742.00,pending:320,status:'active'},
+    {name:'Roberto Crypto',code:'ROBERTO20',tier:'nano',platform:'twitter',followers:9800,clicks:189,signups:21,paying:6,earned:284.40,pending:142,status:'active'},
+  ];
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr">
+      <div class="sec-title"><div class="dot"></div>Todos los Afiliados</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--dim)">Total pendiente: <strong style="color:var(--gold)">$4,857</strong></div>
+    </div>
+    <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      <div class="kpi grn"><div class="kpi-l">Total afiliados</div><div class="kpi-v grn">5</div><div class="kpi-s">3 activos hoy</div></div>
+      <div class="kpi gold"><div class="kpi-l">Total ganado (todos)</div><div class="kpi-v gold">$14,508</div><div class="kpi-s">Histórico</div></div>
+      <div class="kpi blue"><div class="kpi-l">Total referidos</div><div class="kpi-v blue">223</div><div class="kpi-s">Pagando ahora</div></div>
+      <div class="kpi purp"><div class="kpi-l">Pendiente de pago</div><div class="kpi-v purp">$4,857</div><div class="kpi-s">Para transferir</div></div>
+    </div>
+    ${affiliates.map(a=>`
+      <div class="aff-card">
+        <div class="aff-av" style="background:linear-gradient(135deg,#1a6c4a,#00e87a)">${a.name[0]}</div>
+        <div class="aff-info">
+          <div class="aff-name">
+            ${a.name}
+            <span class="tier-badge t-${a.tier}">${a.tier}</span>
+            <span style="font-size:11px;color:var(--mid)">${a.platform} · ${a.followers.toLocaleString()} seguidores</span>
+          </div>
+          <div class="aff-code">/${a.code} · ${a.clicks} clicks · ${a.signups} signups</div>
+        </div>
+        <div class="aff-stats">
+          <div class="as-item"><div class="as-label">Pagando</div><div class="as-val" style="color:var(--grn)">${a.paying}</div></div>
+          <div class="as-item"><div class="as-label">Ganado</div><div class="as-val" style="color:var(--gold)">$${a.earned.toFixed(0)}</div></div>
+          <div class="as-item"><div class="as-label">Pendiente</div><div class="as-val" style="color:var(--cyan)">$${a.pending.toFixed(0)}</div></div>
+          <button style="padding:7px 14px;border-radius:8px;border:none;background:var(--grn);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer" onclick="showToast('Pago procesado para ${a.name}')">Pagar $${a.pending}</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ═══ HELPERS ═══ */
+
+function renderBarChart(containerId, data){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const max=Math.max(...data.map(d=>d.earned),1);
+  el.innerHTML=data.map(d=>`
+    <div class="bc-row">
+      <div class="bc-label">${d.month}</div>
+      <div class="bc-track">
+        <div class="bc-fill" style="width:0%;background:${d.earned>0?'linear-gradient(90deg,rgba(0,232,122,.3),rgba(0,232,122,.15))':'var(--bg3)'}; color:${d.earned>0?'var(--grn)':'var(--dim)'}" data-w="${(d.earned/max*100).toFixed(1)}">
+          ${d.earned>0?`$${d.earned.toFixed(0)}`:''}
+        </div>
+      </div>
+      <div class="bc-val" style="color:${d.earned>0?'var(--gold)':'var(--dim)'}">${d.earned>0?'$'+d.earned.toFixed(0):''}</div>
+    </div>
+  `).join('');
+  setTimeout(()=>{el.querySelectorAll('.bc-fill').forEach(b=>b.style.width=b.dataset.w+'%');},100);
+}
+
+function renderTierProgress(a){
+  const tiers=[
+    {name:'Nano',min:0,max:5000,color:'var(--blue)'},
+    {name:'Micro',min:5000,max:20000,color:'var(--purp)'},
+    {name:'Mid',min:20000,max:100000,color:'var(--cyan)'},
+    {name:'Macro',min:100000,max:500000,color:'var(--gold)'},
+    {name:'Mega',min:500000,max:Infinity,color:'var(--grn)'},
+  ];
+  const curr=tiers.find(t=>t.name.toLowerCase()===a.tier)||tiers[0];
+  const next=tiers[tiers.indexOf(curr)+1];
+  const benefit=a.tier==='nano'?'20% comisión':a.tier==='micro'?'20% comisión':a.tier==='mid'?'25% comisión':a.tier==='macro'?'28% comisión':'30% comisión';
+  return`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${curr.color}">${curr.name} Affiliate</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--mid)">${benefit}</span>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:8px">
+        <div style="height:100%;border-radius:3px;background:${curr.color};width:${Math.min((a.followers/curr.max)*100,100).toFixed(0)}%;transition:width 1s ease"></div>
+      </div>
+      ${next?`<div style="font-size:11px;color:var(--dim)">${a.followers.toLocaleString()} / ${next.min.toLocaleString()} seguidores para tier <span style="color:${next.color};font-weight:600">${next.name}</span></div>`:''}
+    </div>
+  `;
+}
+
+function renderTips(a){
+  const tips=[
+    {ico:'📹',tip:'Los Reels con el terminal en pantalla tienen 3x más clicks que posts estáticos'},
+    {ico:'⏰',tip:'Publica cuando los mercados abren (9:30 AM ET) para máximo engagement'},
+    {ico:'🎯',tip:`Tu código ${a.referral_code} da acceso gratis a tu audiencia — úsalo como gancho`},
+    {ico:'💡',tip:'Muestra una señal real de Oracle AI en video — es tu mejor contenido'},
+  ];
+  return tips.map(t=>`
+    <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg3)">
+      <div style="font-size:16px;flex-shrink:0">${t.ico}</div>
+      <div style="font-size:12px;color:var(--mid);line-height:1.5">${t.tip}</div>
+    </div>
+  `).join('');
+}
+
+function openRefModal(r){
+  if(typeof r==='string')r=JSON.parse(r);
+  const statusLabel={click:'Click recibido',signup:'Se registró',trial:'En prueba gratuita',paying:'Cliente de pago ✓',churned:'Canceló'}[r.status]||r.status;
+  const statusColor={click:'var(--blue)',signup:'var(--purp)',trial:'var(--cyan)',paying:'var(--grn)',churned:'var(--red)'}[r.status]||'var(--mid)';
+  document.getElementById('modal-title').textContent=r.referred_name||'Referido';
+  document.getElementById('modal-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+      <div style="background:var(--bg3);border:1px solid var(--br);border-radius:10px;padding:14px">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Estado actual</div>
+        <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:${statusColor}">${statusLabel}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--br);border-radius:10px;padding:14px">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Comisión</div>
+        <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:${r.commission_earned>0?'var(--gold)':'var(--dim)'}">${r.commission_earned>0?'$'+r.commission_earned.toFixed(2):'—'} ${r.commission_paid?'<span style="color:var(--grn);font-size:12px">✓ Pagada</span>':'<span style="color:var(--gold);font-size:12px">⏳ Pendiente</span>'}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+      <div style="font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Journey</div>
+      ${[
+        {label:'Hizo click',date:r.clicked_at,done:true},
+        {label:'Se registró',date:r.signed_up_at,done:!!r.signed_up_at},
+        {label:'Inició trial',date:r.trial_started_at,done:!!r.trial_started_at||r.status==='trial'||r.status==='paying'},
+        {label:'Primer pago',date:r.first_payment_at,done:!!r.first_payment_at},
+      ].map(s=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:${s.done?'rgba(0,232,122,.06)':'var(--bg3)'};border:1px solid ${s.done?'rgba(0,232,122,.15)':'var(--br)'};border-radius:8px">
+          <div style="width:20px;height:20px;border-radius:50%;background:${s.done?'var(--grn)':'var(--br2)'};display:flex;align-items:center;justify-content:center;font-size:10px;color:${s.done?'var(--bg)':'var(--dim)'}">✓</div>
+          <div style="flex:1;font-size:13px;font-weight:500;color:${s.done?'var(--txt2)':'var(--dim)'}">${s.label}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--dim)">${s.date?fmtDate(s.date):'—'}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${[
+        {label:'Plan',val:r.plan_type?r.plan_type.charAt(0).toUpperCase()+r.plan_type.slice(1):'—'},
+        {label:'País',val:r.country||'—'},
+        {label:'Dispositivo',val:r.device_type||'—'},
+      ].map(i=>`
+        <div style="background:var(--bg3);border:1px solid var(--br);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:var(--dim);margin-bottom:4px">${i.label}</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--txt2)">${i.val}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('refModal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('refModal').classList.remove('open');}
+document.getElementById('refModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+function copyLink(){
+  const link=`https://nexotradeia.com/?ref=${currentAffiliate?.referral_code||'CODE'}`;
+  navigator.clipboard.writeText(link).catch(()=>{});
+  const btn=document.getElementById('copy-btn');
+  btn.textContent='✓ Copied!';
+  setTimeout(()=>btn.textContent='📋 Copy link',2000);
+  showToast('✓ Link copiado al portapapeles');
+}
+
+function requestPayout(){showToast('✓ Solicitud enviada — pago en 5-7 días hábiles');}
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<span style="color:var(--grn);font-size:16px">⚡</span> ${msg}`;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function fmtDate(d){
+  if(!d)return'—';
+  return new Date(d).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+/* ═══ REAL SUPABASE QUERIES ═══ */
+async function loadReferralsFromDB(){
+  if(!sb||isDemoMode)return DEMO.referrals;
+  const {data}=await sb.from('referrals').select('*').eq('affiliate_id',currentAffiliate.id).order('created_at',{ascending:false});
+  return data||[];
+}
+
+/* Check auth on load */
+window.addEventListener('load',async()=>{
+  if(sb){
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){currentUser=session.user;await loadAffiliateData();}
+  }
+});
+</script>
+</body>
+</html>
