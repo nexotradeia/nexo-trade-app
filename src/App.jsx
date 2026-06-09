@@ -1145,11 +1145,12 @@ function PriceProvider({children}){
     return () => clearInterval(flush);
   }, []);
 
-  // REST puntual para un ticker (carga inicial / al registrarse)
+  // REST puntual para un ticker — usa /api/prices (cacheado en CDN, ~80ms)
   const restFetch = async (ticker) => {
     try {
-      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSymbolOf(ticker)}&token=${FINNHUB_KEY}`);
-      const d = await r.json();
+      const r = await fetch(`/api/prices?tickers=${encodeURIComponent(ticker)}`);
+      const j = await r.json();
+      const d = j?.prices?.[ticker];
       if (d && d.c > 0) {
         prevCRef.current[ticker] = d.pc;
         setPrices(p => ({ ...p, [ticker]: { price: d.c, change: d.dp != null ? parseFloat(d.dp.toFixed(2)) : 0 } }));
@@ -1178,22 +1179,22 @@ function PriceProvider({children}){
     }
   }, []);
 
-  // Carga inicial vía endpoint del servidor (1 llamada cacheada en CDN, compartida entre visitantes).
-  // Reemplaza el bombardeo per-navegador a Finnhub (key compartida se saturaba → precios estáticos viejos).
+  // Carga inicial bulk — /api/prices cacheado en CDN (1 llamada compartida entre todos los visitantes).
+  // Resultado: precios aparecen en ~80ms al abrir la app, sin saturar Finnhub.
   useEffect(() => {
     let cancel=false;
     const load = async () => {
       try{
-        const r = await fetch("/api/data?type=quotes&set=tape");
+        const tList = ALL_TRACK.join(",");
+        const r = await fetch(`/api/prices?tickers=${encodeURIComponent(tList)}`);
         const j = await r.json();
         if(cancel || !j || !j.prices) return;
         setPrices(p => {
           const next = {...p};
           Object.entries(j.prices).forEach(([t,v]) => {
-            if(v && v.price > 0){
-              next[t] = { price: v.price, change: v.change ?? 0 };
-              // sembrar prev-close para que los ticks del WebSocket calculen el % correctamente
-              prevCRef.current[t] = (v.change!=null && v.change!==0) ? v.price/(1+v.change/100) : v.price;
+            if(v && v.c > 0){
+              next[t] = { price: v.c, change: v.dp != null ? parseFloat(v.dp.toFixed(2)) : 0 };
+              prevCRef.current[t] = v.pc || v.c;
             }
           });
           return next;
@@ -1201,7 +1202,7 @@ function PriceProvider({children}){
       }catch(_){}
     };
     load();
-    const iv = setInterval(load, 45000); // refresca cada 45s (mismo cache del CDN)
+    const iv = setInterval(load, 55000); // refresca cada 55s (dentro del cache CDN de 60s)
     return () => { cancel=true; clearInterval(iv); };
   }, []);
 
