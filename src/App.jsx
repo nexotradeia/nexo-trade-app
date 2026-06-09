@@ -11702,7 +11702,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
             <strong style={{color:"#FCD34D"}}>{isEN?"New picks are published every Monday at 9AM":"Los picks se publican cada lunes a las 9AM"}</strong> ({isEN?"EST":"hora EST"}).
           </div>
           <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.2)",borderRadius:12,padding:"12px 20px",display:"inline-block"}}>
-            <div style={{fontSize:12,color:"#FCD34D",fontWeight:700}}>Próxima publicación</div>
+            <div style={{fontSize:12,color:"#FCD34D",fontWeight:700}}>{isEN?"Next release":"Próxima publicación"}</div>
             <div style={{fontSize:16,color:"#F1F5F9",fontWeight:900,marginTop:4}}>
               {(()=>{const d=new Date();const day=d.getDay();const diff=day===0?1:8-day;d.setDate(d.getDate()+diff);return d.toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"});})()}
             </div>
@@ -11730,7 +11730,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
       )}
 
       <div style={{background:"rgba(245,158,11,0.05)",border:"1px solid rgba(245,158,11,0.15)",borderRadius:12,padding:"14px 18px",fontSize:11,color:"#94A3B8",lineHeight:1.7}}>
-        ⚠️ <strong style={{color:"#F59E0B"}}>Disclaimer:</strong> Estos picks son análisis educativo y no constituyen consejo financiero. Siempre haz tu propia investigación (DYOR). Las inversiones conllevan riesgo de pérdida de capital.
+        ⚠️ <strong style={{color:"#F59E0B"}}>Disclaimer:</strong> {isEN?"These picks are educational analysis and do not constitute financial advice. Always do your own research (DYOR). Investing carries risk of capital loss.":"Estos picks son análisis educativo y no constituyen consejo financiero. Siempre haz tu propia investigación (DYOR). Las inversiones conllevan riesgo de pérdida de capital."}
       </div>
     </div>
   );
@@ -20613,7 +20613,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt,letterSpacing:.5,marginBottom:8}}>{isEN?"No open orders":"Sin órdenes abiertas"}</div>
               <div style={{fontFamily:SANS,fontSize:12,color:T.mid,maxWidth:420,margin:"0 auto",lineHeight:1.6}}>Este terminal es un <b style={{color:T.txt}}>tracker de tu cartera</b>, no un bróker — no envía órdenes al mercado. Registra tus entradas y salidas como posiciones, y documenta tu plan en el Journal.</div>
               <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18,flexWrap:"wrap"}}>
-                <button onClick={()=>{setNavView("positions");setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:700,cursor:"pointer"}}>+ Añadir posición</button>
+                <button onClick={()=>{setNavView("positions");setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:700,cursor:"pointer"}}>{isEN?"+ Add position":"+ Añadir posición"}</button>
                 <button onClick={()=>setTermTab("journal")} style={{background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:6,padding:"8px 16px",fontFamily:MONO,fontSize:11,fontWeight:600,cursor:"pointer"}}>Abrir Journal →</button>
               </div>
             </div>
@@ -20629,7 +20629,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                   <div style={{flex:1,minWidth:0}}><div style={{fontFamily:MONO,fontSize:12,color:T.txt}}><span style={{color:T.grn,fontWeight:700}}>{isEN?"ADDED":"AÑADIDA"}</span> {p.shares} uds de <b>{tk}</b> @ ${parseFloat(p.entryPrice).toLocaleString("en-US")}</div>{p.note&&<div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginTop:2}}>{p.note}</div>}</div>
                   <div style={{fontFamily:MONO,fontSize:10,color:T.dim,textAlign:"right",flexShrink:0}}>{d.toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})}<br/>{d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}</div>
                 </div>
-              ); }) : <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim,fontSize:12}}>Sin actividad todavía · agrega tu primera posición</div>}
+              ); }) : <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim,fontSize:12}}>{isEN?"No activity yet · add your first position":"Sin actividad todavía · agrega tu primera posición"}</div>}
             </div>
           ); })()}
 
@@ -24739,11 +24739,11 @@ export default function App(){
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:2}}>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>SmartCredit</span>
-                    <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>Patrocinado</span>
+                    <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{isEN?"Sponsored":"Patrocinado"}</span>
                   </div>
-                  <div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>Monitorea tu crédito, protege tus finanzas y mejora tu score — gratis para empezar.</div>
+                  <div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>{isEN?"Monitor your credit, protect your finances and improve your score — free to start.":"Monitorea tu crédito, protege tus finanzas y mejora tu score — gratis para empezar."}</div>
                 </div>
-                <span style={{fontSize:11,color:"#0F4C81",fontWeight:800,flexShrink:0,whiteSpace:"nowrap"}}>Ver más →</span>
+                <span style={{fontSize:11,color:"#0F4C81",fontWeight:800,flexShrink:0,whiteSpace:"nowrap"}}>{isEN?"See more →":"Ver más →"}</span>
               </a>
             )}
             {/* Bots ya inyectados directamente en displayFeed */}
