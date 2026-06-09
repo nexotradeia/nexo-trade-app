@@ -23994,6 +23994,7 @@ export default function App(){
   const [isPro,setIsPro]= useState(
     _getAdminStatus() || (_getSavedUser()?.is_pro || false)
   );
+  const [trialDaysLeft,setTrialDaysLeft] = useState(null); // null = no trial; number = días restantes
   const [onlineUsers, setOnlineUsers] = useState([]);
   const presenceChRef = useRef(null);
   const [profUser,setProfUser] = useState(null);
@@ -24294,6 +24295,22 @@ export default function App(){
         // Premium "sticky": si el perfil cargó, usa su valor; si la consulta falló, NO desactives
         if(profile) setIsPremium((profile.is_premium || false) || isAdmin);
         else setIsPremium(prev => prev || isAdmin || (_getSavedUser()?.is_premium || false));
+        // ── Trial countdown: buscar suscripción activa con status 'trialing' ──
+        try {
+          const {data:sub} = await supabase
+            .from("subscriptions")
+            .select("status,current_period_end")
+            .eq("user_id", session.user.id)
+            .eq("status","trialing")
+            .maybeSingle();
+          if(sub?.current_period_end){
+            const msLeft = new Date(sub.current_period_end).getTime() - Date.now();
+            const days = Math.ceil(msLeft / (1000*60*60*24));
+            setTrialDaysLeft(days > 0 ? days : 0);
+          } else {
+            setTrialDaysLeft(null);
+          }
+        } catch(_){}
         if(profile){
           const u = buildUserFromProfile(session.user, profile);
           saveUser(u);
@@ -25303,8 +25320,39 @@ export default function App(){
         </div>
       )}
 
+      {/* TRIAL BANNER — solo visible para usuarios en periodo de prueba */}
+      {trialDaysLeft !== null && (
+        <div style={{
+          background:"linear-gradient(90deg,#92400e,#b45309,#d97706)",
+          color:"#fff",padding:"8px 16px",display:"flex",alignItems:"center",
+          justifyContent:"center",gap:12,fontSize:13,fontWeight:600,
+          position:"sticky",top:0,zIndex:101,flexWrap:"wrap",textAlign:"center"
+        }}>
+          <span>⏳</span>
+          <span>
+            {trialDaysLeft === 0
+              ? (isEN ? "Your free trial ends today!" : "¡Tu prueba gratuita termina hoy!")
+              : trialDaysLeft === 1
+                ? (isEN ? "1 day left in your free trial" : "Queda 1 día en tu prueba gratuita")
+                : (isEN ? `${trialDaysLeft} days left in your free trial` : `Te quedan ${trialDaysLeft} días de prueba Premium`)
+            }
+          </span>
+          <button onClick={()=>setPage(8)} style={{
+            background:"#fff",color:"#92400e",fontWeight:800,fontSize:12,
+            padding:"5px 14px",borderRadius:100,border:"none",cursor:"pointer",
+            whiteSpace:"nowrap",flexShrink:0
+          }}>
+            {isEN ? "Subscribe now →" : "Suscribirse ahora →"}
+          </button>
+          <button onClick={()=>setTrialDaysLeft(null)} style={{
+            background:"transparent",border:"none",color:"rgba(255,255,255,0.7)",
+            cursor:"pointer",fontSize:16,lineHeight:1,padding:"0 4px",flexShrink:0
+          }} title="Cerrar">×</button>
+        </div>
+      )}
+
       {/* NAVBAR */}
-      <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box"}}>
+      <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:trialDaysLeft!==null?32:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,height:52,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Hamburger — solo móvil */}
