@@ -18817,6 +18817,13 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
           </Card>
         </div>
 
+        {!isPremium ? (
+          <PremiumGate lang={isEN?"en":"es"} icon="🏆"
+            title={isEN?"Full Portfolio Analytics":"Análisis Completo de Cartera"}
+            desc={isEN?"Upgrade to unlock Best & Worst stocks, Monthly heatmap, Return vs Risk, Dividends and full Performance ranking.":"Actualiza para ver Mejores y Peores acciones, Mapa de calor mensual, Rentabilidad vs Riesgo, Dividendos y el Ranking completo de rendimiento."}
+            bullets={isEN?["🏆 Best & Worst stocks","🔥 Monthly heatmap","⚡ Return vs Risk chart","💰 Dividends & ranking"]:["🏆 Mejores y peores acciones","🔥 Mapa de calor mensual","⚡ Gráfico Rentabilidad/Riesgo","💰 Dividendos y ranking"]}
+            onPlans={onNeedPremium}/>
+        ) : <>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <Card><SecTitle icon="🏆" title={isEN?"Best stocks":"Mejores acciones"} sub={isEN?"Highest return in period":"Mayor retorno en el período"} tag="Top 6" tagColor="#059669"/>{top6.map(r=>barRow(r,true))}</Card>
           <Card><SecTitle icon="📉" title={isEN?"Worst stocks":"Peores acciones"} sub={isEN?"Biggest drop in period":"Mayor caída en el período"} tag="Bottom 6" tagColor="#DC2626"/>{bottom6.map(r=>barRow(r,false))}</Card>
@@ -18869,6 +18876,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
             </div>
           </Card>
         </div>
+        </>}
       </div>
     );
   };
@@ -18923,7 +18931,18 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         <div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 4px 12px",flexWrap:"wrap"}}>
           <span style={{fontSize:12,color:"#475569",fontWeight:600}}>{isEN?"Real signal computed from daily candles — RSI(14) + moving averages + momentum. Refreshes every ~6h.":"Señal real calculada de velas diarias — RSI(14) + medias móviles + momentum. Se actualiza cada ~6h."}</span>
         </div>
-        <div style={{overflowX:"auto",border:"1px solid #DBEAFE",borderRadius:12,boxShadow:"0 4px 12px rgba(26,95,173,0.08)"}}>
+        <div style={{position:"relative"}}>
+          {!isPremium&&(
+            <div onClick={onNeedPremium} style={{position:"absolute",right:0,top:0,bottom:0,width:"55%",zIndex:10,cursor:"pointer",background:"linear-gradient(90deg,transparent 0%,rgba(240,249,255,0.85) 12%,rgba(240,249,255,0.97) 40%)",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0"}}>
+              <div style={{textAlign:"center",pointerEvents:"none",userSelect:"none"}}>
+                <div style={{fontSize:28,marginBottom:6}}>🔒</div>
+                <div style={{fontWeight:900,fontSize:13,color:"#0F172A",marginBottom:4}}>{isEN?"Unlock all columns":"Desbloquea todas las columnas"}</div>
+                <div style={{fontSize:11,color:"#64748B",marginBottom:10}}>{isEN?"RSI, SMA signals & price":"RSI, señales SMA y precio"}</div>
+                <div style={{background:"linear-gradient(135deg,#C8901F,#8A5E10)",color:"#fff",borderRadius:9,padding:"7px 18px",fontSize:12,fontWeight:800,display:"inline-block",boxShadow:"0 4px 14px rgba(200,144,31,0.4)"}}>✦ {isEN?"Go Premium":"Hazte Premium"}</div>
+              </div>
+            </div>
+          )}
+          <div style={{overflowX:"auto",border:"1px solid #DBEAFE",borderRadius:12,boxShadow:"0 4px 12px rgba(26,95,173,0.08)"}}>
           <table style={{borderCollapse:"collapse",width:"100%",minWidth:760}}>
             <thead><tr>
               {TCOLS.map(([key,label,w])=>{ const active=techSort===key; return (
@@ -18946,15 +18965,16 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                       <div style={{fontSize:10,color:"#64748B"}}>{TICKER_NAMES_W[tk]||tk}</div>
                     </td>
                     <td style={tdS}>{t.loading?<span style={{color:"#94A3B8",fontSize:12}}>⏳ {isEN?"Loading…":"Cargando…"}</span>: t.signal?chip(t.signal):<span style={{color:"#94A3B8",fontSize:12}}>{isEN?"No data":"Sin datos"}</span>}</td>
-                    <td style={tdS}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:rsiCell(t.rsi)}</td>
-                    <td style={tdS}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:cmp(t.price,t.sma20)}</td>
-                    <td style={tdS}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:cmp(t.price,t.sma50)}</td>
-                    <td style={tdS}><span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:"#334155"}}>{t.price!=null?"$"+Number(t.price).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):(priceOf(tk)?.price!=null?fmtPrice(priceOf(tk).price,tk):"—")}</span></td>
+                    <td style={{...tdS,filter:!isPremium?"blur(5px)":"none",userSelect:!isPremium?"none":"auto",pointerEvents:!isPremium?"none":"auto"}}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:rsiCell(t.rsi)}</td>
+                    <td style={{...tdS,filter:!isPremium?"blur(5px)":"none",userSelect:!isPremium?"none":"auto",pointerEvents:!isPremium?"none":"auto"}}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:cmp(t.price,t.sma20)}</td>
+                    <td style={{...tdS,filter:!isPremium?"blur(5px)":"none",userSelect:!isPremium?"none":"auto",pointerEvents:!isPremium?"none":"auto"}}>{t.loading?<span style={{color:"#CBD5E1"}}>…</span>:cmp(t.price,t.sma50)}</td>
+                    <td style={{...tdS,filter:!isPremium?"blur(5px)":"none",userSelect:!isPremium?"none":"auto",pointerEvents:!isPremium?"none":"auto"}}><span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:"#334155"}}>{t.price!=null?"$"+Number(t.price).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):(priceOf(tk)?.price!=null?fmtPrice(priceOf(tk).price,tk):"—")}</span></td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+          </div>
         </div>
         <div style={{fontSize:11,color:"#5B8DC7",textAlign:"center",padding:"12px 0"}}>
           {isEN?"Technical signals are algorithmic (not advice). Data: Twelve Data / CoinGecko.":"Señales técnicas algorítmicas (no es consejo). Datos: Twelve Data / CoinGecko."}
@@ -19152,7 +19172,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         {/* ── VIEW TABS (inside header) ── */}
         <div style={{display:"flex",gap:2,marginTop:16,borderTop:"1px solid rgba(255,255,255,0.07)",paddingTop:14,flexWrap:"wrap"}}>
           {VIEWS.map(v=>{
-            const isLocked = !isPremium && v.id!=="performance" && v.id!=="market";
+            const isLocked = false; // todas las vistas abiertas con freemium (blur parcial en tabla)
             return (
               <button key={v.id} onClick={()=>setActiveView(v.id)}
                 style={{background:activeView===v.id?"rgba(26,95,173,0.12)":"transparent",border:"none",borderRadius:8,padding:"6px 16px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#1A5FAD":isLocked?"#94A3B8":"#5B8DC7",cursor:"pointer",whiteSpace:"nowrap",borderBottom:activeView===v.id?"2px solid #1A5FAD":"2px solid transparent",transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}>
@@ -19205,7 +19225,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         tickers.length===0
           ? <div style={{textAlign:"center",padding:"40px 20px",color:"#64748B",fontSize:13}}>{isEN?"Add tickers to see performance charts":"Agrega tickers para ver los gráficos de rendimiento"}</div>
           : renderPerf()
-      ) : !isPremium && activeView!=="market" ? (
+      ) : !isPremium && activeView!=="market" && activeView!=="risk" && activeView!=="returns" && activeView!=="technical" && activeView!=="efficiency" && activeView!=="projections" && activeView!=="health" ? (
         <PremiumGate lang={isEN?"en":"es"} icon="📊"
           title={isEN?"Premium Analytics":"Análisis Premium"}
           desc={isEN?"Unlock all Watchlist views: multi-period returns, RSI & SMA signals, risk analysis, projections and more.":"Desbloquea todas las vistas de tu Watchlist: retornos multi-período, señales RSI & SMA, análisis de riesgo, proyecciones y más."}
@@ -19279,7 +19299,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.06)"}
                     onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#F4F9FF":"#EBF3FF"}>
                     {cols.map((c,i)=>{
-                      const locked = !isPremium && i>=4;
+                      const freeUpto = activeView==="returns" ? 5 : activeView==="efficiency" ? 3 : 4; // returns:5 | efficiency:3(lock P/B+) | resto:4
+                      const locked = !isPremium && i>=freeUpto;
                       return (
                         <td key={i} style={{...tdStyle, filter:locked?"blur(5px)":"none", userSelect:locked?"none":"auto", pointerEvents:locked?"none":"auto"}}>{c.render(tk,d,m)}</td>
                       );
