@@ -24740,11 +24740,11 @@ export default function App(){
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:2}}>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>SmartCredit</span>
-                    <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{isEN?"Sponsored":"Patrocinado"}</span>
+                    <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{lang==="en"?"Sponsored":"Patrocinado"}</span>
                   </div>
-                  <div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>{isEN?"Monitor your credit, protect your finances and improve your score — free to start.":"Monitorea tu crédito, protege tus finanzas y mejora tu score — gratis para empezar."}</div>
+                  <div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>{lang==="en"?"Monitor your credit, protect your finances and improve your score — free to start.":"Monitorea tu crédito, protege tus finanzas y mejora tu score — gratis para empezar."}</div>
                 </div>
-                <span style={{fontSize:11,color:"#0F4C81",fontWeight:800,flexShrink:0,whiteSpace:"nowrap"}}>{isEN?"See more →":"Ver más →"}</span>
+                <span style={{fontSize:11,color:"#0F4C81",fontWeight:800,flexShrink:0,whiteSpace:"nowrap"}}>{lang==="en"?"See more →":"Ver más →"}</span>
               </a>
             )}
             {/* Bots ya inyectados directamente en displayFeed */}
@@ -25249,7 +25249,7 @@ export default function App(){
       )}
       {!user && newsletterDone && (
         <div style={{background:"linear-gradient(90deg,#052e16,#14532d)",borderBottom:"1px solid rgba(0,200,100,0.2)",padding:"10px 16px",textAlign:"center",color:"#86efac",fontSize:13,fontWeight:700}}>
-          {isEN?"✅ Done! We will notify you every Monday with the week\u2019s analysis.":"✅ ¡Listo! Te avisaremos cada lunes con el análisis de la semana."}
+          {lang==="en"?"✅ Done! We will notify you every Monday with the week\u2019s analysis.":"✅ ¡Listo! Te avisaremos cada lunes con el análisis de la semana."}
         </div>
       )}
 
@@ -25549,7 +25549,7 @@ export default function App(){
                   <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#0088cc,#006699)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>✈️</div>
                   <div>
                     <div style={{fontWeight:800,color:"#29B6F6",fontSize:12}}>NEXO TRADE</div>
-                    <div style={{fontSize:10,color:"#475569"}}>🐋 Whale Alert · {isEN?"now":"ahora"}</div>
+                    <div style={{fontSize:10,color:"#475569"}}>🐋 Whale Alert · {lang==="en"?"now":"ahora"}</div>
                   </div>
                   <div style={{marginLeft:"auto",width:8,height:8,borderRadius:"50%",background:"#00D26A",boxShadow:"0 0 8px #00D26A"}}/>
                 </div>
@@ -25557,12 +25557,12 @@ export default function App(){
                   <div>📈 <strong>NVDA</strong> · Golden Sweep</div>
                   <div>💰 Premium: <span style={{color:"#00D26A",fontWeight:700}}>$127.4M</span></div>
                   <div>🎯 Strike $890 · Jun 21 · Calls</div>
-                  <div style={{color:"#F59E0B",marginTop:4,fontSize:11}}>{isEN?"⭐ Institutional signal · Above SMA200":"⭐ Señal institucional · Sobre SMA200"}</div>
+                  <div style={{color:"#F59E0B",marginTop:4,fontSize:11}}>{lang==="en"?"⭐ Institutional signal · Above SMA200":"⭐ Señal institucional · Sobre SMA200"}</div>
                 </div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:6,paddingLeft:4}}>
                 <div style={{width:6,height:6,borderRadius:"50%",background:"#00D26A",flexShrink:0}}/>
-                <span style={{fontSize:10,color:"#475569"}}>{isEN?"Arrived 43s ago · Telegram":"Llegó hace 43s · Telegram"}</span>
+                <span style={{fontSize:10,color:"#475569"}}>{lang==="en"?"Arrived 43s ago · Telegram":"Llegó hace 43s · Telegram"}</span>
               </div>
             </div>
             {/* Texto */}
