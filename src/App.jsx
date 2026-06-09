@@ -19884,6 +19884,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
   const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
+  const [impDrag, setImpDrag] = useState(false);
+  const [impMsg, setImpMsg] = useState(null); // {type:"ok"|"err", text}
   const [pCloud, setPCloud] = useState(user?.id ? "loading" : "off"); // off | loading | synced | saving | error
   const pCloudReady = useRef(false);
 
@@ -19958,6 +19960,76 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   },0);
   const totalPnl    = totalValue - totalCost;
   const totalPnlPct = totalCost>0 ? (totalPnl/totalCost*100) : 0;
+
+  // ── Importar posiciones desde archivo (CSV / TXT / Excel) ──
+  const ingestRows = (rows) => {
+    // rows: array de arrays (celdas). Detecta encabezado y mapea ticker/acciones/precio.
+    const clean = rows.map(r=>r.map(c=>(c==null?"":String(c).trim()))).filter(r=>r.some(c=>c!==""));
+    if(!clean.length){ setImpMsg({type:"err",text:"El archivo está vacío."}); return; }
+    let header=null, start=0;
+    const h0=clean[0].map(c=>c.toLowerCase());
+    const hasHeader = h0.some(c=>/tick|symbol|s[ií]mbolo|acc|share|qty|cant|precio|price|entry|costo/.test(c));
+    let iT=0,iS=1,iP=2;
+    if(hasHeader){
+      header=h0; start=1;
+      const find=(re)=>header.findIndex(c=>re.test(c));
+      const t=find(/tick|symbol|s[ií]mbolo/); const s=find(/acc|share|qty|cant|unid/); const p=find(/precio|price|entry|costo|avg/);
+      if(t>=0)iT=t; if(s>=0)iS=s; if(p>=0)iP=p;
+    }
+    const parsed=[];
+    for(let i=start;i<clean.length;i++){
+      const r=clean[i];
+      const tk=(r[iT]||"").toUpperCase().replace(/[^A-Z0-9.\-]/g,"");
+      const sh=parseFloat(String(r[iS]||"").replace(/[, ]/g,""));
+      const ep=parseFloat(String(r[iP]||"").replace(/[$, ]/g,""));
+      if(tk && sh>0 && ep>0) parsed.push({ticker:tk,shares:sh,entryPrice:ep});
+    }
+    if(!parsed.length){ setImpMsg({type:"err",text:"No encontré filas válidas. Formato: Ticker, Acciones, Precio (ej: AAPL,10,154)."}); return; }
+    setPositions(prev=>{
+      const map={}; prev.forEach(p=>{map[p.ticker.toUpperCase()]=p;});
+      parsed.forEach(np=>{
+        const k=np.ticker;
+        if(map[k]) map[k]={...map[k],shares:np.shares,entryPrice:np.entryPrice};
+        else map[k]={id:Date.now()+""+Math.random().toString(36).slice(2,6),ticker:k,shares:np.shares,entryPrice:np.entryPrice,note:"",addedAt:new Date().toISOString()};
+      });
+      return Object.values(map);
+    });
+    setImpMsg({type:"ok",text:`✓ ${parsed.length} ${parsed.length===1?"posición importada":"posiciones importadas"}.`});
+  };
+  const parseCSV = (text) => {
+    const sep = (text.split("\n")[0].match(/;/g)||[]).length > (text.split("\n")[0].match(/,/g)||[]).length ? ";" : (text.includes("\t")&&!text.includes(",")?"\t":",");
+    return text.replace(/\r/g,"").split("\n").map(l=>l.split(sep));
+  };
+  const importFile = (file) => {
+    if(!file){ return; }
+    setImpMsg(null);
+    const name=(file.name||"").toLowerCase();
+    if(name.endsWith(".xlsx")||name.endsWith(".xls")){
+      const run=()=>{ try{
+        const reader=new FileReader();
+        reader.onload=(e)=>{ try{
+          const wb=window.XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+          const ws=wb.Sheets[wb.SheetNames[0]];
+          const rows=window.XLSX.utils.sheet_to_json(ws,{header:1});
+          ingestRows(rows);
+        }catch(err){ setImpMsg({type:"err",text:"No pude leer el Excel. Prueba guardándolo como CSV."}); } };
+        reader.readAsArrayBuffer(file);
+      }catch(err){ setImpMsg({type:"err",text:"Error leyendo el archivo."}); } };
+      if(window.XLSX){ run(); }
+      else {
+        setImpMsg({type:"ok",text:"Cargando lector de Excel…"});
+        const s=document.createElement("script");
+        s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+        s.onload=run; s.onerror=()=>setImpMsg({type:"err",text:"No pude cargar el lector de Excel. Guarda el archivo como CSV y arrástralo."});
+        document.body.appendChild(s);
+      }
+    } else {
+      const reader=new FileReader();
+      reader.onload=(e)=>ingestRows(parseCSV(e.target.result||""));
+      reader.onerror=()=>setImpMsg({type:"err",text:"Error leyendo el archivo."});
+      reader.readAsText(file);
+    }
+  };
 
   const addOrEdit = () => {
     const tk = form.ticker.trim().toUpperCase();
@@ -20075,7 +20147,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{width:1,height:20,background:T.br2}}/>
           <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:totalPnl>=0?T.grn:T.red,textShadow:`0 0 12px ${totalPnl>=0?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)"}`}}>{m$(totalPnl)}</div>
           {(()=>{ const s = pCloud==="synced"?{t:"☁ SYNCED",c:T.grn}:(pCloud==="loading"||pCloud==="saving")?{t:"☁ SYNC…",c:T.blue}:pCloud==="error"?{t:"⚠ LOCAL",c:T.gold}:{t:"☁ SIGN IN",c:T.dim}; return <span onClick={()=>{if(pCloud==="off"&&onNeedAuth)onNeedAuth();}} style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:s.c,border:`1px solid ${s.c}40`,borderRadius:3,padding:"3px 8px",letterSpacing:.5,cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
-          {termTab==="portfolio" && <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>+ AÑADIR</button>}
+          {termTab==="portfolio" && <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:""});setImpMsg(null);setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>+ AÑADIR</button>}
         </div>
       </div>
       {/* LAYOUT — PORTFOLIO */}
@@ -20524,9 +20596,26 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
       {/* ADD/EDIT MODAL */}
       {showAdd && (
-        <div onClick={(e)=>e.target===e.currentTarget&&setShowAdd(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-          <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:8,padding:22,width:"100%",maxWidth:360}}>
+        <div onClick={(e)=>{if(e.target===e.currentTarget){setShowAdd(false);setImpMsg(null);}}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <div style={{background:T.bg2,border:`1px solid ${T.br2}`,borderRadius:8,padding:22,width:"100%",maxWidth:420}}>
             <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>{editId?"EDITAR POSICIÓN":"+ NUEVA POSICIÓN"}</div>
+            {!editId && (
+              <div style={{marginBottom:16}}>
+                <div
+                  onDragOver={(e)=>{e.preventDefault();setImpDrag(true);}}
+                  onDragLeave={(e)=>{e.preventDefault();setImpDrag(false);}}
+                  onDrop={(e)=>{e.preventDefault();setImpDrag(false); const f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) importFile(f);}}
+                  onClick={()=>{ const inp=document.getElementById("nxt-imp-input"); if(inp) inp.click(); }}
+                  style={{border:`2px dashed ${impDrag?T.grn:T.br2}`,borderRadius:10,padding:"22px 14px",textAlign:"center",cursor:"pointer",background:impDrag?"rgba(0,255,135,.07)":T.bg3,transition:"all .15s"}}>
+                  <div style={{fontSize:26,marginBottom:6}}>📁</div>
+                  <div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:impDrag?T.grn:T.txt,letterSpacing:.3}}>Arrastra tu archivo aquí</div>
+                  <div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginTop:4,lineHeight:1.5}}>CSV · Excel · TXT con: <span style={{color:T.mid}}>Ticker, Acciones, Precio</span><br/>o haz clic para buscarlo</div>
+                  <input id="nxt-imp-input" type="file" accept=".csv,.txt,.xlsx,.xls" style={{display:"none"}} onChange={(e)=>{ const f=e.target.files&&e.target.files[0]; if(f) importFile(f); e.target.value=""; }}/>
+                </div>
+                {impMsg && <div style={{marginTop:8,fontFamily:MONO,fontSize:11,fontWeight:600,color:impMsg.type==="ok"?T.grn:T.red,background:(impMsg.type==="ok"?"rgba(0,255,135,.08)":"rgba(255,61,90,.08)"),border:`1px solid ${impMsg.type==="ok"?"rgba(0,255,135,.25)":"rgba(255,61,90,.25)"}`,borderRadius:6,padding:"8px 10px"}}>{impMsg.text}</div>}
+                <div style={{display:"flex",alignItems:"center",gap:10,margin:"14px 0 4px"}}><div style={{flex:1,height:1,background:T.br}}/><span style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>O UNA A UNA</span><div style={{flex:1,height:1,background:T.br}}/></div>
+              </div>
+            )}
             {[["Ticker","ticker","AAPL","text"],["Unidades","shares","10","number"],["Precio entrada","entryPrice","154.00","number"]].map(([l,k,ph,tp])=>(
               <div key={k} style={{marginBottom:10}}>
                 <div style={{...lbl,marginBottom:5}}>{l}</div>
@@ -20534,7 +20623,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </div>
             ))}
             <div style={{display:"flex",gap:8,marginTop:6}}>
-              <button onClick={()=>setShowAdd(false)} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:5,padding:"9px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
+              <button onClick={()=>{setShowAdd(false);setImpMsg(null);}} style={{flex:1,background:T.bg3,border:`1px solid ${T.br}`,color:T.mid,borderRadius:5,padding:"9px",fontFamily:MONO,fontSize:12,fontWeight:600,cursor:"pointer"}}>{impMsg&&impMsg.type==="ok"?"Cerrar":"Cancelar"}</button>
               <button onClick={()=>{ const tk=form.ticker.trim().toUpperCase(); const sh=parseFloat(form.shares); const ep=parseFloat(form.entryPrice); if(!tk||!(sh>0)||!(ep>0))return; if(editId){ setPositions(prev=>prev.map(x=>x.id===editId?{...x,ticker:tk,shares:sh,entryPrice:ep,note:form.note||""}:x)); } else { setPositions(prev=>[...prev,{id:Date.now()+"",ticker:tk,shares:sh,entryPrice:ep,note:form.note||"",addedAt:new Date().toISOString()}]); } setShowAdd(false); setEditId(null); setForm({ticker:"",shares:"",entryPrice:"",note:""}); }} style={{flex:1,background:"rgba(0,255,135,.15)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,borderRadius:5,padding:"9px",fontFamily:MONO,fontSize:12,fontWeight:700,cursor:"pointer"}}>{editId?"Guardar":"Añadir"}</button>
             </div>
           </div>
