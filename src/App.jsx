@@ -19410,11 +19410,11 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       <div style={{background:"#F4F9FF",borderRadius:16,padding:"16px 16px 8px",marginTop:12,border:"1px solid #DBEAFE"}}>
 
       {/* ── ADD TICKER ── */}
-      <div style={{display:"flex",gap:8,padding:"0 4px 12px"}}>
+      <div style={{display:"flex",gap:8,padding:"0 4px 12px",flexWrap:"wrap"}}>
         <input value={input} onChange={e=>setInput(e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,10))}
           onKeyDown={e=>e.key==="Enter"&&addTicker()}
           placeholder="+ Add ticker: AAPL, BTC, NVDA…"
-          style={{width:260,background:"#fff",border:"1px solid #DBEAFE",borderRadius:8,padding:"8px 14px",color:"#0F172A",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
+          style={{flex:"1 1 160px",minWidth:0,background:"#fff",border:"1px solid #DBEAFE",borderRadius:8,padding:"8px 14px",color:"#0F172A",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
         <button onClick={addTicker} style={{background:"#0047C2",border:"none",borderRadius:8,padding:"8px 18px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>
           + {isEN?"Add":"Agregar"}
         </button>
