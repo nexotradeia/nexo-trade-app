@@ -12440,6 +12440,13 @@ const DIV_FALLBACK = [
   {ticker:"MAIN",  name:"Main Street Capital",    price:58.9,   divRate:3.00,  yield:5.09,  quarterly:"0.75",   exDate:"2026-09-19",payDate:"2026-09-26",sector:"BDC/Yield"},
   {ticker:"ARCC",  name:"Ares Capital Corp",      price:22.1,   divRate:1.92,  yield:8.69,  quarterly:"0.48",   exDate:"2026-09-16",payDate:"2026-09-30",sector:"BDC/Yield"},
   {ticker:"FSK",   name:"FS KKR Capital",         price:18.8,   divRate:2.72,  yield:14.47, quarterly:"0.68",   exDate:"2026-09-12",payDate:"2026-09-30",sector:"BDC/Yield"},
+  // ── Más holdings comunes ─────────────────────────────────────────────────────
+  {ticker:"AVGO",  name:"Broadcom Inc",           price:395.7,  divRate:2.36,  yield:0.60,  quarterly:"0.59",   exDate:"2026-06-20",payDate:"2026-06-30",sector:"Tecnología"},
+  {ticker:"COST",  name:"Costco Wholesale",       price:973.7,  divRate:4.64,  yield:0.48,  quarterly:"1.16",   exDate:"2026-08-07",payDate:"2026-08-21",sector:"Consumo"},
+  {ticker:"NVDA",  name:"NVIDIA Corp",            price:209.0,  divRate:0.04,  yield:0.02,  quarterly:"0.01",   exDate:"2026-09-10",payDate:"2026-10-02",sector:"Tecnología"},
+  {ticker:"SCHD",  name:"Schwab US Dividend ETF", price:32.4,   divRate:1.08,  yield:3.34,  quarterly:"0.27",   exDate:"2026-06-25",payDate:"2026-06-30",sector:"ETF"},
+  {ticker:"VOO",   name:"Vanguard S&P 500 ETF",   price:679.7,  divRate:6.80,  yield:1.00,  quarterly:"1.70",   exDate:"2026-06-27",payDate:"2026-07-02",sector:"ETF"},
+  {ticker:"VST",   name:"Vistra Corp",            price:147.5,  divRate:0.89,  yield:0.60,  quarterly:"0.2235", exDate:"2026-06-12",payDate:"2026-06-30",sector:"Utilities"},
 ];
 
 function DividendCalendarPage({lang="es"}) {
@@ -19896,6 +19903,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [divItems, setDivItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(DIV_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
   const [divShow, setDivShow] = useState(false);
   const [divForm, setDivForm] = useState({symbol:"",shares:"",divShare:"",freq:"Trimestral",exDate:"",payDate:""});
+  const [divMsg, setDivMsg] = useState(null);
   const [divDrip, setDivDrip] = useState({});
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
@@ -20815,9 +20823,13 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <div style={{...lbl,marginBottom:10}}>Calendario de Pagos · próximos 6 meses</div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>{months.map((m,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 11px"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginBottom:6}}>{m.label}</div><div style={{fontFamily:MONO,fontSize:16,fontWeight:700,color:m.sum>0?T.gold:T.dim}}>{m.sum>0?"$"+Math.round(m.sum):"—"}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim,marginTop:4,lineHeight:1.4,minHeight:20}}>{m.items.join(" · ")}</div></div>))}</div>
               </div>}
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`,flexWrap:"wrap",gap:8}}>
                 <div style={{...lbl,padding:0}}>Mis Dividendos</div>
-                <button onClick={openNew} style={{background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>+ Añadir dividendo</button>
+                <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                  {divMsg&&<span style={{fontFamily:MONO,fontSize:10,fontWeight:600,color:divMsg.startsWith("✓")?T.grn:T.dim}}>{divMsg}</span>}
+                  <button onClick={()=>{ const DIV_BY={}; DIV_FALLBACK.forEach(d=>{DIV_BY[d.ticker]=d;}); const ex=new Set(divItems.map(d=>d.symbol.toUpperCase())); const add=[]; positions.forEach(p=>{ const tk=p.ticker.toUpperCase(); const fb=DIV_BY[tk]; if(fb&&!ex.has(tk)){ add.push({id:Date.now()+""+Math.random().toString(36).slice(2,6),symbol:tk,shares:String(p.shares),divShare:String(fb.quarterly),freq:"Trimestral",exDate:fb.exDate,payDate:fb.payDate}); ex.add(tk);} }); if(add.length){ setDivItems(prev=>[...add,...prev]); setDivMsg("✓ "+add.length+(add.length===1?" agregada":" agregadas")); } else { const anyMatch=positions.some(p=>DIV_BY[p.ticker.toUpperCase()]); setDivMsg(anyMatch?"Ya estaban todas":"Ninguna de tus acciones paga dividendo conocido"); } setTimeout(()=>setDivMsg(null),4000); }} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 12px",borderRadius:5,cursor:"pointer"}}>⟳ Sincronizar Portfolio</button>
+                  <button onClick={openNew} style={{background:"rgba(240,180,41,.14)",border:`1px solid rgba(240,180,41,.4)`,color:T.gold,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>+ Añadir dividendo</button>
+                </div>
               </div>
               {divItems.length? (
                 <div style={{overflowX:"auto"}}>
@@ -25032,9 +25044,9 @@ export default function App(){
                   {n.locked?<NavIco name="lock" size={13}/>:<NavIco name={n.icon}/>}
                   {mo&&<span style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 7px #22c55e",animation:"nexo-pulse 1.3s infinite",display:"inline-block",flexShrink:0}}/>}
                   {n.idx===37
-                    ? <span style={{display:"inline-flex",flexDirection:"column",alignItems:"flex-start",lineHeight:1.02}}>
-                        <span style={{fontSize:10.5,fontWeight:700,letterSpacing:0.3,color:active?"#E0B64B":"#EAF1FA"}}>{lang==="en"?"Portfolio Terminal":"Portafolio Terminal"}</span>
-                        <span style={{fontSize:11,fontWeight:800,color:"#2BE38A",borderBottom:"2px solid #2BE38A",lineHeight:1.25,textShadow:"0 0 8px rgba(43,227,138,0.55)"}}>{lang==="en"?"Oracle AI":"Oracle IA"}</span>
+                    ? <span style={{display:"inline-flex",flexDirection:"column",alignItems:"center",justifyContent:"center",lineHeight:1.05,textAlign:"center"}}>
+                        <span style={{fontSize:13.5,fontWeight:800,letterSpacing:0.3,color:active?"#E0B64B":"#EAF1FA"}}>{lang==="en"?"Portfolio Terminal":"Portafolio Terminal"}</span>
+                        <span style={{fontSize:15,fontWeight:900,color:"#2BE38A",borderBottom:"2.5px solid #2BE38A",lineHeight:1.3,paddingBottom:1,textShadow:"0 0 10px rgba(43,227,138,0.6)"}}>{lang==="en"?"Oracle AI":"Oracle IA"}</span>
                       </span>
                     : <span style={mo?{color:"#22c55e",fontWeight:800,textShadow:"0 0 9px rgba(34,197,94,0.55)"}:undefined}>{stripEmoji(n.label)}</span>}
                 </>);})()}
