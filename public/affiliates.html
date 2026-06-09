@@ -439,26 +439,8 @@ const DEMO = {
     total_paid_out: 1002.40,
     last_signup_at: new Date(Date.now() - 86400000).toISOString()
   },
-  referrals: [
-    {id:'r1',referred_name:'Jorge López',referred_email:'jorge@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:true,clicked_at:new Date(Date.now()-12*864e5).toISOString(),signed_up_at:new Date(Date.now()-11*864e5).toISOString(),first_payment_at:new Date(Date.now()-10*864e5).toISOString(),country:'US',device_type:'mobile'},
-    {id:'r2',referred_name:'Sofía Martínez',referred_email:'sofia@email.com',status:'paying',plan_type:'monthly',plan_amount:15.99,commission_earned:3.20,commission_paid:true,clicked_at:new Date(Date.now()-9*864e5).toISOString(),signed_up_at:new Date(Date.now()-9*864e5).toISOString(),first_payment_at:new Date(Date.now()-8*864e5).toISOString(),country:'MX',device_type:'desktop'},
-    {id:'r3',referred_name:'Luis Hernández',referred_email:'luis@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:true,clicked_at:new Date(Date.now()-8*864e5).toISOString(),signed_up_at:new Date(Date.now()-7*864e5).toISOString(),first_payment_at:new Date(Date.now()-7*864e5).toISOString(),country:'ES',device_type:'mobile'},
-    {id:'r4',referred_name:'Carmen Vega',referred_email:'carmen@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:false,clicked_at:new Date(Date.now()-6*864e5).toISOString(),signed_up_at:new Date(Date.now()-5*864e5).toISOString(),first_payment_at:new Date(Date.now()-5*864e5).toISOString(),country:'AR',device_type:'desktop'},
-    {id:'r5',referred_name:'Miguel Torres',referred_email:'miguel@email.com',status:'paying',plan_type:'monthly',plan_amount:15.99,commission_earned:3.20,commission_paid:false,clicked_at:new Date(Date.now()-5*864e5).toISOString(),signed_up_at:new Date(Date.now()-4*864e5).toISOString(),first_payment_at:new Date(Date.now()-4*864e5).toISOString(),country:'US',device_type:'mobile'},
-    {id:'r6',referred_name:'Isabella Cruz',referred_email:'isa@email.com',status:'signup',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-4*864e5).toISOString(),signed_up_at:new Date(Date.now()-3*864e5).toISOString(),first_payment_at:null,country:'CO',device_type:'mobile'},
-    {id:'r7',referred_name:'Pedro Ramírez',referred_email:'pedro@email.com',status:'trial',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-3*864e5).toISOString(),signed_up_at:new Date(Date.now()-2*864e5).toISOString(),first_payment_at:null,country:'PE',device_type:'desktop'},
-    {id:'r8',referred_name:'Valentina Soto',referred_email:'vale@email.com',status:'paying',plan_type:'annual',plan_amount:79,commission_earned:15.80,commission_paid:false,clicked_at:new Date(Date.now()-2*864e5).toISOString(),signed_up_at:new Date(Date.now()-2*864e5).toISOString(),first_payment_at:new Date(Date.now()-1*864e5).toISOString(),country:'CL',device_type:'mobile'},
-    {id:'r9',referred_name:'Alejandro Díaz',referred_email:'alex@email.com',status:'click',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-864e5).toISOString(),signed_up_at:null,first_payment_at:null,country:'US',device_type:'mobile'},
-    {id:'r10',referred_name:'Gabriela Moreno',referred_email:'gabi@email.com',status:'signup',plan_type:null,plan_amount:0,commission_earned:0,commission_paid:false,clicked_at:new Date(Date.now()-43200000).toISOString(),signed_up_at:new Date(Date.now()-36000000).toISOString(),first_payment_at:null,country:'MX',device_type:'desktop'},
-  ],
-  monthlyEarnings: [
-    {month:'Ene 2026',earned:0,sales:0},
-    {month:'Feb 2026',earned:0,sales:0},
-    {month:'Mar 2026',earned:142.40,sales:8},
-    {month:'Abr 2026',earned:380.00,sales:14},
-    {month:'May 2026',earned:680.00,sales:22},
-    {month:'Jun 2026',earned:640.00,sales:18},
-  ]
+  referrals: [],
+  monthlyEarnings: []
 };
 
 /* ═══ AUTH ═══ */
@@ -626,7 +608,7 @@ function showSection(sec,el){
 /* DASHBOARD */
 function renderDashboard(){
   const a=currentAffiliate;
-  const refs=isDemoMode?DEMO.referrals:[];
+  const refs=[];
   const convRate=a.total_clicks>0?((a.total_signups/a.total_clicks)*100).toFixed(1):0;
   const payRate=a.total_signups>0?((a.total_paying/a.total_signups)*100).toFixed(1):0;
 
@@ -727,8 +709,16 @@ function refRow(r){
 }
 
 /* REFERRALS PAGE */
-function renderReferrals(filter='all',search=''){
-  let refs=isDemoMode?DEMO.referrals:[];
+async function renderReferrals(filter='all',search=''){
+  // Load from Supabase if logged in
+  let allRefs=[];
+  if(sb&&!isDemoMode){
+    let q=sb.from('referrals').select('*').order('created_at',{ascending:false});
+    if(currentAffiliate?.id&&currentAffiliate.id!=='admin')q=q.eq('affiliate_id',currentAffiliate.id);
+    const{data}=await q;
+    allRefs=data||[];
+  }
+  let refs=allRefs;
   if(filter!=='all')refs=refs.filter(r=>r.status===filter);
   if(search)refs=refs.filter(r=>(r.referred_name||'').toLowerCase().includes(search.toLowerCase())||(r.referred_email||'').toLowerCase().includes(search.toLowerCase()));
 
