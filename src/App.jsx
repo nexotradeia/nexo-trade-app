@@ -6194,71 +6194,62 @@ function SponsoredPostCard({sp}){
 // ── VIP POP-UP MODAL (aparece a los 30s para no-premium) ──────────────────────
 function VipPopup({onClose, onGoVIP, lang="es"}){
   return(
-    <div style={{
-      position:"fixed",inset:0,zIndex:9999,
-      background:"rgba(0,0,0,0.75)",backdropFilter:"blur(6px)",
-      display:"flex",alignItems:"center",justifyContent:"center",
-      padding:16,
-      overflowY:"auto",
-    }} onClick={onClose}>
-      <div onClick={e=>e.stopPropagation()} style={{
-        background:"linear-gradient(160deg,#0F0A2E,#1A0A3D,#0D1A3D)",
-        border:"1.5px solid rgba(15,94,104,0.5)",
-        borderRadius:24,
-        padding:"28px 24px",
-        maxWidth:380,
-        width:"100%",
-        position:"relative",
-        boxShadow:"0 8px 40px rgba(15,94,104,0.35)",
-      }}>
-        {/* Cerrar */}
-        <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"transparent",border:"none",color:"rgba(255,255,255,0.4)",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
+    <div style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(0,0,0,0.82)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,overflowY:"auto"}} onClick={onClose}>
+      <style dangerouslySetInnerHTML={{__html:`
+        @keyframes nvp-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,232,122,.5)}70%{box-shadow:0 0 0 10px rgba(0,232,122,0)}}
+        @keyframes nvp-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+        @keyframes nvp-glow{0%,100%{box-shadow:0 4px 30px rgba(0,232,122,.35)}50%{box-shadow:0 4px 50px rgba(0,232,122,.65)}}
+        @keyframes nvp-shine{0%{left:-100%}100%{left:200%}}
+      `}}/>
+      <div onClick={e=>e.stopPropagation()} style={{background:"linear-gradient(160deg,#04090f,#06100e,#040c18)",border:"1.5px solid rgba(0,232,122,.25)",borderRadius:24,padding:"28px 24px",maxWidth:400,width:"100%",position:"relative",boxShadow:"0 8px 60px rgba(0,232,122,.12)"}}>
+        {/* Top glow line */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,borderRadius:"24px 24px 0 0",background:"linear-gradient(90deg,transparent,#00e87a,transparent)"}}/>
+        {/* Close */}
+        <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"rgba(255,255,255,.06)",border:"none",color:"rgba(255,255,255,.5)",fontSize:16,cursor:"pointer",lineHeight:1,borderRadius:6,width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 
-        {/* Ícono */}
-        <div style={{textAlign:"center",fontSize:44,marginBottom:10}}>✦</div>
+        {/* Icon */}
+        <div style={{textAlign:"center",fontSize:44,marginBottom:8,animation:"nvp-float 3s ease-in-out infinite"}}>🚀</div>
 
-        {/* Título */}
-        <div style={{textAlign:"center",fontWeight:900,color:"#fff",fontSize:22,marginBottom:6,letterSpacing:-0.5}}>
-          {lang==="en"?"Join NEXO PREMIUM":"Únete a NEXO PREMIUM"}
-        </div>
-        <div style={{textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13,marginBottom:20,lineHeight:1.5}}>
-          {lang==="en"?"The best traders are already inside. Get picks, signals and the private room.":"Los mejores traders ya están adentro. Accede a picks, señales y la sala privada."}
+        {/* Badge */}
+        <div style={{textAlign:"center",marginBottom:12}}>
+          <span style={{animation:"nvp-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(0,232,122,.15)",border:"1px solid rgba(0,232,122,.4)",borderRadius:20,padding:"3px 14px",fontSize:10,fontWeight:800,color:"#00e87a",letterSpacing:2}}>PREMIUM — LIMITED OFFER</span>
         </div>
 
-        {/* Beneficios */}
-        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:22}}>
-          {[
-            {icon:"📊", text:lang==="en"?"Weekly PREMIUM picks with entry, target and stop":"Picks PREMIUM semanales con entrada, target y stop"},
-            {icon:"🔔", text:lang==="en"?"Real-time price alerts":"Alertas de precio en tiempo real"},
-            {icon:"💬", text:lang==="en"?"Private room for PREMIUM members only":"Sala privada solo para miembros PREMIUM"},
-            {icon:"📅", text:lang==="en"?"Earnings calendar with pre-analysis":"Earnings calendar con análisis previo"},
-            {icon:"🏆", text:lang==="en"?"Exclusive PREMIUM badge on your profile":"Badge PREMIUM exclusivo en tu perfil"},
-          ].map(({icon,text})=>(
-            <div key={text} style={{display:"flex",alignItems:"center",gap:10}}>
-              <span style={{fontSize:16,flexShrink:0}}>{icon}</span>
-              <span style={{fontSize:12,color:"rgba(255,255,255,0.75)",lineHeight:1.4}}>{text}</span>
+        {/* Title */}
+        <div style={{textAlign:"center",fontWeight:900,color:"#fff",fontSize:22,marginBottom:6,letterSpacing:-0.5,lineHeight:1.2}}>
+          Unlock <span style={{color:"#00e87a"}}>NexoTrade Pro</span>
+        </div>
+        <div style={{textAlign:"center",color:"rgba(255,255,255,.5)",fontSize:13,marginBottom:18,lineHeight:1.5}}>
+          Join 2,847 traders already inside. Real signals, institutional flow, AI picks — all in one place.
+        </div>
+
+        {/* Benefits grid */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:20}}>
+          {[["🐋","Smart Money Flow"],["💡","Weekly AI Picks"],["🏛️","52 Guru Portfolios"],["🛠️","Pro Screener"],["🔮","Oracle AI Signals"],["📅","Earnings Alerts"]].map(([ic,t])=>(
+            <div key={t} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,232,122,.06)",border:"1px solid rgba(0,232,122,.12)",borderRadius:10,padding:"8px 10px"}}>
+              <span style={{fontSize:14}}>{ic}</span>
+              <span style={{fontSize:11,fontWeight:700,color:"#e0eaf8"}}>{t}</span>
             </div>
           ))}
         </div>
 
-        {/* Precio + CTA */}
-        <div style={{textAlign:"center",marginBottom:10}}>
-          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",textDecoration:"line-through"}}>{lang==="en"?"$29/mo":"$29/mes"}</span>
-          <span style={{fontSize:28,fontWeight:900,color:"#FCD34D",marginLeft:8}}>$15.99</span>
-          <span style={{fontSize:12,color:"rgba(255,255,255,0.4)"}}>{lang==="en"?"/mo":"/mes"}</span>
+        {/* Price */}
+        <div style={{background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:14,padding:"12px 20px",textAlign:"center",marginBottom:14}}>
+          <div style={{fontSize:10,color:"#64748b",marginBottom:4,letterSpacing:1}}>ANNUAL PLAN — BEST VALUE</div>
+          <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:6}}>
+            <span style={{fontSize:38,fontWeight:900,color:"#00e87a",fontFamily:"monospace"}}>$6.58</span>
+            <span style={{fontSize:13,color:"#64748b"}}>/mo · $79/year</span>
+          </div>
+          <div style={{fontSize:11,color:"#00e87a",fontWeight:700,marginTop:4}}>Save $113 vs monthly · Cancel anytime</div>
         </div>
 
-        <div onClick={onGoVIP} style={{
-          background:"linear-gradient(135deg,#C8901F,#8A5E10)",
-          borderRadius:14,padding:"14px 20px",textAlign:"center",
-          color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",
-          boxShadow:"0 4px 20px rgba(15,94,104,0.5)",
-          letterSpacing:0.2,
-        }}>
-          {lang==="en"?"✦ Start now →":"✦ Empezar ahora →"}
+        {/* CTA */}
+        <div onClick={onGoVIP} style={{animation:"nvp-glow 2s ease-in-out infinite",position:"relative",overflow:"hidden",background:"linear-gradient(135deg,#00e87a,#00b85e)",borderRadius:14,padding:"14px 20px",textAlign:"center",color:"#000",fontWeight:900,fontSize:15,cursor:"pointer",letterSpacing:.3}}>
+          <div style={{position:"absolute",top:0,bottom:0,width:"40%",background:"rgba(255,255,255,.2)",filter:"blur(12px)",animation:"nvp-shine 2.5s ease-in-out infinite",transform:"skewX(-20deg)"}}/>
+          🎉 Get Annual Premium — $79/year →
         </div>
-        <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"rgba(255,255,255,0.25)"}}>
-          {lang==="en"?"Cancel anytime · No commitment":"Cancela cuando quieras · Sin compromisos"}
+        <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"rgba(255,255,255,.25)"}}>
+          ✓ Instant access &nbsp;✓ Cancel anytime &nbsp;✓ Secure via Stripe
         </div>
       </div>
     </div>
