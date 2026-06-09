@@ -49,6 +49,24 @@ async function subscribeWebPush(user){
   }catch(e){ return false; }
 }
 
+// Pista de instalación para Web Push según el dispositivo:
+//   "ios"     → iPhone/iPad sin la PWA instalada → push REQUIERE instalar (Safari iOS).
+//   "android" → Android sin instalar → push funciona con permiso; instalar mejora la fiabilidad.
+//   null      → escritorio o ya instalada → no hace falta aviso.
+function pushDeviceHint(){
+  try{
+    const ua = navigator.userAgent || "";
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+    const isAndroid = /Android/.test(ua);
+    const standalone = (window.navigator && window.navigator.standalone===true) ||
+                       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    if(standalone) return null;
+    if(isIOS) return "ios";
+    if(isAndroid) return "android";
+    return null;
+  }catch{ return null; }
+}
+
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 // ✅ VIP $15.99/mes — link activo
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/fZu6oAdiq3Lz1i8fANaR20f";
@@ -20743,6 +20761,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 ? <span style={{fontFamily:MONO,fontSize:10,color:T.red}}>🔕 Notificaciones bloqueadas — actívalas en el navegador</span>
                 : <button onClick={askNotif} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>🔔 Activar notificaciones</button>}
             </div>
+            {(()=>{ const hint=pushDeviceHint(); if(!hint) return null; return (
+              <div style={{margin:"14px 22px 0",background:"rgba(77,166,255,.08)",border:`1px solid rgba(77,166,255,.3)`,borderRadius:10,padding:"12px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
+                <span style={{fontSize:18,lineHeight:1}}>📲</span>
+                {hint==="ios"
+                  ? <div style={{fontFamily:SANS,fontSize:12,color:T.txt,lineHeight:1.55}}><b style={{color:T.blue}}>En iPhone, instala la app para recibir alertas.</b> En iOS las notificaciones con la app cerrada solo funcionan si añades NexoTrade a tu pantalla de inicio: toca <b>Compartir</b> <span style={{fontFamily:MONO}}>⬆️</span> en Safari → <b>"Añadir a inicio"</b>, abre NexoTrade desde ese ícono y pulsa <b>🔔 Activar notificaciones</b>.</div>
+                  : <div style={{fontFamily:SANS,fontSize:12,color:T.txt,lineHeight:1.55}}><b style={{color:T.blue}}>En Android ya puedes recibir alertas:</b> pulsa <b>🔔 Activar notificaciones</b> y acepta el permiso. Para que lleguen de forma más fiable (sin que el sistema las pause), te recomendamos <b>instalar la app</b>: menú <span style={{fontFamily:MONO}}>⋮</span> de Chrome → <b>"Instalar app"</b> / "Añadir a pantalla de inicio".</div>}
+              </div>
+            ); })()}
             <div style={{padding:"18px 22px",maxWidth:820}}>
               <div style={{...lbl,marginBottom:8}}>Tipo de condición</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>{COND.map((c)=>{const sel=alType===c[0];return (<div key={c[0]} onClick={()=>setAlType(c[0])} style={{background:sel?c[4]+"14":T.bg3,border:`1px solid ${sel?c[4]+"66":T.br}`,borderRadius:8,padding:"16px 10px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:22,marginBottom:8}}>{c[1]}</div><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:sel?c[4]:T.mid,letterSpacing:.5}}>{c[2]}</div></div>);})}</div>
