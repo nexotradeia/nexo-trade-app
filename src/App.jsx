@@ -2867,7 +2867,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             userPosts.length===0
               ?<div style={{textAlign:"center",padding:"32px 0",color:C.muted2}}>
                   <div style={{fontSize:36,marginBottom:8}}>📭</div>
-                  <div style={{fontSize:13}}>Sin publicaciones aún</div>
+                  <div style={{fontSize:13}}>{lang==="en"?"No posts yet":"Sin publicaciones aún"}</div>
                 </div>
               :userPosts.slice(0,8).map(p=>(
                 <div key={p.id} style={{background:C.card2,borderRadius:14,padding:"14px 16px",marginBottom:10,border:`1px solid ${C.border}`,transition:"box-shadow 0.15s"}}
@@ -3081,7 +3081,7 @@ function AlertsPanel({lang,onClose,onAlertChange,user}){
               setTriggered(`✅ Alerta creada: $${newT} ${newV}`);
               setTimeout(()=>setTriggered(null),2500);
               setNewT("");setNewV("");
-            }} style={{background:`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:8,padding:"8px 16px",color:"#000",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Añadir</button>
+            }} style={{background:`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:8,padding:"8px 16px",color:"#000",fontSize:13,fontWeight:700,cursor:"pointer"}}>{lang==="en"?"+ Add":"+ Añadir"}</button>
           </div>
         </div>
       </div>
@@ -6069,7 +6069,7 @@ function TrendingPage({posts=[],lang="es"}){
       })}
 
       <div style={{textAlign:"center",color:C.muted2,fontSize:11,marginTop:4}}>
-        🔄 Precios en tiempo real · Curación editorial diaria · nexotradeia.com
+        {lang==="en"?"🔄 Real-time prices · Daily editorial curation · nexotradeia.com":"🔄 Precios en tiempo real · Curación editorial diaria · nexotradeia.com"}
       </div>
     </div>
   );
@@ -9270,7 +9270,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         <div style={{...card,background:"linear-gradient(145deg,#1E1B4B,#2D1B69)",border:"1px solid rgba(15,94,104,0.3)",textAlign:"center"}}>
           <div style={{fontSize:26,marginBottom:6}}>✦</div>
           <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>PREMIUM Member</div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>{lang==="en"?<>Exclusive signals, unlimited AI<br/>and access to all the data</>:<>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</>}</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>{lang==="en"?<>Exclusive signals, unlimited AI<br/>and access to all the data</>:<>{lang==="en"?"Exclusive signals, unlimited AI":"Señales exclusivas, IA ilimitada"}<br/>y acceso a todos los datos</>}</div>
           <div style={{fontSize:22,fontWeight:900,color:"#fff",marginBottom:10}}>
             <span style={{color:"#FCD34D"}}>$15.99</span>
             <span style={{fontSize:12,color:"rgba(255,255,255,0.4)",fontWeight:400}}>{lang==="en"?"/mo":"/mes"}</span>
@@ -10394,7 +10394,7 @@ function PaperTrading({ user, lang="es" }){
             )}
             {!liveQ&&ticker&&!fetching&&(
               <div style={{fontSize:12,color:"#DC2626",background:"rgba(220,38,38,0.06)",border:"1px solid rgba(220,38,38,0.15)",borderRadius:8,padding:"8px 12px"}}>
-                ⚠️ Ticker no encontrado. Verifica que sea un símbolo válido (ej: AAPL, MSFT, NVDA).
+                {lang==="en"?"⚠️ Ticker not found. Make sure it is a valid symbol (e.g. AAPL, MSFT, NVDA).":"⚠️ Ticker no encontrado. Verifica que sea un símbolo válido (ej: AAPL, MSFT, NVDA)."}
               </div>
             )}
 
@@ -12037,7 +12037,7 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
       <div style={{marginTop:28,background:"linear-gradient(135deg,#0f172a,#1e293b)",borderRadius:18,padding:"28px 24px",textAlign:"center"}}>
         <div style={{fontSize:36,marginBottom:10}}>📬</div>
         <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:17,fontWeight:800}}>{isEN?"Want NexoTrade original webinars?":"¿Quieres webinars propios de NexoTrade?"}</h3>
-        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>Estamos organizando sesiones en vivo con traders reales. Déjanos tu correo para ser el primero en enterarte.</p>
+        <p style={{margin:"0 0 16px",color:"#64748b",fontSize:13}}>{lang==="en"?"We are organizing live sessions with real traders. Leave us your email to be the first to know.":"Estamos organizando sesiones en vivo con traders reales. Déjanos tu correo para ser el primero en enterarte."}</p>
         <a href="mailto:info@nexotradeia.com?subject=Quiero saber de los webinars de NexoTrade"
           style={{display:"inline-block",background:`linear-gradient(135deg,${C.accent},#0047C2)`,borderRadius:10,padding:"10px 24px",color:"#fff",fontSize:13,fontWeight:700,textDecoration:"none"}}>
           📬 {isEN?"Notify me →":"Notifícame →"}
@@ -15434,7 +15434,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                   ))}
                 </div>
               </div>
-              <div style={{marginTop:10,fontSize:9,color:"#334155",textAlign:"right"}}>Fuente: OGE Financial Disclosure · Vía QuiverQuantitative · Todos los trades son compras</div>
+              <div style={{marginTop:10,fontSize:9,color:"#334155",textAlign:"right"}}>{lang==="en"?"Source: OGE Financial Disclosure · Via QuiverQuantitative · All trades are buys":"Fuente: OGE Financial Disclosure · Vía QuiverQuantitative · Todos los trades son compras"}</div>
             </div>
 
             {/* ── TRUMP MEDIA (DJT) ── */}
@@ -15561,7 +15561,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               </div>
               {/* Footer */}
               <div style={{marginTop:12,fontSize:9,color:"#334155",textAlign:"right"}}>
-                Fuente: Senate Financial Disclosure 2024 · Publicado Aug 13, 2025 · Vía QuiverQuantitative
+                {lang==="en"?"Source: Senate Financial Disclosure 2024 · Published Aug 13, 2025 · Via QuiverQuantitative":"Fuente: Senate Financial Disclosure 2024 · Publicado Aug 13, 2025 · Vía QuiverQuantitative"}
               </div>
             </div>
           </div>
@@ -16528,7 +16528,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontWeight:700,color:isSelected?"#FCD34D":C.text,fontSize:13,marginBottom:2}}>{prof.username}</div>
-                    <div style={{fontSize:11,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{conv?.lastMsg || <span style={{color:"rgba(33,150,243,0.6)",fontStyle:"italic"}}>Iniciar conversación…</span>}</div>
+                    <div style={{fontSize:11,color:C.muted2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{conv?.lastMsg || <span style={{color:"rgba(33,150,243,0.6)",fontStyle:"italic"}}>{lang==="en"?"Start conversation…":"Iniciar conversación…"}</span>}</div>
                   </div>
                   {/* Online dot (decorativo) */}
                   <div style={{width:8,height:8,borderRadius:"50%",background:"#10B981",flexShrink:0,opacity:0.7}}/>
@@ -20439,7 +20439,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const nowT=new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
     const mkt=(()=>{ try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(),tm=et.getHours()*60+et.getMinutes(); const open=d>=1&&d<=5&&tm>=570&&tm<960; return open?{color:T.grn,label:"NYSE OPEN",sub:"Cierra 4:00 PM ET"}:{color:T.gold,label:"NYSE CLOSED",sub:"Abre 9:30 AM ET"}; }catch{return{color:T.grn,label:"NYSE",sub:""};} })();
     return (
-    <div style={{background:T.bg,fontFamily:SANS,color:T.txt,minHeight:"calc(100vh - 60px)",margin:"-12px -16px",borderRadius:0,overflow:"hidden"}}>
+    <div className="nexo-term-root" style={{background:T.bg,fontFamily:SANS,color:T.txt,minHeight:"calc(100vh - 60px)",margin:"-12px -16px",borderRadius:0,overflow:"hidden"}}>
       <style>{`@keyframes nxtMq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}@keyframes nxtBl{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
       {/* TICKER STRIP */}
       <div style={{height:28,background:T.bg2,borderBottom:`1px solid ${T.br}`,overflow:"hidden",position:"relative"}}>
@@ -25063,6 +25063,9 @@ export default function App(){
         .nexo-term-grid > div:not(:last-child) { border-bottom: 1px solid #1e2a38 !important; }
         /* tablas/contenido ancho dentro del terminal hacen scroll-x propio, no rompen la página */
         .nexo-term-grid table { display: block !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; white-space: nowrap !important; }
+
+        /* ── TERMINAL: el contenedor no debe exceder el ancho de pantalla (la sangría negativa -16px lo desbordaba) ── */
+        .nexo-term-root { margin-left: 0 !important; margin-right: 0 !important; max-width: 100vw !important; overflow-x: hidden !important; }
 
         /* ── TERMINAL topbar: apilar en móvil y pestañas en una fila deslizable ── */
         .nexo-term-top { height: auto !important; flex-wrap: wrap !important; padding: 8px 10px !important; gap: 8px !important; row-gap: 8px !important; }
