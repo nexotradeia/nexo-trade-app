@@ -18049,7 +18049,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const [sortCol, setSortCol] = useState(null);   // header (c.h) de la columna por la que se ordena
   const [sortDir, setSortDir] = useState("desc"); // "desc" = mayor a menor (default), "asc" = menor a mayor
   const [perfPeriod, setPerfPeriod] = useState("3m"); // periodo del Returns Dashboard
-  const [activeView, setActiveView] = useState("returns"); // vista activa (declarada arriba: la usan effects)
+  const [activeView, setActiveView] = useState("market"); // vista activa (declarada arriba: la usan effects)
   const [techData, setTechData] = useState({});       // {ticker: {signal, score, rsi, price, sma20, sma50, loading, error}}
   const [techSort, setTechSort] = useState(null);      // columna de orden en la vista Technical
   const [techDir, setTechDir] = useState("desc");
@@ -18234,9 +18234,11 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       setTimeout(()=>setAddFeedback(null),2500);
       return;
     }
-    if(tickers.length>=30){
-      setAddFeedback("full");
-      setTimeout(()=>setAddFeedback(null),2500);
+    const maxTk = isPremium ? 30 : 15;
+    if(tickers.length>=maxTk){
+      setAddFeedback(isPremium?"full":"needPremium");
+      setTimeout(()=>setAddFeedback(null),2800);
+      if(!isPremium) onNeedPremium&&onNeedPremium();
       return;
     }
     setTickers(prev=>[...prev, tk]);
@@ -19150,7 +19152,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         {/* ── VIEW TABS (inside header) ── */}
         <div style={{display:"flex",gap:2,marginTop:16,borderTop:"1px solid rgba(255,255,255,0.07)",paddingTop:14,flexWrap:"wrap"}}>
           {VIEWS.map(v=>{
-            const isLocked = !isPremium && v.id!=="performance";
+            const isLocked = !isPremium && v.id!=="performance" && v.id!=="market";
             return (
               <button key={v.id} onClick={()=>setActiveView(v.id)}
                 style={{background:activeView===v.id?"rgba(26,95,173,0.12)":"transparent",border:"none",borderRadius:8,padding:"6px 16px",fontSize:13,fontWeight:activeView===v.id?700:500,color:activeView===v.id?"#1A5FAD":isLocked?"#94A3B8":"#5B8DC7",cursor:"pointer",whiteSpace:"nowrap",borderBottom:activeView===v.id?"2px solid #1A5FAD":"2px solid transparent",transition:"all 0.15s",display:"flex",alignItems:"center",gap:4}}>
@@ -19185,7 +19187,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </label>
         {addFeedback && (
           <span style={{fontSize:12,fontWeight:600,alignSelf:"center",color:addFeedback==="added"?"#10B981":addFeedback==="exists"?"#F59E0B":"#EF4444"}}>
-            {addFeedback==="added"?"✅ Agregado":addFeedback==="exists"?"⚠️ Ya existe":"🚫 Lista llena"}
+            {addFeedback==="added"?"✅ Agregado":addFeedback==="exists"?"⚠️ Ya existe":addFeedback==="needPremium"?("🔒 "+(isEN?"Limit 15 — upgrade for 30":"Límite 15 — Premium para 30")):"🚫 Lista llena"}
           </span>
         )}
         {importMsg && (
@@ -19194,7 +19196,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
           </span>
         )}
         <span style={{fontSize:11,color:"#5B8DC7",alignSelf:"center",marginLeft:"auto"}}>
-          {lastUpdated?"Updated "+lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"Loading…"} · {tickers.length}/30 tickers
+          {lastUpdated?"Updated "+lastUpdated.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"Loading…"} · {tickers.length}/{isPremium?30:15} tickers{!isPremium&&<span onClick={onNeedPremium} style={{cursor:"pointer",color:"#C8901F",fontWeight:700,marginLeft:4}}>🔒 +30 Premium</span>}
         </span>
       </div>
 
@@ -19203,7 +19205,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         tickers.length===0
           ? <div style={{textAlign:"center",padding:"40px 20px",color:"#64748B",fontSize:13}}>{isEN?"Add tickers to see performance charts":"Agrega tickers para ver los gráficos de rendimiento"}</div>
           : renderPerf()
-      ) : !isPremium ? (
+      ) : !isPremium && activeView!=="market" ? (
         <PremiumGate lang={isEN?"en":"es"} icon="📊"
           title={isEN?"Premium Analytics":"Análisis Premium"}
           desc={isEN?"Unlock all Watchlist views: multi-period returns, RSI & SMA signals, risk analysis, projections and more.":"Desbloquea todas las vistas de tu Watchlist: retornos multi-período, señales RSI & SMA, análisis de riesgo, proyecciones y más."}
@@ -19225,6 +19227,17 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
           </label>
         </div>
       ):(
+        <div style={{position:"relative"}}>
+        {!isPremium && cols.length>2 && (
+          <div onClick={onNeedPremium} style={{position:"absolute",right:0,top:0,bottom:0,width:"62%",zIndex:10,cursor:"pointer",background:"linear-gradient(90deg,transparent 0%,rgba(240,249,255,0.85) 18%,rgba(240,249,255,0.97) 50%)",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0"}}>
+            <div style={{textAlign:"center",pointerEvents:"none",userSelect:"none"}}>
+              <div style={{fontSize:28,marginBottom:6}}>🔒</div>
+              <div style={{fontWeight:900,fontSize:13,color:"#0F172A",marginBottom:4}}>{isEN?"Unlock all columns":"Desbloquea todas las columnas"}</div>
+              <div style={{fontSize:11,color:"#64748B",marginBottom:10}}>{isEN?"Upgrade to see full analytics":"Actualiza para ver el análisis completo"}</div>
+              <div style={{background:"linear-gradient(135deg,#C8901F,#8A5E10)",color:"#fff",borderRadius:9,padding:"7px 18px",fontSize:12,fontWeight:800,display:"inline-block",boxShadow:"0 4px 14px rgba(200,144,31,0.4)"}}>✦ {isEN?"Go Premium":"Hazte Premium"}</div>
+            </div>
+          </div>
+        )}
         <div style={{overflowX:"auto",border:"1px solid #DBEAFE",borderRadius:12,boxShadow:"0 4px 12px rgba(26,95,173,0.08)"}}>
           <table style={{borderCollapse:"collapse",width:"100%",minWidth:totalW}}>
             <thead>
@@ -19258,16 +19271,19 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
               </tr>
             </thead>
             <tbody>
-              {sortedTickers.map((tk,rowIdx)=>{
+              {sortedTickers.slice(0, isPremium ? undefined : 15).map((tk,rowIdx)=>{
                 const d = priceOf(tk);
                 const m = getMock(tk);
                 return(
                   <tr key={tk} style={{background:rowIdx%2===0?"#F4F9FF":"#EBF3FF",transition:"background 0.1s"}}
                     onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.06)"}
                     onMouseLeave={e=>e.currentTarget.style.background=rowIdx%2===0?"#F4F9FF":"#EBF3FF"}>
-                    {cols.map((c,i)=>(
-                      <td key={i} style={tdStyle}>{c.render(tk,d,m)}</td>
-                    ))}
+                    {cols.map((c,i)=>{
+                      const locked = !isPremium && i>=2;
+                      return (
+                        <td key={i} style={{...tdStyle, filter:locked?"blur(5px)":"none", userSelect:locked?"none":"auto", pointerEvents:locked?"none":"auto"}}>{c.render(tk,d,m)}</td>
+                      );
+                    })}
                     <td style={tdStyle}>
                       <div style={{display:"inline-flex",gap:6,alignItems:"center"}}>
                         <button onClick={()=>toggleFav(tk)}
@@ -19290,6 +19306,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
               })}
             </tbody>
           </table>
+        </div>
         </div>
       )}
 
