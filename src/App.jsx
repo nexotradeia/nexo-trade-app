@@ -20368,8 +20368,76 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         );
       })()}
+      {/* ── ALERTS VIEW ── */}
+      {termTab==="alerts" && (()=>{
+        const ALC={PRECIO:T.grn,"% CAMBIO":T.gold,RSI:T.purp,ORACLE:T.purp,VOLUMEN:T.blue};
+        const AL=[
+          ["AAPL","PRECIO","Pendiente","Disparar cuando > $310.00","Resistencia — toma parcial","Creada hace 2h",true],
+          ["NVDA","PRECIO","Pendiente","Disparar cuando > $220.00","Breakout confirmado","Creada hace 1h",true],
+          ["TSLA","% CAMBIO","Disparada 10:24","Disparar cuando > +5% en 1D","Seguimiento momentum","Hoy 10:24 AM",true],
+          ["META","RSI","Pendiente","Disparar cuando RSI < 30","Entrada en oversold","Creada ayer",true],
+          ["BTC","PRECIO","Pendiente","Disparar cuando < $60,000","Nivel psicológico","Creada hace 3 días",false],
+          ["MSFT","ORACLE","Inactiva","Disparar cuando Score Oracle < 70","","Creada hace 1 semana",false],
+          ["SPY","VOLUMEN","Disparada 09:35","Disparar cuando Volumen > 2x promedio","Señal institucional","Hoy 09:35 AM",true],
+          ["AMZN","PRECIO","Pendiente","Disparar cuando > $250.00","Continuación tendencia","Creada hace 5h",true],
+        ];
+        const stC=(s)=> s.startsWith("Disparada")?T.grn:s==="Inactiva"?T.dim:T.gold;
+        const FILTERS=["Todas","Activas","Disparadas","Inactivas"];
+        const passes=(a)=> alFilter==="Todas"?true: alFilter==="Activas"?a[2].startsWith("Pendiente"): alFilter==="Disparadas"?a[2].startsWith("Disparada"): a[2]==="Inactiva";
+        const list=AL.map((a,i)=>({a,i})).filter(({a})=>passes(a));
+        const COND=[["📈","PRICE >"],["📉","PRICE <"],["🎯","% CHANGE"],["📊","VOLUME"],["🌡️","RSI CROSS"],["🔮","ORACLE AI"]];
+        const HIST=[[T.grn,"TSLA","Subió +5.2% — target alcanzado","+$620","Hoy 10:24"],[T.blue,"SPY","Volumen 2.4x promedio detectado","Info","Hoy 09:35"],[T.grn,"NVDA","Breakout $205 confirmado","+$380","Ayer"]];
+        const Toggle=({on,onClick})=>(<div onClick={onClick} style={{width:34,height:18,borderRadius:9,background:on?"rgba(0,255,135,.3)":T.bg4,border:`1px solid ${on?"rgba(0,255,135,.5)":T.br2}`,position:"relative",cursor:"pointer",flexShrink:0}}><div style={{position:"absolute",top:1,left:on?17:1,width:14,height:14,borderRadius:"50%",background:on?T.grn:T.dim,transition:"left .15s"}}/></div>);
+        return (
+        <div style={{display:"grid",gridTemplateColumns:"360px 1fr",alignItems:"stretch"}}>
+          {/* LEFT LIST */}
+          <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
+              <span style={{...lbl,padding:0}}>Alertas · {AL.filter(a=>a[6]).length} activas</span>
+              <button style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 11px",borderRadius:4,cursor:"pointer"}}>+ Nueva</button>
+            </div>
+            <div style={{display:"flex",gap:6,padding:"10px 14px",borderBottom:`1px solid ${T.br}`}}>{FILTERS.map(f=>(<button key={f} onClick={()=>setAlFilter(f)} style={{padding:"4px 10px",borderRadius:4,fontFamily:MONO,fontSize:10,fontWeight:600,cursor:"pointer",border:"none",background:alFilter===f?"rgba(0,255,135,.12)":"transparent",color:alFilter===f?T.grn:T.dim}}>{f}</button>))}</div>
+            <div>{list.map(({a,i})=>{ const on=alToggles[i]!==undefined?alToggles[i]:a[6]; return (
+              <div key={i} style={{padding:"12px 14px",borderBottom:`1px solid ${T.br}`,borderLeft:`2px solid ${stC(a[2])}`}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:T.txt}}>{a[0]}</span>
+                  <span style={{fontFamily:MONO,fontSize:8,fontWeight:700,color:ALC[a[1]],background:ALC[a[1]]+"1a",border:`1px solid ${ALC[a[1]]}33`,borderRadius:3,padding:"2px 6px"}}>{a[1]}</span>
+                  <span style={{fontFamily:MONO,fontSize:10,color:stC(a[2])}}>{a[2].startsWith("Disparada")?"⚡ ":""}{a[2]}</span>
+                  <span style={{marginLeft:"auto"}}><Toggle on={on} onClick={()=>setAlToggles(t=>({...t,[i]:!on}))}/></span>
+                </div>
+                <div style={{fontFamily:MONO,fontSize:12,color:T.mid}}>{a[3].replace(/(\$[\d,\.]+|<\s*\d+|>\s*[+\d][\d,\.%]*|RSI < 30|2x promedio|Score Oracle < 70)/,m=>m)}</div>
+                {a[4] && <div style={{fontFamily:SANS,fontSize:11,color:T.dim,fontStyle:"italic",marginTop:3}}>"{a[4]}"</div>}
+                <div style={{fontFamily:MONO,fontSize:9,color:T.dim2||T.dim,marginTop:4}}>{a[5]}</div>
+              </div>
+            );})}</div>
+          </div>
+          {/* RIGHT FORM */}
+          <div style={{minWidth:0}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 20px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
+              <span style={{...lbl,padding:0,fontSize:10}}>Crear / Editar Alerta</span>
+              <span style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10}}><span style={{fontSize:8,fontWeight:700,color:T.grn,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:3,padding:"2px 6px"}}>REAL</span><span style={{color:T.mid}}>Conectado a precios en tiempo real</span></span>
+            </div>
+            <div style={{padding:"18px 22px",maxWidth:820}}>
+              <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt,letterSpacing:1,marginBottom:14}}>⚡ NUEVA ALERTA DE PRECIO</div>
+              <div style={{...lbl,marginBottom:8}}>Tipo de condición</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>{COND.map((c,i)=>(<div key={i} style={{background:i===0?"rgba(0,255,135,.06)":T.bg3,border:`1px solid ${i===0?"rgba(0,255,135,.3)":T.br}`,borderRadius:8,padding:"18px 10px",textAlign:"center",cursor:"pointer"}}><div style={{fontSize:22,marginBottom:8}}>{c[0]}</div><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:i===0?T.grn:T.mid,letterSpacing:.5}}>{c[1]}</div></div>))}</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
+                <div><div style={{...lbl,marginBottom:5}}>Símbolo</div><input defaultValue="AAPL" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/></div>
+                <div><div style={{...lbl,marginBottom:5}}>Precio target</div><input defaultValue="310.00" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/></div>
+                <div><div style={{...lbl,marginBottom:5}}>Frecuencia</div><select style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}><option style={{background:T.bg2}}>Una vez</option><option style={{background:T.bg2}}>Cada vez</option><option style={{background:T.bg2}}>Diaria</option></select></div>
+                <div><div style={{...lbl,marginBottom:5}}>Notificación</div><select style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}><option style={{background:T.bg2}}>Push + Email</option><option style={{background:T.bg2}}>Solo Push</option><option style={{background:T.bg2}}>Solo Email</option></select></div>
+              </div>
+              <div style={{marginBottom:16}}><div style={{...lbl,marginBottom:5}}>Nota (opcional)</div><input placeholder="Resistencia clave, considerar toma de ganancias…" style={{width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"}}/></div>
+              <button style={{width:"100%",background:`linear-gradient(90deg,${T.grn2},${T.grn})`,color:T.bg,border:"none",borderRadius:8,padding:"13px",fontFamily:MONO,fontSize:13,fontWeight:800,letterSpacing:1,cursor:"pointer",boxShadow:"0 0 18px rgba(0,255,135,.35)"}}>⚡ CREAR ALERTA</button>
+              <div style={{...lbl,margin:"22px 0 10px",display:"flex",alignItems:"center",gap:6}}>Historial de disparos <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>{HIST.map((h,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"12px 14px"}}><span style={{width:8,height:8,borderRadius:"50%",background:h[0],flexShrink:0}}/><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{h[1]}</div><div style={{fontFamily:SANS,fontSize:11,color:T.mid,marginTop:1}}>{h[2]}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:h[3]==="Info"?T.blue:T.grn}}>{h[3]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{h[4]}</div></div></div>))}</div>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
       {/* ── PLACEHOLDER tabs (en construcción) ── */}
-      {(termTab==="alerts"||termTab==="journal") && (
+      {(termTab==="journal") && (
         <div style={{padding:"80px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}>
           <div style={{fontSize:28,marginBottom:10}}>{termTab==="screener"?"🔍":termTab==="alerts"?"🔔":"📓"}</div>
           <div style={{fontSize:14,color:T.mid,letterSpacing:1}}>{termTab.toUpperCase()} · EN CONSTRUCCIÓN</div>
