@@ -7152,7 +7152,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🚀", label:"IPOs 2026",                                   idx:16},
     {icon:"⛏️", label:isEN?"Commodities":"Commodities",              idx:18},
     {icon:"🔍", label:isEN?"Screener":"Screener",                    idx:17, vip:true},
-    {icon:"💼", label:"Portafolio Oracle IA",            idx:37, vip:true},
+    {icon:"💼", label:"Portafolio Terminal Oracle IA",   idx:37, vip:true},
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
     {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
     {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
@@ -17555,7 +17555,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,vip:true},
   {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
   {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
-  {label:"💼 Portafolio Oracle IA",idx:37,vip:true},
+  {label:"💼 Portafolio Terminal Oracle IA",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
   {label:"🐋 Smart Money",idx:20,vip:true},
@@ -20116,7 +20116,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
 
   if(!isPremium) return(
     <PremiumGate lang={isEN?"en":"es"} icon="💼" onPlans={onNeedPremium}
-      title={isEN?"Portfolio Oracle AI":"Portafolio Oracle IA"}
+      title={isEN?"Portfolio Terminal Oracle AI":"Portafolio Terminal Oracle IA"}
       desc={isEN?"Track your positions, monitor P&L in real time and share your best trades with the community.":"Registra tus posiciones, monitorea tu P&L en tiempo real y comparte tus mejores trades con la comunidad."}
       bullets={isEN?["📈 Stocks, ETFs and crypto","💰 Real-time P&L with live prices","🔮 AI projections & health score","📤 Share positions to the feed"]:["📈 Acciones, ETFs y crypto","💰 P&L en tiempo real con precios live","🔮 Proyecciones IA y health score","📤 Comparte posiciones al feed"]}/>
   );
@@ -24750,7 +24750,7 @@ export default function App(){
             {label:"Smart Money",idx:20,locked:!effectivePremium,icon:"whale"},
             {label:"Wall St. & Capitol",idx:19,locked:!effectivePremium,icon:"capitol"},
             {label:lang==="en"?"Screener":"Screener",idx:36,locked:!effectivePremium,icon:"screener"},
-            {label:lang==="en"?"Portfolio Oracle AI":"Portafolio Oracle IA",idx:37,locked:!effectivePremium,icon:"oracle"},
+            {label:lang==="en"?"Portfolio Terminal Oracle AI":"Portafolio Terminal Oracle IA",idx:37,locked:!effectivePremium,icon:"oracle"},
             {label:"Watchlist",idx:38,icon:"watchlist"},
             {label:lang==="en"?"Global Radar":"Radar Global",idx:44,icon:"globe"},
             {label:lang==="en"?"Alerts":"Alertas",idx:42,icon:"alerts"},
