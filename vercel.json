@@ -27,6 +27,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/", "destination": "/nexotrade-landing-v3.html" },
     { "source": "/((?!api/)(?!.*\\.html$)(?!.*\\.png$)(?!.*\\.svg$)(?!.*\\.ico$)(?!.*\\.txt$).*)", "destination": "/index.html" }
   ],
   "crons": [
