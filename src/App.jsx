@@ -12643,7 +12643,7 @@ const IPOS_2028 = [
   {company:"Databricks Inc",       ticker:"DBRK",  exchange:"NASDAQ",  date:"2027–2028", range:"TBD",     raise:"$2.0B+", sector:"Cloud/AI",    status:"rumored",   valuation:"$62B",   desc:"Plataforma de datos e IA. Valorada en $62B en última ronda privada. Una de las más esperadas en cloud."},
 ];
 
-function IpoCalendarPage() {
+function IpoCalendarPage({ isPremium=false, onNeedPremium }={}) {
   const isEN = (()=>{try{return (localStorage.getItem("nexo-lang")||"en")==="en";}catch{return true;}})();
   const [yearTab, setYearTab] = useState("2026");
   const [filter,  setFilter]  = useState("all");
@@ -12662,6 +12662,7 @@ function IpoCalendarPage() {
   const isReminded = (ipo)=> !!reminders[remKey(ipo)];
   const [remToast, setRemToast] = useState(null);
   const toggleRemind = (ipo)=>{
+    if(!isPremium){ onNeedPremium&&onNeedPremium(); return; }
     const k = remKey(ipo);
     setReminders(prev=>{
       const n={...prev};
@@ -12851,7 +12852,7 @@ function IpoCalendarPage() {
                   </div>
                   <div style={{fontSize:22,fontWeight:900,color:C.accent,lineHeight:1}}>{d===0?(isEN?"Today":"Hoy"):d+"d"}</div>
                   <div style={{fontSize:10,color:C.muted2,marginBottom:8}}>{d===0?(isEN?"goes public":"sale a bolsa"):(isEN?"to debut":"para salir")}</div>
-                  <button onClick={()=>toggleRemind(ip)} style={{width:"100%",padding:"6px 0",borderRadius:8,border:`1.5px solid ${isReminded(ip)?C.bull:C.accent}`,background:isReminded(ip)?C.bullBg:"transparent",color:isReminded(ip)?C.bull:C.accent,fontSize:11,fontWeight:800,cursor:"pointer"}}>{isReminded(ip)?(isEN?"🔔 Reminded":"🔔 Avisado"):(isEN?"🔔 Remind me":"🔔 Avísame")}</button>
+                  <button onClick={()=>toggleRemind(ip)} style={{width:"100%",padding:"6px 0",borderRadius:8,border:`1.5px solid ${isReminded(ip)?C.bull:C.accent}`,background:isReminded(ip)?C.bullBg:"transparent",color:isReminded(ip)?C.bull:C.accent,fontSize:11,fontWeight:800,cursor:"pointer"}}>{!isPremium?(isEN?"🔒 Premium":"🔒 Premium"):isReminded(ip)?(isEN?"🔔 Reminded":"🔔 Avisado"):(isEN?"🔔 Remind me":"🔔 Avísame")}</button>
                 </div>
               ))}
             </div>
@@ -12905,7 +12906,7 @@ function IpoCalendarPage() {
                 {ipo.status!=="trading" && (
                   <button onClick={()=>toggleRemind(ipo)}
                     style={{marginTop:8,padding:"5px 12px",borderRadius:9,border:`1.5px solid ${isReminded(ipo)?C.bull:C.accent}`,background:isReminded(ipo)?C.bullBg:"transparent",color:isReminded(ipo)?C.bull:C.accent,fontSize:11,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>
-                    {isReminded(ipo)?(isEN?"🔔 Reminded":"🔔 Avisado"):(isEN?"🔔 Remind me":"🔔 Avísame")}
+                    {!isPremium?(isEN?"🔒 Premium":"🔒 Premium"):isReminded(ipo)?(isEN?"🔔 Reminded":"🔔 Avisado"):(isEN?"🔔 Remind me":"🔔 Avísame")}
                   </button>
                 )}
               </div>
@@ -18253,11 +18254,12 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   const FAV_KEY = `nexo_watchfav_${user?.id||"guest"}`;
   const [favs, setFavs] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(FAV_KEY)||"[]"); return new Set(Array.isArray(s)?s:[]); }catch{ return new Set(); } });
   useEffect(()=>{ try{ localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); }catch{} },[favs, FAV_KEY]);
-  const toggleFav = (tk)=> setFavs(prev=>{ const n=new Set(prev); n.has(tk)?n.delete(tk):n.add(tk); return n; });
+  const toggleFav = (tk)=>{ if(!isPremium){ onNeedPremium&&onNeedPremium(); return; } setFavs(prev=>{ const n=new Set(prev); n.has(tk)?n.delete(tk):n.add(tk); return n; }); };
 
   // ➕ Traer una acción de la watchlist al Portafolio (local + nube)
   const [portMsg, setPortMsg] = useState(null);
   const addToPortfolio = async (tk) => {
+    if(!isPremium){ onNeedPremium&&onNeedPremium(); return; }
     const d = priceOf(tk);
     const px = (d && d.price) ? d.price : 0;
     const ans = window.prompt(isEN?`How many shares/units of ${tk}? (you can edit later in Portfolio)`:`¿Cuántas acciones/unidades de ${tk}? (puedes ajustarlo luego en el Portafolio)`, "1");
@@ -19259,13 +19261,13 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                     <td style={tdStyle}>
                       <div style={{display:"inline-flex",gap:6,alignItems:"center"}}>
                         <button onClick={()=>toggleFav(tk)}
-                          title={favs.has(tk)?(isEN?`Unpin ${tk}`:`Quitar de favoritas ${tk}`):(isEN?`Pin ${tk} to top`:`Fijar ${tk} arriba`)}
-                          style={{background:favs.has(tk)?"rgba(245,158,11,0.15)":"rgba(148,163,184,0.10)",border:`1px solid ${favs.has(tk)?"rgba(245,158,11,0.45)":"rgba(148,163,184,0.30)"}`,color:favs.has(tk)?"#F59E0B":"#94A3B8",fontSize:14,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}>{favs.has(tk)?"★":"☆"}</button>
+                          title={!isPremium?(isEN?"Premium only — pin favorites":"Solo Premium — fijar favoritas"):(favs.has(tk)?(isEN?`Unpin ${tk}`:`Quitar de favoritas ${tk}`):(isEN?`Pin ${tk} to top`:`Fijar ${tk} arriba`))}
+                          style={{background:favs.has(tk)?"rgba(245,158,11,0.15)":"rgba(148,163,184,0.10)",border:`1px solid ${favs.has(tk)?"rgba(245,158,11,0.45)":"rgba(148,163,184,0.30)"}`,color:favs.has(tk)?"#F59E0B":"#94A3B8",fontSize:14,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}>{!isPremium?"🔒":(favs.has(tk)?"★":"☆")}</button>
                         <button onClick={()=>addToPortfolio(tk)}
-                          title={isEN?`Add ${tk} to Portfolio`:`Añadir ${tk} al Portafolio`}
+                          title={!isPremium?(isEN?"Premium only — add to Portfolio":"Solo Premium — añadir al Portafolio"):(isEN?`Add ${tk} to Portfolio`:`Añadir ${tk} al Portafolio`)}
                           style={{background:"rgba(5,150,105,0.10)",border:"1px solid rgba(5,150,105,0.30)",color:"#059669",fontSize:14,fontWeight:800,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}
                           onMouseEnter={e=>{e.currentTarget.style.background="#059669";e.currentTarget.style.color="#fff";}}
-                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(5,150,105,0.10)";e.currentTarget.style.color="#059669";}}>＋</button>
+                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(5,150,105,0.10)";e.currentTarget.style.color="#059669";}}>{!isPremium?"🔒":"＋"}</button>
                         <button onClick={()=>removeTicker(tk)}
                           title={isEN?`Remove ${tk}`:`Quitar ${tk}`}
                           style={{background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.30)",color:"#EF4444",fontSize:14,fontWeight:800,lineHeight:1,cursor:"pointer",width:28,height:28,borderRadius:8,display:"inline-flex",alignItems:"center",justifyContent:"center"}}
@@ -24554,7 +24556,7 @@ export default function App(){
     if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} lang={lang}/>;
     if(page===15) return <DividendCalendarPage lang={lang}/>;
-    if(page===16) return <IpoCalendarPage/>;
+    if(page===16) return <IpoCalendarPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
     if(page===35) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} initialTab="congress"/>;
