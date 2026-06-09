@@ -25288,7 +25288,7 @@ export default function App(){
   };
 
   const [showLanding, setShowLanding] = useState(false); // Feed visible siempre, sin obligar registro
-  const [emailGateDone, setEmailGateDone] = useState(()=>{try{return localStorage.getItem("nexo-email-gate-done")==="1";}catch{return true;}});
+  const [emailGateDone, setEmailGateDone] = useState(true); // EmailGate removed — real landing is at /
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
