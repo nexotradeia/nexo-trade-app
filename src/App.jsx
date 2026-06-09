@@ -19885,6 +19885,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [chPer, setChPer] = useState("1D");
   const [chMA, setChMA] = useState(true);
   const [chVol, setChVol] = useState(true);
+  const [chSel, setChSel] = useState(null); // ticker seleccionado para CHARTS (null = top position)
+  const [ovRange, setOvRange] = useState("1M"); // rango del gráfico overview (PORTFOLIO)
   const [scMarket, setScMarket] = useState("NYSE + NASDAQ");
   const [scSector, setScSector] = useState("Todos");
   const [scQuery, setScQuery] = useState("");
@@ -20223,14 +20225,26 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const best=sortedRows[0];
     const ytdPct=totalPnlPct;
     const avatarBg=(tk)=>{let h=0;for(let i=0;i<tk.length;i++)h=(h*31+tk.charCodeAt(i))>>>0;const arr=["#1e3a28","#1e2a3a","#1a2a3e","#2a1e38","#1a2e2a","#2a2a1a","#1e2e1e","#2e2218","#2a1e1a"];return arr[h%arr.length];};
-    // chart synthetic price path of top position
-    const cp=best||{entry:100,price:100,tk:"—"};
-    const N=32, ser=[]; { const h=(()=>{let x=0;for(let i=0;i<cp.tk.length;i++)x=(x*31+cp.tk.charCodeAt(i))>>>0;return x;})(); for(let i=0;i<=N;i++){const t=i/N; const base=cp.entry+(cp.price-cp.entry)*Math.pow(t,0.92); const wig=i===0||i===N?1:1+((((h>>(i%11))%9)-4)/120); ser.push(base*wig);} }
+    // chart synthetic price path of selected position (fallback: top position)
+    const cpRow=(chSel&&sortedRows.find(r=>r.tk===chSel))||best;
+    const cp=cpRow||{entry:100,price:100,tk:"—"};
+    // ── etiquetas del eje X según timeframe ──
+    const tfLabels=(rk,K=6)=>{ const out=[],now=new Date();
+      if(rk==="1D"||rk==="1m"||rk==="5m"||rk==="15m"||rk==="1H"){ const span={"1D":6.5,"1H":3,"15m":1.2,"5m":0.5,"1m":0.12}[rk]||6.5; for(let i=0;i<K;i++){ const h=16-(1-i/(K-1))*span; const hh=Math.floor(h); const mm=Math.round((h-hh)*60); out.push(hh+":"+String(mm).padStart(2,"0")); } return out; }
+      const span={"5D":5,"1W":7,"1M":30,"3M":90,"6M":180,"1A":365}[rk]||30;
+      for(let i=0;i<K;i++){ const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-Math.round((1-i/(K-1))*span)); out.push(rk==="5D"||rk==="1W"?d.toLocaleDateString("en-US",{weekday:"short"}):(rk==="3M"||rk==="6M"||rk==="1A")?d.toLocaleDateString("en-US",{month:"short"}):d.getDate()+" "+d.toLocaleDateString("en-US",{month:"short"})); }
+      return out; };
+    // cuánto del recorrido entry→precio cae dentro de la ventana (1=todo)
+    const TF_SHARE={"1D":0.05,"5D":0.12,"1M":0.30,"3M":0.55,"6M":0.78,"1A":1, "1m":0.01,"5m":0.02,"15m":0.04,"1H":0.10,"1W":0.16};
+    const tfShare=TF_SHARE[ovRange]||0.3;
+    const ovStart=cp.price-(cp.price-cp.entry)*tfShare;
+    const ovN={"1D":24,"5D":20,"1M":32,"3M":34,"6M":36,"1A":28}[ovRange]||32;
+    const N=ovN, ser=[]; { const h=(()=>{let x=0;for(let i=0;i<cp.tk.length;i++)x=(x*31+cp.tk.charCodeAt(i))>>>0;return x+N*7;})(); const volF={"1D":0.6,"5D":0.8,"1M":1,"3M":1.4,"6M":1.8,"1A":2.4}[ovRange]||1; for(let i=0;i<=N;i++){const t=i/N; const base=ovStart+(cp.price-ovStart)*Math.pow(t,0.92); const wig=i===0||i===N?1:1+((((h>>(i%11))%9)-4)/120)*volF; ser.push(base*wig);} }
     const CW=900,CH=200,CPL=46,CPR=58,CPT=14,CPB=22; const cmn=Math.min(...ser)*0.99,cmx=Math.max(...ser)*1.01;
     const cx=(i)=>CPL+(i/N)*(CW-CPL-CPR), cy=(v)=>CH-CPB-((v-cmn)/((cmx-cmn)||1))*(CH-CPT-CPB);
     const cline=ser.map((v,i)=>cx(i).toFixed(1)+","+cy(v).toFixed(1)).join(" ");
     const sig=(r)=> r.pnlPct>40?["▲ BUY",T.grn,"rgba(0,255,135,.12)"] : r.pnlPct<0?["▼ SELL",T.red,"rgba(255,61,90,.1)"] : r.today>1?["▲ BUY",T.grn,"rgba(0,255,135,.12)"] : ["◆ HOLD",T.gold,"rgba(240,180,41,.1)"];
-    const monthsLbl=(()=>{const a=[];const now=new Date();for(let i=6;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i*5);a.push(d.getDate()+" "+d.toLocaleDateString("en-US",{month:"short"}));}return a;})();
+    const monthsLbl=tfLabels(ovRange,7);
     // ilustrativos
     const TICK=[["AAPL","$301.54","+1.89",1],["NVDA","$208.30","+2.41",1],["MSFT","$412.80","+0.92",1],["META","$589.10","-0.87",0],["TSLA","$408.70","+4.53",1],["AMZN","$244.80","+1.24",1],["BTC","$63,844","+1.92",1],["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["GOLD","$2,318","+0.38",1]];
     const WL=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["GLD","$186.40","+0.38",1],["TLT","$93.20","-0.52",0]];
@@ -20277,7 +20291,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       </div>
       {/* LAYOUT — PORTFOLIO */}
       {termTab==="portfolio" && (
-      <div style={{display:"grid",gridTemplateColumns:"210px 1fr 280px",alignItems:"stretch"}}>
+      <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"210px 1fr 280px",alignItems:"stretch"}}>
         {/* LEFT */}
         <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
           <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
@@ -20329,7 +20343,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <span style={{fontFamily:MONO,fontSize:20,fontWeight:700,color:cp.price>=cp.entry?T.grn:T.red,letterSpacing:-.5,textShadow:cp.price>=cp.entry?"0 0 16px rgba(0,255,135,.3)":"none"}}>${(cp.price||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
                 <span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:cp.pnlPct>=0?T.grn:T.red}}>{cp.pnlPct>=0?"▲ +":"▼ "}{(cp.pnlPct||0).toFixed(2)}%</span>
               </div>
-              <div style={{display:"flex",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:4,padding:2,gap:1}}>{["1D","5D","1M","3M","6M","1A"].map((p,i)=>(<span key={i} style={{padding:"4px 10px",borderRadius:3,fontFamily:MONO,fontSize:10,fontWeight:600,color:i===2?T.grn:T.dim,background:i===2?"rgba(0,255,135,.12)":"transparent",cursor:"pointer"}}>{p}</span>))}</div>
+              <div style={{display:"flex",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:4,padding:2,gap:1}}>{["1D","5D","1M","3M","6M","1A"].map((p,i)=>{ const a=ovRange===p; return (<span key={i} onClick={()=>setOvRange(p)} style={{padding:"4px 10px",borderRadius:3,fontFamily:MONO,fontSize:10,fontWeight:600,color:a?T.grn:T.dim,background:a?"rgba(0,255,135,.12)":"transparent",cursor:"pointer",transition:"all .12s"}}>{p}</span>); })}</div>
             </div>
             <div style={{padding:0}}>
               <svg viewBox={"0 0 "+CW+" "+CH} style={{width:"100%",height:"auto",display:"block",background:T.bg2}}>
@@ -20408,14 +20422,18 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       )}
       {/* ── CHARTS VIEW ── */}
       {termTab==="charts" && (()=>{
-        const ohlv=[["O","$295.20",T.mid],["H","$303.10",T.grn],["L","$293.80",T.red],["V","64.2M",T.mid]];
+        const _o=cp.entry||0,_p=cp.price||0,_hi=Math.max(_o,_p)*1.008,_lo=Math.min(_o,_p)*0.992;
+        const _f2=(v)=>"$"+(v||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+        const ohlv=[["O",_f2(_o),T.mid],["H",_f2(_hi),T.grn],["L",_f2(_lo),T.red],["V","—",T.mid]];
         const STATS=[["Apertura","$295.20",T.txt],["Máximo 52S","$310.80",T.grn],["Mínimo 52S","$164.08",T.red],["Volumen hoy","64.2M",T.txt],["Vol. prom 10D","58.4M",T.txt],["Market Cap","$4.58T",T.txt],["P/E Ratio","31.4x",T.txt],["EPS","$9.59",T.txt],["Beta","1.3",T.txt],["Dividend Yield","0.44%",T.txt]];
         const INDS=[["RSI (14)","68.2","Fuerza",T.grn],["MACD","+2.14","Alcista ↑",T.grn],["BB Upper","$308","Alejando",T.gold],["BB Lower","$294","Soporte",T.blue],["MA 20","$296","Por encima ✓",T.grn],["MA 50","$281","Por encima ✓",T.grn],["Stoch RSI","0.82","Sobrecomprado",T.gold],["ATR (14)","$4.82","Vol. normal",T.mid]];
         const LVLS=[["Target Oracle","$340",T.grn],["Resistencia","$308",T.gold],["Soporte 1","$288",T.blue],["Soporte 2","$264",T.blue],["Stop sugerido","$281",T.red]];
         const IDX=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["DXY","104.32","-0.24",0]];
         const CRY=[["BTC","$63,844","+1.92",1],["ETH","$3,482","-0.54",0]];
-        const NC=46, base=cp.entry||100, end=cp.price||100;
-        const cdl=(()=>{ const a=[]; let pr=base; for(let i=0;i<NC;i++){ const t=i/(NC-1); const tgt=base+(end-base)*Math.pow(t,0.9); const n=Math.sin(i*1.3)*0.6+Math.cos(i*0.7)*0.4; const o=pr; const c=o+(tgt-o)*0.55+n*end*0.004; const hi=Math.max(o,c)+Math.abs(n)*end*0.006+end*0.0014; const lo=Math.min(o,c)-Math.abs(n)*end*0.006-end*0.0014; a.push({o,c,hi,lo,vol:40+Math.abs(n)*34+(i%7)*3,up:c>=o}); pr=c; } return a; })();
+        const end=cp.price||100; const cShare=(TF_SHARE[chPer]!=null?TF_SHARE[chPer]:0.5); const base=end-((end-(cp.entry||100))*cShare);
+        const NC={"1m":40,"5m":42,"15m":44,"1H":46,"1D":48,"1W":40}[chPer]||46;
+        const cVol={"1m":0.5,"5m":0.7,"15m":0.85,"1H":1,"1D":1.25,"1W":1.6}[chPer]||1;
+        const cdl=(()=>{ const a=[]; let pr=base; for(let i=0;i<NC;i++){ const t=i/(NC-1); const tgt=base+(end-base)*Math.pow(t,0.9); const n=(Math.sin(i*1.3)*0.6+Math.cos(i*0.7)*0.4)*cVol; const o=pr; const c=o+(tgt-o)*0.55+n*end*0.004; const hi=Math.max(o,c)+Math.abs(n)*end*0.006+end*0.0014; const lo=Math.min(o,c)-Math.abs(n)*end*0.006-end*0.0014; a.push({o,c,hi,lo,vol:40+Math.abs(n)*34+(i%7)*3,up:c>=o}); pr=c; } return a; })();
         const W=920,H=430,PL=8,PR=66,PT=18,MH=320,VT=350,VH=64;
         const minP=Math.min(...cdl.map(c=>c.lo))*0.999, maxP=Math.max(...cdl.map(c=>c.hi))*1.001;
         const xC=(i)=>PL+(i+0.5)/NC*(W-PL-PR), yP=(v)=>PT+(1-(v-minP)/((maxP-minP)||1))*MH;
@@ -20429,12 +20447,12 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const btn=(active)=>({padding:"4px 10px",borderRadius:3,fontFamily:MONO,fontSize:10,fontWeight:600,cursor:"pointer",border:active?`1px solid rgba(0,255,135,.3)`:`1px solid ${T.br}`,background:active?"rgba(0,255,135,.12)":"transparent",color:active?T.grn:T.dim,letterSpacing:.5});
         const sideRow=(w,i)=>(<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"7px 14px",fontFamily:MONO,fontSize:11,cursor:"pointer"}}><span style={{fontWeight:600,color:T.txt}}>{w[0]}</span><div style={{textAlign:"right"}}><div style={{color:w[3]?T.grn:T.red,fontSize:11,fontWeight:600}}>{w[3]?"▲":"▼"}{w[2].replace("-","").replace("+","")}%</div><div style={{color:T.mid,fontSize:10}}>{w[1]}</div></div></div>);
         return (
-        <div style={{display:"grid",gridTemplateColumns:"210px 1fr 300px",alignItems:"stretch"}}>
+        <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"210px 1fr 300px",alignItems:"stretch"}}>
           {/* LEFT */}
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
               <div style={{...lbl,padding:"0 14px 8px"}}>Mis Posiciones</div>
-              {sortedRows.length? sortedRows.map((r,i)=>(<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,background:i===0?"rgba(0,255,135,.05)":"transparent",cursor:"pointer"}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{r.tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:r.today>=0?T.grn:T.red}}>{(r.today>=0?"+":"")+r.today.toFixed(2)}%</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div></div>)) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>Sin posiciones</div>}
+              {sortedRows.length? sortedRows.map((r,i)=>{ const act=chSel?r.tk===chSel:i===0; return (<div key={i} onClick={()=>setChSel(r.tk)} title={"Ver gráfico de "+r.tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.grn}`:"3px solid transparent",background:act?"rgba(0,255,135,.08)":"transparent",cursor:"pointer",transition:"background .12s"}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.grn:T.txt}}>{r.tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:r.today>=0?T.grn:T.red}}>{(r.today>=0?"+":"")+r.today.toFixed(2)}%</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>${r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim}}>Sin posiciones</div>}
             </div>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Índices</div>{IDX.map(sideRow)}</div>
             <div style={{padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Crypto</div>{CRY.map(sideRow)}</div>
@@ -20465,7 +20483,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <rect x={W-PR+1} y={yP(last.c)-9} width={PR-2} height={18} fill={T.bg3} stroke={T.grn} strokeWidth="1"/>
                 <text x={W-PR+1+(PR-2)/2} y={yP(last.c)+4} textAnchor="middle" fontFamily={MONO} fontSize="10" fontWeight="700" fill={T.grn}>${last.c.toFixed(2)}</text>
                 {chVol && cdl.map((c,i)=>{ const bh=(c.vol/maxVol)*VH; return <rect key={i} x={xC(i)-bw/2} y={VT+VH-bh} width={bw} height={bh} fill={c.up?"rgba(0,255,135,.28)":"rgba(255,61,90,.24)"}/>; })}
-                {["Abr","Abr 15","May","May 15","Jun","Jun 8"].map((mm,i)=><text key={i} x={PL+(i/5)*(W-PL-PR)} y={H-4} fontFamily={MONO} fontSize="8" fill={T.dim} textAnchor="middle">{mm}</text>)}
+                {tfLabels(chPer,6).map((mm,i)=><text key={i} x={PL+(i/5)*(W-PL-PR)} y={H-4} fontFamily={MONO} fontSize="8" fill={T.dim} textAnchor="middle">{mm}</text>)}
               </svg>
             </div>
           </div>
@@ -20506,7 +20524,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const selStyle={background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"6px 9px",color:T.txt,fontFamily:MONO,fontSize:11,outline:"none",cursor:"pointer"};
         const nPos=uni.filter(r=>r.inPos).length, nWl=uni.length-nPos;
         return (
-        <div style={{display:"grid",gridTemplateColumns:"1fr 280px",alignItems:"stretch"}}>
+        <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"1fr 280px",alignItems:"stretch"}}>
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
               {[["Origen",scOrigin,setScOrigin,["Todas","Portfolio","Watchlist"]],["Filtro",scReturn,setScReturn,["Cualquiera","Ganadoras (hoy)","Perdedoras (hoy)"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
@@ -20568,7 +20586,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const relF=(ts)=>{ if(!ts)return ""; const d=Math.floor((Date.now()-ts)/1000); if(d<60)return "ahora"; if(d<3600)return Math.floor(d/60)+"m"; if(d<86400)return Math.floor(d/3600)+"h"; return Math.floor(d/86400)+"d"; };
         const inStyle={width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"};
         return (
-        <div style={{display:"grid",gridTemplateColumns:"360px 1fr",alignItems:"stretch"}}>
+        <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"360px 1fr",alignItems:"stretch"}}>
           {/* LEFT — lista real */}
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
@@ -20644,7 +20662,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const openNew=()=>{ setJrForm({date:todayISO,title:"",summary:"",pnl:"",trades:"",wins:"",errors:""}); setJrEmotion("ENFOCADO"); setJrShow(true); };
         const ST=[["Total P&L",m$(totalPnlJ),totalPnlJ>=0?T.grn:T.red],["Entradas",String(jrItems.length),T.txt],["Trades",String(totalTrades),T.txt],["Win Rate",totalTrades?winRate.toFixed(0)+"%":"—",T.grn],["Best día",jrItems.length?m$(best):"—",T.grn],["Peor día",jrItems.length?m$(worst):"—",T.red]];
         return (
-        <div style={{display:"grid",gridTemplateColumns:"320px 1fr 300px",alignItems:"stretch"}}>
+        <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"320px 1fr 300px",alignItems:"stretch"}}>
           {/* LEFT */}
           <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${T.br}`}}>
@@ -20817,7 +20835,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",borderBottom:`1px solid ${T.br}`}}>
             {KPI.map((k,i)=>(<div key={i} style={{padding:"14px 16px",borderRight:i<3?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:19,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:T.dim,marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
+          <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
             <div style={{minWidth:0}}>
               {divItems.length>0 && <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.br}`}}>
                 <div style={{...lbl,marginBottom:10}}>Calendario de Pagos · próximos 6 meses</div>
@@ -24732,6 +24750,13 @@ export default function App(){
 
         /* ── PORTFOLIO TRACKER summary strip ── */
         .nexo-portfolio-strip { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* ── TERMINAL ORACLE IA — paneles de columnas fijas (210px/280px/300px…)
+              se apilan en 1 columna en móvil para no desbordar Safari iPhone.
+              Bordes laterales → inferior para que el stack se vea limpio ── */
+        .nexo-term-grid { grid-template-columns: 1fr !important; }
+        .nexo-term-grid > div { border-left: none !important; border-right: none !important; }
+        .nexo-term-grid > div:not(:last-child) { border-bottom: 1px solid #1e2a38 !important; }
 
         /* ── WIN STREAK TRACKER — 2 col → 1 col ── */
         .nexo-winstreak-layout { grid-template-columns: 1fr !important; }
