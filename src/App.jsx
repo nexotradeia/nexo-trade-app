@@ -19962,29 +19962,60 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const totalPnlPct = totalCost>0 ? (totalPnl/totalCost*100) : 0;
 
   // ── Importar posiciones desde archivo (CSV / TXT / Excel) ──
-  const ingestRows = (rows) => {
-    // rows: array de arrays (celdas). Detecta encabezado y mapea ticker/acciones/precio.
-    const clean = rows.map(r=>r.map(c=>(c==null?"":String(c).trim()))).filter(r=>r.some(c=>c!==""));
-    if(!clean.length){ setImpMsg({type:"err",text:"El archivo está vacío."}); return; }
-    let header=null, start=0;
-    const h0=clean[0].map(c=>c.toLowerCase());
-    const hasHeader = h0.some(c=>/tick|symbol|s[ií]mbolo|acc|share|qty|cant|precio|price|entry|costo/.test(c));
-    let iT=0,iS=1,iP=2;
-    if(hasHeader){
-      header=h0; start=1;
-      const find=(re)=>header.findIndex(c=>re.test(c));
-      const t=find(/tick|symbol|s[ií]mbolo/); const s=find(/acc|share|qty|cant|unid/); const p=find(/precio|price|entry|costo|avg/);
-      if(t>=0)iT=t; if(s>=0)iS=s; if(p>=0)iP=p;
+  // Parser de números tolerante: maneja "$1,234.56" (US), "1.234,56" (EU), "154,00" (coma decimal), espacios.
+  const numVal = (raw) => {
+    if(raw==null) return NaN;
+    let s=String(raw).trim().replace(/[^0-9.,\-]/g,"");
+    if(s===""||s==="-") return NaN;
+    const hasDot=s.includes("."), hasCom=s.includes(",");
+    if(hasDot&&hasCom){
+      if(s.lastIndexOf(",")>s.lastIndexOf(".")) s=s.replace(/\./g,"").replace(",","."); // 1.234,56
+      else s=s.replace(/,/g,""); // 1,234.56
+    } else if(hasCom){
+      const p=s.split(",");
+      s = (p.length===2 && p[1].length<=2) ? s.replace(",",".") : s.replace(/,/g,"");
     }
-    const parsed=[];
+    const n=parseFloat(s); return isNaN(n)?NaN:n;
+  };
+  const ingestRows = (rows) => {
+    let clean = rows.map(r=>r.map(c=>(c==null?"":String(c).trim()))).filter(r=>r.some(c=>c!==""));
+    // filas de una sola celda con espacios → dividir (ej "AAPL 10 154")
+    clean = clean.map(r=> (r.length===1 && /\s/.test(r[0])) ? r[0].split(/\s+/) : r);
+    if(!clean.length){ setImpMsg({type:"err",text:"El archivo está vacío."}); return; }
+    const h0=clean[0].map(c=>c.toLowerCase());
+    const hasHeader = h0.some(c=>/tick|symbol|s[ií]mbol|acc|share|qty|cant|unid|precio|price|entry|costo|avg/.test(c));
+    let iT=-1,iS=-1,iP=-1, start=0;
+    if(hasHeader){
+      start=1;
+      const find=(re)=>h0.findIndex(c=>re.test(c));
+      iT=find(/tick|symbol|s[ií]mbol/); iS=find(/acc|share|qty|cant|unid/); iP=find(/precio|price|entry|costo|avg/);
+    }
+    const body=clean.slice(start);
+    const ncols=Math.max(1,...body.map(r=>r.length));
+    if(iT<0){ // columna más "texto" (no numérica) = ticker
+      let best=0,bestScore=-1;
+      for(let c=0;c<ncols;c++){ let sc=0; body.forEach(r=>{ const v=r[c]||""; if(v && /[A-Za-z]/.test(v) && isNaN(numVal(v))) sc++; }); if(sc>bestScore){bestScore=sc;best=c;} }
+      iT=best;
+    }
+    const numCols=[];
+    for(let c=0;c<ncols;c++){ if(c===iT) continue; let cnt=0; body.forEach(r=>{ if(!isNaN(numVal(r[c]))) cnt++; }); if(cnt>0) numCols.push(c); }
+    if(iS<0) iS = numCols.length?numCols[0]:iT+1;
+    if(iP<0){ const alt=numCols.find(c=>c!==iS); iP = (alt!=null)?alt:iS+1; }
+    const parsed=[]; let sawTicker=0;
     for(let i=start;i<clean.length;i++){
       const r=clean[i];
       const tk=(r[iT]||"").toUpperCase().replace(/[^A-Z0-9.\-]/g,"");
-      const sh=parseFloat(String(r[iS]||"").replace(/[, ]/g,""));
-      const ep=parseFloat(String(r[iP]||"").replace(/[$, ]/g,""));
+      if(tk) sawTicker++;
+      const sh=numVal(r[iS]); const ep=numVal(r[iP]);
       if(tk && sh>0 && ep>0) parsed.push({ticker:tk,shares:sh,entryPrice:ep});
     }
-    if(!parsed.length){ setImpMsg({type:"err",text:"No encontré filas válidas. Formato: Ticker, Acciones, Precio (ej: AAPL,10,154)."}); return; }
+    if(!parsed.length){
+      const sample=((clean[start]||clean[0]||[]).join(" | ")).slice(0,64);
+      setImpMsg({type:"err",text: sawTicker
+        ? `Leí ${clean.length-start} fila(s) pero faltan Acciones y/o Precio válidos. El Portfolio necesita 3 columnas: Ticker, Acciones, Precio. Tu primera fila: "${sample}". (Para solo símbolos usa la Watchlist.)`
+        : `No pude leer columnas. Usa 3 columnas: Ticker, Acciones, Precio — ej: AAPL,10,154` });
+      return;
+    }
     setPositions(prev=>{
       const map={}; prev.forEach(p=>{map[p.ticker.toUpperCase()]=p;});
       parsed.forEach(np=>{
@@ -19997,8 +20028,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     setImpMsg({type:"ok",text:`✓ ${parsed.length} ${parsed.length===1?"posición importada":"posiciones importadas"}.`});
   };
   const parseCSV = (text) => {
-    const sep = (text.split("\n")[0].match(/;/g)||[]).length > (text.split("\n")[0].match(/,/g)||[]).length ? ";" : (text.includes("\t")&&!text.includes(",")?"\t":",");
-    return text.replace(/\r/g,"").split("\n").map(l=>l.split(sep));
+    const first=text.split("\n")[0]||"";
+    const sep = (first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length ? ";" : (text.includes("\t")&&!first.includes(",")?"\t":",");
+    const splitLine=(line)=>{ const out=[]; let cur="",q=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; } else if(ch===sep && !q){ out.push(cur); cur=""; } else cur+=ch; } out.push(cur); return out; };
+    return text.replace(/\r/g,"").split("\n").map(splitLine);
   };
   const importFile = (file) => {
     if(!file){ return; }
