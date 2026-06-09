@@ -961,7 +961,7 @@ async function renderAdmin(){
   document.getElementById('mainContent').innerHTML=`
     <div class="sec-hdr">
       <div class="sec-title"><div class="dot"></div>All Affiliates</div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--dim)">Pending: <strong style="color:var(--gold)">$${totalPending.toFixed(0)}</strong></div>
+      <button style="padding:8px 18px;border-radius:9px;border:none;background:var(--grn);color:var(--bg);font-size:12px;font-weight:800;cursor:pointer" onclick="showCreateAffiliateForm()">+ Create Affiliate</button>
     </div>
     <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
       <div class="kpi grn"><div class="kpi-l">Total affiliates</div><div class="kpi-v grn">${affiliates.length}</div><div class="kpi-s">registered</div></div>
@@ -991,6 +991,120 @@ async function renderAdmin(){
       </div>
     `).join('')}
   `;
+}
+
+/* CREATE AFFILIATE (admin) */
+function showCreateAffiliateForm(){
+  document.getElementById('mainContent').innerHTML=`
+    <div class="sec-hdr">
+      <div class="sec-title"><div class="dot"></div>Create Affiliate</div>
+      <button style="padding:7px 16px;border-radius:8px;border:1px solid var(--br2);background:var(--bg3);color:var(--mid);font-size:12px;font-weight:600;cursor:pointer" onclick="renderAdmin()">← Back</button>
+    </div>
+    <div class="card">
+      <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-field">
+          <div class="fl">Full name *</div>
+          <input class="fi" id="ca-name" placeholder="María García">
+        </div>
+        <div class="form-field">
+          <div class="fl">Username *</div>
+          <input class="fi" id="ca-username" placeholder="mariagarcia" oninput="updateCode()">
+        </div>
+        <div class="form-field">
+          <div class="fl">Email *</div>
+          <input class="fi" id="ca-email" type="email" placeholder="maria@email.com">
+        </div>
+        <div class="form-field">
+          <div class="fl">Platform *</div>
+          <select class="fi" id="ca-platform">
+            <option value="">Select platform…</option>
+            <option>instagram</option><option>tiktok</option><option>youtube</option>
+            <option>twitter</option><option>facebook</option><option>linkedin</option><option>other</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <div class="fl">Followers</div>
+          <input class="fi" id="ca-followers" type="number" placeholder="10000" oninput="updateTier()">
+        </div>
+        <div class="form-field">
+          <div class="fl">Referral code</div>
+          <input class="fi" id="ca-code" placeholder="CODE20" style="font-family:var(--mono);text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-field">
+          <div class="fl">Commission %</div>
+          <input class="fi" id="ca-comm" type="number" value="20" min="5" max="50">
+        </div>
+        <div class="form-field">
+          <div class="fl">Tier</div>
+          <select class="fi" id="ca-tier">
+            <option value="nano">Nano (&lt;5k)</option>
+            <option value="micro" selected>Micro (5k–20k)</option>
+            <option value="mid">Mid (20k–100k)</option>
+            <option value="macro">Macro (100k–500k)</option>
+            <option value="mega">Mega (500k+)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <div class="fl">PayPal email</div>
+          <input class="fi" id="ca-paypal" placeholder="paypal@email.com">
+        </div>
+        <div class="form-field">
+          <div class="fl">Status</div>
+          <select class="fi" id="ca-status">
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <div style="padding:0 24px 24px;display:flex;gap:12px;align-items:center">
+        <button style="padding:12px 28px;border-radius:10px;border:none;background:var(--grn);color:var(--bg);font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 3px 14px var(--grn-glow)" onclick="createAffiliate()">Create affiliate →</button>
+        <span id="ca-msg" style="font-size:13px;color:var(--mid)"></span>
+      </div>
+    </div>
+  `;
+}
+
+function updateCode(){
+  const u=document.getElementById('ca-username')?.value.replace('@','').trim().toUpperCase().slice(0,8);
+  const el=document.getElementById('ca-code');
+  if(el&&u)el.value=u+'20';
+}
+
+function updateTier(){
+  const f=parseInt(document.getElementById('ca-followers')?.value)||0;
+  const tier=f>=500000?'mega':f>=100000?'macro':f>=20000?'mid':f>=5000?'micro':'nano';
+  const comm=tier==='mega'?30:tier==='macro'?28:tier==='mid'?25:20;
+  const ts=document.getElementById('ca-tier');const cs=document.getElementById('ca-comm');
+  if(ts)ts.value=tier;if(cs)cs.value=comm;
+}
+
+async function createAffiliate(){
+  const name    = document.getElementById('ca-name').value.trim();
+  const username= document.getElementById('ca-username').value.replace('@','').trim();
+  const email   = document.getElementById('ca-email').value.trim().toLowerCase();
+  const platform= document.getElementById('ca-platform').value;
+  const followers=parseInt(document.getElementById('ca-followers').value)||0;
+  const code    = document.getElementById('ca-code').value.trim().toUpperCase();
+  const comm    = parseInt(document.getElementById('ca-comm').value)||20;
+  const tier    = document.getElementById('ca-tier').value;
+  const paypal  = document.getElementById('ca-paypal').value.trim();
+  const status  = document.getElementById('ca-status').value;
+  const msg     = document.getElementById('ca-msg');
+
+  if(!name||!email||!platform||!code){msg.textContent='Please fill name, email, platform and code.';msg.style.color='var(--red)';return;}
+
+  msg.textContent='Creating…';msg.style.color='var(--mid)';
+
+  if(!sb){msg.textContent='No Supabase connection.';msg.style.color='var(--red)';return;}
+  const{error}=await sb.from('affiliates').insert({
+    name,username,email,referral_code:code,platform,followers,tier,
+    commission_pct:comm,paypal_email:paypal||null,status,
+    total_clicks:0,total_signups:0,total_paying:0,
+    total_earned:0,balance_pending:0,total_paid_out:0,
+    created_at:new Date().toISOString()
+  });
+  if(error){msg.textContent='Error: '+error.message;msg.style.color='var(--red)';}
+  else{showToast('✓ Affiliate created: '+name);renderAdmin();}
 }
 
 /* ADMIN PAYOUTS */
