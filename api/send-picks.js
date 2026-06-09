@@ -3,9 +3,9 @@
 // Queries newsletter_subscribers + sends weekly email via Brevo
 // Called by the scheduled task every Monday at 8am
 
-// newsletter_subscribers lives in the client-side Supabase project
-const SUPABASE_URL  = "https://zzqejwrebadrjbmguvno.supabase.co";
-const SUPABASE_KEY  = process.env.SUPABASE_SERVICE_KEY2 || "sb_publishable__kx_ICnRyfI2eavfCLfr4A_-rclY_pQ";
+// newsletter_subscribers lives in the main Supabase project (same as App.jsx)
+const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
+const SUPABASE_KEY  = process.env.SUPABASE_SERVICE_KEY || "sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl";
 const BREVO_KEY     = process.env.BREVO_API_KEY;
 const API_SECRET    = process.env.SUBSCRIBERS_SECRET || "NEXO_PICKS_2026";
 const SENDER_EMAIL  = "info@nexotradeia.com";
