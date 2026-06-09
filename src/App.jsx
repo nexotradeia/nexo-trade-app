@@ -24731,7 +24731,7 @@ export default function App(){
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event, session)=>{
       if(event==="SIGNED_OUT"){
         saveUser(null);
-        setShowLanding(true);
+        window.location.href = '/';
         return;
       }
       if(session?.user && (event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="INITIAL_SESSION")){
