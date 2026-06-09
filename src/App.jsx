@@ -17262,23 +17262,9 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
 
   const asset = assets[assetIdx] || assets[0];
 
-  // Cargar monedas disponibles dinámicamente desde Deribit
-  useEffect(()=>{
-    fetch("https://www.deribit.com/api/v2/public/get_currencies")
-      .then(r=>r.json())
-      .then(data=>{
-        const STABLE = ["USDC","USDT","EURR","STETH","CBETH"];
-        const list = (data.result||[])
-          .filter(c=>!STABLE.includes(c.currency))
-          .map(c=>({
-            sym:c.currency,
-            idx:`${c.currency.toLowerCase()}_usd`,
-            ...(COLOR_MAP[c.currency]||{color:"#64748b",emoji:"●"}),
-          }));
-        if(list.length>0) setAssets(list);
-      })
-      .catch(()=>{}); // mantiene defaults si falla
-  },[]);
+  // Only BTC, ETH, SOL have real options markets on Deribit
+  // (dynamic API loading returned exotic tokens like USYC, PAXG, BUIDL with no data)
+  // DEFAULT_ASSETS is already correct — no dynamic override needed
 
   function parseExpiry(str) {
     try {
@@ -17641,7 +17627,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
             )}
             {/* Greeks legend */}
             <div style={{marginTop:14,display:"flex",flexWrap:"wrap",gap:16,padding:"10px 0",borderTop:"1px solid rgba(255,255,255,0.06)"}}>
-              {[["OI","Open Interest — contratos abiertos"],["IV%","Volatilidad implícita"],["Delta","Sensibilidad al precio del spot"],["Bid/Ask","Precio de compra / venta"]].map(([k,v])=>(
+              {[["OI","Open Interest — open contracts"],["IV%","Implied volatility"],["Delta","Sensitivity to spot price"],["Bid/Ask","Buy / sell price"]].map(([k,v])=>(
                 <span key={k} style={{fontSize:10,color:"#475569"}}><span style={{color:"#64748b",fontWeight:700}}>{k}</span>: {v}</span>
               ))}
             </div>
