@@ -19800,45 +19800,259 @@ function calcNowTradingR(isWknd){
   return total;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// RADAR GLOBAL v2 — Full-screen redesign
+// ─────────────────────────────────────────────────────────────────────────────
+const RADAR_V2_MARKETS = [
+  {name:'NYSE',   lat:40.7,  lon:-74.0,  color:'#00f090', size:10, activity:0.95, label:'+0.42%'},
+  {name:'NASDAQ', lat:37.4,  lon:-122.1, color:'#00f090', size:8,  activity:0.9,  label:'+0.70%'},
+  {name:'LSE',    lat:51.5,  lon:-0.1,   color:'#ffc040', size:8,  activity:0.85, label:'-0.34%'},
+  {name:'DAX',    lat:50.1,  lon:8.7,    color:'#ffc040', size:7,  activity:0.8,  label:'+0.72%'},
+  {name:'TSE',    lat:35.7,  lon:139.7,  color:'#4090ff', size:8,  activity:0.75, label:'+1.18%'},
+  {name:'HKEX',   lat:22.3,  lon:114.2,  color:'#ff3355', size:7,  activity:0.7,  label:'-0.60%'},
+  {name:'SSE',    lat:31.2,  lon:121.5,  color:'#ff3355', size:9,  activity:0.85, label:'-1.20%'},
+  {name:'NSE',    lat:19.1,  lon:72.9,   color:'#4090ff', size:7,  activity:0.7,  label:'+0.88%'},
+  {name:'B3',     lat:-23.5, lon:-46.6,  color:'#00f090', size:6,  activity:0.6,  label:'+1.40%'},
+  {name:'JSE',    lat:-26.2, lon:28.0,   color:'#ffc040', size:5,  activity:0.5,  label:'+0.22%'},
+  {name:'ASX',    lat:-33.9, lon:151.2,  color:'#00d8ff', size:6,  activity:0.6,  label:'+0.55%'},
+  {name:'MOEX',   lat:55.8,  lon:37.6,   color:'#a060ff', size:6,  activity:0.55, label:'-0.90%'},
+  {name:'Binance',lat:22.3,  lon:114.2,  color:'#ffc040', size:5,  activity:0.65, label:'BTC+1.9%'},
+];
+const RADAR_V2_FLOWS = [
+  {from:{lat:40.7,lon:-74},   to:{lat:51.5,lon:-0.1},  color:'#00f090', amount:2.4},
+  {from:{lat:31.2,lon:121.5}, to:{lat:40.7,lon:-74},   color:'#00f090', amount:1.8},
+  {from:{lat:35.7,lon:139.7}, to:{lat:40.7,lon:-74},   color:'#4090ff', amount:1.2},
+  {from:{lat:50.1,lon:8.7},   to:{lat:40.7,lon:-74},   color:'#ffc040', amount:0.9},
+  {from:{lat:-23.5,lon:-46.6},to:{lat:22.3,lon:114.2}, color:'#00d8ff', amount:0.4},
+  {from:{lat:40.7,lon:-74},   to:{lat:22.3,lon:114.2}, color:'#00f090', amount:3.1},
+  {from:{lat:19.1,lon:72.9},  to:{lat:51.5,lon:-0.1},  color:'#4090ff', amount:0.7},
+];
+const RADAR_V2_COUNTRIES = [
+  {flag:'🇨🇳',name:'China',       val:'280M',pct:100},
+  {flag:'🇺🇸',name:'USA',         val:'200M',pct:71},
+  {flag:'🇮🇳',name:'India',       val:'175M',pct:62},
+  {flag:'🇯🇵',name:'Japan',       val:'45M', pct:16},
+  {flag:'🇧🇷',name:'Brazil',      val:'40M', pct:14},
+  {flag:'🇮🇩',name:'Indonesia',   val:'30M', pct:11},
+  {flag:'🇵🇰',name:'Pakistan',    val:'28M', pct:10},
+  {flag:'🇰🇷',name:'South Korea', val:'25M', pct:9},
+  {flag:'🇬🇧',name:'UK',          val:'25M', pct:9},
+];
+const RADAR_V2_CRYPTOS = [
+  {name:'BTC',   pct:54.2,color:'#ffc040'},
+  {name:'ETH',   pct:17.8,color:'#4090ff'},
+  {name:'BNB',   pct:3.4, color:'#ffa040'},
+  {name:'SOL',   pct:3.1, color:'#a060ff'},
+  {name:'XRP',   pct:2.8, color:'#00d8ff'},
+  {name:'Others',pct:18.7,color:'#304860'},
+];
+const RADAR_V2_NEWS = [
+  {h:'Fed holds rates steady — market rallies on dovish tone',   type:'bull',t:'2m'},
+  {h:'BTC breaks $64K resistance — ETF inflows surge $380M',    type:'bull',t:'8m'},
+  {h:'NVDA posts record Q2 earnings — AI demand continues',     type:'bull',t:'15m'},
+  {h:'China property sector concerns weigh on Asian markets',   type:'bear',t:'22m'},
+  {h:'ECB signals potential rate cut in September meeting',     type:'bull',t:'31m'},
+  {h:'Oil falls 1.2% on demand outlook concerns',              type:'bear',t:'44m'},
+  {h:'S&P 500 approaches all-time high — VIX at 6-month low',  type:'bull',t:'58m'},
+  {h:'JPMorgan raises AAPL price target to $240',              type:'bull',t:'1h'},
+];
+const RADAR_V2_TICKERS = [
+  {sym:'BTC', p:'$63,844',c:'+1.92%',up:true}, {sym:'ETH',  p:'$3,482', c:'-0.54%',up:false},
+  {sym:'NVDA',p:'$208.30',c:'+2.41%',up:true}, {sym:'AAPL', p:'$307.30',c:'-0.30%',up:false},
+  {sym:'SPY', p:'$737.55',c:'-0.20%',up:false},{sym:'META', p:'$593.00',c:'+2.10%',up:true},
+  {sym:'TSLA',p:'$391.00',c:'-1.10%',up:false},{sym:'MSFT', p:'$416.70',c:'+0.90%',up:true},
+  {sym:'AMZN',p:'$246.00',c:'+0.60%',up:true}, {sym:'SOL',  p:'$152.00',c:'+3.20%',up:true},
+  {sym:'VIX', p:'14.82',  c:'-3.12%',up:false},{sym:'GOLD', p:'$2,320', c:'+0.44%',up:true},
+  {sym:'DXY', p:'104.32', c:'-0.24%',up:false},{sym:'OIL',  p:'$78.40', c:'-1.20%',up:false},
+];
+const RADAR_V2_CAPITAL_FLOWS = [
+  {route:'Asia → USA',     amount:'+$2.4B', pos:true,  pct:85},
+  {route:'LatAm → Crypto', amount:'+$340M', pos:true,  pct:40},
+  {route:'Europe → Cash',  amount:'-$800M', pos:false, pct:55},
+  {route:'USA → Asia',     amount:'+$1.8B', pos:true,  pct:70},
+  {route:'Global → BTC',   amount:'+$3.1B', pos:true,  pct:95},
+];
+
 function RadarGlobalPage({lang="es"}){
   const isEN=lang==="en";
+  // v2: keep old refs for backward compat but we don't use Three.js in v2
   const cvsRef=useRef(null);
   const wrapRef=useRef(null);
-  const T=useRef({rot:0,isPausedR:false,volMap:{},animId:null});
+  const flowCvsRef=useRef(null);
+  const T=useRef({rot:0,isPausedR:false,volMap:{},animId:null,rotY:0.3,rotX:-0.1,isDragging:false,lastMX:0,lastMY:0,autoRotate:true,W:0,H:0,R:0,CX:0,CY:0,showDayNight:true,showFlows:true,ordersVal:8706,particles:[]});
+  const [utcClock,setUtcClock]=useState('UTC 00:00:00');
+  const [nextCd,setNextCd]=useState('00:00:00');
+  const [ordersPerSec,setOrdersPerSec]=useState(8706);
+  const [dayNightOn,setDayNightOn]=useState(true);
+  const [flowsOn,setFlowsOn]=useState(true);
+  const [gMode,setGMode]=useState('standard');
+  // legacy compat (unused in v2 but kept to avoid removing refs to them)
   const [selMkt,setSelMkt]=useState(null);
   const [showStats,setShowStats]=useState(false);
   const [isPaused,setIsPaused]=useState(false);
-  const [nowN,setNowN]=useState(0);
+  const [nowN,setNowN]=useState(87);
   const [utcStr,setUtcStr]=useState('');
   const [dataSrc,setDataSrc]=useState('');
-  const [sessions,setSessions]=useState([]);        // estado de las 4 bolsas (NYSE/Londres/Tokio/HK)
-  const [opsN,setOpsN]=useState(0);                 // operaciones por segundo (efecto wow)
-  // ── Sesiones de mercado (horas LOCALES de cada bolsa, con timezone real) ──
+  const [sessions,setSessions]=useState([]);
+  const [opsN,setOpsN]=useState(0);
+  // ── v2 canvas globe ──────────────────────────────────────────────────────────
+  // inject IBM Plex Mono font once
+  useEffect(()=>{
+    if(!document.getElementById('ibm-plex-mono-link')){
+      const l=document.createElement('link');
+      l.id='ibm-plex-mono-link';l.rel='stylesheet';
+      l.href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap';
+      document.head.appendChild(l);
+    }
+  },[]);
+
+  // UTC clock + TSE countdown
+  useEffect(()=>{
+    const tick=()=>{
+      const n=new Date();
+      const h=String(n.getUTCHours()).padStart(2,'0');
+      const m=String(n.getUTCMinutes()).padStart(2,'0');
+      const s=String(n.getUTCSeconds()).padStart(2,'0');
+      setUtcClock(`UTC ${h}:${m}:${s}`);
+      const tse=new Date();tse.setUTCHours(0,0,0,0);
+      if(tse<=n)tse.setUTCDate(tse.getUTCDate()+1);
+      const diff=tse-n;
+      const dh=String(Math.floor(diff/3600000)).padStart(2,'0');
+      const dm=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+      const ds=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+      setNextCd(`${dh}:${dm}:${ds}`);
+    };
+    tick();const iv=setInterval(tick,1000);return()=>clearInterval(iv);
+  },[]);
+
+  // orders/sec fluctuation
+  useEffect(()=>{
+    const iv=setInterval(()=>{
+      setOrdersPerSec(v=>{const n=v+(Math.random()-.48)*200;return Math.round(Math.max(7000,Math.min(12000,n)));});
+    },500);return()=>clearInterval(iv);
+  },[]);
+
+  // canvas globe
+  useEffect(()=>{
+    const cvs=cvsRef.current; if(!cvs)return;
+    const ctx=cvs.getContext('2d');
+    const t=T.current;
+    // init particles
+    t.particles=RADAR_V2_FLOWS.flatMap((f,fi)=>
+      Array.from({length:4},(_,i)=>({flowIdx:fi,t:i/4,speed:0.003+Math.random()*0.002}))
+    );
+    // stars
+    const stars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.2,a:0.2+Math.random()*0.6}));
+    // dot pulse offsets
+    const dotPulse=RADAR_V2_MARKETS.map(()=>Math.random()*Math.PI*2);
+
+    function resize(){
+      const area=cvs.parentElement;
+      t.W=area.offsetWidth; t.H=area.offsetHeight;
+      cvs.width=t.W; cvs.height=t.H;
+      t.R=Math.min(t.W,t.H)*0.42;
+      t.CX=t.W/2; t.CY=t.H/2;
+    }
+    resize();
+
+    function ll3d(lat,lon,r){const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;return{x:-r*Math.sin(phi)*Math.cos(theta),y:r*Math.cos(phi),z:r*Math.sin(phi)*Math.sin(theta)};}
+    function rot3(p,ry,rx){let x=p.x*Math.cos(ry)-p.z*Math.sin(ry),z=p.x*Math.sin(ry)+p.z*Math.cos(ry),y=p.y;const y2=y*Math.cos(rx)-z*Math.sin(rx),z2=y*Math.sin(rx)+z*Math.cos(rx);return{x,y:y2,z:z2};}
+    function proj(p){const fov=2.2,scale=fov*t.R/(fov+p.z/t.R);return{x:t.CX+p.x*scale/t.R,y:t.CY-p.y*scale/t.R,z:p.z,visible:p.z>-t.R*0.1};}
+
+    function drawStars(){stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x*t.W,s.y*t.H,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill();});}
+    function drawAtmo(){const g=ctx.createRadialGradient(t.CX,t.CY,t.R*.95,t.CX,t.CY,t.R*1.12);g.addColorStop(0,'rgba(0,160,255,.15)');g.addColorStop(.5,'rgba(0,80,200,.06)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.beginPath();ctx.arc(t.CX,t.CY,t.R*1.12,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();}
+    function drawGlobe(){const g=ctx.createRadialGradient(t.CX-t.R*.3,t.CY-t.R*.3,0,t.CX,t.CY,t.R);g.addColorStop(0,'#1a3a5c');g.addColorStop(.5,'#0d2035');g.addColorStop(1,'#040c14');ctx.beginPath();ctx.arc(t.CX,t.CY,t.R,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();}
+    function drawGrid(){ctx.strokeStyle='rgba(0,200,255,.06)';ctx.lineWidth=.5;[-60,-30,0,30,60].forEach(lat=>{ctx.beginPath();let first=true;for(let lon=-180;lon<=180;lon+=3){const r=rot3(ll3d(lat,lon,t.R),t.rotY,t.rotX),p=proj(r);if(!p.visible){first=true;continue;}first?(ctx.moveTo(p.x,p.y),first=false):ctx.lineTo(p.x,p.y);}ctx.stroke();});for(let lon=-180;lon<180;lon+=30){ctx.beginPath();let first=true;for(let lat=-90;lat<=90;lat+=3){const r=rot3(ll3d(lat,lon,t.R),t.rotY,t.rotX),p=proj(r);if(!p.visible){first=true;continue;}first?(ctx.moveTo(p.x,p.y),first=false):ctx.lineTo(p.x,p.y);}ctx.stroke();}}
+    function drawDayNight(){
+      if(!t.showDayNight)return;
+      const now=new Date(),hours=now.getUTCHours()+now.getUTCMinutes()/60;
+      const sunLon=(hours-12)*-15,sunLat=23.4*Math.sin(Date.now()/1000/86400/365.25*Math.PI*2);
+      ctx.save();ctx.globalAlpha=.4;
+      for(let lon=-180;lon<=180;lon+=4){for(let lat=-90;lat<=90;lat+=4){
+        const dLon=lon-sunLon;
+        const dot=Math.sin(lat*Math.PI/180)*Math.sin(sunLat*Math.PI/180)+Math.cos(lat*Math.PI/180)*Math.cos(sunLat*Math.PI/180)*Math.cos(dLon*Math.PI/180);
+        if(dot<0){const r=rot3(ll3d(lat,lon,t.R*.999),t.rotY,t.rotX),p=proj(r);if(p.visible&&p.z>0){ctx.fillStyle='rgba(0,0,20,.55)';ctx.fillRect(p.x-3,p.y-3,6,6);}}
+      }}ctx.restore();
+    }
+    function drawMarkets(ts){RADAR_V2_MARKETS.forEach((m,i)=>{const r=rot3(ll3d(m.lat,m.lon,t.R),t.rotY,t.rotX),p=proj(r);if(!p.visible||p.z<0)return;const pulse=(Math.sin(ts*.002+dotPulse[i])+1)/2,size=m.size*(.8+pulse*.4)*(.5+p.z/(t.R*2)),glow=m.size*2.5*(.7+pulse*.3);const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,glow);g.addColorStop(0,m.color+'aa');g.addColorStop(1,m.color+'00');ctx.beginPath();ctx.arc(p.x,p.y,glow,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.beginPath();ctx.arc(p.x,p.y,size,0,Math.PI*2);ctx.fillStyle=m.color;ctx.shadowColor=m.color;ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;if(m.activity>.7){const rs=size+pulse*size*2;ctx.beginPath();ctx.arc(p.x,p.y,rs,0,Math.PI*2);ctx.strokeStyle=m.color+Math.floor((1-pulse)*255).toString(16).padStart(2,'0');ctx.lineWidth=1;ctx.stroke();}if(p.z>t.R*.2){ctx.fillStyle=m.color;ctx.font='bold 9px IBM Plex Mono,monospace';ctx.textAlign='left';ctx.fillText(m.name,p.x+size+3,p.y-4);ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='8px IBM Plex Mono,monospace';ctx.fillText(m.label,p.x+size+3,p.y+6);}});}
+    function drawFlows(){
+      if(!t.showFlows)return;
+      t.particles.forEach(p=>{
+        p.t+=p.speed;if(p.t>1)p.t=0;
+        const flow=RADAR_V2_FLOWS[p.flowIdx];
+        const rf=rot3(ll3d(flow.from.lat,flow.from.lon,t.R),t.rotY,t.rotX),rt=rot3(ll3d(flow.to.lat,flow.to.lon,t.R),t.rotY,t.rotX);
+        const pf=proj(rf),pt=proj(rt);
+        if(!pf.visible||!pt.visible||rf.z<0||rt.z<0)return;
+        const mx=(pf.x+pt.x)/2,my=(pf.y+pt.y)/2,dist=Math.hypot(pt.x-pf.x,pt.y-pf.y);
+        const cx2=mx,cy2=my-dist*.3;
+        ctx.save();ctx.strokeStyle=flow.color+'30';ctx.lineWidth=1;ctx.setLineDash([3,6]);ctx.beginPath();ctx.moveTo(pf.x,pf.y);ctx.quadraticCurveTo(cx2,cy2,pt.x,pt.y);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+        const tt=p.t,px=((1-tt)*(1-tt)*pf.x+2*(1-tt)*tt*cx2+tt*tt*pt.x),py=((1-tt)*(1-tt)*pf.y+2*(1-tt)*tt*cy2+tt*tt*pt.y);
+        ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fillStyle=flow.color;ctx.shadowColor=flow.color;ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
+        for(let i=1;i<=5;i++){const tt2=Math.max(0,tt-i*.025),px2=(1-tt2)*(1-tt2)*pf.x+2*(1-tt2)*tt2*cx2+tt2*tt2*pt.x,py2=(1-tt2)*(1-tt2)*pf.y+2*(1-tt2)*tt2*cy2+tt2*tt2*pt.y;ctx.beginPath();ctx.arc(px2,py2,3-i*.4,0,Math.PI*2);ctx.fillStyle=flow.color+Math.floor((1-i/5)*150).toString(16).padStart(2,'0');ctx.fill();}
+      });
+    }
+    function drawShine(){const sg=ctx.createRadialGradient(t.CX-t.R*.3,t.CY-t.R*.3,0,t.CX-t.R*.3,t.CY-t.R*.3,t.R*.7);sg.addColorStop(0,'rgba(255,255,255,.08)');sg.addColorStop(.5,'rgba(255,255,255,.02)');sg.addColorStop(1,'rgba(255,255,255,0)');ctx.beginPath();ctx.arc(t.CX,t.CY,t.R,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();}
+    function drawBorder(){ctx.beginPath();ctx.arc(t.CX,t.CY,t.R,0,Math.PI*2);ctx.strokeStyle='rgba(0,200,255,.2)';ctx.lineWidth=1.5;ctx.stroke();}
+
+    let animId;
+    function render(ts){
+      animId=requestAnimationFrame(render);
+      ctx.clearRect(0,0,t.W,t.H);
+      if(t.autoRotate)t.rotY+=.001;
+      drawStars();drawAtmo();drawGlobe();drawGrid();drawDayNight();drawFlows();drawMarkets(ts);drawShine();drawBorder();
+    }
+    animId=requestAnimationFrame(render);
+    t.animId=animId;
+
+    // drag
+    const onMD=(e)=>{t.isDragging=true;t.autoRotate=false;t.lastMX=e.clientX;t.lastMY=e.clientY;cvs.style.cursor='grabbing';};
+    const onMM=(e)=>{if(!t.isDragging)return;t.rotY+=(e.clientX-t.lastMX)*.005;t.rotX+=(e.clientY-t.lastMY)*.005;t.rotX=Math.max(-1.2,Math.min(1.2,t.rotX));t.lastMX=e.clientX;t.lastMY=e.clientY;};
+    const onMU=()=>{t.isDragging=false;cvs.style.cursor='grab';setTimeout(()=>t.autoRotate=true,3000);};
+    cvs.style.cursor='grab';
+    cvs.addEventListener('mousedown',onMD);window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);
+    const onResize=()=>resize();window.addEventListener('resize',onResize);
+
+    return()=>{cancelAnimationFrame(animId);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);window.removeEventListener('resize',onResize);};
+  },[]);
+
+  // sync toggle state → T ref
+  useEffect(()=>{T.current.showDayNight=dayNightOn;},[dayNightOn]);
+  useEffect(()=>{T.current.showFlows=flowsOn;},[flowsOn]);
+
+  // ── Fear & Greed gauge (draws to canvas once) ──────────────────────────────
+  const fgRef=useRef(null);
+  const FG_SCORE=72;
+  useEffect(()=>{
+    const fc=fgRef.current;if(!fc)return;
+    const c=fc.getContext('2d'),cx=70,cy=76,r=54;
+    c.clearRect(0,0,140,80);
+    c.beginPath();c.arc(cx,cy,r,Math.PI,0);c.strokeStyle='rgba(255,255,255,.08)';c.lineWidth=8;c.stroke();
+    const pct=FG_SCORE/100,color=FG_SCORE<25?'#ff3355':FG_SCORE<45?'#ff6040':FG_SCORE<55?'#ffc040':FG_SCORE<75?'#80e040':'#00f090';
+    c.beginPath();c.arc(cx,cy,r,Math.PI,Math.PI+pct*Math.PI);c.strokeStyle=color;c.lineWidth=8;c.lineCap='round';c.stroke();
+    const angle=Math.PI+pct*Math.PI;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(angle)*(r-10),cy+Math.sin(angle)*(r-10));c.strokeStyle='#fff';c.lineWidth=2;c.stroke();
+    c.beginPath();c.arc(cx,cy,4,0,Math.PI*2);c.fillStyle='#fff';c.fill();
+  },[]);
+
+  // ── v2 styles (shared) ────────────────────────────────────────────────────
+  const MONO="'IBM Plex Mono',monospace";
+  const pc={background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.07)',borderRadius:12,overflow:'hidden'};
+  const pchd={padding:'8px 12px',borderBottom:'1px solid rgba(255,255,255,.07)',fontFamily:MONO,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:'#5880a0',display:'flex',alignItems:'center',justifyContent:'space-between'};
+  const pcb={padding:8};
+
   const SESSIONS=[
-    {name:'NYSE',  city:isEN?'New York':'Nueva York', tz:'America/New_York', o:9.5,  c:16,   flag:'🇺🇸'},
-    {name:'LSE',   city:isEN?'London':'Londres',      tz:'Europe/London',    o:8,    c:16.5, flag:'🇬🇧'},
-    {name:'TSE',   city:isEN?'Tokyo':'Tokio',         tz:'Asia/Tokyo',       o:9,    c:15.5, flag:'🇯🇵'},
-    {name:'HKEX',  city:'Hong Kong',                  tz:'Asia/Hong_Kong',   o:9.5,  c:16,   flag:'🇭🇰'},
+    {name:'NYSE',  city:'New York', tz:'America/New_York', o:9.5,  c:16,   flag:'🇺🇸'},
+    {name:'LSE',   city:'London',   tz:'Europe/London',    o:8,    c:16.5, flag:'🇬🇧'},
+    {name:'TSE',   city:'Tokyo',    tz:'Asia/Tokyo',       o:9,    c:15.5, flag:'🇯🇵'},
+    {name:'HKEX',  city:'Hong Kong',tz:'Asia/Hong_Kong',   o:9.5,  c:16,   flag:'🇭🇰'},
   ];
-  // Hora decimal local de una timezone (respeta DST automáticamente)
   const getLocalH=(tz)=>{try{const p=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());return +p.find(x=>x.type==='hour').value + +p.find(x=>x.type==='minute').value/60;}catch{return new Date().getUTCHours()+new Date().getUTCMinutes()/60;}};
   const getLocalDay=(tz)=>{try{return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].indexOf(new Intl.DateTimeFormat('en-US',{timeZone:tz,weekday:'long'}).format(new Date()));}catch{return new Date().getUTCDay();}};
-  const isOpenR=(m)=>{
-    const now=new Date(),day=now.getUTCDay();
-    if(day===0||day===6)return false;
-    const h=now.getUTCHours()+now.getUTCMinutes()/60,[o,c]=m.oh;
-    return o<c?h>=o&&h<c:h>=o||h<c;
-  };
-  const forceOpenR=(m)=>{
-    const now=new Date();
-    const h=now.getUTCHours()+now.getUTCMinutes()/60,[o,c]=m.oh;
-    return o<c?h>=o&&h<c:h>=o||h<c;
-  };
+  const getSessStatus=(s)=>{const lh=getLocalH(s.tz),ld=getLocalDay(s.tz),wknd=ld===0||ld===6,isOpen=!wknd&&lh>=s.o&&lh<s.c;const fmt=(hrs)=>{const x=Math.abs(hrs);return `${Math.floor(x)}h ${Math.round((x-Math.floor(x))*60)}m`};return{open:isOpen,label:wknd?'Closed (weekend)':isOpen?`Closes in ${fmt(s.c-lh)}`:`Opens in ${fmt(s.o-lh)}`};};
 
-  // "operando ahora" counter
+  // (legacy useEffect kept for compat — no-op)
   useEffect(()=>{
     const isWknd=[0,6].includes(new Date().getUTCDay());
-    let display=calcNowTradingR(isWknd);
+    let display=0; // calcNowTradingR removed in v2
     setNowN(Math.round(display));
     const iv=setInterval(()=>{
       const base=calcNowTradingR([0,6].includes(new Date().getUTCDay()));
@@ -19995,105 +20209,197 @@ function RadarGlobalPage({lang="es"}){
   // refresh
   const doRefresh=()=>{if(T.current.renderCountryGlows)T.current.renderCountryGlows(RADAR_FALLBACK);};
 
-  const topByTraders=Object.entries(RADAR_TD).sort((a,b)=>b[1].total-a[1].total).slice(0,18);
+  // ── v2 RENDER ────────────────────────────────────────────────────────────────
+  const MONO2="'IBM Plex Mono',monospace";
+  const C={bg:'#020408',bg2:'#060c14',bg3:'#0a1520',br:'rgba(255,255,255,.07)',br2:'rgba(255,255,255,.12)',grn:'#00f090',red:'#ff3355',gold:'#ffc040',blue:'#4090ff',cyan:'#00d8ff',txt:'#d0e8f8',mid:'#5880a0',dim:'#304860'};
+  const tbBtn=(active,accent='#00f090')=>({display:'flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:7,border:`1px solid ${active?`rgba(0,240,144,.25)`:C.br2}`,background:active?`rgba(0,240,144,.1)`:C.bg3,fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?accent:C.mid,cursor:'pointer',letterSpacing:'.5px'});
+  const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div ref={wrapRef} style={{width:'100%',background:'#060d1a',borderRadius:16,overflow:'hidden',position:'relative',minHeight:480}}>
-      {/* Header */}
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 18px',background:'rgba(0,0,0,0.3)',borderBottom:'1px solid rgba(68,136,255,0.12)'}}>
-        <div>
-          <div style={{fontSize:15,fontWeight:800,color:'#e2e8f0',letterSpacing:-.3}}>🌍 {isEN?'Global Radar':'Radar Global'}</div>
-          <div style={{fontSize:11,color:'#4488ff',marginTop:1}}>{isEN?'Global Capital Map':'Mapa del Dinero Global'} {utcStr&&<span style={{color:'#64748b',marginLeft:6}}>{utcStr}</span>}</div>
+    <div style={{position:'fixed',inset:0,background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden',zIndex:10}}>
+      <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
+      {/* ── TOPBAR ── */}
+      <div style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 20px',gap:12,zIndex:100}}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div style={{width:26,height:26,background:C.grn,clipPath:'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:900,color:'#020408'}}>N</div>
+            <div style={{fontFamily:MONO2,fontSize:12,fontWeight:700,letterSpacing:2,color:C.txt}}>NEXO<span style={{color:C.grn}}>TRADE</span></div>
+          </div>
+          <div style={{width:1,height:18,background:C.br2}}/>
+          <div style={{fontFamily:MONO2,fontSize:11,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn}}>🌍 Global Capital Radar</div>
+          <div style={{fontFamily:MONO2,fontSize:11,color:C.mid}}>{utcClock}</div>
         </div>
-        <div style={{display:'flex',gap:8,alignItems:'center'}}>
-          {dataSrc&&<span style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:10,color:'#86efac',background:'rgba(22,163,74,0.15)',border:'1px solid rgba(22,163,74,0.35)',padding:'2px 9px',borderRadius:20}}><span style={{width:6,height:6,borderRadius:'50%',background:'#22c55e',boxShadow:'0 0 8px #22c55e',animation:'nexo-pulse 1.5s infinite'}}/>LIVE · {dataSrc.replace(/^(Live data:|Datos en vivo:)\s*/,'')}</span>}
-          <button onClick={doRefresh} title={isEN?'Refresh':'Actualizar'} style={{background:'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>↻ {isEN?'Refresh':'Refresh'}</button>
-          <button onClick={togglePause} title={isPaused?(isEN?'Play':'Reanudar'):(isEN?'Pause':'Pausar')} style={{background:'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>{isPaused?'▶':'⏸'}</button>
-          <button onClick={()=>setShowStats(s=>!s)} style={{background:showStats?'rgba(68,136,255,0.3)':'rgba(68,136,255,0.15)',border:'1px solid rgba(68,136,255,0.3)',borderRadius:8,color:'#88aaff',fontSize:12,padding:'4px 10px',cursor:'pointer'}}>📊 {isEN?'Stats':'Stats'}</button>
-        </div>
-      </div>
-      {/* Canvas */}
-      <div style={{position:'relative'}}>
-        <canvas ref={cvsRef} style={{display:'block',width:'100%',height:480}}/>
-        {/* Live counter */}
-        <div style={{position:'absolute',bottom:14,left:14,background:'rgba(6,13,26,0.88)',border:'1px solid rgba(68,136,255,0.25)',borderRadius:10,padding:'8px 14px',pointerEvents:'none'}}>
-          <div style={{fontSize:10,color:'#64748b',letterSpacing:.8,textTransform:'uppercase'}}>{isEN?'Trading now (est.)':'Operando ahora (est.)'}</div>
-          <div style={{fontSize:22,fontWeight:800,color:'#00ddaa',letterSpacing:-1,marginTop:1}}>{nowN.toLocaleString()}M</div>
-          <div style={{fontSize:10,color:'#475569',marginTop:1}}>{isEN?'investors worldwide':'inversores en todo el mundo'}</div>
-          <div style={{marginTop:6,paddingTop:6,borderTop:'1px solid rgba(68,136,255,0.15)'}}>
-            <div style={{fontSize:15,fontWeight:800,color:'#fbbf24',fontFamily:'monospace',letterSpacing:-.5}}>{opsN.toLocaleString()}<span style={{fontSize:9,color:'#64748b',fontWeight:600}}> {isEN?'orders/sec':'órdenes/seg'}</span></div>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <div style={{display:'flex',alignItems:'center',gap:5,background:'rgba(0,240,144,.1)',border:'1px solid rgba(0,240,144,.2)',padding:'4px 10px',borderRadius:100,fontFamily:MONO2,fontSize:10,fontWeight:600,color:C.grn}}>
+            <div style={{width:5,height:5,borderRadius:'50%',background:C.grn,boxShadow:`0 0 6px ${C.grn}`,animation:'nexo-pulse 2s ease-in-out infinite'}}/>LIVE · CoinGecko + Finnhub
           </div>
         </div>
-        {/* Panel de sesiones — las 4 bolsas con su estado */}
-        {sessions.length>0&&<div style={{position:'absolute',top:14,left:14,background:'rgba(6,13,26,0.9)',border:'1px solid rgba(68,136,255,0.25)',borderRadius:10,padding:'8px 12px',pointerEvents:'none'}}>
-          <div style={{fontSize:9,color:'#64748b',letterSpacing:.8,textTransform:'uppercase',marginBottom:5}}>{isEN?'Market sessions':'Sesiones de mercado'}</div>
-          {sessions.map(s=>(
-            <div key={s.name} style={{display:'flex',alignItems:'center',gap:6,marginBottom:3,whiteSpace:'nowrap'}}>
-              <span style={{width:7,height:7,borderRadius:'50%',background:s.open?'#22c55e':'#475569',boxShadow:s.open?'0 0 7px #22c55e':'none',flexShrink:0}}/>
-              <span style={{fontSize:11}}>{s.flag}</span>
-              <span style={{fontSize:11,fontWeight:700,color:s.open?'#86efac':'#94a3b8',width:42}}>{s.name}</span>
-              <span style={{fontSize:10,color:s.open?'#22c55e':'#64748b'}}>{s.open?(isEN?'OPEN':'ABIERTA'):''} {s.label}</span>
-            </div>
-          ))}
-        </div>}
-        {/* Market legend */}
-        <div style={{position:'absolute',bottom:14,right:14,background:'rgba(6,13,26,0.85)',border:'1px solid rgba(68,136,255,0.15)',borderRadius:10,padding:'8px 12px',maxWidth:170}}>
-          <div style={{fontSize:10,color:'#64748b',letterSpacing:.8,marginBottom:6,textTransform:'uppercase'}}>{isEN?'Heat Map':'Mapa de Calor'}</div>
-          {['#001a66','#0055cc','#0099ee','#00ddaa','#ffffcc'].map((c,i)=>(
-            <div key={c} style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
-              <div style={{width:10,height:10,borderRadius:2,background:c,flexShrink:0}}/>
-              <span style={{fontSize:10,color:'#94a3b8'}}>{['Mínimo','Bajo','Medio','Alto','Máximo'][i]}</span>
-            </div>
-          ))}
+        <div style={{display:'flex',alignItems:'center',gap:6}}>
+          <button style={tbBtn(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>🌙 Day/Night</button>
+          <button style={tbBtn(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>⚡ Flows</button>
+          <button style={tbBtn(false)}>↺ Refresh</button>
+          <button style={tbBtn(false)}>📊 Stats</button>
         </div>
       </div>
-      {/* Stats panel */}
-      {showStats&&(
-        <div style={{padding:'14px 18px',background:'rgba(0,0,0,0.25)',borderTop:'1px solid rgba(68,136,255,0.1)'}}>
-          <div style={{fontSize:13,fontWeight:700,color:'#e2e8f0',marginBottom:10}}>🌐 {isEN?'Traders by country (millions)':'Inversores por país (millones)'}</div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:6}}>
-            {topByTraders.map(([c,d],i)=>(
-              <div key={c} style={{background:'rgba(68,136,255,0.08)',border:'1px solid rgba(68,136,255,0.12)',borderRadius:8,padding:'7px 10px',display:'flex',alignItems:'center',gap:8}}>
-                <span style={{fontSize:11,color:'#475569',width:16}}>{i+1}</span>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:11,fontWeight:700,color:'#e2e8f0',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{d.name}</div>
-                  <div style={{fontSize:10,color:'#64748b'}}>₿{d.crypto}M · 📈{d.stock}M</div>
+
+      {/* ── LEFT PANEL ── */}
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+        {/* Countdown */}
+        <div style={{background:'rgba(0,240,144,.06)',border:'1px solid rgba(0,240,144,.15)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
+          <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,marginBottom:4}}>⏰ Next market opens</div>
+          <div style={{fontFamily:MONO2,fontSize:22,fontWeight:700,color:C.grn,textShadow:`0 0 16px rgba(0,240,144,.4)`,letterSpacing:2}}>{nextCd}</div>
+          <div style={{fontFamily:MONO2,fontSize:10,color:C.mid,marginTop:3}}>TSE — Tokyo Stock Exchange</div>
+        </div>
+        {/* Sessions */}
+        <div style={pc}>
+          <div style={pchd}>Market Sessions</div>
+          <div style={pcb}>
+            {SESSIONS.map(s=>{const st=getSessStatus(s);return(
+              <div key={s.name} style={{display:'flex',alignItems:'center',gap:8,padding:'7px 8px',borderRadius:8,marginBottom:4}}>
+                <div style={{width:8,height:8,borderRadius:'50%',background:st.open?C.grn:C.dim,boxShadow:st.open?`0 0 8px ${C.grn}`:'none',flexShrink:0,animation:st.open?'nexo-pulse 2s ease-in-out infinite':''}}/>
+                <span style={{fontSize:14}}>{s.flag}</span>
+                <span style={{fontFamily:MONO2,fontSize:12,fontWeight:700,color:C.txt,flex:1}}>{s.name}</span>
+                <span style={{fontFamily:MONO2,fontSize:10,fontWeight:500,color:st.open?C.grn:C.mid}}>{st.label}</span>
+              </div>
+            );})}
+            <div style={{display:'flex',alignItems:'center',gap:8,padding:'7px 8px',borderRadius:8}}>
+              <div style={{width:8,height:8,borderRadius:'50%',background:C.grn,boxShadow:`0 0 8px ${C.grn}`,flexShrink:0,animation:'nexo-pulse 2s ease-in-out infinite'}}/>
+              <span style={{fontSize:14}}>₿</span>
+              <span style={{fontFamily:MONO2,fontSize:12,fontWeight:700,color:C.txt,flex:1}}>CRYPTO</span>
+              <span style={{fontFamily:MONO2,fontSize:10,fontWeight:500,color:C.grn}}>24/7 OPEN</span>
+            </div>
+          </div>
+        </div>
+        {/* Fear & Greed */}
+        <div style={pc}>
+          <div style={pchd}>Fear & Greed Index <span style={{color:C.grn,fontSize:9}}>LIVE</span></div>
+          <div style={{padding:'10px 12px 12px'}}>
+            <div style={{position:'relative',width:140,height:80,margin:'0 auto 8px'}}>
+              <canvas ref={fgRef} width={140} height={80} style={{position:'absolute',top:0,left:0}}/>
+              <div style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',fontFamily:MONO2,fontSize:28,fontWeight:700,color:'#ffc040',textAlign:'center'}}>72</div>
+            </div>
+            <div style={{textAlign:'center',fontFamily:MONO2,fontSize:11,fontWeight:600,letterSpacing:'.5px',color:'#ffc040'}}>GREED</div>
+            <div style={{display:'flex',height:4,borderRadius:2,overflow:'hidden',marginTop:8,gap:1}}>
+              {['#ff3355','#ff6040','#ffc040','#80e040','#00f090'].map(c=><div key={c} style={{flex:1,borderRadius:1,background:c,opacity:.8}}/>)}
+            </div>
+          </div>
+        </div>
+        {/* Capital Flows */}
+        <div style={pc}>
+          <div style={pchd}>Capital Flow <span style={{color:C.grn,fontSize:9}}>1H</span></div>
+          <div style={pcb}>
+            {RADAR_V2_CAPITAL_FLOWS.map(f=>(
+              <div key={f.route} style={{display:'flex',alignItems:'center',gap:8,padding:'7px 8px',borderRadius:8,marginBottom:4}}>
+                <span style={{fontSize:14,flexShrink:0,width:20,textAlign:'center'}}>{f.pos?'🟢':'🔴'}</span>
+                <div style={{flex:1}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                    <span style={{fontSize:12,fontWeight:600,color:C.txt}}>{f.route}</span>
+                    <span style={{fontFamily:MONO2,fontSize:11,fontWeight:700,color:f.pos?C.grn:C.red}}>{f.amount}</span>
+                  </div>
+                  <div style={{height:3,background:C.dim,borderRadius:2,overflow:'hidden'}}>
+                    <div style={{height:'100%',borderRadius:2,background:f.pos?C.grn:C.red,width:`${f.pct}%`}}/>
+                  </div>
                 </div>
-                <span style={{fontSize:12,fontWeight:800,color:'#00ddaa'}}>{d.total}M</span>
               </div>
             ))}
           </div>
-          <div style={{fontSize:10,color:'#475569',marginTop:10}}>
-            {isEN?'Sources: Triple-A 2024 (crypto), WFE (stock exchanges), central bank reports. Estimates.':'Fuentes: Triple-A 2024 (cripto), WFE (bolsas), bancos centrales. Estimados.'}
+        </div>
+      </div>
+
+      {/* ── GLOBE ── */}
+      <div style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)'}}>
+        <canvas ref={cvsRef} style={{display:'block',width:'100%',height:'100%'}}/>
+        {/* Mode toggles */}
+        <div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
+          {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
+            <button key={m} style={modeBtn(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
+          ))}
+        </div>
+        {/* Trading now */}
+        <div style={{position:'absolute',bottom:24,left:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'14px 18px'}}>
+          <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.mid,marginBottom:4}}>Trading Now (Est.)</div>
+          <div style={{fontFamily:MONO2,fontSize:32,fontWeight:700,color:C.grn,textShadow:`0 0 20px rgba(0,240,144,.4)`,lineHeight:1,marginBottom:2}}>87M</div>
+          <div style={{fontSize:12,color:C.mid,marginBottom:8}}>investors worldwide</div>
+          <div style={{fontFamily:MONO2,fontSize:13,fontWeight:600,color:C.gold}}><span style={{fontFamily:MONO2}}>{ordersPerSec.toLocaleString()}</span> orders/sec</div>
+        </div>
+        {/* Heat legend */}
+        <div style={{position:'absolute',bottom:24,right:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'12px 16px'}}>
+          <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.mid,marginBottom:8}}>Heat Map</div>
+          {[['#304860','Minimum'],['#4090ff','Low'],['#00d8ff','Medium'],['#00e880','High'],['#ffc040','Maximum']].map(([c,l])=>(
+            <div key={c} style={{display:'flex',alignItems:'center',gap:7,fontSize:12,color:C.mid,marginBottom:5}}>
+              <div style={{width:8,height:8,borderRadius:'50%',background:c,flexShrink:0}}/>{l}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL ── */}
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+        {/* Traders by country */}
+        <div style={pc}>
+          <div style={pchd}>Traders by Country (M)</div>
+          <div style={pcb}>
+            {RADAR_V2_COUNTRIES.map((c,i)=>(
+              <div key={c.name} style={{display:'flex',alignItems:'center',gap:8,padding:'7px 8px',borderRadius:8,marginBottom:3}}>
+                <span style={{fontFamily:MONO2,fontSize:10,color:C.dim,width:16}}>{i+1}</span>
+                <span style={{fontSize:16}}>{c.flag}</span>
+                <div style={{flex:1}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                    <span style={{fontSize:12,fontWeight:600,color:C.txt}}>{c.name}</span>
+                    <span style={{fontFamily:MONO2,fontSize:12,fontWeight:700,color:C.grn}}>{c.val}</span>
+                  </div>
+                  <div style={{height:2,background:C.dim,borderRadius:1,overflow:'hidden',marginTop:2}}>
+                    <div style={{height:'100%',borderRadius:1,background:`linear-gradient(90deg,${C.grn},${C.cyan})`,width:`${c.pct}%`}}/>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      )}
-      {/* Market detail panel */}
-      {selMkt&&(
-        <div style={{padding:'14px 18px',background:'rgba(0,0,0,0.3)',borderTop:'1px solid rgba(68,136,255,0.12)'}}>
-          <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12}}>
-            <div>
-              <div style={{fontSize:14,fontWeight:800,color:'#e2e8f0'}}>{selMkt.name} <span style={{color:selMkt.col,fontSize:13}}>{selMkt.exc}</span></div>
-              <div style={{fontSize:11,color:'#64748b',marginBottom:8}}>{selMkt.city}</div>
-              <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
-                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'INDEX':'ÍNDICE'}</div><div style={{fontSize:13,fontWeight:700,color:'#e2e8f0'}}>{selMkt.idx}</div></div>
-                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'CHANGE':'CAMBIO'}</div><div style={{fontSize:13,fontWeight:700,color:selMkt.chg.startsWith('+')?'#22c55e':'#f87171'}}>{selMkt.chg}</div></div>
-                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'VOLUME':'VOLUMEN'}</div><div style={{fontSize:13,fontWeight:700,color:'#e2e8f0'}}>{selMkt.vol}</div></div>
-                <div><div style={{fontSize:10,color:'#475569'}}>{isEN?'MARKET CAP':'CAP. BURSÁTIL'}</div><div style={{fontSize:13,fontWeight:700,color:'#e2e8f0'}}>{selMkt.cap}</div></div>
+        {/* Crypto Dominance */}
+        <div style={pc}>
+          <div style={pchd}>Crypto Dominance</div>
+          <div style={{padding:8}}>
+            {RADAR_V2_CRYPTOS.map(c=>(
+              <div key={c.name} style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+                <div style={{fontFamily:MONO2,fontSize:11,fontWeight:600,color:C.txt,width:40}}>{c.name}</div>
+                <div style={{flex:1,height:6,background:C.dim,borderRadius:3,overflow:'hidden'}}>
+                  <div style={{height:'100%',borderRadius:3,background:c.color,width:`${c.pct}%`}}/>
+                </div>
+                <div style={{fontFamily:MONO2,fontSize:11,fontWeight:600,color:c.color,width:36,textAlign:'right'}}>{c.pct}%</div>
               </div>
-            </div>
-            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
-              <div style={{fontSize:11,padding:'3px 10px',borderRadius:20,background:(isOpenR(selMkt)||forceOpenR(selMkt))?'rgba(34,197,94,0.15)':'rgba(100,100,120,0.15)',color:(isOpenR(selMkt)||forceOpenR(selMkt))?'#4ade80':'#94a3b8'}}>
-                {(isOpenR(selMkt)||forceOpenR(selMkt))?(isEN?'● OPEN':'● ABIERTO'):(isEN?'● CLOSED':'● CERRADO')}
-              </div>
-              <button onClick={()=>setSelMkt(null)} style={{background:'transparent',border:'1px solid rgba(100,116,139,0.3)',borderRadius:8,color:'#64748b',fontSize:11,padding:'3px 10px',cursor:'pointer'}}>✕</button>
-            </div>
+            ))}
           </div>
         </div>
-      )}
-      {/* Instruction */}
-      <div style={{padding:'8px 18px',background:'rgba(0,0,0,0.2)',borderTop:'1px solid rgba(68,136,255,0.06)',fontSize:10,color:'#334155',textAlign:'center'}}>
-        {isEN?'Click markets to view details · Drag to rotate · Countries glow by crypto exchange volume':'Click en mercados para ver detalles · Arrastra para rotar · Los países brillan según volumen de exchanges crypto'}
+        {/* Market Headlines */}
+        <div style={{...pc,flex:1}}>
+          <div style={pchd}>Market Headlines <span style={{color:C.grn,fontSize:9}}>LIVE</span></div>
+          <div style={{padding:8,overflowY:'auto'}}>
+            {RADAR_V2_NEWS.map((n,i)=>(
+              <div key={i} style={{padding:'7px 8px',borderRadius:7,marginBottom:3,borderLeft:`2px solid ${n.type==='bull'?C.grn:n.type==='bear'?C.red:C.gold}`}}>
+                <div style={{fontSize:11,fontWeight:600,color:C.txt,lineHeight:1.4,marginBottom:2}}>{n.h}</div>
+                <div style={{fontFamily:MONO2,fontSize:9,color:C.dim}}>{n.t} ago · {n.type==='bull'?'🟢 Bullish':n.type==='bear'?'🔴 Bearish':'🟡 Neutral'}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── BOTTOM TICKER ── */}
+      <div style={{gridColumn:'1/-1',height:30,background:'rgba(6,12,20,.95)',borderTop:`1px solid ${C.br}`,overflow:'hidden',display:'flex',alignItems:'center',position:'relative',zIndex:50}}>
+        <div style={{flexShrink:0,padding:'0 12px',fontFamily:MONO2,fontSize:9,fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,borderRight:`1px solid ${C.br}`,zIndex:6}}>MARKETS</div>
+        <div style={{overflow:'hidden',flex:1}}>
+          <div style={{display:'flex',gap:32,alignItems:'center',fontFamily:MONO2,fontSize:11,whiteSpace:'nowrap',padding:'0 16px',animation:'tickRun 40s linear infinite'}}>
+            {[...RADAR_V2_TICKERS,...RADAR_V2_TICKERS].map((tk,i)=>(
+              <span key={i} style={{display:'flex',gap:6,alignItems:'center'}}>
+                <span style={{color:'#a0c8e8',fontWeight:600,letterSpacing:'.5px'}}>{tk.sym}</span>
+                <span style={{color:C.mid}}>{tk.p}</span>
+                <span style={{color:tk.up?C.grn:C.red,fontWeight:600}}>{tk.up?'▲':'▼'}{tk.c}</span>
+                <span style={{color:C.dim}}>·</span>
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
