@@ -20775,6 +20775,106 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         );
       })()}
+      {/* ── DIVIDENDS VIEW ── */}
+      {termTab==="dividends" && (()=>{
+        const Demo=()=><span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px",marginLeft:6}}>DEMO</span>;
+        const Real=()=><span style={{fontSize:8,color:T.grn,border:`1px solid ${T.grn}55`,borderRadius:3,padding:"1px 5px",marginLeft:6}}>REAL</span>;
+        const KPI=[
+          ["Ingreso Anual Proyectado","$3,240",T.gold,"▲ +12% vs 2025",T.grn],
+          ["Yield Medio Ponderado","2.14%",T.grn,"sobre valor cartera",T.dim],
+          ["Próximo Pago","Jul 15",T.blue,"AVGO · $0.53/acc",T.dim],
+          ["DRIP Activo","4 tickers",T.blue,"reinversión automática",T.dim],
+          ["Streak de Cobros","18 meses",T.purp,"consecutivos",T.dim],
+        ];
+        const CAL=[["JUN 2026","Sin pagos","",T.dim],["JUL 2026","$184","AVGO $184",T.gold],["AGO 2026","$336","AAPL $72 · MSFT $264",T.gold],["SEP 2026","$96","GOOG $96",T.gold],["OCT 2026","$139","COST $139",T.gold],["NOV 2026","$184","AVGO $184",T.gold]];
+        const ROWS=[
+          ["AAPL","Apple Inc.",0.44,"$0.25","Trimestral","Aug 8","Aug 15","$2.50","$72","+4.8",12,false,false],
+          ["MSFT","Microsoft Corp.",0.72,"$0.83","Trimestral","Aug 12","Sep 12","$6.64","$264","+10.2",16,true,false],
+          ["AVGO","Broadcom Inc.",1.2,"$1.15","Trimestral","Jul 15","Jul 31","$4.60","$184","+22.4",14,true,true],
+          ["COST","Costco Wholesale",0.58,"$1.16","Semestral","Oct 1","Oct 15","$2.32","$139","+12.8",20,false,false],
+          ["GOOG","Alphabet Inc.",0.5,"$0.20","Trimestral","Sep 5","Sep 19","$1.20","$96","0",2,true,false],
+        ];
+        const NEXT=[["15","JUL","AVGO","Dividendo trimestral","$1.15 × 4 acc","$4.60",true],["08","AGO","AAPL","Dividendo trimestral","$0.25 × 10 acc","$2.50",false],["12","AGO","MSFT","Dividendo trimestral","$0.83 × 8 acc","$6.64",false],["05","SEP","GOOG","Dividendo trimestral","$0.20 × 6 acc","$1.20",false]];
+        const MON=[["Ene",0],["Feb",0],["Mar",0],["Abr",264],["May",0],["Jun",0],["Jul",184],["Ago",336],["Sep",96],["Oct",139],["Nov",184],["Dic",336]]; const maxM=336;
+        const ring=(y,col)=>{const r=9,c=2*Math.PI*r,frac=Math.min(y/1.5,1);return (<svg width="26" height="26" viewBox="0 0 26 26"><circle cx="13" cy="13" r={r} fill="none" stroke={T.bg4} strokeWidth="3.5"/><circle cx="13" cy="13" r={r} fill="none" stroke={col} strokeWidth="3.5" strokeDasharray={frac*c+" "+c} strokeLinecap="round" transform="rotate(-90 13 13)"/></svg>);};
+        const Toggle=({on,onClick})=>(<div onClick={onClick} style={{display:"inline-flex",alignItems:"center",gap:5,cursor:"pointer"}}><div style={{width:30,height:16,borderRadius:8,background:on?"rgba(0,255,135,.3)":T.bg4,border:`1px solid ${on?"rgba(0,255,135,.5)":T.br2}`,position:"relative"}}><div style={{position:"absolute",top:1,left:on?15:1,width:12,height:12,borderRadius:"50%",background:on?T.grn:T.dim}}/></div><span style={{fontFamily:MONO,fontSize:8,fontWeight:700,color:on?T.grn:T.dim}}>{on?"ON":"OFF"}</span></div>);
+        // proyección 10 años
+        const PW=256,PH=120,ql=8,qr=34,qt=12,qb=18; let wd=3240,nd=3240; const W10=[],N10=[];
+        for(let yr=0;yr<=10;yr++){ W10.push(wd); N10.push(nd); wd=wd*1.12+wd*0.085; nd=nd*1.04; } // con DRIP compone, sin DRIP solo crece div
+        // simplificado: recomputar limpio
+        const wA=[],nA=[]; let w=3240,n=3240; for(let yr=0;yr<=10;yr++){ wA.push(w); nA.push(n); w=w*1.14; n=n*1.05; }
+        const mx=Math.max(...wA),mn=3000;
+        const qx=(i)=>ql+i/10*(PW-ql-qr), qy=(v)=>qt+(1-(v-mn)/((mx-mn)||1))*(PH-qt-qb);
+        const wLine=wA.map((v,i)=>qx(i).toFixed(1)+","+qy(v).toFixed(1)).join(" ");
+        const nLine=nA.map((v,i)=>qx(i).toFixed(1)+","+qy(v).toFixed(1)).join(" ");
+        return (
+        <div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",borderBottom:`1px solid ${T.br}`}}>
+            {KPI.map((k,i)=>(<div key={i} style={{padding:"13px 16px",borderRight:i<4?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:19,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:k[4],marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
+            <div style={{minWidth:0}}>
+              {/* calendario */}
+              <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.br}`}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><div style={{...lbl,padding:0}}>Calendario de Pagos <Demo/></div><span style={{fontFamily:MONO,fontSize:10,color:T.dim}}>2026 · próximos 6 meses</span></div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>{CAL.map((m,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 11px"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginBottom:6}}>{m[0]}</div><div style={{fontFamily:MONO,fontSize:17,fontWeight:700,color:m[3]}}>{m[1]}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim,marginTop:4,lineHeight:1.4,minHeight:22}}>{m[2]}</div></div>))}</div>
+              </div>
+              {/* tabla */}
+              <div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11,minWidth:920}}>
+                  <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","YIELD","DIV/ACC","FRECUENCIA","EX-DATE","PAY DATE","PRÓXIMO COBRO","ANUAL PROYECT.","CRECIM. 5A","STREAK","DRIP"].map((h,i)=><th key={i} style={{padding:"9px 12px",fontSize:8.5,fontWeight:600,letterSpacing:1,color:i===1?T.grn:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}{i===1?" ↑":""}</th>)}</tr></thead>
+                  <tbody>{ROWS.map((r,i)=>{const on=divDrip[r[0]]!==undefined?divDrip[r[0]]:r[11];const yCol=r[2]>=1?T.grn:r[2]>=0.6?T.grn:T.gold;const gw=Math.min(parseFloat(r[9])/25*100,100);return (
+                    <tr key={i} style={{borderBottom:"1px solid #111820"}}>
+                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(r[0]),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{r[0].slice(0,2)}</div><div><div style={{fontSize:12,fontWeight:700,color:T.txt}}>{r[0]}</div><div style={{fontSize:9,color:T.dim}}>{r[1]}</div></div></div></td>
+                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:7}}>{ring(r[2],yCol)}<span style={{color:yCol,fontWeight:700}}>{r[2]}%</span></div></td>
+                      <td style={{padding:"11px 12px",color:T.txt,fontWeight:600}}>{r[3]}</td>
+                      <td style={{padding:"11px 12px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:600,color:r[4]==="Semestral"?T.purp:T.blue,border:`1px solid ${(r[4]==="Semestral"?T.purp:T.blue)}40`,borderRadius:4,padding:"3px 8px"}}>{r[4]}</span></td>
+                      <td style={{padding:"11px 12px",color:T.mid}}>{r[5]}{r[0]==="AVGO"&&<span style={{color:T.gold,fontSize:9}}> ⚡37d</span>}</td>
+                      <td style={{padding:"11px 12px",color:T.mid}}>{r[6]}</td>
+                      <td style={{padding:"11px 12px",color:T.gold,fontWeight:700}}>{r[7]}</td>
+                      <td style={{padding:"11px 12px",color:T.txt,fontWeight:600}}>{r[8]}</td>
+                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:46,height:5,background:T.bg4,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:gw+"%",background:parseFloat(r[9])>0?T.gold:T.dim,borderRadius:3}}/></div><span style={{color:parseFloat(r[9])>0?T.grn:T.dim,fontSize:10}}>{r[9]}%</span></div></td>
+                      <td style={{padding:"11px 12px"}}><div style={{display:"flex",alignItems:"center",gap:3}}>{Array.from({length:8}).map((_,d)=><span key={d} style={{width:4,height:4,borderRadius:"50%",background:d<Math.min(8,Math.round(r[10]/3))?T.gold:T.bg4}}/>)}<span style={{color:T.dim,fontSize:9,marginLeft:4}}>{r[10]}Q</span></div></td>
+                      <td style={{padding:"11px 12px"}}><Toggle on={on} onClick={()=>setDivDrip(d=>({...d,[r[0]]:!on}))}/></td>
+                    </tr>
+                  );})}</tbody>
+                </table>
+                <div style={{padding:"8px 16px",fontFamily:MONO,fontSize:9,color:T.dim}}>Próximo cobro = yield × tus acciones · datos de dividendos <span style={{color:T.gold}}>ilustrativos</span></div>
+              </div>
+            </div>
+            {/* RIGHT */}
+            <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
+              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+                <div style={{...lbl,padding:"0 14px 8px"}}>Próximos Pagos <Real/></div>
+                <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:8}}>{NEXT.map((p,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${p[6]?"rgba(240,180,41,.3)":T.br}`,borderRadius:8,padding:"10px 12px"}}><div style={{textAlign:"center",flexShrink:0}}><div style={{fontFamily:MONO,fontSize:15,fontWeight:700,color:T.txt}}>{p[0]}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>{p[1]}</div></div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{p[2]}{p[6]&&<span style={{color:T.gold,fontSize:9}}> ⚡ PRÓXIMO</span>}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,marginTop:1}}>{p[3]} · {p[4]}</div></div><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.gold}}>{p[5]}</div></div>))}</div>
+              </div>
+              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+                <div style={{...lbl,padding:"0 14px 8px"}}>Ingreso Mensual <Demo/></div>
+                <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:4}}>{MON.map((m,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontFamily:MONO,fontSize:9,color:T.dim,width:22}}>{m[0]}</span><div style={{flex:1,height:11,background:T.bg3,borderRadius:2,overflow:"hidden"}}>{m[1]>0&&<div style={{height:"100%",width:m[1]/maxM*100+"%",background:"rgba(240,180,41,.45)",borderRadius:2}}/>}</div><span style={{fontFamily:MONO,fontSize:9,fontWeight:600,color:m[1]>0?T.gold:T.dim,width:38,textAlign:"right"}}>{m[1]>0?"$"+m[1]:"—"}</span></div>))}</div>
+              </div>
+              <div style={{padding:"12px 14px"}}>
+                <div style={{...lbl,marginBottom:8}}>Proyección 10 años · DRIP <Demo/></div>
+                <svg viewBox={"0 0 "+PW+" "+PH} style={{width:"100%",height:"auto"}}>
+                  <polyline points={nLine} fill="none" stroke={T.blue} strokeWidth="1.8" strokeLinejoin="round"/>
+                  <polyline points={wLine} fill="none" stroke={T.gold} strokeWidth="2" strokeLinejoin="round"/>
+                  <circle cx={qx(10)} cy={qy(wA[10])} r="3" fill={T.gold}/>
+                  <circle cx={qx(10)} cy={qy(nA[10])} r="3" fill={T.blue}/>
+                  <text x={qx(10)-2} y={qy(wA[10])-5} fontFamily={MONO} fontSize="9" fontWeight="700" fill={T.gold} textAnchor="end">${(wA[10]/1000).toFixed(1)}K</text>
+                  <text x={qx(10)-2} y={qy(nA[10])+11} fontFamily={MONO} fontSize="9" fontWeight="700" fill={T.blue} textAnchor="end">${(nA[10]/1000).toFixed(1)}K</text>
+                  <text x={ql} y={PH-4} fontFamily={MONO} fontSize="8" fill={T.dim}>Hoy</text>
+                  <text x={qx(10)} y={PH-4} fontFamily={MONO} fontSize="8" fill={T.dim} textAnchor="end">2036</text>
+                </svg>
+                <div style={{display:"flex",gap:14,marginTop:6,fontFamily:MONO,fontSize:9}}><span style={{color:T.gold}}>● Con DRIP</span><span style={{color:T.blue}}>● Sin DRIP</span></div>
+                <div style={{marginTop:10,background:T.bg3,border:`1px solid rgba(0,255,135,.15)`,borderRadius:8,padding:11}}>
+                  <div style={{...lbl,marginBottom:5}}>Oracle AI 🔮</div>
+                  <div style={{fontFamily:SANS,fontSize:11,color:T.mid,lineHeight:1.6}}>Añade <strong style={{color:T.txt}}>$O (Realty Income)</strong> — yield 5.4%, paga mensual. Activa <strong style={{color:T.txt}}>DRIP en MSFT</strong> para componer +$1.2K en 10 años.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
       {/* BOTTOM BAR */}
       <div style={{display:"flex",alignItems:"center",gap:16,padding:"6px 20px",background:T.bg2,borderTop:`1px solid ${T.br}`,fontFamily:MONO,fontSize:10,color:T.dim}}>
         <span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:4,height:4,borderRadius:"50%",background:T.grn}}/>Finnhub <strong style={{color:T.txt}}>CONNECTED</strong></span>
