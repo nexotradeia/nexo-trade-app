@@ -460,16 +460,39 @@ footer p{font-size:12px;color:var(--hint)}
   <div class="price-header">
     <p class="sec-eyebrow">Planes</p>
     <h2 class="sec-h2" style="margin-bottom:0">Empieza gratis.<br>Escala cuando estés listo.</h2>
-    <p style="font-size:14px;color:var(--muted);margin:10px 0 24px">Sin tarjeta · Cancela cuando quieras</p>
-    <div class="price-hero-row">
-      <span class="price-big">$6.58</span>
-      <div class="price-meta"><span>/mes Premium</span><small>facturado anual · $79/año</small></div>
+    <p style="font-size:14px;color:var(--muted);margin:10px 0 32px">Sin tarjeta · Cancela cuando quieras · 7 días gratis</p>
+
+    <!-- Plan cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:640px;margin:0 auto 36px">
+
+      <!-- Plan mensual -->
+      <div style="border:1px solid var(--border2);border-radius:20px;padding:28px 24px;text-align:center;background:var(--surface)">
+        <p style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">MENSUAL</p>
+        <div style="display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:6px">
+          <span style="font-size:18px;font-weight:800;color:var(--muted);margin-top:8px">$</span>
+          <span style="font-size:52px;font-weight:900;color:var(--text);line-height:1">9.99</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:20px">/mes · sin compromiso</p>
+        <button onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')" style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--text);font-size:13px;font-weight:700;padding:12px;border-radius:10px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='var(--border2)'">Empezar mensual</button>
+      </div>
+
+      <!-- Plan anual — destacado -->
+      <div style="border:2px solid var(--green);border-radius:20px;padding:28px 24px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,217,126,.08),transparent 70%);position:relative;overflow:hidden">
+        <!-- Badge oferta -->
+        <div style="position:absolute;top:14px;right:-1px;background:linear-gradient(90deg,#92400e,#f59e0b);color:#fff;font-size:10px;font-weight:800;padding:4px 12px 4px 10px;border-radius:6px 0 0 6px;letter-spacing:.5px">🔥 OFERTA FUNDADOR</div>
+        <p style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:14px">ANUAL · MEJOR PRECIO</p>
+        <div style="display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:2px">
+          <span style="font-size:18px;font-weight:800;color:var(--green);margin-top:8px">$</span>
+          <span style="font-size:52px;font-weight:900;color:var(--green);line-height:1">6.58</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:4px">/mes · facturado <strong style="color:var(--text)">$79/año</strong></p>
+        <p style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:20px">Ahorras $40.88 vs mensual</p>
+        <button onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')" style="width:100%;background:var(--green);border:none;color:#001a0d;font-size:13px;font-weight:800;padding:12px;border-radius:10px;cursor:pointer;transition:filter .15s" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter='none'">⚡ Empezar por $79/año</button>
+      </div>
+
     </div>
-    <p class="price-compare">O $9.99/mes · <s style="opacity:.5">Bloomberg: $340/mes</s></p>
-    <div class="price-btns">
-      <button class="pb-main" onclick="scroll2('cta-final')">⚡ Empezar Premium — $6.58/mes</button>
-      <button class="pb-free" onclick="scroll2('cta-final')">Empezar gratis</button>
-    </div>
+
+    <p style="font-size:12px;color:var(--hint);margin-bottom:8px">🛡 Garantía de reembolso 30 días · <s style="opacity:.5">Bloomberg: $340/mes</s> · 7 días gratis sin cargo</p>
   </div>
 
   <table class="comp">
