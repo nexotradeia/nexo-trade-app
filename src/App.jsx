@@ -19920,7 +19920,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [alFired, setAlFired] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(AL_KEY+"_fired")||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
   const [notifPerm, setNotifPerm] = useState(()=>{ try{ return (typeof Notification!=="undefined")?Notification.permission:"default"; }catch{ return "default"; } });
   const alItemsRef = useRef(alItems); alItemsRef.current = alItems;
-  const askNotif = ()=>{ try{ if(typeof Notification!=="undefined"){ Notification.requestPermission().then(p=>setNotifPerm(p)); } }catch{} };
+  const askNotif = ()=>{ try{ if(typeof Notification!=="undefined"){ Notification.requestPermission().then(p=>{ setNotifPerm(p); if(p==="granted"){ try{ subscribeWebPush(user); }catch{} } }); } }catch{} };
   const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
   const JR_KEY = `nexo_journal_${user?.id||"guest"}`;
   const [jrItems, setJrItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(JR_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
@@ -19977,6 +19977,17 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   useEffect(()=>{ try{ localStorage.setItem(AL_KEY, JSON.stringify(alItems)); }catch{} },[alItems, AL_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(JR_KEY, JSON.stringify(jrItems)); }catch{} },[jrItems, JR_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(AL_KEY+"_fired", JSON.stringify(alFired)); }catch{} },[alFired, AL_KEY]);
+  // ☁️ Sincronizar alertas activas a la nube → el emisor de Web Push (nexo_push_alert.py)
+  //    las evalúa aunque la app esté cerrada. Solo usuarios logueados; con debounce.
+  useEffect(()=>{
+    if(!user?.id) return;
+    const t=setTimeout(()=>{
+      const cloud=alItems.filter(a=>a.on).map(a=>({id:String(a.id),sym:a.sym,type:a.type,target:a.target,freq:a.freq}));
+      try{ supabase.from("user_alerts").upsert({user_id:user.id,alerts:cloud,updated_at:new Date().toISOString()}); }catch{}
+    },1500);
+    return ()=>clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[alItems,user?.id]);
   useEffect(()=>{ try{ localStorage.setItem(OPT_KEY, JSON.stringify(optItems)); }catch{} },[optItems, OPT_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(DIV_KEY, JSON.stringify(divItems)); }catch{} },[divItems, DIV_KEY]);
 
