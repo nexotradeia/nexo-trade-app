@@ -19881,6 +19881,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [scMarket, setScMarket] = useState("NYSE + NASDAQ");
   const [scSector, setScSector] = useState("Todos");
   const [scQuery, setScQuery] = useState("");
+  const [scReturn, setScReturn] = useState("Cualquiera");
+  const [scVolume, setScVolume] = useState("Cualquiera");
+  const [scCap, setScCap] = useState("Cualquiera");
+  const [scRan, setScRan] = useState(false);
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
   const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
@@ -20168,7 +20172,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       <div style={{height:48,background:T.bg2,borderBottom:`1px solid ${T.br}`,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 18px"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:26,height:26,background:T.grn,clipPath:"polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:T.bg}}>N</div>
-          <div><div style={{fontFamily:MONO,fontSize:13,fontWeight:700,letterSpacing:3,textTransform:"uppercase"}}>NEXO<span style={{color:T.grn}}>TERMINAL</span></div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>PRO TRADER · v4.2.1</div></div>
+          <div><div style={{fontFamily:MONO,fontSize:12.5,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap"}}>PORTAFOLIO TERMINAL <span style={{color:T.grn,textShadow:"0 0 12px rgba(0,255,135,.5)"}}>ORACLE IA</span></div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1}}>PRO TRADER · v4.2.1</div></div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
           {[["portfolio","PORTFOLIO"],["charts","CHARTS"],["screener","SCREENER"],["alerts","ALERTS"],["journal","JOURNAL"]].map(([k,l])=>(
@@ -20398,18 +20402,45 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       {/* ── SCREENER VIEW ── */}
       {termTab==="screener" && (()=>{
         const SC=[
-          ["AAPL","Apple Inc.","$301.54","+1.89","+18.3","+22.1","64.2M","$4.58T","31.4","1.6",82,"HOLD"],
-          ["NVDA","NVIDIA Corp.","$208.3","+2.41","+41.2","+68.4","48.8M","$5.12T","68.2","1.4",91,"BUY"],
-          ["MSFT","Microsoft Corp.","$412.8","+0.92","+12.1","+18.3","22.4M","$3.07T","36.8","2.2",88,"HOLD"],
-          ["META","Meta Platforms","$589.1","-0.87","+28.7","+42.6","18.2M","$1.49T","28.4","2.1",79,"HOLD"],
-          ["TSLA","Tesla Inc.","$408.7","+4.53","+22.4","+35.8","94.6M","$1.31T","78.1","0.9",61,"WATCH"],
-          ["AMZN","Amazon.com","$244.8","+1.24","+14.8","+21.4","36.8M","$2.58T","44.2","1.8",84,"BUY"],
-          ["GOOG","Alphabet Inc.","$362.4","+0.66","+11.8","+16.2","24.2M","$2.21T","26.8","1.8",80,"WATCH"],
-          ["COST","Costco Wholesale","$973.38","-0.3","-3.4","+8.2","3.2M","$432B","54.8","1.7",72,"HOLD"],
-          ["BTC","Bitcoin","$63,844","+1.92","+38.2","+52.4","$28B","$1.26T","—","1.3",74,"BUY"],
+          ["AAPL","Apple Inc.","$301.54","+1.89","+18.3","+22.1","64.2M","$4.58T","31.4","1.6",82,"HOLD","Tech","NASDAQ"],
+          ["NVDA","NVIDIA Corp.","$208.3","+2.41","+41.2","+68.4","48.8M","$5.12T","68.2","1.4",91,"BUY","Tech","NASDAQ"],
+          ["MSFT","Microsoft Corp.","$412.8","+0.92","+12.1","+18.3","22.4M","$3.07T","36.8","2.2",88,"HOLD","Tech","NASDAQ"],
+          ["META","Meta Platforms","$589.1","-0.87","+28.7","+42.6","18.2M","$1.49T","28.4","2.1",79,"HOLD","Tech","NASDAQ"],
+          ["TSLA","Tesla Inc.","$408.7","+4.53","+22.4","+35.8","94.6M","$1.31T","78.1","0.9",61,"WATCH","Consumo","NASDAQ"],
+          ["AMZN","Amazon.com","$244.8","+1.24","+14.8","+21.4","36.8M","$2.58T","44.2","1.8",84,"BUY","Consumo","NASDAQ"],
+          ["GOOG","Alphabet Inc.","$362.4","+0.66","+11.8","+16.2","24.2M","$2.21T","26.8","1.8",80,"WATCH","Tech","NASDAQ"],
+          ["COST","Costco Wholesale","$973.38","-0.3","-3.4","+8.2","3.2M","$432B","54.8","1.7",72,"HOLD","Consumo","NASDAQ"],
+          ["JPM","JPMorgan Chase","$248.6","+0.74","+9.8","+14.5","9.1M","$712B","13.2","2.0",83,"BUY","Finanzas","NYSE"],
+          ["V","Visa Inc.","$312.4","+0.31","+7.2","+11.3","6.4M","$598B","32.1","2.3",81,"HOLD","Finanzas","NYSE"],
+          ["XOM","Exxon Mobil","$118.7","-0.42","+5.1","+6.8","14.2M","$487B","13.8","1.5",70,"HOLD","Energía","NYSE"],
+          ["UNH","UnitedHealth","$528.9","+1.12","-2.4","+4.1","3.8M","$486B","18.6","1.6",73,"HOLD","Salud","NYSE"],
+          ["WMT","Walmart Inc.","$89.4","+0.58","+10.4","+19.7","11.3M","$719B","38.4","2.1",85,"BUY","Consumo","NYSE"],
+          ["BTC","Bitcoin","$63,844","+1.92","+38.2","+52.4","$28B","$1.26T","—","1.3",74,"BUY","Crypto","Crypto"],
         ];
+        const pNum=(s)=>parseFloat(String(s).replace(/[^0-9.\-]/g,""))||0;
+        const pVol=(s)=>{const n=pNum(s); return /B/.test(s)?n*1000:n;}; // en millones
+        const pCap=(s)=>{const n=pNum(s); return /T/.test(s)?n*1000:n;}; // en miles de millones (B)
         const q=scQuery.trim().toUpperCase();
-        const list=q? SC.filter(r=>r[0].includes(q)||r[1].toUpperCase().includes(q)) : SC;
+        const filtered=SC.filter(r=>{
+          if(scMarket==="Crypto" && r[13]!=="Crypto") return false;
+          if(scMarket==="NYSE" && r[13]!=="NYSE") return false;
+          if(scMarket==="NASDAQ" && r[13]!=="NASDAQ") return false;
+          if(scMarket==="NYSE + NASDAQ" && r[13]==="Crypto") return false;
+          if(scSector!=="Todos" && r[12]!==scSector) return false;
+          const ytd=pNum(r[5]);
+          if(scReturn==="> 0%" && !(ytd>0)) return false;
+          if(scReturn==="> 20%" && !(ytd>20)) return false;
+          if(scReturn==="> 50%" && !(ytd>50)) return false;
+          const vol=pVol(r[6]);
+          if(scVolume==="> 20M" && !(vol>20)) return false;
+          if(scVolume==="> 50M" && !(vol>50)) return false;
+          const cap=pCap(r[7]);
+          if(scCap==="> 1T" && !(cap>1000)) return false;
+          if(scCap==="> 500B" && !(cap>500)) return false;
+          if(q && !(r[0].includes(q)||r[1].toUpperCase().includes(q))) return false;
+          return true;
+        });
+        const list = scRan ? filtered : [];
         const scoreC=(s)=> s>=85?T.grn:s>=70?T.gold:T.red;
         const shC=(v)=>{const n=parseFloat(v); return n>=2?T.grn:n>=1.5?T.gold:T.red;};
         const sigC={BUY:[T.grn,"▲ BUY"],HOLD:[T.gold,"◆ HOLD"],WATCH:[T.blue,"◎ WATCH"]};
@@ -20421,12 +20452,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         <div style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-              {[["Mercado",scMarket,setScMarket,["NYSE + NASDAQ","NYSE","NASDAQ","Crypto"]],["Sector",scSector,setScSector,["Todos","Tech","Consumo","Finanzas","Salud","Energía"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
-              {["Retorno","Volumen","Mkt Cap"].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f}</span><select style={selStyle}><option style={{background:T.bg2}}>Cualquiera</option></select></div>))}
+              {[["Mercado",scMarket,setScMarket,["NYSE + NASDAQ","NYSE","NASDAQ","Crypto"]],["Sector",scSector,setScSector,["Todos","Tech","Consumo","Finanzas","Salud","Energía"]],["Retorno",scReturn,setScReturn,["Cualquiera","> 0%","> 20%","> 50%"]],["Volumen",scVolume,setScVolume,["Cualquiera","> 20M","> 50M"]],["Mkt Cap",scCap,setScCap,["Cualquiera","> 500B","> 1T"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
               <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>Buscar</span><input value={scQuery} onChange={e=>setScQuery(e.target.value)} placeholder="AAPL, TSLA…" style={{...selStyle,width:120}}/></div>
-              <button style={{background:T.grn,color:T.bg,border:"none",fontFamily:MONO,fontSize:11,fontWeight:700,padding:"7px 14px",borderRadius:5,cursor:"pointer",letterSpacing:.5,boxShadow:"0 0 14px rgba(0,255,135,.3)"}}>▶ EJECUTAR SCAN</button>
-              <button onClick={()=>{setScQuery("");setScMarket("NYSE + NASDAQ");setScSector("Todos");}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
-              <span style={{marginLeft:"auto",fontFamily:MONO,fontSize:11,color:T.dim}}>{list.length} resultados</span>
+              <button onClick={()=>setScRan(true)} style={{background:T.grn,color:T.bg,border:"none",fontFamily:MONO,fontSize:11,fontWeight:700,padding:"7px 14px",borderRadius:5,cursor:"pointer",letterSpacing:.5,boxShadow:"0 0 14px rgba(0,255,135,.3)"}}>▶ EJECUTAR SCAN</button>
+              <button onClick={()=>{setScQuery("");setScMarket("NYSE + NASDAQ");setScSector("Todos");setScReturn("Cualquiera");setScVolume("Cualquiera");setScCap("Cualquiera");setScRan(false);}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
+              <span style={{marginLeft:"auto",fontFamily:MONO,fontSize:11,color:scRan?T.grn:T.dim}}>{scRan?list.length:0} resultados</span>
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
@@ -20447,7 +20477,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                   </tr>
                 );})}</tbody>
               </table>
-              <div style={{padding:"8px 16px",fontFamily:MONO,fontSize:9,color:T.dim}}>Precio y % hoy = datos de mercado · Score Oracle y señales = <span style={{color:T.gold}}>DEMO</span></div>
+              {!scRan && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>🔍</div><div style={{fontSize:13,color:T.mid,letterSpacing:.5}}>Configura los filtros y pulsa <span style={{color:T.grn}}>▶ EJECUTAR SCAN</span></div><div style={{fontSize:11,marginTop:6}}>Los resultados aparecerán aquí</div></div>}
+              {scRan && list.length===0 && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>∅</div><div style={{fontSize:13,color:T.mid}}>Sin coincidencias para esos filtros</div><div style={{fontSize:11,marginTop:6}}>Ajusta los filtros o pulsa ↻ Reset</div></div>}
+              {scRan && list.length>0 && <div style={{padding:"8px 16px",fontFamily:MONO,fontSize:9,color:T.dim}}>Precio y % hoy = datos de mercado · Score Oracle y señales = <span style={{color:T.gold}}>DEMO</span></div>}
             </div>
           </div>
           {/* RIGHT */}
