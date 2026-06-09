@@ -20437,10 +20437,83 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   });
 
   if(!isPremium) return(
-    <PremiumGate lang={isEN?"en":"es"} icon="💼" onPlans={onNeedPremium}
-      title={isEN?"Portfolio Terminal Oracle AI":"Portafolio Terminal Oracle IA"}
-      desc={isEN?"Track your positions, monitor P&L in real time and share your best trades with the community.":"Registra tus posiciones, monitorea tu P&L en tiempo real y comparte tus mejores trades con la comunidad."}
-      bullets={isEN?["📈 Stocks, ETFs and crypto","💰 Real-time P&L with live prices","🔮 AI projections & health score","📤 Share positions to the feed"]:["📈 Acciones, ETFs y crypto","💰 P&L en tiempo real con precios live","🔮 Proyecciones IA y health score","📤 Comparte posiciones al feed"]}/>
+    <div style={{position:"relative",borderRadius:20,overflow:"hidden",minHeight:580,background:"#06080e",border:"1px solid rgba(0,232,122,.18)",maxWidth:980,margin:"20px auto",boxShadow:"0 0 60px rgba(0,232,122,.06)"}}>
+      {/* ── TERMINAL BACKGROUND (blurred) ── */}
+      <div aria-hidden style={{position:"absolute",inset:0,filter:"blur(5px)",opacity:.45,userSelect:"none",pointerEvents:"none",padding:"16px 20px"}}>
+        {/* Top bar */}
+        <div style={{display:"flex",gap:6,marginBottom:12}}>
+          {["PORTFOLIO","CHARTS","SCREENER","ALERTS","JOURNAL"].map((t,i)=>(
+            <div key={i} style={{background:i===0?"rgba(0,232,122,.15)":"rgba(255,255,255,.04)",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,color:i===0?"#00e87a":"#4a6280",border:`1px solid ${i===0?"rgba(0,232,122,.3)":"rgba(255,255,255,.07)"}`}}>{t}</div>
+          ))}
+        </div>
+        {/* Summary cards */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+          {[["Total Value","$48,320",""],["Total P&L","+$6,840","+16.5%"],["Today","+$412","+0.86%"],["AI Score","87/100","BULLISH"]].map(([l,v,s],i)=>(
+            <div key={i} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"10px 12px"}}>
+              <div style={{fontSize:10,color:"#4a6280",marginBottom:4}}>{l}</div>
+              <div style={{fontSize:16,fontWeight:800,color:i===0?"#c8daea":i===3?"#f0b429":"#00e87a",fontFamily:"monospace"}}>{v}</div>
+              {s&&<div style={{fontSize:10,color:"#00e87a"}}>{s}</div>}
+            </div>
+          ))}
+        </div>
+        {/* Rows */}
+        {[["NVDA","NVIDIA Corp.","42","$208.30","+$3,240","+18.4%","🟢"],["AAPL","Apple Inc.","15","$307.30","+$890","+21.2%","🟢"],["BTC","Bitcoin","0.5","$63,844","+$1,920","+6.4%","🟢"],["TSLA","Tesla Inc.","10","$391.00","-$480","-10.9%","🔴"],["META","Meta Platforms","8","$593.00","+$1,370","+40.6%","🟢"],["AMZN","Amazon.com","5","$246.00","+$610","+99.2%","🟢"]].map(([tk,nm,sh,pr,pnl,pct,dot],i)=>(
+          <div key={i} style={{display:"grid",gridTemplateColumns:"60px 1fr 50px 80px 90px 70px 28px",gap:8,alignItems:"center",padding:"10px 6px",borderBottom:"1px solid rgba(255,255,255,.05)"}}>
+            <span style={{fontWeight:900,fontFamily:"monospace",color:"#c8daea",fontSize:13}}>{tk}</span>
+            <span style={{fontSize:11,color:"#4a6280"}}>{nm}</span>
+            <span style={{fontSize:11,color:"#4a6280"}}>{sh} sh</span>
+            <span style={{fontFamily:"monospace",fontSize:12,color:"#7a9ab8"}}>{pr}</span>
+            <span style={{fontWeight:800,fontSize:12,color:pnl.startsWith("+")?"#00e87a":"#ff3d5a"}}>{pnl}</span>
+            <span style={{fontWeight:700,fontSize:11,color:pct.startsWith("+")?"#00e87a":"#ff3d5a"}}>{pct}</span>
+            <span>{dot}</span>
+          </div>
+        ))}
+        {/* Mini chart */}
+        <svg width="100%" height="60" viewBox="0 0 600 60" style={{marginTop:8}}>
+          <defs><linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#00e87a" stopOpacity=".2"/><stop offset="100%" stopColor="#00e87a" stopOpacity="0"/></linearGradient></defs>
+          <path d="M0,45 C40,42 80,38 120,32 C160,26 200,30 240,22 C280,14 320,18 360,11 C400,4 440,8 480,5 C520,2 560,6 600,3 L600,60 L0,60 Z" fill="url(#cg2)"/>
+          <path d="M0,45 C40,42 80,38 120,32 C160,26 200,30 240,22 C280,14 320,18 360,11 C400,4 440,8 480,5 C520,2 560,6 600,3" fill="none" stroke="#00e87a" strokeWidth="2"/>
+        </svg>
+      </div>
+      {/* Gradient overlay */}
+      <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(6,8,14,.1) 0%,rgba(6,8,14,.92) 55%)"}}/>
+      {/* Top glow line */}
+      <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,#00e87a,rgba(0,212,255,.5),transparent)"}}/>
+      {/* ── OVERLAY CARD ── */}
+      <div style={{position:"relative",zIndex:2,maxWidth:480,margin:"0 auto",textAlign:"center",padding:"90px 24px 52px"}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:7,background:"rgba(0,232,122,.1)",border:"1px solid rgba(0,232,122,.25)",borderRadius:100,padding:"5px 16px",fontSize:11,fontWeight:700,color:"#00e87a",letterSpacing:1,marginBottom:20}}>
+          <span style={{width:6,height:6,borderRadius:"50%",background:"#00e87a",display:"inline-block",animation:"nexoPremiumGlow 1.5s ease-in-out infinite"}}/>
+          PREMIUM FEATURE
+        </div>
+        <div style={{fontSize:48,marginBottom:12,filter:"drop-shadow(0 0 20px rgba(0,232,122,.4))"}}>💼</div>
+        <h2 style={{color:"#f0f6ff",fontWeight:900,fontSize:26,margin:"0 0 10px",letterSpacing:-.5}}>Portfolio Terminal <span style={{color:"#00e87a"}}>Oracle AI</span></h2>
+        <p style={{color:"#6888a8",fontSize:14,lineHeight:1.7,margin:"0 0 24px"}}>Track every position in real time — stocks, ETFs and crypto — with live P&L, AI health score and instant sharing to the feed.</p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:28,textAlign:"left"}}>
+          {["📈 Stocks, ETFs & crypto","💰 Live P&L via Finnhub","🔮 Oracle AI projections","📤 Share to community feed","📊 Portfolio evolution chart","🔔 Custom price alerts"].map((b,i)=>(
+            <div key={i} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"9px 12px",fontSize:12,fontWeight:600,color:"#a0c0e8"}}>{b}</div>
+          ))}
+        </div>
+        {/* Price */}
+        <div style={{background:"rgba(0,232,122,.07)",border:"1px solid rgba(0,232,122,.2)",borderRadius:14,padding:"14px 20px",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"center",gap:20}}>
+          <div>
+            <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:36,fontWeight:700,color:"#00e87a",lineHeight:1}}><span style={{fontSize:18,verticalAlign:"top",marginTop:6,display:"inline-block",color:"rgba(0,232,122,.7)"}}>$</span>6<span style={{fontSize:20}}>.58</span></div>
+            <div style={{fontSize:11,color:"#6888a8"}}>per month · billed $79/year</div>
+          </div>
+          <div style={{width:1,height:40,background:"rgba(255,255,255,.08)"}}/>
+          <div style={{textAlign:"left"}}>
+            <div style={{fontSize:11,color:"#3a5068",textDecoration:"line-through"}}>$15.99/mo monthly</div>
+            <div style={{fontSize:12,fontWeight:700,color:"#00e87a"}}>🎉 Save $113/year</div>
+          </div>
+        </div>
+        <button onClick={onNeedPremium}
+          style={{display:"block",width:"100%",background:"linear-gradient(135deg,#00e87a,#00b85e)",border:"none",borderRadius:14,padding:"16px 32px",color:"#06080e",fontSize:16,fontWeight:900,cursor:"pointer",boxShadow:"0 8px 32px rgba(0,232,122,.35)",marginBottom:12}}>
+          🎉 Get Annual Premium — $79/year →
+        </button>
+        <div style={{fontSize:11,color:"#3a5068",display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+          <span>✓ Instant access</span><span>✓ Cancel anytime</span><span>✓ 30-day guarantee</span>
+        </div>
+      </div>
+    </div>
   );
 
   return (()=>{
