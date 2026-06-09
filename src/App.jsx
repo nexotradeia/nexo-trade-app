@@ -19886,6 +19886,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [scCap, setScCap] = useState("Cualquiera");
   const [scRan, setScRan] = useState(false);
   const [scOrigin, setScOrigin] = useState("Todas"); // Todas | Portfolio | Watchlist
+  const [optTicker, setOptTicker] = useState("AAPL");
+  const [optExpiry, setOptExpiry] = useState("Jul 5");
+  const [divDrip, setDivDrip] = useState({});
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
   const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
@@ -20179,6 +20182,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           {[["portfolio","PORTFOLIO"],["charts","CHARTS"],["screener","SCREENER"],["alerts","ALERTS"],["journal","JOURNAL"]].map(([k,l])=>(
             <button key={k} onClick={()=>setTermTab(k)} style={{padding:"5px 12px",borderRadius:4,fontFamily:MONO,fontSize:11,fontWeight:500,letterSpacing:.5,cursor:"pointer",border:termTab===k?`1px solid rgba(0,255,135,.3)`:`1px solid ${T.br2}`,background:termTab===k?"rgba(0,255,135,.12)":"transparent",color:termTab===k?T.grn:T.mid}}>{l}</button>
           ))}
+          <div style={{width:1,height:18,background:T.br2,margin:"0 2px"}}/>
+          <button onClick={()=>setTermTab("options")} style={{padding:"5px 12px",borderRadius:4,fontFamily:MONO,fontSize:11,fontWeight:500,letterSpacing:.5,cursor:"pointer",border:termTab==="options"?`1px solid rgba(77,166,255,.4)`:`1px solid ${T.br2}`,background:termTab==="options"?"rgba(77,166,255,.12)":"transparent",color:termTab==="options"?T.blue:T.mid}}>⬡ OPTIONS</button>
+          <button onClick={()=>setTermTab("dividends")} style={{padding:"5px 12px",borderRadius:4,fontFamily:MONO,fontSize:11,fontWeight:500,letterSpacing:.5,cursor:"pointer",border:termTab==="dividends"?`1px solid rgba(240,180,41,.4)`:`1px solid ${T.br2}`,background:termTab==="dividends"?"rgba(240,180,41,.12)":"transparent",color:termTab==="dividends"?T.gold:T.mid}}>💰 DIVIDENDS</button>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:11}}><span style={{width:6,height:6,borderRadius:"50%",background:mkt.color||T.grn,boxShadow:`0 0 8px ${mkt.color||T.grn}`,animation:"nxtBl 2s ease-in-out infinite"}}/><span style={{color:mkt.color||T.grn,letterSpacing:.5}}>{(mkt.label||"MARKET").toUpperCase()}</span><span style={{color:T.dim}}>· {mkt.sub||""}</span></div>
@@ -20602,6 +20608,167 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{background:T.bg3,border:`1px solid rgba(0,255,135,.15)`,borderRadius:8,padding:12}}>
                 <div style={{display:"flex",alignItems:"baseline",gap:6,marginBottom:8}}><span style={{fontFamily:MONO,fontSize:28,fontWeight:700,color:T.grn,textShadow:"0 0 18px rgba(0,255,135,.3)"}}>74</span><span style={{fontFamily:MONO,fontSize:11,color:T.dim}}>/100</span></div>
                 <div style={{fontFamily:SANS,fontSize:11,color:T.mid,lineHeight:1.6}}>Disciplina sólida. Tu mayor fuga: cerrar ganadores temprano por ansiedad (visto en BKNG hoy). Trabaja en <strong style={{color:T.txt}}>dejar correr los winners</strong>.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
+      {/* ── OPTIONS VIEW ── */}
+      {termTab==="options" && (()=>{
+        const cyan="#22d3ee";
+        const KPI=[
+          ["P&L Opciones","+$4,264",T.grn,"▲ +32.4% en 30D",T.grn],
+          ["Posiciones Abiertas","12",T.purp,"8 calls · 4 puts",T.dim],
+          ["Prima Cobrada (30D)","$1,840",T.gold,"Covered calls + CSP",T.dim],
+          ["Delta Neta","+0.42",T.blue,"Sesgo alcista moderado",T.dim],
+          ["Theta Diaria","−$48",T.red,"Decay: $48/día",T.dim],
+          ["IV Implícita Media","28.4%",cyan,"vs HV 30D: 22.1%",T.dim],
+        ];
+        const CAD=[["AAPL","$301.54","28.4","64",T.gold],["NVDA","$208.3","42.1","",T.red],["MSFT","$412.8","22.8","",T.grn],["META","$589.1","35.6","",T.red],["TSLA","$408.7","58.2","",T.red]];
+        const GK=[["Δ","+0.38",T.grn,76],["Γ","0.028",T.blue,40],["θ","−$12",T.red,30],["ν","$18",T.blue,55],["ρ","$4.2",T.purp,20]];
+        const EXPO=[["Covered Calls",35,T.grn],["CSP",28,T.gold],["Spreads",22,T.blue],["Naked Puts",15,T.purp]];
+        const EXPS=["Jun 21","Jun 28","Jul 5","Jul 19","Aug 16"];
+        const CH=[
+          [280,"22.40","22.60","1.6K","14.2K","32.1","0.82","-0.18","30.4","3.2K","0.3K","0.32","0.28"],
+          [285,"17.60","17.80","2.1K","18.6K","30.4","0.76","-0.24","29.2","5.8K","0.4K","0.58","0.52"],
+          [290,"13.20","13.40","3.4K","24.8K","29.2","0.68","-0.32","28.6","8.4K","0.7K","1.04","0.96"],
+          [295,"9.40","9.60","4.8K","31.2K","28.8","0.59","-0.41","28.2","12.0K","0.9K","1.72","1.60"],
+          [300,"6.20","6.40","8.2K","48.6K","28.4","0.49","-0.51","27.8","22.0K","1.8K","2.96","2.80"],
+          [305,"3.80","4.00","6.4K","38.4K","28.2","0.38","-0.62","28.0","18.4K","1.2K","4.80","4.60"],
+          [310,"2.10","2.24","4.2K","28.8K","28.6","0.28","-0.72","28.4","12.8K","0.7K","7.00","6.80"],
+          [315,"1.08","1.16","2.8K","18.2K","29.2","0.19","-0.81","28.8","8.0K","0.4K","9.80","9.60"],
+          [320,"0.52","0.58","1.6K","10.4K","30.1","0.12","-0.88","29.4","4.8K","0.2K","13.40","13.20"],
+          [325,"0.24","0.28","0.8K","5.2K","31.4","0.07","-0.93","30.2","2.4K","0.1K","17.20","17.00"],
+        ];
+        const spotK=300;
+        const pK=(s)=>parseFloat(String(s).replace(/[^0-9.]/g,""))*(/K/.test(s)?1000:1);
+        const maxOI=Math.max(...CH.map(r=>Math.max(pK(r[4]),pK(r[9]))));
+        const POS=[
+          ["LONG","CALL",T.grn,"AAPL $305 Jul 19","Debit Spread · +2 contratos · Δ 0.38 · θ −12/día","$4.20","$4.00","41","−$40","−4.8%",false],
+          ["SHORT","CALL",T.grn,"AAPL $310 Jul 19","Debit Spread · −2 contratos · Δ 0.28 · θ 8/día","$2.40","$2.24","41","+$32","+6.7%",true],
+          ["SHORT","PUT",T.red,"NVDA $195 Jun 21","Cash Secured Put · −1 contrato · Δ −0.18 · θ 22/día","$2.10","$0.84","13","+$126","+60.0%",true],
+          ["SHORT","CALL",T.grn,"MSFT $420 Jul 5","Covered Call · −2 contratos · Δ 0.24 · θ 14/día","$3.80","$2.20","27","+$320","+42.0%",true],
+        ];
+        const GKD=[["Delta","+0.38",T.grn,"Por cada $1 que sube AAPL, la opción sube $0.38"],["Gamma","0.028",T.blue,"Velocidad de cambio del delta"],["Theta","−$12",T.red,"Pierdes $12 de valor por día"],["Vega","$18",T.blue,"Por cada 1pt de IV, ganas $18"]];
+        let acc=0; const circ=2*Math.PI*30;
+        // payoff bull call spread 305/310
+        const PW=260,PH=150,ppl=8,ppr=40,ppt=14,ppb=22; const xs=295,xe=320;
+        const payoff=(s)=>{ const long=Math.max(0,s-305), short=Math.max(0,s-310); return (long-short-1.8)*100; }; // debit 1.8
+        const pys=[]; for(let i=0;i<=50;i++){ const s=xs+(xe-xs)*i/50; pys.push([s,payoff(s)]); }
+        const pmin=-200,pmax=350;
+        const xP=(s)=>ppl+(s-xs)/(xe-xs)*(PW-ppl-ppr), yP=(v)=>ppt+(1-(v-pmin)/(pmax-pmin))*(PH-ppt-ppb);
+        const payLine=pys.map(p=>xP(p[0]).toFixed(1)+","+yP(p[1]).toFixed(1)).join(" ");
+        const Demo=()=><span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px",marginLeft:6}}>DEMO</span>;
+        return (
+        <div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",borderBottom:`1px solid ${T.br}`}}>
+            {KPI.map((k,i)=>(<div key={i} style={{padding:"13px 14px",borderRight:i<5?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:k[4],marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"180px 1fr 280px",alignItems:"stretch"}}>
+            {/* LEFT */}
+            <div style={{background:T.bg2,borderRight:`1px solid ${T.br}`}}>
+              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+                <div style={{...lbl,padding:"0 14px 8px"}}>Cadenas de Opciones</div>
+                {CAD.map((c,i)=>(<div key={i} onClick={()=>setOptTicker(c[0])} style={{display:"flex",alignItems:"center",gap:9,padding:"9px 14px",borderLeft:optTicker===c[0]?`2px solid ${cyan}`:"2px solid transparent",background:optTicker===c[0]?"rgba(34,211,238,.06)":"transparent",cursor:"pointer"}}><div style={{width:26,height:26,borderRadius:5,background:avatarBg(c[0]),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:8,fontWeight:800,color:T.txt}}>{c[0].slice(0,2)}</div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{c[0]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{c[1]}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:c[4]}}>IV {c[2]}%</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>IV Rank</div></div></div>))}
+              </div>
+              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+                <div style={{...lbl,padding:"0 14px 8px"}}>Griegos · {optTicker} <Demo/></div>
+                <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:9}}>{GK.map((g,i)=>(<div key={i}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3,fontFamily:MONO,fontSize:11}}><span style={{color:g[2]}}>{g[0]}</span><span style={{color:T.txt,fontWeight:600}}>{g[1]}</span></div><div style={{height:4,background:T.bg3,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:g[3]+"%",background:g[2],borderRadius:2}}/></div></div>))}</div>
+              </div>
+              <div style={{padding:"12px 0"}}>
+                <div style={{...lbl,padding:"0 14px 8px"}}>Exposición por Tipo <Demo/></div>
+                <div style={{display:"flex",alignItems:"center",gap:12,padding:"4px 14px"}}>
+                  <svg width="84" height="84" viewBox="0 0 84 84"><g transform="rotate(-90 42 42)">{EXPO.map((d,i)=>{const len=d[1]/100*circ;const el=<circle key={i} cx="42" cy="42" r="30" fill="none" stroke={d[2]} strokeWidth="11" strokeDasharray={len+" "+(circ-len)} strokeDashoffset={-acc}/>;acc+=len;return el;})}</g><circle cx="42" cy="42" r="21" fill={T.bg2}/></svg>
+                  <div style={{display:"flex",flexDirection:"column",gap:3}}>{EXPO.map((d,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:5,fontFamily:MONO,fontSize:9}}><span style={{width:7,height:7,borderRadius:2,background:d[2]}}/><span style={{color:T.mid}}>{d[0]}</span><span style={{color:T.txt,fontWeight:600}}>{d[1]}%</span></div>))}</div>
+                </div>
+              </div>
+            </div>
+            {/* CENTER */}
+            <div style={{minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
+                <span style={{fontFamily:MONO,fontSize:16,fontWeight:700,letterSpacing:1}}>{optTicker}</span>
+                <span style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:cyan}}>$301.54</span>
+                <span style={{fontFamily:MONO,fontSize:11,color:T.mid}}>IV: <span style={{color:T.gold}}>28.4%</span> · HV: 22.1% · IV Rank <span style={{color:T.gold}}>64</span> · IV Pct 72%</span>
+                <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{...lbl,padding:0}}>Vencimiento</span>{EXPS.map(e=>(<button key={e} onClick={()=>setOptExpiry(e)} style={{padding:"4px 9px",borderRadius:3,fontFamily:MONO,fontSize:10,fontWeight:600,cursor:"pointer",border:optExpiry===e?`1px solid rgba(34,211,238,.4)`:`1px solid ${T.br}`,background:optExpiry===e?"rgba(34,211,238,.12)":"transparent",color:optExpiry===e?cyan:T.dim}}>{e}</button>))}</div>
+              </div>
+              <div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:10.5,minWidth:880}}>
+                  <thead>
+                    <tr style={{background:T.bg2}}>
+                      <th colSpan={7} style={{padding:"5px 0",textAlign:"center",color:T.grn,fontSize:9,fontWeight:700,letterSpacing:2,borderBottom:`1px solid ${T.br}`,borderRight:`1px solid ${T.br2}`}}>CALLS</th>
+                      <th style={{borderBottom:`1px solid ${T.br}`}}></th>
+                      <th colSpan={7} style={{padding:"5px 0",textAlign:"center",color:T.red,fontSize:9,fontWeight:700,letterSpacing:2,borderBottom:`1px solid ${T.br}`,borderLeft:`1px solid ${T.br2}`}}>PUTS</th>
+                    </tr>
+                    <tr style={{background:T.bg2}}>{["BID","ASK","VOL","OI","IV%","Δ","",  "STRIKE",  "","Δ","IV%","OI","VOL","ASK","BID"].map((h,i)=><th key={i} style={{padding:"6px 8px",fontSize:8,fontWeight:600,letterSpacing:.8,color:i===7?cyan:T.dim,textAlign:i===7?"center":"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr>
+                  </thead>
+                  <tbody>{CH.map((r,i)=>{const k=r[0];const callItm=k<spotK;const putItm=k>spotK;const atm=k===spotK;const oiC=(pK(r[4])/maxOI*100).toFixed(0),oiP=(pK(r[9])/maxOI*100).toFixed(0);return (
+                    <tr key={i} style={{borderBottom:"1px solid #0d1117",background:atm?"rgba(34,211,238,.06)":"transparent"}}>
+                      <td style={{padding:"7px 8px",color:T.grn,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[1]}</td>
+                      <td style={{padding:"7px 8px",color:T.mid,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[2]}</td>
+                      <td style={{padding:"7px 8px",color:T.mid,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[3]}</td>
+                      <td style={{padding:"7px 8px",background:callItm?"rgba(0,255,135,.04)":"transparent"}}><div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:30,height:4,background:T.bg4,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:oiC+"%",background:"rgba(0,255,135,.4)"}}/></div><span style={{color:T.dim,fontSize:9}}>{r[4]}</span></div></td>
+                      <td style={{padding:"7px 8px",color:T.grn,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[5]}%</td>
+                      <td style={{padding:"7px 8px",color:T.grn,fontWeight:600,background:callItm?"rgba(0,255,135,.04)":"transparent"}}>{r[6]}</td>
+                      <td style={{padding:"7px 8px",background:callItm?"rgba(0,255,135,.04)":"transparent"}}><span style={{fontSize:8,fontWeight:700,color:callItm?T.grn:T.dim}}>{callItm?"▶ ITM":"OTM"}</span></td>
+                      <td style={{padding:"7px 8px",textAlign:"center",background:atm?"rgba(34,211,238,.12)":T.bg3,borderLeft:`1px solid ${T.br2}`,borderRight:`1px solid ${T.br2}`}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:cyan}}>${k}</div>{atm&&<div style={{fontSize:7,color:cyan,letterSpacing:1}}>ATM</div>}</td>
+                      <td style={{padding:"7px 8px",background:putItm?"rgba(255,61,90,.04)":"transparent"}}><span style={{fontSize:8,fontWeight:700,color:putItm?T.red:T.dim}}>{putItm?"▶ ITM":"OTM"}</span></td>
+                      <td style={{padding:"7px 8px",color:T.red,fontWeight:600,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[7]}</td>
+                      <td style={{padding:"7px 8px",color:T.blue,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[8]}%</td>
+                      <td style={{padding:"7px 8px",background:putItm?"rgba(255,61,90,.04)":"transparent"}}><div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:30,height:4,background:T.bg4,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:oiP+"%",background:"rgba(255,61,90,.35)"}}/></div><span style={{color:T.dim,fontSize:9}}>{r[9]}</span></div></td>
+                      <td style={{padding:"7px 8px",color:T.mid,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[10]}</td>
+                      <td style={{padding:"7px 8px",color:T.mid,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[11]}</td>
+                      <td style={{padding:"7px 8px",color:T.red,background:putItm?"rgba(255,61,90,.04)":"transparent"}}>{r[12]}</td>
+                    </tr>
+                  );})}</tbody>
+                </table>
+              </div>
+              <div style={{padding:"12px 16px",borderTop:`1px solid ${T.br}`}}>
+                <div style={{...lbl,marginBottom:10}}>⬡ Mis Posiciones de Opciones <Demo/></div>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>{POS.map((p,i)=>{const tp=p[8].startsWith("+");const dteAlert=parseInt(p[7])<15;return (
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:T.bg3,border:`1px solid ${T.br}`,borderLeft:`3px solid ${p[2]}`,borderRadius:8,padding:"11px 14px",flexWrap:"wrap"}}>
+                    <span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:p[0]==="LONG"?T.grn:T.gold,background:(p[0]==="LONG"?"rgba(0,255,135,.12)":"rgba(240,180,41,.12)"),border:`1px solid ${(p[0]==="LONG"?T.grn:T.gold)}33`,borderRadius:3,padding:"3px 7px"}}>{p[0]}</span>
+                    <span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:p[2],background:p[2]+"1a",border:`1px solid ${p[2]}33`,borderRadius:3,padding:"3px 7px"}}>{p[1]}</span>
+                    <div style={{flex:1,minWidth:160}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{p[3]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginTop:1}}>{p[4]}</div></div>
+                    <div style={{textAlign:"right",fontFamily:MONO,fontSize:9,color:T.dim}}><div>Entrada</div><div style={{color:T.mid,fontSize:11}}>{p[5]}</div></div>
+                    <div style={{textAlign:"right",fontFamily:MONO,fontSize:9,color:T.dim}}><div>Actual</div><div style={{color:T.mid,fontSize:11}}>{p[6]}</div></div>
+                    <div style={{textAlign:"right",fontFamily:MONO,fontSize:9,color:T.dim}}><div>DTE</div><div style={{color:dteAlert?T.red:T.mid,fontSize:11,fontWeight:dteAlert?700:400}}>{p[7]}</div></div>
+                    <div style={{textAlign:"right",minWidth:60}}><div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:tp?T.grn:T.red}}>{p[8]}</div><div style={{fontFamily:MONO,fontSize:9,color:tp?T.grn:T.red}}>{p[9]}</div></div>
+                  </div>
+                );})}</div>
+              </div>
+            </div>
+            {/* RIGHT */}
+            <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
+              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+                <div style={{...lbl,padding:"0 14px 8px"}}>P&L Diagrama · Bull Spread <Demo/></div>
+                <div style={{padding:"0 10px"}}><svg viewBox={"0 0 "+PW+" "+PH} style={{width:"100%",height:"auto"}}>
+                  <line x1={ppl} y1={yP(0)} x2={PW-ppr} y2={yP(0)} stroke={T.br2} strokeWidth="1" strokeDasharray="2 2"/>
+                  <text x={PW-ppr+3} y={yP(0)+3} fontFamily={MONO} fontSize="8" fill={T.dim}>$0</text>
+                  <text x={PW-ppr+3} y={yP(320)+3} fontFamily={MONO} fontSize="8" fill={T.grn}>+$320</text>
+                  <text x={PW-ppr+3} y={yP(-180)+3} fontFamily={MONO} fontSize="8" fill={T.red}>−$180</text>
+                  <line x1={xP(305)} y1={ppt} x2={xP(305)} y2={PH-ppb} stroke={T.dim2||T.dim} strokeWidth="0.5" strokeDasharray="2 2"/>
+                  <line x1={xP(310)} y1={ppt} x2={xP(310)} y2={PH-ppb} stroke={T.dim2||T.dim} strokeWidth="0.5" strokeDasharray="2 2"/>
+                  <polyline points={payLine} fill="none" stroke={T.grn} strokeWidth="2" strokeLinejoin="round"/>
+                  <circle cx={xP(301.54)} cy={yP(payoff(301.54))} r="3.5" fill={T.gold}/>
+                  <text x={xP(301.54)} y={yP(payoff(301.54))-7} fontFamily={MONO} fontSize="8" fill={T.gold} textAnchor="middle">Actual</text>
+                  <text x={xP(305)} y={PH-6} fontFamily={MONO} fontSize="8" fill={cyan} textAnchor="middle">$305</text>
+                  <text x={xP(310)} y={PH-6} fontFamily={MONO} fontSize="8" fill={cyan} textAnchor="middle">$310</text>
+                </svg></div>
+              </div>
+              <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+                <div style={{...lbl,padding:"0 14px 8px"}}>Griegos Detallados <Demo/></div>
+                <div style={{padding:"0 12px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{GKD.map((g,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 11px",position:"relative",overflow:"hidden"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>{g[0]}</div><div style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:g[2],margin:"3px 0 5px"}}>{g[1]}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,lineHeight:1.4}}>{g[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:g[2]}}/></div>))}
+                  <div style={{gridColumn:"1 / -1",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 11px",position:"relative",overflow:"hidden"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>Rho</div><div style={{fontFamily:MONO,fontSize:18,fontWeight:700,color:T.purp,margin:"3px 0 5px"}}>$4.2</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim}}>Sensibilidad a tasa de interés</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:T.purp}}/></div>
+                </div>
+              </div>
+              <div style={{padding:"12px 14px"}}>
+                <div style={{...lbl,marginBottom:8}}>Oracle AI · Opciones <Demo/></div>
+                <div style={{background:T.bg3,border:`1px solid rgba(0,255,135,.15)`,borderRadius:8,padding:12}}>
+                  <div style={{display:"flex",alignItems:"baseline",gap:6,marginBottom:8}}><span style={{fontFamily:MONO,fontSize:26,fontWeight:700,color:T.grn}}>78</span><span style={{fontFamily:MONO,fontSize:11,color:T.dim}}>/100 · Análisis IV</span></div>
+                  <div style={{fontFamily:SANS,fontSize:11,color:T.mid,lineHeight:1.6,marginBottom:10}}>IV (28.4%) por encima de HV (22.1%) — favorece <strong style={{color:T.txt}}>vender prima</strong>. IV Rank 64 = elevado.</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:5}}>{[["Covered Call $310 Jul19",T.grn],["Cash Secured Put $290",T.gold],["Bull Put Spread $295/$290",T.blue],["Iron Condor $290/$315",T.purp]].map((s,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:8,background:T.bg2,border:`1px solid ${s[1]}33`,borderRadius:5,padding:"7px 10px",cursor:"pointer"}}><span style={{width:6,height:6,borderRadius:"50%",background:s[1]}}/><span style={{fontFamily:MONO,fontSize:10,color:s[1],fontWeight:600}}>{s[0]}</span></div>))}</div>
+                </div>
               </div>
             </div>
           </div>
