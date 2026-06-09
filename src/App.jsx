@@ -10076,22 +10076,22 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
       )}
 
       {/* ── 1. CALCULADORA RIESGO/RECOMPENSA ── */}
-      {tool==="riesgo" && <RiskRewardCalc/>}
+      {tool==="riesgo" && <RiskRewardCalc lang={lang}/>}
 
       {/* ── 2. SHARPE RATIO ── */}
-      {tool==="sharpe" && <SharpeCalc/>}
+      {tool==="sharpe" && <SharpeCalc lang={lang}/>}
 
       {/* ── 3. RACHA & ESTADÍSTICAS ── */}
-      {tool==="racha" && <WinStreakTracker/>}
+      {tool==="racha" && <WinStreakTracker lang={lang}/>}
 
       {/* ── 4. EVOLUCIÓN PORTAFOLIO ── */}
-      {tool==="portafolio" && <PortfolioEvolution/>}
+      {tool==="portafolio" && <PortfolioEvolution lang={lang}/>}
 
       {/* ── 5. ALERTAS DE PRECIO ── */}
-      {tool==="alertas" && <PriceAlerts/>}
+      {tool==="alertas" && <PriceAlerts lang={lang}/>}
 
       {/* ── 6. EXPORTAR DATOS ── */}
-      {tool==="exportar" && <ExportData posts={posts} user={user}/>}
+      {tool==="exportar" && <ExportData posts={posts} user={user} lang={lang}/>}
     </div>
   );
 }
@@ -10822,7 +10822,8 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
 }
 
 // ── HERRAMIENTA 1: RIESGO/RECOMPENSA ─────────────────────────────────────────
-function RiskRewardCalc(){
+function RiskRewardCalc({lang="es"}){
+  const isEN=lang==="en";
   const [entry,setEntry]=useState("");
   const [stop,setStop]=useState("");
   const [target,setTarget]=useState("");
@@ -10840,7 +10841,7 @@ function RiskRewardCalc(){
     const potLoss=shares*riskPerShare;
     return{rr,shares,potGain,potLoss,riskPerShare,gainPerShare,
       rrColor:rr>=3?"#00E58F":rr>=2?"#F59E0B":"#FF4D6A",
-      rrLabel:rr>=3?"Excelente":rr>=2?"Buena":rr>=1?"Aceptable":"Mala"};
+      rrLabel:rr>=3?(isEN?"Excellent":"Excelente"):rr>=2?(isEN?"Good":"Buena"):rr>=1?(isEN?"Acceptable":"Aceptable"):(isEN?"Poor":"Mala")};
   },[entry,stop,target,capital,riskPct]);
 
   const inp=(label,val,set,placeholder)=>(
@@ -10857,18 +10858,18 @@ function RiskRewardCalc(){
   return(
     <div className="nexo-calc-rr" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
-        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>⚖️ Calculadora Riesgo/Recompensa</h3>
-        {inp("Precio de entrada",entry,setEntry,"0.00")}
+        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>{isEN?"⚖️ Risk/Reward Calculator":"⚖️ Calculadora Riesgo/Recompensa"}</h3>
+        {inp(isEN?"Entry price":"Precio de entrada",entry,setEntry,"0.00")}
         {inp("Stop Loss",stop,setStop,"0.00")}
-        {inp("Precio objetivo (Target)",target,setTarget,"0.00")}
+        {inp(isEN?"Target price":"Precio objetivo (Target)",target,setTarget,"0.00")}
         <div style={{height:1,background:"rgba(255,255,255,0.06)",margin:"16px 0"}}/>
         <div style={{marginBottom:12}}>
-          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:0.5}}>Capital disponible ($)</label>
+          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Available capital ($)":"Capital disponible ($)"}</label>
           <input value={capital} onChange={e=>setCapital(e.target.value)} type="number"
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:14,fontFamily:"monospace",outline:"none",boxSizing:"border-box"}}/>
         </div>
         <div style={{marginBottom:16}}>
-          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:0.5}}>% de riesgo por operación: {riskPct}%</label>
+          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"% risk per trade":"% de riesgo por operación"}: {riskPct}%</label>
           <input type="range" min="0.5" max="10" step="0.5" value={riskPct} onChange={e=>setRiskPct(e.target.value)}
             style={{width:"100%",accentColor:"#F59E0B"}}/>
         </div>
@@ -10877,16 +10878,16 @@ function RiskRewardCalc(){
         <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>📊 Resultado</h3>
         {result ? (<>
           <div style={{textAlign:"center",marginBottom:20,padding:"20px",background:`rgba(${result.rr>=3?"0,229,143":result.rr>=2?"245,158,11":"255,77,106"},0.08)`,borderRadius:14,border:`1px solid rgba(${result.rr>=3?"0,229,143":result.rr>=2?"245,158,11":"255,77,106"},0.2)`}}>
-            <div style={{fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:1}}>RATIO RIESGO/RECOMPENSA</div>
+            <div style={{fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:1}}>{isEN?"RISK/REWARD RATIO":"RATIO RIESGO/RECOMPENSA"}</div>
             <div style={{fontSize:48,fontWeight:900,color:result.rrColor,fontFamily:"monospace"}}>{result.rr.toFixed(2)}<span style={{fontSize:20}}>:1</span></div>
-            <div style={{fontSize:14,color:result.rrColor,fontWeight:700}}>{result.rrLabel} operación</div>
+            <div style={{fontSize:14,color:result.rrColor,fontWeight:700}}>{result.rrLabel} {isEN?"trade":"operación"}</div>
           </div>
           {[
-            {label:"Acciones a comprar",val:`${result.shares} acciones`,color:"#F1F5F9"},
-            {label:"Riesgo máximo",val:`-$${result.potLoss.toFixed(2)}`,color:"#FF4D6A"},
-            {label:"Ganancia potencial",val:`+$${result.potGain.toFixed(2)}`,color:"#00E58F"},
-            {label:"Riesgo por acción",val:`$${result.riskPerShare.toFixed(2)}`,color:"#94A3B8"},
-            {label:"Ganancia por acción",val:`$${result.gainPerShare.toFixed(2)}`,color:"#94A3B8"},
+            {label:isEN?"Shares to buy":"Acciones a comprar",val:`${result.shares} ${isEN?"shares":"acciones"}`,color:"#F1F5F9"},
+            {label:isEN?"Max risk":"Riesgo máximo",val:`-$${result.potLoss.toFixed(2)}`,color:"#FF4D6A"},
+            {label:isEN?"Potential gain":"Ganancia potencial",val:`+$${result.potGain.toFixed(2)}`,color:"#00E58F"},
+            {label:isEN?"Risk per share":"Riesgo por acción",val:`$${result.riskPerShare.toFixed(2)}`,color:"#94A3B8"},
+            {label:isEN?"Gain per share":"Ganancia por acción",val:`$${result.gainPerShare.toFixed(2)}`,color:"#94A3B8"},
           ].map(r=>(
             <div key={r.label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
               <span style={{fontSize:13,color:"#64748B"}}>{r.label}</span>
@@ -10894,12 +10895,12 @@ function RiskRewardCalc(){
             </div>
           ))}
           <div style={{marginTop:16,padding:"12px",background:"rgba(15,76,129,0.07)",borderRadius:10,border:"1px solid rgba(15,76,129,0.15)",fontSize:12,color:"#94A3B8",lineHeight:1.6}}>
-            💡 <strong style={{color:"#0F4C81"}}>Regla de oro:</strong> Solo operar con R:R ≥ 2:1. Así puedes perder el 50% de tus operaciones y seguir siendo rentable.
+            💡 <strong style={{color:"#0F4C81"}}>{isEN?"Golden rule:":"Regla de oro:"}</strong> {isEN?"Only trade with R:R ≥ 2:1. That way you can lose 50% of your trades and still be profitable.":"Solo operar con R:R ≥ 2:1. Así puedes perder el 50% de tus operaciones y seguir siendo rentable."}
           </div>
         </>) : (
           <div style={{textAlign:"center",padding:"40px 20px",color:"#475569"}}>
             <div style={{fontSize:36,marginBottom:12}}>⚖️</div>
-            <div style={{fontSize:13}}>Ingresa entrada, stop loss y objetivo para calcular</div>
+            <div style={{fontSize:13}}>{isEN?"Enter entry, stop loss and target to calculate":"Ingresa entrada, stop loss y objetivo para calcular"}</div>
           </div>
         )}
       </div>
@@ -10908,7 +10909,8 @@ function RiskRewardCalc(){
 }
 
 // ── HERRAMIENTA 2: SHARPE RATIO ───────────────────────────────────────────────
-function SharpeCalc(){
+function SharpeCalc({lang="es"}){
+  const isEN=lang==="en";
   const [returns,setReturns]=useState("");
   const [rfRate,setRfRate]=useState("5");
   const result = useMemo(()=>{
@@ -10920,7 +10922,7 @@ function SharpeCalc(){
     const std=Math.sqrt(variance);
     const annualMean=mean*12; const annualStd=std*Math.sqrt(12);
     const sharpe=(annualMean-rf)/annualStd;
-    const label=sharpe>=2?"Excelente 🏆":sharpe>=1?"Bueno ✅":sharpe>=0.5?"Aceptable ⚠️":sharpe>=0?"Bajo 📉":"Negativo ❌";
+    const label=sharpe>=2?(isEN?"Excellent 🏆":"Excelente 🏆"):sharpe>=1?(isEN?"Good ✅":"Bueno ✅"):sharpe>=0.5?(isEN?"Acceptable ⚠️":"Aceptable ⚠️"):sharpe>=0?(isEN?"Low 📉":"Bajo 📉"):(isEN?"Negative ❌":"Negativo ❌");
     const color=sharpe>=2?"#00E58F":sharpe>=1?"#0F4C81":sharpe>=0.5?"#F59E0B":sharpe>=0?"#FF9F43":"#FF4D6A";
     return{sharpe,mean,std,annualMean,annualStd,count:vals.length,label,color};
   },[returns,rfRate]);
@@ -10928,23 +10930,23 @@ function SharpeCalc(){
   return(
     <div className="nexo-calc-sharpe" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
-        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:8}}>📐 Calculadora Sharpe Ratio</h3>
-        <p style={{color:"#64748B",fontSize:12,marginBottom:20,lineHeight:1.6}}>Mide el rendimiento ajustado al riesgo. Mayor = mejor. Ingresa tus retornos mensuales separados por comas.</p>
+        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:8}}>{isEN?"📐 Sharpe Ratio Calculator":"📐 Calculadora Sharpe Ratio"}</h3>
+        <p style={{color:"#64748B",fontSize:12,marginBottom:20,lineHeight:1.6}}>{isEN?"Measures risk-adjusted return. Higher = better. Enter your monthly returns separated by commas.":"Mide el rendimiento ajustado al riesgo. Mayor = mejor. Ingresa tus retornos mensuales separados por comas."}</p>
         <div style={{marginBottom:16}}>
-          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:0.5}}>Retornos mensuales (%) — ej: 3.2, -1.5, 4.1, 2.8</label>
+          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Monthly returns (%) — e.g. 3.2, -1.5, 4.1, 2.8":"Retornos mensuales (%) — ej: 3.2, -1.5, 4.1, 2.8"}</label>
           <textarea value={returns} onChange={e=>setReturns(e.target.value)} placeholder="3.2, -1.5, 4.1, 2.8, -0.5, 5.1, 1.2, -2.1, 3.5, 4.0, 1.8, 2.2"
             style={{width:"100%",height:100,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:13,fontFamily:"monospace",outline:"none",resize:"vertical",boxSizing:"border-box"}}/>
         </div>
         <div style={{marginBottom:16}}>
-          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:0.5}}>Tasa libre de riesgo anual (%)</label>
+          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:0.5}}>{isEN?"Annual risk-free rate (%)":"Tasa libre de riesgo anual (%)"}</label>
           <input value={rfRate} onChange={e=>setRfRate(e.target.value)} type="number" step="0.1"
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 12px",color:"#F1F5F9",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
         </div>
         {result&&<div style={{fontSize:12,color:"#475569",lineHeight:1.8}}>
-          📊 {result.count} meses de datos<br/>
-          Retorno medio mensual: <strong style={{color:"#F1F5F9"}}>{result.mean.toFixed(2)}%</strong><br/>
-          Desviación estándar: <strong style={{color:"#F1F5F9"}}>{result.std.toFixed(2)}%</strong><br/>
-          Retorno anualizado: <strong style={{color:"#00E58F"}}>{result.annualMean.toFixed(2)}%</strong>
+          📊 {result.count} {isEN?"months of data":"meses de datos"}<br/>
+          {isEN?"Avg monthly return":"Retorno medio mensual"}: <strong style={{color:"#F1F5F9"}}>{result.mean.toFixed(2)}%</strong><br/>
+          {isEN?"Standard deviation":"Desviación estándar"}: <strong style={{color:"#F1F5F9"}}>{result.std.toFixed(2)}%</strong><br/>
+          {isEN?"Annualized return":"Retorno anualizado"}: <strong style={{color:"#00E58F"}}>{result.annualMean.toFixed(2)}%</strong>
         </div>}
       </div>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
@@ -10956,12 +10958,12 @@ function SharpeCalc(){
             <div style={{fontSize:15,color:result.color,fontWeight:700,marginTop:4}}>{result.label}</div>
           </div>
           <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:"16px",marginBottom:16}}>
-            <div style={{fontSize:12,color:"#64748B",fontWeight:700,marginBottom:10}}>ESCALA DE REFERENCIA</div>
-            {[{min:"< 0",label:"Negativo — peor que el libre de riesgo",color:"#FF4D6A"},
-              {min:"0 – 0.5",label:"Bajo — rentable pero con mucho riesgo",color:"#FF9F43"},
-              {min:"0.5 – 1",label:"Aceptable — rendimiento decente",color:"#F59E0B"},
-              {min:"1 – 2",label:"Bueno — portafolio eficiente",color:"#0F4C81"},
-              {min:"> 2",label:"Excelente — clase de Warren Buffett",color:"#00E58F"},
+            <div style={{fontSize:12,color:"#64748B",fontWeight:700,marginBottom:10}}>{isEN?"REFERENCE SCALE":"ESCALA DE REFERENCIA"}</div>
+            {[{min:"< 0",label:isEN?"Negative — worse than risk-free":"Negativo — peor que el libre de riesgo",color:"#FF4D6A"},
+              {min:"0 – 0.5",label:isEN?"Low — profitable but high risk":"Bajo — rentable pero con mucho riesgo",color:"#FF9F43"},
+              {min:"0.5 – 1",label:isEN?"Acceptable — decent return":"Aceptable — rendimiento decente",color:"#F59E0B"},
+              {min:"1 – 2",label:isEN?"Good — efficient portfolio":"Bueno — portafolio eficiente",color:"#0F4C81"},
+              {min:"> 2",label:isEN?"Excellent — Warren Buffett class":"Excelente — clase de Warren Buffett",color:"#00E58F"},
             ].map(r=>(
               <div key={r.min} style={{display:"flex",gap:8,alignItems:"center",padding:"5px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
                 <span style={{width:50,fontSize:11,color:r.color,fontFamily:"monospace",fontWeight:700,flexShrink:0}}>{r.min}</span>
@@ -10972,7 +10974,7 @@ function SharpeCalc(){
         </>) : (
           <div style={{textAlign:"center",padding:"40px 20px",color:"#475569"}}>
             <div style={{fontSize:36,marginBottom:12}}>📐</div>
-            <div style={{fontSize:13}}>Ingresa tus retornos mensuales para calcular</div>
+            <div style={{fontSize:13}}>{isEN?"Enter your monthly returns to calculate":"Ingresa tus retornos mensuales para calcular"}</div>
           </div>
         )}
       </div>
@@ -10981,7 +10983,8 @@ function SharpeCalc(){
 }
 
 // ── HERRAMIENTA 3: RACHA DE GANANCIAS ────────────────────────────────────────
-function WinStreakTracker(){
+function WinStreakTracker({lang="es"}){
+  const isEN=lang==="en";
   const [trades,setTrades]=useState([]);
   const [newTrade,setNewTrade]=useState({ticker:"",result:"win",pnl:""});
   const stats = useMemo(()=>{
@@ -11008,7 +11011,7 @@ function WinStreakTracker(){
   return(
     <div className="nexo-winstreak-layout" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
-        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>🔥 Registrar Operación</h3>
+        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>{isEN?"🔥 Log Trade":"🔥 Registrar Operación"}</h3>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
           <div>
             <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4}}>TICKER</label>
@@ -11016,7 +11019,7 @@ function WinStreakTracker(){
               style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:14,fontFamily:"monospace",outline:"none",boxSizing:"border-box"}}/>
           </div>
           <div>
-            <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4}}>RESULTADO</label>
+            <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4}}>{isEN?"RESULT":"RESULTADO"}</label>
             <select value={newTrade.result} onChange={e=>setNewTrade(t=>({...t,result:e.target.value}))}
               style={{width:"100%",background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:newTrade.result==="win"?"#00E58F":"#FF4D6A",fontSize:14,fontWeight:700,outline:"none",boxSizing:"border-box"}}>
               <option value="win">✅ Win</option>
@@ -11025,11 +11028,11 @@ function WinStreakTracker(){
           </div>
         </div>
         <div style={{marginBottom:14}}>
-          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4}}>P&L ($) — positivo o negativo</label>
+          <label style={{display:"block",fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4}}>{isEN?"P&L ($) — positive or negative":"P&L ($) — positivo o negativo"}</label>
           <input value={newTrade.pnl} onChange={e=>setNewTrade(t=>({...t,pnl:e.target.value}))} placeholder="+250.00" type="number"
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:14,fontFamily:"monospace",outline:"none",boxSizing:"border-box"}}/>
         </div>
-        <button onClick={addTrade} style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:10,padding:"11px",fontSize:14,fontWeight:800,color:"#000",cursor:"pointer",marginBottom:16}}>+ Agregar Operación</button>
+        <button onClick={addTrade} style={{width:"100%",background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:10,padding:"11px",fontSize:14,fontWeight:800,color:"#000",cursor:"pointer",marginBottom:16}}>{isEN?"+ Add Trade":"+ Agregar Operación"}</button>
         {/* Historial */}
         <div style={{maxHeight:240,overflowY:"auto"}}>
           {[...trades].reverse().map(tr=>(
@@ -11045,20 +11048,20 @@ function WinStreakTracker(){
         </div>
       </div>
       <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
-        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>📊 Estadísticas</h3>
+        <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:20}}>{isEN?"📊 Statistics":"📊 Estadísticas"}</h3>
         {stats ? (<>
           {/* Racha actual */}
           <div style={{textAlign:"center",marginBottom:20,padding:"16px",background:stats.curStreak>0?"rgba(0,229,143,0.07)":"rgba(255,77,106,0.07)",borderRadius:14}}>
-            <div style={{fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:1}}>RACHA ACTUAL</div>
+            <div style={{fontSize:11,color:"#64748B",fontWeight:700,marginBottom:4,letterSpacing:1}}>{isEN?"CURRENT STREAK":"RACHA ACTUAL"}</div>
             <div style={{fontSize:44,fontWeight:900,color:stats.curStreak>0?"#00E58F":"#FF4D6A"}}>{stats.curStreak>0?"🔥":"💔"} {stats.curStreak}</div>
-            <div style={{fontSize:12,color:"#64748B"}}>Mejor racha: {stats.bestStreak} operaciones consecutivas</div>
+            <div style={{fontSize:12,color:"#64748B"}}>{isEN?"Best streak":"Mejor racha"}: {stats.bestStreak} {isEN?"trades in a row":"operaciones consecutivas"}</div>
           </div>
           {/* Stats grid */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
             {[
               {label:"Win Rate",val:`${stats.winRate.toFixed(1)}%`,color:stats.winRate>=50?"#00E58F":"#FF4D6A"},
               {label:"Total P&L",val:`${stats.totalPnl>=0?"+":""}$${stats.totalPnl.toFixed(0)}`,color:stats.totalPnl>=0?"#00E58F":"#FF4D6A"},
-              {label:"Operaciones",val:`${stats.wins}W / ${stats.losses}L`,color:"#F1F5F9"},
+              {label:isEN?"Trades":"Operaciones",val:`${stats.wins}W / ${stats.losses}L`,color:"#F1F5F9"},
               {label:"Profit Factor",val:stats.profitFactor===Infinity?"∞":stats.profitFactor.toFixed(2),color:stats.profitFactor>=1.5?"#00E58F":stats.profitFactor>=1?"#F59E0B":"#FF4D6A"},
               {label:"Avg Win",val:`+$${stats.avgWin.toFixed(0)}`,color:"#00E58F"},
               {label:"Avg Loss",val:`-$${stats.avgLoss.toFixed(0)}`,color:"#FF4D6A"},
@@ -11079,7 +11082,7 @@ function WinStreakTracker(){
         </>) : (
           <div style={{textAlign:"center",padding:"40px 20px",color:"#475569"}}>
             <div style={{fontSize:36,marginBottom:12}}>🔥</div>
-            <div style={{fontSize:13}}>Agrega operaciones para ver tus estadísticas</div>
+            <div style={{fontSize:13}}>{isEN?"Add trades to see your statistics":"Agrega operaciones para ver tus estadísticas"}</div>
           </div>
         )}
       </div>
@@ -11088,7 +11091,8 @@ function WinStreakTracker(){
 }
 
 // ── HERRAMIENTA 4: EVOLUCIÓN DEL PORTAFOLIO ───────────────────────────────────
-function PortfolioEvolution(){
+function PortfolioEvolution({lang="es"}){
+  const isEN=lang==="en";
   const [entries,setEntries]=useState([{date:"2024-01",value:"10000"},{date:"2024-06",value:"11500"},{date:"2024-12",value:"13200"},{date:"2025-06",value:"14800"}]);
   const [newDate,setNewDate]=useState(""); const [newVal,setNewVal]=useState("");
 
@@ -11117,15 +11121,15 @@ function PortfolioEvolution(){
 
   return(
     <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
-      <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:4}}>📈 Evolución de tu Portafolio</h3>
-      <p style={{color:"#64748B",fontSize:12,marginBottom:20}}>Registra el valor de tu portafolio cada mes para ver tu crecimiento real.</p>
+      <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:4}}>{isEN?"📈 Your Portfolio Growth":"📈 Evolución de tu Portafolio"}</h3>
+      <p style={{color:"#64748B",fontSize:12,marginBottom:20}}>{isEN?"Log your portfolio value each month to see your real growth.":"Registra el valor de tu portafolio cada mes para ver tu crecimiento real."}</p>
       {/* Chart */}
       {chartData.length>1 && (
         <div style={{marginBottom:20}}>
           <div style={{display:"flex",gap:20,marginBottom:12}}>
-            <div><div style={{fontSize:10,color:"#64748B",fontWeight:700}}>VALOR ACTUAL</div><div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",fontFamily:"monospace"}}>${lastVal.toLocaleString()}</div></div>
-            <div><div style={{fontSize:10,color:"#64748B",fontWeight:700}}>RETORNO TOTAL</div><div style={{fontSize:20,fontWeight:900,color:totalReturn>=0?"#00E58F":"#FF4D6A",fontFamily:"monospace"}}>{totalReturn>=0?"+":""}{totalReturn.toFixed(2)}%</div></div>
-            <div><div style={{fontSize:10,color:"#64748B",fontWeight:700}}>GANANCIA $</div><div style={{fontSize:20,fontWeight:900,color:totalGain>=0?"#00E58F":"#FF4D6A",fontFamily:"monospace"}}>{totalGain>=0?"+":"-"}${Math.abs(totalGain).toLocaleString()}</div></div>
+            <div><div style={{fontSize:10,color:"#64748B",fontWeight:700}}>{isEN?"CURRENT VALUE":"VALOR ACTUAL"}</div><div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",fontFamily:"monospace"}}>${lastVal.toLocaleString()}</div></div>
+            <div><div style={{fontSize:10,color:"#64748B",fontWeight:700}}>{isEN?"TOTAL RETURN":"RETORNO TOTAL"}</div><div style={{fontSize:20,fontWeight:900,color:totalReturn>=0?"#00E58F":"#FF4D6A",fontFamily:"monospace"}}>{totalReturn>=0?"+":""}{totalReturn.toFixed(2)}%</div></div>
+            <div><div style={{fontSize:10,color:"#64748B",fontWeight:700}}>{isEN?"GAIN $":"GANANCIA $"}</div><div style={{fontSize:20,fontWeight:900,color:totalGain>=0?"#00E58F":"#FF4D6A",fontFamily:"monospace"}}>{totalGain>=0?"+":"-"}${Math.abs(totalGain).toLocaleString()}</div></div>
           </div>
           <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
             <defs>
@@ -11148,23 +11152,24 @@ function PortfolioEvolution(){
       {/* Add entry */}
       <div style={{display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
         <div style={{flex:1,minWidth:130}}>
-          <label style={{display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4}}>MES (YYYY-MM)</label>
+          <label style={{display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4}}>{isEN?"MONTH (YYYY-MM)":"MES (YYYY-MM)"}</label>
           <input value={newDate} onChange={e=>setNewDate(e.target.value)} placeholder="2025-06" type="month"
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
         </div>
         <div style={{flex:1,minWidth:130}}>
-          <label style={{display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4}}>VALOR ($)</label>
+          <label style={{display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4}}>{isEN?"VALUE ($)":"VALOR ($)"}</label>
           <input value={newVal} onChange={e=>setNewVal(e.target.value)} placeholder="12500" type="number"
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
         </div>
-        <button onClick={addEntry} style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>+ Agregar</button>
+        <button onClick={addEntry} style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>{isEN?"+ Add":"+ Agregar"}</button>
       </div>
     </div>
   );
 }
 
 // ── HERRAMIENTA 5: ALERTAS DE PRECIO ─────────────────────────────────────────
-function PriceAlerts(){
+function PriceAlerts({lang="es"}){
+  const isEN=lang==="en";
   const [alerts,setAlerts]=useState(()=>{try{return JSON.parse(localStorage.getItem("nexotrade-alerts")||"[]");}catch{return[];}});
   const [ticker,setTicker]=useState(""); const [price,setPrice]=useState(""); const [cond,setCond]=useState("above");
   const prices=useContext(PriceCtx)||{};
@@ -11179,15 +11184,15 @@ function PriceAlerts(){
 
   const getStatus=(alert)=>{
     const cur=prices[alert.ticker]?.price;
-    if(!cur) return{text:"Sin precio",color:"#475569"};
+    if(!cur) return{text:isEN?"No price":"Sin precio",color:"#475569"};
     const triggered=alert.cond==="above"?cur>=alert.price:cur<=alert.price;
-    return triggered?{text:"🔔 ACTIVADA",color:"#F59E0B"}:{text:"En espera",color:"#64748B"};
+    return triggered?{text:isEN?"🔔 TRIGGERED":"🔔 ACTIVADA",color:"#F59E0B"}:{text:isEN?"Waiting":"En espera",color:"#64748B"};
   };
 
   return(
     <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
-      <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:8}}>🔔 Alertas de Precio Personalizadas</h3>
-      <p style={{color:"#64748B",fontSize:12,marginBottom:20}}>Recibe una alerta visual cuando una acción llegue a tu precio objetivo.</p>
+      <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:8}}>{isEN?"🔔 Custom Price Alerts":"🔔 Alertas de Precio Personalizadas"}</h3>
+      <p style={{color:"#64748B",fontSize:12,marginBottom:20}}>{isEN?"Get a visual alert when a stock reaches your target price.":"Recibe una alerta visual cuando una acción llegue a tu precio objetivo."}</p>
       {/* Form */}
       <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:24,padding:"16px",background:"rgba(255,255,255,0.02)",borderRadius:12,border:"1px solid rgba(255,255,255,0.06)"}}>
         <div style={{flex:"1 1 100px"}}>
@@ -11196,11 +11201,11 @@ function PriceAlerts(){
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:14,fontFamily:"monospace",fontWeight:700,outline:"none",boxSizing:"border-box"}}/>
         </div>
         <div style={{flex:"1 1 80px"}}>
-          <label style={{display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4}}>CONDICIÓN</label>
+          <label style={{display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4}}>{isEN?"CONDITION":"CONDICIÓN"}</label>
           <select value={cond} onChange={e=>setCond(e.target.value)}
             style={{width:"100%",background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:13,fontWeight:700,outline:"none",boxSizing:"border-box"}}>
-            <option value="above">📈 Sube de</option>
-            <option value="below">📉 Baja de</option>
+            <option value="above">{isEN?"📈 Rises above":"📈 Sube de"}</option>
+            <option value="below">{isEN?"📉 Falls below":"📉 Baja de"}</option>
           </select>
         </div>
         <div style={{flex:"1 1 100px"}}>
@@ -11209,14 +11214,14 @@ function PriceAlerts(){
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:14,fontFamily:"monospace",outline:"none",boxSizing:"border-box"}}/>
         </div>
         <div style={{display:"flex",alignItems:"flex-end"}}>
-          <button onClick={addAlert} style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>+ Crear Alerta</button>
+          <button onClick={addAlert} style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>{isEN?"+ Create Alert":"+ Crear Alerta"}</button>
         </div>
       </div>
       {/* List */}
       {alerts.length===0?(
         <div style={{textAlign:"center",padding:"32px",color:"#475569"}}>
           <div style={{fontSize:32,marginBottom:8}}>🔔</div>
-          <div style={{fontSize:13}}>No tienes alertas configuradas</div>
+          <div style={{fontSize:13}}>{isEN?"You have no alerts set":"No tienes alertas configuradas"}</div>
         </div>
       ):(
         alerts.map(a=>{
@@ -11228,15 +11233,15 @@ function PriceAlerts(){
               <div style={{flex:1}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
                   <span style={{fontWeight:900,color:"#F1F5F9",fontSize:15,fontFamily:"monospace"}}>{a.ticker}</span>
-                  <span style={{fontSize:12,color:"#64748B"}}>{a.cond==="above"?"sube de":"baja de"}</span>
+                  <span style={{fontSize:12,color:"#64748B"}}>{a.cond==="above"?(isEN?"rises above":"sube de"):(isEN?"falls below":"baja de")}</span>
                   <span style={{fontWeight:800,color:"#F59E0B",fontFamily:"monospace"}}>${a.price.toFixed(2)}</span>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"center"}}>
                   <span style={{fontSize:11,color:status.color,fontWeight:700}}>{status.text}</span>
-                  {cur&&<span style={{fontSize:11,color:"#475569"}}>Precio actual: ${cur.toFixed(2)}</span>}
+                  {cur&&<span style={{fontSize:11,color:"#475569"}}>{isEN?"Current price":"Precio actual"}: ${cur.toFixed(2)}</span>}
                 </div>
               </div>
-              <button onClick={()=>deleteAlert(a.id)} style={{background:"none",border:"1px solid rgba(255,77,106,0.2)",borderRadius:7,padding:"5px 10px",color:"#FF4D6A",cursor:"pointer",fontSize:12,fontWeight:700}}>Borrar</button>
+              <button onClick={()=>deleteAlert(a.id)} style={{background:"none",border:"1px solid rgba(255,77,106,0.2)",borderRadius:7,padding:"5px 10px",color:"#FF4D6A",cursor:"pointer",fontSize:12,fontWeight:700}}>{isEN?"Delete":"Borrar"}</button>
             </div>
           );
         })
@@ -11246,7 +11251,8 @@ function PriceAlerts(){
 }
 
 // ── HERRAMIENTA 6: EXPORTAR DATOS ────────────────────────────────────────────
-function ExportData({posts=[],user}){
+function ExportData({posts=[],user,lang="es"}){
+  const isEN=lang==="en";
   const downloadCSV=(data,filename)=>{
     if(!data.length) return;
     const headers=Object.keys(data[0]);
@@ -11269,9 +11275,9 @@ function ExportData({posts=[],user}){
   };
 
   const options=[
-    {title:"📋 Todos los Posts del Feed",desc:`${posts.length} posts del feed principal`,fn:exportPosts,color:"#0F4C81"},
-    {title:"✍️ Mis Posts",desc:`Solo tus publicaciones en NexoTrade`,fn:exportMisPosts,color:"#00E58F"},
-    {title:"📊 Plantilla de Trading Journal",desc:"Hoja Excel preformateada para registrar tus operaciones",fn:()=>{
+    {title:isEN?"📋 All Feed Posts":"📋 Todos los Posts del Feed",desc:isEN?`${posts.length} posts from the main feed`:`${posts.length} posts del feed principal`,fn:exportPosts,color:"#0F4C81"},
+    {title:isEN?"✍️ My Posts":"✍️ Mis Posts",desc:isEN?`Only your posts on NexoTrade`:`Solo tus publicaciones en NexoTrade`,fn:exportMisPosts,color:"#00E58F"},
+    {title:isEN?"📊 Trading Journal Template":"📊 Plantilla de Trading Journal",desc:isEN?"Pre-formatted Excel sheet to log your trades":"Hoja Excel preformateada para registrar tus operaciones",fn:()=>{
       const template=[{Fecha:"",Ticker:"",Entrada:"",SL:"",TP:"",Resultado:"",PnL:"",RR:"",Notas:""}];
       downloadCSV(template,"nexotrade-trading-journal-template.csv");
     },color:"#F59E0B"},
@@ -11279,8 +11285,8 @@ function ExportData({posts=[],user}){
 
   return(
     <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
-      <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:8}}>📤 Exportar Datos</h3>
-      <p style={{color:"#64748B",fontSize:12,marginBottom:24}}>Descarga tus datos en formato CSV compatible con Excel, Google Sheets y cualquier herramienta de análisis.</p>
+      <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:8}}>{isEN?"📤 Export Data":"📤 Exportar Datos"}</h3>
+      <p style={{color:"#64748B",fontSize:12,marginBottom:24}}>{isEN?"Download your data in CSV format compatible with Excel, Google Sheets and any analysis tool.":"Descarga tus datos en formato CSV compatible con Excel, Google Sheets y cualquier herramienta de análisis."}</p>
       <div style={{display:"grid",gap:12}}>
         {options.map(o=>(
           <div key={o.title} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 20px",background:"rgba(255,255,255,0.02)",borderRadius:12,border:"1px solid rgba(255,255,255,0.06)"}}>
@@ -11291,13 +11297,13 @@ function ExportData({posts=[],user}){
             <button onClick={o.fn} style={{background:"transparent",border:`1.5px solid ${o.color}`,borderRadius:9,padding:"8px 16px",color:o.color,fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",transition:"all 0.15s"}}
               onMouseEnter={e=>{e.currentTarget.style.background=o.color+"22";}}
               onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
-              ⬇ Descargar CSV
+              {isEN?"⬇ Download CSV":"⬇ Descargar CSV"}
             </button>
           </div>
         ))}
       </div>
       <div style={{marginTop:20,padding:"14px 16px",background:"rgba(15,76,129,0.05)",borderRadius:10,border:"1px solid rgba(15,76,129,0.1)",fontSize:12,color:"#64748B",lineHeight:1.7}}>
-        💡 <strong style={{color:"#0F4C81"}}>Cómo usar en Excel:</strong> Abre Excel → Archivo → Importar → selecciona el CSV → codificación UTF-8 → delimitado por comas. Listo.
+        💡 <strong style={{color:"#0F4C81"}}>{isEN?"How to use in Excel:":"Cómo usar en Excel:"}</strong> {isEN?"Open Excel → File → Import → select the CSV → UTF-8 encoding → comma-delimited. Done.":"Abre Excel → Archivo → Importar → selecciona el CSV → codificación UTF-8 → delimitado por comas. Listo."}
       </div>
     </div>
   );
