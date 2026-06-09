@@ -19885,6 +19885,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [scVolume, setScVolume] = useState("Cualquiera");
   const [scCap, setScCap] = useState("Cualquiera");
   const [scRan, setScRan] = useState(false);
+  const [scOrigin, setScOrigin] = useState("Todas"); // Todas | Portfolio | Watchlist
   const [alFilter, setAlFilter] = useState("Todas");
   const [alToggles, setAlToggles] = useState({});
   const [jrEmotion, setJrEmotion] = useState("ENFOCADO");
@@ -20399,108 +20400,66 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         </div>
         );
       })()}
-      {/* ── SCREENER VIEW ── */}
+      {/* ── SCREENER VIEW (tus acciones reales) ── */}
       {termTab==="screener" && (()=>{
-        const SC=[
-          ["AAPL","Apple Inc.","$301.54","+1.89","+18.3","+22.1","64.2M","$4.58T","31.4","1.6",82,"HOLD","Tech","NASDAQ"],
-          ["NVDA","NVIDIA Corp.","$208.3","+2.41","+41.2","+68.4","48.8M","$5.12T","68.2","1.4",91,"BUY","Tech","NASDAQ"],
-          ["MSFT","Microsoft Corp.","$412.8","+0.92","+12.1","+18.3","22.4M","$3.07T","36.8","2.2",88,"HOLD","Tech","NASDAQ"],
-          ["META","Meta Platforms","$589.1","-0.87","+28.7","+42.6","18.2M","$1.49T","28.4","2.1",79,"HOLD","Tech","NASDAQ"],
-          ["TSLA","Tesla Inc.","$408.7","+4.53","+22.4","+35.8","94.6M","$1.31T","78.1","0.9",61,"WATCH","Consumo","NASDAQ"],
-          ["AMZN","Amazon.com","$244.8","+1.24","+14.8","+21.4","36.8M","$2.58T","44.2","1.8",84,"BUY","Consumo","NASDAQ"],
-          ["GOOG","Alphabet Inc.","$362.4","+0.66","+11.8","+16.2","24.2M","$2.21T","26.8","1.8",80,"WATCH","Tech","NASDAQ"],
-          ["COST","Costco Wholesale","$973.38","-0.3","-3.4","+8.2","3.2M","$432B","54.8","1.7",72,"HOLD","Consumo","NASDAQ"],
-          ["JPM","JPMorgan Chase","$248.6","+0.74","+9.8","+14.5","9.1M","$712B","13.2","2.0",83,"BUY","Finanzas","NYSE"],
-          ["V","Visa Inc.","$312.4","+0.31","+7.2","+11.3","6.4M","$598B","32.1","2.3",81,"HOLD","Finanzas","NYSE"],
-          ["XOM","Exxon Mobil","$118.7","-0.42","+5.1","+6.8","14.2M","$487B","13.8","1.5",70,"HOLD","Energía","NYSE"],
-          ["UNH","UnitedHealth","$528.9","+1.12","-2.4","+4.1","3.8M","$486B","18.6","1.6",73,"HOLD","Salud","NYSE"],
-          ["WMT","Walmart Inc.","$89.4","+0.58","+10.4","+19.7","11.3M","$719B","38.4","2.1",85,"BUY","Consumo","NYSE"],
-          ["BTC","Bitcoin","$63,844","+1.92","+38.2","+52.4","$28B","$1.26T","—","1.3",74,"BUY","Crypto","Crypto"],
-        ];
-        const pNum=(s)=>parseFloat(String(s).replace(/[^0-9.\-]/g,""))||0;
-        const pVol=(s)=>{const n=pNum(s); return /B/.test(s)?n*1000:n;}; // en millones
-        const pCap=(s)=>{const n=pNum(s); return /T/.test(s)?n*1000:n;}; // en miles de millones (B)
+        let wl=[]; try{ const s=JSON.parse(localStorage.getItem(`nexo_watchlist_${user?.id||"guest"}`)||"null"); if(Array.isArray(s)) wl=s.map(x=>String(x).toUpperCase()); }catch{}
+        const posTk=positions.map(p=>p.ticker.toUpperCase());
+        const allTk=Array.from(new Set([...posTk,...wl]));
+        const uni=allTk.map(tk=>{ const lp=livePrices[tk]; const pos=positions.find(p=>p.ticker.toUpperCase()===tk); const price=lp?lp.price:(pos?parseFloat(pos.entryPrice):null); const today=lp?(lp.change||0):null; const inPos=posTk.includes(tk); return {tk,name:NAMES[tk]||tk,price,today,inPos,sh:pos?pos.shares:null}; });
         const q=scQuery.trim().toUpperCase();
-        const filtered=SC.filter(r=>{
-          if(scMarket==="Crypto" && r[13]!=="Crypto") return false;
-          if(scMarket==="NYSE" && r[13]!=="NYSE") return false;
-          if(scMarket==="NASDAQ" && r[13]!=="NASDAQ") return false;
-          if(scMarket==="NYSE + NASDAQ" && r[13]==="Crypto") return false;
-          if(scSector!=="Todos" && r[12]!==scSector) return false;
-          const ytd=pNum(r[5]);
-          if(scReturn==="> 0%" && !(ytd>0)) return false;
-          if(scReturn==="> 20%" && !(ytd>20)) return false;
-          if(scReturn==="> 50%" && !(ytd>50)) return false;
-          const vol=pVol(r[6]);
-          if(scVolume==="> 20M" && !(vol>20)) return false;
-          if(scVolume==="> 50M" && !(vol>50)) return false;
-          const cap=pCap(r[7]);
-          if(scCap==="> 1T" && !(cap>1000)) return false;
-          if(scCap==="> 500B" && !(cap>500)) return false;
-          if(q && !(r[0].includes(q)||r[1].toUpperCase().includes(q))) return false;
+        const filtered=uni.filter(r=>{
+          if(scOrigin==="Portfolio" && !r.inPos) return false;
+          if(scOrigin==="Watchlist" && r.inPos) return false;
+          if(scReturn==="Ganadoras (hoy)" && !(r.today>0)) return false;
+          if(scReturn==="Perdedoras (hoy)" && !(r.today<0)) return false;
+          if(q && !(r.tk.includes(q)||r.name.toUpperCase().includes(q))) return false;
           return true;
-        });
+        }).sort((a,b)=>(b.today||-999)-(a.today||-999));
         const list = scRan ? filtered : [];
-        const scoreC=(s)=> s>=85?T.grn:s>=70?T.gold:T.red;
-        const shC=(v)=>{const n=parseFloat(v); return n>=2?T.grn:n>=1.5?T.gold:T.red;};
-        const sigC={BUY:[T.grn,"▲ BUY"],HOLD:[T.gold,"◆ HOLD"],WATCH:[T.blue,"◎ WATCH"]};
-        const SCANS=[["🚀","Momentum alcista","23",T.grn],["📊","Volatilidad baja","41",T.blue],["💰","Dividendos altos","18",T.gold],["📉","Sobrevendidos RSI","9",T.red],["🔮","Oracle AI Top Picks","7",T.purp]];
-        const DONUT=[["Tech",58,T.grn],["Consumo",14,T.blue],["Finanzas",12,T.gold],["Salud",9,T.purp],["Otro",7,T.mid]];
-        let acc=0; const circ=2*Math.PI*42;
         const selStyle={background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,padding:"6px 9px",color:T.txt,fontFamily:MONO,fontSize:11,outline:"none",cursor:"pointer"};
+        const nPos=uni.filter(r=>r.inPos).length, nWl=uni.length-nPos;
         return (
-        <div style={{display:"grid",gridTemplateColumns:"1fr 300px",alignItems:"stretch"}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 280px",alignItems:"stretch"}}>
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"10px 16px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-              {[["Mercado",scMarket,setScMarket,["NYSE + NASDAQ","NYSE","NASDAQ","Crypto"]],["Sector",scSector,setScSector,["Todos","Tech","Consumo","Finanzas","Salud","Energía"]],["Retorno",scReturn,setScReturn,["Cualquiera","> 0%","> 20%","> 50%"]],["Volumen",scVolume,setScVolume,["Cualquiera","> 20M","> 50M"]],["Mkt Cap",scCap,setScCap,["Cualquiera","> 500B","> 1T"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
+              {[["Origen",scOrigin,setScOrigin,["Todas","Portfolio","Watchlist"]],["Filtro",scReturn,setScReturn,["Cualquiera","Ganadoras (hoy)","Perdedoras (hoy)"]]].map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>{f[0]}</span><select value={f[1]} onChange={e=>f[2](e.target.value)} style={selStyle}>{f[3].map(o=><option key={o} style={{background:T.bg2}}>{o}</option>)}</select></div>))}
               <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{...lbl,padding:0}}>Buscar</span><input value={scQuery} onChange={e=>setScQuery(e.target.value)} placeholder="AAPL, TSLA…" style={{...selStyle,width:120}}/></div>
               <button onClick={()=>setScRan(true)} style={{background:T.grn,color:T.bg,border:"none",fontFamily:MONO,fontSize:11,fontWeight:700,padding:"7px 14px",borderRadius:5,cursor:"pointer",letterSpacing:.5,boxShadow:"0 0 14px rgba(0,255,135,.3)"}}>▶ EJECUTAR SCAN</button>
-              <button onClick={()=>{setScQuery("");setScMarket("NYSE + NASDAQ");setScSector("Todos");setScReturn("Cualquiera");setScVolume("Cualquiera");setScCap("Cualquiera");setScRan(false);}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
+              <button onClick={()=>{setScQuery("");setScOrigin("Todas");setScReturn("Cualquiera");setScRan(false);}} style={{background:T.bg3,color:T.mid,border:`1px solid ${T.br}`,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"7px 12px",borderRadius:5,cursor:"pointer"}}>↻ Reset</button>
               <span style={{marginLeft:"auto",fontFamily:MONO,fontSize:11,color:scRan?T.grn:T.dim}}>{scRan?list.length:0} resultados</span>
             </div>
             <div style={{overflowX:"auto"}}>
-              <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
-                <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","PRECIO","HOY %","3M %","YTD %","VOLUMEN","MKT CAP","P/E","SHARPE","SCORE ORACLE","SEÑAL"].map((h,i)=><th key={i} style={{padding:"9px 14px",fontSize:9,fontWeight:600,letterSpacing:1.2,color:i===1?T.grn:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}{i===1?" ↑":""}</th>)}</tr></thead>
-                <tbody>{list.map((r,i)=>{const tp=r[3].startsWith("+");const sg=sigC[r[11]];return (
+              <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:12}}>
+                <thead><tr style={{background:T.bg2}}>{["SÍMBOLO","PRECIO","HOY %","ORIGEN"].map((h,i)=><th key={i} style={{padding:"9px 16px",fontSize:9,fontWeight:600,letterSpacing:1.2,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                <tbody>{list.map((r,i)=>(
                   <tr key={i} style={{borderBottom:"1px solid #111820",cursor:"pointer"}}>
-                    <td style={{padding:"10px 14px"}}><div style={{display:"flex",alignItems:"center",gap:9}}><div style={{width:30,height:30,borderRadius:6,background:avatarBg(r[0]),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r[0].slice(0,2)}</div><div><div style={{fontSize:13,fontWeight:700,color:T.txt}}>{r[0]}</div><div style={{fontSize:10,color:T.dim}}>{r[1]}</div></div></div></td>
-                    <td style={{padding:"10px 14px",color:T.txt,fontWeight:600}}>{r[2]}</td>
-                    <td style={{padding:"10px 14px",color:tp?T.grn:T.red,fontWeight:600}}>{r[3]}%</td>
-                    <td style={{padding:"10px 14px",color:r[4].startsWith("-")?T.red:T.grn}}>{r[4]}%</td>
-                    <td style={{padding:"10px 14px",color:r[5].startsWith("-")?T.red:T.grn}}>{r[5]}%</td>
-                    <td style={{padding:"10px 14px",color:T.mid}}>{r[6]}</td>
-                    <td style={{padding:"10px 14px",color:T.mid}}>{r[7]}</td>
-                    <td style={{padding:"10px 14px",color:T.mid}}>{r[8]}</td>
-                    <td style={{padding:"10px 14px",color:shC(r[9]),fontWeight:600}}>{r[9]}</td>
-                    <td style={{padding:"10px 14px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:60,height:6,background:T.bg4,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:r[10]+"%",background:scoreC(r[10]),borderRadius:3}}/></div><span style={{color:scoreC(r[10]),fontWeight:700}}>{r[10]}</span></div></td>
-                    <td style={{padding:"10px 14px"}}><span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:sg[0],background:sg[0]+"1a",border:`1px solid ${sg[0]}33`,borderRadius:3,padding:"3px 8px"}}>{sg[1]}</span></td>
+                    <td style={{padding:"11px 16px"}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:30,height:30,borderRadius:6,background:avatarBg(r.tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r.tk.slice(0,2)}</div><div><div style={{fontSize:13,fontWeight:700,color:T.txt}}>{r.tk}</div><div style={{fontSize:10,color:T.dim}}>{r.name}</div></div></div></td>
+                    <td style={{padding:"11px 16px",color:r.price!=null?T.txt:T.dim,fontWeight:600}}>{r.price!=null?"$"+r.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):"—"}</td>
+                    <td style={{padding:"11px 16px",fontWeight:600,color:r.today==null?T.dim:r.today>=0?T.grn:T.red}}>{r.today==null?"—":(r.today>=0?"▲ +":"▼ ")+Math.abs(r.today).toFixed(2)+"%"}</td>
+                    <td style={{padding:"11px 16px"}}>{r.inPos?<span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:T.grn,background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,borderRadius:3,padding:"3px 8px"}}>💼 PORTFOLIO{r.sh?" · "+r.sh+" sh":""}</span>:<span style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:T.blue,background:"rgba(77,166,255,.1)",border:`1px solid rgba(77,166,255,.3)`,borderRadius:3,padding:"3px 8px"}}>👁 WATCHLIST</span>}</td>
                   </tr>
-                );})}</tbody>
+                ))}</tbody>
               </table>
-              {!scRan && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>🔍</div><div style={{fontSize:13,color:T.mid,letterSpacing:.5}}>Configura los filtros y pulsa <span style={{color:T.grn}}>▶ EJECUTAR SCAN</span></div><div style={{fontSize:11,marginTop:6}}>Los resultados aparecerán aquí</div></div>}
-              {scRan && list.length===0 && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>∅</div><div style={{fontSize:13,color:T.mid}}>Sin coincidencias para esos filtros</div><div style={{fontSize:11,marginTop:6}}>Ajusta los filtros o pulsa ↻ Reset</div></div>}
-              {scRan && list.length>0 && <div style={{padding:"8px 16px",fontFamily:MONO,fontSize:9,color:T.dim}}>Precio y % hoy = datos de mercado · Score Oracle y señales = <span style={{color:T.gold}}>DEMO</span></div>}
+              {!scRan && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>🔍</div><div style={{fontSize:13,color:T.mid,letterSpacing:.5}}>Pulsa <span style={{color:T.grn}}>▶ EJECUTAR SCAN</span> para ver tus acciones</div><div style={{fontSize:11,marginTop:6}}>{uni.length} en tu universo ({nPos} portfolio · {nWl} watchlist)</div></div>}
+              {scRan && list.length===0 && <div style={{padding:"60px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:30,marginBottom:10}}>∅</div><div style={{fontSize:13,color:T.mid}}>{uni.length===0?"No tienes acciones todavía":"Sin coincidencias para ese filtro"}</div><div style={{fontSize:11,marginTop:6}}>{uni.length===0?"Agrégalas en tu Portfolio o Watchlist":"Ajusta el filtro o pulsa ↻ Reset"}</div></div>}
             </div>
           </div>
           {/* RIGHT */}
           <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
             <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px"}}>Scans Predefinidos</div>
-              <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:6}}>{SCANS.map((s,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:9,background:T.bg3,border:`1px solid ${s[3]}33`,borderRadius:6,padding:"9px 11px",cursor:"pointer"}}><span style={{fontSize:14}}>{s[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:s[3],flex:1}}>{s[1]}</span><span style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.mid}}>{s[2]}</span></div>))}</div>
-            </div>
-            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",gap:6}}>Distribución Sector <span style={{fontSize:8,color:T.gold,border:`1px solid ${T.gold}55`,borderRadius:3,padding:"1px 5px"}}>DEMO</span></div>
-              <div style={{display:"flex",alignItems:"center",gap:14,padding:"4px 14px"}}>
-                <svg width="110" height="110" viewBox="0 0 110 110">
-                  <g transform="rotate(-90 55 55)">{DONUT.map((d,i)=>{const len=d[1]/100*circ;const el=<circle key={i} cx="55" cy="55" r="42" fill="none" stroke={d[2]} strokeWidth="14" strokeDasharray={len+" "+(circ-len)} strokeDashoffset={-acc}/>;acc+=len;return el;})}</g>
-                  <circle cx="55" cy="55" r="30" fill={T.bg2}/>
-                </svg>
-                <div style={{display:"flex",flexDirection:"column",gap:4}}>{DONUT.map((d,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:10}}><span style={{width:8,height:8,borderRadius:2,background:d[2]}}/><span style={{color:T.mid}}>{d[0]}</span><span style={{color:T.txt,fontWeight:600}}>{d[1]}%</span></div>))}</div>
+              <div style={{...lbl,padding:"0 14px 8px"}}>Tu Universo</div>
+              <div style={{padding:"0 14px",display:"flex",flexDirection:"column",gap:8}}>
+                {[["Total tickers",uni.length,T.txt],["En Portfolio",nPos,T.grn],["En Watchlist",nWl,T.blue]].map((s,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"10px 12px"}}><span style={{fontFamily:MONO,fontSize:11,color:T.mid}}>{s[0]}</span><span style={{fontFamily:MONO,fontSize:16,fontWeight:700,color:s[2]}}>{s[1]}</span></div>))}
               </div>
             </div>
-            <div style={{padding:"12px 0"}}>
-              <div style={{...lbl,padding:"0 14px 8px"}}>Mis Scans Guardados</div>
-              <div style={{padding:"0 14px"}}><div style={{fontFamily:MONO,fontSize:11,color:T.dim,lineHeight:1.6,marginBottom:10}}>No tienes scans guardados.<br/>Ejecuta un scan y guárdalo.</div><button style={{width:"100%",background:T.bg3,border:`1px dashed ${T.br2}`,color:T.mid,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"9px",borderRadius:6,cursor:"pointer"}}>+ Guardar scan actual</button></div>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
+              <div style={{...lbl,padding:"0 14px 8px"}}>Filtros rápidos</div>
+              <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:6}}>
+                {[["💼","Solo Portfolio","Portfolio",T.grn],["👁","Solo Watchlist","Watchlist",T.blue],["▲","Ganadoras hoy",null,T.grn],["▼","Perdedoras hoy",null,T.red]].map((s,i)=>(<div key={i} onClick={()=>{ if(s[2]!==undefined&&s[2]!==null){setScOrigin(s[2]);setScReturn("Cualquiera");} else {setScReturn(s[0]==="▲"?"Ganadoras (hoy)":"Perdedoras (hoy)");setScOrigin("Todas");} setScRan(true); }} style={{display:"flex",alignItems:"center",gap:9,background:T.bg3,border:`1px solid ${s[3]}33`,borderRadius:6,padding:"9px 11px",cursor:"pointer"}}><span style={{fontSize:13,color:s[3]}}>{s[0]}</span><span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:s[3]}}>{s[1]}</span></div>))}
+              </div>
+            </div>
+            <div style={{padding:"12px 14px"}}>
+              <div style={{fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.6}}>El Screener escanea <span style={{color:T.mid}}>tus acciones reales</span> del Portfolio y la Watchlist. Para agregar o quitar, usa esas páginas.</div>
             </div>
           </div>
         </div>
