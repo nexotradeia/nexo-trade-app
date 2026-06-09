@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NexoTrade — Planes</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090b;--surface:#111115;--border:#1f1f23;--border2:#27272a;
+  --text:#ffffff;--muted:#71717a;--hint:#3f3f46;
+  --green:#00d97e;--green-dim:rgba(0,217,126,.12);--green-border:rgba(0,217,126,.28);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+
+/* ── LAYOUT ── */
+.page{max-width:780px;margin:0 auto;padding:0 20px 80px}
+
+/* ── HEADER ── */
+.header{text-align:center;padding:64px 0 56px}
+.eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:700;color:var(--green);margin-bottom:14px}
+.headline{font-size:clamp(30px,5vw,46px);font-weight:900;line-height:1.1;margin-bottom:16px}
+.headline em{color:var(--green);font-style:normal}
+.subline{font-size:15px;color:var(--muted);max-width:480px;margin:0 auto 40px}
+
+/* ── PRICE HERO ── */
+.price-hero{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-bottom:10px}
+.price-big{font-size:52px;font-weight:900;color:var(--green);line-height:1;font-variant-numeric:tabular-nums}
+.price-detail{padding-bottom:8px}
+.price-detail .per{font-size:14px;color:var(--muted);display:block;line-height:1.3}
+.price-detail .billed{font-size:12px;color:var(--hint);display:block}
+.price-compare{font-size:13px;color:var(--hint);text-align:center;margin-bottom:32px}
+.price-compare s{color:var(--hint);opacity:.6}
+
+.pill-cta{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#001a0d;font-size:14px;font-weight:800;padding:14px 32px;border-radius:100px;cursor:pointer;border:none;letter-spacing:.2px;transition:filter .15s,transform .12s;margin-bottom:12px}
+.pill-cta:hover{filter:brightness(1.08)}
+.pill-cta:active{transform:scale(.97)}
+.free-note{font-size:12px;color:var(--hint);text-align:center}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:56px 0}
+.section-title{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:28px;text-align:center}
+
+/* ── COMPARISON TABLE ── */
+.comp-table{width:100%;border-collapse:collapse}
+.comp-table .cat-row td{background:rgba(255,255,255,.025);padding:8px 16px;font-size:10.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--hint);border-top:1px solid var(--border)}
+.comp-table .head-row th{padding:14px 16px;font-size:12px;font-weight:700;text-align:center;border-bottom:2px solid var(--border2);color:var(--muted)}
+.comp-table .head-row th:first-child{text-align:left;color:var(--text)}
+.comp-table tr.feat td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13.5px;text-align:center;vertical-align:middle}
+.comp-table tr.feat td:first-child{text-align:left;color:var(--text)}
+.comp-table tr.feat:hover td{background:rgba(255,255,255,.02)}
+.check{color:var(--green);font-size:17px;font-weight:900}
+.dash{color:var(--hint);font-size:16px}
+.partial{font-size:11.5px;color:var(--muted);font-weight:600}
+.feat-name{font-size:13.5px;color:var(--text)}
+.feat-note{font-size:11px;color:var(--muted);display:block;margin-top:1px}
+.col-free{color:var(--muted);font-size:13px;font-weight:600}
+.col-pro{color:var(--green);font-size:13px;font-weight:800}
+.badge-pro{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);font-size:10px;font-weight:800;padding:2px 8px;border-radius:100px;letter-spacing:.3px}
+
+/* ── FAQ ── */
+.faq-list{display:flex;flex-direction:column;gap:1px}
+.faq-item{border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.faq-item.open{border-color:var(--border2)}
+.faq-q{width:100%;background:transparent;border:none;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:12px;text-align:left}
+.faq-q-text{font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
+.faq-icon{width:24px;height:24px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);font-size:14px;transition:transform .2s,background .2s}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:var(--green-dim);color:var(--green);border-color:var(--green-border)}
+.faq-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
+.faq-item.open .faq-body{max-height:300px}
+.faq-body-inner{padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.7}
+.faq-body-inner strong{color:var(--text)}
+
+/* ── CTA FINAL ── */
+.cta-final{border:1px solid var(--green-border);border-radius:24px;padding:48px 40px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,217,126,.07) 0%,transparent 70%);position:relative;overflow:hidden;margin-top:56px}
+.cta-final::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.cta-label{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;color:var(--green);margin-bottom:12px}
+.cta-headline{font-size:clamp(24px,4vw,36px);font-weight:900;line-height:1.2;margin-bottom:10px}
+.cta-sub{font-size:14px;color:var(--muted);margin-bottom:32px}
+.email-form{display:flex;gap:10px;max-width:420px;margin:0 auto 16px;flex-wrap:wrap}
+.email-input{flex:1;min-width:200px;background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:12px;padding:13px 16px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s}
+.email-input:focus{border-color:var(--green);background:rgba(0,217,126,.04)}
+.email-input::placeholder{color:var(--hint)}
+.email-btn{background:var(--green);color:#001a0d;font-size:14px;font-weight:800;padding:13px 28px;border-radius:12px;border:none;cursor:pointer;white-space:nowrap;transition:filter .15s,transform .12s;letter-spacing:.2px}
+.email-btn:hover{filter:brightness(1.08)}
+.email-btn:active{transform:scale(.97)}
+.cta-micro{font-size:11.5px;color:var(--hint)}
+.cta-guarantee{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--hint);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <p class="eyebrow">Planes NexoTrade</p>
+    <h1 class="headline">Invierte como los<br><em>grandes fondos.</em></h1>
+    <p class="subline">Dark pools, IA, señales institucionales — todo lo que Bloomberg cobra $300/mes, por una fracción.</p>
+
+    <div class="price-hero">
+      <span class="price-big">$6.58</span>
+      <div class="price-detail">
+        <span class="per">/mes</span>
+        <span class="billed">facturado anual · $79/año</span>
+      </div>
+    </div>
+    <p class="price-compare">O <strong style="color:var(--text)">$9.99/mes</strong> mes a mes · <s>Bloomberg: $340/mes</s></p>
+
+    <button class="pill-cta" onclick="document.getElementById('email-field').focus()">
+      ⚡ Empezar ahora por $6.58/mes
+    </button><br>
+    <span class="free-note">Sin tarjeta de crédito · Cancela cuando quieras · Garantía 30 días</span>
+  </div>
+
+  <!-- ── COMPARISON TABLE ── -->
+  <p class="section-title">Qué incluye cada plan</p>
+
+  <table class="comp-table">
+    <thead>
+      <tr class="head-row">
+        <th style="width:54%">Feature</th>
+        <th style="width:23%"><span class="col-free">Free</span></th>
+        <th style="width:23%"><span class="col-pro">Premium <span class="badge-pro">⚡</span></span></th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- BÁSICO -->
+      <tr class="cat-row"><td colspan="3">Acceso base</td></tr>
+      <tr class="feat">
+        <td><span class="feat-name">Feed social en tiempo real</span></td>
+        <td><span class="check">✓</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Precios de mercado</span><span class="feat-note">Diferido 15 min / RT crypto</span></td>
+        <td><span class="check">✓</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Paper Trading</span></td>
+        <td><span class="check">✓</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Market Overview</span><span class="feat-note">Índices, sectores, crypto</span></td>
+        <td><span class="check">✓</span></td><td><span class="check">✓</span></td>
+      </tr>
+
+      <!-- WATCHLIST -->
+      <tr class="cat-row"><td colspan="3">Watchlist inteligente</td></tr>
+      <tr class="feat">
+        <td><span class="feat-name">Tickers en watchlist</span></td>
+        <td><span class="partial">Máx 15</span></td><td><span class="check">✓ 30</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Vistas Market, Risk, Returns, Technical</span></td>
+        <td><span class="partial">4 cols</span></td><td><span class="check">✓ Todo</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Vistas Efficiency, Projections, Health</span></td>
+        <td><span class="partial">4 cols</span></td><td><span class="check">✓ Todo</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Portfolio Evolution + Allocation</span></td>
+        <td><span class="check">✓</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Best/Worst stocks · Heatmap · Ranking</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Análisis VaR, Sharpe, Max Drawdown</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+
+      <!-- SMART MONEY -->
+      <tr class="cat-row"><td colspan="3">Smart Money · Flujo institucional</td></tr>
+      <tr class="feat">
+        <td><span class="feat-name">Whale Flow · Dark Pool en vivo</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Formularios 13F — grandes fondos</span><span class="feat-note">Berkshire, Bridgewater, Citadel…</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">SEC Insiders — compras de directivos</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Portafolio ARK Invest actualizado</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+
+      <!-- ORACLE AI -->
+      <tr class="cat-row"><td colspan="3">Oracle AI · Inteligencia artificial</td></tr>
+      <tr class="feat">
+        <td><span class="feat-name">Score Oracle AI por acción (0–100)</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Insights: momentum, target, catalizador</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Estrategias de opciones con IA</span><span class="feat-note">Calls, Puts, Spreads, Greeks</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Opciones crypto (BTC, ETH, SOL)</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+
+      <!-- HERRAMIENTAS -->
+      <tr class="cat-row"><td colspan="3">Herramientas Pro</td></tr>
+      <tr class="feat">
+        <td><span class="feat-name">Screener avanzado Oracle AI</span><span class="feat-note">5,000+ acciones · filtros personalizados</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Terminal Pro Trader</span><span class="feat-note">P&amp;L en vivo · Greeks · Journal</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Radar Global 3D</span><span class="feat-note">50+ bolsas · sweep en vivo</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Picks VIP semanales · Acceso a gurús</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+      <tr class="feat">
+        <td><span class="feat-name">Alertas de precio + señales push</span></td>
+        <td><span class="dash">—</span></td><td><span class="check">✓</span></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <div class="divider"></div>
+
+  <!-- ── FAQ ── -->
+  <p class="section-title">Preguntas frecuentes</p>
+
+  <div class="faq-list">
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        <span class="faq-q-text">¿Es gratis de verdad? ¿Hay trampa?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-body"><div class="faq-body-inner">
+        Sí, el plan gratis es permanente y no requiere tarjeta. Tienes acceso real al feed social, precios de mercado, paper trading y las primeras columnas del Watchlist. <strong>No hay trampa</strong> — el free existe para que conozcas la plataforma. Solo pagas si quieres las herramientas institucionales (Whale Flow, Oracle AI, Screener, etc.).
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        <span class="faq-q-text">¿Puedo cancelar cuando quiera?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-body"><div class="faq-body-inner">
+        Sí. Cancelas desde tu perfil con un clic, sin llamadas ni formularios. Si cancelas el plan anual, sigues con acceso hasta que venza el período pagado. <strong>Sin penalizaciones, sin letra chica.</strong>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        <span class="faq-q-text">¿Qué pasa si el precio sube?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-body"><div class="faq-body-inner">
+        Si te suscribes ahora al precio de fundador ($6.58/mes), <strong>ese precio se congela para ti</strong> mientras mantengas la suscripción activa. El precio solo puede subir para nuevos usuarios. Es el beneficio de entrar temprano.
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        <span class="faq-q-text">¿Qué es Oracle AI exactamente?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-body"><div class="faq-body-inner">
+        Oracle AI es nuestro motor de análisis propio. Para cada acción calcula un score del 0 al 100 basado en RSI, medias móviles, flujo de opciones, momentum y datos fundamentales. Además genera <strong>3 insights claros</strong> (momentum, precio objetivo, catalizador próximo) y sugiere estrategias de opciones específicas con Greeks calculados. Piénsalo como un analista de Wall Street que trabaja 24/7 para ti.
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        <span class="faq-q-text">¿Funciona para crypto y opciones?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-body"><div class="faq-body-inner">
+        Sí a ambas. Para <strong>crypto</strong>: precios RT de BTC, ETH, SOL y 200+ tokens, whale alerts, opciones crypto. Para <strong>opciones</strong>: Oracle AI sugiere estrategias (Calls, Puts, Bull/Bear Spreads) con strike, vencimiento, delta y ratio riesgo/beneficio. También tienes el Whale Flow con sweeps institucionales de opciones en tiempo real.
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        <span class="faq-q-text">¿Cómo funciona la garantía de 30 días?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-body"><div class="faq-body-inner">
+        Si en los primeros 30 días no estás satisfecho, te devolvemos el 100% del dinero sin preguntas. Escríbenos a soporte y procesamos el reembolso en menos de 48 horas. <strong>Sin excepciones, sin burocracia.</strong>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        <span class="faq-q-text">¿Cuándo me cobran?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-body"><div class="faq-body-inner">
+        El plan anual ($79) se cobra una vez al momento de suscribirte. El plan mensual ($9.99) se cobra cada mes en la misma fecha. Aceptamos tarjetas Visa, Mastercard, American Express y PayPal. El pago se procesa de forma segura vía Stripe — nunca almacenamos tu información de pago.
+      </div></div>
+    </div>
+
+  </div>
+
+  <!-- ── CTA FINAL ── -->
+  <div class="cta-final">
+    <p class="cta-label">Empieza hoy</p>
+    <h2 class="cta-headline">Precio de fundador.<br>Por tiempo limitado.</h2>
+    <p class="cta-sub">Entra antes de que suba. Sin tarjeta, sin compromiso.</p>
+
+    <form class="email-form" onsubmit="handleSubmit(event)">
+      <input id="email-field" class="email-input" type="email" placeholder="tu@email.com" required autocomplete="email">
+      <button type="submit" class="email-btn">Empezar por $6.58 →</button>
+    </form>
+    <p class="cta-micro">Al continuar aceptas los Términos de servicio · Plan gratis siempre disponible</p>
+    <p class="cta-guarantee"><span>🛡</span> Garantía de reembolso 30 días · Sin preguntas</p>
+  </div>
+
+</div>
+
+<script>
+function toggle(btn){
+  const item=btn.closest('.faq-item');
+  const isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+function handleSubmit(e){
+  e.preventDefault();
+  const email=document.getElementById('email-field').value;
+  // Redirige al checkout con email pre-llenado — ajusta la URL a tu Stripe checkout
+  const url='https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e?prefilled_email='+encodeURIComponent(email);
+  window.open(url,'_blank');
+}
+</script>
+</body>
+</html>

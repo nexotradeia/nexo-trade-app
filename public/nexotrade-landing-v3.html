@@ -285,7 +285,7 @@ footer p{font-size:12px;color:var(--hint)}
           <p class="fc-hook">Ve dónde mueve el dinero grande</p>
           <p class="fc-sub">Dark pool flows, sweeps y whale alerts en tiempo real.</p>
           <div class="fc-price"><strong>$6.58</strong>/mes · anual</div>
-          <button class="fc-cta cta-gold">Unlock Smart Money</button>
+          <button class="fc-cta cta-gold" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Smart Money</button>
           <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
         </div>
       </div>
@@ -311,7 +311,7 @@ footer p{font-size:12px;color:var(--hint)}
           <p class="fc-hook">Scan 5,000+ stocks<br>en segundos</p>
           <p class="fc-sub">Oracle AI score · señales · filtros avanzados.</p>
           <div class="fc-price"><strong>$6.58</strong>/mes</div>
-          <button class="fc-cta cta-gold">Unlock Screener</button>
+          <button class="fc-cta cta-gold" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Screener</button>
           <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
         </div>
       </div>
@@ -344,7 +344,7 @@ footer p{font-size:12px;color:var(--hint)}
           <p class="fc-hook">50+ mercados.<br>Un solo globo.</p>
           <p class="fc-sub">NYSE, London, Tokyo, Shanghai — en tiempo real.</p>
           <div class="fc-price"><strong>$6.58</strong>/mes</div>
-          <button class="fc-cta cta-blue">Unlock Radar Global</button>
+          <button class="fc-cta cta-blue" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Radar Global</button>
           <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
         </div>
       </div>
@@ -381,7 +381,7 @@ footer p{font-size:12px;color:var(--hint)}
           <p class="fc-hook">Tu Bloomberg.<br>Fracción del precio.</p>
           <p class="fc-sub">P&amp;L en vivo · Greeks · Screener · Journal de trades.</p>
           <div class="fc-price"><strong>$6.58</strong>/mes · anual</div>
-          <button class="fc-cta cta-gold">Unlock Terminal Pro</button>
+          <button class="fc-cta cta-gold" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Terminal Pro</button>
           <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
         </div>
       </div>
@@ -413,7 +413,7 @@ footer p{font-size:12px;color:var(--hint)}
           <p class="fc-hook">IA que piensa como<br>un trader pro.</p>
           <p class="fc-sub">Score, insights y estrategias de opciones — por acción.</p>
           <div class="fc-price" style="border-color:rgba(168,85,247,.18)"><strong>$6.58</strong>/mes</div>
-          <button class="fc-cta cta-purple">Unlock Oracle AI</button>
+          <button class="fc-cta cta-purple" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Oracle AI</button>
           <a class="fc-free" onclick="scroll2('cta-final')">Continuar gratis →</a>
         </div>
       </div>
@@ -571,8 +571,9 @@ function scroll2(id){const el=document.getElementById(id);if(el)el.scrollIntoVie
 function faqToggle(btn){const item=btn.closest('.faq-item'),open=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!open)item.classList.add('open')}
 
 /* ── Forms ── */
-function handleHero(e){e.preventDefault();const em=document.getElementById('hero-email').value;window.location='https://nexotradeia.com/signup?email='+encodeURIComponent(em)}
-function handleCta(e){e.preventDefault();const em=document.getElementById('cta-email').value;window.location='https://nexotradeia.com/signup?email='+encodeURIComponent(em)}
+const STRIPE_LINK='https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e';
+function handleHero(e){e.preventDefault();const em=document.getElementById('hero-email').value;window.open(STRIPE_LINK+'?prefilled_email='+encodeURIComponent(em),'_blank')}
+function handleCta(e){e.preventDefault();const em=document.getElementById('cta-email').value;window.open(STRIPE_LINK+'?prefilled_email='+encodeURIComponent(em),'_blank')}
 </script>
 </body>
 </html>
