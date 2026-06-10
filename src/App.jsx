@@ -20216,7 +20216,7 @@ function RadarGlobalPage({lang="es",onBack}){
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div style={{position:'fixed',inset:0,zIndex:200,background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'}}>
+    <div style={{position:'fixed',inset:0,zIndex:9990,background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'}}>
       <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
       {/* ── TOPBAR ── */}
       <div style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 20px',gap:12,zIndex:100}}>
@@ -26110,7 +26110,7 @@ export default function App(){
       )}
 
       {/* NAVBAR */}
-      <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:trialDaysLeft!==null?32:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box"}}>
+      {page!==44&&<nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:trialDaysLeft!==null?32:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,height:52,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Hamburger — solo móvil */}
@@ -26262,7 +26262,7 @@ export default function App(){
             {effectivePremium ? "✦ Premium" : (lang==="en"?"⭐ Premium — $6.58/mo →":"⭐ Premium — $6.58/mes →")}
           </button>
         </div>
-      </nav>
+      </nav>}
 
       {/* HERO LANDING */}
       {showLanding && page===0 && (
