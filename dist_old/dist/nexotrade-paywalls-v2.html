@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NexoTrade — Paywalls</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#09090b;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* ── NAV ── */
+.nav{display:flex;gap:6px;justify-content:center;padding:32px 16px 24px;flex-wrap:wrap}
+.nav-btn{padding:8px 18px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #27272a;background:transparent;color:#71717a;transition:all .18s;letter-spacing:.3px}
+.nav-btn:hover{color:#d4d4d8;border-color:#3f3f46}
+.nav-btn.active{background:#18181b;color:#fff;border-color:#52525b}
+
+/* ── DEMO WRAPPER ── */
+.demo{display:none;max-width:760px;margin:0 auto;padding:0 16px 60px}
+.demo.on{display:block}
+
+/* ── PAYWALL FRAME ── */
+.pw{position:relative;border-radius:20px;overflow:hidden;border:1px solid #1f1f23;min-height:380px}
+
+/* blurred preview */
+.pw-bg{width:100%;pointer-events:none;user-select:none;filter:blur(5px) brightness(.4);transform:scale(1.04);transform-origin:center center}
+
+/* glass overlay */
+.pw-glass{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(9,9,11,.52);
+}
+
+/* card */
+.card{
+  background:rgba(18,18,22,.9);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:30px 28px 24px;
+  text-align:center;
+  width:min(310px,88%);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  box-shadow:0 24px 60px rgba(0,0,0,.6);
+}
+
+.card-icon{font-size:30px;margin-bottom:12px;display:block;line-height:1}
+.card-hook{font-size:19px;font-weight:800;line-height:1.2;color:#fff;margin-bottom:7px}
+.card-sub{font-size:13px;color:#71717a;line-height:1.5;margin-bottom:20px}
+
+/* price pill */
+.price-pill{
+  display:inline-flex;align-items:baseline;gap:2px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:100px;padding:6px 18px;margin-bottom:20px;
+  background:rgba(255,255,255,.04)
+}
+.price-main{font-size:24px;font-weight:900;color:#fff}
+.price-per{font-size:12px;color:#52525b;margin-left:3px}
+
+/* CTA button */
+.cta{
+  display:block;width:100%;padding:14px;border-radius:12px;
+  font-size:14px;font-weight:800;cursor:pointer;border:none;
+  letter-spacing:.2px;transition:filter .15s,transform .12s;
+  margin-bottom:12px
+}
+.cta:hover{filter:brightness(1.1)}
+.cta:active{transform:scale(.97)}
+.cta-gold{background:linear-gradient(135deg,#c8901f 0%,#f5c842 50%,#b8780e 100%);color:#1a0e00}
+.cta-green{background:#00d97e;color:#001a0d}
+.cta-blue{background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:#fff}
+.cta-purple{background:linear-gradient(135deg,#6d28d9,#a855f7);color:#fff}
+
+/* free link */
+.free-link{
+  font-size:12.5px;color:#52525b;cursor:pointer;
+  text-decoration:none;display:block;
+  transition:color .15s;padding:2px 0 10px
+}
+.free-link:hover{color:#a1a1aa}
+
+/* guarantee */
+.guarantee{font-size:11px;color:#27272a;display:flex;align-items:center;justify-content:center;gap:5px;padding-top:4px;border-top:1px solid rgba(255,255,255,.05)}
+
+/* ══════════════════════════════════ */
+/* PREVIEW CONTENT STYLES             */
+/* ══════════════════════════════════ */
+
+/* ticker bar */
+.ticker{display:flex;gap:28px;padding:13px 20px;background:#0c0c0f;border-bottom:1px solid #111115;overflow:hidden;white-space:nowrap}
+.t{font-size:12px;font-family:monospace}.t b{color:#fff;font-weight:800}.t .g{color:#00d97e;margin-left:5px}.t .r{color:#ef4444;margin-left:5px}
+
+/* flow rows */
+.flow{padding:11px 20px;border-bottom:1px solid #0f0f12;display:flex;align-items:center;gap:10px}
+.flow-side{font-size:10px;font-weight:800;letter-spacing:.8px;width:30px}
+.flow-amt{font-size:14px;font-weight:900;min-width:60px}
+.flow-meta{font-size:11.5px;color:#52525b;flex:1;line-height:1.4}
+.flow-ts{font-size:10px;color:#3f3f46}
+.bull{background:rgba(0,217,126,.12);color:#00d97e;border:1px solid rgba(0,217,126,.25);padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800}
+.bear{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.22);padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800}
+
+/* table */
+.pt{width:100%;border-collapse:collapse}
+.pt th{padding:10px 16px;font-size:10.5px;color:#52525b;text-align:left;border-bottom:1px solid #18181b;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.pt td{padding:11px 16px;font-size:13px;border-bottom:1px solid #0f0f12;color:#d4d4d8}
+.pt tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+.sym{font-family:monospace;font-weight:900;color:#00d97e}
+.bar-w{width:72px;height:5px;background:#1f1f23;border-radius:3px;display:inline-block;vertical-align:middle}
+.bar-f{height:100%;border-radius:3px}
+
+/* globe */
+.globe-wrap{height:280px;background:radial-gradient(ellipse at 50% 60%,#0b1f12 0%,#09090b 68%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.globe-body{width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 36% 32%,#133020,#0b1c11 55%,#09130b);border:1px solid rgba(0,217,126,.18);position:relative;box-shadow:0 0 60px rgba(0,217,126,.06),inset 0 0 30px rgba(0,0,0,.6)}
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(0,217,126,.15)}
+.dot{position:absolute;width:8px;height:8px;border-radius:50%;background:#00d97e;box-shadow:0 0 10px #00d97e}
+.lbl{position:absolute;background:rgba(0,217,126,.08);border:1px solid rgba(0,217,126,.22);border-radius:8px;padding:5px 10px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.lbl .dot-s{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:middle}
+
+/* kpi cards */
+.kpis{display:flex;gap:10px;padding:16px 20px 0}
+.kpi{flex:1;background:#111115;border-radius:12px;padding:13px;border:1px solid #1a1a1f}
+.kpi-l{font-size:9.5px;color:#52525b;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;font-weight:700}
+.kpi-v{font-size:21px;font-weight:900}
+
+/* chart area */
+.chart-area{padding:12px 20px 16px;display:flex;gap:10px}
+.chart-main{flex:1;background:#0d0d10;border-radius:10px;padding:12px;border:1px solid #18181b}
+.chart-watch{width:110px;background:#0d0d10;border-radius:10px;padding:12px;border:1px solid #18181b}
+.wl-row{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px}
+
+/* oracle */
+.oracle-area{padding:20px;display:flex;gap:20px;align-items:flex-start}
+.oracle-ring{flex-shrink:0;position:relative;width:130px;height:130px}
+.oracle-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.oracle-num{font-size:34px;font-weight:900;color:#a855f7}
+.oracle-tag{font-size:9px;color:#52525b;letter-spacing:1px;text-transform:uppercase}
+.oracle-insights{flex:1}
+.insight{border-left:2px solid #6d28d9;border-radius:0 8px 8px 0;background:#0f0a1a;padding:8px 12px;margin-bottom:8px}
+.insight-t{font-size:12px;font-weight:700;color:#d4d4d8}
+.insight-s{font-size:10.5px;color:#52525b;margin-top:2px}
+.oracle-strats{display:flex;gap:8px;padding:0 20px 16px}
+.strat{flex:1;background:#0d0a1a;border:1px solid #2d1a4a;border-radius:10px;padding:10px 12px}
+.strat-l{font-size:9.5px;color:#7c3aed;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;font-weight:700}
+.strat-v{font-size:12px;font-weight:800;color:#d4d4d8}
+.strat-s{font-size:10px;color:#52525b;margin-top:2px}
+
+/* screener filters */
+.filters{display:flex;gap:7px;padding:14px 20px 10px;flex-wrap:wrap}
+.fi{font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px}
+.fi-on{background:rgba(0,217,126,.1);color:#00d97e;border:1px solid rgba(0,217,126,.25)}
+.fi-off{background:#18181b;color:#52525b;border:1px solid #27272a}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="sw('sm')">📡 Smart Money</button>
+  <button class="nav-btn" onclick="sw('sc')">🔬 Screener</button>
+  <button class="nav-btn" onclick="sw('rd')">🌐 Radar</button>
+  <button class="nav-btn" onclick="sw('tm')">📊 Terminal</button>
+  <button class="nav-btn" onclick="sw('ai')">🔮 Oracle AI</button>
+</div>
+
+<!-- ─── 1. SMART MONEY ─── -->
+<div class="demo on" id="d-sm">
+<div class="pw">
+  <div class="pw-bg">
+    <div class="ticker">
+      <span class="t"><b>NVDA</b><span class="g">+2.41%</span></span>
+      <span class="t"><b>AAPL</b><span class="g">+0.87%</span></span>
+      <span class="t"><b>META</b><span class="g">+1.32%</span></span>
+      <span class="t"><b>TSLA</b><span class="r">-1.10%</span></span>
+      <span class="t"><b>BTC</b><span class="g">+3.21%</span></span>
+      <span class="t"><b>SPY</b><span class="g">+0.42%</span></span>
+    </div>
+    <div class="flow"><span class="flow-side" style="color:#00d97e">BUY</span><span class="flow-amt" style="color:#00d97e">$4.2M</span><span class="flow-meta">NVDA · SWEEP · 42 contracts · OTM Call · Exp Jun 21</span><span class="bull">BULLISH</span><span class="flow-ts">2m</span></div>
+    <div class="flow"><span class="flow-side" style="color:#00d97e">BUY</span><span class="flow-amt" style="color:#00d97e">$2.8M</span><span class="flow-meta">AAPL · BLOCK · 280 contracts · ATM Call · Exp Jun 28</span><span class="bull">BULLISH</span><span class="flow-ts">7m</span></div>
+    <div class="flow"><span class="flow-side" style="color:#ef4444">SELL</span><span class="flow-amt" style="color:#ef4444">$1.6M</span><span class="flow-meta">TSLA · PUT · 180 contracts · OTM Put · Exp Jul 5</span><span class="bear">BEARISH</span><span class="flow-ts">12m</span></div>
+    <div class="flow"><span class="flow-side" style="color:#00d97e">BUY</span><span class="flow-amt" style="color:#00d97e">$3.1M</span><span class="flow-meta">META · CALL · 310 contracts · ITM Call · Exp Jun 28</span><span class="bull">BULLISH</span><span class="flow-ts">19m</span></div>
+    <div class="flow"><span class="flow-side" style="color:#00d97e">BUY</span><span class="flow-amt" style="color:#00d97e">$12.4M</span><span class="flow-meta">BTC · WHALE · spot accumulation · Binance dark pool</span><span class="bull">BULLISH</span><span class="flow-ts">31m</span></div>
+    <div class="flow"><span class="flow-side" style="color:#ef4444">SELL</span><span class="flow-amt" style="color:#ef4444">$920K</span><span class="flow-meta">SPY · BLOCK · 920 contracts · PUT hedge</span><span class="bear">BEARISH</span><span class="flow-ts">44m</span></div>
+  </div>
+  <div class="pw-glass">
+    <div class="card">
+      <span class="card-icon">📡</span>
+      <p class="card-hook">See where big money moves</p>
+      <p class="card-sub">Dark pool flows, sweeps y whale alerts en tiempo real.</p>
+      <div class="price-pill"><span class="price-main">$6.58</span><span class="price-per">/mes · facturado anual</span></div>
+      <button class="cta cta-gold" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Smart Money</button>
+      <a class="free-link">Continuar con acceso gratis →</a>
+      <p class="guarantee"><span>🛡</span> Garantía 30 días</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ─── 2. SCREENER ─── -->
+<div class="demo" id="d-sc">
+<div class="pw">
+  <div class="pw-bg">
+    <div class="filters">
+      <span class="fi fi-on">Score &gt; 75</span>
+      <span class="fi fi-on">Strong Buy</span>
+      <span class="fi fi-on">Tech sector</span>
+      <span class="fi fi-off">+ Filtro</span>
+    </div>
+    <table class="pt">
+      <thead><tr><th>Ticker</th><th>Nombre</th><th>Oracle AI Score</th><th>Señal</th><th>Cambio</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sym">NVDA</span></td><td style="color:#52525b;font-size:12px">Nvidia Corp.</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;color:#00d97e;font-family:monospace">91</span><div class="bar-w"><div class="bar-f" style="width:91%;background:#00d97e"></div></div></div></td><td><span class="bull">Strong Buy</span></td><td style="color:#00d97e;font-family:monospace;font-weight:700">+2.41%</td></tr>
+        <tr><td><span class="sym">AAPL</span></td><td style="color:#52525b;font-size:12px">Apple Inc.</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;color:#00d97e;font-family:monospace">82</span><div class="bar-w"><div class="bar-f" style="width:82%;background:#00d97e"></div></div></div></td><td><span class="bull">Buy</span></td><td style="color:#00d97e;font-family:monospace;font-weight:700">+0.87%</td></tr>
+        <tr><td><span class="sym">AMZN</span></td><td style="color:#52525b;font-size:12px">Amazon.com</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;color:#00d97e;font-family:monospace">84</span><div class="bar-w"><div class="bar-f" style="width:84%;background:#00d97e"></div></div></div></td><td><span class="bull">Strong Buy</span></td><td style="color:#00d97e;font-family:monospace;font-weight:700">+1.12%</td></tr>
+        <tr><td><span class="sym">META</span></td><td style="color:#52525b;font-size:12px">Meta Platforms</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;color:#f59e0b;font-family:monospace">79</span><div class="bar-w"><div class="bar-f" style="width:79%;background:#f59e0b"></div></div></div></td><td><span class="bull">Buy</span></td><td style="color:#00d97e;font-family:monospace;font-weight:700">+1.32%</td></tr>
+        <tr><td><span class="sym">TSLA</span></td><td style="color:#52525b;font-size:12px">Tesla Inc.</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;color:#ef4444;font-family:monospace">61</span><div class="bar-w"><div class="bar-f" style="width:61%;background:#ef4444"></div></div></div></td><td><span class="bear">Neutral</span></td><td style="color:#ef4444;font-family:monospace;font-weight:700">-1.10%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pw-glass">
+    <div class="card">
+      <span class="card-icon">🔬</span>
+      <p class="card-hook">Scan 5,000+ stocks<br>en segundos</p>
+      <p class="card-sub">Oracle AI score · señales · filtros avanzados.</p>
+      <div class="price-pill"><span class="price-main">$6.58</span><span class="price-per">/mes · facturado anual</span></div>
+      <button class="cta cta-gold" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Screener</button>
+      <a class="free-link">Continuar con acceso gratis →</a>
+      <p class="guarantee"><span>🛡</span> Garantía 30 días</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ─── 3. RADAR GLOBAL ─── -->
+<div class="demo" id="d-rd">
+<div class="pw">
+  <div class="pw-bg">
+    <div class="globe-wrap">
+      <div style="position:relative;width:280px;height:280px;display:flex;align-items:center;justify-content:center">
+        <div class="ring" style="width:300px;height:300px;top:-10px;left:-10px"></div>
+        <div class="ring" style="width:360px;height:360px;top:-40px;left:-40px;border-color:rgba(0,217,126,.08)"></div>
+        <div class="globe-body">
+          <div class="dot" style="top:28%;left:18%"></div>
+          <div class="dot" style="top:22%;left:64%;background:#f59e0b;box-shadow:0 0 10px #f59e0b"></div>
+          <div class="dot" style="top:52%;left:44%"></div>
+          <div class="dot" style="top:60%;left:13%;background:#ef4444;box-shadow:0 0 10px #ef4444"></div>
+          <div class="dot" style="top:38%;left:73%"></div>
+        </div>
+        <div class="lbl" style="top:15%;left:-52%"><span class="dot-s" style="background:#00d97e"></span>NYSE <span style="color:#00d97e">+0.42%</span></div>
+        <div class="lbl" style="top:10%;right:-46%"><span class="dot-s" style="background:#f59e0b"></span>Nikkei <span style="color:#f59e0b">+1.18%</span></div>
+        <div class="lbl" style="bottom:32%;left:-50%"><span class="dot-s" style="background:#ef4444"></span>FTSE <span style="color:#ef4444">-0.34%</span></div>
+        <div class="lbl" style="bottom:18%;right:-44%"><span class="dot-s" style="background:#00d97e"></span>DAX <span style="color:#00d97e">+0.72%</span></div>
+        <div class="lbl" style="bottom:6%;left:20%"><span class="dot-s" style="background:#00d97e"></span>B3 <span style="color:#00d97e">+1.05%</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pw-glass">
+    <div class="card">
+      <span class="card-icon">🌐</span>
+      <p class="card-hook">50+ mercados.<br>Un solo globo.</p>
+      <p class="card-sub">NYSE, London, Tokyo, Shanghai — en tiempo real.</p>
+      <div class="price-pill"><span class="price-main">$6.58</span><span class="price-per">/mes · facturado anual</span></div>
+      <button class="cta cta-blue" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Global Radar</button>
+      <a class="free-link">Continuar con acceso gratis →</a>
+      <p class="guarantee"><span>🛡</span> Garantía 30 días</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ─── 4. TERMINAL ─── -->
+<div class="demo" id="d-tm">
+<div class="pw">
+  <div class="pw-bg">
+    <div class="ticker">
+      <span class="t"><b>AAPL</b><span class="g">$307.30 +1.96%</span></span>
+      <span class="t"><b>BTC</b><span class="g">$63,844 +1.92%</span></span>
+      <span class="t"><b>META</b><span class="g">$593 +2.10%</span></span>
+      <span class="t"><b>NVDA</b><span class="r">$208 -0.20%</span></span>
+      <span class="t"><b>SPY</b><span class="g">$538 +0.42%</span></span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-l">P&amp;L Total</div><div class="kpi-v" style="color:#00d97e">+$24,830</div></div>
+      <div class="kpi"><div class="kpi-l">Win Rate</div><div class="kpi-v" style="color:#00d97e">74.2%</div></div>
+      <div class="kpi"><div class="kpi-l">Sharpe</div><div class="kpi-v" style="color:#a855f7">1.6</div></div>
+      <div class="kpi"><div class="kpi-l">Posiciones</div><div class="kpi-v" style="color:#d4d4d8">12</div></div>
+    </div>
+    <div class="chart-area">
+      <div class="chart-main">
+        <div style="font-size:9.5px;color:#52525b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">AAPL · 1D</div>
+        <svg viewBox="0 0 220 56" style="width:100%;height:48px"><defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#00d97e" stop-opacity=".22"/><stop offset="100%" stop-color="#00d97e" stop-opacity="0"/></linearGradient></defs><path d="M0,52 C30,44 50,40 70,32 S110,18 140,12 S180,6 220,3" stroke="#00d97e" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M0,52 C30,44 50,40 70,32 S110,18 140,12 S180,6 220,3 L220,56 L0,56Z" fill="url(#g1)"/></svg>
+      </div>
+      <div class="chart-watch">
+        <div style="font-size:9.5px;color:#52525b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Watchlist</div>
+        <div class="wl-row"><span style="color:#d4d4d8;font-weight:700;font-family:monospace;font-size:12px">NVDA</span><span style="color:#00d97e;font-family:monospace;font-size:12px">$208</span></div>
+        <div class="wl-row"><span style="color:#d4d4d8;font-weight:700;font-family:monospace;font-size:12px">AAPL</span><span style="color:#00d97e;font-family:monospace;font-size:12px">$307</span></div>
+        <div class="wl-row"><span style="color:#d4d4d8;font-weight:700;font-family:monospace;font-size:12px">BTC</span><span style="color:#00d97e;font-family:monospace;font-size:12px">$63K</span></div>
+        <div class="wl-row" style="opacity:.35"><span style="color:#71717a;font-size:11px">🔒 +9 más</span><span style="color:#52525b;font-size:11px">Pro</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pw-glass">
+    <div class="card">
+      <span class="card-icon">📊</span>
+      <p class="card-hook">Tu Bloomberg.<br>Fracción del precio.</p>
+      <p class="card-sub">P&amp;L en vivo · Greeks · Screener · Journal de trades.</p>
+      <div class="price-pill"><span class="price-main">$6.58</span><span class="price-per">/mes · facturado anual</span></div>
+      <button class="cta cta-gold" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Terminal Pro</button>
+      <a class="free-link">Continuar con acceso gratis →</a>
+      <p class="guarantee"><span>🛡</span> Garantía 30 días</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ─── 5. ORACLE AI ─── -->
+<div class="demo" id="d-ai">
+<div class="pw">
+  <div class="pw-bg">
+    <div class="oracle-area">
+      <div class="oracle-ring">
+        <svg viewBox="0 0 130 130" width="130" height="130">
+          <circle cx="65" cy="65" r="54" fill="none" stroke="#1a0a2e" stroke-width="10"/>
+          <circle cx="65" cy="65" r="54" fill="none" stroke="#a855f7" stroke-width="10"
+            stroke-dasharray="339" stroke-dashoffset="61"
+            stroke-linecap="round" transform="rotate(-90 65 65)" opacity=".9"/>
+        </svg>
+        <div class="oracle-inner">
+          <span class="oracle-num">82</span>
+          <span class="oracle-tag">AAPL · Score</span>
+        </div>
+      </div>
+      <div class="oracle-insights">
+        <div class="insight"><div class="insight-t">📈 Momentum fuerte</div><div class="insight-s">RSI 64 · sobre SMA50 · volumen +22%</div></div>
+        <div class="insight"><div class="insight-t">🎯 Target: $341</div><div class="insight-s">Upside +11% · 18 analistas Bull</div></div>
+        <div class="insight"><div class="insight-t">⚡ Catalizador: Jun 14</div><div class="insight-s">WWDC — IA features anunciadas</div></div>
+      </div>
+    </div>
+    <div class="oracle-strats">
+      <div class="strat"><div class="strat-l">Estrategia</div><div class="strat-v">Bull Call Spread</div><div class="strat-s">R/R 1:3.2</div></div>
+      <div class="strat"><div class="strat-l">Strike</div><div class="strat-v">310C · Jul 21</div><div class="strat-s">IV 28% · Δ 0.52</div></div>
+      <div class="strat"><div class="strat-l">Entrada</div><div class="strat-v">$308.40</div><div class="strat-s">Stop: $301</div></div>
+    </div>
+  </div>
+  <div class="pw-glass" style="background:rgba(9,9,11,.55)">
+    <div class="card" style="border-color:rgba(168,85,247,.2)">
+      <span class="card-icon">🔮</span>
+      <p class="card-hook">IA que piensa como<br>un trader pro.</p>
+      <p class="card-sub">Score, insights y estrategias de opciones — por acción.</p>
+      <div class="price-pill" style="border-color:rgba(168,85,247,.2)"><span class="price-main">$6.58</span><span class="price-per">/mes · facturado anual</span></div>
+      <button class="cta cta-purple" onclick="window.open('https://buy.stripe.com/28E9AM3HQa9XaSI74haR20e','_blank')">Unlock Oracle AI</button>
+      <a class="free-link">Continuar con acceso gratis →</a>
+      <p class="guarantee"><span>🛡</span> Garantía 30 días</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function sw(id){
+  document.querySelectorAll('.demo').forEach(d=>d.classList.remove('on'));
+  document.getElementById('d-'+id).classList.add('on');
+  const map={sm:0,sc:1,rd:2,tm:3,ai:4};
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',i===map[id]));
+}
+</script>
+</body>
+</html>

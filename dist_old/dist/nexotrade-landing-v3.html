@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JTY7WDDEFF"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JTY7WDDEFF');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="QYpWSCazfO7Ka6kGt44WhoRXAoMtwteXQfkNJZBH6Ps" />
+<title>NexoTrade — Invest smarter. Together.</title>
+<meta name="description" content="The #1 trading platform for investors. AI-powered picks, weekly signals, global radar and a community of 3,200+ traders. Free access.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{background:#04060d;font-family:'Inter',sans-serif;color:#e2eaf6;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+
+/* ─── AMBIENT ─── */
+.amb{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(0,220,120,.06) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 65%, rgba(0,130,210,.04) 0%,transparent 50%),
+    radial-gradient(ellipse 35% 45% at 10% 85%, rgba(90,40,200,.035) 0%,transparent 50%);}
+.grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+  background-size:64px 64px;}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:58px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 36px;
+  background:rgba(4,6,13,.82);backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,255,255,.05);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nl-hex{width:28px;height:28px;background:#00df74;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#04060d;}
+.nl-name{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#e2eaf6;}
+.nl-name em{color:#00df74;font-style:normal;}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.nav-link{font-size:13px;font-weight:500;color:#5a7899;cursor:pointer;transition:color .15s;text-decoration:none;}
+.nav-link:hover{color:#e2eaf6;}
+.nav-btn{padding:8px 20px;border-radius:9px;border:none;background:#00df74;color:#04060d;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.nav-btn:hover{box-shadow:0 0 24px rgba(0,223,116,.35);transform:translateY(-1px);}
+
+/* ─── HERO ─── */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 24px 60px;text-align:center;}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,223,116,.09);border:1px solid rgba(0,223,116,.22);padding:6px 16px;border-radius:100px;font-size:12px;font-weight:600;color:#00df74;margin-bottom:28px;animation:badgePulse 3s ease-in-out infinite;}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(0,223,116,.15)}50%{box-shadow:0 0 0 8px rgba(0,223,116,.0)}}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#00df74;animation:dotBlink 1.4s ease-in-out infinite;}
+@keyframes dotBlink{0%,100%{opacity:1}50%{opacity:.25}}
+.badge-timer{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;margin-left:2px;}
+
+/* Eyebrow */
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:#00df74;margin-bottom:18px;}
+
+/* H1 */
+.h1{font-size:clamp(40px,6.5vw,78px);font-weight:900;letter-spacing:-3px;line-height:.97;color:#eef4ff;margin-bottom:20px;max-width:820px;}
+.h1 .g{color:#00df74;position:relative;display:inline-block;}
+.h1 .g::after{content:'';position:absolute;bottom:-5px;left:0;right:0;height:3px;border-radius:2px;background:linear-gradient(90deg,#00df74,transparent);}
+
+/* Sub */
+.sub{font-size:18px;font-weight:400;color:#5a7899;line-height:1.65;max-width:500px;margin:0 auto 36px;}
+.sub strong{color:#8ab4d8;font-weight:500;}
+
+/* Social avatars */
+.avatars{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:36px;}
+.av-stack{display:flex;}
+.av{width:33px;height:33px;border-radius:50%;border:2px solid #04060d;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;margin-left:-10px;flex-shrink:0;}
+.av:first-child{margin-left:0;}
+.av-text{font-size:13px;color:#5a7899;}
+.av-text strong{color:#8ab4d8;}
+.av-live{font-size:12px;color:#00df74;font-weight:700;}
+
+/* ─── CAPTURE BOX ─── */
+.box{background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:36px 32px;max-width:500px;width:100%;backdrop-filter:blur(14px);box-shadow:0 28px 70px rgba(0,0,0,.45);position:relative;overflow:hidden;}
+.box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,223,116,.45),transparent);}
+.box-title{font-size:19px;font-weight:800;color:#eef4ff;margin-bottom:6px;letter-spacing:-.4px;}
+.box-sub{font-size:13px;color:#5a7899;margin-bottom:22px;}
+.row{display:flex;gap:8px;}
+.inp{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:14px 16px;font-family:'Inter',sans-serif;font-size:14px;color:#e2eaf6;outline:none;transition:all .2s;}
+.inp:focus{border-color:rgba(0,223,116,.45);background:rgba(0,223,116,.04);box-shadow:0 0 0 3px rgba(0,223,116,.1);}
+.inp::placeholder{color:#2e4458;}
+.inp.err{border-color:rgba(255,51,85,.5)!important;box-shadow:0 0 0 3px rgba(255,51,85,.1)!important;}
+.cta{padding:14px 24px;border-radius:11px;border:none;background:#00df74;color:#04060d;font-family:'Inter',sans-serif;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 4px 22px rgba(0,223,116,.3);transition:all .2s;position:relative;overflow:hidden;}
+.cta::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);pointer-events:none;}
+.cta:hover{box-shadow:0 6px 32px rgba(0,223,116,.5);transform:translateY(-1px);}
+.guarantees{display:flex;justify-content:center;gap:20px;margin-top:14px;flex-wrap:wrap;}
+.gu{font-size:11px;color:#2e4458;display:flex;align-items:center;gap:5px;}
+.gu::before{content:'✓';color:#00df74;}
+/* Success */
+.success{display:none;flex-direction:column;align-items:center;padding:8px 0;animation:fadeUp .4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ss-ic{font-size:44px;margin-bottom:12px;}
+.ss-t{font-size:19px;font-weight:800;color:#eef4ff;margin-bottom:6px;}
+.ss-s{font-size:14px;color:#5a7899;line-height:1.5;}
+.ss-btn{margin-top:16px;padding:12px 28px;border-radius:10px;border:none;background:#00df74;color:#04060d;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.ss-btn:hover{box-shadow:0 4px 20px rgba(0,223,116,.4);}
+
+/* ─── STATS STRIP ─── */
+.stats{position:relative;z-index:1;padding:0 24px 80px;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.055);border-radius:18px;overflow:hidden;max-width:920px;margin:0 auto;}
+.stat{background:#04060d;padding:30px 24px;text-align:center;transition:background .2s;}
+.stat:hover{background:rgba(255,255,255,.022);}
+.sv{font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;letter-spacing:-1px;color:#eef4ff;margin-bottom:6px;}
+.sv em{color:#00df74;font-style:normal;}
+.sl{font-size:12px;color:#2e4458;letter-spacing:.3px;}
+
+/* ─── SECTION HEADER ─── */
+.sec-head{text-align:center;margin-bottom:60px;}
+.sec-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:#00df74;margin-bottom:14px;}
+.sec-title{font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-1.5px;color:#eef4ff;line-height:1.08;max-width:620px;margin:0 auto 14px;}
+.sec-sub{font-size:16px;color:#5a7899;max-width:460px;margin:0 auto;}
+
+/* ─── FEATURES ─── */
+.features{position:relative;z-index:1;padding:80px 24px;}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1100px;margin:0 auto;}
+.card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.065);border-radius:22px;overflow:hidden;transition:all .3s;position:relative;}
+.card:hover{border-color:rgba(0,223,116,.18);box-shadow:0 20px 50px rgba(0,0,0,.5);transform:translateY(-3px);}
+.card.wide{grid-column:1/-1;}
+.card-top{padding:20px 24px 14px;}
+.ctag{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:5px;display:inline-flex;align-items:center;gap:5px;margin-bottom:10px;}
+.ctag.new{background:rgba(0,223,116,.1);color:#00df74;}
+.ctag.live{background:rgba(255,51,85,.1);color:#ff3355;}
+.ctag.live::before{content:'';width:5px;height:5px;border-radius:50%;background:#ff3355;animation:dotBlink 1s infinite;}
+.ctag.vip{background:rgba(240,180,0,.1);color:#f0b400;}
+.card-title{font-size:17px;font-weight:700;color:#eef4ff;letter-spacing:-.3px;margin-bottom:6px;}
+.card-sub{font-size:13px;color:#5a7899;line-height:1.55;padding:0 24px 18px;}
+
+/* ── Terminal preview ── */
+.term{margin:0 16px 16px;background:#020408;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;height:210px;}
+.term-bar{height:28px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;padding:0 12px;gap:5px;}
+.tb-d{width:8px;height:8px;border-radius:50%;}
+.ticker-strip{flex:1;display:flex;gap:18px;overflow:hidden;margin-left:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;}
+.ts-i{display:flex;gap:5px;white-space:nowrap;animation:tickerMove 20s linear infinite;}
+@keyframes tickerMove{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ts-s{color:#8ab4d8;font-weight:700;} .ts-p{color:#5a7899;} .ts-u{color:#00df74;font-weight:700;} .ts-d{color:#ff3355;font-weight:700;}
+.term-body{display:flex;height:calc(100% - 28px);}
+.term-left{width:130px;border-right:1px solid rgba(255,255,255,.05);overflow:hidden;}
+.sym-row{padding:6px 10px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;transition:background .15s;}
+.sym-row.on{background:rgba(0,223,116,.07);border-right:2px solid #00df74;}
+.sym-row:hover{background:rgba(255,255,255,.03);}
+.sr-s{color:#e2eaf6;font-weight:700;} .sr-g{color:#00df74;font-size:10px;font-weight:700;} .sr-r{color:#ff3355;font-size:10px;font-weight:700;}
+.term-main{flex:1;padding:10px 12px;}
+.tm-price{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#00df74;text-shadow:0 0 14px rgba(0,223,116,.25);}
+.tm-chg{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#00df74;margin-bottom:8px;}
+.term-right{width:100px;border-left:1px solid rgba(255,255,255,.05);padding:8px;}
+.tr-hd{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#2e4458;margin-bottom:5px;font-weight:600;}
+.tr-r{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.035);font-family:'IBM Plex Mono',monospace;font-size:10px;}
+.tr-r:last-child{border-bottom:none;}
+.tr-rs{color:#8ab4d8;font-weight:700;} .tr-rp{color:#5a7899;}
+
+/* ── Globe preview ── */
+.globe-wrap{margin:0 16px 16px;height:230px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.globe-c{position:relative;width:190px;height:190px;}
+.globe{width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 33% 33%,#0b1e3e,#050c1a);border:1px solid rgba(0,223,116,.18);box-shadow:0 0 44px rgba(0,223,116,.09),inset 0 0 44px rgba(0,0,0,.55);position:relative;overflow:hidden;animation:globeGlow 5s ease-in-out infinite;}
+@keyframes globeGlow{0%,100%{box-shadow:0 0 44px rgba(0,223,116,.09),inset 0 0 44px rgba(0,0,0,.55)}50%{box-shadow:0 0 64px rgba(0,223,116,.18),inset 0 0 44px rgba(0,0,0,.55)}}
+.globe-grid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 18px,rgba(0,223,116,.07) 19px),repeating-linear-gradient(90deg,transparent,transparent 18px,rgba(0,223,116,.07) 19px);border-radius:50%;animation:gridSlide 9s linear infinite;}
+@keyframes gridSlide{0%{transform:translateX(0)}100%{transform:translateX(19px)}}
+.sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(0,223,116,.0) 0deg,rgba(0,223,116,.16) 55deg,rgba(0,223,116,.0) 80deg);animation:sweepRot 3.2s linear infinite;}
+@keyframes sweepRot{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.gdot{position:absolute;width:6px;height:6px;border-radius:50%;animation:dotPulse 2s ease-in-out infinite;}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
+.gdot.g{background:#00df74;box-shadow:0 0 8px rgba(0,223,116,.8);}
+.gdot.r{background:#ff3355;box-shadow:0 0 8px rgba(255,51,85,.8);}
+.gdot.y{background:#f0b400;box-shadow:0 0 8px rgba(240,180,0,.8);}
+.gring{position:absolute;border-radius:50%;border:1px solid rgba(0,223,116,.12);animation:ringPulse 4.5s ease-in-out infinite;}
+.gring.r1{inset:-9px;animation-delay:0s;}
+.gring.r2{inset:-18px;border-color:rgba(0,223,116,.06);animation-delay:.6s;}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.5}}
+.mlabel{position:absolute;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;display:flex;align-items:center;gap:4px;animation:labelFloat 3.5s ease-in-out infinite;}
+@keyframes labelFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.ml-d{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.ml-t{color:#5a7899;letter-spacing:.5px;}
+.ml-v{font-weight:600;}
+.ml-v.g{color:#00df74;} .ml-v.r{color:#ff3355;} .ml-v.y{color:#f0b400;}
+
+/* ── Watchlist preview ── */
+.wl-wrap{margin:0 16px 16px;}
+.wl-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.055);border-radius:11px;margin-bottom:7px;transition:all .2s;}
+.wl-row:hover{background:rgba(255,255,255,.035);border-color:rgba(0,223,116,.14);}
+.wl-av{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;}
+.wl-info{flex:1;}
+.wl-sym{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#e2eaf6;}
+.wl-name{font-size:10px;color:#2e4458;margin-top:1px;}
+.wl-spark{width:58px;height:22px;flex-shrink:0;}
+.wl-price{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#e2eaf6;min-width:72px;text-align:right;}
+.wl-chg{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;min-width:52px;text-align:right;}
+.wl-chg.g{color:#00df74;} .wl-chg.r{color:#ff3355;}
+.wl-lock{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(240,180,0,.035);border:1px solid rgba(240,180,0,.12);border-radius:11px;}
+.wl-blur{flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(255,255,255,.12);filter:blur(5px);user-select:none;}
+.wl-cta{font-size:10px;font-weight:800;color:#f0b400;background:rgba(240,180,0,.1);border:1px solid rgba(240,180,0,.2);padding:5px 11px;border-radius:7px;white-space:nowrap;cursor:pointer;}
+
+/* ─── PRICING ─── */
+.pricing{position:relative;z-index:1;padding:80px 24px;}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:760px;margin:0 auto;}
+.plan{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:22px;padding:32px;transition:all .3s;position:relative;overflow:hidden;}
+.plan:hover{transform:translateY(-3px);}
+.plan.vip{border-color:rgba(0,223,116,.3);background:rgba(0,223,116,.04);}
+.plan.vip::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00df74,transparent);}
+.plan-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:14px;}
+.plan-badge.free{background:rgba(255,255,255,.06);color:#5a7899;}
+.plan-badge.vip{background:rgba(0,223,116,.1);color:#00df74;}
+.plan-name{font-size:24px;font-weight:900;color:#eef4ff;letter-spacing:-.5px;margin-bottom:6px;}
+.plan-price{font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:700;color:#00df74;letter-spacing:-1px;margin-bottom:4px;}
+.plan-price span{font-size:14px;color:#5a7899;font-weight:400;letter-spacing:0;}
+.plan-trial{font-size:12px;color:#5a7899;margin-bottom:22px;}
+.plan-trial strong{color:#00df74;}
+.plan-features{list-style:none;margin-bottom:24px;}
+.plan-features li{font-size:13px;color:#8ab4d8;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:8px;}
+.plan-features li:last-child{border-bottom:none;}
+.plan-features li::before{content:'✓';color:#00df74;font-weight:700;font-size:12px;flex-shrink:0;}
+.plan-features li.lock::before{content:'🔒';font-size:11px;}
+.plan-features li.lock{color:#2e4458;}
+.plan-btn{width:100%;padding:14px;border-radius:12px;border:none;font-family:'Inter',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;}
+.plan-btn.free{background:rgba(255,255,255,.07);color:#e2eaf6;border:1px solid rgba(255,255,255,.1);}
+.plan-btn.free:hover{background:rgba(255,255,255,.12);}
+.plan-btn.vip{background:#00df74;color:#04060d;box-shadow:0 4px 22px rgba(0,223,116,.3);}
+.plan-btn.vip:hover{box-shadow:0 6px 32px rgba(0,223,116,.5);transform:translateY(-1px);}
+
+/* ─── TESTIMONIALS ─── */
+.tests{position:relative;z-index:1;padding:0 24px 80px;max-width:940px;margin:0 auto;}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.tc{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:20px;transition:all .2s;}
+.tc:hover{border-color:rgba(0,223,116,.14);transform:translateY(-2px);}
+.tc-stars{font-size:13px;letter-spacing:2px;margin-bottom:10px;}
+.tc-text{font-size:13px;color:#5a7899;line-height:1.65;margin-bottom:14px;font-style:italic;}
+.tc-text strong{color:#8ab4d8;font-style:normal;}
+.tc-author{display:flex;align-items:center;gap:9px;}
+.tc-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;}
+.tc-name{font-size:12px;font-weight:700;color:#8ab4d8;}
+.tc-loc{font-size:11px;color:#2e4458;}
+
+/* ─── FINAL CTA ─── */
+.final{position:relative;z-index:1;padding:80px 24px 100px;text-align:center;}
+.final-box{background:rgba(0,223,116,.04);border:1px solid rgba(0,223,116,.15);border-radius:28px;padding:60px 48px;max-width:640px;margin:0 auto;position:relative;overflow:hidden;}
+.final-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00df74,transparent);}
+.final-title{font-size:clamp(32px,5vw,52px);font-weight:900;letter-spacing:-2px;color:#eef4ff;line-height:.98;margin-bottom:12px;}
+.final-sub{font-size:16px;color:#5a7899;margin-bottom:36px;line-height:1.6;}
+.final-form{display:flex;gap:10px;max-width:420px;margin:0 auto 14px;}
+.final-note{font-size:12px;color:#2e4458;}
+.final-note em{color:#00df74;font-style:normal;}
+
+/* ─── DIVIDER ─── */
+.div{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.055),transparent);margin:0 24px;}
+
+/* ─── REVEAL ─── */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .feat-grid,.pricing-grid,.test-grid{grid-template-columns:1fr;}
+  .card.wide{grid-column:auto;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .row,.final-form{flex-direction:column;}
+  .h1{font-size:38px;letter-spacing:-1.5px;}
+  .final-box{padding:36px 24px;}
+  .nav-right .nav-link{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="amb"></div>
+<div class="grid"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="nl-hex">N</div>
+    <div class="nl-name">NEXO<em>TRADE</em></div>
+  </a>
+  <div class="nav-right">
+    <a class="nav-link" href="/" onclick="goApp(event,'feed')">Explore platform</a>
+    <a class="nav-link" href="/" onclick="goApp(event,'login')">Sign in</a>
+    <button class="nav-btn" onclick="scrollToBox()">Get free access →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    🔥 Founder offer — ends in <span class="badge-timer" id="timer">23:47:12</span>
+  </div>
+  <div class="eyebrow">The #1 investment platform for global traders</div>
+  <h1 class="h1">Invest smarter.<br><span class="g">Together.</span></h1>
+  <p class="sub">
+    The global investor community for stocks &amp; crypto. Get <strong>AI-powered picks</strong>, institutional flow and a live market feed — straight to your inbox, every week.
+  </p>
+  <div class="avatars">
+    <div class="av-stack">
+      <div class="av" style="background:linear-gradient(135deg,#1a6c4a,#00df74)">JL</div>
+      <div class="av" style="background:linear-gradient(135deg,#1a3a6c,#4da6ff)">MR</div>
+      <div class="av" style="background:linear-gradient(135deg,#6c1a4a,#ff4da6)">AS</div>
+      <div class="av" style="background:linear-gradient(135deg,#6c4a1a,#f0b400)">PG</div>
+      <div class="av" style="background:linear-gradient(135deg,#2a1a6c,#a06cff)">CI</div>
+    </div>
+    <div>
+      <div class="av-text"><strong>+3,200 traders</strong> active</div>
+      <div class="av-live">● 127 online now</div>
+    </div>
+  </div>
+
+  <!-- CAPTURE BOX -->
+  <div class="box" id="captureBox">
+    <div id="formArea">
+      <div class="box-title">Join free — no credit card needed</div>
+      <div class="box-sub">Join the first 500. Price goes up after that.</div>
+      <div class="row">
+        <input class="inp" type="email" id="heroEmail" placeholder="your@email.com" autocomplete="email">
+        <button class="cta" id="heroBtn" onclick="submitHero()">Get access →</button>
+      </div>
+      <div class="guarantees">
+        <div class="gu">No spam</div>
+        <div class="gu">3 days free</div>
+        <div class="gu">Cancel anytime</div>
+      </div>
+      <div style="margin-top:14px;">
+        <a href="/app" style="color:#4a7a9b;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.2px;opacity:0.8;">Skip — explore the platform →</a>
+      </div>
+    </div>
+    <div class="success" id="heroSuccess">
+      <div class="ss-ic">🎉</div>
+      <div class="ss-t">You're now part of NexoTrade!</div>
+      <div class="ss-s">Check your email — a welcome message is on its way.<br>You can now explore the platform.</div>
+      <button class="ss-btn" onclick="window.location.href='/app'">Enter NexoTrade →</button>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats rv">
+  <div class="stats-grid">
+    <div class="stat"><div class="sv"><em id="n1">3,200</em></div><div class="sl">Registered traders</div></div>
+    <div class="stat"><div class="sv">$<em id="n2">284,000</em></div><div class="sl">In reported gains</div></div>
+    <div class="stat"><div class="sv"><em id="n3">18,400</em></div><div class="sl">Published analyses</div></div>
+    <div class="stat"><div class="sv"><em id="n4">52</em><em>+</em></div><div class="sl">Live markets</div></div>
+  </div>
+</div>
+
+<div class="div"></div>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="sec-head rv">
+    <div class="sec-label">What you get</div>
+    <div class="sec-title">Tools the pros use.<br>Now for everyone.</div>
+    <div class="sec-sub">Everything you need to invest smarter — in one platform.</div>
+  </div>
+  <div class="feat-grid">
+
+    <!-- Terminal — wide -->
+    <div class="card wide rv">
+      <div class="card-top">
+        <div class="ctag new">NEW</div>
+        <div class="card-title">NEXO TERMINAL — Pro Trader</div>
+      </div>
+      <div class="card-sub">The most advanced dashboard for serious traders. Live price, P&L, multi-timeframe charts, screener and journal — all in one screen.</div>
+      <div class="term">
+        <div class="term-bar">
+          <div class="tb-d" style="background:#ff3355"></div>
+          <div class="tb-d" style="background:#f0b400;margin-left:2px"></div>
+          <div class="tb-d" style="background:#00df74;margin-left:2px"></div>
+          <div class="ticker-strip">
+            <!-- duplicated for seamless loop -->
+            <span class="ts-i"><span class="ts-s">NVDA</span><span class="ts-p"> $208.30 </span><span class="ts-u">▲2.41%</span>&nbsp;&nbsp;&nbsp;</span>
+            <span class="ts-i"><span class="ts-s">AAPL</span><span class="ts-p"> $307.30 </span><span class="ts-d">▼0.30%</span>&nbsp;&nbsp;&nbsp;</span>
+            <span class="ts-i"><span class="ts-s">BTC</span><span class="ts-p"> $63,844 </span><span class="ts-u">▲1.92%</span>&nbsp;&nbsp;&nbsp;</span>
+            <span class="ts-i"><span class="ts-s">META</span><span class="ts-p"> $593.00 </span><span class="ts-u">▲2.10%</span>&nbsp;&nbsp;&nbsp;</span>
+            <span class="ts-i"><span class="ts-s">TSLA</span><span class="ts-p"> $391.00 </span><span class="ts-d">▼1.10%</span>&nbsp;&nbsp;&nbsp;</span>
+            <span class="ts-i"><span class="ts-s">SPY</span><span class="ts-p"> $737.55 </span><span class="ts-d">▼0.20%</span>&nbsp;&nbsp;&nbsp;</span>
+            <span class="ts-i"><span class="ts-s">NVDA</span><span class="ts-p"> $208.30 </span><span class="ts-u">▲2.41%</span>&nbsp;&nbsp;&nbsp;</span>
+            <span class="ts-i"><span class="ts-s">AAPL</span><span class="ts-p"> $307.30 </span><span class="ts-d">▼0.30%</span>&nbsp;&nbsp;&nbsp;</span>
+          </div>
+        </div>
+        <div class="term-body">
+          <div class="term-left">
+            <div class="sym-row on"><span class="sr-s">AAPL</span><span class="sr-g">+1.89%</span></div>
+            <div class="sym-row"><span class="sr-s">NVDA</span><span class="sr-g">+2.41%</span></div>
+            <div class="sym-row"><span class="sr-s">MSFT</span><span class="sr-g">+0.92%</span></div>
+            <div class="sym-row"><span class="sr-s">META</span><span class="sr-r">−0.87%</span></div>
+            <div class="sym-row"><span class="sr-s">TSLA</span><span class="sr-g">+4.53%</span></div>
+            <div class="sym-row"><span class="sr-s">BTC</span><span class="sr-g">+1.92%</span></div>
+            <div class="sym-row"><span class="sr-s">AMZN</span><span class="sr-g">+1.24%</span></div>
+          </div>
+          <div class="term-main">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#2e4458;margin-bottom:4px;display:flex;justify-content:space-between;"><span>AAPL · 1D</span><span>O:295 H:310 L:293 V:64M</span></div>
+            <div class="tm-price">$307.30</div>
+            <div class="tm-chg">▲ +5.79 (+1.96%) today</div>
+            <svg width="100%" height="78" viewBox="0 0 300 78" style="margin-top:4px;">
+              <path d="M0,65 C20,60 40,55 60,50 C80,45 100,48 120,42 C140,36 160,38 180,30 C200,22 220,25 240,18 C260,11 280,14 300,10 L300,78 L0,78 Z" fill="rgba(0,223,116,.07)"/>
+              <path d="M0,65 C20,60 40,55 60,50 C80,45 100,48 120,42 C140,36 160,38 180,30 C200,22 220,25 240,18 C260,11 280,14 300,10" fill="none" stroke="#00df74" stroke-width="2"/>
+              <line x1="0" y1="54" x2="300" y2="54" stroke="rgba(255,255,255,.12)" stroke-dasharray="4,3" stroke-width="1"/>
+              <text x="4" y="51" fill="rgba(255,255,255,.25)" font-size="8" font-family="IBM Plex Mono">Entrada $154</text>
+              <circle cx="300" cy="10" r="4" fill="#00df74"/>
+              <circle cx="300" cy="10" r="9" fill="rgba(0,223,116,.14)"/>
+            </svg>
+          </div>
+          <div class="term-right">
+            <div class="tr-hd">Watchlist</div>
+            <div class="tr-r"><span class="tr-rs">NVDA</span><span class="tr-rp" style="color:#00df74">$208</span></div>
+            <div class="tr-r"><span class="tr-rs">AAPL</span><span class="tr-rp">$307</span></div>
+            <div class="tr-r"><span class="tr-rs">BTC</span><span class="tr-rp" style="color:#00df74">$63K</span></div>
+            <div class="tr-r"><span class="tr-rs">META</span><span class="tr-rp" style="color:#00df74">$593</span></div>
+            <div style="height:1px;background:rgba(240,180,0,.18);margin:5px 0"></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:700;color:#f0b400;text-align:center;padding:3px 0">🔒 +4 más · VIP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Globe -->
+    <div class="card rv">
+      <div class="card-top">
+        <div class="ctag live">LIVE</div>
+        <div class="card-title">Global Market Radar</div>
+      </div>
+      <div class="card-sub">All the world's markets in real time. NYSE, NASDAQ, Europe, Asia, Crypto — in one interactive view.</div>
+      <div class="globe-wrap">
+        <div class="globe-c">
+          <div class="gring r1"></div>
+          <div class="gring r2"></div>
+          <div class="globe">
+            <div class="globe-grid"></div>
+            <div class="sweep"></div>
+            <div class="gdot g" style="top:28%;left:20%;animation-delay:.2s"></div>
+            <div class="gdot r" style="top:44%;left:47%;animation-delay:.8s"></div>
+            <div class="gdot g" style="top:36%;left:64%;animation-delay:.4s"></div>
+            <div class="gdot y" style="top:60%;left:34%;animation-delay:1.2s"></div>
+            <div class="gdot g" style="top:22%;left:70%;animation-delay:.6s"></div>
+            <div class="gdot r" style="top:55%;left:76%;animation-delay:1s"></div>
+            <div class="gdot g" style="top:72%;left:56%;animation-delay:.3s"></div>
+            <div class="gdot y" style="top:18%;left:42%;animation-delay:.9s"></div>
+          </div>
+        </div>
+        <div class="mlabel" style="top:16%;left:0%;animation-delay:0s"><div class="ml-d" style="background:#00df74"></div><div><div class="ml-t">NYSE</div><div class="ml-v g">+0.42%</div></div></div>
+        <div class="mlabel" style="top:44%;right:0%;animation-delay:.5s"><div class="ml-d" style="background:#f0b400"></div><div><div class="ml-t">NIKKEI</div><div class="ml-v y">+1.18%</div></div></div>
+        <div class="mlabel" style="bottom:20%;left:0%;animation-delay:1s"><div class="ml-d" style="background:#ff3355"></div><div><div class="ml-t">FTSE</div><div class="ml-v r">−0.34%</div></div></div>
+        <div class="mlabel" style="bottom:16%;right:0%;animation-delay:.3s"><div class="ml-d" style="background:#00df74"></div><div><div class="ml-t">DAX</div><div class="ml-v g">+0.72%</div></div></div>
+      </div>
+    </div>
+
+    <!-- Watchlist -->
+    <div class="card rv">
+      <div class="card-top">
+        <div class="ctag vip">PREMIUM</div>
+        <div class="card-title">Smart Watchlist</div>
+      </div>
+      <div class="card-sub">Track your favorite assets with alerts, sparklines, risk metrics and AI signals included.</div>
+      <div class="wl-wrap">
+        <div class="wl-row">
+          <div class="wl-av" style="background:#1a3a20">🟢</div>
+          <div class="wl-info"><div class="wl-sym">NVDA</div><div class="wl-name">NVIDIA Corp.</div></div>
+          <svg class="wl-spark" viewBox="0 0 60 24"><polyline points="0,20 10,16 20,18 30,10 40,12 50,6 60,4" fill="none" stroke="#00df74" stroke-width="1.5"/></svg>
+          <div class="wl-price">$208.30</div><div class="wl-chg g">▲2.41%</div>
+        </div>
+        <div class="wl-row">
+          <div class="wl-av" style="background:#1a2a3a">🍎</div>
+          <div class="wl-info"><div class="wl-sym">AAPL</div><div class="wl-name">Apple Inc.</div></div>
+          <svg class="wl-spark" viewBox="0 0 60 24"><polyline points="0,8 10,10 20,12 30,14 40,10 50,12 60,16" fill="none" stroke="#ff3355" stroke-width="1.5"/></svg>
+          <div class="wl-price">$307.30</div><div class="wl-chg r">▼0.30%</div>
+        </div>
+        <div class="wl-row">
+          <div class="wl-av" style="background:#2a1a10">₿</div>
+          <div class="wl-info"><div class="wl-sym">BTC</div><div class="wl-name">Bitcoin</div></div>
+          <svg class="wl-spark" viewBox="0 0 60 24"><polyline points="0,18 10,14 20,16 30,8 40,10 50,4 60,6" fill="none" stroke="#00df74" stroke-width="1.5"/></svg>
+          <div class="wl-price">$63,844</div><div class="wl-chg g">▲1.92%</div>
+        </div>
+        <div class="wl-lock">
+          <div class="wl-av" style="background:rgba(240,180,0,.08)">🔒</div>
+          <div class="wl-blur">AMZN $246.00 ▲0.60% META $593 ▲2.1%</div>
+          <div class="wl-cta" onclick="scrollToBox()">Unlock with VIP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="sec-head rv">
+    <div class="sec-label">Plans</div>
+    <div class="sec-title">Simple. Transparent.<br>No surprises.</div>
+    <div class="sec-sub">Start free. Upgrade to VIP anytime.</div>
+  </div>
+  <div class="pricing-grid rv">
+    <div class="plan">
+      <div class="plan-badge free">FREE</div>
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0<span>/mo</span></div>
+      <div class="plan-trial">Free forever</div>
+      <ul class="plan-features">
+        <li>Live market feed</li>
+        <li>Trader community</li>
+        <li>Paper trading ($100k virtual)</li>
+        <li>Basic Global Radar</li>
+        <li>Watchlist (4 assets)</li>
+        <li class="lock">Weekly AI picks</li>
+        <li class="lock">Smart Money Flow</li>
+        <li class="lock">Pro Trader Terminal</li>
+        <li class="lock">Price alerts</li>
+      </ul>
+      <button class="plan-btn free" onclick="window.location.href='/app'">Start free</button>
+    </div>
+    <div class="plan vip">
+      <div class="plan-badge vip">✦ VIP</div>
+      <div class="plan-name">Premium</div>
+      <div class="plan-price">$6.58<span>/mo</span></div>
+      <div class="plan-trial"><strong>3 days free</strong> — no card required</div>
+      <ul class="plan-features">
+        <li>Everything in Free included</li>
+        <li>📈 Weekly AI-powered picks</li>
+        <li>🐋 Smart Money Flow</li>
+        <li>⚡ Full Pro Trader Terminal</li>
+        <li>🔔 Unlimited price alerts</li>
+        <li>📊 Unlimited watchlist</li>
+        <li>📧 Exclusive Monday newsletter</li>
+        <li>🌍 Advanced Global Radar (52 exchanges)</li>
+        <li>💎 Priority access to all new features</li>
+      </ul>
+      <button class="plan-btn vip" onclick="scrollToBox()">Start 3-day free trial →</button>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- TESTIMONIALS -->
+<section class="tests rv">
+  <div class="sec-head">
+    <div class="sec-label">What they say</div>
+    <div class="sec-title" style="font-size:clamp(24px,3.5vw,38px)">Real traders. Real results.</div>
+  </div>
+  <div class="test-grid">
+    <div class="tc">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-text">"I've been using NexoTrade for 3 months and my win rate went from <strong>48% to 71%</strong>. The AI signals are the best I've seen."</div>
+      <div class="tc-author"><div class="tc-av" style="background:linear-gradient(135deg,#1a6c4a,#00df74)">JL</div><div><div class="tc-name">Jorge L.</div><div class="tc-loc">Miami, FL</div></div></div>
+    </div>
+    <div class="tc">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-text">"The Global Radar helped me spot an opportunity in Asia that generated <strong>+$4,200 in one week</strong>. Incredible."</div>
+      <div class="tc-author"><div class="tc-av" style="background:linear-gradient(135deg,#6c1a4a,#ff4da6)">MR</div><div><div class="tc-name">María R.</div><div class="tc-loc">Bogotá, CO</div></div></div>
+    </div>
+    <div class="tc">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-text">"I used to pay $300/mo for Bloomberg. NexoTrade gives me the <strong>same level of data</strong> for a fraction of the price."</div>
+      <div class="tc-author"><div class="tc-av" style="background:linear-gradient(135deg,#1a3a6c,#4da6ff)">AS</div><div><div class="tc-name">Andrés S.</div><div class="tc-loc">Buenos Aires, AR</div></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- FINAL CTA -->
+<section class="final rv">
+  <div class="final-box">
+    <div class="final-title">Start free today.</div>
+    <div class="final-sub">Join before the price goes up. No card. No commitment. Cancel anytime.</div>
+    <div class="final-form">
+      <input class="inp" type="email" id="finalEmail" placeholder="your@email.com">
+      <button class="cta" onclick="submitFinal()">Get access →</button>
+    </div>
+    <div class="final-note"><em>✓</em> 3 days free &nbsp;·&nbsp; <em>✓</em> No spam &nbsp;·&nbsp; <em>✓</em> +3,200 already inside</div>
+  </div>
+</section>
+
+<script>
+/* ── REF CAPTURE ── */
+(function(){
+  try{
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if(ref) localStorage.setItem('nexo-ref', ref.toLowerCase().trim());
+  }catch(e){}
+})();
+
+/* ── SUPABASE ── */
+const SB_URL = 'https://glvrzrtatekuuhwtzzhd.supabase.co';
+const SB_KEY = 'sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl';
+
+async function saveEmail(email){
+  try{
+    const ref = localStorage.getItem('nexo-ref') || null;
+    await fetch(`${SB_URL}/rest/v1/newsletter_subscribers`, {
+      method:'POST',
+      headers:{
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ email: email.trim().toLowerCase(), source: ref ? `ref_${ref}` : 'landing_v3', created_at: new Date().toISOString() })
+    });
+    // Track influencer ref si existe
+    if(ref){
+      fetch('/api/track-ref',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ref_code: ref, user_email: email.trim().toLowerCase(), source: 'landing' })
+      }).catch(()=>{});
+    }
+  }catch(e){}
+}
+
+function validateEmail(email){ return email && email.includes('@') && email.includes('.'); }
+
+async function submitHero(){
+  const email = document.getElementById('heroEmail').value.trim();
+  if(!validateEmail(email)){
+    const inp = document.getElementById('heroEmail');
+    inp.classList.add('err');
+    setTimeout(()=>inp.classList.remove('err'), 1600);
+    return;
+  }
+  const btn = document.getElementById('heroBtn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  await saveEmail(email);
+  document.getElementById('formArea').style.display = 'none';
+  document.getElementById('heroSuccess').style.display = 'flex';
+}
+
+async function submitFinal(){
+  const email = document.getElementById('finalEmail').value.trim();
+  if(!validateEmail(email)){
+    const inp = document.getElementById('finalEmail');
+    inp.classList.add('err');
+    setTimeout(()=>inp.classList.remove('err'), 1600);
+    return;
+  }
+  await saveEmail(email);
+  document.querySelector('.final-box').innerHTML = `
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:52px;margin-bottom:14px;">🎉</div>
+      <div style="font-size:22px;font-weight:900;color:#eef4ff;margin-bottom:8px;letter-spacing:-.5px;">You're now part of NexoTrade!</div>
+      <div style="font-size:14px;color:#5a7899;margin-bottom:22px;line-height:1.6;">Check your email — a welcome message is on its way.</div>
+      <button onclick="window.location.href='/app'" style="padding:14px 32px;border-radius:12px;border:none;background:#00df74;color:#04060d;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;">Enter NexoTrade →</button>
+    </div>`;
+}
+
+function scrollToBox(){
+  document.getElementById('captureBox').scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>{ try{document.getElementById('heroEmail').focus();}catch(e){} }, 600);
+}
+
+function goApp(e, page){
+  e.preventDefault();
+  window.location.href = '/app';
+}
+
+/* ── COUNTDOWN ── */
+let totalSecs = 23*3600 + 47*60 + 12;
+setInterval(()=>{
+  totalSecs = Math.max(0, totalSecs - 1);
+  const h = Math.floor(totalSecs/3600);
+  const m = Math.floor((totalSecs%3600)/60);
+  const s = totalSecs % 60;
+  const el = document.getElementById('timer');
+  if(el) el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}, 1000);
+
+/* ── SCROLL REVEAL ── */
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('vis'); });
+},{threshold:.12});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+/* ── ANIMATED COUNTERS ── */
+function animNum(id, target){
+  const el = document.getElementById(id);
+  if(!el) return;
+  let cur = 0; const step = target/60;
+  const iv = setInterval(()=>{
+    cur = Math.min(cur+step, target);
+    const v = Math.floor(cur);
+    el.textContent = v >= 1000 ? v.toLocaleString('en-US') : v;
+    if(cur >= target) clearInterval(iv);
+  }, 22);
+}
+const numObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      animNum('n1',3200); animNum('n2',284000); animNum('n3',18400); animNum('n4',52);
+      numObs.disconnect();
+    }
+  });
+},{threshold:.4});
+const statEl = document.querySelector('.stats');
+if(statEl) numObs.observe(statEl);
+</script>
+</body>
+</html>

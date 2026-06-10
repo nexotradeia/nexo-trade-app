@@ -25380,6 +25380,286 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
   );
 }
 // ─────────────────────────────────────────────────────────────────────────────
+// ── MARKETS PAGE ─────────────────────────────────────────────────────────────
+function MarketsPage({user, isPremium, onNavigate, lang="en"}){
+  var [tab,setTab]       = useState("overview");
+  var [region,setRegion] = useState("global");
+  var [calTab,setCalTab] = useState("economic");
+  var prices             = useContext(PriceCtx)||{};
+
+  // ── design tokens (light) ──
+  var PAGE="#f6f7f9",SURFACE="#fff",S2="#f3f4f7";
+  var HAIR="#e8eaee",HAIR2="#dfe2e7";
+  var INK="#0a0d14",INK2="#5b616e",INK3="#9aa0ab";
+  var BLUE="#1f6bff",BLUEBG="rgba(31,107,255,.10)";
+  var UP="#0a9d5c",UPBG="rgba(10,157,92,.10)";
+  var DN="#e0463d",DNBG="rgba(224,70,61,.10)";
+  var SH="0 1px 2px rgba(10,13,20,.04),0 8px 24px rgba(10,13,20,.05)";
+
+  // ── live price helpers ──
+  function liveP(sym,fp,fc){
+    var d=prices[sym];
+    return {p:d&&d.price?d.price:fp, c:d&&d.change!==undefined?d.change:fc};
+  }
+  function fmtP(p,sym){
+    if(!p) return "–";
+    if(sym==="BTC"||sym==="ETH") return p>=1000?p.toLocaleString("en",{maximumFractionDigits:0}):p.toFixed(2);
+    if(p>=10000) return p.toLocaleString("en",{maximumFractionDigits:0});
+    if(p>=1000)  return p.toLocaleString("en",{maximumFractionDigits:2});
+    if(p>=10)    return p.toFixed(2);
+    return p.toFixed(4);
+  }
+  function fmtC(c){return (c>=0?"+":"")+c.toFixed(2)+"%";}
+  function cClr(c){return c>=0?UP:DN;}
+
+  // ── region index data ──
+  var REGIONS={
+    global:[
+      {nm:"S&P 500",    sym:"SPY",  fp:580,   fc:-0.8},
+      {nm:"Nasdaq 100", sym:"QQQ",  fp:495,   fc:-1.2},
+      {nm:"Dow 30",     sym:"DIA",  fp:430,   fc:-0.7},
+      {nm:"Russell 2000",sym:"IWM", fp:210,   fc:-0.5},
+    ],
+    europe:[
+      {nm:"Euro Stoxx 50",  sym:"EZU",  fp:58.2,  fc:+0.3},
+      {nm:"Germany (DAX)",  sym:"EWG",  fp:35.4,  fc:+0.5},
+      {nm:"UK (FTSE 100)",  sym:"EWU",  fp:38.1,  fc:+0.2},
+      {nm:"France (CAC 40)",sym:"EWQ",  fp:27.8,  fc:+0.4},
+    ],
+    asia:[
+      {nm:"Japan (Nikkei)", sym:"EWJ",  fp:72.5,  fc:-0.4},
+      {nm:"China (CSI 300)",sym:"FXI",  fp:27.9,  fc:+1.2},
+      {nm:"Korea (KOSPI)",  sym:"EWY",  fp:60.2,  fc:-0.3},
+      {nm:"India (Nifty)",  sym:"INDA", fp:50.1,  fc:+0.8},
+    ],
+    latam:[
+      {nm:"Brazil (Bovespa)",sym:"EWZ", fp:27.4,  fc:-1.1},
+      {nm:"Mexico (IPC)",    sym:"EWW", fp:55.2,  fc:-0.6},
+      {nm:"Chile",           sym:"ECH", fp:23.8,  fc:+0.4},
+      {nm:"Latam ETF",       sym:"ILF", fp:22.1,  fc:-0.8},
+    ],
+  };
+  var CRYPTO=[
+    {nm:"Bitcoin",   sym:"BTC", fp:61800, fc:+1.4},
+    {nm:"Ethereum",  sym:"ETH", fp:1629,  fc:-1.25},
+    {nm:"Solana",    sym:"SOL", fp:142.3, fc:+2.1},
+    {nm:"XRP",       sym:"XRP", fp:0.58,  fc:-0.4},
+  ];
+
+  // ── sector heatmap ──
+  var SECTORS=[
+    {s:"Energy",      c:+1.8},{s:"Health",    c:+0.9},
+    {s:"Staples",     c:+0.3},{s:"Utilities", c: 0.0},
+    {s:"Financials",  c:-0.4},{s:"Industrials",c:-1.1},
+    {s:"Tech",        c:-2.0},{s:"Cons. Disc.",c:-2.3},
+  ];
+  function secBg(c){
+    if(c>=1.5) return "#0a9d5c";
+    if(c>=0.5) return "#34b277";
+    if(c>0)    return "#7cc9a3";
+    if(c===0)  return "#b9bfc9";
+    if(c>-0.7) return "#efa39d";
+    if(c>-1.5) return "#e87169";
+    return "#e0463d";
+  }
+
+  // ── top movers (use TICKER_DATA_INIT + live overlay) ──
+  var moversRaw=(TICKER_DATA_INIT||[]).filter(t=>t.symbol&&t.change!==undefined).sort((a,b)=>Math.abs(b.change)-Math.abs(a.change)).slice(0,6);
+
+  // ── right rail data ──
+  var EVENTS=[
+    {tm:"8:30",  t:"CPI inflation (May)",   m:"Forecast 3.2% YoY",      imp:"High"},
+    {tm:"10:00", t:"Fed Chair speech",      m:"Monetary policy outlook", imp:"High"},
+    {tm:"2:00",  t:"FOMC minutes",          m:"From last meeting",       imp:"High"},
+  ];
+  var MARKET_NEWS=[
+    {t:"Tech leads selloff as yields climb ahead of inflation print",   src:"Reuters · 22m"},
+    {t:"Bitcoin reclaims $61k as ETF inflows resume",                   src:"Bloomberg · 1h"},
+    {t:"Energy outperforms on supply concerns",                         src:"CNBC · 2h"},
+  ];
+  var spyLive=liveP("SPY",580,-0.8);
+  var glance=spyLive.c<-1?{label:"Risk-off",sub:"Equities soft, yields up, crypto firm",c:DN}
+            :spyLive.c>1 ?{label:"Risk-on", sub:"Equities rallying, risk assets bid",   c:UP}
+            :{label:"Mixed",sub:"Equity leadership mixed, watch yields",c:INK2};
+
+  // ── shared styles ──
+  var tabBtn=(active)=>({fontSize:13.5,fontWeight:600,color:active?INK:INK2,padding:"8px 14px",borderRadius:10,background:active?SURFACE:"none",border:active?`1px solid ${HAIR}`:"none",boxShadow:active?SH:"none",cursor:"pointer",fontFamily:"inherit"});
+  var regBtn=(active)=>({fontSize:12.5,fontWeight:600,color:active?BLUE:INK2,background:active?BLUEBG:SURFACE,border:active?`1px solid rgba(31,107,255,.25)`:  `1px solid ${HAIR}`,padding:"7px 13px",borderRadius:9,cursor:"pointer",fontFamily:"inherit"});
+  var BLOCK={background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:16,boxShadow:SH,overflow:"hidden"};
+  var BH={padding:"11px 16px",borderBottom:`1px solid ${HAIR}`,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",color:INK3};
+
+  // ── right rail (always) ──
+  var rail=(
+    <div style={{display:"flex",flexDirection:"column",gap:16,minWidth:0}}>
+      {/* Today's events */}
+      <div style={{...BLOCK,borderRadius:16}}>
+        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Today's events</div>
+        {EVENTS.map((ev,i)=>(
+          <div key={i} style={{padding:"12px 15px",borderBottom:i<EVENTS.length-1?`1px solid ${HAIR}`:"none",display:"flex",gap:11,alignItems:"flex-start"}}>
+            <span style={{fontSize:11.5,fontWeight:700,color:BLUE,width:54,flexShrink:0,fontVariantNumeric:"tabular-nums"}}>{ev.tm}</span>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:12.5,fontWeight:600,color:INK}}>{ev.t}</div>
+              <div style={{fontSize:11,color:INK3,marginTop:1}}>{ev.m}</div>
+            </div>
+            <span style={{fontSize:9.5,fontWeight:700,color:DN,background:DNBG,padding:"2px 6px",borderRadius:5,flexShrink:0}}>{ev.imp}</span>
+          </div>
+        ))}
+      </div>
+      {/* Market-moving news */}
+      <div style={{...BLOCK,borderRadius:16}}>
+        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Market-moving news</div>
+        {MARKET_NEWS.map((n,i)=>(
+          <div key={i} style={{padding:"12px 15px",borderBottom:i<MARKET_NEWS.length-1?`1px solid ${HAIR}`:"none"}}>
+            <div style={{fontSize:12.5,fontWeight:600,color:INK,lineHeight:1.4}}>{n.t}</div>
+            <div style={{fontSize:11,color:INK3,marginTop:3}}>{n.src}</div>
+          </div>
+        ))}
+      </div>
+      {/* Markets at a glance */}
+      <div style={{...BLOCK,borderRadius:16}}>
+        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Markets at a glance</div>
+        <div style={{padding:15,textAlign:"center"}}>
+          <div style={{fontSize:17,fontWeight:800,color:glance.c}}>{glance.label}</div>
+          <div style={{fontSize:12,color:INK2,marginTop:3}}>{glance.sub}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Non-overview tabs: full width ──
+  if(tab==="news")     return <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><NoticiasPage lang={lang}/></div></div>;
+  if(tab==="earnings") return <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><EarningsPage lang={lang}/></div></div>;
+  if(tab==="calendars"){
+    var calComponents={
+      economic:  <EconCalendarPage lang={lang}/>,
+      dividends: <DividendCalendarPage lang={lang}/>,
+      ipos:      <IpoCalendarPage isPremium={isPremium} onNeedPremium={()=>onNavigate&&onNavigate(8)}/>,
+      splits:    <SplitsCalendar lang={lang}/>,
+      holidays:  <HolidayCalendar lang={lang}/>,
+      futures:   <FuturesExpiryCalendar lang={lang}/>,
+    };
+    return(
+      <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+        <div style={{maxWidth:1100,margin:"0 auto"}}>
+          <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:20}}>
+            {["economic","dividends","ipos","splits","holidays","futures"].map(c=>(
+              <button key={c} style={regBtn(calTab===c)} onClick={()=>setCalTab(c)}>{c.charAt(0).toUpperCase()+c.slice(1)}</button>
+            ))}
+          </div>
+          {calComponents[calTab]||null}
+        </div>
+      </div>
+    );
+  }
+
+  // ── OVERVIEW ──
+  var idxList=(REGIONS[region]||REGIONS.global);
+  return(
+    <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <div style={{maxWidth:1100,margin:"0 auto",display:"grid",gridTemplateColumns:"minmax(0,1fr) 300px",gap:22,alignItems:"start"}}>
+
+        {/* ── LEFT / MAIN ── */}
+        <div style={{display:"flex",flexDirection:"column",gap:18,minWidth:0}}>
+
+          {/* Page header */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <h1 style={{fontSize:23,fontWeight:800,letterSpacing:"-0.03em",color:INK}}>Markets</h1>
+            <div style={{display:"flex",alignItems:"center",gap:7,fontSize:12,color:UP,fontWeight:600}}>
+              <span style={{width:7,height:7,borderRadius:"50%",background:UP,display:"inline-block"}}/>
+              Live · {new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true})} ET
+            </div>
+          </div>
+
+          {/* Sub-nav tabs */}
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {["overview","news","earnings","calendars"].map(t=>(
+              <button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>
+            ))}
+          </div>
+
+          {/* Region chips */}
+          <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+            {["global","europe","asia","latam"].map(r=>(
+              <button key={r} style={regBtn(region===r)} onClick={()=>setRegion(r)}>{r.charAt(0).toUpperCase()+r.slice(1)}</button>
+            ))}
+          </div>
+
+          {/* Indices + Crypto side-by-side */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
+            <div style={BLOCK}>
+              <div style={BH}>Indices</div>
+              {idxList.map((idx,i)=>{
+                var live=liveP(idx.sym,idx.fp,idx.fc);
+                return(
+                  <div key={i} style={{display:"flex",alignItems:"center",padding:"12px 16px",borderBottom:i<idxList.length-1?`1px solid ${HAIR}`:"none"}}>
+                    <span style={{fontSize:14,fontWeight:600,color:INK,flex:1}}>{idx.nm}</span>
+                    <span style={{fontSize:14,fontWeight:700,color:INK,width:90,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{fmtP(live.p,idx.sym)}</span>
+                    <span style={{fontSize:13,fontWeight:600,width:78,textAlign:"right",color:cClr(live.c),fontVariantNumeric:"tabular-nums"}}>{fmtC(live.c)}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={BLOCK}>
+              <div style={BH}>Crypto</div>
+              {CRYPTO.map((c,i)=>{
+                var live=liveP(c.sym,c.fp,c.fc);
+                return(
+                  <div key={i} style={{display:"flex",alignItems:"center",padding:"12px 16px",borderBottom:i<CRYPTO.length-1?`1px solid ${HAIR}`:"none"}}>
+                    <span style={{fontSize:14,fontWeight:600,color:INK,flex:1}}>{c.nm}</span>
+                    <span style={{fontSize:14,fontWeight:700,color:INK,width:90,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{fmtP(live.p,c.sym)}</span>
+                    <span style={{fontSize:13,fontWeight:600,width:78,textAlign:"right",color:cClr(live.c),fontVariantNumeric:"tabular-nums"}}>{fmtC(live.c)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sector heatmap */}
+          <div style={BLOCK}>
+            <div style={BH}>Sector heatmap</div>
+            <div style={{padding:14,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:7}}>
+              {SECTORS.map((sec,i)=>(
+                <div key={i} style={{borderRadius:9,padding:"11px 10px",background:secBg(sec.c),color:"#fff"}}>
+                  <div style={{fontSize:12.5,fontWeight:700}}>{sec.s}</div>
+                  <div style={{fontSize:11,fontWeight:600,opacity:0.9,marginTop:2,fontVariantNumeric:"tabular-nums"}}>{fmtC(sec.c)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Top movers */}
+          <div style={BLOCK}>
+            <div style={BH}>Top movers</div>
+            {(moversRaw.length>0?moversRaw.slice(0,6):[
+              {symbol:"COST",price:981.73,change:+1.36},
+              {symbol:"NOW", price:108.77,change:+1.68},
+              {symbol:"TSLA",price:381.61,change:-3.80},
+              {symbol:"AVGO",price:372.98,change:-4.89},
+              {symbol:"NVDA",price:138.50,change:+2.10},
+              {symbol:"META",price:542.00,change:-1.20},
+            ]).map((m,i)=>{
+              var live=liveP(m.symbol,m.price,m.change);
+              return(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 16px",borderBottom:i<5?`1px solid ${HAIR}`:"none"}}>
+                  <span style={{fontSize:13.5,fontWeight:700,color:INK,flex:1}}>{m.symbol}</span>
+                  <span style={{fontSize:12.5,color:INK2,fontWeight:600,fontVariantNumeric:"tabular-nums"}}>${fmtP(live.p,m.symbol)}</span>
+                  <span style={{fontSize:12,fontWeight:600,padding:"3px 8px",borderRadius:7,minWidth:62,textAlign:"center",color:live.c>=0?UP:DN,background:live.c>=0?UPBG:DNBG,fontVariantNumeric:"tabular-nums"}}>{fmtC(live.c)}</span>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>{/* /main */}
+
+        {/* ── RIGHT RAIL ── */}
+        {rail}
+
+      </div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 // ── AI PAGE ──────────────────────────────────────────────────────────────────
 function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
   var [qry,setQry] = useState("");
@@ -26225,7 +26505,8 @@ export default function App(){
     if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')} lang={lang}/>;
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
-    if(page===7) return <TrendingPage posts={posts} lang={lang}/>;
+    if(page===7) return <MarketsPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} lang={lang}/>;
+    if(page===7777) return <TrendingPage posts={posts} lang={lang}/>;{/* TrendingPage preserved but moved off main nav */}
     if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===10) return <AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={()=>setShowAI(true)} lang={lang}/>;
@@ -27800,7 +28081,7 @@ export default function App(){
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>,
             l:"Markets",
-            on:()=>{setPage(7);setShowLanding(false);},
+            on:()=>{setPage(7);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
             active:page===7
           },
           {
