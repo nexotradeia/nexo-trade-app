@@ -145,7 +145,32 @@
 
   <div id="root"></div>
 
-  <script type="module" src="/src/main.jsx"></script>
+  
+  <!-- ── DEBUG: catch React runtime crash ── -->
+  <script>
+    window.__nexoErrors = [];
+    window.onerror = function(msg, src, line, col, err) {
+      var stack = err && err.stack ? err.stack : '';
+      var info = msg + (stack ? '\n\n' + stack : '');
+      window.__nexoErrors.push(info);
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;inset:0;background:#1a0000;color:#ff6b6b;padding:20px;font-size:12px;z-index:999999;overflow:auto;white-space:pre-wrap;word-break:break-all;font-family:monospace';
+      d.textContent = '=== NEXO DEBUG ERROR ===\n' + info;
+      document.body.appendChild(d);
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      var r = e.reason;
+      var info = 'UNHANDLED REJECTION: ' + (r && r.stack ? r.stack : String(r));
+      window.__nexoErrors.push(info);
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;inset:0;background:#1a0a00;color:#ffb347;padding:20px;font-size:12px;z-index:999999;overflow:auto;white-space:pre-wrap;word-break:break-all;font-family:monospace';
+      d.textContent = '=== NEXO DEBUG REJECTION ===\n' + info;
+      document.body.appendChild(d);
+    });
+  </script>
+
+<script type="module" src="/src/main.jsx"></script>
   <script>
     // Ocultar loader cuando React monta
     window.__nexoLoaderHide = function() {
