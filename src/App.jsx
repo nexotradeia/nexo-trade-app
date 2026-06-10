@@ -13295,7 +13295,7 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
           <span style={{fontSize:32}}>🏛️</span>
           <div>
             <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>Super Inversores</div>
-            <div style={{fontSize:12,color:"#475569"}}>Carteras actualizadas · SEC 13F · Q1 2026 · Toca un inversor para ver su portafolio</div>
+            <div style={{fontSize:12,color:"#475569"}}>Carteras actualizadas · SEC 13F · {GURUS_QUARTER} · Toca un inversor para ver su portafolio</div>
           </div>
           <div style={{marginLeft:"auto",background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#00D26A"}}>
             {GURUS.length} GURUS
@@ -14502,9 +14502,25 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
 }
 
 // ── GURÚS / INVERSORES INFLUYENTES PAGE ──────────────────────────────────────
+// ┌──────────────────────────────────────────────────────────────────────────┐
+// │  ACTUALIZAR CADA TRIMESTRE (13F se publican ~45 días tras fin de trimestre)│
+// │                                                                            │
+// │  Q2 2026 → disponible ~15 agosto 2026 (en SEC EDGAR)                      │
+// │  Q3 2026 → disponible ~15 noviembre 2026                                  │
+// │                                                                            │
+// │  Para actualizar:                                                          │
+// │  1. Cambiar GURUS_QUARTER y GURUS_PORTFOLIO_DATE abajo                    │
+// │  2. Actualizar holdings[] de cada gurú con los datos nuevos del 13F        │
+// │  3. Ajustar aum, numStocks y act (Buy/Reduce/New/Sold) de cada posición    │
+// │  4. Fuente: https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany     │
+// │     o https://whalewisdom.com / https://13f.info / https://fintel.io       │
+// └──────────────────────────────────────────────────────────────────────────┘
+const GURUS_QUARTER        = "Q1 2026";          // ← cambiar a "Q2 2026" en agosto
+const GURUS_PORTFOLIO_DATE = "31 Mar 2026";      // ← cambiar a "30 Jun 2026" en agosto
+
 const GURUS_13F = [
   { id:"ackman", name:"Bill Ackman", fund:"Pershing Square Capital Management", emoji:"♟️", color:"#06B6D4",
-    aum:"$13.7B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:11,
+    aum:"$13.7B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:11,
     bio:"Activista agresivo. Alta convicción, pocas posiciones. Conocido por sus campañas en Herbalife y Valeant.",
     style:"Activista · Concentrado · Largo plazo",
     holdings:[
@@ -14521,7 +14537,7 @@ const GURUS_13F = [
       {t:"GOOGL",n:"Alphabet Inc.",                  pct:0.07,  act:"Reduce", actPct:-95.23, shares:32376,    rPrice:287.56, val:9310000,    w52l:161.64,w52h:408.61},
     ]},
   { id:"buffett", name:"Warren Buffett", fund:"Berkshire Hathaway Inc.", emoji:"🎩", color:"#F59E0B",
-    aum:"$370B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:45,
+    aum:"$370B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:45,
     bio:"El Oráculo de Omaha. Value investing puro. Compra negocios extraordinarios a precios razonables.",
     style:"Value · Largo plazo · Dividendos",
     holdings:[
@@ -14535,7 +14551,7 @@ const GURUS_13F = [
       {t:"KHC",  n:"Kraft Heinz Co.",                pct:2.6,  act:"Hold",   actPct:null,   shares:325634818,rPrice:28.36, val:9232000000, w52l:26.49, w52h:38.11},
     ]},
   { id:"burry", name:"Michael Burry", fund:"Scion Asset Management", emoji:"🐻", color:"#EF4444",
-    aum:"$145M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:8,
+    aum:"$145M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:8,
     bio:"El del 'Big Short'. Contrarian extremo. Apostó contra el mercado hipotecario en 2007 y ganó $800M.",
     style:"Contrarian · Value profundo · Shorts",
     holdings:[
@@ -14547,7 +14563,7 @@ const GURUS_13F = [
       {t:"CVS",  n:"CVS Health Corp.",                pct:7.9,  act:"Add",    actPct:25.0,  shares:220000,   rPrice:49.28,  val:10841600,   w52l:44.71, w52h:80.88},
     ]},
   { id:"druckenmiller", name:"Stanley Druckenmiller", fund:"Duquesne Family Office", emoji:"🧠", color:"#10B981",
-    aum:"$3.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:28,
+    aum:"$3.2B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:28,
     bio:"El mejor macro trader de todos los tiempos. Retornos de +30%/año por 30 años sin un año negativo.",
     style:"Macro · Momentum · Flexible",
     holdings:[
@@ -14559,7 +14575,7 @@ const GURUS_13F = [
       {t:"AMZN", n:"Amazon.com Inc.",                 pct:6.9,  act:"Add",    actPct:14.0,  shares:700000,   rPrice:186.55, val:130585000,  w52l:171.81,w52h:242.52},
     ]},
   { id:"soros", name:"George Soros", fund:"Soros Fund Management", emoji:"🌐", color:"#EC4899",
-    aum:"$6.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:52,
+    aum:"$6.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:52,
     bio:"Quebró el Banco de Inglaterra en 1992. Teoría de la reflexividad. Macro global y trades políticos.",
     style:"Macro global · Político · Reflexividad",
     holdings:[
@@ -14571,7 +14587,7 @@ const GURUS_13F = [
     ]},
   // ── NUEVOS GURÚS ──────────────────────────────────────────────────────────
   { id:"howard_marks", name:"Howard Marks", fund:"Oaktree Capital Management", emoji:"🏔️", color:"#14B8A6",
-    aum:"$189B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:18,
+    aum:"$189B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:18,
     holdings:[
       {t:"AAPL", n:"Apple Inc.",           pct:22.4, act:"Add",    actPct:8.2,  shares:6200000,  rPrice:207.15, val:1284330000, w52l:164.08,w52h:260.10},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:18.7, act:"Hold",   actPct:null, shares:5900000,  rPrice:175.50, val:1035450000, w52l:140.53,w52h:207.05},
@@ -14581,7 +14597,7 @@ const GURUS_13F = [
       {t:"JNJ",  n:"Johnson & Johnson",    pct:7.8,  act:"New",    actPct:null, shares:2100000,  rPrice:165.40, val:347340000,  w52l:142.00,w52h:175.50},
     ]},
   { id:"duan_yongping", name:"Duan Yongping", fund:"H&H International Investment", emoji:"🐉", color:"#F97316",
-    aum:"$2.1B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:4,
+    aum:"$2.1B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:4,
     holdings:[
       {t:"AAPL", n:"Apple Inc.",           pct:52.3, act:"Hold",   actPct:null, shares:8400000,  rPrice:207.15, val:1740060000, w52l:164.08,w52h:260.10},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:31.8, act:"Add",    actPct:12.5, shares:2800000,  rPrice:175.50, val:491400000,  w52l:140.53,w52h:207.05},
@@ -14589,7 +14605,7 @@ const GURUS_13F = [
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:6.5,  act:"Hold",   actPct:null, shares:490000,   rPrice:387.20, val:189728000,  w52l:337.00,w52h:418.00},
     ]},
   { id:"nelson_peltz", name:"Nelson Peltz", fund:"Trian Fund Management", emoji:"⚔️", color:"#0F5E68",
-    aum:"$8.4B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:9,
+    aum:"$8.4B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:9,
     holdings:[
       {t:"DIS",  n:"Walt Disney Co.",      pct:24.5, act:"Add",    actPct:15.3, shares:6200000,  rPrice:100.40, val:622480000,  w52l:83.91, w52h:123.74},
       {t:"PG",   n:"Procter & Gamble",     pct:21.8, act:"Hold",   actPct:null, shares:5100000,  rPrice:165.80, val:845580000,  w52l:147.23,w52h:178.02},
@@ -14598,7 +14614,7 @@ const GURUS_13F = [
       {t:"BK",   n:"Bank of New York Mellon",pct:12.1,act:"Reduce",actPct:-3.2, shares:3800000,  rPrice:80.25,  val:304950000,  w52l:65.11, w52h:88.50},
     ]},
   { id:"lee_ainslie", name:"Lee Ainslie", fund:"Maverick Capital", emoji:"🦅", color:"#84CC16",
-    aum:"$9.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:45,
+    aum:"$9.2B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:45,
     holdings:[
       {t:"META", n:"Meta Platforms Inc.",  pct:18.6, act:"Add",    actPct:9.4,  shares:2100000,  rPrice:596.80, val:1253280000, w52l:520.26,w52h:794.38},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:15.3, act:"Hold",   actPct:null, shares:5500000,  rPrice:175.50, val:965250000,  w52l:140.53,w52h:207.05},
@@ -14608,7 +14624,7 @@ const GURUS_13F = [
       {t:"UBER", n:"Uber Technologies",    pct:7.2,  act:"New",    actPct:null, shares:4800000,  rPrice:78.60,  val:377280000,  w52l:68.46, w52h:101.99},
     ]},
   { id:"viking_global", name:"Viking Global Investors", fund:"Viking Global Investors", emoji:"⚡", color:"#A855F7",
-    aum:"$47B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:62,
+    aum:"$47B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:62,
     holdings:[
       {t:"AMZN", n:"Amazon.com Inc.",      pct:16.4, act:"Add",    actPct:7.8,  shares:9100000,  rPrice:226.50, val:2061150000, w52l:166.21,w52h:242.52},
       {t:"META", n:"Meta Platforms Inc.",  pct:14.8, act:"Hold",   actPct:null, shares:2600000,  rPrice:596.80, val:1551680000, w52l:520.26,w52h:794.38},
@@ -14619,7 +14635,7 @@ const GURUS_13F = [
       {t:"MA",   n:"Mastercard Inc.",       pct:6.4,  act:"Hold",   actPct:null, shares:1500000,  rPrice:538.20, val:807300000,  w52l:455.00,w52h:576.50},
     ]},
   { id:"valueact", name:"ValueAct Capital", fund:"ValueAct Capital Management", emoji:"🎯", color:"#0F4C81",
-    aum:"$7.1B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:11,
+    aum:"$7.1B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:11,
     holdings:[
       {t:"MSFT", n:"Microsoft Corp.",      pct:34.2, act:"Hold",   actPct:null, shares:5800000,  rPrice:448.30, val:2600140000, w52l:355.51,w52h:551.05},
       {t:"SEIC", n:"SEI Investments",       pct:22.6, act:"Hold",   actPct:null, shares:6100000,  rPrice:72.80,  val:444080000,  w52l:62.50, w52h:89.50},
@@ -14628,7 +14644,7 @@ const GURUS_13F = [
       {t:"IAC",  n:"IAC Inc.",               pct:10.3, act:"New",    actPct:null, shares:3900000,  rPrice:46.80,  val:182520000,  w52l:38.10, w52h:68.90},
     ]},
   { id:"li_lu", name:"Li Lu", fund:"Himalaya Capital Management", emoji:"🏯", color:"#06B6D4",
-    aum:"$1.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:5,
+    aum:"$1.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:5,
     holdings:[
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:48.6, act:"Hold",   actPct:null, shares:2300000,  rPrice:387.20, val:890560000,  w52l:337.00,w52h:418.00},
       {t:"BAC",  n:"Bank of America Corp.", pct:28.4, act:"Hold",   actPct:null, shares:14800000, rPrice:44.20,  val:654160000,  w52l:35.41, w52h:48.85},
@@ -14636,7 +14652,7 @@ const GURUS_13F = [
       {t:"BYDDY",n:"BYD Co. ADR",          pct:7.8,  act:"Hold",   actPct:null, shares:4200000,  rPrice:78.40,  val:329280000,  w52l:52.80, w52h:95.20},
     ]},
   { id:"einhorn", name:"David Einhorn", fund:"Greenlight Capital", emoji:"💡", color:"#10B981",
-    aum:"$1.6B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:22,
+    aum:"$1.6B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:22,
     holdings:[
       {t:"CONSOL",n:"CONSOL Energy Inc.",   pct:21.5, act:"Hold",   actPct:null, shares:3800000,  rPrice:92.40,  val:351120000,  w52l:75.20, w52h:128.00},
       {t:"GRBK", n:"Green Brick Partners",  pct:18.3, act:"Hold",   actPct:null, shares:5200000,  rPrice:64.80,  val:336960000,  w52l:48.90, w52h:88.10},
@@ -14646,7 +14662,7 @@ const GURUS_13F = [
       {t:"CNX",  n:"CNX Resources Corp.",   pct:8.7,  act:"Add",    actPct:8.5,  shares:5600000,  rPrice:22.80,  val:127680000,  w52l:16.90, w52h:32.10},
     ]},
   { id:"icahn", name:"Carl Icahn", fund:"Icahn Capital Management", emoji:"🦁", color:"#EF4444",
-    aum:"$6.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:14,
+    aum:"$6.2B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:14,
     holdings:[
       {t:"CVX",  n:"Chevron Corp.",         pct:26.4, act:"Add",    actPct:5.6,  shares:4100000,  rPrice:162.80, val:667480000,  w52l:139.62,w52h:177.49},
       {t:"IEP",  n:"Icahn Enterprises LP",  pct:22.8, act:"Hold",   actPct:null, shares:42000000, rPrice:8.60,   val:361200000,  w52l:6.20,  w52h:17.50},
@@ -14655,14 +14671,14 @@ const GURUS_13F = [
       {t:"SBUX", n:"Starbucks Corp.",        pct:10.4, act:"New",    actPct:null, shares:3600000,  rPrice:78.50,  val:282600000,  w52l:68.40, w52h:112.00},
     ]},
   { id:"berkowitz", name:"Bruce Berkowitz", fund:"Fairholme Capital Management", emoji:"🔥", color:"#F59E0B",
-    aum:"$320M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:3,
+    aum:"$320M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:3,
     holdings:[
       {t:"JOE",  n:"St. Joe Company",       pct:82.4, act:"Hold",   actPct:null, shares:12600000, rPrice:48.20,  val:607320000,  w52l:39.50, w52h:57.80},
       {t:"SHLD", n:"Sears Holdings (WTS)",  pct:12.3, act:"Hold",   actPct:null, shares:4100000,  rPrice:1.80,   val:7380000,    w52l:0.50,  w52h:3.20},
       {t:"BAC",  n:"Bank of America Corp.", pct:5.3,  act:"Hold",   actPct:null, shares:900000,   rPrice:44.20,  val:39780000,   w52l:35.41, w52h:48.85},
     ]},
   { id:"bill_nygren", name:"Bill Nygren", fund:"Oakmark Funds", emoji:"🦉", color:"#F59E0B",
-    aum:"$24.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:52,
+    aum:"$24.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:52,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:15.8, act:"Add",    actPct:6.4,  shares:8800000,  rPrice:175.50, val:1544400000, w52l:140.53,w52h:207.05},
       {t:"COF",  n:"Capital One Financial", pct:12.4, act:"Hold",   actPct:null, shares:4200000,  rPrice:188.50, val:791700000,  w52l:133.18,w52h:210.00},
@@ -14672,7 +14688,7 @@ const GURUS_13F = [
       {t:"HCA",  n:"HCA Healthcare Inc.",   pct:7.4,  act:"Reduce", actPct:-3.8, shares:1800000,  rPrice:342.80, val:617040000,  w52l:271.00,w52h:396.50},
     ]},
   { id:"gates_foundation", name:"Bill & Melinda Gates Foundation", fund:"Gates Foundation Trust", emoji:"💚", color:"#22D3EE",
-    aum:"$49.6B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:22,
+    aum:"$49.6B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:22,
     holdings:[
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:46.2, act:"Hold",   actPct:null, shares:41800000, rPrice:387.20, val:16184960000,w52l:337.00,w52h:418.00},
       {t:"WM",   n:"Waste Management Inc.", pct:15.4, act:"Hold",   actPct:null, shares:11200000, rPrice:222.80, val:2495360000, w52l:183.00,w52h:252.00},
@@ -14681,7 +14697,7 @@ const GURUS_13F = [
       {t:"ECL",  n:"Ecolab Inc.",            pct:7.2,  act:"Hold",   actPct:null, shares:3800000,  rPrice:230.40, val:875520000,  w52l:184.00,w52h:263.00},
     ]},
   { id:"norbert_lou", name:"Norbert Lou", fund:"Punch Card Management", emoji:"🃏", color:"#F97316",
-    aum:"$480M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:4,
+    aum:"$480M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:4,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:54.8, act:"Hold",   actPct:null, shares:1500000,  rPrice:175.50, val:263250000,  w52l:140.53,w52h:207.05},
       {t:"FCNCA",n:"First Citizens Bancshares",pct:28.4,act:"Hold", actPct:null, shares:88000,   rPrice:2040.50,val:179564000,  w52l:1510.00,w52h:2250.00},
@@ -14689,7 +14705,7 @@ const GURUS_13F = [
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:4.7,  act:"Hold",   actPct:null, shares:60000,    rPrice:387.20, val:23232000,   w52l:337.00,w52h:418.00},
     ]},
   { id:"ellenbogen", name:"Henry Ellenbogen", fund:"Durable Capital Partners", emoji:"🌱", color:"#86EFAC",
-    aum:"$4.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:34,
+    aum:"$4.2B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:34,
     holdings:[
       {t:"SHOP", n:"Shopify Inc. Cl A",     pct:18.6, act:"Add",    actPct:12.5, shares:3800000,  rPrice:118.40, val:449920000,  w52l:54.27, w52h:132.00},
       {t:"SAMSARA",n:"Samsara Inc.",        pct:15.3, act:"Hold",   actPct:null, shares:8400000,  rPrice:48.20,  val:404880000,  w52l:28.50, w52h:62.80},
@@ -14698,7 +14714,7 @@ const GURUS_13F = [
       {t:"SNOW", n:"Snowflake Inc.",        pct:9.2,  act:"Hold",   actPct:null, shares:2600000,  rPrice:158.60, val:412360000,  w52l:107.13,w52h:195.00},
     ]},
   { id:"bloomstran", name:"Christopher Bloomstran", fund:"Semper Augustus Investments", emoji:"🦋", color:"#C084FC",
-    aum:"$820M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:8,
+    aum:"$820M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:8,
     holdings:[
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:58.4, act:"Hold",   actPct:null, shares:1250000,  rPrice:387.20, val:484000000,  w52l:337.00,w52h:418.00},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:22.6, act:"Hold",   actPct:null, shares:1060000,  rPrice:175.50, val:186030000,  w52l:140.53,w52h:207.05},
@@ -14706,7 +14722,7 @@ const GURUS_13F = [
       {t:"V",    n:"Visa Inc. Cl A",       pct:6.6,  act:"Hold",   actPct:null, shares:180000,   rPrice:305.80, val:55044000,   w52l:260.00,w52h:354.00},
     ]},
   { id:"mason_hawkins", name:"Mason Hawkins", fund:"Southeastern Asset Management", emoji:"🌄", color:"#FB923C",
-    aum:"$3.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:18,
+    aum:"$3.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:18,
     holdings:[
       {t:"CNQ",  n:"Canadian Natural Resources",pct:24.5,act:"Hold",actPct:null,shares:9800000,  rPrice:36.50,  val:357700000,  w52l:28.00, w52h:46.20},
       {t:"LBTYK",n:"Liberty TripAdvisor Hldgs",pct:18.2,act:"Add", actPct:6.8,  shares:82000000, rPrice:6.20,   val:508400000,  w52l:4.10,  w52h:9.80},
@@ -14715,7 +14731,7 @@ const GURUS_13F = [
       {t:"CPRI", n:"Capri Holdings Ltd.",   pct:10.8, act:"Reduce", actPct:-8.0, shares:6400000,  rPrice:23.40,  val:149760000,  w52l:18.50, w52h:40.20},
     ]},
   { id:"greenberg", name:"Glenn Greenberg", fund:"Brave Warrior Advisors", emoji:"🗡️", color:"#34D399",
-    aum:"$3.1B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:12,
+    aum:"$3.1B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:12,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:28.4, act:"Add",    actPct:7.2,  shares:4600000,  rPrice:175.50, val:807300000,  w52l:140.53,w52h:207.05},
       {t:"META", n:"Meta Platforms Inc.",  pct:22.8, act:"Hold",   actPct:null, shares:760000,   rPrice:596.80, val:453568000,  w52l:520.26,w52h:794.38},
@@ -14724,7 +14740,7 @@ const GURUS_13F = [
       {t:"MSFT", n:"Microsoft Corp.",      pct:10.5, act:"Hold",   actPct:null, shares:460000,   rPrice:448.30, val:206218000,  w52l:355.51,w52h:551.05},
     ]},
   { id:"daniel_loeb", name:"Daniel Loeb", fund:"Third Point LLC", emoji:"🎭", color:"#FB7185",
-    aum:"$11.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:38,
+    aum:"$11.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:38,
     holdings:[
       {t:"META", n:"Meta Platforms Inc.",  pct:20.4, act:"Add",    actPct:8.6,  shares:2100000,  rPrice:596.80, val:1253280000, w52l:520.26,w52h:794.38},
       {t:"AMZN", n:"Amazon.com Inc.",      pct:17.8, act:"Hold",   actPct:null, shares:5800000,  rPrice:226.50, val:1313700000, w52l:166.21,w52h:242.52},
@@ -14733,7 +14749,7 @@ const GURUS_13F = [
       {t:"DPST", n:"Danaher Corp.",         pct:10.8, act:"Reduce", actPct:-4.5, shares:1900000,  rPrice:236.50, val:449350000,  w52l:192.00,w52h:285.00},
     ]},
   { id:"stephen_mandel", name:"Stephen Mandel", fund:"Lone Pine Capital", emoji:"🌲", color:"#4ADE80",
-    aum:"$21.6B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:48,
+    aum:"$21.6B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:48,
     holdings:[
       {t:"META", n:"Meta Platforms Inc.",  pct:18.2, act:"Hold",   actPct:null, shares:3800000,  rPrice:596.80, val:2267840000, w52l:520.26,w52h:794.38},
       {t:"AMZN", n:"Amazon.com Inc.",      pct:15.6, act:"Add",    actPct:5.8,  shares:9200000,  rPrice:226.50, val:2083800000, w52l:166.21,w52h:242.52},
@@ -14743,7 +14759,7 @@ const GURUS_13F = [
       {t:"UBER", n:"Uber Technologies",    pct:7.8,  act:"Add",    actPct:8.5,  shares:12400000, rPrice:78.60,  val:974640000,  w52l:68.46, w52h:101.99},
     ]},
   { id:"valley_forge", name:"Valley Forge Capital", fund:"Valley Forge Capital Management", emoji:"⛰️", color:"#60A5FA",
-    aum:"$2.1B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:16,
+    aum:"$2.1B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:16,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:32.6, act:"Hold",   actPct:null, shares:2100000,  rPrice:175.50, val:368550000,  w52l:140.53,w52h:207.05},
       {t:"MCO",  n:"Moody's Corporation",  pct:24.8, act:"Hold",   actPct:null, shares:620000,   rPrice:482.60, val:299212000,  w52l:380.00,w52h:544.00},
@@ -14752,7 +14768,7 @@ const GURUS_13F = [
       {t:"V",    n:"Visa Inc. Cl A",       pct:10.0, act:"Reduce", actPct:-3.5, shares:480000,   rPrice:305.80, val:146784000,  w52l:260.00,w52h:354.00},
     ]},
   { id:"david_rolfe", name:"David Rolfe", fund:"Wedgewood Partners", emoji:"🪵", color:"#FCD34D",
-    aum:"$1.1B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:19,
+    aum:"$1.1B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:19,
     holdings:[
       {t:"AAPL", n:"Apple Inc.",           pct:26.4, act:"Hold",   actPct:null, shares:1400000,  rPrice:207.15, val:290010000,  w52l:164.08,w52h:260.10},
       {t:"META", n:"Meta Platforms Inc.",  pct:21.8, act:"Add",    actPct:10.2, shares:410000,   rPrice:596.80, val:244688000,  w52l:520.26,w52h:794.38},
@@ -14761,7 +14777,7 @@ const GURUS_13F = [
       {t:"NVR",  n:"NVR Inc.",             pct:12.4, act:"Hold",   actPct:null, shares:28000,    rPrice:8620.00,val:241360000,  w52l:6500.00,w52h:9800.00},
     ]},
   { id:"david_tepper", name:"David Tepper", fund:"Appaloosa Management", emoji:"🐎", color:"#FCD34D",
-    aum:"$13.6B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:32,
+    aum:"$13.6B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:32,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:22.6, act:"Add",    actPct:14.8, shares:7200000,  rPrice:175.50, val:1263600000, w52l:140.53,w52h:207.05},
       {t:"META", n:"Meta Platforms Inc.",  pct:18.4, act:"Hold",   actPct:null, shares:1600000,  rPrice:596.80, val:954880000,  w52l:520.26,w52h:794.38},
@@ -14771,7 +14787,7 @@ const GURUS_13F = [
       {t:"BABA", n:"Alibaba Group ADR",    pct:8.2,  act:"Add",    actPct:20.0, shares:3800000,  rPrice:105.60, val:401280000,  w52l:68.50, w52h:142.00},
     ]},
   { id:"chase_coleman", name:"Chase Coleman", fund:"Tiger Global Management", emoji:"🐯", color:"#FCA5A5",
-    aum:"$58B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:72,
+    aum:"$58B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:72,
     holdings:[
       {t:"META", n:"Meta Platforms Inc.",  pct:14.6, act:"Add",    actPct:6.8,  shares:9800000,  rPrice:596.80, val:5848640000, w52l:520.26,w52h:794.38},
       {t:"MSFT", n:"Microsoft Corp.",      pct:12.8, act:"Hold",   actPct:null, shares:10400000, rPrice:448.30, val:4662320000, w52l:355.51,w52h:551.05},
@@ -14781,7 +14797,7 @@ const GURUS_13F = [
       {t:"DUOL", n:"Duolingo Inc.",        pct:7.4,  act:"Add",    actPct:12.5, shares:2800000,  rPrice:392.80, val:1099840000, w52l:186.00,w52h:480.00},
     ]},
   { id:"francois_rochon", name:"Francois Rochon", fund:"Giverny Capital", emoji:"🗼", color:"#93C5FD",
-    aum:"$1.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:24,
+    aum:"$1.2B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:24,
     holdings:[
       {t:"MSFT", n:"Microsoft Corp.",      pct:22.4, act:"Hold",   actPct:null, shares:580000,   rPrice:448.30, val:260014000,  w52l:355.51,w52h:551.05},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:18.6, act:"Hold",   actPct:null, shares:1200000,  rPrice:175.50, val:210600000,  w52l:140.53,w52h:207.05},
@@ -14790,7 +14806,7 @@ const GURUS_13F = [
       {t:"NKE",  n:"Nike Inc.",            pct:10.4, act:"Add",    actPct:8.5,  shares:1800000,  rPrice:75.40,  val:135720000,  w52l:52.68, w52h:98.00},
     ]},
   { id:"leon_cooperman", name:"Leon Cooperman", fund:"Omega Advisors (Family Office)", emoji:"🎺", color:"#D1D5DB",
-    aum:"$2.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:28,
+    aum:"$2.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:28,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:18.4, act:"Hold",   actPct:null, shares:1800000,  rPrice:175.50, val:315900000,  w52l:140.53,w52h:207.05},
       {t:"ATVI", n:"Activision Blizzard",  pct:14.2, act:"Hold",   actPct:null, shares:1900000,  rPrice:82.20,  val:156180000,  w52l:72.50, w52h:95.00},
@@ -14799,7 +14815,7 @@ const GURUS_13F = [
       {t:"SLB",  n:"SLB (Schlumberger)",   pct:9.2,  act:"Hold",   actPct:null, shares:3400000,  rPrice:38.60,  val:131240000,  w52l:32.00, w52h:56.00},
     ]},
   { id:"bill_miller", name:"Bill Miller", fund:"Miller Value Partners", emoji:"🎲", color:"#FDE68A",
-    aum:"$2.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:26,
+    aum:"$2.2B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:26,
     holdings:[
       {t:"AMZN", n:"Amazon.com Inc.",      pct:28.6, act:"Hold",   actPct:null, shares:2800000,  rPrice:226.50, val:634200000,  w52l:166.21,w52h:242.52},
       {t:"DAL",  n:"Delta Air Lines",      pct:18.4, act:"Add",    actPct:12.0, shares:8900000,  rPrice:48.80,  val:434320000,  w52l:36.40, w52h:62.80},
@@ -14808,7 +14824,7 @@ const GURUS_13F = [
       {t:"RH",   n:"RH (Restoration Hardware)",pct:10.4,act:"Reduce",actPct:-8.5,shares:280000,  rPrice:368.00, val:103040000,  w52l:200.00,w52h:430.00},
     ]},
   { id:"pat_dorsey", name:"Pat Dorsey", fund:"Dorsey Asset Management", emoji:"🔍", color:"#67E8F9",
-    aum:"$420M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:14,
+    aum:"$420M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:14,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:28.4, act:"Hold",   actPct:null, shares:620000,   rPrice:175.50, val:108810000,  w52l:140.53,w52h:207.05},
       {t:"POOL", n:"Pool Corporation",     pct:22.6, act:"Add",    actPct:7.5,  shares:280000,   rPrice:352.80, val:98784000,   w52l:290.00,w52h:400.00},
@@ -14817,7 +14833,7 @@ const GURUS_13F = [
       {t:"MCO",  n:"Moody's Corporation",  pct:15.4, act:"Add",    actPct:5.0,  shares:98000,    rPrice:482.60, val:47294800,   w52l:380.00,w52h:544.00},
     ]},
   { id:"chris_hohn", name:"Chris Hohn", fund:"TCI Fund Management", emoji:"🏦", color:"#4F46E5",
-    aum:"$78B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:16,
+    aum:"$78B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:16,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:28.6, act:"Add",    actPct:6.2,  shares:48000000, rPrice:175.50, val:8424000000, w52l:140.53,w52h:207.05},
       {t:"MSFT", n:"Microsoft Corp.",      pct:22.4, act:"Hold",   actPct:null, shares:22000000, rPrice:448.30, val:9862600000, w52l:355.51,w52h:551.05},
@@ -14827,7 +14843,7 @@ const GURUS_13F = [
       {t:"SPOT", n:"Spotify Technology",   pct:8.4,  act:"New",    actPct:null, shares:6200000,  rPrice:618.40, val:3834080000, w52l:290.71,w52h:685.00},
     ]},
   { id:"terry_smith", name:"Terry Smith", fund:"Fundsmith LLP", emoji:"🇬🇧", color:"#2DD4BF",
-    aum:"$24.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:28,
+    aum:"$24.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:28,
     holdings:[
       {t:"MSFT", n:"Microsoft Corp.",      pct:18.4, act:"Hold",   actPct:null, shares:9800000,  rPrice:448.30, val:4393340000, w52l:355.51,w52h:551.05},
       {t:"AMZN", n:"Amazon.com Inc.",      pct:15.6, act:"Add",    actPct:5.2,  shares:6200000,  rPrice:226.50, val:1404300000, w52l:166.21,w52h:242.52},
@@ -14837,7 +14853,7 @@ const GURUS_13F = [
       {t:"MKTX", n:"MarketAxess Holdings", pct:8.6,  act:"Hold",   actPct:null, shares:1200000,  rPrice:212.40, val:254880000,  w52l:168.00,w52h:268.00},
     ]},
   { id:"prem_watsa", name:"Prem Watsa", fund:"Fairfax Financial Holdings", emoji:"🍁", color:"#F87171",
-    aum:"$5.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:21,
+    aum:"$5.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:21,
     holdings:[
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:24.6, act:"Hold",   actPct:null, shares:1850000,  rPrice:387.20, val:716320000,  w52l:337.00,w52h:418.00},
       {t:"ATCO", n:"Atlas Corp.",          pct:18.4, act:"Hold",   actPct:null, shares:28000000, rPrice:14.80,  val:414400000,  w52l:11.00, w52h:19.50},
@@ -14846,7 +14862,7 @@ const GURUS_13F = [
       {t:"BKNG", n:"Booking Holdings",     pct:10.8, act:"Hold",   actPct:null, shares:72000,    rPrice:5180.00,val:372960000,  w52l:3400.00,w52h:5650.00},
     ]},
   { id:"seth_klarman", name:"Seth Klarman", fund:"Baupost Group", emoji:"🏛️", color:"#818CF8",
-    aum:"$27.4B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:24,
+    aum:"$27.4B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:24,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:22.4, act:"Add",    actPct:8.5,  shares:12800000, rPrice:175.50, val:2246400000, w52l:140.53,w52h:207.05},
       {t:"QGEN", n:"Qiagen N.V.",          pct:16.8, act:"Hold",   actPct:null, shares:12600000, rPrice:48.60,  val:612360000,  w52l:38.40, w52h:58.00},
@@ -14855,7 +14871,7 @@ const GURUS_13F = [
       {t:"WBD",  n:"Warner Bros. Discovery",pct:10.4,act:"Add",    actPct:15.0, shares:28000000, rPrice:12.80,  val:358400000,  w52l:7.00,  w52h:18.00},
     ]},
   { id:"chuck_akre", name:"Chuck Akre", fund:"Akre Capital Management", emoji:"🦩", color:"#FCA5A5",
-    aum:"$9.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:18,
+    aum:"$9.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:18,
     holdings:[
       {t:"MCO",  n:"Moody's Corporation",  pct:28.4, act:"Hold",   actPct:null, shares:2600000,  rPrice:482.60, val:1254760000, w52l:380.00,w52h:544.00},
       {t:"MA",   n:"Mastercard Inc.",       pct:22.8, act:"Hold",   actPct:null, shares:3200000,  rPrice:538.20, val:1722240000, w52l:455.00,w52h:576.50},
@@ -14864,7 +14880,7 @@ const GURUS_13F = [
       {t:"CBOE", n:"Cboe Global Markets",  pct:10.2, act:"Add",    actPct:6.8,  shares:1800000,  rPrice:226.50, val:407700000,  w52l:180.00,w52h:255.00},
     ]},
   { id:"john_rogers", name:"John Rogers", fund:"Ariel Investments", emoji:"🏺", color:"#FBBF24",
-    aum:"$9.6B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:54,
+    aum:"$9.6B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:54,
     holdings:[
       {t:"MSGS", n:"MSG Sports Corp.",     pct:14.8, act:"Hold",   actPct:null, shares:2200000,  rPrice:213.50, val:469700000,  w52l:170.00,w52h:245.00},
       {t:"JHG",  n:"Janus Henderson Group",pct:12.6, act:"Add",    actPct:8.2,  shares:8800000,  rPrice:44.20,  val:388960000,  w52l:36.00, w52h:52.00},
@@ -14873,7 +14889,7 @@ const GURUS_13F = [
       {t:"UGP",  n:"Ultrapar Participações",pct:9.4, act:"Hold",   actPct:null, shares:14200000, rPrice:3.80,   val:53960000,   w52l:2.80,  w52h:5.20},
     ]},
   { id:"david_abrams", name:"David Abrams", fund:"Abrams Capital Management", emoji:"🎯", color:"#A3E635",
-    aum:"$5.8B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:16,
+    aum:"$5.8B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:16,
     holdings:[
       {t:"META", n:"Meta Platforms Inc.",  pct:26.4, act:"Hold",   actPct:null, shares:1400000,  rPrice:596.80, val:835520000,  w52l:520.26,w52h:794.38},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:22.8, act:"Add",    actPct:6.5,  shares:3800000,  rPrice:175.50, val:666900000,  w52l:140.53,w52h:207.05},
@@ -14882,7 +14898,7 @@ const GURUS_13F = [
       {t:"BKNG", n:"Booking Holdings",     pct:12.8, act:"Hold",   actPct:null, shares:52000,    rPrice:5180.00,val:269360000,  w52l:3400.00,w52h:5650.00},
     ]},
   { id:"dennis_hong", name:"Dennis Hong", fund:"ShawSpring Partners", emoji:"🌊", color:"#38BDF8",
-    aum:"$820M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:22,
+    aum:"$820M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:22,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:24.6, act:"Hold",   actPct:null, shares:780000,   rPrice:175.50, val:136890000,  w52l:140.53,w52h:207.05},
       {t:"NFLX", n:"Netflix Inc.",         pct:20.4, act:"Add",    actPct:9.5,  shares:98000,    rPrice:1084.00,val:106232000,  w52l:480.00,w52h:1200.00},
@@ -14891,7 +14907,7 @@ const GURUS_13F = [
       {t:"SHOP", n:"Shopify Inc. Cl A",   pct:12.6, act:"Add",    actPct:12.5, shares:540000,   rPrice:118.40, val:63936000,   w52l:54.27, w52h:132.00},
     ]},
   { id:"ruane_cunniff", name:"Ruane Cunniff LP", fund:"Ruane Cunniff & Goldfarb", emoji:"🦆", color:"#D9F99D",
-    aum:"$4.9B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:28,
+    aum:"$4.9B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:28,
     holdings:[
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:22.4, act:"Hold",   actPct:null, shares:2850000,  rPrice:387.20, val:1103520000, w52l:337.00,w52h:418.00},
       {t:"META", n:"Meta Platforms Inc.",  pct:18.6, act:"Add",    actPct:7.5,  shares:810000,   rPrice:596.80, val:483408000,  w52l:520.26,w52h:794.38},
@@ -14900,7 +14916,7 @@ const GURUS_13F = [
       {t:"BIO",  n:"Bio-Rad Laboratories", pct:10.4, act:"Hold",   actPct:null, shares:210000,   rPrice:298.40, val:62664000,   w52l:230.00,w52h:380.00},
     ]},
   { id:"first_eagle", name:"First Eagle Investment", fund:"First Eagle Investment Management", emoji:"🦅", color:"#FDE047",
-    aum:"$102B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:98,
+    aum:"$102B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:98,
     holdings:[
       {t:"BRK.B",n:"Berkshire Hathaway B", pct:12.4, act:"Hold",   actPct:null, shares:19200000, rPrice:387.20, val:7434240000, w52l:337.00,w52h:418.00},
       {t:"GLD",  n:"SPDR Gold Shares ETF", pct:10.8, act:"Hold",   actPct:null, shares:18000000, rPrice:292.40, val:5263200000, w52l:182.00,w52h:302.00},
@@ -14909,7 +14925,7 @@ const GURUS_13F = [
       {t:"META", n:"Meta Platforms Inc.",  pct:6.8,  act:"New",    actPct:null, shares:820000,   rPrice:596.80, val:489376000,  w52l:520.26,w52h:794.38},
     ]},
   { id:"altarock", name:"AltaRock Partners", fund:"AltaRock Partners", emoji:"🪨", color:"#6EE7B7",
-    aum:"$380M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:8,
+    aum:"$380M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:8,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:38.4, act:"Hold",   actPct:null, shares:620000,   rPrice:175.50, val:108810000,  w52l:140.53,w52h:207.05},
       {t:"META", n:"Meta Platforms Inc.",  pct:28.6, act:"Add",    actPct:10.0, shares:280000,   rPrice:596.80, val:167104000,  w52l:520.26,w52h:794.38},
@@ -14917,7 +14933,7 @@ const GURUS_13F = [
       {t:"AMZN", n:"Amazon.com Inc.",      pct:14.6, act:"Add",    actPct:6.5,  shares:240000,   rPrice:226.50, val:54360000,   w52l:166.21,w52h:242.52},
     ]},
   { id:"ako_capital", name:"AKO Capital", fund:"AKO Capital LLP", emoji:"🌍", color:"#C4B5FD",
-    aum:"$8.2B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:22,
+    aum:"$8.2B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:22,
     holdings:[
       {t:"ASML", n:"ASML Holding N.V.",    pct:24.8, act:"Hold",   actPct:null, shares:480000,   rPrice:872.40, val:418752000,  w52l:631.00,w52h:1060.00},
       {t:"MSFT", n:"Microsoft Corp.",      pct:20.4, act:"Add",    actPct:6.2,  shares:2400000,  rPrice:448.30, val:1075920000, w52l:355.51,w52h:551.05},
@@ -14926,7 +14942,7 @@ const GURUS_13F = [
       {t:"NOVO", n:"Novo Nordisk ADR",     pct:12.6, act:"Add",    actPct:8.5,  shares:3800000,  rPrice:82.40,  val:313120000,  w52l:54.00, w52h:128.00},
     ]},
   { id:"bryan_lawrence", name:"Bryan Lawrence", fund:"Oakcliff Capital", emoji:"🌊", color:"#BAE6FD",
-    aum:"$580M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:6,
+    aum:"$580M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:6,
     holdings:[
       {t:"BKNG", n:"Booking Holdings",     pct:42.6, act:"Hold",   actPct:null, shares:46000,    rPrice:5180.00,val:238280000,  w52l:3400.00,w52h:5650.00},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:28.4, act:"Add",    actPct:6.0,  shares:520000,   rPrice:175.50, val:91260000,   w52l:140.53,w52h:207.05},
@@ -14934,7 +14950,7 @@ const GURUS_13F = [
       {t:"EXPE", n:"Expedia Group Inc.",   pct:10.8, act:"Add",    actPct:12.5, shares:580000,   rPrice:168.40, val:97672000,   w52l:128.00,w52h:200.00},
     ]},
   { id:"hillman", name:"Hillman Capital Management", fund:"Hillman Capital Management", emoji:"⛰️", color:"#E2E8F0",
-    aum:"$650M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:12,
+    aum:"$650M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:12,
     holdings:[
       {t:"MSFT", n:"Microsoft Corp.",      pct:28.4, act:"Hold",   actPct:null, shares:420000,   rPrice:448.30, val:188286000,  w52l:355.51,w52h:551.05},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:22.6, act:"Hold",   actPct:null, shares:840000,   rPrice:175.50, val:147420000,  w52l:140.53,w52h:207.05},
@@ -14943,14 +14959,14 @@ const GURUS_13F = [
       {t:"MA",   n:"Mastercard Inc.",       pct:15.8, act:"Hold",   actPct:null, shares:180000,   rPrice:538.20, val:96876000,   w52l:455.00,w52h:576.50},
     ]},
   { id:"clifford_sosin", name:"Clifford Sosin", fund:"CAS Investment Partners", emoji:"🔭", color:"#7DD3FC",
-    aum:"$520M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:4,
+    aum:"$520M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:4,
     holdings:[
       {t:"CSU",  n:"Constellation Software",pct:68.4, act:"Hold",  actPct:null, shares:29000,    rPrice:4150.00,val:120350000,  w52l:3200.00,w52h:4800.00},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:18.6, act:"Add",    actPct:8.0,  shares:310000,   rPrice:175.50, val:54405000,   w52l:140.53,w52h:207.05},
       {t:"META", n:"Meta Platforms Inc.",  pct:13.0, act:"Hold",   actPct:null, shares:52000,    rPrice:596.80, val:31033600,   w52l:520.26,w52h:794.38},
     ]},
   { id:"tom_bancroft", name:"Tom Bancroft", fund:"Makaira Partners", emoji:"🦋", color:"#FBCFE8",
-    aum:"$380M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:10,
+    aum:"$380M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:10,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:32.4, act:"Add",    actPct:5.0,  shares:420000,   rPrice:175.50, val:73710000,   w52l:140.53,w52h:207.05},
       {t:"META", n:"Meta Platforms Inc.",  pct:28.6, act:"Hold",   actPct:null, shares:92000,    rPrice:596.80, val:54905600,   w52l:520.26,w52h:794.38},
@@ -14958,7 +14974,7 @@ const GURUS_13F = [
       {t:"AMZN", n:"Amazon.com Inc.",      pct:16.6, act:"Add",    actPct:8.0,  shares:140000,   rPrice:226.50, val:31710000,   w52l:166.21,w52h:242.52},
     ]},
   { id:"greg_alexander", name:"Greg Alexander", fund:"Conifer Management", emoji:"🌲", color:"#86EFAC",
-    aum:"$620M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:14,
+    aum:"$620M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:14,
     holdings:[
       {t:"META", n:"Meta Platforms Inc.",  pct:30.4, act:"Hold",   actPct:null, shares:300000,   rPrice:596.80, val:179040000,  w52l:520.26,w52h:794.38},
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:24.8, act:"Add",    actPct:5.5,  shares:840000,   rPrice:175.50, val:147420000,  w52l:140.53,w52h:207.05},
@@ -14967,7 +14983,7 @@ const GURUS_13F = [
       {t:"LLY",  n:"Eli Lilly & Co.",      pct:11.4, act:"New",    actPct:null, shares:120000,   rPrice:780.00, val:93600000,   w52l:620.00,w52h:1060.00},
     ]},
   { id:"triple_frond", name:"Triple Frond Partners", fund:"Triple Frond Partners", emoji:"🍀", color:"#6EE7B7",
-    aum:"$290M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:7,
+    aum:"$290M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:7,
     holdings:[
       {t:"GOOGL",n:"Alphabet Inc. Cl A",   pct:38.6, act:"Hold",   actPct:null, shares:340000,   rPrice:175.50, val:59670000,   w52l:140.53,w52h:207.05},
       {t:"META", n:"Meta Platforms Inc.",  pct:30.4, act:"Add",    actPct:8.5,  shares:140000,   rPrice:596.80, val:83552000,   w52l:520.26,w52h:794.38},
@@ -14975,7 +14991,7 @@ const GURUS_13F = [
       {t:"MA",   n:"Mastercard Inc.",       pct:12.6, act:"Hold",   actPct:null, shares:70000,    rPrice:538.20, val:37674000,   w52l:455.00,w52h:576.50},
     ]},
   { id:"alex_roepers", name:"Alex Roepers", fund:"Atlantic Investment Management", emoji:"🌊", color:"#5EEAD4",
-    aum:"$780M", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:16,
+    aum:"$780M", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:16,
     holdings:[
       {t:"INGR", n:"Ingredion Inc.",        pct:22.4, act:"Hold",   actPct:null, shares:1200000,  rPrice:124.80, val:149760000,  w52l:96.00, w52h:142.00},
       {t:"FLS",  n:"Flowserve Corp.",       pct:18.6, act:"Add",    actPct:8.5,  shares:2800000,  rPrice:62.40,  val:174720000,  w52l:48.00, w52h:78.00},
@@ -14984,7 +15000,7 @@ const GURUS_13F = [
       {t:"CE",   n:"Celanese Corp.",        pct:12.8, act:"Add",    actPct:10.5, shares:1400000,  rPrice:96.40,  val:134960000,  w52l:72.00, w52h:148.00},
     ]},
   { id:"david_einhorn2", name:"Glenn Welling", fund:"Engaged Capital", emoji:"⚙️", color:"#A5B4FC",
-    aum:"$1.1B", period:"Q1 2026", portfolioDate:"31 Mar 2026", numStocks:18,
+    aum:"$1.1B", period:GURUS_QUARTER, portfolioDate:GURUS_PORTFOLIO_DATE, numStocks:18,
     holdings:[
       {t:"LSXMA",n:"Liberty SiriusXM Grp.", pct:24.6, act:"Hold",  actPct:null, shares:9800000,  rPrice:24.80,  val:243040000,  w52l:18.00, w52h:34.00},
       {t:"SFIX", n:"Stitch Fix Inc.",        pct:18.4, act:"Add",   actPct:22.5, shares:22000000, rPrice:4.20,   val:92400000,   w52l:2.20,  w52h:6.80},
