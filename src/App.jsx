@@ -1698,15 +1698,15 @@ function PolymarketWidget(){
   useEffect(()=>{
     // Fallback curado de mercados financieros relevantes mientras la API carga
     const fallback = isEN ? [
-      {question:"Will the Fed cut rates in 2025?", probability:0.62, volume:"$1.2M"},
-      {question:"Will the S&P 500 close above 5,500 in 2025?", probability:0.58, volume:"$890K"},
-      {question:"Will Bitcoin top $100K before year-end?", probability:0.71, volume:"$3.1M"},
-      {question:"Will U.S. inflation fall below 3% in 2025?", probability:0.45, volume:"$670K"},
+      {question:"Will the Fed cut rates at least twice in 2026?", probability:0.62, volume:"$1.2M"},
+      {question:"Will S&P 500 hit 6,500 before year-end 2026?", probability:0.58, volume:"$890K"},
+      {question:"Will Bitcoin reach $150K in 2026?", probability:0.71, volume:"$3.1M"},
+      {question:"Will U.S. inflation stay below 3% in 2026?", probability:0.45, volume:"$670K"},
     ] : [
-      {question:"¿Habrá recorte de tasas de la Fed en 2025?", probability:0.62, volume:"$1.2M"},
-      {question:"¿El S&P 500 cerrará por encima de 5,500 en 2025?", probability:0.58, volume:"$890K"},
-      {question:"¿Bitcoin superará $100K antes de fin de año?", probability:0.71, volume:"$3.1M"},
-      {question:"¿La inflación bajará del 3% en EE.UU. en 2025?", probability:0.45, volume:"$670K"},
+      {question:"¿La Fed recortará tasas al menos 2 veces en 2026?", probability:0.62, volume:"$1.2M"},
+      {question:"¿El S&P 500 llegará a 6,500 antes de fin de 2026?", probability:0.58, volume:"$890K"},
+      {question:"¿Bitcoin llegará a $150K en 2026?", probability:0.71, volume:"$3.1M"},
+      {question:"¿La inflación en EE.UU. se mantendrá bajo 3% en 2026?", probability:0.45, volume:"$670K"},
     ];
     const ctrl = new AbortController();
     const timer = setTimeout(()=>ctrl.abort(), 4000);
