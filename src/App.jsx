@@ -27170,15 +27170,7 @@ export default function App(){
             <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{background:"none",border:"none",color:"#475569",fontSize:18,cursor:"pointer",lineHeight:1,flexShrink:0,padding:"2px 4px"}}>✕</button>
           </div>
         </div>
-      )}
-            <button onClick={()=>setAuth("register")} style={{marginTop:16,background:"transparent",border:"none",color:"#475569",fontSize:12,cursor:"pointer",textDecoration:"underline"}}>
-              O crear cuenta gratis y verlo ahora →
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── CHATBOT FLOTANTE IA ── */}
+      )}{/* ── CHATBOT FLOTANTE IA ── */}
       {/* Robot flotante DESACTIVADO (pedido usuaria: ocupaba mucho espacio). La IA se abre desde el botón "IA" del navbar/barra inferior. */}
       {false && !showAI && !aiHidden && (
         <div className="nexo-ai-fab" style={{
