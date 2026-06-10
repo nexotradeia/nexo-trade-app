@@ -25196,6 +25196,7 @@ export default function App(){
     return()=>clearInterval(t);
   },[]);
   const [lang,setLang]         = useState(()=>{ try{ const s=localStorage.getItem("nexo-lang"); if(s==="es"||s==="en") return s; /* Auto-detección: español si el navegador del visitante es hispano; inglés para el resto del mundo */ const navs=(typeof navigator!=="undefined")?((navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||navigator.userLanguage||"en"]):["en"]; return navs.some(l=>String(l).toLowerCase().startsWith("es"))?"es":"en"; }catch{ return "en"; } });
+  const isEN = lang === "en"; // FIX: declarado en App() para evitar ReferenceError en JSX del navbar
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
   const [showVipPopup,setVipPopup] = useState(false);
