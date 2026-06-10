@@ -20078,11 +20078,25 @@ function RadarGlobalPage({lang="es",onBack}){
     cvs.style.cursor='grab';
     cvs.addEventListener('mousedown',onMD);window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);
     cvs.addEventListener('click',onCLICK);
-    // ── touch events (mobile swipe to rotate) ──
-    const onTD=(e)=>{e.preventDefault();const touch=e.touches[0];t.isDragging=true;t.autoRotate=false;t.lastMX=touch.clientX;t.lastMY=touch.clientY;};
-    const onTM=(e)=>{e.preventDefault();if(!t.isDragging)return;const touch=e.touches[0];t.rotY+=(touch.clientX-t.lastMX)*.005;t.rotX+=(touch.clientY-t.lastMY)*.005;t.rotX=Math.max(-1.2,Math.min(1.2,t.rotX));t.lastMX=touch.clientX;t.lastMY=touch.clientY;};
-    const onTU=(e)=>{t.isDragging=false;setTimeout(()=>t.autoRotate=true,3000);};
-    cvs.addEventListener('touchstart',onTD,{passive:false});
+    // ── touch events (mobile swipe to rotate, allow vertical scroll) ──
+    let touchStartX=0,touchStartY=0,touchLocked=null; // null=undecided, 'rotate', 'scroll'
+    const onTD=(e)=>{const touch=e.touches[0];touchStartX=touch.clientX;touchStartY=touch.clientY;touchLocked=null;t.lastMX=touch.clientX;t.lastMY=touch.clientY;};
+    const onTM=(e)=>{
+      if(!e.touches[0])return;
+      const touch=e.touches[0];
+      const dx=Math.abs(touch.clientX-touchStartX),dy=Math.abs(touch.clientY-touchStartY);
+      if(!touchLocked){
+        if(dx>6||dy>6) touchLocked=dx>dy?'rotate':'scroll';
+        else return;
+      }
+      if(touchLocked==='scroll')return; // let the page scroll naturally
+      e.preventDefault(); // only block scroll if rotating
+      t.isDragging=true;t.autoRotate=false;
+      t.rotY+=(touch.clientX-t.lastMX)*.005;t.rotX+=(touch.clientY-t.lastMY)*.005;
+      t.rotX=Math.max(-1.2,Math.min(1.2,t.rotX));t.lastMX=touch.clientX;t.lastMY=touch.clientY;
+    };
+    const onTU=()=>{t.isDragging=false;touchLocked=null;setTimeout(()=>t.autoRotate=true,3000);};
+    cvs.addEventListener('touchstart',onTD,{passive:true});
     cvs.addEventListener('touchmove',onTM,{passive:false});
     cvs.addEventListener('touchend',onTU);
     const onResize=()=>resize();window.addEventListener('resize',onResize);
@@ -20342,7 +20356,7 @@ function RadarGlobalPage({lang="es",onBack}){
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div style={{width:'100%',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,...(mob?{display:'flex',flexDirection:'column',overflowY:'auto',height:'calc(100vh - 112px)'}:{display:'grid',height:'calc(100vh - 52px)',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'})}}>
+    <div style={{width:'100%',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,...(mob?{display:'flex',flexDirection:'column',overflowY:'auto',height:'calc(100vh - 112px)',overscrollBehavior:'contain',WebkitOverflowScrolling:'touch'}:{display:'grid',height:'calc(100vh - 52px)',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'})}}>
       <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
       {/* ── TOPBAR ── */}
       <div style={{...(mob?{}:{gridColumn:'1/-1'}),flexShrink:0,height:mob?44:48,background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:mob?'0 8px':'0 20px',gap:mob?4:12,zIndex:100}}>
@@ -20435,7 +20449,7 @@ function RadarGlobalPage({lang="es",onBack}){
 
       {/* ── GLOBE ── */}
       <div style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)',...(mob?{height:'360px',flexShrink:0}:{flex:1})}}>
-        <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'none'}}/>
+        <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'pan-y'}}/>
         {/* Mode toggles — desktop only */}
         {!mob&&<div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
           {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
