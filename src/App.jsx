@@ -20342,7 +20342,7 @@ function RadarGlobalPage({lang="es",onBack}){
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div style={{width:'100%',height:'calc(100vh - 52px)',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:mob?'44px 1fr 30px':'48px 1fr 30px',gridTemplateColumns:mob?'1fr':'260px 1fr 260px',overflow:'hidden'}}>
+    <div style={{width:'100%',height:mob?'calc(100vh - 112px)':'calc(100vh - 52px)',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:mob?'44px 1fr 30px':'48px 1fr 30px',gridTemplateColumns:mob?'1fr':'260px 1fr 260px',overflow:'hidden'}}>
       <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
       {/* ── TOPBAR ── */}
       <div style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:mob?'0 8px':'0 20px',gap:mob?4:12,zIndex:100}}>
