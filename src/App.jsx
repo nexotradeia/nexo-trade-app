@@ -2878,20 +2878,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             </div>
           )}
 
-          {/* ── PROGRESS BAR ── */}
-          {progressToNext&&(
-            <div style={{marginBottom:20,background:C.card2,borderRadius:14,padding:"12px 16px",border:`1px solid ${C.border}`}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <span style={{fontSize:12,fontWeight:800,color:C.text}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</span>
-                <span style={{fontSize:11,color:C.muted2}}>{user.points.toLocaleString()} / {progressToNext.min.toLocaleString()} pts</span>
-                <span style={{fontSize:12,fontWeight:800,color:C.muted}}>{getLevel(progressToNext.min).emoji} {lang==="en"?getLevel(progressToNext.min).nameEn:getLevel(progressToNext.min).name}</span>
-              </div>
-              <div style={{background:C.border,borderRadius:20,height:10,overflow:"hidden"}}>
-                <div style={{height:"100%",borderRadius:20,width:`${progress}%`,background:`linear-gradient(90deg,${accent},#00c49a)`,transition:"width 1s ease",boxShadow:`0 0 8px ${accent}88`}}/>
-              </div>
-              <div style={{fontSize:11,color:C.muted2,marginTop:5,textAlign:"right"}}>{Math.round(progress)}% hacia el siguiente nivel</div>
-            </div>
-          )}
+          {/* Progress bar removed */}
 
           {/* ── TABS ── */}
           <div style={{display:"flex",gap:4,marginBottom:16,background:C.card2,borderRadius:12,padding:4,border:`1px solid ${C.border}`}}>
@@ -7300,12 +7287,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 : <div style={{width:56,height:56,borderRadius:16,background:"#1e3a5f",border:"3px solid rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>&#x1F464;</div>
               }
             </div>
-            {/* Level badge top-right */}
-            {user && lvl && (
-              <div style={{position:"absolute",top:10,right:10,background:"rgba(255,255,255,0.95)",borderRadius:20,padding:"4px 10px",fontSize:10,fontWeight:700,color:"#1e293b",display:"flex",alignItems:"center",gap:4,boxShadow:"0 2px 8px rgba(0,0,0,0.2)"}}>
-                {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
-              </div>
-            )}
+            {/* Level badge removed */}
             {/* Join date bottom-right */}
             {joinDate && (
               <div style={{position:"absolute",bottom:8,right:10,fontSize:10,color:"rgba(255,255,255,0.5)",fontWeight:600,display:"flex",alignItems:"center",gap:3}}>
@@ -7379,30 +7361,18 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 )}
               </div>
 
-              {/* Level progress bar */}
-              {lvl && (
-                <div style={{background:"#F1F5F9",borderRadius:10,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{fontSize:14,flexShrink:0}}>{lvl.emoji}</span>
-                  <span style={{fontWeight:700,fontSize:11,color:"#0F172A",whiteSpace:"nowrap"}}>{lang==="en"?lvl.nameEn:lvl.name}</span>
-                  <div style={{flex:1,height:5,background:"#E2E8F0",borderRadius:99,overflow:"hidden"}}>
-                    <div style={{width:`${Math.min(100,progressPct)}%`,height:"100%",background:"linear-gradient(90deg,#3B82F6,#22D3EE)",borderRadius:99,transition:"width 0.5s"}}/>
-                  </div>
-                  <span style={{fontSize:10,color:"#94A3B8",fontWeight:600,whiteSpace:"nowrap"}}>{user.points||0}/{progressToNext?progressToNext.min:lvl.max}</span>
-                </div>
-              )}
+              {/* Level progress bar removed */}
 
               {/* Stats */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr 1px 1fr",background:"#F8FAFF",borderRadius:10,overflow:"hidden",border:"1px solid rgba(0,0,0,0.06)",marginBottom:12}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr",background:"#F8FAFF",borderRadius:10,overflow:"hidden",border:"1px solid rgba(0,0,0,0.06)",marginBottom:12}}>
                 {[
                   {v:user.followers||0, l:"Followers"},
                   null,
                   {v:user.following||0, l:"Following"},
-                  null,
-                  {v:user.points||0,   l:"Points"},
                 ].map((item,i)=> item===null
                   ? <div key={i} style={{background:"rgba(0,0,0,0.05)"}}/>
                   : <div key={i} style={{padding:"9px 4px",textAlign:"center"}}>
-                      <div style={{fontWeight:800,fontSize:16,color:i===4?"#0F4C81":"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
+                      <div style={{fontWeight:800,fontSize:16,color:"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
                       <div style={{fontSize:8,color:"#94A3B8",fontWeight:700,letterSpacing:0.7,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
                     </div>
                 )}
