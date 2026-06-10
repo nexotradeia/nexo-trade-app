@@ -6697,10 +6697,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
                 <span style={{background:C.accentDim,color:C.accentText,borderRadius:8,padding:"3px 10px",fontSize:14,fontWeight:800,fontFamily:"monospace"}}>${s.ticker}</span>
                 <span style={{background:s.tipo==="COMPRA"?C.bullBg:C.bearBg,color:s.tipo==="COMPRA"?C.bull:C.bear,border:`1px solid ${s.tipo==="COMPRA"?C.bull:C.bear}44`,borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:800}}>
-                  {s.tipo==="COMPRA"?"▲ COMPRA":"▼ VENTA"}
+                  {s.tipo==="COMPRA"?(isEN?"▲ BUY":"▲ COMPRA"):(isEN?"▼ SELL":"▼ VENTA")}
                 </span>
                 <div style={{display:"flex",gap:16,marginLeft:"auto",flexWrap:"wrap"}}>
-                  {[["Entrada",s.entrada,C.text],["Target",s.target,C.bull],["Stop",s.stop,C.bear]].map(([l,v,c])=>(
+                  {isEN?[["Entry",s.entrada,C.text],["Target",s.target,C.bull],["Stop",s.stop,C.bear]]:[["Entrada",s.entrada,C.text],["Target",s.target,C.bull],["Stop",s.stop,C.bear]].map(([l,v,c])=>(
                     <div key={l} style={{textAlign:"center"}}>
                       <div style={{fontFamily:"monospace",fontSize:14,fontWeight:800,color:c}}>{v}</div>
                       <div style={{fontSize:10,color:C.muted2}}>{l}</div>
@@ -6708,7 +6708,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   ))}
                   <div style={{textAlign:"center"}}>
                     <div style={{fontSize:14,fontWeight:800,color:s.conf>=85?C.bull:s.conf>=70?C.gold:C.bear}}>{s.conf}%</div>
-                    <div style={{fontSize:10,color:C.muted2}}>Confianza</div>
+                    <div style={{fontSize:10,color:C.muted2}}>{isEN?"Confidence":"Confianza"}</div>
                   </div>
                 </div>
                 <span style={{color:C.muted2,fontSize:11,width:"100%"}}>{s.tiempo}</span>
@@ -10372,11 +10372,11 @@ function PaperTrading({ user, lang="es" }){
                   {/* Precio actual */}
                   <div style={{minWidth:80}}>
                     <div style={{fontWeight:800,fontSize:14,fontFamily:"monospace",color:"#0F172A"}}>{fmtUSD(p.cp)}</div>
-                    <div style={{fontSize:11,color:p.pct>=0?"#16A34A":"#DC2626",fontWeight:700}}>{p.pct>=0?"+":""}{p.pct?.toFixed(2)}% hoy</div>
+                    <div style={{fontSize:11,color:p.pct>=0?"#16A34A":"#DC2626",fontWeight:700}}>{p.pct>=0?"+":""}{p.pct?.toFixed(2)}% {isEN?"today":"hoy"}</div>
                   </div>
                   {/* Costo promedio */}
                   <div style={{minWidth:80}}>
-                    <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>COMPRA PROM.</div>
+                    <div style={{fontSize:10,color:"#64748B",fontWeight:600}}>{isEN?"AVG COST":"COMPRA PROM."}</div>
                     <div style={{fontWeight:700,fontSize:13,fontFamily:"monospace",color:"#64748B"}}>{fmtUSD(p.avgCost)}</div>
                   </div>
                   {/* Valor total */}
@@ -10730,7 +10730,7 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
           {liveQ&&(
             <div style={{display:"flex",gap:16,alignItems:"center",padding:"6px 14px",background:"rgba(15,76,129,0.06)",borderBottom:"1px solid rgba(15,76,129,0.1)",flexShrink:0}}>
               <span style={{fontFamily:"monospace",fontWeight:900,fontSize:18,color:"#E2E8F0"}}>{fmtUSD(liveQ.price)}</span>
-              <span style={{fontWeight:800,fontSize:13,color:liveQ.change>=0?"#00E58F":"#FF4D6A"}}>{liveQ.change>=0?"+":""}{liveQ.change?.toFixed(2)}% hoy</span>
+              <span style={{fontWeight:800,fontSize:13,color:liveQ.change>=0?"#00E58F":"#FF4D6A"}}>{liveQ.change>=0?"+":""}{liveQ.change?.toFixed(2)}% {isEN?"today":"hoy"}</span>
               <span style={{fontSize:11,color:"#00E58F",background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.2)",borderRadius:8,padding:"2px 8px",fontWeight:700}}>✓ En vivo — ${chartTk}</span>
             </div>
           )}
@@ -10795,12 +10795,12 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
                 <button onClick={buy}
                   disabled={!liveQ||!shares||parseFloat(shares)<=0}
                   style={{background:liveQ&&shares?"linear-gradient(135deg,#00E58F,#16A34A)":"rgba(255,255,255,0.05)",border:"none",borderRadius:10,padding:"12px",fontWeight:900,fontSize:14,color:liveQ&&shares?"#0B0E1A":"#475569",cursor:liveQ&&shares?"pointer":"not-allowed",letterSpacing:0.3}}>
-                  ▲ COMPRAR {chartTk}
+                  {isEN?`▲ BUY ${chartTk}`:`▲ COMPRAR ${chartTk}`}
                 </button>
 
                 {pf.positions[chartTk]&&(
                   <div>
-                    <div style={{fontSize:10,color:"#64748B",marginBottom:5,fontWeight:600}}>POSICIÓN ABIERTA EN ${chartTk}</div>
+                    <div style={{fontSize:10,color:"#64748B",marginBottom:5,fontWeight:600}}>{isEN?`OPEN POSITION IN $${chartTk}`:`POSICIÓN ABIERTA EN $${chartTk}`}</div>
                     <div style={{background:"rgba(255,77,106,0.06)",border:"1px solid rgba(255,77,106,0.15)",borderRadius:8,padding:"10px",marginBottom:8,fontSize:12}}>
                       <div style={{color:"#94A3B8"}}>Tienes <strong style={{color:"#E2E8F0"}}>{pf.positions[chartTk].shares}</strong> acciones a <strong style={{color:"#E2E8F0"}}>{fmtUSD(pf.positions[chartTk].avgCost)}</strong></div>
                     </div>
@@ -12616,14 +12616,14 @@ function DividendCalendarPage({lang="es"}) {
           <span style={{fontSize:30}}>💰</span>
           <div style={{flex:1}}>
             <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-              <div style={{fontSize:20,fontWeight:800,color:C.text}}>Calendario de Dividendos</div>
+              <div style={{fontSize:20,fontWeight:800,color:C.text}}>{isEN?"Dividend Calendar":"Calendario de Dividendos"}</div>
               {source==="live"      && <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● LIVE</span>}
-              {source==="projected" && <span style={{fontSize:10,fontWeight:700,color:"#F59E0B",background:"rgba(245,158,11,0.1)",borderRadius:10,padding:"2px 8px"}}>PROYECTADO</span>}
+              {source==="projected" && <span style={{fontSize:10,fontWeight:700,color:"#F59E0B",background:"rgba(245,158,11,0.1)",borderRadius:10,padding:"2px 8px"}}>{isEN?"PROJECTED":"PROYECTADO"}</span>}
               {source==="local"     && <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>CURATED</span>}
             </div>
             <div style={{fontSize:12,color:C.muted,marginTop:2}}>{isEN?"Upcoming ex-dividend dates and payouts of major companies":"Próximas fechas ex-dividendo y pagos de las principales empresas"}</div>
           </div>
-          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px"}}>Actualizando...</span>}
+          {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px"}}>{isEN?"Updating...":"Actualizando..."}</span>}
         </div>
         {/* Year tabs */}
         <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
@@ -12631,7 +12631,7 @@ function DividendCalendarPage({lang="es"}) {
             <button key={y} onClick={()=>setYearTab(y)}
               style={{padding:"5px 16px",borderRadius:20,border:`2px solid ${yearTab===y?C.bull:C.border}`,background:yearTab===y?C.bull+"18":"transparent",cursor:"pointer",transition:"all 0.15s"}}>
               <span style={{fontSize:13,fontWeight:800,color:yearTab===y?C.bull:C.muted}}>{y}</span>
-              {y!==String(curYear) && <span style={{fontSize:10,color:yearTab===y?C.bull:C.muted2,fontWeight:600,marginLeft:4}}>Proy.</span>}
+              {y!==String(curYear) && <span style={{fontSize:10,color:yearTab===y?C.bull:C.muted2,fontWeight:600,marginLeft:4}}>{isEN?"Proj.":"Proy."}</span>}
             </button>
           ))}
         </div>
@@ -12650,7 +12650,7 @@ function DividendCalendarPage({lang="es"}) {
       <div className="nexo-scroll-x" style={{borderRadius:16}}>
       <div style={{minWidth:530,background:C.card,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
         <div style={{display:"grid",gridTemplateColumns:"90px 1fr 90px 90px 80px 80px",gap:0,background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px"}}>
-          {["Ticker","Empresa","Ex-Fecha","Pago","Trimestral","Yield"].map(h=>(
+          {isEN?["Ticker","Company","Ex-Date","Payout","Quarterly","Yield"]:["Ticker","Empresa","Ex-Fecha","Pago","Trimestral","Yield"].map(h=>(
             <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
           ))}
         </div>
@@ -12690,7 +12690,7 @@ const IPOS_2026 = [
   {company:"CoreWeave Inc",        ticker:"CRWV",  exchange:"NASDAQ",  date:"2026-03-28",range:"$40",     raise:"$1.5B",  sector:"Cloud/AI",    status:"trading",   desc:"GPU cloud provider for AI workloads, OpenAI's primary infrastructure partner. Up ~140% since IPO."},
   {company:"Venture Global LNG",   ticker:"VG",    exchange:"NYSE",    date:"2026-01-24",range:"$25",     raise:"$1.75B", sector:"Energy",      status:"trading",   desc:"Major U.S. LNG exporter. One of the biggest IPOs of the year by capital raised."},
   {company:"eToro Group Ltd",      ticker:"ETOR",  exchange:"NASDAQ",  date:"2026-05-14",range:"$52",     raise:"$620M",  sector:"Fintech",     status:"trading",   desc:"Social trading platform with 35M registered users worldwide. Debuted above range."},
-  {company:"SpaceX",               ticker:"SPCX",  exchange:"NASDAQ",  date:"2026-06-11",range:"TBD",     raise:"TBD",    sector:"Aerospace",   status:"upcoming",  desc:"La empresa aeroespacial de Elon Musk sale a bolsa. Starlink + lanzamientos. El IPO más esperado de la década — cotiza la semana del 11 de junio."},
+  {company:"SpaceX",               ticker:"SPCX",  exchange:"NASDAQ",  date:"2026-06-11",range:"TBD",     raise:"TBD",    sector:"Aerospace",   status:"upcoming",  desc:"La empresa aeroespacial de Elon Musk sale a bolsa. Starlink + lanzamientos. El IPO más esperado de la década. Cotiza esta semana."},
   {company:"Klarna Bank AB",       ticker:"KLAR",  exchange:"NYSE",    date:"2026-07-01",range:"$68–$72", raise:"$1.0B",  sector:"Fintech",     status:"upcoming",  desc:"Europe's leading BNPL platform with 85M users across 45 countries. Highly anticipated."},
   {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2026-07-08",range:"$22–$26", raise:"$600M",  sector:"Neobank",     status:"upcoming",  desc:"U.S. neobank with 22M active accounts. No overdraft fees model disrupting traditional banking."},
   {company:"SHEIN Group Ltd",      ticker:"SHEI",  exchange:"NYSE",    date:"2026-07-22",range:"$60–$70", raise:"$5.0B",  sector:"Retail",      status:"upcoming",  desc:"Ultra-fast fashion e-commerce giant. Est. valuation $65B. Highly controversial ESG profile."},
@@ -13014,12 +13014,12 @@ function IpoCalendarPage({ isPremium=false, onNeedPremium }={}) {
 
 // ── STOCK SCREENER PAGE (page 17) — VIP ───────────────────────────────────────
 const SCREENER_PRESETS = [
-  {k:"gainers",    label:"📈 Top Ganadores",   desc:"Las más alcistas hoy"},
-  {k:"losers",     label:"📉 Top Perdedores",  desc:"Las más bajistas hoy"},
-  {k:"active",     label:"🔥 Más Activas",     desc:"Mayor volumen del mercado"},
-  {k:"undervalued",label:"💎 Subvaloradas",    desc:"Crecimiento con buen precio"},
-  {k:"growth",     label:"🚀 Crecimiento Tech",desc:"Tecnología con alto potencial"},
-  {k:"dividend",   label:"💰 Dividendos",      desc:"Carteras anchor de dividendo"},
+  {k:"gainers",    label:"📈 Top Gainers",    labelEs:"📈 Top Ganadores",   desc:"Top movers today",            descEs:"Las más alcistas hoy"},
+  {k:"losers",     label:"📉 Top Losers",     labelEs:"📉 Top Perdedores",  desc:"Biggest decliners today",     descEs:"Las más bajistas hoy"},
+  {k:"active",     label:"🔥 Most Active",    labelEs:"🔥 Más Activas",     desc:"Highest market volume",       descEs:"Mayor volumen del mercado"},
+  {k:"undervalued",label:"💎 Undervalued",    labelEs:"💎 Subvaloradas",    desc:"Growth at good price",        descEs:"Crecimiento con buen precio"},
+  {k:"growth",     label:"🚀 Growth Tech",    labelEs:"🚀 Crecimiento Tech",desc:"Tech with high potential",    descEs:"Tecnología con alto potencial"},
+  {k:"dividend",   label:"💰 Dividends",      labelEs:"💰 Dividendos",      desc:"Anchor dividend portfolios",  descEs:"Carteras anchor de dividendo"},
 ];
 
 function ScreenerPage({isPremium, onNeedPremium, lang="es"}) {
@@ -13049,8 +13049,8 @@ function ScreenerPage({isPremium, onNeedPremium, lang="es"}) {
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:10,marginBottom:14}}>
           {SCREENER_PRESETS.map((p,i)=>(
             <div key={i} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"14px 16px",cursor:"pointer"}}>
-              <div style={{fontSize:14,fontWeight:700,color:"#E2E8F0",marginBottom:4}}>{p.label}</div>
-              <div style={{fontSize:11,color:"#475569"}}>{p.desc}</div>
+              <div style={{fontSize:14,fontWeight:700,color:"#E2E8F0",marginBottom:4}}>{isEN?p.label:p.labelEs}</div>
+              <div style={{fontSize:11,color:"#475569"}}>{isEN?p.desc:p.descEs}</div>
             </div>
           ))}
         </div>
@@ -13097,20 +13097,20 @@ function ScreenerPage({isPremium, onNeedPremium, lang="es"}) {
           </div>
         </div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          {SCREENER_PRESETS.map(({k,label})=>(
-            <button key={k} onClick={()=>setScreen(k)} style={{background:screen===k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",color:screen===k?"#fff":C.muted,border:`1.5px solid ${screen===k?"transparent":C.border}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s",boxShadow:screen===k?"0 4px 12px rgba(15,94,104,0.3)":"none"}}>{label}</button>
+          {SCREENER_PRESETS.map((p)=>(
+            <button key={p.k} onClick={()=>setScreen(p.k)} style={{background:screen===p.k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",color:screen===p.k?"#fff":C.muted,border:`1.5px solid ${screen===p.k?"transparent":C.border}`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s",boxShadow:screen===p.k?"0 4px 12px rgba(15,94,104,0.3)":"none"}}>{isEN?p.label:p.labelEs}</button>
           ))}
         </div>
       </div>
 
       {loading && <div style={{textAlign:"center",padding:"40px",color:C.muted,fontSize:14}}>{isEN?"Loading screener… ⏳":"Cargando screener… ⏳"}</div>}
-      {error   && <div style={{textAlign:"center",padding:"40px",color:C.bear,fontSize:14}}>Error al cargar datos. Intenta de nuevo.</div>}
+      {error   && <div style={{textAlign:"center",padding:"40px",color:C.bear,fontSize:14}}>{isEN?"Error loading data. Please try again.":"Error al cargar datos. Intenta de nuevo."}</div>}
 
       {!loading && !error && quotes.length > 0 && (
         <div style={{background:C.card,borderRadius:16,boxShadow:C.shadow,border:`1px solid ${C.border}`,overflowX:"auto"}}>
           <div style={{minWidth:720}}>
             <div style={{display:"grid",gridTemplateColumns:"80px minmax(140px,1fr) 90px 90px 70px 100px 90px",background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px",gap:8,borderRadius:"16px 16px 0 0"}}>
-              {["Ticker","Empresa","Precio","Cambio %","P/E","Mkt Cap","Volumen"].map(h=>(
+              {isEN?["Ticker","Company","Price","Change %","P/E","Mkt Cap","Volume"]:["Ticker","Empresa","Precio","Cambio %","P/E","Mkt Cap","Volumen"].map(h=>(
                 <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
               ))}
             </div>
@@ -15390,7 +15390,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           ) : arkErr ? (
             <div style={{textAlign:"center",padding:"60px",color:C.muted}}>
               <div style={{fontSize:40,marginBottom:12}}>⚠️</div>
-              <div style={{fontSize:14,color:"#FF4D6A",marginBottom:8}}>No se pudo cargar datos de ARK</div>
+              <div style={{fontSize:14,color:"#FF4D6A",marginBottom:8}}>{isEN?"Could not load ARK data":"No se pudo cargar datos de ARK"}</div>
               <div style={{fontSize:12,color:C.muted2}}>{isEN?"Try refreshing or check back later":"Intenta hacer Refresh o revisa más tarde"}</div>
             </div>
           ) : (
@@ -15519,8 +15519,8 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                     <div>
                       <span style={{display:"inline-flex",alignItems:"center",gap:4,background:isCompra?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:isCompra?"#00D26A":"#FF4D6A",border:`1px solid ${isCompra?"rgba(0,210,106,0.3)":"rgba(255,77,106,0.3)"}`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap"}}>
                         {isCompra
-                          ? <><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>COMPRA</>
-                          : <><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>VENTA</>
+                          ? <><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>{isEN?"BUY":"COMPRA"}</>
+                          : <><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>{isEN?"SELL":"VENTA"}</>
                         }
                       </span>
                     </div>
@@ -15821,7 +15821,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             </div>
           ) : congress.length===0 ? (
             <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(255,255,255,0.01)",borderRadius:16,border:"1px dashed rgba(255,255,255,0.06)"}}>
-              <div style={{fontSize:13,color:C.muted}}>No hay datos · Haz clic en Actualizar</div>
+              <div style={{fontSize:13,color:C.muted}}>{isEN?"No data · Click Refresh":"No hay datos · Haz clic en Actualizar"}</div>
             </div>
           ) : (
             <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -19250,10 +19250,10 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       const chg=tickers.map(t=>priceOf(t)?.change).filter(v=>v!=null);
       const up=chg.filter(c=>c>=0).length, down=chg.filter(c=>c<0).length, aC=avg(chg);
       cards=[
-        {title:"Activos",value:String(tickers.length),sub:"En tu watchlist",badge:["LISTA","#1D4ED8","rgba(29,78,216,0.1)"],accent:"linear-gradient(90deg,#0EA5E9,#0047C2)",barColor:"#0EA5E9"},
-        {title:"Suben hoy",value:String(up),sub:"Con cambio positivo",badge:["VERDE","#15803D","rgba(16,185,129,0.12)"],accent:"linear-gradient(90deg,#10B981,#059669)",barColor:"#10B981"},
-        {title:"Bajan hoy",value:String(down),sub:"Con cambio negativo",badge:["ROJO","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#EF4444,#B91C1C)",barColor:"#EF4444"},
-        {title:"Cambio promedio",value:(aC>=0?"+":"")+aC.toFixed(2)+"%",sub:"Promedio del día",badge:aC>=0?["+","#15803D","rgba(16,185,129,0.12)"]:["−","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#10B981,#EF4444)",barColor:aC>=0?"#10B981":"#EF4444"},
+        {title:isEN?"Active":"Activos",value:String(tickers.length),sub:isEN?"In your watchlist":"En tu watchlist",badge:["LIST","#1D4ED8","rgba(29,78,216,0.1)"],accent:"linear-gradient(90deg,#0EA5E9,#0047C2)",barColor:"#0EA5E9"},
+        {title:isEN?"Up today":"Suben hoy",value:String(up),sub:isEN?"Positive change":"Con cambio positivo",badge:[isEN?"GREEN":"VERDE","#15803D","rgba(16,185,129,0.12)"],accent:"linear-gradient(90deg,#10B981,#059669)",barColor:"#10B981"},
+        {title:isEN?"Down today":"Bajan hoy",value:String(down),sub:isEN?"Negative change":"Con cambio negativo",badge:[isEN?"RED":"ROJO","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#EF4444,#B91C1C)",barColor:"#EF4444"},
+        {title:isEN?"Avg change":"Cambio promedio",value:(aC>=0?"+":"")+aC.toFixed(2)+"%",sub:isEN?"Day average":"Promedio del día",badge:aC>=0?["+","#15803D","rgba(16,185,129,0.12)"]:["−","#B91C1C","rgba(185,28,28,0.12)"],accent:"linear-gradient(90deg,#10B981,#EF4444)",barColor:aC>=0?"#10B981":"#EF4444"},
       ];
     } else if(activeView==="returns"){
       const rs=tickers.map(t=>({t,r:extRet(t).ytd})).filter(x=>x.r!=null).sort((a,b)=>b.r-a.r);
@@ -22065,7 +22065,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 <div style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:12}}>
                   <div style={{...lbl,marginBottom:6}}>Ingreso mensual estimado</div>
                   <div style={{fontFamily:MONO,fontSize:22,fontWeight:700,color:T.gold}}>${divItems.length?Math.round(ingresoAnual/12).toLocaleString("en-US"):"0"}</div>
-                  <div style={{fontFamily:SANS,fontSize:10,color:T.dim,marginTop:4}}>promedio · ${divItems.length?Math.round(ingresoAnual).toLocaleString("en-US"):"0"}/año proyectado</div>
+                  <div style={{fontFamily:SANS,fontSize:10,color:T.dim,marginTop:4}}>{isEN?`avg · $${divItems.length?Math.round(ingresoAnual).toLocaleString("en-US"):"0"}/yr projected`:`promedio · $${divItems.length?Math.round(ingresoAnual).toLocaleString("en-US"):"0"}/año proyectado`}</div>
                 </div>
               </div>
             </div>
@@ -23045,8 +23045,8 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
             {/* Price + RSI */}
             <div className="nexo-radar-detail-stats" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
               {[
-                {l:"Precio",v:`$${selectedRow.p?.toFixed(2)}`,c:C.text},
-                {l:"Cambio",v:`${selectedRow.chg>=0?"+":""}${selectedRow.chg?.toFixed(2)}%`,c:chgColor(selectedRow.chg)},
+                {l:isEN?"Price":"Precio",v:`$${selectedRow.p?.toFixed(2)}`,c:C.text},
+                {l:isEN?"Change":"Cambio",v:`${selectedRow.chg>=0?"+":""}${selectedRow.chg?.toFixed(2)}%`,c:chgColor(selectedRow.chg)},
                 {l:"RSI",v:selectedRow.rsi||"—",c:rsiColor(selectedRow.rsi||50)},
               ].map((item,i)=>(
                 <div key={i} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px",textAlign:"center"}}>
@@ -23250,7 +23250,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
           )}
           {tab==="options"&&(
             <div style={{display:"grid",gridTemplateColumns:"66px 140px 84px 66px 76px 60px 64px 64px 70px 72px",padding:"9px 14px",background:C.card2,borderBottom:`1px solid ${C.border}`,gap:8}}>
-              {[["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["price","Precio"],["iv","IV"],["vol","Vol"],["pay","Pago pot."],["prob","Prob ITM"],["score","Score"]].map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
+              {(isEN?[["s","Ticker"],["n","Contract"],["strike","Strike"],["exp","Exp"],["price","Price"],["iv","IV"],["vol","Vol"],["pay","Pot. Pay"],["prob","Prob ITM"],["score","Score"]]:([["s","Ticker"],["n","Contrato"],["strike","Strike"],["exp","Vto"],["price","Precio"],["iv","IV"],["vol","Vol"],["pay","Pago pot."],["prob","Prob ITM"],["score","Score"]])).map(([col,lbl])=>(<SortBtn key={col} col={col} label={lbl}/>))}
             </div>
           )}
           {tab==="intraday"&&(
