@@ -5742,7 +5742,7 @@ function NexoTermometro({lang="es"}) {
       // -3% = 0, 0% = 50, +3% = 100 (clamped)
       setStockFG(Math.min(100, Math.max(0, Math.round(50 + avg/3*50))));
     } catch(e) { setStockFG(50); }
-    setUpdated(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
+    setUpdated(new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"}));
     setLoading(false);
   }, []);
 
@@ -12374,9 +12374,11 @@ function EconCalendarPage({lang="es"}) {
   const [source,    setSource]    = useState("local");
   const [lastUpd,   setLastUpd]   = useState(null);
   const today = new Date().toISOString().split("T")[0];
-  const CATS  = ["todas","Inflación","Empleo","Banco Central","Economía","Consumo","Manufactura"];
-  const IMP   = {high:{bg:"#FEF2F2",color:C.bear,label:"Alta"},med:{bg:"#FFFBEB",color:C.gold,label:"Media"},low:{bg:"#F0FDF4",color:C.bull,label:"Baja"}};
-  const fmtDate = d => new Date(d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"});
+  const CATS_ES = ["todas","Inflación","Empleo","Banco Central","Economía","Consumo","Manufactura"];
+  const CATS_EN = ["todas","Inflation","Employment","Central Bank","Economy","Consumer","Manufacturing"];
+  const CATS    = isEN ? CATS_EN : CATS_ES;
+  const IMP   = {high:{bg:"#FEF2F2",color:C.bear,label:isEN?"High":"Alta"},med:{bg:"#FFFBEB",color:C.gold,label:isEN?"Med":"Media"},low:{bg:"#F0FDF4",color:C.bull,label:isEN?"Low":"Baja"}};
+  const fmtDate = d => new Date(d+"T12:00:00").toLocaleDateString(isEN?"en-US":"es-ES",{weekday:"short",day:"numeric",month:"short"});
 
   useEffect(()=>{
     fetch("/api/data?type=econ")
@@ -12385,7 +12387,7 @@ function EconCalendarPage({lang="es"}) {
         if(d.events && d.events.length > 5){
           setEvents(d.events);
           setSource(d.source==="fmp" ? "live" : "local");
-          setLastUpd(new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));
+          setLastUpd(new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"}));
         }
       })
       .catch(()=>{})
@@ -12409,13 +12411,13 @@ function EconCalendarPage({lang="es"}) {
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <div style={{fontSize:20,fontWeight:800,color:C.text}}>{isEN?"Economic Calendar":"Calendario Económico"}</div>
               {source==="live"
-                ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>● EN VIVO</span>
-                : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>MODO LOCAL</span>
+                ? <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>{isEN?"● LIVE":"● EN VIVO"}</span>
+                : <span style={{fontSize:10,fontWeight:700,color:C.muted2,background:C.card2,borderRadius:10,padding:"2px 8px",border:`1px solid ${C.border}`}}>{isEN?"LOCAL":"MODO LOCAL"}</span>
               }
             </div>
             <div style={{fontSize:12,color:C.muted}}>
-              Eventos macro que mueven los mercados — FOMC · CPI · NFP · GDP · PCE
-              {lastUpd && <span style={{marginLeft:8,color:C.muted2}}>· Actualizado {lastUpd}</span>}
+              {isEN?"Macro events that move the markets — FOMC · CPI · NFP · GDP · PCE":"Eventos macro que mueven los mercados — FOMC · CPI · NFP · GDP · PCE"}
+              {lastUpd && <span style={{marginLeft:8,color:C.muted2}}>· {isEN?"Updated":"Actualizado"} {lastUpd}</span>}
             </div>
           </div>
           {loading && <span style={{fontSize:11,color:C.muted,background:C.card2,borderRadius:8,padding:"3px 9px",border:`1px solid ${C.border}`}}>{isEN?"⏳ Loading…":"⏳ Cargando…"}</span>}
@@ -12436,11 +12438,11 @@ function EconCalendarPage({lang="es"}) {
           {Object.entries(IMP).map(([k,v])=>(
             <span key={k} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:C.muted}}>
               <span style={{width:8,height:8,borderRadius:"50%",background:v.color}}/>
-              {v.label} importancia
+              {v.label} {isEN?"importance":"importancia"}
             </span>
           ))}
         </div>
-        <span style={{fontSize:11,color:C.muted2}}>{rows.length} eventos</span>
+        <span style={{fontSize:11,color:C.muted2}}>{rows.length} {isEN?"events":"eventos"}</span>
       </div>
 
       <div className="nexo-scroll-x" style={{borderRadius:12}}>
@@ -12462,20 +12464,20 @@ function EconCalendarPage({lang="es"}) {
                 <div style={{fontSize:14,fontWeight:700,color:past&&!hasActual?C.muted:C.text}}>{ev.event}</div>
                 <div style={{display:"flex",gap:6,marginTop:4,alignItems:"center",flexWrap:"wrap"}}>
                   <span style={{fontSize:10,fontWeight:700,color:imp.color,background:imp.bg,borderRadius:10,padding:"2px 8px"}}>{imp.label}</span>
-                  {isToday && <span style={{fontSize:10,fontWeight:700,color:C.accent,background:C.accentDim,borderRadius:10,padding:"2px 8px"}}>HOY</span>}
-                  {hasActual && <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>✓ PUBLICADO</span>}
+                  {isToday && <span style={{fontSize:10,fontWeight:700,color:C.accent,background:C.accentDim,borderRadius:10,padding:"2px 8px"}}>{isEN?"TODAY":"HOY"}</span>}
+                  {hasActual && <span style={{fontSize:10,fontWeight:700,color:C.bull,background:C.bullBg,borderRadius:10,padding:"2px 8px"}}>{isEN?"✓ RELEASED":"✓ PUBLICADO"}</span>}
                   {ev.cat==="Banco Central" && <span style={{fontSize:10,fontWeight:700,color:"#0F5E68",background:"rgba(15,94,104,0.09)",borderRadius:10,padding:"2px 8px"}}>🏦 FED</span>}
                 </div>
               </div>
               <div style={{textAlign:"right"}}>
                 {hasActual && (
                   <div style={{fontSize:14,fontWeight:800,color:C.bull,marginBottom:4}}>
-                    <span style={{fontSize:10,color:C.muted2,fontWeight:500,display:"block",marginBottom:1}}>ACTUAL</span>
+                    <span style={{fontSize:10,color:C.muted2,fontWeight:500,display:"block",marginBottom:1}}>{isEN?"ACTUAL":"ACTUAL"}</span>
                     {ev.actual}
                   </div>
                 )}
                 {ev.est!=="—" && !hasActual && <div style={{fontSize:11,color:past?C.muted:C.accent,marginBottom:2}}><b>Est:</b> {ev.est}</div>}
-                {ev.prev!=="—" && <div style={{fontSize:11,color:C.muted}}><b>Ant:</b> {ev.prev}</div>}
+                {ev.prev!=="—" && <div style={{fontSize:11,color:C.muted}}><b>{isEN?"Prev:":"Ant:"}</b> {ev.prev}</div>}
               </div>
             </div>
           );
@@ -12483,8 +12485,8 @@ function EconCalendarPage({lang="es"}) {
       </div>{/* /nexo-scroll-x inner */}
       </div>{/* /nexo-scroll-x */}
       <div style={{textAlign:"center",padding:"16px 0",fontSize:11,color:C.muted2}}>
-        {source==="live" ? "⚡ Datos en tiempo real via Financial Modeling Prep (FMP)" : "📋 Datos base — agrega FMP_API_KEY en Vercel para tiempo real"}
-        {" · "}Fuentes: Federal Reserve, BLS, BEA
+        {source==="live" ? isEN?"⚡ Real-time data via Financial Modeling Prep (FMP)":"⚡ Datos en tiempo real via Financial Modeling Prep (FMP)" : isEN?"📋 Base data — add FMP_API_KEY in Vercel for real-time":"📋 Datos base — agrega FMP_API_KEY en Vercel para tiempo real"}
+        {" · "}{isEN?"Sources":"Fuentes"}: Federal Reserve, BLS, BEA
       </div>
     </div>
   );
@@ -18712,7 +18714,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Volatility %",   w:110, render:(tk,d,m)=>vip(m.vol,"%")},
       {h:"Open",           w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{fmtPrice(d?.open??null,tk)}</span>},
       {h:"Prev Close",     w:110, render:(tk,d,m)=><span style={{fontFamily:"monospace",color:"#475569"}}>{fmtPrice(d?.prev??null,tk)}</span>},
-      {h:"Tendencia",      w:110, render:(tk,d,m)=>Spark(tk,m)},
+      {h:isEN?"Trend":"Tendencia",      w:110, render:(tk,d,m)=>Spark(tk,m)},
     ],
     risk:[
       {h:"Name",           w:170, render:nm},
@@ -18723,8 +18725,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       {h:"Sharpe Ratio",   w:110, render:(tk,d,m)=>isPremium?numPill(parseFloat((2.4-m.beta*0.6).toFixed(2))):upgBtn},
       {h:"Max Drawdown",   w:120, render:(tk,d,m)=>isPremium?<span style={{fontFamily:"monospace",fontWeight:700,fontSize:13,color:"#EF4444"}}>{parseFloat((-m.vol*0.58).toFixed(1))}%</span>:upgBtn},
       {h:"Correlation SPY",w:120, render:(tk,d,m)=>isPremium?gauge(parseFloat((1.1-m.beta*0.08).toFixed(2))):upgBtn},
-      {h:"Riesgo",         w:110, render:(tk,d,m)=>riskBadge(m.vol)},
-      {h:"Tendencia",      w:110, render:(tk,d,m)=>Spark(tk,m)},
+      {h:isEN?"Risk":"Riesgo",         w:110, render:(tk,d,m)=>riskBadge(m.vol)},
+      {h:isEN?"Trend":"Tendencia",      w:110, render:(tk,d,m)=>Spark(tk,m)},
     ],
     returns:[
       {h:"Name",  w:150, render:nm},
@@ -18785,7 +18787,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       case "Open": return d?.open;
       case "Prev Close": return d?.prev;
       case "Riesgo": return m.vol;
-      case "Tendencia": return m.ytd;
+      case "Tendencia": case "Trend": return m.ytd;
       case "VaR (95%)": return m.vol!=null?m.vol*0.082:null;
       case "Sharpe Ratio": return m.beta!=null?2.4-m.beta*0.6:null;
       case "Max Drawdown": return m.vol!=null?-m.vol*0.58:null;
@@ -21318,7 +21320,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const ofMax=Math.max(...OF_ASK.map(x=>x[1]),...OF_BID.map(x=>x[1]));
     const lbl={fontFamily:MONO,fontSize:9,fontWeight:600,letterSpacing:1.5,textTransform:"uppercase",color:T.dim};
     const card={background:T.bg2,borderBottom:`1px solid ${T.br}`};
-    const nowT=new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+    const nowT=new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"});
     const mkt=(()=>{ try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(),tm=et.getHours()*60+et.getMinutes(); const open=d>=1&&d<=5&&tm>=570&&tm<960; return open?{color:T.grn,label:"NYSE OPEN",sub:"Cierra 4:00 PM ET"}:{color:T.gold,label:"NYSE CLOSED",sub:"Abre 9:30 AM ET"}; }catch{return{color:T.grn,label:"NYSE",sub:""};} })();
     return (
     <div className="nexo-term-root" style={{background:T.bg,fontFamily:SANS,color:T.txt,minHeight:"calc(100vh - 60px)",margin:"-12px -16px",borderRadius:0,overflow:"hidden"}}>
