@@ -19978,6 +19978,8 @@ function RadarGlobalPage({lang="es",onBack}){
       t.CX=t.W/2; t.CY=t.H/2;
     }
     resize();
+    // re-check after CSS layout settles (media queries / flex may shift sizes)
+    const rsTick=setTimeout(()=>resize(),120);
 
     function ll3d(lat,lon,r){const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;return{x:-r*Math.sin(phi)*Math.cos(theta),y:r*Math.cos(phi),z:r*Math.sin(phi)*Math.sin(theta)};}
     function rot3(p,ry,rx){let x=p.x*Math.cos(ry)-p.z*Math.sin(ry),z=p.x*Math.sin(ry)+p.z*Math.cos(ry),y=p.y;const y2=y*Math.cos(rx)-z*Math.sin(rx),z2=y*Math.sin(rx)+z*Math.cos(rx);return{x,y:y2,z:z2};}
@@ -20079,7 +20081,7 @@ function RadarGlobalPage({lang="es",onBack}){
     cvs.addEventListener('touchend',onTU);
     const onResize=()=>resize();window.addEventListener('resize',onResize);
 
-    return()=>{cancelAnimationFrame(animId);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);cvs.removeEventListener('click',onCLICK);cvs.removeEventListener('touchstart',onTD);cvs.removeEventListener('touchmove',onTM);cvs.removeEventListener('touchend',onTU);window.removeEventListener('resize',onResize);};
+    return()=>{clearTimeout(rsTick);cancelAnimationFrame(animId);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);cvs.removeEventListener('click',onCLICK);cvs.removeEventListener('touchstart',onTD);cvs.removeEventListener('touchmove',onTM);cvs.removeEventListener('touchend',onTU);window.removeEventListener('resize',onResize);};
   },[]);
 
   // sync toggle state → T ref
@@ -20336,11 +20338,16 @@ function RadarGlobalPage({lang="es",onBack}){
         @media(max-width:700px){
           .nexo-radar-wrap{grid-template-columns:1fr!important;grid-template-rows:44px 1fr 30px!important;height:calc(100vh - 52px)!important;}
           .nexo-radar-left,.nexo-radar-right{display:none!important;}
-          .nexo-radar-topbar{padding:0 10px!important;gap:6px!important;}
-          .nexo-radar-topbar .nexo-radar-logo{display:none!important;}
-          .nexo-radar-topbar .nexo-radar-title{font-size:10px!important;}
-          .nexo-radar-topbar .nexo-radar-live{display:none!important;}
-          .nexo-radar-topbar .nexo-radar-btns button{padding:4px 8px!important;font-size:9px!important;}
+          .nexo-radar-topbar{padding:0 8px!important;gap:4px!important;flex-wrap:nowrap!important;}
+          .nexo-radar-logo{display:none!important;}
+          .nexo-radar-live{display:none!important;}
+          .nexo-radar-btns{gap:4px!important;}
+          .nexo-radar-btns button{padding:3px 7px!important;font-size:8px!important;}
+          .nexo-radar-modes{display:none!important;}
+          .nexo-radar-trading-now{bottom:8px!important;left:8px!important;padding:8px 10px!important;}
+          .nexo-radar-trading-now .nexo-radar-big-num{font-size:20px!important;}
+          .nexo-radar-heatlegend{display:none!important;}
+          .nexo-radar-canvas{touch-action:none;}
         }
       `}</style>
       {/* ── TOPBAR ── */}
@@ -20434,22 +20441,22 @@ function RadarGlobalPage({lang="es",onBack}){
 
       {/* ── GLOBE ── */}
       <div style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)'}}>
-        <canvas ref={cvsRef} style={{display:'block',width:'100%',height:'100%'}}/>
+        <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'none'}}/>
         {/* Mode toggles */}
-        <div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
+        <div className="nexo-radar-modes" style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
           {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
             <button key={m} style={modeBtn(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
           ))}
         </div>
         {/* Trading now */}
-        <div style={{position:'absolute',bottom:24,left:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'14px 18px'}}>
+        <div className="nexo-radar-trading-now" style={{position:'absolute',bottom:24,left:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'14px 18px'}}>
           <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.mid,marginBottom:4}}>Trading Now (Est.)</div>
-          <div style={{fontFamily:MONO2,fontSize:32,fontWeight:700,color:C.grn,textShadow:`0 0 20px rgba(0,240,144,.4)`,lineHeight:1,marginBottom:2}}>87M</div>
+          <div className="nexo-radar-big-num" style={{fontFamily:MONO2,fontSize:32,fontWeight:700,color:C.grn,textShadow:`0 0 20px rgba(0,240,144,.4)`,lineHeight:1,marginBottom:2}}>87M</div>
           <div style={{fontSize:12,color:C.mid,marginBottom:8}}>investors worldwide</div>
           <div style={{fontFamily:MONO2,fontSize:13,fontWeight:600,color:C.gold}}><span style={{fontFamily:MONO2}}>{ordersPerSec.toLocaleString()}</span> orders/sec</div>
         </div>
         {/* Heat legend */}
-        <div style={{position:'absolute',bottom:24,right:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'12px 16px'}}>
+        <div className="nexo-radar-heatlegend" style={{position:'absolute',bottom:24,right:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'12px 16px'}}>
           <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.mid,marginBottom:8}}>Heat Map</div>
           {[['#304860','Minimum'],['#4090ff','Low'],['#00d8ff','Medium'],['#00e880','High'],['#ffc040','Maximum']].map(([c,l])=>(
             <div key={c} style={{display:'flex',alignItems:'center',gap:7,fontSize:12,color:C.mid,marginBottom:5}}>
