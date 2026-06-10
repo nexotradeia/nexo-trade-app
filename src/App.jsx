@@ -5071,8 +5071,8 @@ function EarningsPage({lang}){
   const EPS_PREV_MAP={TSLA:"$0.45",MSFT:"$2.69",GOOGL:"$1.89",META:"$4.39",NVDA:"$4.93",AAPL:"$1.53",NFLX:"$4.21",AMZN:"$1.16",MU:"$1.01",JPM:"$4.44",GS:"$11.58",GM:"$2.44",NXP:"$2.88",BABB:"$0.18",CUEN:"$0.09"};
   const HIGH_IMPACT=new Set(["TSLA","NVDA","AAPL","MSFT","META","GOOGL","AMZN","JPM","NFLX","MU","GS","AMZN","BAC","WMT","DIS","INTC","AMD","QCOM","CRM","ORCL"]);
   const MED_IMPACT =new Set(["NXP","BABB","GM","F","XOM","CVX","UBER","LYFT","SNAP","TWTR","PINS","ROKU","ETSY","SHOP"]);
-  const getImpact=(t)=>HIGH_IMPACT.has(t)?"Alto":MED_IMPACT.has(t)?"Medio":"Bajo";
-  const impactColor=(imp)=>imp==="Alto"?"#EF4444":imp==="Medio"?"#F59E0B":"#94A3B8";
+  const getImpact=(t)=>HIGH_IMPACT.has(t)?(isEN?"High":"Alto"):MED_IMPACT.has(t)?(isEN?"Med":"Medio"):(isEN?"Low":"Bajo");
+  const impactColor=(imp)=>(imp==="Alto"||imp==="High")?"#EF4444":(imp==="Medio"||imp==="Med")?"#F59E0B":"#94A3B8";
   const tickerBg=(t)=>{
     const cols=["#1E3A5F","#7C2D12","#065F46","#4C1D95","#1E3A8A","#0F5E68","#B45309","#0047C2","#9D174D","#064E3B"];
     let h=0; for(const c of t) h=(h*31+c.charCodeAt(0))%cols.length;
@@ -5149,7 +5149,7 @@ function EarningsPage({lang}){
     return true;
   });
   const displayed=showAll?selFiltered:selFiltered.slice(0,30);
-  const highImpactCount=selDayAll.filter(e=>getImpact(e.ticker)==="Alto").length;
+  const highImpactCount=selDayAll.filter(e=>["Alto","High"].includes(getImpact(e.ticker))).length;
   const avgBull=selDayAll.length?Math.round(selDayAll.reduce((s,e)=>s+(votes[e.ticker]||50),0)/selDayAll.length):0;
   const nextCall=selDayAll.find(e=>e.horaRaw==="amc")||selDayAll[0];
   const upcoming=allEarnings.filter(e=>e.rawDate>=todayStr).sort((a,b)=>a.rawDate.localeCompare(b.rawDate));
@@ -5171,7 +5171,7 @@ function EarningsPage({lang}){
     const impact=getImpact(e.ticker);
     const bull=votes[e.ticker]||50;
     const dateLabel=new Date(e.rawDate+"T12:00:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-    const impactEmoji=impact==="Alto"?"🔴":impact==="Medio"?"🟡":"⚪";
+    const impactEmoji=(impact==="Alto"||impact==="High")?"🔴":(impact==="Medio"||impact==="Med")?"🟡":"⚪";
     const msg=`📅 *EARNINGS ALERT — NEXO TRADE*\n\n`+
       `*${e.ticker}* — ${e.nombre}\n`+
       `📆 Fecha: ${dateLabel}\n`+
@@ -10525,7 +10525,7 @@ function PaperTrading({ user, lang="es" }){
                     {t.action==="buy"?"▲":"▼"}
                   </div>
                   <div style={{flex:1}}>
-                    <div style={{fontWeight:800,fontSize:13,color:"#0F172A"}}>{t.action==="buy"?"COMPRA":"VENTA"} <span style={{fontFamily:"monospace",color:C.accentText}}>${t.ticker}</span></div>
+                    <div style={{fontWeight:800,fontSize:13,color:"#0F172A"}}>{isEN?(t.action==="buy"?"BUY":"SELL"):(t.action==="buy"?"COMPRA":"VENTA")} <span style={{fontFamily:"monospace",color:C.accentText}}>${t.ticker}</span></div>
                     <div style={{fontSize:11,color:"#64748B"}}>{fmtDate(t.date)}</div>
                   </div>
                   <div style={{textAlign:"right"}}>
@@ -10875,7 +10875,7 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
                           {t.action==="buy"?"▲":"▼"}
                         </div>
                         <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontWeight:700,fontSize:11,color:"#E2E8F0"}}>{t.action==="buy"?"COMPRA":"VENTA"} <span style={{fontFamily:"monospace",color:"#0F4C81"}}>${t.ticker}</span></div>
+                          <div style={{fontWeight:700,fontSize:11,color:"#E2E8F0"}}>{isEN?(t.action==="buy"?"BUY":"SELL"):(t.action==="buy"?"COMPRA":"VENTA")} <span style={{fontFamily:"monospace",color:"#0F4C81"}}>${t.ticker}</span></div>
                           <div style={{fontSize:10,color:"#475569"}}>{fmtDate(t.date)}</div>
                         </div>
                         <div style={{textAlign:"right"}}>
@@ -12962,7 +12962,7 @@ function IpoCalendarPage({ isPremium=false, onNeedPremium }={}) {
                 </div>
                 {ipo.desc && <div style={{fontSize:12,color:C.muted,marginBottom:6,lineHeight:1.5}}>{ipo.desc}</div>}
                 <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-                  {ipo.sector && ipo.sector!=="Mercado" && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>Sector:</b> {ipo.sector}</span>}
+                  {ipo.sector && ipo.sector!=="Mercado" && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>{isEN?"Sector":"Sector"}:</b> {ipo.sector}</span>}
                   {ipo.raise  && ipo.raise!=="—"  && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>{isEN?"Raised:":"Recaudación:"}</b> {ipo.raise}</span>}
                   {ipo.valuation && <span style={{fontSize:12,color:C.muted}}><b style={{color:C.text}}>{isEN?"Valuation:":"Valoración:"}</b> {ipo.valuation}</span>}
                   {ipo.shares && ipo.shares!=="—" && <span style={{fontSize:12,color:C.muted}}>{ipo.shares}</span>}
@@ -13422,7 +13422,7 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
       {/* Holdings table */}
       <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,overflow:"hidden"}}>
         <div style={{display:"grid",gridTemplateColumns:"50px 1fr 70px 80px 80px 80px",gap:8,padding:"10px 16px",background:"rgba(255,255,255,0.03)",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
-          {["#","EMPRESA","% PORT","VALOR","ACCIONES","CAMBIO"].map(h=>(
+          {isEN?["#","COMPANY","% PORT","VALUE","SHARES","CHANGE"]:["#","EMPRESA","% PORT","VALOR","ACCIONES","CAMBIO"].map(h=>(
             <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
           ))}
         </div>
@@ -15316,7 +15316,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             <div style={{minWidth:900}}>
             {/* Table header */}
             <div style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 90px 90px 80px 80px",gap:6,padding:"8px 14px",background:C.card2,borderRadius:"12px 12px 0 0",marginBottom:6,border:`1px solid ${C.border}`}}>
-              {["ACCIÓN","EMPRESA","% PORT.","ACTIVIDAD","ACCIONES","PRECIO REP.","VALOR","PRECIO HOY","+/- REP.","52W RANGO"].map(h=>(
+              {isEN?["STOCK","COMPANY","% PORT.","ACTIVITY","SHARES","REP. PRICE","VALUE","TODAY","+/- REP.","52W RANGE"]:["ACCIÓN","EMPRESA","% PORT.","ACTIVIDAD","ACCIONES","PRECIO REP.","VALOR","PRECIO HOY","+/- REP.","52W RANGO"].map(h=>(
                 <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.5,whiteSpace:"nowrap"}}>{h}</div>
               ))}
             </div>
@@ -15398,7 +15398,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
               <div style={{minWidth:480}}>
               <div style={{display:"grid",gridTemplateColumns:"50px 1fr 80px 80px 80px",gap:8,padding:"8px 16px",background:C.card2,borderRadius:12,marginBottom:6,border:`1px solid ${C.border}`}}>
-                {["#","EMPRESA","PESO %","PRECIO","HOY"].map(h=>(
+                {isEN?["#","COMPANY","WEIGHT %","PRICE","TODAY"]:["#","EMPRESA","PESO %","PRECIO","HOY"].map(h=>(
                   <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.6}}>{h}</div>
                 ))}
               </div>
@@ -16225,7 +16225,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
   const SIGNAL_COLOR = { "COMPRA":"#10B981", "VENTA":"#EF4444", "NEUTRO":"#F59E0B" };
   const SIGNAL_BG    = { "COMPRA":"rgba(16,185,129,0.12)", "VENTA":"rgba(239,68,68,0.12)", "NEUTRO":"rgba(245,158,11,0.12)" };
   const SIGNAL_ICON  = { "COMPRA":"↑", "VENTA":"↓", "NEUTRO":"→" };
-  const RISK_LABEL   = { 1:"Bajo", 2:"Medio", 3:"Alto" };
+  const RISK_LABEL   = isEN?{ 1:"Low", 2:"Med", 3:"High" }:{ 1:"Bajo", 2:"Medio", 3:"Alto" };
   const RISK_COLOR   = { 1:"#10B981", 2:"#F59E0B", 3:"#EF4444" };
 
   const IdeaCard = ({ idea }) => {
@@ -16309,7 +16309,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
               </div>
             </div>
             <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:20,padding:"4px 10px",display:"flex",alignItems:"center",gap:4}}>
-              <span style={{fontSize:11,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {idea.signal}</span>
+              <span style={{fontSize:11,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {isEN?(idea.signal==="COMPRA"?"BUY":idea.signal==="VENTA"?"SELL":"HOLD"):idea.signal}</span>
             </div>
           </div>
 
@@ -16348,8 +16348,8 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
           </div>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
             <div style={{fontSize:9,color:"#EF4444"}}>Stop ${idea.stop}</div>
-            <div style={{fontSize:9,color:"#F59E0B"}}>Entrada ${idea.entry}</div>
-            <div style={{fontSize:9,color:sc}}>Obj. ${idea.target}</div>
+            <div style={{fontSize:9,color:"#F59E0B"}}>{isEN?"Entry":"Entrada"} ${idea.entry}</div>
+            <div style={{fontSize:9,color:sc}}>{isEN?"Target":"Obj."} ${idea.target}</div>
           </div>
 
           {/* Tags row */}
@@ -16364,7 +16364,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
             <div style={{display:"flex",gap:6}}>
               <span style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.2)",borderRadius:5,padding:"2px 7px",fontSize:9,color:"#818CF8",fontWeight:700}}>⏱ {idea.horizon}</span>
               <span style={{background:`rgba(${RISK_COLOR[idea.riskN]==="#10B981"?"16,185,129":RISK_COLOR[idea.riskN]==="#F59E0B"?"245,158,11":"239,68,68"},0.1)`,borderRadius:5,padding:"2px 7px",fontSize:9,color:RISK_COLOR[idea.riskN],fontWeight:700}}>
-                ⚡ Riesgo {RISK_LABEL[idea.riskN]}
+                {isEN?"⚡ Risk":"⚡ Riesgo"} {RISK_LABEL[idea.riskN]}
               </span>
             </div>
             <span style={{fontSize:9,color:"#334155"}}>{daysPub === 0 ? "Hoy" : `Hace ${daysPub}d`}</span>
@@ -16404,7 +16404,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
               </div>
               <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
                 <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:20,padding:"5px 14px"}}>
-                  <span style={{fontSize:13,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {idea.signal}</span>
+                  <span style={{fontSize:13,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {isEN?(idea.signal==="COMPRA"?"BUY":idea.signal==="VENTA"?"SELL":"HOLD"):idea.signal}</span>
                 </div>
                 <button onClick={onClose} style={{background:"transparent",border:"none",color:"#475569",cursor:"pointer",fontSize:18,padding:"2px 6px"}}>✕</button>
               </div>
@@ -16430,7 +16430,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
               {[
                 {l:"ENTRADA SUGERIDA", v:`$${idea.entry}`},
                 {l:"HORIZONTE", v:idea.horizon},
-                {l:"RIESGO", v:RISK_LABEL[idea.riskN], c:RISK_COLOR[idea.riskN]},
+                {l:isEN?"RISK":"RIESGO", v:RISK_LABEL[idea.riskN], c:RISK_COLOR[idea.riskN]},
               ].map(s=>(
                 <div key={s.l} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:10,padding:"10px 12px",textAlign:"center"}}>
                   <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,marginBottom:4}}>{s.l}</div>
@@ -16473,10 +16473,10 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
           <span style={{fontSize:28}}>💡</span>
           <div>
             <div style={{fontSize:19,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>{isEN?"Investment Ideas":"Ideas de Inversión"}</div>
-            <div style={{fontSize:12,color:"#475569"}}>{isEN?"Signals analyzed by NexoTrade Research · Real-time prices":"Señales analizadas por NexoTrade Research · Precios en tiempo real"} · {IDEAS_DATA.length} ideas activas</div>
+            <div style={{fontSize:12,color:"#475569"}}>{isEN?"Signals analyzed by NexoTrade Research · Real-time prices":"Señales analizadas por NexoTrade Research · Precios en tiempo real"} · {IDEAS_DATA.length} {isEN?"active ideas":"ideas activas"}</div>
           </div>
           <div style={{marginLeft:"auto",display:"flex",gap:8,flexWrap:"wrap"}}>
-            {[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}].map(s=>(
+            {isEN?[{l:`${compras} Buys`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Sells`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Hold`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}]:[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}].map(s=>(
               <div key={s.l} style={{background:s.bg,border:`1px solid ${s.c}30`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:800,color:s.c}}>{s.l}</div>
             ))}
             {loading && <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8"}}>{isEN?"⟳ Loading prices…":"⟳ Cargando precios…"}</div>}
@@ -16488,7 +16488,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
         {/* Signal filter */}
         <div style={{display:"flex",gap:4}}>
-          {[["todos","🌐 Todos"],["compra","↑ Compras"],["venta","↓ Ventas"],["neutro","→ Neutro"]].map(([k,l])=>(
+          {isEN?[["todos","🌐 All"],["compra","↑ Buys"],["venta","↓ Sells"],["neutro","→ Hold"]]:[["todos","🌐 Todos"],["compra","↑ Compras"],["venta","↓ Ventas"],["neutro","→ Neutro"]].map(([k,l])=>(
             <button key={k} onClick={()=>{setFilter(k);setPage(1);}}
               style={{background:filter===k?"linear-gradient(135deg,#0F5E68,#4F46E5)":"transparent",border:`1.5px solid ${filter===k?"transparent":C.border}`,borderRadius:20,padding:"6px 13px",fontSize:11,fontWeight:700,color:filter===k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
               {l}
@@ -16497,7 +16497,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         </div>
         <div style={{width:1,height:24,background:C.border}}/>
         {/* Risk filter */}
-        {[["todos","⚡ Todo riesgo"],["1","🟢 Bajo"],["2","🟡 Medio"],["3","🔴 Alto"]].map(([k,l])=>(
+        {isEN?[["todos","⚡ All risk"],["1","🟢 Low"],["2","🟡 Med"],["3","🔴 High"]]:[["todos","⚡ Todo riesgo"],["1","🟢 Bajo"],["2","🟡 Medio"],["3","🔴 Alto"]].map(([k,l])=>(
           <button key={k} onClick={()=>{setRiskF(k);setPage(1);}}
             style={{background:riskF===k?"rgba(15,94,104,0.2)":"transparent",border:`1.5px solid ${riskF===k?"#0F5E68":C.border}`,borderRadius:20,padding:"6px 12px",fontSize:11,fontWeight:700,color:riskF===k?"#A5B4FC":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
             {l}
@@ -16508,7 +16508,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
           <select value={sortBy} onChange={e=>{setSortBy(e.target.value);setPage(1);}}
             style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:10,padding:"6px 12px",fontSize:12,color:C.muted,cursor:"pointer"}}>
             <option value="fecha">{isEN?"Most recent":"Más recientes"}</option>
-            <option value="upside">Mayor upside</option>
+            <option value="upside">{isEN?"Highest upside":"Mayor upside"}</option>
             <option value="señal">{isEN?"By signal":"Por señal"}</option>
           </select>
         </div>
@@ -18661,7 +18661,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   };
   // Badge de nivel de riesgo según volatilidad
   const riskBadge = (vol) => {
-    const lvl = vol==null?null: vol>=50?["Muy alto","#B91C1C","rgba(185,28,28,0.1)"]: vol>=38?["Alto","#EA580C","rgba(234,88,12,0.1)"]: vol>=28?["Medio","#B45309","rgba(245,158,11,0.12)"]:["Bajo","#15803D","rgba(16,185,129,0.12)"];
+    const lvl = vol==null?null: vol>=50?[isEN?"Very High":"Muy alto","#B91C1C","rgba(185,28,28,0.1)"]: vol>=38?[isEN?"High":"Alto","#EA580C","rgba(234,88,12,0.1)"]: vol>=28?[isEN?"Medium":"Medio","#B45309","rgba(245,158,11,0.12)"]:[isEN?"Low":"Bajo","#15803D","rgba(16,185,129,0.12)"];
     if(!lvl) return <span style={{color:"#94A3B8"}}>—</span>;
     return <span style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11.5,fontWeight:800,color:lvl[1],background:lvl[2],borderRadius:20,padding:"3px 11px"}}><span style={{width:6,height:6,borderRadius:"50%",background:lvl[1]}}/>{lvl[0]}</span>;
   };
@@ -21569,7 +21569,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             </div>
           </div>
           <div style={{borderBottom:`1px solid ${T.br}`}}>
-            <div style={{...lbl,padding:"12px 14px 8px"}}>Sector Heatmap · Hoy</div>
+            <div style={{...lbl,padding:"12px 14px 8px"}}>{isEN?"Sector Heatmap · Today":"Sector Heatmap · Hoy"}</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:4,padding:"0 12px 12px"}}>{SECT.map((s,i)=>{const pos=s[2];const inten=Math.min(Math.abs(parseFloat(s[1]))/3,1);return (<div key={i} style={{borderRadius:4,padding:"7px 8px",background:pos?`rgba(0,255,135,${0.08+inten*0.25})`:`rgba(255,61,90,${0.08+inten*0.25})`,border:`1px solid ${pos?`rgba(0,255,135,${0.15+inten*0.2})`:`rgba(255,61,90,${0.15+inten*0.2})`}`}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:"#fff",marginBottom:2}}>{s[0]}</div><div style={{fontFamily:MONO,fontSize:10,fontWeight:600,color:pos?T.grn:T.red}}>{pos?"+":""}{s[1]}%</div></div>);})}</div>
           </div>
           <div>
