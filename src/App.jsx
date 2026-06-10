@@ -25380,6 +25380,213 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
   );
 }
 // ─────────────────────────────────────────────────────────────────────────────
+// ── AI PAGE ──────────────────────────────────────────────────────────────────
+function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
+  var [qry,setQry] = useState("");
+
+  // AI Pick data
+  var pick = (WEEKLY_PICKS_FALLBACK&&WEEKLY_PICKS_FALLBACK.corto&&WEEKLY_PICKS_FALLBACK.corto[0])||{};
+  var sym   = pick.symbol||"NVDA";
+  var nm    = pick.name||"NVIDIA";
+  var dir   = ((pick.direction||"long")+"").toUpperCase();
+  var entry = pick.price||198;
+  var tgt   = pick.target||215;
+  var stp   = pick.stop||189;
+  var thesis= pick.thesis_en||pick.thesis||"Our model flagged unusual options flow and a 3-day momentum build ahead of next week's catalyst. Volume confirms accumulation.";
+  var ret   = pick.return_pct||8.4;
+  var hdays = pick.hold_days||5;
+
+  // Sparkline path
+  var sparkD = "M2 66 L28 60 L52 64 L78 44 L104 49 L130 30 L156 33 L178 12";
+  var fillD  = sparkD + " L178 84 L2 84 Z";
+
+  // Weekly picks
+  var wkPicks = [
+    {sym:"MSFT",date:"Jun 9", reason:"Cloud re-acceleration, breakout setup", ret:"+3.1%",up:true},
+    {sym:"AMD", date:"Jun 6", reason:"AI demand, gap-fill long",               ret:"+5.7%",up:true},
+    {sym:"COIN",date:"Jun 4", reason:"Crypto momentum, volume spike",          ret:"−2.2%",up:false},
+    {sym:"META",date:"Jun 2", reason:"Earnings drift, trend continuation",     ret:"+4.4%",up:true},
+  ];
+
+  // Popular questions
+  var pqs=["Is NVDA still a buy after the pullback?","Which sectors are leading this week?","Safe dividend stocks for 2026?"];
+
+  // Recent chats mock
+  var chats=[{q:"Analyze $TSLA earnings risk",t:"2h"},{q:"Rebalance my portfolio",t:"Yest."},{q:"Compare $AAPL vs $MSFT",t:"Mon"}];
+  try{var rc=JSON.parse(localStorage.getItem("nexo-ai-chats")||"null");if(rc&&rc.length)chats=rc.slice(0,3);}catch{}
+
+  function ask(q){
+    try{if(q)sessionStorage.setItem("nexo-ai-prefill",q);}catch{}
+    if(onAI)onAI();
+  }
+
+  // ── CSS tokens (light theme matching mockup) ──
+  var PAGE="#f6f7f9", SURFACE="#fff", S2="#f3f4f7";
+  var HAIR="#e8eaee", HAIR2="#dfe2e7";
+  var INK="#0a0d14", INK2="#5b616e", INK3="#9aa0ab";
+  var BLUE="#1f6bff", BLUEBG="rgba(31,107,255,.10)";
+  var UP="#0a9d5c", UPBG="rgba(10,157,92,.10)";
+  var DN="#e0463d";
+  var GOLD="#b07d11", GOLDBG="rgba(176,125,17,.12)";
+  var SH="0 1px 2px rgba(10,13,20,.04),0 8px 24px rgba(10,13,20,.05)";
+  var RAD16={borderRadius:16}, RAD18={borderRadius:18};
+
+  return(
+    <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <div style={{maxWidth:1100,margin:"0 auto",display:"grid",gridTemplateColumns:"minmax(0,1fr) 300px",gap:22,alignItems:"start"}}>
+
+        {/* ── MAIN COLUMN ── */}
+        <div style={{display:"flex",flexDirection:"column",gap:18,minWidth:0}}>
+
+          {/* Ask the AI hero */}
+          <div style={{background:"linear-gradient(155deg,#eef4ff 0%,#ffffff 60%)",border:"1px solid rgba(31,107,255,.22)",...RAD18,padding:24,boxShadow:SH,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",inset:0,background:"radial-gradient(420px 200px at 90% -30%,rgba(31,107,255,.18),transparent 70%)",pointerEvents:"none"}}/>
+            <div style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:11,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:BLUE,background:BLUEBG,border:"1px solid rgba(31,107,255,.3)",padding:"6px 11px",borderRadius:999,position:"relative",zIndex:1}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>
+              NexoTrade AI
+            </div>
+            <h1 style={{fontSize:23,fontWeight:800,letterSpacing:"-0.03em",margin:"13px 0 0",color:INK,position:"relative",zIndex:1}}>Ask anything — a ticker, your portfolio, the market.</h1>
+            <div style={{marginTop:15,display:"flex",alignItems:"center",gap:12,background:SURFACE,border:`1px solid ${HAIR2}`,borderRadius:14,padding:"14px 16px",boxShadow:SH,position:"relative",zIndex:1}}>
+              <input
+                value={qry}
+                onChange={e=>setQry(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&ask(qry)}
+                placeholder={`e.g. "Analyze $NVDA" or "Is my portfolio too tech-heavy?"`}
+                style={{flex:1,border:"none",outline:"none",fontSize:15,color:qry?INK:INK3,background:"transparent",fontFamily:"inherit"}}
+              />
+              <div onClick={()=>ask(qry)} style={{width:40,height:40,borderRadius:11,background:BLUE,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </div>
+            </div>
+            <div style={{marginTop:13,display:"flex",gap:8,flexWrap:"wrap",position:"relative",zIndex:1}}>
+              {["Analyze $NVDA","What's moving today?","Is my portfolio too tech-heavy?","Compare $AAPL vs $MSFT"].map(q=>(
+                <button key={q} onClick={()=>ask(q)} style={{fontSize:12.5,fontWeight:600,color:INK2,background:SURFACE,border:`1px solid ${HAIR}`,padding:"8px 13px",borderRadius:9,cursor:"pointer",fontFamily:"inherit"}}>
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Today's AI Pick */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <span style={{fontSize:16,fontWeight:700,color:INK}}>Today's AI Pick</span>
+            <button onClick={()=>onNavigate&&onNavigate(3)} style={{fontSize:12.5,color:BLUE,fontWeight:600,background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>View all picks</button>
+          </div>
+          <div style={{background:SURFACE,border:`1px solid ${HAIR}`,...RAD18,padding:20,boxShadow:SH}}>
+            <div style={{display:"flex",gap:22,alignItems:"center",flexWrap:"wrap"}}>
+              <div style={{flex:1,minWidth:200}}>
+                <div style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:10.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:BLUE,background:BLUEBG,padding:"5px 10px",borderRadius:999}}>High conviction</div>
+                <div style={{fontSize:24,fontWeight:800,letterSpacing:"-0.03em",marginTop:11,color:INK}}>{nm.toUpperCase()} <small style={{fontSize:13,fontWeight:600,color:INK2,marginLeft:8}}>{sym}</small></div>
+                <p style={{marginTop:9,fontSize:13.5,lineHeight:1.5,color:INK2,maxWidth:"48ch"}}>{(thesis||"").slice(0,160)}</p>
+                <div style={{marginTop:13,display:"flex",gap:8,flexWrap:"wrap"}}>
+                  <span style={{fontSize:12,fontWeight:600,padding:"6px 11px",borderRadius:8,background:UPBG,border:"1px solid rgba(10,157,92,.3)",color:UP}}>{dir}</span>
+                  {[["Entry","$"+entry],["Target","$"+tgt],["Stop","$"+stp]].map(([k,v])=>(
+                    <span key={k} style={{fontSize:12,fontWeight:600,padding:"6px 11px",borderRadius:8,background:S2,border:`1px solid ${HAIR}`,color:INK2}}>{k} <strong style={{color:INK}}>{v}</strong></span>
+                  ))}
+                </div>
+                <button onClick={()=>onNavigate&&onNavigate(3)} style={{marginTop:16,display:"inline-flex",alignItems:"center",gap:8,background:BLUE,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 17px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+                  See full analysis <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+              <div style={{flexShrink:0,textAlign:"right"}}>
+                <div style={{fontSize:13,color:UP,fontWeight:700,marginBottom:4,fontVariantNumeric:"tabular-nums"}}>+{ret}% · {hdays}d</div>
+                <svg width="180" height="84" viewBox="0 0 180 84" fill="none">
+                  <defs><linearGradient id="aip-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={BLUE} stopOpacity="0.28"/><stop offset="1" stopColor={BLUE} stopOpacity="0"/></linearGradient></defs>
+                  <path d={sparkD} stroke={BLUE} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d={fillD} fill="url(#aip-g)"/>
+                  <circle cx="178" cy="12" r="3.2" fill={BLUE}/>
+                </svg>
+              </div>
+            </div>
+            <div style={{marginTop:13,fontSize:10.5,color:INK3}}>AI signal based on model analysis · not financial advice</div>
+          </div>
+
+          {/* This week's picks */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <span style={{fontSize:16,fontWeight:700,color:INK}}>This week's picks &amp; track record</span>
+            <button onClick={()=>onNavigate&&onNavigate(51)} style={{fontSize:12.5,color:BLUE,fontWeight:600,background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Full history</button>
+          </div>
+          <div style={{background:SURFACE,border:`1px solid ${HAIR}`,...RAD16,overflow:"hidden",boxShadow:SH}}>
+            {wkPicks.map((p,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"13px 16px",borderBottom:i<wkPicks.length-1?`1px solid ${HAIR}`:"none"}}>
+                <span style={{fontSize:13.5,fontWeight:700,color:INK,width:60}}>{p.sym}</span>
+                <span style={{fontSize:12,color:INK3,width:74,fontVariantNumeric:"tabular-nums"}}>{p.date}</span>
+                <span style={{flex:1,fontSize:12.5,color:INK2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.reason}</span>
+                <span style={{fontSize:13,fontWeight:700,minWidth:62,textAlign:"right",color:p.up?UP:DN,fontVariantNumeric:"tabular-nums"}}>{p.ret}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Locked: Oracle AI */}
+          <div style={{position:"relative",background:SURFACE,border:`1px dashed ${HAIR2}`,...RAD16,padding:20,boxShadow:SH,overflow:"hidden"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:8,fontSize:13,color:GOLD,fontWeight:700}}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+              Oracle AI — Portfolio analysis
+            </div>
+            <p style={{fontSize:12.5,color:INK2,marginTop:7,lineHeight:1.45,maxWidth:"50ch"}}>Connect your holdings and let the AI review risk, concentration and ideas tailored to what you actually own.</p>
+            <div style={{marginTop:12,display:"flex",flexDirection:"column",gap:8,filter:"blur(3px)",opacity:0.6,userSelect:"none",pointerEvents:"none"}}>
+              {[85,100,60].map((w,i)=><div key={i} style={{height:14,borderRadius:6,background:S2,width:w+"%"}}/>)}
+            </div>
+            {isPremium
+              ? <button onClick={()=>onNavigate&&onNavigate(37)} style={{marginTop:14,display:"inline-flex",background:BLUE,color:"#fff",fontSize:13,fontWeight:700,padding:"10px 16px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Open Oracle AI</button>
+              : <button onClick={()=>onNavigate&&onNavigate(8)} style={{marginTop:14,display:"inline-flex",background:BLUE,color:"#fff",fontSize:13,fontWeight:700,padding:"10px 16px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Unlock with Pro</button>
+            }
+          </div>
+
+        </div>{/* /main column */}
+
+        {/* ── RIGHT RAIL ── */}
+        <div style={{display:"flex",flexDirection:"column",gap:16,minWidth:0}}>
+
+          {/* Track record */}
+          <div style={{border:`1px solid ${HAIR}`,...RAD16,background:SURFACE,overflow:"hidden",boxShadow:SH}}>
+            <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Picks track record</div>
+            <div style={{padding:15}}>
+              <div style={{display:"flex",alignItems:"baseline",gap:8}}>
+                <span style={{fontSize:26,fontWeight:800,letterSpacing:"-0.02em",color:INK,fontVariantNumeric:"tabular-nums"}}>68%</span>
+                <span style={{fontSize:14,color:INK3,fontWeight:600}}>hit rate</span>
+              </div>
+              <div style={{fontSize:12,color:INK2,marginTop:2}}>Last 30 picks · updated daily</div>
+              <div style={{marginTop:12,display:"flex",gap:18}}>
+                {[{v:"+4.1%",k:"Avg. winner",c:UP},{v:"−2.0%",k:"Avg. loser",c:DN},{v:"5d",k:"Avg. hold",c:INK}].map((s,i)=>(
+                  <div key={i}>
+                    <div style={{fontSize:15,fontWeight:700,color:s.c,fontVariantNumeric:"tabular-nums"}}>{s.v}</div>
+                    <div style={{fontSize:11,color:INK3,marginTop:1}}>{s.k}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Popular questions */}
+          <div style={{border:`1px solid ${HAIR}`,...RAD16,background:SURFACE,overflow:"hidden",boxShadow:SH}}>
+            <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Popular questions</div>
+            {pqs.map((q,i)=>(
+              <button key={i} onClick={()=>ask(q)} style={{display:"flex",gap:9,alignItems:"flex-start",width:"100%",padding:"11px 15px",borderBottom:i<pqs.length-1?`1px solid ${HAIR}`:"none",background:"none",border:i<pqs.length-1?undefined:"none",borderLeft:"none",borderRight:"none",borderTop:"none",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}}>
+                <span style={{color:BLUE,fontWeight:700,fontSize:13,flexShrink:0}}>Q</span>
+                <span style={{fontSize:12.5,color:INK2,fontWeight:500,lineHeight:1.4}}>{q}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Recent chats */}
+          <div style={{border:`1px solid ${HAIR}`,...RAD16,background:SURFACE,overflow:"hidden",boxShadow:SH}}>
+            <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Your recent chats</div>
+            {chats.map((c,i)=>(
+              <button key={i} onClick={()=>ask(c.q)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",width:"100%",padding:"11px 15px",borderBottom:i<chats.length-1?`1px solid ${HAIR}`:"none",background:"none",border:i<chats.length-1?undefined:"none",borderLeft:"none",borderRight:"none",borderTop:"none",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}}>
+                <span style={{fontSize:12.5,color:INK,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{c.q}</span>
+                <span style={{fontSize:11,color:INK3,flexShrink:0,marginLeft:10}}>{c.t}</span>
+              </button>
+            ))}
+          </div>
+
+        </div>{/* /right rail */}
+
+      </div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 
 export default function App(){
@@ -26021,6 +26228,7 @@ export default function App(){
     if(page===7) return <TrendingPage posts={posts} lang={lang}/>;
     if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
+    if(page===10) return <AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={()=>setShowAI(true)} lang={lang}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===14) return <EconCalendarPage lang={lang}/>;
@@ -27350,8 +27558,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onlineUsers={onlineUsers} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onlineUsers={onlineUsers} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -27368,8 +27576,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}>
+        <div style={{gridColumn:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
@@ -27586,8 +27794,8 @@ export default function App(){
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5H18l-3.75 2.7 1.5 4.5L12 12l-3.75 2.7 1.5-4.5L6 7.5h4.5z"/><path d="M5 17l1.5 1.5"/><path d="M19 17l-1.5 1.5"/><path d="M12 20v1"/></svg>,
             l:"AI",
-            on:()=>setShowAI(true),
-            active:false
+            on:()=>{setPage(10);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
+            active:page===10
           },
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>,

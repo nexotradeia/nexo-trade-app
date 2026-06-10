@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 320" width="420" height="320">
+  <defs>
+    <radialGradient id="glowC" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00ffe0" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00ffe0" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowStrong" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="nexoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00ffe0"/>
+      <stop offset="100%" stop-color="#4da6ff"/>
+    </linearGradient>
+    <linearGradient id="orbitGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#00ffe0"/>
+    </linearGradient>
+    <linearGradient id="orbitGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4da6ff"/>
+      <stop offset="100%" stop-color="#00ffe0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient glow behind icon -->
+  <ellipse cx="210" cy="118" rx="72" ry="72" fill="url(#glowC)"/>
+
+  <!-- ORBITAL RINGS -->
+  <!-- Ring 1: tilted ~35deg -->
+  <ellipse cx="210" cy="118" rx="78" ry="28"
+    fill="none" stroke="url(#orbitGrad1)" stroke-width="1.8" opacity="0.85"
+    transform="rotate(35,210,118)" filter="url(#glow)"/>
+  <!-- Ring 2: tilted ~-35deg -->
+  <ellipse cx="210" cy="118" rx="78" ry="28"
+    fill="none" stroke="url(#orbitGrad2)" stroke-width="1.8" opacity="0.85"
+    transform="rotate(-35,210,118)" filter="url(#glow)"/>
+  <!-- Ring 3: horizontal -->
+  <ellipse cx="210" cy="118" rx="78" ry="22"
+    fill="none" stroke="#00ffe0" stroke-width="1.4" opacity="0.6"
+    filter="url(#glow)"/>
+
+  <!-- CENTER ICON: N with slash -->
+  <g filter="url(#glow)">
+    <!-- N shape simplified as diagonal slash with dots -->
+    <line x1="196" y1="104" x2="224" y2="132" stroke="#00ffe0" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="196" cy="104" r="3.5" fill="#00ffe0"/>
+    <circle cx="224" cy="132" r="3.5" fill="#4da6ff"/>
+    <!-- extra dot top right -->
+    <circle cx="222" cy="105" r="2.5" fill="#4da6ff"/>
+    <!-- extra dot bottom left -->
+    <circle cx="197" cy="131" r="2.5" fill="#00ffe0"/>
+  </g>
+
+  <!-- ORBITAL DOTS -->
+  <!-- Ring 1 dots -->
+  <circle cx="284" cy="108" r="5" fill="#00ffe0" filter="url(#glow)" opacity="0.9"/>
+  <circle cx="136" cy="128" r="5" fill="#00ffe0" filter="url(#glow)" opacity="0.9"/>
+  <circle cx="248" cy="145" r="4" fill="#7c3aed" filter="url(#glow)" opacity="0.9"/>
+  <!-- Ring 2 dots -->
+  <circle cx="214" cy="58"  r="5" fill="#4da6ff" filter="url(#glow)" opacity="0.9"/>
+  <circle cx="207" cy="178" r="4" fill="#a855f7" filter="url(#glow)" opacity="0.85"/>
+  <!-- Ring 3 dots -->
+  <circle cx="170" cy="100" r="4" fill="#00ffe0" filter="url(#glow)" opacity="0.7"/>
+  <circle cx="252" cy="136" r="3.5" fill="#4da6ff" filter="url(#glow)" opacity="0.7"/>
+
+  <!-- NEXO text -->
+  <text x="210" y="232"
+    font-family="'Arial Black', 'Impact', sans-serif"
+    font-size="72" font-weight="900"
+    text-anchor="middle"
+    fill="url(#nexoGrad)"
+    letter-spacing="6"
+    filter="url(#glowStrong)">NEXO</text>
+
+  <!-- separator line -->
+  <line x1="100" y1="242" x2="320" y2="242" stroke="#4da6ff" stroke-width="1.2" opacity="0.6"/>
+
+  <!-- TRADE text -->
+  <text x="210" y="284"
+    font-family="'Arial Black', 'Impact', sans-serif"
+    font-size="56" font-weight="900"
+    text-anchor="middle"
+    fill="#ffffff"
+    letter-spacing="10">TRADE</text>
+
+  <!-- Tagline -->
+  <text x="210" y="308"
+    font-family="'Arial', sans-serif"
+    font-size="11" font-weight="400"
+    text-anchor="middle"
+    fill="#00ffe0"
+    letter-spacing="3.5"
+    opacity="0.8">AI POWERED TRADING COMMUNITY</text>
+</svg>
