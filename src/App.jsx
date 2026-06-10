@@ -12493,14 +12493,14 @@ function EconCalendarPage({lang="es"}) {
 // ── DIVIDEND CALENDAR PAGE (page 15) ─────────────────────────────────────────
 const DIV_FALLBACK = [
   // ── Tecnología ──────────────────────────────────────────────────────────────
-  {ticker:"AAPL",  name:"Apple Inc",              price:248.2,  divRate:1.00,  yield:0.40,  quarterly:"0.25",   exDate:"2026-05-09",payDate:"2026-05-15",sector:"Tecnología"},
-  {ticker:"MSFT",  name:"Microsoft Corp",         price:440.5,  divRate:3.32,  yield:0.75,  quarterly:"0.83",   exDate:"2026-05-15",payDate:"2026-06-12",sector:"Tecnología"},
+  {ticker:"AAPL",  name:"Apple Inc",              price:248.2,  divRate:1.00,  yield:0.40,  quarterly:"0.25",   exDate:"2026-08-08",payDate:"2026-08-14",sector:"Tecnología"},
+  {ticker:"MSFT",  name:"Microsoft Corp",         price:440.5,  divRate:3.32,  yield:0.75,  quarterly:"0.83",   exDate:"2026-08-20",payDate:"2026-09-11",sector:"Tecnología"},
   {ticker:"IBM",   name:"IBM Corp",               price:214.9,  divRate:6.68,  yield:3.11,  quarterly:"1.67",   exDate:"2026-08-07",payDate:"2026-09-10",sector:"Tecnología"},
   {ticker:"CSCO",  name:"Cisco Systems",          price:56.4,   divRate:1.60,  yield:2.84,  quarterly:"0.40",   exDate:"2026-07-03",payDate:"2026-07-24",sector:"Tecnología"},
   {ticker:"TXN",   name:"Texas Instruments",      price:178.3,  divRate:5.20,  yield:2.92,  quarterly:"1.30",   exDate:"2026-07-31",payDate:"2026-08-19",sector:"Tecnología"},
   {ticker:"INTC",  name:"Intel Corp",             price:22.8,   divRate:0.50,  yield:2.19,  quarterly:"0.125",  exDate:"2026-08-06",payDate:"2026-09-01",sector:"Tecnología"},
   // ── Salud ────────────────────────────────────────────────────────────────────
-  {ticker:"JNJ",   name:"Johnson & Johnson",      price:160.3,  divRate:4.96,  yield:3.10,  quarterly:"1.24",   exDate:"2026-05-27",payDate:"2026-06-10",sector:"Salud"},
+  {ticker:"JNJ",   name:"Johnson & Johnson",      price:160.3,  divRate:4.96,  yield:3.10,  quarterly:"1.24",   exDate:"2026-08-25",payDate:"2026-09-09",sector:"Salud"},
   {ticker:"ABBV",  name:"AbbVie Inc",             price:188.2,  divRate:6.40,  yield:3.40,  quarterly:"1.60",   exDate:"2026-07-14",payDate:"2026-08-15",sector:"Salud"},
   {ticker:"PFE",   name:"Pfizer Inc",             price:27.4,   divRate:1.68,  yield:6.13,  quarterly:"0.42",   exDate:"2026-07-30",payDate:"2026-09-03",sector:"Salud"},
   {ticker:"MRK",   name:"Merck & Co",             price:98.7,   divRate:3.12,  yield:3.16,  quarterly:"0.77",   exDate:"2026-07-15",payDate:"2026-08-07",sector:"Salud"},
@@ -12508,17 +12508,17 @@ const DIV_FALLBACK = [
   {ticker:"MDT",   name:"Medtronic",              price:88.6,   divRate:2.80,  yield:3.16,  quarterly:"0.70",   exDate:"2026-06-27",payDate:"2026-07-18",sector:"Salud"},
   // ── Consumo ──────────────────────────────────────────────────────────────────
   {ticker:"KO",    name:"Coca-Cola Co",           price:67.8,   divRate:1.94,  yield:2.86,  quarterly:"0.485",  exDate:"2026-06-13",payDate:"2026-07-01",sector:"Consumo"},
-  {ticker:"PEP",   name:"PepsiCo Inc",            price:158.4,  divRate:5.44,  yield:3.43,  quarterly:"1.36",   exDate:"2026-06-05",payDate:"2026-06-30",sector:"Consumo"},
-  {ticker:"MCD",   name:"McDonald's Corp",        price:307.4,  divRate:7.08,  yield:2.30,  quarterly:"1.77",   exDate:"2026-06-04",payDate:"2026-06-16",sector:"Consumo"},
+  {ticker:"PEP",   name:"PepsiCo Inc",            price:158.4,  divRate:5.44,  yield:3.43,  quarterly:"1.36",   exDate:"2026-09-04",payDate:"2026-09-30",sector:"Consumo"},
+  {ticker:"MCD",   name:"McDonald's Corp",        price:307.4,  divRate:7.08,  yield:2.30,  quarterly:"1.77",   exDate:"2026-09-03",payDate:"2026-09-16",sector:"Consumo"},
   {ticker:"PG",    name:"Procter & Gamble",       price:167.9,  divRate:4.02,  yield:2.40,  quarterly:"1.006",  exDate:"2026-07-18",payDate:"2026-08-15",sector:"Consumo"},
   {ticker:"WMT",   name:"Walmart Inc",            price:98.3,   divRate:0.88,  yield:0.90,  quarterly:"0.22",   exDate:"2026-08-06",payDate:"2026-09-03",sector:"Consumo"},
   {ticker:"HD",    name:"Home Depot Inc",         price:388.1,  divRate:9.00,  yield:2.32,  quarterly:"2.25",   exDate:"2026-09-03",payDate:"2026-09-18",sector:"Consumo"},
   {ticker:"CL",    name:"Colgate-Palmolive",      price:91.2,   divRate:1.96,  yield:2.15,  quarterly:"0.49",   exDate:"2026-07-17",payDate:"2026-08-15",sector:"Consumo"},
   {ticker:"GIS",   name:"General Mills",          price:56.8,   divRate:2.48,  yield:4.37,  quarterly:"0.62",   exDate:"2026-07-10",payDate:"2026-08-01",sector:"Consumo"},
-  {ticker:"KMB",   name:"Kimberly-Clark",         price:137.6,  divRate:5.04,  yield:3.66,  quarterly:"1.26",   exDate:"2026-06-06",payDate:"2026-07-04",sector:"Consumo"},
+  {ticker:"KMB",   name:"Kimberly-Clark",         price:137.6,  divRate:5.04,  yield:3.66,  quarterly:"1.26",   exDate:"2026-09-05",payDate:"2026-10-03",sector:"Consumo"},
   // ── Energía ──────────────────────────────────────────────────────────────────
-  {ticker:"XOM",   name:"ExxonMobil Corp",        price:117.5,  divRate:3.96,  yield:3.37,  quarterly:"0.99",   exDate:"2026-05-13",payDate:"2026-06-10",sector:"Energía"},
-  {ticker:"CVX",   name:"Chevron Corp",           price:145.8,  divRate:6.84,  yield:4.69,  quarterly:"1.71",   exDate:"2026-05-19",payDate:"2026-06-10",sector:"Energía"},
+  {ticker:"XOM",   name:"ExxonMobil Corp",        price:117.5,  divRate:3.96,  yield:3.37,  quarterly:"0.99",   exDate:"2026-08-12",payDate:"2026-09-10",sector:"Energía"},
+  {ticker:"CVX",   name:"Chevron Corp",           price:145.8,  divRate:6.84,  yield:4.69,  quarterly:"1.71",   exDate:"2026-08-18",payDate:"2026-09-10",sector:"Energía"},
   {ticker:"COP",   name:"ConocoPhillips",         price:108.4,  divRate:2.32,  yield:2.14,  quarterly:"0.58",   exDate:"2026-07-15",payDate:"2026-09-01",sector:"Energía"},
   {ticker:"OXY",   name:"Occidental Petroleum",  price:49.7,   divRate:0.88,  yield:1.77,  quarterly:"0.22",   exDate:"2026-09-10",payDate:"2026-10-15",sector:"Energía"},
   {ticker:"ET",    name:"Energy Transfer LP",     price:19.8,   divRate:1.28,  yield:6.46,  quarterly:"0.32",   exDate:"2026-07-30",payDate:"2026-08-19",sector:"Energía"},
@@ -12528,10 +12528,10 @@ const DIV_FALLBACK = [
   {ticker:"VZ",    name:"Verizon Comm",           price:45.0,   divRate:2.66,  yield:5.91,  quarterly:"0.665",  exDate:"2026-07-08",payDate:"2026-08-02",sector:"Telecomunicaciones"},
   // ── Finanzas ─────────────────────────────────────────────────────────────────
   {ticker:"JPM",   name:"JPMorgan Chase",         price:262.1,  divRate:5.00,  yield:1.91,  quarterly:"1.25",   exDate:"2026-07-03",payDate:"2026-07-31",sector:"Finanzas"},
-  {ticker:"BAC",   name:"Bank of America",        price:44.8,   divRate:1.04,  yield:2.32,  quarterly:"0.26",   exDate:"2026-06-06",payDate:"2026-06-27",sector:"Finanzas"},
+  {ticker:"BAC",   name:"Bank of America",        price:44.8,   divRate:1.04,  yield:2.32,  quarterly:"0.26",   exDate:"2026-09-05",payDate:"2026-09-26",sector:"Finanzas"},
   {ticker:"WFC",   name:"Wells Fargo",            price:72.3,   divRate:1.40,  yield:1.94,  quarterly:"0.35",   exDate:"2026-08-08",payDate:"2026-09-01",sector:"Finanzas"},
   {ticker:"GS",    name:"Goldman Sachs",          price:598.4,  divRate:12.00, yield:2.00,  quarterly:"3.00",   exDate:"2026-08-29",payDate:"2026-09-26",sector:"Finanzas"},
-  {ticker:"BLK",   name:"BlackRock Inc",          price:1014.3, divRate:21.12, yield:2.08,  quarterly:"5.28",   exDate:"2026-06-06",payDate:"2026-06-23",sector:"Finanzas"},
+  {ticker:"BLK",   name:"BlackRock Inc",          price:1014.3, divRate:21.12, yield:2.08,  quarterly:"5.28",   exDate:"2026-09-05",payDate:"2026-09-22",sector:"Finanzas"},
   // ── REITs (alto dividendo) ───────────────────────────────────────────────────
   {ticker:"O",     name:"Realty Income Corp",     price:55.8,   divRate:3.16,  yield:5.66,  quarterly:"0.264",  exDate:"2026-06-30",payDate:"2026-07-15",sector:"REITs"},
   {ticker:"AMT",   name:"American Tower",         price:198.7,  divRate:6.84,  yield:3.44,  quarterly:"1.71",   exDate:"2026-06-25",payDate:"2026-07-11",sector:"REITs"},
