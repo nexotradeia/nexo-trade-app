@@ -6806,18 +6806,18 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                           onClick={handleBuyWebinar}
                           disabled={isSoldOut}
                           style={{background:isSoldOut?"#374151":`linear-gradient(135deg,${C.accent},#0047C2)`,border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",width:"100%",opacity:isSoldOut?0.5:1}}
-                        >{isSoldOut ? "Agotado" : "Reservar →"}</button>
+                        >{isSoldOut ? (isEN?"Sold out":"Agotado") : (isEN?"Reserve →":"Reservar →")}</button>
                       </>
                     ) : (
                       <>
-                        <div style={{fontSize:10,color:C.muted2,fontWeight:600,marginBottom:2}}>PRECIO</div>
+                        <div style={{fontSize:10,color:C.muted2,fontWeight:600,marginBottom:2}}>{isEN?"PRICE":"PRECIO"}</div>
                         <div style={{fontSize:22,fontWeight:900,color:C.text,lineHeight:1}}>${w.precio}</div>
-                        <div style={{fontSize:10,color:"#E0B64B",marginBottom:8}}>PREMIUM paga ${w.precioVip}</div>
+                        <div style={{fontSize:10,color:"#E0B64B",marginBottom:8}}>{isEN?`PREMIUM pays $${w.precioVip}`:`PREMIUM paga $${w.precioVip}`}</div>
                         <button
                           onClick={handleBuyWebinar}
                           disabled={isSoldOut}
                           style={{background:isSoldOut?"#374151":"linear-gradient(135deg,#1d4ed8,#0F5E68)",border:"none",borderRadius:10,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:700,cursor:isSoldOut?"default":"pointer",width:"100%",opacity:isSoldOut?0.5:1}}
-                        >{isSoldOut ? "Agotado" : "Comprar →"}</button>
+                        >{isSoldOut ? (isEN?"Sold out":"Agotado") : (isEN?"Buy →":"Comprar →")}</button>
                       </>
                     )}
                   </div>
@@ -6842,24 +6842,28 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
             <div style={{width:36,height:36,borderRadius:10,background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🏦</div>
             <div>
-              <div style={{fontWeight:800,color:"#0F172A",fontSize:15}}>Webinars Gratuitos — IBKR Campus</div>
-              <div style={{fontSize:11,color:"#64748B",marginTop:1}}>Interactive Brokers · 100% gratis · Sin registro previo</div>
+              <div style={{fontWeight:800,color:"#0F172A",fontSize:15}}>{isEN?"Free Webinars — IBKR Campus":"Webinars Gratuitos — IBKR Campus"}</div>
+              <div style={{fontSize:11,color:"#64748B",marginTop:1}}>{isEN?"Interactive Brokers · 100% free · No prior registration":"Interactive Brokers · 100% gratis · Sin registro previo"}</div>
             </div>
             <a href="https://ibkrcampus.com/campus/webinar-categories/upcoming-webinars/" target="_blank" rel="noopener noreferrer"
               style={{marginLeft:"auto",fontSize:11,fontWeight:700,color:"#1d4ed8",background:"rgba(29,78,216,0.08)",border:"1px solid rgba(29,78,216,0.2)",borderRadius:8,padding:"5px 12px",textDecoration:"none",flexShrink:0}}>
-              Ver todos ↗
+              {isEN?"See all ↗":"Ver todos ↗"}
             </a>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:10}}>
             {[
-              {titulo:"Options Trading Fundamentals",      nivel:"Principiante", tema:"Opciones",     emoji:"📊", desc:"Aprende cómo funcionan las opciones, calls, puts y estrategias básicas con ejemplos reales."},
-              {titulo:"Technical Analysis Masterclass",   nivel:"Intermedio",   tema:"Análisis Téc.", emoji:"📈", desc:"Patrones de velas, soportes, resistencias y los indicadores más usados por traders profesionales."},
-              {titulo:"Understanding Futures Markets",    nivel:"Intermedio",   tema:"Futuros",       emoji:"⚡", desc:"Cómo operar futuros de índices, commodities y divisas. Margin, leverage y gestión de riesgo."},
-              {titulo:"Fixed Income & Bond Investing",    nivel:"Principiante", tema:"Renta Fija",    emoji:"🏛️", desc:"Bonos del Tesoro, corporativos y municipales. Cómo construir un portafolio de renta fija."},
-              {titulo:"Crypto Trading Strategies",        nivel:"Intermedio",   tema:"Crypto",        emoji:"₿",  desc:"Bitcoin, Ethereum y altcoins. Análisis on-chain, DeFi y cómo operar con gestión de riesgo."},
-              {titulo:"ETF Investing for Beginners",      nivel:"Principiante", tema:"ETFs",          emoji:"🗂️", desc:"Los mejores ETFs del mercado: S&P 500, growth, dividendos y emergentes. Cómo construir cartera."},
+              {titulo:"Options Trading Fundamentals",    tituloEs:"Fundamentos de Opciones",       nivel:"Beginner",     nivelEs:"Principiante", tema:"Options",    temaEs:"Opciones",     emoji:"📊", desc:"Learn how options work: calls, puts, and basic strategies with real examples.",     descEs:"Aprende cómo funcionan las opciones, calls, puts y estrategias básicas con ejemplos reales."},
+              {titulo:"Technical Analysis Masterclass",  tituloEs:"Masterclass Análisis Técnico",  nivel:"Intermediate", nivelEs:"Intermedio",   tema:"Tech. Anal.",temaEs:"Análisis Téc.",emoji:"📈", desc:"Candlestick patterns, support/resistance and the indicators most used by professional traders.", descEs:"Patrones de velas, soportes, resistencias y los indicadores más usados por traders profesionales."},
+              {titulo:"Understanding Futures Markets",   tituloEs:"Mercados de Futuros",           nivel:"Intermediate", nivelEs:"Intermedio",   tema:"Futures",    temaEs:"Futuros",      emoji:"⚡", desc:"How to trade index, commodity and currency futures. Margin, leverage and risk management.", descEs:"Cómo operar futuros de índices, commodities y divisas. Margin, leverage y gestión de riesgo."},
+              {titulo:"Fixed Income & Bond Investing",   tituloEs:"Renta Fija y Bonos",            nivel:"Beginner",     nivelEs:"Principiante", tema:"Bonds",      temaEs:"Renta Fija",   emoji:"🏛️", desc:"Treasury, corporate and municipal bonds. How to build a fixed income portfolio.", descEs:"Bonos del Tesoro, corporativos y municipales. Cómo construir un portafolio de renta fija."},
+              {titulo:"Crypto Trading Strategies",       tituloEs:"Estrategias Crypto",            nivel:"Intermediate", nivelEs:"Intermedio",   tema:"Crypto",     temaEs:"Crypto",       emoji:"₿",  desc:"Bitcoin, Ethereum and altcoins. On-chain analysis, DeFi and trading with risk management.", descEs:"Bitcoin, Ethereum y altcoins. Análisis on-chain, DeFi y cómo operar con gestión de riesgo."},
+              {titulo:"ETF Investing for Beginners",     tituloEs:"ETFs para Principiantes",       nivel:"Beginner",     nivelEs:"Principiante", tema:"ETFs",       temaEs:"ETFs",         emoji:"🗂️", desc:"The best ETFs: S&P 500, growth, dividends and emerging markets. How to build your portfolio.", descEs:"Los mejores ETFs del mercado: S&P 500, growth, dividendos y emergentes. Cómo construir cartera."},
             ].map((w,i)=>{
-              const nivelColor = w.nivel==="Avanzado"?"#ef4444":w.nivel==="Intermedio"?"#f59e0b":"#10b981";
+              const nivelLabel = isEN ? w.nivel : w.nivelEs;
+              const temaLabel  = isEN ? w.tema  : w.temaEs;
+              const wTitulo    = isEN ? w.titulo : w.tituloEs;
+              const wDesc      = isEN ? w.desc   : w.descEs;
+              const nivelColor = (w.nivel==="Intermediate")?"#f59e0b":"#10b981";
               return(
                 <a key={i} href="https://ibkrcampus.com/campus/webinar-categories/upcoming-webinars/" target="_blank" rel="noopener noreferrer"
                   style={{display:"block",background:"#fff",border:"1px solid rgba(0,0,0,0.07)",borderRadius:14,padding:"14px 16px",textDecoration:"none",transition:"all 0.15s",boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
@@ -6868,22 +6872,22 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <span style={{fontSize:22}}>{w.emoji}</span>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontWeight:700,color:"#0F172A",fontSize:13,lineHeight:1.3}}>{w.titulo}</div>
+                      <div style={{fontWeight:700,color:"#0F172A",fontSize:13,lineHeight:1.3}}>{wTitulo}</div>
                       <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap"}}>
-                        <span style={{fontSize:9,fontWeight:700,color:nivelColor,background:nivelColor+"15",borderRadius:5,padding:"1px 6px"}}>{w.nivel}</span>
-                        <span style={{fontSize:9,fontWeight:600,color:"#64748B",background:"rgba(0,0,0,0.04)",borderRadius:5,padding:"1px 6px"}}>{w.tema}</span>
-                        <span style={{fontSize:9,fontWeight:700,color:"#10b981",background:"rgba(16,185,129,0.1)",borderRadius:5,padding:"1px 6px"}}>GRATIS</span>
+                        <span style={{fontSize:9,fontWeight:700,color:nivelColor,background:nivelColor+"15",borderRadius:5,padding:"1px 6px"}}>{nivelLabel}</span>
+                        <span style={{fontSize:9,fontWeight:600,color:"#64748B",background:"rgba(0,0,0,0.04)",borderRadius:5,padding:"1px 6px"}}>{temaLabel}</span>
+                        <span style={{fontSize:9,fontWeight:700,color:"#10b981",background:"rgba(16,185,129,0.1)",borderRadius:5,padding:"1px 6px"}}>{isEN?"FREE":"GRATIS"}</span>
                       </div>
                     </div>
                   </div>
-                  <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:8}}>{w.desc}</div>
-                  <div style={{fontSize:11,fontWeight:700,color:"#1d4ed8"}}>Ver en IBKR Campus →</div>
+                  <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:8}}>{wDesc}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:"#1d4ed8"}}>{isEN?"View on IBKR Campus →":"Ver en IBKR Campus →"}</div>
                 </a>
               );
             })}
           </div>
           <div style={{marginTop:10,fontSize:10,color:"#94A3B8",textAlign:"center"}}>
-            Webinars impartidos por Interactive Brokers y proveedores financieros certificados · Registro gratuito en ibkrcampus.com
+            {isEN?"Webinars by Interactive Brokers and certified financial providers · Free registration at ibkrcampus.com":"Webinars impartidos por Interactive Brokers y proveedores financieros certificados · Registro gratuito en ibkrcampus.com"}
           </div>
         </div>
 
