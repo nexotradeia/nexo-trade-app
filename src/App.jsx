@@ -20334,46 +20334,34 @@ function RadarGlobalPage({lang="es",onBack}){
   },[]);
   // market click tooltip
   const [clickedMkt,setClickedMkt]=useState(null);
-  const tbBtn=(active,accent='#00f090')=>({display:'flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:7,border:`1px solid ${active?`rgba(0,240,144,.25)`:C.br2}`,background:active?`rgba(0,240,144,.1)`:C.bg3,fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?accent:C.mid,cursor:'pointer',letterSpacing:'.5px'});
+  // mobile detection via JS (CSS media queries can't override inline styles on Safari iOS)
+  const [mob,setMob]=useState(()=>typeof window!=='undefined'&&window.innerWidth<700);
+  useEffect(()=>{const fn=()=>setMob(window.innerWidth<700);window.addEventListener('resize',fn);return()=>window.removeEventListener('resize',fn);},[]);
+
+  const tbBtn=(active,accent='#00f090')=>({display:'flex',alignItems:'center',gap:5,padding:mob?'3px 7px':'5px 12px',borderRadius:7,border:`1px solid ${active?`rgba(0,240,144,.25)`:C.br2}`,background:active?`rgba(0,240,144,.1)`:C.bg3,fontFamily:MONO2,fontSize:mob?9:10,fontWeight:600,color:active?accent:C.mid,cursor:'pointer',letterSpacing:'.5px'});
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div className="nexo-radar-wrap" style={{width:'100%',height:'calc(100vh - 52px)',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'}}>
-      <style>{`
-        @keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-        @media(max-width:700px){
-          .nexo-radar-wrap{grid-template-columns:1fr!important;grid-template-rows:44px 1fr 30px!important;height:calc(100vh - 52px)!important;}
-          .nexo-radar-left,.nexo-radar-right{display:none!important;}
-          .nexo-radar-topbar{padding:0 8px!important;gap:4px!important;flex-wrap:nowrap!important;}
-          .nexo-radar-logo{display:none!important;}
-          .nexo-radar-live{display:none!important;}
-          .nexo-radar-btns{gap:4px!important;}
-          .nexo-radar-btns button{padding:3px 7px!important;font-size:8px!important;}
-          .nexo-radar-modes{display:none!important;}
-          .nexo-radar-trading-now{bottom:8px!important;left:8px!important;padding:8px 10px!important;}
-          .nexo-radar-trading-now .nexo-radar-big-num{font-size:20px!important;}
-          .nexo-radar-heatlegend{display:none!important;}
-          .nexo-radar-canvas{touch-action:none;}
-        }
-      `}</style>
+    <div style={{width:'100%',height:'calc(100vh - 52px)',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:mob?'44px 1fr 30px':'48px 1fr 30px',gridTemplateColumns:mob?'1fr':'260px 1fr 260px',overflow:'hidden'}}>
+      <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
       {/* ── TOPBAR ── */}
-      <div className="nexo-radar-topbar" style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 20px',gap:12,zIndex:100}}>
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
+      <div style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:mob?'0 8px':'0 20px',gap:mob?4:12,zIndex:100}}>
+        <div style={{display:'flex',alignItems:'center',gap:mob?6:12}}>
           {onBack&&<button onClick={onBack} style={{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:7,border:`1px solid ${C.br2}`,background:'rgba(0,240,144,.08)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:C.grn,cursor:'pointer',letterSpacing:'.5px'}}>← Back</button>}
-          <div className="nexo-radar-logo" style={{display:'flex',alignItems:'center',gap:8}}>
+          {!mob&&<div style={{display:'flex',alignItems:'center',gap:8}}>
             <div style={{width:26,height:26,background:C.grn,clipPath:'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:900,color:'#020408'}}>N</div>
             <div style={{fontFamily:MONO2,fontSize:12,fontWeight:700,letterSpacing:2,color:C.txt}}>NEXO<span style={{color:C.grn}}>TRADE</span></div>
-          </div>
-          <div style={{width:1,height:18,background:C.br2}}/>
-          <div className="nexo-radar-title" style={{fontFamily:MONO2,fontSize:11,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn}}>🌍 Global Capital Radar</div>
-          <div style={{fontFamily:MONO2,fontSize:11,color:C.mid}}>{utcClock}</div>
+          </div>}
+          {!mob&&<div style={{width:1,height:18,background:C.br2}}/>}
+          <div style={{fontFamily:MONO2,fontSize:mob?10:11,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn}}>🌍 {mob?'Radar':'Global Capital Radar'}</div>
+          {!mob&&<div style={{fontFamily:MONO2,fontSize:11,color:C.mid}}>{utcClock}</div>}
         </div>
-        <div className="nexo-radar-live" style={{display:'flex',alignItems:'center',gap:8}}>
+        {!mob&&<div style={{display:'flex',alignItems:'center',gap:8}}>
           <div style={{display:'flex',alignItems:'center',gap:5,background:'rgba(0,240,144,.1)',border:'1px solid rgba(0,240,144,.2)',padding:'4px 10px',borderRadius:100,fontFamily:MONO2,fontSize:10,fontWeight:600,color:C.grn}}>
             <div style={{width:5,height:5,borderRadius:'50%',background:C.grn,boxShadow:`0 0 6px ${C.grn}`,animation:'nexo-pulse 2s ease-in-out infinite'}}/>LIVE · CoinGecko + Finnhub
           </div>
-        </div>
-        <div className="nexo-radar-btns" style={{display:'flex',alignItems:'center',gap:6}}>
+        </div>}
+        <div style={{display:'flex',alignItems:'center',gap:mob?4:6}}>
           <button style={tbBtn(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>🌙 Day/Night</button>
           <button style={tbBtn(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>⚡ Flows</button>
           <button style={tbBtn(false)} onClick={refreshGlobe}>↺ Refresh</button>
@@ -20382,7 +20370,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── LEFT PANEL ── */}
-      <div className="nexo-radar-left" style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:`1px solid ${C.br}`,display:mob?'none':'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
         {/* Countdown */}
         <div style={{background:'rgba(0,240,144,.06)',border:'1px solid rgba(0,240,144,.15)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
           <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,marginBottom:4}}>⏰ Next market opens</div>
@@ -20448,28 +20436,28 @@ function RadarGlobalPage({lang="es",onBack}){
       {/* ── GLOBE ── */}
       <div style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)'}}>
         <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'none'}}/>
-        {/* Mode toggles */}
-        <div className="nexo-radar-modes" style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
+        {/* Mode toggles — desktop only */}
+        {!mob&&<div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
           {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
             <button key={m} style={modeBtn(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
           ))}
-        </div>
+        </div>}
         {/* Trading now */}
-        <div className="nexo-radar-trading-now" style={{position:'absolute',bottom:24,left:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'14px 18px'}}>
-          <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.mid,marginBottom:4}}>Trading Now (Est.)</div>
-          <div className="nexo-radar-big-num" style={{fontFamily:MONO2,fontSize:32,fontWeight:700,color:C.grn,textShadow:`0 0 20px rgba(0,240,144,.4)`,lineHeight:1,marginBottom:2}}>87M</div>
-          <div style={{fontSize:12,color:C.mid,marginBottom:8}}>investors worldwide</div>
-          <div style={{fontFamily:MONO2,fontSize:13,fontWeight:600,color:C.gold}}><span style={{fontFamily:MONO2}}>{ordersPerSec.toLocaleString()}</span> orders/sec</div>
+        <div style={{position:'absolute',bottom:mob?8:24,left:mob?8:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:mob?'8px 12px':'14px 18px'}}>
+          <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.mid,marginBottom:4}}>Trading Now</div>
+          <div style={{fontFamily:MONO2,fontSize:mob?18:32,fontWeight:700,color:C.grn,textShadow:`0 0 20px rgba(0,240,144,.4)`,lineHeight:1,marginBottom:2}}>87M</div>
+          {!mob&&<div style={{fontSize:12,color:C.mid,marginBottom:8}}>investors worldwide</div>}
+          <div style={{fontFamily:MONO2,fontSize:mob?11:13,fontWeight:600,color:C.gold}}>{ordersPerSec.toLocaleString()} orders/sec</div>
         </div>
-        {/* Heat legend */}
-        <div className="nexo-radar-heatlegend" style={{position:'absolute',bottom:24,right:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'12px 16px'}}>
+        {/* Heat legend — desktop only */}
+        {!mob&&<div style={{position:'absolute',bottom:24,right:20,background:'rgba(6,12,20,.9)',backdropFilter:'blur(12px)',border:`1px solid ${C.br2}`,borderRadius:12,padding:'12px 16px'}}>
           <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.mid,marginBottom:8}}>Heat Map</div>
           {[['#304860','Minimum'],['#4090ff','Low'],['#00d8ff','Medium'],['#00e880','High'],['#ffc040','Maximum']].map(([c,l])=>(
             <div key={c} style={{display:'flex',alignItems:'center',gap:7,fontSize:12,color:C.mid,marginBottom:5}}>
               <div style={{width:8,height:8,borderRadius:'50%',background:c,flexShrink:0}}/>{l}
             </div>
           ))}
-        </div>
+        </div>}
         {/* ── MARKET CLICK TOOLTIP ── */}
         {clickedMkt&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-60%)',zIndex:30,background:'rgba(2,6,14,.96)',backdropFilter:'blur(20px)',border:`1px solid ${C.br2}`,borderRadius:14,padding:'16px 20px',minWidth:220,boxShadow:'0 8px 32px rgba(0,0,0,.6)'}}>
           <button onClick={()=>setClickedMkt(null)} style={{position:'absolute',top:8,right:10,background:'none',border:'none',color:C.mid,cursor:'pointer',fontFamily:MONO2,fontSize:12}}>✕</button>
@@ -20541,7 +20529,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── RIGHT PANEL ── */}
-      <div className="nexo-radar-right" style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:`1px solid ${C.br}`,display:mob?'none':'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
         {/* Traders by country */}
         <div style={pc}>
           <div style={pchd}>Traders by Country (M)</div>
