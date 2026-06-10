@@ -1,4 +1,4 @@
-// NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
+// NEXO TRADE — build: 2026-06-10 04:07:49
 import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9051,7 +9051,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}}>
                 {[
                   {label:"Posts",val:bd.posts.toLocaleString()},
-                  {label:"Seguidores",val:bd.followers.toLocaleString()},
+                  {label:isEN?"Followers":"Seguidores",val:bd.followers.toLocaleString()},
                   {label:"Win Rate",val:bd.winRate},
                 ].map(s=>(
                   <div key={s.label} style={{background:"#F9FAFB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}>
@@ -11469,7 +11469,7 @@ function AdminPicksModal({onClose}){
 
         <div style={{display:"flex",gap:10}}>
           <button onClick={save} disabled={saving} style={{flex:1,background:ok?"#00D26A":"linear-gradient(135deg,#0F4C81,#0C3D68)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer"}}>
-            {saving?"Guardando...":ok?"✅ Guardado!":"+ Agregar Pick"}
+            {saving?(isEN?"Saving...":"Guardando..."):ok?"✅ Guardado!":(isEN?"+ Add Pick":"+ Agregar Pick")}
           </button>
           <button onClick={clearWeek} style={{background:"rgba(255,77,106,0.1)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:10,padding:"12px 16px",color:"#FF4D6A",fontSize:13,fontWeight:700,cursor:"pointer"}}>🗑️ Limpiar semana</button>
         </div>
@@ -15796,7 +15796,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                       <span style={{fontSize:10,color:C.muted,marginLeft:"auto"}}>{t.date?.slice(0,10)}</span>
                     </div>
                   ))}
-                  {pelosiTrades.length===0&&<div style={{fontSize:12,color:C.muted}}>Sin trades recientes</div>}
+                  {pelosiTrades.length===0&&<div style={{fontSize:12,color:C.muted}}>{isEN?"No recent trades":"Sin trades recientes"}</div>}
                 </div>
                 <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(15,76,129,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:"12px 14px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
@@ -16879,7 +16879,7 @@ function MessagesPage({ user, following, supabaseClient, onNeedAuth, initialChat
                   <div style={{padding:"10px 14px",borderTop:"1px solid rgba(33,150,243,0.15)",display:"flex",gap:8,alignItems:"center",background:"rgba(33,150,243,0.03)"}}>
                     <input value={msgText} onChange={e=>setMsgText(e.target.value)}
                       onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
-                      placeholder={`Escribe a @${selConv.username}…`}
+                      placeholder={isEN?`Message @${selConv.username}…`:`Escribe a @${selConv.username}…`}
                       maxLength={500}
                       style={{flex:1,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(33,150,243,0.2)",borderRadius:22,padding:"10px 18px",fontSize:13,color:C.text,outline:"none",fontFamily:"inherit",transition:"border 0.15s"}}
                       onFocus={e=>e.target.style.borderColor="rgba(33,150,243,0.5)"}
@@ -21125,7 +21125,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           ingestRows(rows);
         }catch(err){ setImpMsg({type:"err",text:"No pude leer el Excel. Prueba guardándolo como CSV."}); } };
         reader.readAsArrayBuffer(file);
-      }catch(err){ setImpMsg({type:"err",text:"Error leyendo el archivo."}); } };
+      }catch(err){ setImpMsg({type:"err",text:isEN?"Error reading the file.":"Error leyendo el archivo."}); } };
       if(window.XLSX){ run(); }
       else {
         setImpMsg({type:"ok",text:"Loading Excel reader…"});
@@ -21137,7 +21137,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     } else {
       const reader=new FileReader();
       reader.onload=(e)=>ingestRows(parseCSV(e.target.result||""));
-      reader.onerror=()=>setImpMsg({type:"err",text:"Error leyendo el archivo."});
+      reader.onerror=()=>setImpMsg({type:"err",text:isEN?"Error reading the file.":"Error leyendo el archivo."});
       reader.readAsText(file);
     }
   };
@@ -21314,7 +21314,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const WL=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["GLD","$186.40","+0.38",1],["TLT","$93.20","-0.52",0]];
     const RISK=[["1.6","SHARPE",T.grn],["1.3","BETA",T.gold],["24.1%","VOL",T.red],["2.0%","VAR 95%",T.grn],["−14%","MAX DD",T.gold],["74.2%","WIN RATE",T.blue]];
     const SECT=[["XLK","+1.82",1],["XLY","+0.64",1],["XLF","-0.21",0],["XLE","+2.14",1],["XLV","-0.88",0],["XLI","+0.42",1],["XLRE","-1.24",0],["XLU","+0.12",1],["XLB","+0.78",1]];
-    const TRADES=[["B","NVDA","5 uds · $148.20","+$300.50","10:32"],["S","BKNG","2 uds · $163.27","−$82.40","09:58"],["B","TSLA","7 uds · $320.00","+$620.90","09:41"],["S","AMZN","3 uds · $220.00","+$74.40","Ayer"],["B","META","3 uds · $440.00","+$447.30","Ayer"]];
+    const TRADES=[["B","NVDA","5 uds · $148.20","+$300.50","10:32"],["S","BKNG","2 uds · $163.27","−$82.40","09:58"],["B","TSLA","7 uds · $320.00","+$620.90","09:41"],["S","AMZN","3 uds · $220.00","+$74.40",isEN?"Yesterday":"Ayer"],["B","META","3 uds · $440.00","+$447.30",isEN?"Yesterday":"Ayer"]];
     const OF_ASK=[["$302.20",120],["$301.90",340],["$301.70",180],["$301.60",520],["$301.55",240]];
     const OF_BID=[["$301.50",480],["$301.40",280],["$301.20",620],["$301.00",160],["$300.80",380]];
     const ofMax=Math.max(...OF_ASK.map(x=>x[1]),...OF_BID.map(x=>x[1]));
@@ -22240,7 +22240,7 @@ function CongressTradesPage({ isPremium, onNeedPremium, lang }) {
               <span style={{fontSize:10,color:C.muted,marginLeft:"auto"}}>{t.date?.slice(0,10)}</span>
             </div>
           ))}
-          {pelosiTrades.length===0&&<div style={{fontSize:12,color:C.muted}}>Sin trades recientes</div>}
+          {pelosiTrades.length===0&&<div style={{fontSize:12,color:C.muted}}>{isEN?"No recent trades":"Sin trades recientes"}</div>}
         </div>
         {/* Top Buyers */}
         <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(15,76,129,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:14,padding:"12px 16px"}}>
@@ -24306,7 +24306,7 @@ function AdminDashboard(){
       const mins=Math.floor(diff/60000);
       const hrs=Math.floor(diff/3600000);
       const days=Math.floor(diff/86400000);
-      const ago=mins<1?"Ahora mismo":mins<60?`Hace ${mins}m`:hrs<24?`Hace ${hrs}h`:days===1?"Ayer":`Hace ${days}d`;
+      const ago=isEN?(mins<1?"Just now":mins<60?`${mins}m ago`:hrs<24?`${hrs}h ago`:days===1?"Yesterday":`${days}d ago`):(mins<1?"Ahora mismo":mins<60?`Hace ${mins}m`:hrs<24?`Hace ${hrs}h`:days===1?"Ayer":`Hace ${days}d`);
       return {date,time,ago};
     }catch{return {date:"—",time:"—",ago:"—"};}
   };
@@ -24426,7 +24426,7 @@ function AdminDashboard(){
               </div>
               <div style={{display:"flex",alignItems:"center",gap:8,background:"#F9FAFB",border:"1px solid #EBEBEB",borderRadius:10,padding:"7px 12px",minWidth:180}}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar..." style={{border:"none",outline:"none",background:"transparent",fontSize:13,color:"#111827",width:"100%"}}/>
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={isEN?"Search...":"Buscar..."} style={{border:"none",outline:"none",background:"transparent",fontSize:13,color:"#111827",width:"100%"}}/>
               </div>
             </div>
 
@@ -24474,7 +24474,7 @@ function AdminDashboard(){
             ))}
 
             {filtered.length===0 && (
-              <div style={{padding:"30px",textAlign:"center",color:"#9CA3AF",fontSize:13}}>Sin resultados para "{search}"</div>
+              <div style={{padding:"30px",textAlign:"center",color:"#9CA3AF",fontSize:13}}>{isEN?`No results for "${search}"`:`Sin resultados para "${search}"`}</div>
             )}
           </div>
 
@@ -26408,7 +26408,7 @@ export default function App(){
 
             {/* Settings panel */}
             <button onClick={()=>setShowSettings(true)}
-              title="Configuración"
+              title={isEN?"Settings":"Configuración"}
               style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${showSettings?"rgba(15,76,129,0.6)":"rgba(15,76,129,0.2)"}`,background:showSettings?"rgba(15,76,129,0.13)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0F4C81",transition:"all 0.15s"}}
               onMouseEnter={e=>{e.currentTarget.style.background="rgba(15,76,129,0.12)";e.currentTarget.style.borderColor="rgba(15,76,129,0.5)";}}
               onMouseLeave={e=>{e.currentTarget.style.background=showSettings?"rgba(15,76,129,0.13)":"transparent";e.currentTarget.style.borderColor=showSettings?"rgba(15,76,129,0.6)":"rgba(15,76,129,0.2)";}}>
