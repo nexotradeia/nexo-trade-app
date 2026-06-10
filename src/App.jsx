@@ -815,17 +815,6 @@ const NAV_ICOS = {
   star:        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>,
   lock:        <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
   globe:       <><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>,
-  // Additional icons for drawer & menus
-  calendar:    <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
-  calculator:  <><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></>,
-  currency:    <><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3s-3 1-3 3a3 3 0 0 0 6 0"/></>,
-  investing:   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,
-  education:   <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>,
-  tools:       <><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>,
-  leaderboard: <><path d="M8 6v14M12 2v18M16 9v11"/></>,
-  ai:          <><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></>,
-  terminal:    <><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></>,
-  insiders:    <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
 };
 const NavIco = ({name, size=17}) => {
   const inner = NAV_ICOS[name];
@@ -1368,11 +1357,11 @@ function TickerTape({lang="es", onPremium}) {
       };
     });
     const PROMOS = isEN ? [
-      "VIP plan — $6.58/mo billed annually · $79/year",
-      "See what hedge funds are buying → VIP",
+      "🔥 Launch price $15.99/mo — going up to $29 soon",
+      "🐋 See what hedge funds are buying → Premium",
     ] : [
-      "Plan VIP — $6.58/mes facturado anualmente · $79/año",
-      "Ve qué compran los hedge funds → VIP",
+      "🔥 Precio de lanzamiento $15.99/mes — sube a $29 pronto",
+      "🐋 Ve qué compran los hedge funds → Premium",
     ];
     const merged = [];
     items.forEach((it,i)=>{
@@ -4934,6 +4923,8 @@ function MarketsMiniWidget({ lang="es" }){
 function AdBannerFeed(){ return null; }
 function AdBannerSidebar(){ return null; }
 
+const MN_CID = "REEMPLAZAR_CID_MEDIANET"; // ej: "8CU57YRJN"
+
 function MediaNetBannerFeed(){
   const ref = useRef(null);
   const pushed = useRef(false);
@@ -6223,7 +6214,7 @@ function VipPopup({onClose, onGoVIP, lang="es"}){
 
         {/* Badge */}
         <div style={{textAlign:"center",marginBottom:12}}>
-          <span style={{display:"inline-block",background:"rgba(0,232,122,.12)",border:"1px solid rgba(0,232,122,.35)",borderRadius:20,padding:"3px 14px",fontSize:10,fontWeight:800,color:"#00e87a",letterSpacing:2}}>NEXO TRADE VIP</span>
+          <span style={{animation:"nvp-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(0,232,122,.15)",border:"1px solid rgba(0,232,122,.4)",borderRadius:20,padding:"3px 14px",fontSize:10,fontWeight:800,color:"#00e87a",letterSpacing:2}}>PREMIUM — LIMITED OFFER</span>
         </div>
 
         {/* Title */}
@@ -6231,13 +6222,14 @@ function VipPopup({onClose, onGoVIP, lang="es"}){
           Unlock <span style={{color:"#00e87a"}}>NexoTrade Pro</span>
         </div>
         <div style={{textAlign:"center",color:"rgba(255,255,255,.5)",fontSize:13,marginBottom:18,lineHeight:1.5}}>
-          Real signals, institutional flow, AI picks — all in one place.
+          Join 2,847 traders already inside. Real signals, institutional flow, AI picks — all in one place.
         </div>
 
         {/* Benefits grid */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:20}}>
-          {["Smart Money Flow","Weekly AI Picks","52 Guru Portfolios","Pro Screener","Oracle AI Signals","Earnings Alerts"].map(t=>(
-            <div key={t} style={{display:"flex",alignItems:"center",background:"rgba(0,232,122,.06)",border:"1px solid rgba(0,232,122,.12)",borderRadius:10,padding:"8px 12px"}}>
+          {[["🐋","Smart Money Flow"],["💡","Weekly AI Picks"],["🏛️","52 Guru Portfolios"],["🛠️","Pro Screener"],["🔮","Oracle AI Signals"],["📅","Earnings Alerts"]].map(([ic,t])=>(
+            <div key={t} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,232,122,.06)",border:"1px solid rgba(0,232,122,.12)",borderRadius:10,padding:"8px 10px"}}>
+              <span style={{fontSize:14}}>{ic}</span>
               <span style={{fontSize:11,fontWeight:700,color:"#e0eaf8"}}>{t}</span>
             </div>
           ))}
@@ -6256,7 +6248,7 @@ function VipPopup({onClose, onGoVIP, lang="es"}){
         {/* CTA */}
         <div onClick={onGoVIP} style={{animation:"nvp-glow 2s ease-in-out infinite",position:"relative",overflow:"hidden",background:"linear-gradient(135deg,#00e87a,#00b85e)",borderRadius:14,padding:"14px 20px",textAlign:"center",color:"#000",fontWeight:900,fontSize:15,cursor:"pointer",letterSpacing:.3}}>
           <div style={{position:"absolute",top:0,bottom:0,width:"40%",background:"rgba(255,255,255,.2)",filter:"blur(12px)",animation:"nvp-shine 2.5s ease-in-out infinite",transform:"skewX(-20deg)"}}/>
-          {lang==="en"?"Get Annual VIP — $79/year →":"Obtener VIP Anual — $79/año →"}
+          🎉 Get Annual Premium — $79/year →
         </div>
         <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"rgba(255,255,255,.25)"}}>
           ✓ Instant access &nbsp;✓ Cancel anytime &nbsp;✓ Secure via Stripe
@@ -6404,7 +6396,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"You are a Premium member!":"¡Eres miembro Premium!"}</h1>
                 <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>{isEN?"You have full access to all exclusive features.":"Tienes acceso completo a todas las funciones exclusivas."}</p>
                 <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-                  {(isEN?["PREMIUM Ideas","13F Gurus","Institutional Flow","Screener","Oracle AI","Global Radar","Trading Terminal","Unlimited AI","SEC Insiders"]:["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","Oracle IA","Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","Insiders SEC"]).map(b=>(
+                  {(isEN?["💡 PREMIUM Ideas","🏛️ 13F Gurus","🐋 Institutional Flow","🛠️ Screener","Oracle AI","Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","SEC Insiders"]:["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","Oracle IA","Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","Insiders SEC"]).map(b=>(
                     <span key={b} style={{background:C.bull+"22",color:C.bull,border:`1px solid ${C.bull}44`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700}}>{b}</span>
                   ))}
                 </div>
@@ -8765,17 +8757,17 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
   const toggle=()=>{ if(!open&&btnRef.current){const r=btnRef.current.getBoundingClientRect();setPos({left:Math.max(8,Math.min(r.left,(window.innerWidth||1000)-628)),top:r.bottom+6});} setOpen(o=>!o); };
   const go=idx=>{setOpen(false);onNavigate&&onNavigate(idx);};
   const groups=[
-    {t:isEN?"Calendars":"Calendarios", items:[
+    {t:isEN?"📅 Calendars":"📅 Calendarios", items:[
       [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
-    {t:isEN?"Calculators":"Calculadoras", items:[
+    {t:isEN?"🧮 Calculators":"🧮 Calculadoras", items:[
       ["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
-    {t:isEN?"Currencies":"Divisas", items:[
+    {t:isEN?"💱 Currencies":"💱 Divisas", items:[
       [isEN?"Currency Converter":"Conversor",53],["Heat Map",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
-    {t:isEN?"Investing Tools":"Inversión", items:[
+    {t:isEN?"📊 Investing Tools":"📊 Inversión", items:[
       ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56],[isEN?"Track Record":"Track Record",51]]},
-    {t:isEN?"Markets":"Mercados", items:[
+    {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
       [isEN?"Live Markets":"Mercado en Vivo",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20]]},
-    {t:isEN?"Education":"Educación", items:[
+    {t:isEN?"📚 Education":"📚 Educación", items:[
       ["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
   const navBtn = variant==="nav";
@@ -8784,7 +8776,7 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
       <button ref={btnRef} onClick={toggle} style={navBtn
         ? {display:"flex",alignItems:"center",gap:7,height:52,padding:"0 18px",border:"none",borderBottom:`2.5px solid ${open?"#2196F3":"transparent"}`,background:open?"rgba(33,150,243,0.06)":"transparent",color:open?"#2196F3":"#1A5FAD",fontSize:14,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit"}
         : {display:"flex",alignItems:"center",gap:6,background:open?"rgba(15,76,129,0.1)":"transparent",border:`1px solid ${open?"rgba(15,76,129,0.35)":"rgba(15,76,129,0.2)"}`,borderRadius:10,padding:"7px 13px",cursor:"pointer",color:"#0F4C81",fontSize:13,fontWeight:800,fontFamily:"inherit",whiteSpace:"nowrap"}}>
-        {isEN?"Tools":"Herramientas"} <span style={{fontSize:9}}>▾</span>
+        🧰 {isEN?"Tools":"Herramientas"} <span style={{fontSize:9}}>▾</span>
       </button>
       {open&&(
         <div style={{position:"fixed",left:pos.left,top:pos.top,background:"#fff",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 50px rgba(0,0,0,0.22)",zIndex:99995,padding:16,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(175px,1fr))",gap:"6px 22px",width:"min(620px,94vw)",maxHeight:"min(74vh,580px)",overflowY:"auto"}}>
@@ -8810,13 +8802,13 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
   const isEN=lang==="en";
   const go=idx=>{onClose();onNavigate(idx);};
   const SECTIONS=[
-    {t:isEN?"Main":"Principal",items:[["Feed",0],["Stock Pick IA",3],[isEN?"Live Markets":"Mercado en Vivo",7],["Earnings",6],[isEN?"News":"Noticias",5],[isEN?"Messages":"Mensajes",22],[""+(isEN?"Leaderboard":"Ranking"),40]]},
-    {t:isEN?"Calendars":"Calendarios",items:[[isEN?"Economic":"Económico",14],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
-    {t:isEN?"Calculators":"Calculadoras",items:[["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
-    {t:isEN?"Currencies":"Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
-    {t:isEN?"Investing":"Inversión",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
-    {t:isEN?"Markets":"Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
-    {t:isEN?"Education":"Educación",items:[["Webinars",11],[isEN?"Academy":"Academia",12]]},
+    {t:isEN?"Main":"Principal",items:[["🔥 Feed",0],["⚡ Stock Pick IA",3],[isEN?"📡 Live Markets":"📡 Mercado en Vivo",7],["📅 Earnings",6],[isEN?"📰 News":"📰 Noticias",5],[isEN?"💬 Messages":"💬 Mensajes",22],["🏆 "+(isEN?"Leaderboard":"Ranking"),40]]},
+    {t:isEN?"📅 Calendars":"📅 Calendarios",items:[[isEN?"Economic":"Económico",14],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
+    {t:isEN?"🧮 Calculators":"🧮 Calculadoras",items:[["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
+    {t:isEN?"💱 Currencies":"💱 Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
+    {t:isEN?"📊 Investing":"📊 Inversión",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
+    {t:isEN?"🌐 Markets":"🌐 Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
+    {t:isEN?"📚 Education":"📚 Educación",items:[["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
   return(<>
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:99996,backdropFilter:"blur(2px)"}}/>
@@ -8827,8 +8819,8 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
       </div>
       <div style={{padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
         {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:12,padding:"11px",color:"#1B1303",fontWeight:900,fontSize:14,cursor:"pointer"}}>✦ {isEN?"Go Premium — $15.99/mo":"Hazte Premium — $15.99/mes"}</button>}
-        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"none",border:"none",marginTop:-2,color:"#10B981",fontWeight:800,fontSize:11.5,cursor:"pointer",textAlign:"center"}}>{isEN?"or $79/year — save $112 (59% off)":"o $79/año — ahorra $112 (59% off)"}</button>}
-        <button onClick={()=>{onClose();onAI&&onAI();}} style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:12,padding:"11px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer"}}>✦ {isEN?"Ask the AI":"Preguntar a la IA"}</button>
+        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"none",border:"none",marginTop:-2,color:"#10B981",fontWeight:800,fontSize:11.5,cursor:"pointer",textAlign:"center"}}>{isEN?"💡 or $79/year — save $112 (59% off)":"💡 o $79/año — ahorra $112 (59% off)"}</button>}
+        <button onClick={()=>{onClose();onAI&&onAI();}} style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:12,padding:"11px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer"}}>🤖 {isEN?"Ask the AI":"Preguntar a la IA"}</button>
       </div>
       <div style={{padding:"0 10px 28px"}}>
         {SECTIONS.map(s=>(
@@ -9432,8 +9424,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       })()}
 
 
-      {/* ── BANNERS AFILIADOS ROTATIVOS — solo para free users ── */}
-      {!effectivePremium && <AffiliateBanner/>}
+      {/* ── BANNERS AFILIADOS ROTATIVOS ── */}
+      <AffiliateBanner/>
 
       {/* ── DISCLAIMER ── */}
       <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
@@ -25206,7 +25198,6 @@ export default function App(){
     return()=>clearInterval(t);
   },[]);
   const [lang,setLang]         = useState(()=>{ try{ const s=localStorage.getItem("nexo-lang"); if(s==="es"||s==="en") return s; /* Auto-detección: español si el navegador del visitante es hispano; inglés para el resto del mundo */ const navs=(typeof navigator!=="undefined")?((navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||navigator.userLanguage||"en"]):["en"]; return navs.some(l=>String(l).toLowerCase().startsWith("es"))?"es":"en"; }catch{ return "en"; } });
-  const isEN = lang === "en"; // FIX: declarado en App() para evitar ReferenceError en JSX del navbar
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
   const [showVipPopup,setVipPopup] = useState(false);
@@ -25928,12 +25919,12 @@ export default function App(){
                 </a>
               );
             })()}
-            {/* Post patrocinado completo cada 5 posts — solo free users */}
-            {!effectivePremium && (i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
+            {/* Post patrocinado completo cada 5 posts */}
+            {(i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
             )}
-            {/* SmartCredit afiliado cada 8 posts — solo free users */}
-            {!effectivePremium && (i+1)%8===0 && (
+            {/* SmartCredit afiliado cada 8 posts */}
+            {(i+1)%8===0 && (
               <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
                 style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,rgba(15,76,129,0.06),rgba(16,185,129,0.04))",border:"1.5px solid rgba(15,76,129,0.18)",borderRadius:14,padding:"13px 16px",margin:"6px 0",textDecoration:"none",transition:"all 0.18s"}}
                 onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.11),rgba(16,185,129,0.07))";e.currentTarget.style.borderColor="rgba(15,76,129,0.38)";}}
@@ -26693,7 +26684,7 @@ export default function App(){
                   ))}
                 </div>
                 <div style={{flex:1}}>
-                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{communityCount.toLocaleString("en-US")} {lang==="en"?"active traders":"traders activos"}</div>
+                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{animatedCount.toLocaleString("es-MX")} {lang==="en"?"active traders":"traders activos"}</div>
                   <div style={{display:"flex",gap:2,marginTop:2}}>
                     {"⭐⭐⭐⭐⭐".split("").map((s,i)=><span key={i} style={{fontSize:12}}>{s}</span>)}
                     <span style={{fontSize:11,color:"#94a3b8",marginLeft:4}}>4.9/5 · 840+ {lang==="en"?"reviews":"reseñas"}</span>
@@ -27099,7 +27090,7 @@ export default function App(){
       <Footer setPage={(p)=>{setPage(p);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} onAuth={()=>setAuth("register")} lang={lang}/>
 
       {/* BANNER AFILIADOS MÓVIL — fijo al pie, solo en móvil */}
-      {!user && !effectivePremium && <MobileAffiliateBanner/>}
+      {!user && <MobileAffiliateBanner/>}
 
       {/* Mobile logout removed — sign out available in top nav settings */}
 
@@ -27142,36 +27133,46 @@ export default function App(){
         </div>
       )}
 
-      {/* ── EMAIL CAPTURE — fixed bottom bar (no full-screen interrupt) ── */}
+      {/* ── POP-UP CAPTURA DE EMAIL ── */}
       {showEmailPopup && !user && (
-        <div style={{position:"fixed",bottom:70,left:0,right:0,zIndex:9500,display:"flex",justifyContent:"center",padding:"0 12px",pointerEvents:"none"}}>
-          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(15,76,129,0.4)",borderRadius:16,padding:"12px 16px",maxWidth:480,width:"100%",boxShadow:"0 -4px 32px rgba(0,0,0,0.5)",pointerEvents:"auto",display:"flex",alignItems:"center",gap:12,animation:"nexo-slidein 0.4s ease"}}>
-            <div style={{flex:1,minWidth:0}}>
-              {!emailPopupSent ? (
-                <form onSubmit={(e)=>{
-                  e.preventDefault();
-                  const email = e.target.email.value;
-                  if(!email) return;
-                  try{ supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
-                  try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
-                  setEmailPopupSent(true);
-                  localStorage.setItem("nexo-email-popup-seen","1");
-                }} style={{display:"flex",gap:8,alignItems:"center"}}>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{color:"#fff",fontWeight:700,fontSize:12,marginBottom:4}}>{lang==="en"?"Get the weekly pick free — every Monday":"Recibe el pick semanal gratis — cada lunes"}</div>
-                    <input name="email" type="email" required placeholder={lang==="en"?"your@email.com":"tu@email.com"}
-                      style={{width:"100%",background:"rgba(255,255,255,0.07)",border:"1px solid rgba(15,76,129,0.4)",borderRadius:8,padding:"8px 10px",color:"#fff",fontSize:13,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
-                  </div>
-                  <button type="submit" style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:9,padding:"10px 14px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{lang==="en"?"Subscribe →":"Suscribir →"}</button>
-                </form>
-              ) : (
-                <div style={{color:"#10b981",fontWeight:700,fontSize:13}}>✅ {lang==="en"?"Done! You’ll get the pick this Monday.":"¡Listo! Te llegará el pick este lunes."}</div>
-              )}
-            </div>
-            <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{background:"none",border:"none",color:"#475569",fontSize:18,cursor:"pointer",lineHeight:1,flexShrink:0,padding:"2px 4px"}}>✕</button>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}}>
+          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:24,padding:"40px 36px",maxWidth:440,width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",position:"relative",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",color:"#475569",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
+            {/* Ícono */}
+            <div style={{width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#0F4C81,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,margin:"0 auto 20px",boxShadow:"0 0 32px rgba(15,76,129,0.4)"}}>🎯</div>
+            <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:22,fontWeight:900}}>Recibe el pick de la semana gratis</h3>
+            <p style={{margin:"0 0 24px",color:"#64748b",fontSize:14,lineHeight:1.6}}>Cada lunes a las 9am te enviamos el pick <strong style={{color:"#fff"}}>más votado por la comunidad</strong> directo a tu email. Sin spam.</p>
+            {!emailPopupSent ? (
+              <form onSubmit={(e)=>{
+                e.preventDefault();
+                const email = e.target.email.value;
+                if(!email) return;
+                // Fire-and-forget: nunca esperar a Supabase (no bloquear el botón)
+                try{ supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
+                try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
+                setEmailPopupSent(true);
+                localStorage.setItem("nexo-email-popup-seen","1");
+              }}>
+                <div style={{display:"flex",gap:8,marginBottom:12}}>
+                  <input name="email" type="email" required placeholder="tu@email.com"
+                    style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:10,padding:"12px 14px",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
+                  <button type="submit" style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:10,padding:"12px 18px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",whiteSpace:"nowrap"}}>Recibir →</button>
+                </div>
+                <div style={{color:"#1e3a5f",fontSize:11}}>🔒 Sin spam. Cancela cuando quieras.</div>
+              </form>
+            ) : (
+              <div style={{background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.3)",borderRadius:12,padding:"18px",color:"#10b981",fontWeight:700,fontSize:15}}>
+                ✅ ¡Listo! Te llegará el pick este lunes.
+              </div>
+            )}
+            <button onClick={()=>setAuth("register")} style={{marginTop:16,background:"transparent",border:"none",color:"#475569",fontSize:12,cursor:"pointer",textDecoration:"underline"}}>
+              O crear cuenta gratis y verlo ahora →
+            </button>
           </div>
         </div>
-      )}{/* ── CHATBOT FLOTANTE IA ── */}
+      )}
+
+      {/* ── CHATBOT FLOTANTE IA ── */}
       {/* Robot flotante DESACTIVADO (pedido usuaria: ocupaba mucho espacio). La IA se abre desde el botón "IA" del navbar/barra inferior. */}
       {false && !showAI && !aiHidden && (
         <div className="nexo-ai-fab" style={{
@@ -27264,18 +27265,18 @@ export default function App(){
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase} onOpenAlerts={()=>setAlerts(true)} alertCount={alertCount}/>}
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
-      {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
+      {/* ── BOTTOM NAV MÓVIL (estilo Robinhood/Instagram) — visible solo en móvil vía CSS ── */}
       <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"#FFFFFF",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
         {[
-          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-5h4v5h5V9.5"/></svg>,l:"Home",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
-          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>,l:"Feed",on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},active:false},
-          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>,l:"AI",on:()=>setShowAI(true),active:false},
-          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>,l:"Markets",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
-          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,l:"Pro",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
+          {ic:"🏠",l:lang==="en"?"Home":"Inicio",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
+          {ic:"🔥",l:"Feed",on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},active:false},
+          {ic:"🤖",l:"IA",on:()=>setShowAI(true),active:false},
+          {ic:"⚡",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
+          {ic:"📡",l:lang==="en"?"Live":"En Vivo",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
         ].map((b,i)=>(
-          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0,transition:"color 0.15s"}}>
-            {b.svg}
-            <span style={{fontSize:9.5,fontWeight:b.active?800:600,letterSpacing:"0.01em"}}>{b.l}</span>
+          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0}}>
+            <span style={{fontSize:19,lineHeight:1}}>{b.ic}</span>
+            <span style={{fontSize:9.5,fontWeight:b.active?800:600}}>{b.l}</span>
           </button>
         ))}
       </div>
