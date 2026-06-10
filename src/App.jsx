@@ -6364,12 +6364,12 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   ];
 
   const WEBINARS = [
-    {titulo:"Análisis técnico para principiantes", fecha:"Lun 2 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar1, nivel:"Principiante", duracion:"90 min", desc:"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
-    {titulo:"Bitcoin: ciclos y análisis on-chain",  fecha:"Mié 4 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar2, nivel:"Intermedio",   duracion:"2 horas", desc:"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
-    {titulo:"Cómo leer un earnings report",         fecha:"Vie 6 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar3, nivel:"Principiante", duracion:"75 min", desc:"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
-    {titulo:"Opciones: estrategias defensivas",     fecha:"Lun 9 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:STRIPE_LINKS.webinar4, nivel:"Avanzado",     duracion:"2.5 horas", desc:"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
-    {titulo:"Cripto DeFi: yield farming y staking", fecha:"Mié 11 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar5, nivel:"Intermedio",   duracion:"2 horas", desc:"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
-    {titulo:"Trading de dividendos — renta pasiva",  fecha:"Vie 13 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:STRIPE_LINKS.webinar6, nivel:"Principiante", duracion:"90 min", desc:"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2025."},
+    {titulo:isEN?"Technical Analysis for Beginners":"Análisis técnico para principiantes", fecha:isEN?"Mon Jun 16":"Lun 16 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar1, nivel:isEN?"Beginner":"Principiante", duracion:"90 min", desc:isEN?"Learn to read charts, identify support & resistance, and the 5 most profitable patterns in the market.":"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
+    {titulo:isEN?"Bitcoin: Cycles & On-Chain Analysis":"Bitcoin: ciclos y análisis on-chain",  fecha:isEN?"Wed Jun 18":"Mié 18 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar2, nivel:isEN?"Intermediate":"Intermedio",   duracion:isEN?"2 hours":"2 horas", desc:isEN?"How to anticipate Bitcoin cycles using on-chain data: MVRV, NVT, Hodl Waves and more.":"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
+    {titulo:isEN?"How to Read an Earnings Report":"Cómo leer un earnings report",         fecha:isEN?"Fri Jun 20":"Vie 20 Jun", hora:"18:30 EST", instructor:"NvidiaChad",  spots:60, spotsLeft:23, emoji:"📊", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar3, nivel:isEN?"Beginner":"Principiante", duracion:isEN?"75 min":"75 min", desc:isEN?"Everything you need to trade earnings: EPS, revenue, guidance and how to position yourself.":"Todo lo que necesitas saber para operar earnings: EPS, revenue, guidance y cómo posicionarte."},
+    {titulo:isEN?"Options: Defensive Strategies":"Opciones: estrategias defensivas",     fecha:isEN?"Mon Jun 23":"Lun 23 Jun", hora:"19:00 EST", instructor:"SPY_Trader",  spots:35, spotsLeft:7,  emoji:"🛡️", precio:79, precioVip:39, stripeLink:STRIPE_LINKS.webinar4, nivel:isEN?"Advanced":"Avanzado",     duracion:isEN?"2.5 hours":"2.5 horas", desc:isEN?"Covered calls, protective puts and iron condors explained step by step with real examples.":"Covered calls, protective puts y iron condors explicados paso a paso con ejemplos reales."},
+    {titulo:isEN?"Crypto DeFi: Yield Farming & Staking":"Cripto DeFi: yield farming y staking", fecha:isEN?"Wed Jun 25":"Mié 25 Jun",hora:"20:00 EST", instructor:"CryptoWolf",  spots:40, spotsLeft:18, emoji:"🌾", precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar5, nivel:isEN?"Intermediate":"Intermedio",   duracion:isEN?"2 hours":"2 horas", desc:isEN?"Generate passive income with your crypto: the best DeFi protocols, risks and how to start.":"Genera ingresos pasivos con tus cryptos: los mejores protocolos DeFi, riesgos y cómo empezar."},
+    {titulo:isEN?"Dividend Trading — Passive Income":"Trading de dividendos — renta pasiva",  fecha:isEN?"Fri Jun 27":"Vie 27 Jun",hora:"18:30 EST", instructor:"NvidiaChad",  spots:55, spotsLeft:31, emoji:"💰", precio:39, precioVip:19, stripeLink:STRIPE_LINKS.webinar6, nivel:isEN?"Beginner":"Principiante", duracion:"90 min", desc:isEN?"Build a dividend portfolio that generates monthly income. The best stocks for 2026.":"Construye un portafolio de dividendos que genere ingresos mensuales. Las mejores acciones para 2026."},
   ];
 
   const ALERT_TYPES = isEN ? [
@@ -9284,7 +9284,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         <div style={{...card,background:"linear-gradient(145deg,#1E1B4B,#2D1B69)",border:"1px solid rgba(15,94,104,0.3)",textAlign:"center"}}>
           <div style={{fontSize:26,marginBottom:6}}>✦</div>
           <div style={{fontWeight:800,color:"#fff",fontSize:14,marginBottom:4}}>PREMIUM Member</div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>{lang==="en"?<>Exclusive signals, unlimited AI<br/>and access to all the data</>:<>{lang==="en"?"Exclusive signals, unlimited AI":"Señales exclusivas, IA ilimitada"}<br/>y acceso a todos los datos</>}</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:10,lineHeight:1.6}}>{lang==="en"?<>Exclusive signals, unlimited AI<br/>and access to all the data</>:<>Señales exclusivas, IA ilimitada<br/>y acceso a todos los datos</>}</div>
           <div style={{fontSize:22,fontWeight:900,color:"#fff",marginBottom:10}}>
             <span style={{color:"#FCD34D"}}>$15.99</span>
             <span style={{fontSize:12,color:"rgba(255,255,255,0.4)",fontWeight:400}}>{lang==="en"?"/mo":"/mes"}</span>
@@ -11946,64 +11946,70 @@ function AcademiaPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
 ═══════════════════════════════════════════════════════════════ */
 const WEBINARS_LIST = [
   {
-    titulo:"Análisis Técnico con TradingView",
+    titulo:"Análisis Técnico con TradingView", tituloEn:"Technical Analysis with TradingView",
     fuente:"TradingView Education",
-    emoji:"📊", nivel:"Principiante", duracion:"60 min", gratis:true,
-    badge:"GRATIS",
+    emoji:"📊", nivel:"Principiante", nivelEn:"Beginner", duracion:"60 min", gratis:true,
+    badge:"GRATIS", badgeEn:"FREE",
     desc:"Serie oficial de TradingView: aprende a usar gráficas, indicadores, alertas y Pine Script desde cero. Acceso inmediato.",
+    descEn:"Official TradingView series: learn to use charts, indicators, alerts and Pine Script from scratch. Instant access.",
     url:"https://www.tradingview.com/education/?aff_id=167149",
     afiliado:true,
-    tags:["Gráficas","Indicadores","Alertas"],
+    tags:["Gráficas","Indicadores","Alertas"], tagsEn:["Charts","Indicators","Alerts"],
   },
   {
-    titulo:"Introducción a Futuros y Opciones",
+    titulo:"Introducción a Futuros y Opciones", tituloEn:"Introduction to Futures & Options",
     fuente:"CME Group Education",
-    emoji:"🏛️", nivel:"Principiante", duracion:"45 min", gratis:true,
-    badge:"GRATIS",
+    emoji:"🏛️", nivel:"Principiante", nivelEn:"Beginner", duracion:"45 min", gratis:true,
+    badge:"GRATIS", badgeEn:"FREE",
     desc:"CME Group — el mayor mercado de futuros del mundo — ofrece webinars gratuitos sobre futuros, opciones y gestión de riesgo.",
+    descEn:"CME Group — the world's largest futures market — offers free webinars on futures, options and risk management.",
     url:"https://www.cmegroup.com/education/webinars.html",
     afiliado:false,
-    tags:["Futuros","Opciones","Riesgo"],
+    tags:["Futuros","Opciones","Riesgo"], tagsEn:["Futures","Options","Risk"],
   },
   {
-    titulo:"Estrategias de Inversión para Principiantes",
+    titulo:"Estrategias de Inversión para Principiantes", tituloEn:"Investment Strategies for Beginners",
     fuente:"Charles Schwab",
-    emoji:"🏦", nivel:"Principiante", duracion:"90 min", gratis:true,
-    badge:"GRATIS",
+    emoji:"🏦", nivel:"Principiante", nivelEn:"Beginner", duracion:"90 min", gratis:true,
+    badge:"GRATIS", badgeEn:"FREE",
     desc:"Schwab ofrece webinars semanales gratuitos sobre acciones, ETFs, opciones y planificación financiera. Sin cuenta requerida.",
+    descEn:"Schwab offers free weekly webinars on stocks, ETFs, options and financial planning. No account required.",
     url:"https://www.schwab.com/learn/online-courses",
     afiliado:false,
-    tags:["ETFs","Acciones","Portafolio"],
+    tags:["ETFs","Acciones","Portafolio"], tagsEn:["ETFs","Stocks","Portfolio"],
   },
   {
-    titulo:"Análisis de Mercados con TradingView Pro",
+    titulo:"Análisis de Mercados con TradingView Pro", tituloEn:"Market Analysis with TradingView Pro",
     fuente:"TradingView Webinars",
-    emoji:"📈", nivel:"Intermedio", duracion:"60 min", gratis:true,
-    badge:"GRATIS",
+    emoji:"📈", nivel:"Intermedio", nivelEn:"Intermediate", duracion:"60 min", gratis:true,
+    badge:"GRATIS", badgeEn:"FREE",
     desc:"Webinars en vivo con traders expertos analizando mercados en tiempo real. Disponibles para todos los usuarios de TradingView.",
+    descEn:"Live webinars with expert traders analyzing markets in real time. Available to all TradingView users.",
     url:"https://www.tradingview.com/webinars/?aff_id=167149",
     afiliado:true,
-    tags:["Análisis","En Vivo","Mercados"],
+    tags:["Análisis","En Vivo","Mercados"], tagsEn:["Analysis","Live","Markets"],
   },
   {
-    titulo:"Trading de Opciones: Nivel Intermedio",
+    titulo:"Trading de Opciones: Nivel Intermedio", tituloEn:"Options Trading: Intermediate Level",
     fuente:"CME Group Education",
-    emoji:"🛡️", nivel:"Intermedio", duracion:"60 min", gratis:true,
-    badge:"GRATIS",
+    emoji:"🛡️", nivel:"Intermedio", nivelEn:"Intermediate", duracion:"60 min", gratis:true,
+    badge:"GRATIS", badgeEn:"FREE",
     desc:"Webinar de CME sobre estrategias con opciones: calls cubiertos, puts protectoras y spreads. Material descargable incluido.",
+    descEn:"CME webinar on options strategies: covered calls, protective puts and spreads. Downloadable materials included.",
     url:"https://www.cmegroup.com/education/webinars.html",
     afiliado:false,
-    tags:["Opciones","Spreads","Hedging"],
+    tags:["Opciones","Spreads","Hedging"], tagsEn:["Options","Spreads","Hedging"],
   },
   {
-    titulo:"Cripto y Bitcoin: Análisis On-Chain",
+    titulo:"Cripto y Bitcoin: Análisis On-Chain", tituloEn:"Crypto & Bitcoin: On-Chain Analysis",
     fuente:"TradingView Crypto",
-    emoji:"₿", nivel:"Intermedio", duracion:"75 min", gratis:true,
-    badge:"GRATIS",
+    emoji:"₿", nivel:"Intermedio", nivelEn:"Intermediate", duracion:"75 min", gratis:true,
+    badge:"GRATIS", badgeEn:"FREE",
     desc:"Aprende a leer métricas on-chain de Bitcoin y Ethereum usando las herramientas de TradingView: MVRV, NVT, dominancia y más.",
+    descEn:"Learn to read Bitcoin and Ethereum on-chain metrics using TradingView tools: MVRV, NVT, dominance and more.",
     url:"https://www.tradingview.com/education/bitcoin/?aff_id=167149",
     afiliado:true,
-    tags:["Bitcoin","On-Chain","Crypto"],
+    tags:["Bitcoin","On-Chain","Crypto"], tagsEn:["Bitcoin","On-Chain","Crypto"],
   },
 ];
 
@@ -12066,10 +12072,14 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
       {/* Webinar cards */}
       <div style={{display:"flex",flexDirection:"column",gap:14}}>
         {filtered.map((w,i)=>{
-          const nivelColor = w.nivel==="Intermedio"?"#f59e0b":"#10b981";
+          const nivelLabel = isEN ? (w.nivelEn||w.nivel) : w.nivel;
+          const nivelColor = (w.nivel==="Intermedio"||w.nivelEn==="Intermediate")?"#f59e0b":"#10b981";
+          const wTitulo = isEN ? (w.tituloEn||w.titulo) : w.titulo;
+          const wDesc   = isEN ? (w.descEn||w.desc) : w.desc;
+          const wTags   = isEN ? (w.tagsEn||w.tags) : w.tags;
           return(
             <div key={i} style={{background:C.surface,border:`1px solid ${w.afiliado?"rgba(41,98,255,0.25)":C.border}`,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,position:"relative"}}>
-              {w.afiliado && <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#2962FF,#1d4ed8)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 10px",borderRadius:"0 16px 0 8px",letterSpacing:0.5}}>AFILIADO ACTIVO</div>}
+              {w.afiliado && <div style={{position:"absolute",top:0,right:0,background:"linear-gradient(135deg,#2962FF,#1d4ed8)",color:"#fff",fontSize:9,fontWeight:800,padding:"3px 10px",borderRadius:"0 16px 0 8px",letterSpacing:0.5}}>{isEN?"ACTIVE AFFILIATE":"AFILIADO ACTIVO"}</div>}
               <div style={{padding:"18px 20px",display:"flex",gap:14,alignItems:"flex-start",flexWrap:"wrap"}}>
                 {/* icon */}
                 <div style={{width:52,height:52,borderRadius:14,background:w.afiliado?"rgba(41,98,255,0.15)":C.accentDim,border:`1px solid ${w.afiliado?"rgba(41,98,255,0.3)":C.accent+"33"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>{w.emoji}</div>
@@ -12077,25 +12087,25 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
                 {/* body */}
                 <div style={{flex:1,minWidth:180}}>
                   <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:5}}>
-                    <h3 style={{margin:0,color:C.text,fontSize:14,fontWeight:800}}>{w.titulo}</h3>
-                    <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700}}>{w.nivel}</span>
-                    <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700}}>✅ GRATIS</span>
+                    <h3 style={{margin:0,color:C.text,fontSize:14,fontWeight:800}}>{wTitulo}</h3>
+                    <span style={{background:nivelColor+"22",color:nivelColor,border:`1px solid ${nivelColor}44`,borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700}}>{nivelLabel}</span>
+                    <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700}}>✅ {isEN?"FREE":"GRATIS"}</span>
                   </div>
                   <div style={{fontSize:11,color:C.muted,fontWeight:600,marginBottom:6}}>🏛️ {w.fuente} · ⏱ {w.duracion}</div>
-                  <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.6}}>{w.desc}</p>
+                  <p style={{margin:"0 0 10px",color:C.muted2,fontSize:12,lineHeight:1.6}}>{wDesc}</p>
                   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                    {w.tags.map(t=><span key={t} style={{background:C.border,color:C.muted2,borderRadius:6,padding:"2px 8px",fontSize:11}}>{t}</span>)}
+                    {wTags.map(t=><span key={t} style={{background:C.border,color:C.muted2,borderRadius:6,padding:"2px 8px",fontSize:11}}>{t}</span>)}
                   </div>
                 </div>
 
                 {/* CTA */}
                 <div style={{flexShrink:0,display:"flex",flexDirection:"column",gap:8,alignItems:"center",minWidth:130}}>
-                  <div style={{fontSize:22,fontWeight:900,color:"#00D26A"}}>GRATIS</div>
+                  <div style={{fontSize:22,fontWeight:900,color:"#00D26A"}}>{isEN?"FREE":"GRATIS"}</div>
                   <a href={w.url} target="_blank" rel="noopener noreferrer"
                     style={{display:"block",background:w.afiliado?"linear-gradient(135deg,#2962FF,#1d4ed8)":"linear-gradient(135deg,#10b981,#059669)",border:"none",borderRadius:10,padding:"10px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"center",textDecoration:"none",width:"100%",boxSizing:"border-box"}}>
-                    Ver webinar →
+                    {isEN?"Watch webinar →":"Ver webinar →"}
                   </a>
-                  <div style={{fontSize:10,color:C.muted2,textAlign:"center"}}>🌐 Acceso inmediato</div>
+                  <div style={{fontSize:10,color:C.muted2,textAlign:"center"}}>🌐 {isEN?"Instant access":"Acceso inmediato"}</div>
                 </div>
               </div>
             </div>
