@@ -20342,10 +20342,10 @@ function RadarGlobalPage({lang="es",onBack}){
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div style={{width:'100%',height:mob?'calc(100vh - 112px)':'calc(100vh - 52px)',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:mob?'44px 1fr 30px':'48px 1fr 30px',gridTemplateColumns:mob?'1fr':'260px 1fr 260px',overflow:'hidden'}}>
+    <div style={{width:'100%',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,...(mob?{display:'flex',flexDirection:'column',overflowY:'auto',height:'calc(100vh - 112px)'}:{display:'grid',height:'calc(100vh - 52px)',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'})}}>
       <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
       {/* ── TOPBAR ── */}
-      <div style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:mob?'0 8px':'0 20px',gap:mob?4:12,zIndex:100}}>
+      <div style={{...(mob?{}:{gridColumn:'1/-1'}),flexShrink:0,height:mob?44:48,background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:mob?'0 8px':'0 20px',gap:mob?4:12,zIndex:100}}>
         <div style={{display:'flex',alignItems:'center',gap:mob?6:12}}>
           {onBack&&<button onClick={onBack} style={{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:7,border:`1px solid ${C.br2}`,background:'rgba(0,240,144,.08)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:C.grn,cursor:'pointer',letterSpacing:'.5px'}}>← Back</button>}
           {!mob&&<div style={{display:'flex',alignItems:'center',gap:8}}>
@@ -20370,7 +20370,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── LEFT PANEL ── */}
-      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:`1px solid ${C.br}`,display:mob?'none':'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
         {/* Countdown */}
         <div style={{background:'rgba(0,240,144,.06)',border:'1px solid rgba(0,240,144,.15)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
           <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,marginBottom:4}}>⏰ Next market opens</div>
@@ -20434,7 +20434,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── GLOBE ── */}
-      <div style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)'}}>
+      <div style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)',...(mob?{height:'360px',flexShrink:0}:{flex:1})}}>
         <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'none'}}/>
         {/* Mode toggles — desktop only */}
         {!mob&&<div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
@@ -20529,7 +20529,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── RIGHT PANEL ── */}
-      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:`1px solid ${C.br}`,display:mob?'none':'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
         {/* Traders by country */}
         <div style={pc}>
           <div style={pchd}>Traders by Country (M)</div>
@@ -20581,7 +20581,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── BOTTOM TICKER ── */}
-      <div style={{gridColumn:'1/-1',height:30,background:'rgba(6,12,20,.95)',borderTop:`1px solid ${C.br}`,overflow:'hidden',display:'flex',alignItems:'center',position:'relative',zIndex:50}}>
+      <div style={{...(mob?{}:{gridColumn:'1/-1'}),flexShrink:0,height:30,background:'rgba(6,12,20,.95)',borderTop:`1px solid ${C.br}`,overflow:'hidden',display:'flex',alignItems:'center',position:'relative',zIndex:50}}>
         <div style={{flexShrink:0,padding:'0 12px',fontFamily:MONO2,fontSize:9,fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,borderRight:`1px solid ${C.br}`,zIndex:6}}>MARKETS</div>
         <div style={{overflow:'hidden',flex:1}}>
           <div style={{display:'flex',gap:32,alignItems:'center',fontFamily:MONO2,fontSize:11,whiteSpace:'nowrap',padding:'0 16px',animation:'tickRun 40s linear infinite'}}>
