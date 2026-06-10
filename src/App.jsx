@@ -9646,7 +9646,7 @@ function ReferralSection({ user }) {
 }
 
 // ── USER MENU ─────────────────────────────────────────────────────────────────
-function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
+function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,onNavigate,lang}){
   const t=LANGS[lang];
   const [open,setOpen]=useState(false);
   const lvl=getLevel(user.points);
@@ -9666,7 +9666,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
             <div style={{color:C.muted2,fontSize:11,marginBottom:4}}>{lang==="en"?"Your points":"Tus puntos"}</div>
             <LevelBadge points={user.points} lang={lang}/>
           </div>
-          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},...(ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase())?[{label:"🤝 Affiliate Dashboard",fn:()=>{window.open("/affiliates.html","_blank");setOpen(false);},affiliate:true},{label:"🛡️ Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}]:[]),{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
+          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`💬 Messages`,fn:()=>{if(onNavigate)onNavigate(22);setOpen(false);}},{label:`💼 Portfolio`,fn:()=>{if(onNavigate)onNavigate(37);setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},...(ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase())?[{label:"🤝 Affiliate Dashboard",fn:()=>{window.open("/affiliates.html","_blank");setOpen(false);},affiliate:true},{label:"🛡️ Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}]:[]),{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
             <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:item.admin?"linear-gradient(135deg,#0F5E6822,#4c1d9511)":item.affiliate?"linear-gradient(135deg,#00c87a18,#00c87a08)":"none",border:item.admin?"1px solid #0F5E6844":item.affiliate?"1px solid #00c87a33":"none",cursor:"pointer",color:item.red?C.bear:item.admin?"#a78bfa":item.affiliate?"#00c87a":C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s",marginBottom:(item.admin||item.affiliate)?4:0}}
               onMouseEnter={e=>e.currentTarget.style.background=C.card2}
               onMouseLeave={e=>e.currentTarget.style.background="none"}>
@@ -26844,7 +26844,7 @@ export default function App(){
   sessionStorage.clear();
   try{ await supabase.auth.signOut(); }catch(e){}
   window.location.replace("/");
-}} onProfile={setProfUser} onAlerts={()=>{setPage(39);setShowLanding(false);}} onAdmin={()=>{setPage(99);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} lang={lang}/>
+}} onProfile={setProfUser} onAlerts={()=>{setPage(39);setShowLanding(false);}} onAdmin={()=>{setPage(99);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} lang={lang}/>
               : <div className="nexo-auth-btns"><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></div>
             }
           </div>

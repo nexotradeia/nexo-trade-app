@@ -121,7 +121,7 @@
     ]
   }
   </script>
-  <script type="module" crossorigin src="/assets/index-Bz49bTj7.js"></script>
+  <script type="module" crossorigin src="/assets/index-DWdToHP_.js"></script>
 </head>
 <body>
   <!-- Loader inicial — skeleton con logo animado -->
@@ -146,22 +146,6 @@
 
   <div id="root"></div>
 
-  <!-- ── ERROR CAPTURE (temp debug) ── -->
-  <script>
-    window.__nexoErrors = [];
-    var _origCE = console.error;
-    console.error = function() {
-      var msg = Array.from(arguments).map(function(a){ return a instanceof Error ? a.stack : String(a); }).join(' ');
-      window.__nexoErrors.push(msg);
-      _origCE.apply(console, arguments);
-    };
-    window.onerror = function(msg,src,line,col,err) {
-      window.__nexoErrors.push('onerror: ' + msg + ' @ ' + src + ':' + line);
-    };
-    window.onunhandledrejection = function(e) {
-      window.__nexoErrors.push('unhandled: ' + String(e.reason));
-    };
-  </script>
   <script>
     // Ocultar loader cuando React monta
     window.__nexoLoaderHide = function() {

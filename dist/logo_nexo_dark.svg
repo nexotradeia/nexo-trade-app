@@ -1,0 +1,37 @@
+<svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <linearGradient id="horb1" x1="20" y1="20" x2="160" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/><stop offset="45%" stop-color="#22B8CF"/><stop offset="100%" stop-color="#2DD4A8"/>
+    </linearGradient>
+    <linearGradient id="horb2" x1="40" y1="130" x2="150" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34D399"/><stop offset="60%" stop-color="#22B8CF"/><stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+    <linearGradient id="horb3" x1="20" y1="40" x2="160" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14B8A6"/><stop offset="100%" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <linearGradient id="hbar" x1="75" y1="50" x2="110" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E7490"/><stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+  <!-- átomo -->
+  <ellipse cx="90" cy="75" rx="34" ry="26" fill="#F8FDFF" opacity="0.12"/>
+  <g stroke-width="4" stroke-linecap="round">
+    <ellipse cx="90" cy="75" rx="66" ry="23" stroke="url(#horb3)"/>
+    <ellipse cx="90" cy="75" rx="66" ry="25" stroke="url(#horb1)" transform="rotate(38 90 75)"/>
+    <ellipse cx="90" cy="75" rx="66" ry="25" stroke="url(#horb2)" transform="rotate(-38 90 75)"/>
+  </g>
+  <line x1="78" y1="58" x2="104" y2="92" stroke="url(#hbar)" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="78" cy="58" r="6" fill="#14B8A6"/>
+  <circle cx="104" cy="92" r="6" fill="#10B981"/>
+  <circle cx="90" cy="26"  r="5" fill="#3B82F6"/>
+  <circle cx="90" cy="124" r="5" fill="#8B5CF6"/>
+  <circle cx="25" cy="75"  r="5" fill="#14B8A6"/>
+  <circle cx="156" cy="75" r="5" fill="#10B981"/>
+  <circle cx="119" cy="50" r="4.5" fill="#22D3EE"/>
+  <circle cx="58"  cy="102" r="4.5" fill="#38BDF8"/>
+  <circle cx="116" cy="61" r="5.5" fill="#818CF8"/>
+  <!-- wordmark horizontal -->
+  <text x="178" y="84" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="52" letter-spacing="4" fill="#5EEAD4">NEXO</text>
+  <text x="352" y="84" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="52" letter-spacing="4" fill="#F1F5F9">TRADE</text>
+  <text x="180" y="112" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="14" letter-spacing="3.2" fill="#94A3B8">AI POWERED TRADING COMMUNITY</text>
+</svg>
