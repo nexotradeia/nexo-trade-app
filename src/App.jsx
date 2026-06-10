@@ -1,5 +1,5 @@
 // NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
-import React, { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo, Component } from 'react';
+import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo, Component } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
@@ -9479,7 +9479,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       })()}
 
       {/* ── BANNERS AFILIADOS ROTATIVOS — solo para free users ── */}
-      {!effectivePremium && <AffiliateBanner/>}
+      {!isPremium && <AffiliateBanner/>}
 
       {/* ── DISCLAIMER ── */}
       <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
