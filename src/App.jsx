@@ -19972,14 +19972,20 @@ function RadarGlobalPage({lang="es",onBack}){
 
     function resize(){
       const area=cvs.parentElement;
-      t.W=area.offsetWidth; t.H=area.offsetHeight;
+      const W=area.clientWidth||area.offsetWidth;
+      const H=area.clientHeight||area.offsetHeight;
+      if(W<4||H<4)return; // skip if layout not ready
+      t.W=W; t.H=H;
       cvs.width=t.W; cvs.height=t.H;
       t.R=Math.min(t.W,t.H)*0.42;
       t.CX=t.W/2; t.CY=t.H/2;
     }
     resize();
-    // re-check after CSS layout settles (media queries / flex may shift sizes)
-    const rsTick=setTimeout(()=>resize(),120);
+    // ResizeObserver fires exactly when the container changes (media queries, grid reflow, etc.)
+    const ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(()=>resize()):null;
+    if(ro)ro.observe(cvs.parentElement);
+    // fallback timeout for browsers without ResizeObserver
+    const rsTick=setTimeout(()=>resize(),400);
 
     function ll3d(lat,lon,r){const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;return{x:-r*Math.sin(phi)*Math.cos(theta),y:r*Math.cos(phi),z:r*Math.sin(phi)*Math.sin(theta)};}
     function rot3(p,ry,rx){let x=p.x*Math.cos(ry)-p.z*Math.sin(ry),z=p.x*Math.sin(ry)+p.z*Math.cos(ry),y=p.y;const y2=y*Math.cos(rx)-z*Math.sin(rx),z2=y*Math.sin(rx)+z*Math.cos(rx);return{x,y:y2,z:z2};}
@@ -20081,7 +20087,7 @@ function RadarGlobalPage({lang="es",onBack}){
     cvs.addEventListener('touchend',onTU);
     const onResize=()=>resize();window.addEventListener('resize',onResize);
 
-    return()=>{clearTimeout(rsTick);cancelAnimationFrame(animId);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);cvs.removeEventListener('click',onCLICK);cvs.removeEventListener('touchstart',onTD);cvs.removeEventListener('touchmove',onTM);cvs.removeEventListener('touchend',onTU);window.removeEventListener('resize',onResize);};
+    return()=>{if(ro)ro.disconnect();clearTimeout(rsTick);cancelAnimationFrame(animId);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);cvs.removeEventListener('click',onCLICK);cvs.removeEventListener('touchstart',onTD);cvs.removeEventListener('touchmove',onTM);cvs.removeEventListener('touchend',onTU);window.removeEventListener('resize',onResize);};
   },[]);
 
   // sync toggle state → T ref
