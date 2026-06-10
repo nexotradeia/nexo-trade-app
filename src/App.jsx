@@ -25380,6 +25380,161 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
   );
 }
 // ─────────────────────────────────────────────────────────────────────────────
+// ── PRO PAGE ─────────────────────────────────────────────────────────────────
+function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
+  // ── design tokens ──
+  var PAGE="#f6f7f9",SURFACE="#fff",S2="#f3f4f7";
+  var HAIR="#e8eaee";
+  var INK="#0a0d14",INK2="#5b616e",INK3="#9aa0ab";
+  var BLUE="#1f6bff",BLUEBG="rgba(31,107,255,.10)";
+  var GOLD="#b07d11",GOLDBG="rgba(176,125,17,.12)";
+  var SH="0 1px 2px rgba(10,13,20,.04),0 8px 24px rgba(10,13,20,.05)";
+
+  // ── lock icon SVG ──
+  var LockIcon=(
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>
+    </svg>
+  );
+  var ArrowIcon=(color)=>(
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M13 6l6 6-6 6"/>
+    </svg>
+  );
+
+  // ── tool definitions ──
+  var tools=[
+    {
+      name:"Trading Terminal",
+      desc:"Live price, P&L, multi-timeframe charts, screener and journal — all in one screen.",
+      page:9,
+      icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>,
+    },
+    {
+      name:"Screener",
+      desc:"Filter the entire market by price, volume, fundamentals and AI signals.",
+      page:17,
+      icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8"><path d="M4 6h16M7 12h10M10 18h4"/></svg>,
+    },
+    {
+      name:"Smart Money Flow",
+      desc:"Track institutional and options flow — see where the big money is moving.",
+      page:20,
+      icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8"><path d="M4 18l5-6 4 4 7-9"/><path d="M21 7h-5M21 7v5"/></svg>,
+    },
+    {
+      name:"13F Gurus",
+      desc:"See what the top hedge funds and investors are holding and buying.",
+      page:19,
+      icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6"/></svg>,
+    },
+    {
+      name:"SEC Insiders",
+      desc:"Real-time insider buys and sells filed with the SEC.",
+      page:35,
+      icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v3l2 2"/></svg>,
+    },
+    {
+      name:"Global Radar",
+      desc:"Every exchange in real time — NYSE, NASDAQ, Europe, Asia, Crypto.",
+      page:44,
+      icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>,
+    },
+  ];
+
+  return(
+    <div style={{background:PAGE,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <div style={{maxWidth:960,margin:"0 auto"}}>
+
+        {/* Page header */}
+        <div style={{marginBottom:18}}>
+          <h1 style={{fontSize:24,fontWeight:800,letterSpacing:"-0.03em",color:INK}}>Pro tools</h1>
+          <p style={{fontSize:14,color:INK2,marginTop:6}}>Institutional-grade tools used by serious traders. Unlock all of them with Pro.</p>
+        </div>
+
+        {/* Upgrade banner — only for free users */}
+        {!isPremium&&(
+          <div style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"22px 26px",display:"flex",alignItems:"center",gap:20,marginBottom:22,position:"relative",overflow:"hidden",flexWrap:"wrap"}}>
+            <div style={{position:"absolute",right:-40,top:-60,width:260,height:260,borderRadius:"50%",background:"rgba(255,255,255,.08)",pointerEvents:"none"}}/>
+            <div style={{flex:1,position:"relative",zIndex:1,minWidth:200}}>
+              <h2 style={{fontSize:19,fontWeight:800,color:"#fff",letterSpacing:"-0.02em"}}>Unlock all 6 Pro tools</h2>
+              <p style={{fontSize:13.5,color:"rgba(255,255,255,.85)",marginTop:5}}>Terminal, Screener, Smart Money Flow, 13F Gurus, SEC Insiders &amp; Global Radar.</p>
+            </div>
+            <div style={{position:"relative",zIndex:1,textAlign:"right",color:"#fff",flexShrink:0}}>
+              <div style={{fontSize:26,fontWeight:800,fontVariantNumeric:"tabular-nums"}}>$6.58<span style={{fontSize:14,fontWeight:600,opacity:.85}}>/mo</span></div>
+              <div style={{fontSize:11.5,opacity:.85,marginTop:1}}>billed annually · 3 days free</div>
+            </div>
+            <button onClick={()=>{if(!user&&onNeedAuth)onNeedAuth();}} style={{position:"relative",zIndex:1,background:"#fff",color:"#0a2c7a",fontSize:14,fontWeight:700,padding:"13px 22px",borderRadius:11,border:"none",cursor:"pointer",flexShrink:0,fontFamily:"inherit"}}>
+              Start free trial
+            </button>
+          </div>
+        )}
+
+        {/* Pro welcome banner — for premium users */}
+        {isPremium&&(
+          <div style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"18px 26px",display:"flex",alignItems:"center",gap:16,marginBottom:22,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",right:-40,top:-60,width:260,height:260,borderRadius:"50%",background:"rgba(255,255,255,.08)",pointerEvents:"none"}}/>
+            <div style={{position:"relative",zIndex:1,flex:1}}>
+              <div style={{fontSize:17,fontWeight:800,color:"#fff"}}>All 6 Pro tools unlocked</div>
+              <div style={{fontSize:13,color:"rgba(255,255,255,.85)",marginTop:3}}>Click any card to open the tool directly.</div>
+            </div>
+            <div style={{position:"relative",zIndex:1,background:"rgba(255,255,255,.18)",border:"1px solid rgba(255,255,255,.25)",borderRadius:9,padding:"7px 15px",fontSize:13,fontWeight:700,color:"#fff"}}>
+              ★ Pro member
+            </div>
+          </div>
+        )}
+
+        {/* Tools grid */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
+          {tools.map((tool,i)=>{
+            var locked=!isPremium;
+            var iconBg=locked?GOLDBG:BLUEBG;
+            var iconClr=locked?GOLD:BLUE;
+            return(
+              <div key={i}
+                onClick={()=>{ if(!locked&&onNavigate){ onNavigate(tool.page); } else if(locked&&onNeedAuth&&!user){ onNeedAuth(); } }}
+                style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:16,padding:18,boxShadow:SH,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",minHeight:190,cursor:locked?"default":"pointer",transition:"box-shadow 0.15s"}}
+                onMouseEnter={e=>{ if(!locked) e.currentTarget.style.boxShadow="0 4px 28px rgba(31,107,255,.18)"; }}
+                onMouseLeave={e=>{ e.currentTarget.style.boxShadow=SH; }}
+              >
+                {/* Icon */}
+                <div style={{width:42,height:42,borderRadius:12,background:iconBg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <svg width="22" height="22" viewBox={tool.icon.props.viewBox} fill="none" stroke={iconClr} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    {tool.icon.props.children}
+                  </svg>
+                </div>
+
+                {/* Name + lock */}
+                <div style={{fontSize:15.5,fontWeight:700,marginTop:13,color:INK,display:"flex",alignItems:"center",gap:8}}>
+                  {tool.name}
+                  {locked&&<span style={{display:"inline-flex"}}>{LockIcon}</span>}
+                </div>
+
+                {/* Description */}
+                <div style={{fontSize:12.5,color:INK2,marginTop:6,lineHeight:1.45,flex:1}}>{tool.desc}</div>
+
+                {/* Footer link */}
+                <div style={{marginTop:14}}>
+                  {locked
+                    ? <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12.5,fontWeight:700,color:GOLD}}>Unlock {ArrowIcon(GOLD)}</span>
+                    : <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12.5,fontWeight:700,color:BLUE}}>Open {ArrowIcon(BLUE)}</span>
+                  }
+                </div>
+
+                {/* Blurred preview strip for locked tools */}
+                {locked&&(
+                  <div style={{position:"absolute",left:0,right:0,bottom:0,height:52,background:"repeating-linear-gradient(100deg,"+S2+" 0 9px,#eceef2 9px 18px)",filter:"blur(3px)",opacity:0.5,pointerEvents:"none"}}/>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 // ── MARKETS PAGE ─────────────────────────────────────────────────────────────
 function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   var [tab,setTab]       = useState("overview");
@@ -26507,7 +26662,8 @@ export default function App(){
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <MarketsPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} lang={lang}/>;
     if(page===7777) return <TrendingPage posts={posts} lang={lang}/>;{/* TrendingPage preserved but moved off main nav */}
-    if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
+    if(page===8) return <ProPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
+    if(page===808) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;{/* old PremiumPage preserved */}
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===10) return <AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={()=>setShowAI(true)} lang={lang}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
