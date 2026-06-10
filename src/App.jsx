@@ -1,5 +1,5 @@
 // NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
-import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo, Component } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
@@ -25201,7 +25201,7 @@ function MarketStatusDot({ lang }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ERROR BOUNDARY for MobileHomeDashboard
 // ─────────────────────────────────────────────────────────────────────────────
-class MobileDashErrorBoundary extends React.Component {
+class MobileDashErrorBoundary extends Component {
   constructor(props){ super(props); this.state={err:false}; }
   static getDerivedStateFromError(){ return {err:true}; }
   componentDidCatch(e){ console.error("[MobileDash]", e); }
