@@ -9421,8 +9421,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       })()}
 
 
-      {/* ── BANNERS AFILIADOS ROTATIVOS ── */}
-      <AffiliateBanner/>
+      {/* ── BANNERS AFILIADOS ROTATIVOS — solo para free users ── */}
+      {!effectivePremium && <AffiliateBanner/>}
 
       {/* ── DISCLAIMER ── */}
       <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
@@ -25916,12 +25916,12 @@ export default function App(){
                 </a>
               );
             })()}
-            {/* Post patrocinado completo cada 5 posts */}
-            {(i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
+            {/* Post patrocinado completo cada 5 posts — solo free users */}
+            {!effectivePremium && (i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
             )}
-            {/* SmartCredit afiliado cada 8 posts */}
-            {(i+1)%8===0 && (
+            {/* SmartCredit afiliado cada 8 posts — solo free users */}
+            {!effectivePremium && (i+1)%8===0 && (
               <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
                 style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,rgba(15,76,129,0.06),rgba(16,185,129,0.04))",border:"1.5px solid rgba(15,76,129,0.18)",borderRadius:14,padding:"13px 16px",margin:"6px 0",textDecoration:"none",transition:"all 0.18s"}}
                 onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.11),rgba(16,185,129,0.07))";e.currentTarget.style.borderColor="rgba(15,76,129,0.38)";}}
@@ -26681,7 +26681,7 @@ export default function App(){
                   ))}
                 </div>
                 <div style={{flex:1}}>
-                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{animatedCount.toLocaleString("es-MX")} {lang==="en"?"active traders":"traders activos"}</div>
+                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{communityCount.toLocaleString("en-US")} {lang==="en"?"active traders":"traders activos"}</div>
                   <div style={{display:"flex",gap:2,marginTop:2}}>
                     {"⭐⭐⭐⭐⭐".split("").map((s,i)=><span key={i} style={{fontSize:12}}>{s}</span>)}
                     <span style={{fontSize:11,color:"#94a3b8",marginLeft:4}}>4.9/5 · 840+ {lang==="en"?"reviews":"reseñas"}</span>
@@ -27087,7 +27087,7 @@ export default function App(){
       <Footer setPage={(p)=>{setPage(p);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} onAuth={()=>setAuth("register")} lang={lang}/>
 
       {/* BANNER AFILIADOS MÓVIL — fijo al pie, solo en móvil */}
-      {!user && <MobileAffiliateBanner/>}
+      {!user && !effectivePremium && <MobileAffiliateBanner/>}
 
       {/* Mobile logout removed — sign out available in top nav settings */}
 
@@ -27130,38 +27130,36 @@ export default function App(){
         </div>
       )}
 
-      {/* ── POP-UP CAPTURA DE EMAIL ── */}
+      {/* ── EMAIL CAPTURE — fixed bottom bar (no full-screen interrupt) ── */}
       {showEmailPopup && !user && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}}>
-          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:24,padding:"40px 36px",maxWidth:440,width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",position:"relative",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
-            <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",color:"#475569",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
-            {/* Ícono */}
-            <div style={{width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#0F4C81,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,margin:"0 auto 20px",boxShadow:"0 0 32px rgba(15,76,129,0.4)"}}>🎯</div>
-            <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:22,fontWeight:900}}>Recibe el pick de la semana gratis</h3>
-            <p style={{margin:"0 0 24px",color:"#64748b",fontSize:14,lineHeight:1.6}}>Cada lunes a las 9am te enviamos el pick <strong style={{color:"#fff"}}>más votado por la comunidad</strong> directo a tu email. Sin spam.</p>
-            {!emailPopupSent ? (
-              <form onSubmit={(e)=>{
-                e.preventDefault();
-                const email = e.target.email.value;
-                if(!email) return;
-                // Fire-and-forget: nunca esperar a Supabase (no bloquear el botón)
-                try{ supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
-                try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
-                setEmailPopupSent(true);
-                localStorage.setItem("nexo-email-popup-seen","1");
-              }}>
-                <div style={{display:"flex",gap:8,marginBottom:12}}>
-                  <input name="email" type="email" required placeholder="tu@email.com"
-                    style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:10,padding:"12px 14px",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
-                  <button type="submit" style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:10,padding:"12px 18px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",whiteSpace:"nowrap"}}>Recibir →</button>
-                </div>
-                <div style={{color:"#1e3a5f",fontSize:11}}>🔒 Sin spam. Cancela cuando quieras.</div>
-              </form>
-            ) : (
-              <div style={{background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.3)",borderRadius:12,padding:"18px",color:"#10b981",fontWeight:700,fontSize:15}}>
-                ✅ ¡Listo! Te llegará el pick este lunes.
-              </div>
-            )}
+        <div style={{position:"fixed",bottom:70,left:0,right:0,zIndex:9500,display:"flex",justifyContent:"center",padding:"0 12px",pointerEvents:"none"}}>
+          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(15,76,129,0.4)",borderRadius:16,padding:"12px 16px",maxWidth:480,width:"100%",boxShadow:"0 -4px 32px rgba(0,0,0,0.5)",pointerEvents:"auto",display:"flex",alignItems:"center",gap:12,animation:"nexo-slidein 0.4s ease"}}>
+            <div style={{flex:1,minWidth:0}}>
+              {!emailPopupSent ? (
+                <form onSubmit={(e)=>{
+                  e.preventDefault();
+                  const email = e.target.email.value;
+                  if(!email) return;
+                  try{ supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
+                  try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
+                  setEmailPopupSent(true);
+                  localStorage.setItem("nexo-email-popup-seen","1");
+                }} style={{display:"flex",gap:8,alignItems:"center"}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{color:"#fff",fontWeight:700,fontSize:12,marginBottom:4}}>{lang==="en"?"Get the weekly pick free — every Monday":"Recibe el pick semanal gratis — cada lunes"}</div>
+                    <input name="email" type="email" required placeholder={lang==="en"?"your@email.com":"tu@email.com"}
+                      style={{width:"100%",background:"rgba(255,255,255,0.07)",border:"1px solid rgba(15,76,129,0.4)",borderRadius:8,padding:"8px 10px",color:"#fff",fontSize:13,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
+                  </div>
+                  <button type="submit" style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:9,padding:"10px 14px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{lang==="en"?"Subscribe →":"Suscribir →"}</button>
+                </form>
+              ) : (
+                <div style={{color:"#10b981",fontWeight:700,fontSize:13}}>✅ {lang==="en"?"Done! You’ll get the pick this Monday.":"¡Listo! Te llegará el pick este lunes."}</div>
+              )}
+            </div>
+            <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{background:"none",border:"none",color:"#475569",fontSize:18,cursor:"pointer",lineHeight:1,flexShrink:0,padding:"2px 4px"}}>✕</button>
+          </div>
+        </div>
+      )}
             <button onClick={()=>setAuth("register")} style={{marginTop:16,background:"transparent",border:"none",color:"#475569",fontSize:12,cursor:"pointer",textDecoration:"underline"}}>
               O crear cuenta gratis y verlo ahora →
             </button>
@@ -27262,18 +27260,18 @@ export default function App(){
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase} onOpenAlerts={()=>setAlerts(true)} alertCount={alertCount}/>}
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
-      {/* ── BOTTOM NAV MÓVIL (estilo Robinhood/Instagram) — visible solo en móvil vía CSS ── */}
+      {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
       <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"#FFFFFF",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
         {[
-          {ic:"🏠",l:lang==="en"?"Home":"Inicio",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
-          {ic:"🔥",l:"Feed",on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},active:false},
-          {ic:"🤖",l:"IA",on:()=>setShowAI(true),active:false},
-          {ic:"⚡",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
-          {ic:"📡",l:lang==="en"?"Live":"En Vivo",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
+          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-5h4v5h5V9.5"/></svg>,l:"Home",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
+          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>,l:"Feed",on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},active:false},
+          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>,l:"AI",on:()=>setShowAI(true),active:false},
+          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>,l:"Markets",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
+          {svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,l:"Pro",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
         ].map((b,i)=>(
-          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0}}>
-            <span style={{fontSize:19,lineHeight:1}}>{b.ic}</span>
-            <span style={{fontSize:9.5,fontWeight:b.active?800:600}}>{b.l}</span>
+          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0,transition:"color 0.15s"}}>
+            {b.svg}
+            <span style={{fontSize:9.5,fontWeight:b.active?800:600,letterSpacing:"0.01em"}}>{b.l}</span>
           </button>
         ))}
       </div>
