@@ -815,6 +815,21 @@ const NAV_ICOS = {
   star:        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>,
   lock:        <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
   globe:       <><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>,
+  // Additional icons for drawer & menus
+  calendar:    <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/></>,
+  calculator:  <><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/><line x1="8" y1="18" x2="8.01" y2="18"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="16" y1="18" x2="16.01" y2="18"/></>,
+  currency:    <><circle cx="12" cy="12" r="10"/><path d="M12 6v2M12 16v2M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3s-3 1-3 3a3 3 0 0 0 6 0"/></>,
+  investing:   <><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></>,
+  markets:     <><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></>,
+  education:   <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>,
+  tools:       <><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>,
+  leaderboard: <><path d="M8 6v14M12 2v18M16 9v11"/></>,
+  ai:          <><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></>,
+  terminal:    <><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></>,
+  insiders:    <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
+  radar:       <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></>,
+  premarket:   <><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></>,
+  crypto:      <><path d="M9.5 2a7.5 7.5 0 0 1 5 13.33V21h-6l-3-3v-2l-2-2V9L9.5 2z"/><path d="M14.5 8a2.5 2.5 0 0 1 0 5"/></>,
 };
 const NavIco = ({name, size=17}) => {
   const inner = NAV_ICOS[name];
@@ -1107,6 +1122,7 @@ const CRYPTO_SYM = {
 };
 const fhSymbolOf = (t) => FH_SYM[t] || CRYPTO_SYM[t] || t;
 
+// ── BINANCE WS directa para crypto (gratis, ilimitado, sin proxy Finnhub) ────
 const BINANCE_STREAMS = {
   BTC:"btcusdt",ETH:"ethusdt",SOL:"solusdt",BNB:"bnbusdt",
   XRP:"xrpusdt",ADA:"adausdt",DOGE:"dogeusdt",AVAX:"avaxusdt",
@@ -1131,16 +1147,14 @@ function PriceProvider({children}){
     ALL_TRACK.forEach(t => { symToTickerRef.current[fhSymbolOf(t)] = t; });
   }
 
-  // Buffer de ticks: en horario de mercado llegan decenas de ticks/seg.
-  // Antes cada tick hacía setPrices → re-render de toda la app (lag en móvil).
-  // Ahora acumulamos en un ref y volcamos a estado 1 vez/seg.
+  // Buffer de ticks — volcamos a estado máximo 2 veces/seg (throttle para no redibujar en cada tick)
   const pendingRef = useRef({});
-  const updatePrice = (ticker, price) => {
+  const updatePrice = (ticker, price, dp = null) => {
     const pc = prevCRef.current[ticker];
-    const dp = pc && pc > 0 ? parseFloat(((price - pc) / pc * 100).toFixed(2)) : null;
-    const prevPrice = pendingRef.current[ticker]?.price || prevCRef.current[ticker] || 0;
+    const change = dp !== null ? dp : (pc && pc > 0 ? parseFloat(((price - pc) / pc * 100).toFixed(2)) : null);
+    const prevPrice = pendingRef.current[ticker]?.price || pc || 0;
     const flash = prevPrice > 0 ? (price > prevPrice ? "up" : price < prevPrice ? "down" : null) : null;
-    pendingRef.current[ticker] = { price, change: dp, flash };
+    pendingRef.current[ticker] = { price, change, flash };
   };
   useEffect(() => {
     const flush = setInterval(() => {
@@ -1154,8 +1168,14 @@ function PriceProvider({children}){
         });
         return next;
       });
-      setTimeout(() => setPrices(p => { if(!Object.values(p).some(v=>v?.flash)) return p; const n={...p}; Object.keys(n).forEach(t=>{if(n[t]?.flash) n[t]={...n[t],flash:null};}); return n; }), 600);
-    }, 500);
+      // Limpiar flash después de 600ms
+      setTimeout(() => setPrices(p => {
+        if(!Object.values(p).some(v=>v?.flash)) return p;
+        const n={...p};
+        Object.keys(n).forEach(t=>{if(n[t]?.flash) n[t]={...n[t],flash:null};});
+        return n;
+      }), 600);
+    }, 500); // throttle 2/seg
     return () => clearInterval(flush);
   }, []);
 
@@ -1220,7 +1240,7 @@ function PriceProvider({children}){
     return () => { cancel=true; clearInterval(iv); };
   }, []);
 
-  // ── Binance WS directo para crypto (gratis, ilimitado) ──────────────────
+  // ── Binance WS directo para crypto (gratis, ilimitado, sin necesitar plan Finnhub) ──
   useEffect(() => {
     let ws, rt;
     const streams = Object.values(BINANCE_STREAMS).map(s=>`${s}@miniTicker`).join("/");
@@ -1245,7 +1265,7 @@ function PriceProvider({children}){
     return () => { clearTimeout(rt); ws?.close(); };
   }, []);
 
-  // ── Finnhub WS solo para ACCIONES (crypto cubierta por Binance) ──────────
+  // ── Finnhub WS solo para ACCIONES (crypto ya la cubre Binance arriba) ──────
   useEffect(() => {
     let socket, reconnectTimer;
     const connect = () => {
@@ -1253,7 +1273,7 @@ function PriceProvider({children}){
       wsRef.current = socket;
       socket.onopen = () => {
         trackedRef.current.forEach(ticker => {
-          if(BINANCE_STREAMS[ticker]) return;
+          if(BINANCE_STREAMS[ticker]) return; // crypto → Binance
           socket.send(JSON.stringify({ type: "subscribe", symbol: fhSymbolOf(ticker) }));
         });
       };
@@ -1357,11 +1377,11 @@ function TickerTape({lang="es", onPremium}) {
       };
     });
     const PROMOS = isEN ? [
-      "🔥 Launch price $15.99/mo — going up to $29 soon",
-      "🐋 See what hedge funds are buying → Premium",
+      "VIP plan — $6.58/mo billed annually · $79/year",
+      "See what hedge funds are buying → VIP",
     ] : [
-      "🔥 Precio de lanzamiento $15.99/mes — sube a $29 pronto",
-      "🐋 Ve qué compran los hedge funds → Premium",
+      "Plan VIP — $6.58/mes facturado anualmente · $79/año",
+      "Ve qué compran los hedge funds → VIP",
     ];
     const merged = [];
     items.forEach((it,i)=>{
@@ -2878,20 +2898,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
             </div>
           )}
 
-          {/* ── PROGRESS BAR ── */}
-          {progressToNext&&(
-            <div style={{marginBottom:20,background:C.card2,borderRadius:14,padding:"12px 16px",border:`1px solid ${C.border}`}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <span style={{fontSize:12,fontWeight:800,color:C.text}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</span>
-                <span style={{fontSize:11,color:C.muted2}}>{user.points.toLocaleString()} / {progressToNext.min.toLocaleString()} pts</span>
-                <span style={{fontSize:12,fontWeight:800,color:C.muted}}>{getLevel(progressToNext.min).emoji} {lang==="en"?getLevel(progressToNext.min).nameEn:getLevel(progressToNext.min).name}</span>
-              </div>
-              <div style={{background:C.border,borderRadius:20,height:10,overflow:"hidden"}}>
-                <div style={{height:"100%",borderRadius:20,width:`${progress}%`,background:`linear-gradient(90deg,${accent},#00c49a)`,transition:"width 1s ease",boxShadow:`0 0 8px ${accent}88`}}/>
-              </div>
-              <div style={{fontSize:11,color:C.muted2,marginTop:5,textAlign:"right"}}>{Math.round(progress)}% hacia el siguiente nivel</div>
-            </div>
-          )}
+          {/* Progress bar removed */}
 
           {/* ── TABS ── */}
           <div style={{display:"flex",gap:4,marginBottom:16,background:C.card2,borderRadius:12,padding:4,border:`1px solid ${C.border}`}}>
@@ -4809,7 +4816,7 @@ function TickerStrip(){
 // ── MARKETS MINI WIDGET — tabs Mercados / Predicciones / Tendencias ───────────
 function MarketsMiniWidget({ lang="es" }){
   const isEN = lang === "en";
-  const [tab, setTab] = useState("mercados");
+  const [tab, setTab] = useState("markets");
   const [polyData] = useState(isEN ? [
     {q:"Fed cuts rates again in 2026?", p:0.55, vol:"$1.8M"},
     {q:"S&P 500 closes above 7,000 in 2026?", p:0.42, vol:"$2.1M"},
@@ -4836,16 +4843,16 @@ function MarketsMiniWidget({ lang="es" }){
     <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:"var(--c-shadow)"}}>
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:"1px solid var(--c-border)",padding:"0 8px"}}>
-        {[["mercados", isEN?"📈 Markets":"📈 Mercados"],["predicciones", isEN?"🎯 Predictions":"🎯 Predicciones"],["tendencias","🔥 Trending"]].map(([k,l])=>(
+        {[["markets", isEN?"📈 Markets":"📈 Mercados"],["predicciones", isEN?"🎯 Predictions":"🎯 Predicciones"],["tendencias","🔥 Trending"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
             style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#0F4C81":"transparent"}`,background:"transparent",color:tab===k?"#0F4C81":"var(--c-muted)",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
-            {l}{k==="mercados"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
+            {l}{k==="markets"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
           </button>
         ))}
       </div>
 
       {/* Mercados — cards estilo screenshot */}
-      {tab==="mercados"&&(
+      {tab==="markets"&&(
         <div className="nexo-scroll-x" style={{padding:"10px 10px 12px",display:"flex",gap:8,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
           {prices.map((t)=>{
             const up = t.c >= 0;
@@ -4921,8 +4928,19 @@ function MarketsMiniWidget({ lang="es" }){
 
 // AdBanner removed — no ads on a premium product
 function AdBannerFeed(){ return null; }
-function AdBannerSidebar(){ return null; }
 
+// Banner cuadrado 300×250 — para sidebar (sin minHeight para no crear espacio vacío)
+function AdBannerSidebar(){
+  return <AdBanner slot="8915846882" format="auto" style={{margin:"6px 0",borderRadius:10,overflow:"hidden",minHeight:0}}/>;
+}
+
+// ── MEDIA.NET ADS ─────────────────────────────────────────────────────────────
+// INSTRUCCIONES:
+// 1. Regístrate en https://www.media.net → Apply Now → pon nexotradeia.com
+// 2. Cuando te aprueben (2-3 días), activa el script en index.html descomentando la línea
+// 3. En tu panel Media.net: Ad Units → Create → copia el CID y los TAG IDs
+// 4. Reemplaza REEMPLAZAR_CID, REEMPLAZAR_TAG_FEED y REEMPLAZAR_TAG_SIDEBAR abajo
+// 5. Corre python3 fix_everything.py para deploy
 const MN_CID = "REEMPLAZAR_CID_MEDIANET"; // ej: "8CU57YRJN"
 
 function MediaNetBannerFeed(){
@@ -6134,40 +6152,40 @@ const SPONSORED_POSTS = [
     brand:"Interactive Brokers",
     logo:"🏦",
     brandColor:"#C8102E",
-    text:"Opera en 150 mercados mundiales — acciones, opciones, futuros, forex y crypto. Comisiones desde $0. Regulado por SEC y FINRA. El broker favorito de inversores profesionales en LATAM.",
-    cta:"Abrir cuenta y ganar $200 →",
+    text:"Trade in 150+ global markets — stocks, options, futures, forex and crypto. Commissions from $0. SEC & FINRA regulated. Top broker for professional investors worldwide.",
+    cta:"Open account & earn $200 →",
     url:"https://www.interactivebrokers.com/mkt/?src=nexotrade1&url=%2Fen%2Fwhyib%2Foverviewnetwork.php",
-    badge:"Patrocinado",
+    badge:"Sponsored",
   },
   {
     id:"sp2",
     brand:"Kraken",
     logo:"🐙",
     brandColor:"#5741D9",
-    text:"El exchange de crypto más seguro y regulado. Más de 200 criptomonedas disponibles, staking hasta 21% APY, y soporte 24/7 en español. Recomendado por traders profesionales.",
-    cta:"Empezar en Kraken gratis →",
+    text:"The most secure regulated crypto exchange. 200+ cryptocurrencies, staking up to 21% APY, 24/7 support. Trusted by professional traders worldwide.",
+    cta:"Start on Kraken free →",
     url:"https://www.kraken.com/sign-up?referral=nexotrade",
-    badge:"Patrocinado",
+    badge:"Sponsored",
   },
   {
     id:"sp3",
     brand:"Tastytrade",
     logo:"🌮",
     brandColor:"#F97316",
-    text:"La plataforma de opciones favorita de traders profesionales en EE.UU. Comisión $0 al cerrar posición. Educación gratuita incluida. Más de 1 millón de traders activos.",
-    cta:"Probar gratis 60 días →",
+    text:"The #1 options platform for professional traders in the US. $0 commission to close. Free education included. 1M+ active traders.",
+    cta:"Try free for 60 days →",
     url:"https://open.tastytrade.com/",
-    badge:"Patrocinado",
+    badge:"Sponsored",
   },
   {
     id:"sp4",
     brand:"Bybit",
     logo:"⚡",
     brandColor:"#F7A600",
-    text:"Opera futuros y spot con las comisiones más competitivas del mercado. Bono de bienvenida hasta $100 USDT. Copy trading disponible — copia a los mejores traders automáticamente.",
-    cta:"Reclamar $100 de bienvenida →",
+    text:"Trade futures and spot with the most competitive fees. Up to $100 USDT welcome bonus. Copy trading — auto-follow the top traders.",
+    cta:"Claim $100 welcome bonus →",
     url:"https://www.bybit.com/invite?ref=NEXOTRADE",
-    badge:"Patrocinado",
+    badge:"Sponsored",
   },
 ];
 
@@ -6183,7 +6201,7 @@ function SponsoredPostCard({sp}){
       <div style={{flex:1,minWidth:0}}>
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:1}}>
           <span style={{fontWeight:700,fontSize:12,color:"#0F172A"}}>{sp.brand}</span>
-          <span style={{fontSize:9,color:"#94A3B8",background:"rgba(0,0,0,0.04)",borderRadius:20,padding:"1px 7px",fontWeight:600}}>Patrocinado</span>
+          <span style={{fontSize:9,color:"#94A3B8",background:"rgba(0,0,0,0.04)",borderRadius:20,padding:"1px 7px",fontWeight:600}}>Sponsored</span>
         </div>
         <div style={{fontSize:11,color:"#64748B",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{sp.text}</div>
       </div>
@@ -6214,22 +6232,24 @@ function VipPopup({onClose, onGoVIP, lang="es"}){
 
         {/* Badge */}
         <div style={{textAlign:"center",marginBottom:12}}>
-          <span style={{animation:"nvp-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(0,232,122,.15)",border:"1px solid rgba(0,232,122,.4)",borderRadius:20,padding:"3px 14px",fontSize:10,fontWeight:800,color:"#00e87a",letterSpacing:2}}>PREMIUM — LIMITED OFFER</span>
+          <span style={{display:"inline-block",background:"rgba(0,232,122,.12)",border:"1px solid rgba(0,232,122,.35)",borderRadius:20,padding:"3px 14px",fontSize:10,fontWeight:800,color:"#00e87a",letterSpacing:2}}>NEXO TRADE VIP</span>
         </div>
 
         {/* Title */}
         <div style={{textAlign:"center",fontWeight:900,color:"#fff",fontSize:22,marginBottom:6,letterSpacing:-0.5,lineHeight:1.2}}>
-          Unlock <span style={{color:"#00e87a"}}>NexoTrade Pro</span>
+          {lang==="en"?"Unlock the full platform":"Desbloquea la plataforma completa"}
         </div>
         <div style={{textAlign:"center",color:"rgba(255,255,255,.5)",fontSize:13,marginBottom:18,lineHeight:1.5}}>
-          Join 2,847 traders already inside. Real signals, institutional flow, AI picks — all in one place.
+          {lang==="en"?"Real signals, institutional flow, AI picks — all in one place.":"Señales reales, flujo institucional, picks IA — todo en un lugar."}
         </div>
 
         {/* Benefits grid */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:20}}>
-          {[["🐋","Smart Money Flow"],["💡","Weekly AI Picks"],["🏛️","52 Guru Portfolios"],["🛠️","Pro Screener"],["🔮","Oracle AI Signals"],["📅","Earnings Alerts"]].map(([ic,t])=>(
-            <div key={t} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,232,122,.06)",border:"1px solid rgba(0,232,122,.12)",borderRadius:10,padding:"8px 10px"}}>
-              <span style={{fontSize:14}}>{ic}</span>
+          {(lang==="en"
+            ?["Smart Money Flow","Weekly AI Picks","52 Guru Portfolios","Pro Screener","Oracle AI Signals","Earnings Alerts"]
+            :["Smart Money Flow","Picks IA semanales","52 Portafolios Gurús","Screener Pro","Señales Oracle IA","Alertas de Earnings"]
+          ).map(t=>(
+            <div key={t} style={{display:"flex",alignItems:"center",background:"rgba(0,232,122,.06)",border:"1px solid rgba(0,232,122,.12)",borderRadius:10,padding:"8px 12px"}}>
               <span style={{fontSize:11,fontWeight:700,color:"#e0eaf8"}}>{t}</span>
             </div>
           ))}
@@ -6248,7 +6268,7 @@ function VipPopup({onClose, onGoVIP, lang="es"}){
         {/* CTA */}
         <div onClick={onGoVIP} style={{animation:"nvp-glow 2s ease-in-out infinite",position:"relative",overflow:"hidden",background:"linear-gradient(135deg,#00e87a,#00b85e)",borderRadius:14,padding:"14px 20px",textAlign:"center",color:"#000",fontWeight:900,fontSize:15,cursor:"pointer",letterSpacing:.3}}>
           <div style={{position:"absolute",top:0,bottom:0,width:"40%",background:"rgba(255,255,255,.2)",filter:"blur(12px)",animation:"nvp-shine 2.5s ease-in-out infinite",transform:"skewX(-20deg)"}}/>
-          🎉 Get Annual Premium — $79/year →
+          {lang==="en"?"Get Annual VIP — $79/year →":"Obtener VIP Anual — $79/año →"}
         </div>
         <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"rgba(255,255,255,.25)"}}>
           ✓ Instant access &nbsp;✓ Cancel anytime &nbsp;✓ Secure via Stripe
@@ -6296,6 +6316,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     "Watchlist básica (hasta 5 activos)",
     "IA NEXO — 5 preguntas diarias",
   ];
+
   const PREMIUM_FEATURES = isEN ? [
     "Everything in Free, without limits",
     "AI Stock Picks — 10 weekly picks with full analysis",
@@ -6344,6 +6365,13 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
     "Badge PREMIUM dorado + acceso anticipado a nuevas funciones",
   ];
 
+  const SIGNALS = [
+    {ticker:"NVDA", tipo:"COMPRA", entrada:"$205", target:"$300", stop:"$185", conf:92, tiempo:isEN?"2h ago":"hace 2h", blur:!isPremium},
+    {ticker:"BTC",  tipo:"COMPRA", entrada:"$63,000", target:"$82,000", stop:"$58,000", conf:85, tiempo:isEN?"4h ago":"hace 4h", blur:!isPremium},
+    {ticker:"TSLA", tipo:"VENTA",  entrada:"$391", target:"$340", stop:"$410", conf:78, tiempo:isEN?"6h ago":"hace 6h", blur:!isPremium},
+    {ticker:"ETH",  tipo:"COMPRA", entrada:"$1,685", target:"$2,200", stop:"$1,480", conf:81, tiempo:isEN?"8h ago":"hace 8h", blur:!isPremium},
+  ];
+
   const WEBINARS = [
     {titulo:isEN?"Technical Analysis for Beginners":"Análisis técnico para principiantes", fecha:isEN?"Mon Jun 16":"Lun 16 Jun",  hora:"19:00 EST", instructor:"SPY_Trader",  spots:47, spotsLeft:12, emoji:"📈", precio:29, precioVip:14, stripeLink:STRIPE_LINKS.webinar1, nivel:isEN?"Beginner":"Principiante", duracion:"90 min", desc:isEN?"Learn to read charts, identify support & resistance, and the 5 most profitable patterns in the market.":"Aprende a leer gráficas, identificar soportes, resistencias y los 5 patrones más rentables del mercado."},
     {titulo:isEN?"Bitcoin: Cycles & On-Chain Analysis":"Bitcoin: ciclos y análisis on-chain",  fecha:isEN?"Wed Jun 18":"Mié 18 Jun", hora:"20:00 EST", instructor:"CryptoWolf",  spots:50, spotsLeft:8,  emoji:"₿",  precio:49, precioVip:24, stripeLink:STRIPE_LINKS.webinar2, nivel:isEN?"Intermediate":"Intermedio",   duracion:isEN?"2 hours":"2 horas", desc:isEN?"How to anticipate Bitcoin cycles using on-chain data: MVRV, NVT, Hodl Waves and more.":"Cómo anticipar los ciclos de Bitcoin usando datos on-chain: MVRV, NVT, Hodl Waves y más."},
@@ -6378,10 +6406,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   };
 
   const TABS = [
-    {k:"planes",   l:isEN?"💎 Plans":"💎 Planes"},
-    {k:"senales",  l:isEN?"📡 Signals":"📡 Señales"},
-    {k:"webinars", l:"🎓 Webinars"},
-    {k:"alertas",  l:isEN?"📧 Email Alerts":"📧 Alertas Email"},
+    {k:"planes",   l:"Plans"},
+    {k:"senales",  l:"Signals"},
+    {k:"webinars", l:"Webinars"},
+    {k:"alertas",  l:"Email Alerts"},
   ];
 
   return(
@@ -6391,23 +6419,66 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
         <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:`radial-gradient(circle at 30% 50%,${C.accent}15,transparent 60%), radial-gradient(circle at 70% 50%,${C.blue}15,transparent 60%)`,pointerEvents:"none"}}/>
         <div style={{position:"relative"}}>
           {isPremium
-            ? <>
-                <div style={{fontSize:48,marginBottom:12}}>⭐</div>
-                <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"You are a Premium member!":"¡Eres miembro Premium!"}</h1>
-                <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>{isEN?"You have full access to all exclusive features.":"Tienes acceso completo a todas las funciones exclusivas."}</p>
-                <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-                  {(isEN?["💡 PREMIUM Ideas","🏛️ 13F Gurus","🐋 Institutional Flow","🛠️ Screener","Oracle AI","Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","SEC Insiders"]:["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","Oracle IA","Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","Insiders SEC"]).map(b=>(
-                    <span key={b} style={{background:C.bull+"22",color:C.bull,border:`1px solid ${C.bull}44`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700}}>{b}</span>
-                  ))}
-                </div>
-              </>
+            ? (()=>{
+                const today = new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+                const QUICK_LINKS = [
+                  {label:"AI Picks",     pg:3,  ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>},
+                  {label:"Smart Money", pg:20, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
+                  {label:"Gurus 13F",   pg:21, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>},
+                  {label:"Terminal",    pg:37, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>},
+                  {label:"Screener",    pg:36, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>},
+                  {label:"Radar",       pg:44, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>},
+                ];
+                return(
+                  <div style={{textAlign:"left"}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+                      <div>
+                        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                          <span style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",borderRadius:7,padding:"2px 9px",fontSize:10,fontWeight:900,color:"#1B1303",letterSpacing:0.5}}>PREMIUM</span>
+                          <span style={{fontSize:11,color:"#64748b"}}>{today}</span>
+                        </div>
+                        <div style={{fontSize:20,fontWeight:900,color:"#fff",lineHeight:1.2}}>Welcome back{user?.name?`, ${user.name.split(" ")[0]}`:""}</div>
+                      </div>
+                      <div style={{width:44,height:44,borderRadius:13,background:"rgba(224,182,75,0.08)",border:"1.5px solid rgba(224,182,75,0.25)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E0B64B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      </div>
+                    </div>
+                    <div style={{marginBottom:16}}>
+                      <div style={{fontSize:10,fontWeight:800,color:"#64748b",letterSpacing:1,textTransform:"uppercase",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+                        <span style={{width:6,height:6,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
+                        Live Signals
+                      </div>
+                      <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                        {SIGNALS.slice(0,3).map((s,i)=>(
+                          <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"9px 12px"}}>
+                            <span style={{fontWeight:900,fontSize:13,color:"#fff",minWidth:44}}>{s.ticker}</span>
+                            <span style={{fontSize:11,fontWeight:800,color:s.tipo==="COMPRA"?"#22c55e":"#ef4444",background:s.tipo==="COMPRA"?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",borderRadius:5,padding:"2px 7px"}}>{s.tipo==="COMPRA"?"BUY":"SELL"}</span>
+                            <span style={{fontSize:11,color:"#94a3b8",flex:1}}>Entry {s.entrada} → {s.target}</span>
+                            <span style={{fontSize:10,fontWeight:700,color:"#22c55e"}}>{s.conf}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7}}>
+                      {QUICK_LINKS.map(q=>(
+                        <button key={q.label} onClick={()=>onSubscribe&&onSubscribe(q.pg)}
+                          style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:10,padding:"10px 6px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:5,fontFamily:"inherit",transition:"all 0.15s"}}
+                          onMouseEnter={e=>{e.currentTarget.style.background="rgba(224,182,75,0.10)";e.currentTarget.style.borderColor="rgba(224,182,75,0.30)";}}
+                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.05)";e.currentTarget.style.borderColor="rgba(255,255,255,0.09)";}}>
+                          <span style={{color:"#E0B64B"}}>{q.ico}</span>
+                          <span style={{fontSize:10,fontWeight:700,color:"#cbd5e1"}}>{q.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()
             : <>
                 <style dangerouslySetInnerHTML={{__html:`
                   @keyframes npp-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,232,122,.5)}70%{box-shadow:0 0 0 10px rgba(0,232,122,0)}}
                   @keyframes npp-glow{0%,100%{box-shadow:0 4px 30px rgba(0,232,122,.4)}50%{box-shadow:0 4px 55px rgba(0,232,122,.7)}}
                   @keyframes npp-shine{0%{left:-100%}100%{left:200%}}
                 `}}/>
-
                 <h1 style={{margin:"0 0 6px",color:"#fff",fontSize:"clamp(24px,4vw,34px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Trade Smarter with":"Opera más inteligente con"} <span style={{color:"#00e87a"}}>NexoTrade Pro</span></h1>
                 <p style={{margin:"0 auto 16px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, institutional flow, AI picks and 52 guru portfolios — all in one platform.":"Señales en tiempo real, flujo institucional, picks IA y 52 gurús — todo en una plataforma."}</p>
 
@@ -6455,8 +6526,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"✓ Instant access · ✓ Cancel anytime · ✓ Secure via Stripe":"✓ Acceso inmediato · ✓ Cancela cuando quieras · ✓ Pago seguro Stripe"}</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {(lang==="en"
-                    ?["💡 Ideas PREMIUM","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","Oracle AI","Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
-                    :["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","Oracle IA","Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","📅 Calendarios"]
+                    ?["AI Picks","Guru Portfolios","Institutional Flow","Screener","Oracle AI","Global Radar","Trading Terminal","Unlimited AI","Calendars"]
+                    :["Picks IA","Gurús 13F","Flujo Institucional","Screener","Oracle IA","Radar Global","Terminal Trading","IA Ilimitada","Calendarios"]
                   ).map(b=>(
                     <span key={b} style={{background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
                   ))}
@@ -6475,182 +6546,184 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
       {/* ── PLANES TAB ── */}
       {activeTab==="planes" && <>
-        {/* ── GRID 2 COLUMNAS ── */}
-        <div className="nexo-premium-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0,marginBottom:28,borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}}>
+        {/* ── PRICING HEADER ── */}
+        <div style={{textAlign:"center",marginBottom:32}}>
+          <h2 style={{margin:"0 0 8px",fontSize:"clamp(22px,4vw,32px)",fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5,lineHeight:1.2}}>
+            {isEN?"Start free. Upgrade when you're ready.":"Empieza gratis. Sube cuando estés listo."}
+          </h2>
+          <p style={{margin:0,fontSize:15,color:"#64748B"}}>
+            {isEN?"Same platform. VIP unlocks the tools the pros use.":"Misma plataforma. VIP desbloquea las herramientas de los pros."}
+          </p>
+        </div>
 
-          {/* FREE */}
-          <div style={{background:"rgba(10,16,30,0.98)",padding:"28px 24px",borderRight:"1px solid rgba(255,255,255,0.06)",position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,width:180,height:180,background:"radial-gradient(circle,rgba(15,76,129,0.06),transparent 70%)",pointerEvents:"none"}}/>
-            <div style={{position:"relative"}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#0F4C81",letterSpacing:1.5,marginBottom:6}}>FREE</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:2,marginBottom:4}}>
-                <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>$0</span>
-              </div>
-              <div style={{fontSize:12,color:"#475569",marginBottom:14}}>Para siempre gratis</div>
-              <div style={{display:"flex",flexDirection:"column",gap:5}}>
-                {FREE_FEATURES.slice(0,6).map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:11,color:"#0F4C81",flexShrink:0,fontWeight:700}}>✓</span>
-                    <span style={{fontSize:12,color:"#94A3B8"}}>{f}</span>
-                  </div>
-                ))}
-                {FREE_FEATURES.length>6&&<div style={{fontSize:11,color:"#475569",marginTop:2}}>+ {FREE_FEATURES.length-6} {isEN?"more":"más"}…</div>}
-              </div>
-              <div style={{marginTop:24,padding:"12px",borderRadius:10,background:"rgba(15,76,129,0.04)",textAlign:"center",color:"#334155",fontSize:12,fontWeight:700,border:"1px solid rgba(15,76,129,0.1)"}}>
-                Plan actual
-              </div>
+        {/* ── PRICING CARDS ── */}
+        <div className="nexo-premium-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:32,alignItems:"start"}}>
+
+          {/* FREE CARD */}
+          <div style={{background:"#F8FAFC",borderRadius:20,padding:"32px 28px",border:"1px solid #E2E8F0",boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
+            <div style={{fontSize:12,fontWeight:700,color:"#64748B",letterSpacing:1.5,marginBottom:12}}>FREE</div>
+            <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+              <span style={{fontSize:42,fontWeight:900,color:"#0F172A",lineHeight:1}}>$0</span>
+              <span style={{fontSize:14,color:"#64748B",fontWeight:500}}>/mo</span>
+            </div>
+            <div style={{fontSize:13,color:"#94A3B8",marginBottom:24}}>{isEN?"Free forever — no card":"Gratis para siempre — sin tarjeta"}</div>
+
+            {isPremium
+              ? <div style={{width:"100%",padding:"13px",borderRadius:12,background:"#F1F5F9",textAlign:"center",color:"#64748B",fontSize:13,fontWeight:600,marginBottom:28,boxSizing:"border-box"}}>
+                  {isEN?"Your previous plan":"Tu plan anterior"}
+                </div>
+              : <div style={{width:"100%",padding:"13px",borderRadius:12,background:"#F1F5F9",textAlign:"center",color:"#334155",fontSize:13,fontWeight:700,marginBottom:28,boxSizing:"border-box",border:"1px solid #E2E8F0"}}>
+                  {isEN?"Current plan":"Plan actual"}
+                </div>
+            }
+
+            {/* Checked features */}
+            <div style={{display:"flex",flexDirection:"column",gap:11,marginBottom:16}}>
+              {[
+                isEN?"Live market feed":"Feed de mercado en vivo",
+                isEN?"Trader community":"Comunidad de traders",
+                isEN?"Paper trading ($100k virtual)":"Paper trading ($100k virtual)",
+                isEN?"Basic Global Radar":"Radar Global básico",
+                isEN?"Watchlist — 4 assets":"Watchlist — 4 activos",
+              ].map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10}}>
+                  <span style={{fontSize:12,color:"#3B82F6",fontWeight:700,marginTop:1,flexShrink:0}}>✓</span>
+                  <span style={{fontSize:13,color:"#334155",lineHeight:1.4}}>{f}</span>
+                </div>
+              ))}
+            </div>
+            {/* Locked features */}
+            <div style={{display:"flex",flexDirection:"column",gap:11}}>
+              {[
+                isEN?"Weekly AI picks":"Picks IA semanales",
+                isEN?"Smart Money Flow":"Smart Money Flow",
+                isEN?"Pro Trader Terminal":"Terminal Pro Trader",
+                isEN?"Price alerts":"Alertas de precio",
+              ].map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10}}>
+                  <span style={{fontSize:12,color:"#CBD5E1",fontWeight:700,marginTop:1,flexShrink:0}}>—</span>
+                  <span style={{fontSize:13,color:"#94A3B8",lineHeight:1.4}}>{f}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* VIP */}
-          <div style={{background:"rgba(12,10,30,0.99)",padding:"28px 24px",position:"relative",overflow:"hidden",borderLeft:"2px solid #0F5E68"}}>
-            <div style={{position:"absolute",top:0,right:0,background:billing==="annual"?"linear-gradient(135deg,#10B981,#059669)":"linear-gradient(135deg,#C8901F,#8A5E10)",color:"#fff",fontSize:9,fontWeight:800,padding:"5px 14px",borderRadius:"0 0 0 10px",letterSpacing:0.8,transition:"background .2s"}}>{billing==="annual"?(isEN?"💎 BEST VALUE":"💎 MEJOR VALOR"):(isEN?"✦ MOST POPULAR":"✦ MÁS POPULAR")}</div>
-            <div style={{position:"absolute",top:0,left:0,width:220,height:220,background:"radial-gradient(circle,rgba(15,94,104,0.1),transparent 70%)",pointerEvents:"none"}}/>
-            <div style={{position:"relative"}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#FCD34D",letterSpacing:1.5,marginBottom:10}}>✦ PREMIUM</div>
-
-              {/* Toggle mensual / anual inline */}
-              <div style={{display:"flex",background:"rgba(0,0,0,0.3)",borderRadius:10,padding:3,gap:2,marginBottom:14,border:"1px solid rgba(255,255,255,0.07)"}}>
-                <button onClick={()=>setBilling("monthly")}
-                  style={{flex:1,padding:"6px 0",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,transition:"all 0.2s",
-                    background:billing==="monthly"?"rgba(15,94,104,0.3)":"transparent",
-                    color:billing==="monthly"?"#fff":"#475569"}}>
-                  Mensual
-                </button>
-                <button onClick={()=>setBilling("annual")}
-                  style={{flex:1,padding:"6px 0",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:800,transition:"all 0.2s",position:"relative",
-                    background:billing==="annual"?"linear-gradient(135deg,#C8901F,#8A5E10)":"transparent",
-                    color:billing==="annual"?"#fff":"#475569",
-                    boxShadow:billing==="annual"?"0 2px 10px rgba(15,94,104,0.35)":"none"}}>
-                  Anual
-                  {billing!=="annual"&&<span style={{position:"absolute",top:-7,right:2,background:"#10B981",color:"#fff",fontSize:8,fontWeight:900,padding:"1px 4px",borderRadius:4}}>-{savingsPct}%</span>}
-                </button>
-              </div>
-
-              {/* Precio dinámico */}
-              {billing==="annual" ? (
-                <div style={{marginBottom:4}}>
-                  <div style={{display:"flex",alignItems:"baseline",gap:4,flexWrap:"wrap"}}>
-                    <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${(priceAnual/12).toFixed(2)}</span>
-                    <span style={{fontSize:13,color:"#64748B"}}>{isEN?"/mo":"/mes"}</span>
-                    <span style={{fontSize:11,color:"#10B981",fontWeight:700,marginLeft:4}}>{isEN?`billed $${priceAnual}/yr`:`facturado $${priceAnual}/año`}</span>
-                  </div>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
-                    <span style={{fontSize:12,color:"#475569",textDecoration:"line-through"}}>${price.toFixed(2)}{isEN?"/mo":"/mes"}</span>
-                    <span style={{background:"rgba(16,185,129,0.15)",color:"#10B981",border:"1px solid rgba(16,185,129,0.3)",borderRadius:6,fontSize:11,fontWeight:800,padding:"1px 7px"}}>🎉 -{savingsPct}%</span>
-                  </div>
-                  <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?`or $${price}/mo month-to-month`:`o $${price}/mes mes a mes`}</div>
-                </div>
-              ) : (
-                <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                  <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>${price.toFixed(2)}</span>
-                  <span style={{fontSize:13,color:"#64748B"}}>/mes</span>
-                </div>
-              )}
-              <div style={{fontSize:12,color:"#475569",marginBottom:16}}>
-                {billing==="annual" ? (isEN?"One annual payment · No surprise renewals":"Pago único anual · Sin renovación sorpresa") : (isEN?"Cancel anytime · No commitment":"Cancela cuando quieras · Sin permanencia")}
-              </div>
-
-              <div style={{display:"flex",flexDirection:"column",gap:5}}>
-                {PREMIUM_FEATURES.slice(0,8).map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:11,color:"#10B981",flexShrink:0,fontWeight:700}}>✓</span>
-                    <span style={{fontSize:12,color:"#CBD5E1"}}>{f}</span>
-                  </div>
-                ))}
-                {PREMIUM_FEATURES.length>8&&<div style={{fontSize:11,color:"#475569",marginTop:2}}>+ {PREMIUM_FEATURES.length-8} {isEN?"more below":"características más abajo"}…</div>}
-              </div>
-
-              <div style={{marginTop:24}}>
-                {isPremium
-                  ? <div style={{background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.3)",borderRadius:10,padding:"13px",textAlign:"center",color:"#16A34A",fontWeight:800,fontSize:14}}>{isEN?"✅ Active plan — thanks for being PREMIUM!":"✅ Plan activo — ¡Gracias por ser PREMIUM!"}</div>
-                  : <>
-                    {billing==="annual" ? (
-                      <>
-                        <button onClick={()=>handleSubscribe("annual")}
-                          style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 24px rgba(16,185,129,0.45)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
-                          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,0.6)";}}
-                          onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 24px rgba(16,185,129,0.45)";}}>
-                          🎉 {isEN?"Get Annual PREMIUM — $79/yr →":"Obtener PREMIUM Anual — $79/año →"}
-                        </button>
-                        <div style={{textAlign:"center",fontSize:11,color:"#10B981",fontWeight:700,marginBottom:4}}>Save ${savingsAnual} vs monthly · Instant access</div>
-                        <div style={{textAlign:"center",fontSize:10,color:"#334155",cursor:"pointer",textDecoration:"underline"}} onClick={()=>setBilling("monthly")}>
-                          {isEN?"Or continue monthly at $15.99/mo →":"O continúa mensual por $15.99/mes →"}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div style={{background:"rgba(0,200,100,0.1)",border:"1px solid rgba(0,200,100,0.25)",borderRadius:10,padding:"8px 12px",marginBottom:10,textAlign:"center"}}>
-                          <span style={{fontSize:12,fontWeight:800,color:"#10b981"}}>{isEN?"🎁 Cancel anytime · Just $15.99/mo":"🎁 Cancela cuando quieras · Solo $15.99/mes"}</span>
-                        </div>
-                        <button onClick={()=>handleSubscribe("monthly")}
-                          style={{width:"100%",background:"linear-gradient(135deg,#C8901F,#8A5E10)",border:"none",borderRadius:10,padding:"15px",fontSize:15,fontWeight:900,color:"#fff",cursor:"pointer",boxShadow:"0 4px 28px rgba(200,144,31,0.5)",marginBottom:8,transition:"transform 0.15s, box-shadow 0.15s"}}
-                          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 36px rgba(15,94,104,0.7)";}}
-                          onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 28px rgba(15,94,104,0.55)";}}>
-                          ✦ Start free trial →
-                        </button>
-                        <div style={{textAlign:"center",fontSize:11,color:"#475569",marginBottom:4}}>No card · Cancel anytime · Instant access</div>
-                        <div style={{textAlign:"center",fontSize:10,color:"#10B981",fontWeight:700,cursor:"pointer"}} onClick={()=>setBilling("annual")}>
-                          💡 Or save ${savingsAnual} with annual plan →
-                        </div>
-                      </>
-                    )}
-                  </>
-                }
-              </div>
+          {/* VIP CARD */}
+          <div style={{background:"#0F172A",borderRadius:20,padding:"32px 28px",border:"1px solid rgba(255,255,255,0.08)",boxShadow:"0 8px 40px rgba(0,0,0,0.4)",position:"relative",overflow:"hidden"}}>
+            {/* MOST POPULAR badge */}
+            <div style={{position:"absolute",top:20,right:20,background:"#fff",color:"#0F172A",fontSize:10,fontWeight:800,padding:"4px 12px",borderRadius:20,letterSpacing:0.8}}>
+              {isEN?"MOST POPULAR":"MÁS POPULAR"}
             </div>
+
+            <div style={{fontSize:12,fontWeight:700,color:"#64748B",letterSpacing:1.5,marginBottom:12}}>VIP</div>
+            <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+              <span style={{fontSize:42,fontWeight:900,color:"#F1F5F9",lineHeight:1}}>${(priceAnual/12).toFixed(2)}</span>
+              <span style={{fontSize:14,color:"#64748B",fontWeight:500}}>/mo</span>
+            </div>
+            <div style={{fontSize:13,color:"#94A3B8",marginBottom:6}}>
+              {isEN?`Billed annually ($${priceAnual}/yr) · or $${price}/mo monthly`:`Facturado anual ($${priceAnual}/año) · o $${price}/mes mensual`}
+            </div>
+            <div style={{fontSize:13,color:"#3B82F6",fontWeight:600,marginBottom:24}}>
+              {isEN?"3 days free — no card required":"3 días gratis — sin tarjeta"}
+            </div>
+
+            {isPremium
+              ? <div style={{width:"100%",padding:"14px",borderRadius:12,background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.25)",textAlign:"center",color:"#00E58A",fontSize:13,fontWeight:800,marginBottom:28,boxSizing:"border-box"}}>
+                  ✅ {isEN?"Active plan — thanks for being VIP!":"Plan activo — ¡Gracias por ser VIP!"}
+                </div>
+              : <button onClick={()=>handleSubscribe("annual")}
+                  style={{width:"100%",padding:"14px",borderRadius:12,background:"#fff",border:"none",textAlign:"center",color:"#0F172A",fontSize:14,fontWeight:800,cursor:"pointer",marginBottom:28,boxSizing:"border-box",transition:"opacity 0.15s",boxShadow:"0 2px 12px rgba(255,255,255,0.15)"}}
+                  onMouseEnter={e=>e.currentTarget.style.opacity="0.9"}
+                  onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+                  {isEN?"Start 3-day free trial":"Comenzar prueba de 3 días"}
+                </button>
+            }
+
+            {/* VIP features */}
+            <div style={{display:"flex",flexDirection:"column",gap:11}}>
+              {[
+                isEN?"Everything in Free":"Todo lo del plan Free",
+                isEN?"Weekly AI-powered picks":"Picks semanales con IA",
+                isEN?"Smart Money Flow":"Smart Money Flow",
+                isEN?"Full Pro Trader Terminal":"Terminal Pro Trader completa",
+                isEN?"Unlimited price alerts":"Alertas de precio ilimitadas",
+                isEN?"Unlimited watchlist":"Watchlist ilimitada",
+                isEN?"Exclusive Monday newsletter":"Newsletter exclusivo lunes",
+                isEN?"Advanced Global Radar — 52 exchanges":"Radar Global — 52 bolsas",
+                isEN?"Priority access to new features":"Acceso prioritario a novedades",
+              ].map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10}}>
+                  <span style={{fontSize:12,color:"#3B82F6",fontWeight:700,marginTop:1,flexShrink:0}}>✓</span>
+                  <span style={{fontSize:13,color:"#CBD5E1",lineHeight:1.4}}>{f}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Monthly option link */}
+            {!isPremium && (
+              <div style={{marginTop:20,textAlign:"center"}}>
+                <span style={{fontSize:12,color:"#475569",cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2}}
+                  onClick={()=>handleSubscribe("monthly")}>
+                  {isEN?`Or start monthly at $${price}/mo →`:`O mensual por $${price}/mes →`}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* ── FEATURE COMPARISON TABLE ── */}
         {activeTab==="planes" && (()=>{
-          const CMP=[
+          const CMP_ROWS = [
             {cat:isEN?"Community":"Comunidad"},
-            {f:isEN?"Social feed":"Foro social",free:true,pro:true},
-            {f:isEN?"Private messages":"Mensajes privados",free:true,pro:true},
-            {f:isEN?"Paper Trading ($100k virtual)":"Paper Trading ($100k virtual)",free:true,pro:true},
-            {f:isEN?"Public leaderboard":"Leaderboard público",free:true,pro:true},
+            {f:isEN?"Social feed (post, comment, repost)":"Foro social (publicar, comentar, repostear)",free:true,pro:true},
+            {f:isEN?"Private messages between traders":"Mensajes privados entre traders",free:true,pro:true},
+            {f:isEN?"Paper Trading — $100k virtual":"Paper Trading — $100k virtual",free:true,pro:true},
+            {f:isEN?"Public traders leaderboard":"Leaderboard público de traders",free:true,pro:true},
             {cat:isEN?"Market Data":"Datos de Mercado"},
-            {f:isEN?"Real-time news":"Noticias en tiempo real",free:true,pro:true},
+            {f:isEN?"Real-time market news":"Noticias del mercado en tiempo real",free:true,pro:true},
             {f:isEN?"Earnings calendar":"Calendario de earnings",free:true,pro:true},
-            {f:isEN?"Dividend calendar":"Calendario de dividendos",free:false,pro:true},
+            {f:isEN?"Real-time dividend calendar":"Calendario de dividendos en tiempo real",free:false,pro:true},
             {f:isEN?"IPO calendar":"Calendario de IPOs",free:false,pro:true},
-            {f:isEN?"Macro economic calendar":"Calendario macro económico",free:false,pro:true},
+            {f:isEN?"Macro economic calendar":"Calendario económico macro",free:false,pro:true},
             {cat:isEN?"AI & Signals":"IA y Señales"},
-            {f:isEN?"NEXO AI (5/day)":"IA NEXO (5/día)",free:true,pro:true},
+            {f:isEN?"NEXO AI — 5 questions/day":"IA NEXO — 5 preguntas/día",free:true,pro:true},
             {f:isEN?"Unlimited NEXO AI":"IA NEXO ilimitada",free:false,pro:true},
-            {f:isEN?"AI Stock Picks (10/week)":"Stock Picks IA (10/semana)",free:false,pro:true},
-            {f:isEN?"30+ Investment ideas":"30+ Ideas de inversión",free:false,pro:true},
+            {f:isEN?"AI Stock Picks — 10 picks/week with full analysis":"Stock Picks IA — 10 picks/sem con análisis completo",free:false,pro:true},
+            {f:isEN?"30+ Investment ideas (thesis, entry, target, stop)":"30+ Ideas de inversión (tesis, entrada, target, stop)",free:false,pro:true},
             {cat:isEN?"Professional Tools":"Herramientas Pro"},
             {f:isEN?"Basic watchlist (5 assets)":"Watchlist básica (5 activos)",free:true,pro:true},
-            {f:isEN?"Bloomberg Watchlist — 6 tabs":"Watchlist Bloomberg — 6 tabs",free:false,pro:true},
-            {f:isEN?"Advanced Screener":"Advanced Screener",free:false,pro:true},
-            {f:isEN?"Portfolio Oracle AI":"Portfolio Oracle IA",free:false,pro:true},
+            {f:isEN?"Bloomberg-style Watchlist — 6 tabs":"Watchlist Bloomberg-style — 6 tabs",free:false,pro:true},
+            {f:isEN?"Advanced Screener — 20+ filters":"Advanced Screener — 20+ filtros",free:false,pro:true},
+            {f:isEN?"Portfolio Oracle AI — real-time P&L":"Portfolio Oracle IA — P&L en tiempo real",free:false,pro:true},
             {f:isEN?"Full-screen Trading Terminal":"Terminal de Trading full-screen",free:false,pro:true},
-            {f:isEN?"Global Radar 3D":"Radar Global 3D",free:false,pro:true},
+            {f:isEN?"Global Radar — 3D capital flow map":"Radar Global — Mapa 3D de flujos de capital",free:false,pro:true},
             {cat:isEN?"Institutional Data":"Datos Institucionales"},
-            {f:isEN?"52 Guru portfolios":"52 portafolios Gurús",free:false,pro:true},
-            {f:isEN?"Congress Trades":"Congress Trades",free:false,pro:true},
-            {f:isEN?"Institutional flow (dark pool)":"Flujo institucional (dark pool)",free:false,pro:true},
+            {f:isEN?"52 Guru portfolios (Buffett, Ackman...)":"52 portafolios Gurús (Buffett, Ackman...)",free:false,pro:true},
+            {f:isEN?"Congress Trades — real time":"Congress Trades — en tiempo real",free:false,pro:true},
+            {f:isEN?"Institutional flow — dark pool & sweeps":"Flujo institucional — dark pool y sweeps",free:false,pro:true},
             {f:isEN?"SEC Insiders — Form 4":"Insiders SEC — Form 4",free:false,pro:true},
-            {f:isEN?"ARK Invest holdings":"ARK Invest holdings",free:false,pro:true},
+            {f:isEN?"ARK Invest daily holdings":"ARK Invest holdings diarios",free:false,pro:true},
+            {cat:isEN?"Other":"Otros"},
+            {f:isEN?"3 free Academy lessons":"3 lecciones gratis de Academia",free:true,pro:true},
+            {f:isEN?"Full Academy — all courses & webinars":"Academia completa — todos los cursos y webinars",free:false,pro:true},
+            {f:isEN?"Custom price alerts by email":"Alertas de precio personalizadas por email",free:false,pro:true},
+            {f:isEN?"Crypto Options — full BTC/ETH/SOL chain":"Opciones Crypto — cadena completa BTC/ETH/SOL",free:false,pro:true},
           ];
-          const th={padding:"10px 16px",fontSize:10,fontWeight:800,color:"#475569",letterSpacing:1.2,borderBottom:"1px solid rgba(255,255,255,0.06)"};
           return(
-            <div style={{borderRadius:16,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",marginBottom:28,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 100px 100px",background:"rgba(8,13,24,0.98)"}}>
-                <div style={{...th}}>{isEN?"FEATURE":"FUNCIONALIDAD"}</div>
-                <div style={{...th,textAlign:"center",color:"#334155"}}>FREE</div>
-                <div style={{...th,textAlign:"center",color:"#FCD34D"}}>PREMIUM</div>
+            <div style={{borderRadius:16,overflow:"hidden",border:`1px solid ${C.border}`,marginBottom:28,boxShadow:C.shadow}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 120px 120px",background:"rgba(10,16,30,0.95)",borderBottom:`1px solid ${C.border}`}}>
+                <div style={{padding:"12px 16px",fontSize:11,fontWeight:700,color:C.muted2,letterSpacing:1}}>{isEN?"FEATURE":"FUNCIONALIDAD"}</div>
+                <div style={{padding:"12px 8px",textAlign:"center",fontSize:11,fontWeight:700,color:"#64748B",letterSpacing:1}}>FREE</div>
+                <div style={{padding:"12px 8px",textAlign:"center",fontSize:11,fontWeight:700,color:"#FCD34D",letterSpacing:1}}>PREMIUM</div>
               </div>
-              {CMP.map((r,i)=> r.cat
-                ? <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 100px 100px",background:"rgba(15,76,129,0.05)",borderTop:"1px solid rgba(255,255,255,0.04)"}}>
-                    <div style={{padding:"7px 16px",fontSize:10,fontWeight:800,color:"#475569",letterSpacing:1.1,gridColumn:"1/-1"}}>{r.cat.toUpperCase()}</div>
+              {CMP_ROWS.map((r,i)=> r.cat
+                ? <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 120px 120px",background:"rgba(15,76,129,0.06)",borderTop:`1px solid ${C.border}`}}>
+                    <div style={{padding:"8px 16px",fontSize:10,fontWeight:800,color:"#475569",letterSpacing:1.2,gridColumn:"1/-1"}}>{r.cat.toUpperCase()}</div>
                   </div>
-                : <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 100px 100px",borderTop:"1px solid rgba(255,255,255,0.03)",background:i%2===0?"transparent":"rgba(255,255,255,0.01)"}}>
-                    <div style={{padding:"9px 16px",fontSize:12,color:"#CBD5E1"}}>{r.f}</div>
-                    <div style={{padding:"9px 8px",textAlign:"center",fontSize:13,fontWeight:700,color:r.free?"#3B82F6":"#1e293b"}}>{r.free?"✓":"—"}</div>
-                    <div style={{padding:"9px 8px",textAlign:"center",fontSize:13,fontWeight:700,color:r.pro?"#10B981":"#1e293b"}}>{r.pro?"✓":"—"}</div>
+                : <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 120px 120px",borderTop:`1px solid rgba(255,255,255,0.03)`,background:i%2===0?"transparent":"rgba(255,255,255,0.01)"}}>
+                    <div style={{padding:"10px 16px",fontSize:12,color:C.text}}>{r.f}</div>
+                    <div style={{padding:"10px 8px",textAlign:"center",fontSize:14}}>{r.free ? <span style={{color:"#3B82F6",fontWeight:700}}>✓</span> : <span style={{color:"#334155"}}>—</span>}</div>
+                    <div style={{padding:"10px 8px",textAlign:"center",fontSize:14}}>{r.pro ? <span style={{color:"#10B981",fontWeight:700}}>✓</span> : <span style={{color:"#334155"}}>—</span>}</div>
                   </div>
               )}
             </div>
@@ -6696,7 +6769,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
           <div style={{flex:1,minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
               <span style={{fontWeight:900,fontSize:15,color:C.text}}>SmartCredit</span>
-              <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.22)",borderRadius:20,padding:"1px 9px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{isEN?"Sponsored":"Patrocinado"}</span>
+              <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.22)",borderRadius:20,padding:"1px 9px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{isEN?"Sponsored":"Sponsored"}</span>
             </div>
             <div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>{isEN?"Monitor your credit score, protect your identity and improve your finances. Start free — no credit card.":"Monitorea tu score de crédito, protege tu identidad y mejora tus finanzas. Empieza gratis — sin tarjeta de crédito."}</div>
           </div>
@@ -7209,28 +7282,28 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
 
   const isEN = lang==="en";
   const navItems = [
-    {icon:"🔥", label:"Feed",                                        idx:0},
-    {icon:"📊", label:isEN?"Top Traders":"Tops Traders",             idx:1},
-    {icon:"₿",  label:isEN?"₿ Crypto":"₿ Cripto",                   idx:2},
-    {icon:"📈", label:isEN?"Markets":"Mercados",                     idx:3},
-    {icon:"🎮", label:isEN?"Paper Trading Sim":"Paper Trading Sim",     idx:9, vip:true, ai:true},
-    {icon:"💎", label:isEN?"Pricing & Plans":"Precios y Planes",              idx:8, premium:true},
+    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-5h4v5h5V9.5"/></svg>, label:"Feed", idx:0},
+    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>, label:"Top Traders", idx:1},
+    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>, label:"Crypto", idx:2},
+    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>, label:"Markets", idx:3},
+    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>, label:"Paper Trading", idx:9, vip:true, ai:true},
+    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, label:"Plans", idx:8, premium:true},
   ];
   const navMore = [
     {icon:"📅", label:isEN?"Economic Calendar":"Calendario",         idx:14},
-    {icon:"💰", label:isEN?"Dividends":"Dividendos",                 idx:15},
+    {icon:"💰", label:"Dividends",                 idx:15},
     {icon:"🚀", label:"IPOs 2026",                                   idx:16},
     {icon:"⛏️", label:isEN?"Commodities":"Commodities",              idx:18},
     {icon:"🔍", label:isEN?"Screener":"Screener",                    idx:17, vip:true},
     {icon:"💼", label:"Portfolio Terminal Oracle AI",   idx:37, vip:true},
     {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
-    {icon:"🔔", label:isEN?"Notifications":"Notificaciones",         idx:39},
+    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>, label:"Notifications", idx:39},
     {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
     {icon:"🎮",  label:isEN?"Paper Trading Sim":"Paper Trading Sim",  idx:9, vip:true},
-    {icon:"🏆", label:isEN?"Leaderboard":"Ranking",                  idx:40},
-    {icon:"📰", label:isEN?"News":"Noticias",                        idx:5},
+    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>, label:"Leaderboard", idx:40},
+    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6z"/></svg>, label:"News", idx:5},
     {icon:"📅", label:"Earnings",                                    idx:6},
-    {icon:"🚀", label:isEN?"Live Markets":"Mercado en Vivo",         idx:7},
+    {icon:"🚀", label:"Live Markets",         idx:7},
     {icon:"🌅", label:isEN?"Pre-Market & After-Hours":"Pre-Market y After-Hours", idx:45},
     {icon:"📐", label:isEN?"Pivot Points":"Puntos Pivote",           idx:46},
     {icon:"💵", label:isEN?"Profit Calculator":"Calc. Ganancias",    idx:47},
@@ -7240,9 +7313,9 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🔮", label:isEN?"Forward Rates":"Tasas Forward",          idx:50},
     {icon:"💱", label:isEN?"Currency Converter":"Conversor Divisas", idx:53},
     {icon:"🌡️", label:isEN?"FX Heat Map":"Heat Map Divisas",         idx:60},
-    {icon:"🎓", label:"Webinars",                                    idx:11},
-    {icon:"📚", label:isEN?"Academy":"Academia",                     idx:12},
-    {icon:"🌍", label:isEN?"Global Radar":"Radar Global",           idx:44},
+    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>, label:"Webinars", idx:11},
+    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>, label:"Academy", idx:12},
+    {icon:"🌍", label:"Global Radar",           idx:44},
   ];
 
   return(
@@ -7303,12 +7376,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 : <div style={{width:56,height:56,borderRadius:16,background:"#1e3a5f",border:"3px solid rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>&#x1F464;</div>
               }
             </div>
-            {/* Level badge top-right */}
-            {user && lvl && (
-              <div style={{position:"absolute",top:10,right:10,background:"rgba(255,255,255,0.95)",borderRadius:20,padding:"4px 10px",fontSize:10,fontWeight:700,color:"#1e293b",display:"flex",alignItems:"center",gap:4,boxShadow:"0 2px 8px rgba(0,0,0,0.2)"}}>
-                {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
-              </div>
-            )}
+            {/* Level badge removed */}
             {/* Join date bottom-right */}
             {joinDate && (
               <div style={{position:"absolute",bottom:8,right:10,fontSize:10,color:"rgba(255,255,255,0.5)",fontWeight:600,display:"flex",alignItems:"center",gap:3}}>
@@ -7382,30 +7450,18 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 )}
               </div>
 
-              {/* Level progress bar */}
-              {lvl && (
-                <div style={{background:"#F1F5F9",borderRadius:10,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{fontSize:14,flexShrink:0}}>{lvl.emoji}</span>
-                  <span style={{fontWeight:700,fontSize:11,color:"#0F172A",whiteSpace:"nowrap"}}>{lang==="en"?lvl.nameEn:lvl.name}</span>
-                  <div style={{flex:1,height:5,background:"#E2E8F0",borderRadius:99,overflow:"hidden"}}>
-                    <div style={{width:`${Math.min(100,progressPct)}%`,height:"100%",background:"linear-gradient(90deg,#3B82F6,#22D3EE)",borderRadius:99,transition:"width 0.5s"}}/>
-                  </div>
-                  <span style={{fontSize:10,color:"#94A3B8",fontWeight:600,whiteSpace:"nowrap"}}>{user.points||0}/{progressToNext?progressToNext.min:lvl.max}</span>
-                </div>
-              )}
+              {/* Level progress bar removed */}
 
               {/* Stats */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr 1px 1fr",background:"#F8FAFF",borderRadius:10,overflow:"hidden",border:"1px solid rgba(0,0,0,0.06)",marginBottom:12}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1px 1fr",background:"#F8FAFF",borderRadius:10,overflow:"hidden",border:"1px solid rgba(0,0,0,0.06)",marginBottom:12}}>
                 {[
                   {v:user.followers||0, l:"Followers"},
                   null,
                   {v:user.following||0, l:"Following"},
-                  null,
-                  {v:user.points||0,   l:"Points"},
                 ].map((item,i)=> item===null
                   ? <div key={i} style={{background:"rgba(0,0,0,0.05)"}}/>
                   : <div key={i} style={{padding:"9px 4px",textAlign:"center"}}>
-                      <div style={{fontWeight:800,fontSize:16,color:i===4?"#0F4C81":"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
+                      <div style={{fontWeight:800,fontSize:16,color:"#0F172A",letterSpacing:-0.5}}>{item.v}</div>
                       <div style={{fontSize:8,color:"#94A3B8",fontWeight:700,letterSpacing:0.7,textTransform:"uppercase",marginTop:1}}>{item.l}</div>
                     </div>
                 )}
@@ -7419,8 +7475,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
                 {lang==="en"?"View my profile →":"Ver mi perfil →"}
               </button>
             </> : <>
-              <div style={{fontWeight:700,color:"#0F172A",fontSize:14,marginBottom:4}}>{lang==="en"?"Join NexoTrade!":"¡Únjoms a NexoTrade!"}</div>
-              <div style={{fontSize:12,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading global investor community 🌎":"La comunidad global de inversores 🌎"}</div>
+              <div style={{fontWeight:700,color:"#0F172A",fontSize:14,marginBottom:4}}>{lang==="en"?"Join NexoTrade!":"Join NexoTrade!"}</div>
+              <div style={{fontSize:12,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>{lang==="en"?"The leading global investor community 🌎":"The leading global investor community 🌎"}</div>
               <button onClick={onNeedAuth}
                 style={{width:"100%",background:"#0F172A",color:"#fff",border:"none",borderRadius:12,padding:"10px",fontWeight:700,fontSize:13,cursor:"pointer"}}
                 onMouseEnter={e=>e.currentTarget.style.background="#1e293b"}
@@ -7574,7 +7630,7 @@ const AFFILIATES = [
     bg:"linear-gradient(135deg,#1A0003,#2D0008)",
     tagline:"$200 para ti al abrir cuenta",
     sub:"150 mercados · Comisiones desde $0 · Regulado SEC y FINRA",
-    cta:"Abrir cuenta y ganar $200 →",
+    cta:"Open account & earn $200 →",
     badge:"MAYOR PAGO",
     badgeColor:"#C8102E",
     url:"https://www.interactivebrokers.com/mkt/?src=nexotrade1&url=%2Fen%2Fwhyib%2Foverviewnetwork.php",
@@ -7733,10 +7789,10 @@ function AffiliateBanner(){
       {/* Fondo oscuro del broker */}
       <div style={{background:aff.bg,padding:"14px 16px"}}>
 
-        {/* Badge + label "Patrocinado" */}
+        {/* Badge + label "Sponsored" */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <span style={{fontSize:9,fontWeight:700,color:aff.badgeColor,background:`${aff.badgeColor}22`,borderRadius:20,padding:"2px 8px",letterSpacing:0.8}}>{aff.badge}</span>
-          <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontWeight:500,letterSpacing:0.5}}>Patrocinado</span>
+          <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontWeight:500,letterSpacing:0.5}}>Sponsored</span>
         </div>
 
         {/* Logo + nombre */}
@@ -7802,7 +7858,7 @@ function MobileAffiliateBanner(){
       <div onClick={()=>window.open(aff.url,"_blank","noopener")} role="button" style={{flex:1,minWidth:0,cursor:"pointer"}}>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
           <span style={{fontWeight:800,color:"#fff",fontSize:12.5}}>{aff.name}</span>
-          <span style={{fontSize:8,color:"rgba(255,255,255,0.35)",letterSpacing:0.5}}>Patrocinado</span>
+          <span style={{fontSize:8,color:"rgba(255,255,255,0.35)",letterSpacing:0.5}}>Sponsored</span>
         </div>
         <div style={{fontSize:10.5,color:aff.color,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{aff.tagline}</div>
       </div>
@@ -7884,12 +7940,11 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
               </div>
             ))}
           </div>
+          {/* Ribbon de fundador */}
           <div style={{textAlign:"center",marginBottom:14}}>
-            <span style={{fontSize:14,color:"#94A3B8",fontWeight:600,textDecoration:"line-through",marginRight:7}}>$29</span>
             <span style={{fontSize:30,fontWeight:900,color:"#0F172A",letterSpacing:-1}}>$15.99</span>
             <span style={{fontSize:13,color:"#94A3B8",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
-            <div style={{fontSize:11,color:"#B45309",fontWeight:800,marginTop:3}}>{isEN?"🔥 Launch price — going up to $29 soon":"🔥 Precio de lanzamiento — sube a $29 pronto"}</div>
-            <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:2}}>{isEN?"3 days free · cancel anytime":"3 días gratis · cancela cuando quieras"}</div>
+            <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:4}}>{isEN?"3 days free · cancel anytime":"3 días gratis · cancela cuando quieras"}</div>
           </div>
           <button onClick={onUpgrade}
             style={{width:"100%",background:"linear-gradient(135deg,#0F4C81,#0F5E68)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontWeight:800,fontSize:14.5,cursor:"pointer",boxShadow:"0 6px 20px rgba(15,76,129,0.35)",fontFamily:"inherit"}}>
@@ -8757,18 +8812,18 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
   const toggle=()=>{ if(!open&&btnRef.current){const r=btnRef.current.getBoundingClientRect();setPos({left:Math.max(8,Math.min(r.left,(window.innerWidth||1000)-628)),top:r.bottom+6});} setOpen(o=>!o); };
   const go=idx=>{setOpen(false);onNavigate&&onNavigate(idx);};
   const groups=[
-    {t:isEN?"📅 Calendars":"📅 Calendarios", items:[
-      [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
-    {t:isEN?"🧮 Calculators":"🧮 Calculadoras", items:[
-      ["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
-    {t:isEN?"💱 Currencies":"💱 Divisas", items:[
-      [isEN?"Currency Converter":"Conversor",53],["Heat Map",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
-    {t:isEN?"📊 Investing Tools":"📊 Inversión", items:[
-      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56],[isEN?"Track Record":"Track Record",51]]},
-    {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
-      [isEN?"Live Markets":"Mercado en Vivo",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20]]},
-    {t:isEN?"📚 Education":"📚 Educación", items:[
-      ["Webinars",11],[isEN?"Academy":"Academia",12]]},
+    {t:"Calendars", items:[
+      [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],["Dividends",15],["IPOs",16],["Holidays",57],["Splits",58],["Futures Expiry",59]]},
+    {t:"Calculators", items:[
+      ["Pivot Points",46],["Profit",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],["Mortgage",49]]},
+    {t:"Currencies", items:[
+      [isEN?"Currency Converter":"Conversor",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
+    {t:isEN?"Investing Tools":"Inversión", items:[
+      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],[isEN?"Track Record":"Track Record",51]]},
+    {t:"Markets", items:[
+      ["Live Markets",7],["Pre-Market",45],["Crypto",41],["Commodities",18],["Global Radar",44],["Smart Money",20]]},
+    {t:"Education", items:[
+      ["Webinars",11],["Academy",12]]},
   ];
   const navBtn = variant==="nav";
   return(
@@ -8776,7 +8831,7 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
       <button ref={btnRef} onClick={toggle} style={navBtn
         ? {display:"flex",alignItems:"center",gap:7,height:52,padding:"0 18px",border:"none",borderBottom:`2.5px solid ${open?"#2196F3":"transparent"}`,background:open?"rgba(33,150,243,0.06)":"transparent",color:open?"#2196F3":"#1A5FAD",fontSize:14,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit"}
         : {display:"flex",alignItems:"center",gap:6,background:open?"rgba(15,76,129,0.1)":"transparent",border:`1px solid ${open?"rgba(15,76,129,0.35)":"rgba(15,76,129,0.2)"}`,borderRadius:10,padding:"7px 13px",cursor:"pointer",color:"#0F4C81",fontSize:13,fontWeight:800,fontFamily:"inherit",whiteSpace:"nowrap"}}>
-        🧰 {isEN?"Tools":"Herramientas"} <span style={{fontSize:9}}>▾</span>
+        <NavIco name="tools" size={15}/> {isEN?"Tools":"Herramientas"} <span style={{fontSize:9}}>▾</span>
       </button>
       {open&&(
         <div style={{position:"fixed",left:pos.left,top:pos.top,background:"#fff",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 50px rgba(0,0,0,0.22)",zIndex:99995,padding:16,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(175px,1fr))",gap:"6px 22px",width:"min(620px,94vw)",maxHeight:"min(74vh,580px)",overflowY:"auto"}}>
@@ -8802,13 +8857,13 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
   const isEN=lang==="en";
   const go=idx=>{onClose();onNavigate(idx);};
   const SECTIONS=[
-    {t:isEN?"Main":"Principal",items:[["🔥 Feed",0],["⚡ Stock Pick IA",3],[isEN?"📡 Live Markets":"📡 Mercado en Vivo",7],["📅 Earnings",6],[isEN?"📰 News":"📰 Noticias",5],[isEN?"💬 Messages":"💬 Mensajes",22],["🏆 "+(isEN?"Leaderboard":"Ranking"),40]]},
-    {t:isEN?"📅 Calendars":"📅 Calendarios",items:[[isEN?"Economic":"Económico",14],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
-    {t:isEN?"🧮 Calculators":"🧮 Calculadoras",items:[["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
-    {t:isEN?"💱 Currencies":"💱 Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
-    {t:isEN?"📊 Investing":"📊 Inversión",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
-    {t:isEN?"🌐 Markets":"🌐 Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
-    {t:isEN?"📚 Education":"📚 Educación",items:[["Webinars",11],[isEN?"Academy":"Academia",12]]},
+    {t:isEN?"Main":"Principal",items:[["Feed",0],["Stock Pick AI",3],["Live Markets",7],["Earnings",6],["News",5],["Messages",22],["Leaderboard",40]]},
+    {t:"Calendars",items:[["Economic",14],["Dividends",15],["IPOs",16],["Holidays",57],["Splits",58],["Futures Expiry",59]]},
+    {t:"Calculators",items:[["Pivot Points",46],["Profit",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],["Mortgage",49]]},
+    {t:"Currencies",items:[["Converter",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
+    {t:"Investing Tools",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],["Track Record",51]]},
+    {t:"Markets",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],["Global Radar",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
+    {t:"Education",items:[["Webinars",11],["Academy",12]]},
   ];
   return(<>
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:99996,backdropFilter:"blur(2px)"}}/>
@@ -8818,9 +8873,9 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
         <button onClick={onClose} style={{background:C.card2||"#f1f5f9",border:"none",borderRadius:"50%",width:32,height:32,fontSize:16,color:C.muted,cursor:"pointer"}}>✕</button>
       </div>
       <div style={{padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
-        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:12,padding:"11px",color:"#1B1303",fontWeight:900,fontSize:14,cursor:"pointer"}}>✦ {isEN?"Go Premium — $15.99/mo":"Hazte Premium — $15.99/mes"}</button>}
-        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"none",border:"none",marginTop:-2,color:"#10B981",fontWeight:800,fontSize:11.5,cursor:"pointer",textAlign:"center"}}>{isEN?"💡 or $79/year — save $112 (59% off)":"💡 o $79/año — ahorra $112 (59% off)"}</button>}
-        <button onClick={()=>{onClose();onAI&&onAI();}} style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:12,padding:"11px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer"}}>🤖 {isEN?"Ask the AI":"Preguntar a la IA"}</button>
+        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:12,padding:"11px",color:"#1B1303",fontWeight:900,fontSize:14,cursor:"pointer"}}>✦ {"Go Premium — $15.99/mo"}</button>}
+        {!isPremium&&<button onClick={()=>{onClose();onPremium();}} style={{background:"none",border:"none",marginTop:-2,color:"#10B981",fontWeight:800,fontSize:11.5,cursor:"pointer",textAlign:"center"}}>{"or $79/year — save $112 (59% off)"}</button>}
+        <button onClick={()=>{onClose();onAI&&onAI();}} style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:12,padding:"11px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><NavIco name="ai" size={16}/> {"Ask the AI"}</button>
       </div>
       <div style={{padding:"0 10px 28px"}}>
         {SECTIONS.map(s=>(
@@ -8855,7 +8910,7 @@ function BondsWidget({lang="es"}){
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"14px 16px",boxShadow:C.shadow}}>
       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
         <span style={{fontSize:15}}>🏦</span>
-        <span style={{fontWeight:800,fontSize:13,color:C.text}}>{isEN?"US Treasury Yields":"Bonos del Tesoro USA"}</span>
+        <span style={{fontWeight:800,fontSize:13,color:C.text}}>{"US Treasury Yields"}</span>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
         {items.map(({l,r})=>(
@@ -8867,7 +8922,7 @@ function BondsWidget({lang="es"}){
       </div>
       {spread!=null && (
         <div style={{marginTop:9,display:"flex",alignItems:"center",justifyContent:"space-between",background:spread<0?"rgba(220,38,38,0.08)":"rgba(22,163,74,0.08)",border:`1px solid ${spread<0?"rgba(220,38,38,0.25)":"rgba(22,163,74,0.25)"}`,borderRadius:9,padding:"7px 10px"}}>
-          <span style={{fontSize:10.5,fontWeight:700,color:C.muted}}>{isEN?"10Y-2Y spread":"Spread 10A-2A"}</span>
+          <span style={{fontSize:10.5,fontWeight:700,color:C.muted}}>{"10Y-2Y spread"}</span>
           <span style={{fontSize:12.5,fontWeight:800,fontFamily:"monospace",color:spread<0?"#DC2626":"#16A34A"}}>{spread>0?"+":""}{spread.toFixed(2)}%{spread<0?(isEN?" ⚠":"⚠"):""}</span>
         </div>
       )}
@@ -8885,9 +8940,9 @@ function MarketOverview({lang="es"}){
   const [rLoading,setRLoading]=useState(false);
   const REGION_TABS=[
     {id:"global",label:"Global",flag:"🌐"},
-    {id:"europe",label:"Europa",flag:"🇪🇺"},
-    {id:"asia",  label:isEN?"Asia-Pacific":"Asia-Pacífico",flag:"🌏"},
-    {id:"latam", label:"Latam",flag:"🌎"},
+    {id:"europe",label:"Europe",flag:"🇪🇺"},
+    {id:"asia",  label:"Asia-Pacific",flag:"🌏"},
+    {id:"latam", label:"Latin America",flag:"🌎"},
   ];
   useEffect(()=>{
     let c=false;
@@ -8915,7 +8970,7 @@ function MarketOverview({lang="es"}){
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"14px 16px",boxShadow:"0 2px 14px rgba(15,23,42,0.06)"}}>
       <div style={{fontSize:11,fontWeight:800,color:C.muted2,textTransform:"uppercase",letterSpacing:0.7,marginBottom:10}}>{title}</div>
       {(rows||[]).length===0
-        ? <div style={{fontSize:11,color:C.muted2,padding:"6px 0"}}>{loading?(isEN?"loading…":"cargando…"):"—"}</div>
+        ? <div style={{fontSize:11,color:C.muted2,padding:"6px 0"}}>{loading?"loading…":"—"}</div>
         : rows.map((r,i)=>(
         <div key={r.s} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"7px 0",borderBottom:i<rows.length-1?`1px solid ${C.border}`:"none"}}>
           <span style={{fontSize:12.5,fontWeight:600,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.n}</span>
@@ -8941,8 +8996,8 @@ function MarketOverview({lang="es"}){
   return(
     <div style={{marginBottom:20}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
-        <h2 style={{margin:0,fontSize:16,fontWeight:800,color:C.text}}>🌐 {isEN?"Market Overview":"Resumen del Mercado"}</h2>
-        <span style={{fontSize:10.5,fontWeight:700,color:busy?"#F59E0B":"#16A34A"}}>{busy?(isEN?"loading…":"cargando…"):"● "+(isEN?"live":"en vivo")}</span>
+        <h2 style={{margin:0,fontSize:16,fontWeight:800,color:C.text}}>🌐 {"Market Overview"}</h2>
+        <span style={{fontSize:10.5,fontWeight:700,color:busy?"#F59E0B":"#16A34A"}}>{busy?(isEN?"loading…":"loading…"):"● "+("live")}</span>
       </div>
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
         {REGION_TABS.map(t=>{
@@ -8962,16 +9017,16 @@ function MarketOverview({lang="es"}){
       </div>
       {region==="global"
         ? <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:12}}>
-            <Section title={isEN?"Indices":"Índices"} rows={d?.indices}/>
+            <Section title={"Indices"} rows={d?.indices}/>
             <Section title="Crypto" rows={d?.crypto}/>
             <Section title="Commodities" rows={d?.commodities}/>
           </div>
         : (regionRows&&regionRows.length===0)
-          ? <div style={{fontSize:12.5,color:C.muted2,padding:"14px 0"}}>{isEN?"Updating real data…":"Actualizando datos reales…"}</div>
+          ? <div style={{fontSize:12.5,color:C.muted2,padding:"14px 0"}}>{isEN?"Updating real data…":"Updating real data…"}</div>
           : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12}}>
               {(regionRows||[]).map(r=><Tile key={r.s} r={r}/>)}
             </div>}
-      {region!=="global" && <div style={{fontSize:10.5,color:C.muted2,marginTop:8}}>{isEN?"Index proxies via regional ETFs · for reference":"Aproximación vía ETFs regionales · referencial"}</div>}
+      {region!=="global" && <div style={{fontSize:10.5,color:C.muted2,marginTop:8}}>{"Index proxies via regional ETFs · for reference"}</div>}
     </div>
   );
 }
@@ -8980,7 +9035,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
   const SIDEBAR_STATIC=[
-    {ticker:"BTC",  price:"$61,800", change:+1.4},
+    {ticker:"BTC",  price:"$62,060", change:+0.0},
     {ticker:"NVDA", price:"$205.10", change:+0.9},
     {ticker:"TSLA", price:"$391.00", change:-1.1},
     {ticker:"ETH",  price:"$1,617",  change:+3.0},
@@ -9103,8 +9158,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         );
       })()}
 
-      {/* ── WIDGET AFILIADO DESTACADO (sidebar derecho) ── */}
-      <a href={topAff.url} target="_blank" rel="noopener noreferrer" style={{display:"block",textDecoration:"none",marginBottom:10}}>
+      {/* ── WIDGET AFILIADO DESTACADO (sidebar derecho) — solo free users ── */}
+      {!isPremium && <a href={topAff.url} target="_blank" rel="noopener noreferrer" style={{display:"block",textDecoration:"none",marginBottom:10}}>
         <div style={{
           background:topAff.bg,
           borderRadius:16,
@@ -9121,7 +9176,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
           <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,borderRadius:"50%",background:`${topAff.color}11`}}/>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
             <span style={{fontSize:9,fontWeight:700,color:topAff.badgeColor,background:`${topAff.badgeColor}22`,borderRadius:20,padding:"2px 8px",letterSpacing:0.8}}>{topAff.badge}</span>
-            <span style={{fontSize:9,color:"rgba(255,255,255,0.3)"}}>Patrocinado</span>
+            <span style={{fontSize:9,color:"rgba(255,255,255,0.3)"}}>Sponsored</span>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
             <span style={{fontSize:22}}>{topAff.logo}</span>
@@ -9139,7 +9194,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
             ))}
           </div>
         </div>
-      </a>
+      </a>}
 
       {/* ── AI MARKET PULSE — versión compacta (Opción A) ── */}
       <div onClick={onAI} style={{...card,padding:"12px 14px",
@@ -9423,9 +9478,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         );
       })()}
 
-
-      {/* ── BANNERS AFILIADOS ROTATIVOS ── */}
-      <AffiliateBanner/>
+      {/* ── BANNERS AFILIADOS ROTATIVOS — solo para free users ── */}
+      {!effectivePremium && <AffiliateBanner/>}
 
       {/* ── DISCLAIMER ── */}
       <div style={{background:"rgba(245,158,11,0.04)",border:"1px solid rgba(245,158,11,0.1)",borderRadius:10,padding:"10px 14px",color:"#A16207",fontSize:10,lineHeight:1.8}}>
@@ -9657,41 +9711,60 @@ function TrackRecordPage({lang="es"}){
     {mo:"Apr '25",ticker:"MSFT",entry:"$385",  exit:"$415",  ret:7.8,  win:true},
     {mo:"May '25",ticker:"TSLA",entry:"$295",  exit:"$270",  ret:-8.5, win:false},
   ];
-  const total=SIGNALS.length,wins=SIGNALS.filter(s=>s.win).length;
+  const total=SIGNALS.length;
+  const wins=SIGNALS.filter(s=>s.win).length;
   const winRate=Math.round(wins/total*100);
   const avgRet=(SIGNALS.reduce((a,s)=>a+s.ret,0)/total).toFixed(1);
   const best=SIGNALS.reduce((a,b)=>b.ret>a.ret?b:a);
+  // Cumulative line (10% portfolio allocation per signal)
   const cumLine=[0];
   SIGNALS.forEach(s=>{ cumLine.push(parseFloat((cumLine[cumLine.length-1]+s.ret*0.1).toFixed(2))); });
-  const W=600,H=130,maxV=Math.max(...cumLine),minV=Math.min(0,...cumLine),range=maxV-minV||1;
+  const W=600,H=130;
+  const maxV=Math.max(...cumLine),minV=Math.min(0,...cumLine),range=maxV-minV||1;
   const toY=v=>H-10-((v-minV)/range)*(H-22);
   const toX=i=>(i/(cumLine.length-1))*W;
-  const poly=cumLine.map((v,i)=>toX(i).toFixed(1)+","+toY(v).toFixed(1)).join(" ");
-  const fill=toX(0)+","+toY(0)+" "+cumLine.map((v,i)=>toX(i).toFixed(1)+","+toY(v).toFixed(1)).join(" ")+" "+toX(cumLine.length-1)+","+toY(0);
+  const poly=cumLine.map((v,i)=>`${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" ");
+  const fill=[`${toX(0)},${toY(0)}`,...cumLine.map((v,i)=>`${toX(i).toFixed(1)},${toY(v).toFixed(1)}`),`${toX(cumLine.length-1)},${toY(0)}`].join(" ");
   const STATS=[
     {l:isEN?"Total Signals":"Total Señales",v:total+"",c:C.text},
-    {l:isEN?"Win Rate":"Win Rate",v:winRate+"%",c:"#16A34A"},
-    {l:isEN?"Avg Return":"Retorno Prom.",v:(parseFloat(avgRet)>0?"+":"")+avgRet+"%",c:"#16A34A"},
-    {l:isEN?"Best Signal":"Mejor Señal",v:"+"+best.ret+"% "+best.ticker,c:"#16A34A"},
-    {l:isEN?"Portfolio ↑":"Cartera ↑",v:"+30.5%",c:"#16A34A"},
+    {l:isEN?"Win Rate":"Win Rate",         v:winRate+"%",c:"#16A34A"},
+    {l:isEN?"Avg Return":"Retorno Prom.",  v:(avgRet>0?"+":"")+avgRet+"%",c:"#16A34A"},
+    {l:isEN?"Best Signal":"Mejor Señal",   v:"+"+best.ret+"% "+best.ticker,c:"#16A34A"},
+    {l:isEN?"Portfolio ↑":"Cartera ↑",    v:"+30.5%",c:"#16A34A"},
   ];
   return(
     <div style={{maxWidth:960,margin:"0 auto",padding:"0 0 48px"}}>
+      {/* Header */}
       <div style={{background:"linear-gradient(135deg,#0F4C81 0%,#0066CC 100%)",borderRadius:18,padding:"28px 32px",marginBottom:20,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",right:-20,top:-20,width:200,height:200,borderRadius:"50%",background:"rgba(255,255,255,0.04)"}}/>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,flexWrap:"wrap"}}>
-          <span style={{fontSize:26}}>📊</span>
+          <span style={{fontSize:28}}>📊</span>
           <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:900,fontFamily:"'Syne',sans-serif"}}>Track Record</h1>
-          <span style={{background:"rgba(255,255,255,0.18)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700}}>{isEN?"Jan 2024 — May 2025":"Ene 2024 — May 2025"}</span>
+          <span style={{background:"rgba(255,255,255,0.18)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
+            {isEN?"Jan 2024 — May 2025":"Ene 2024 — May 2025"}
+          </span>
         </div>
-        <p style={{color:"rgba(255,255,255,0.82)",margin:0,fontSize:13,maxWidth:560}}>{isEN?"Verified performance of NexoTrade IA signals. All trades documented. For educational purposes only — not financial advice.":"Rendimiento verificado de señales NexoTrade IA. Todos los trades documentados. Solo fines educativos — no es consejo financiero."}</p>
+        <p style={{color:"rgba(255,255,255,0.82)",margin:0,fontSize:13,maxWidth:560}}>
+          {isEN
+            ?"Verified performance of NexoTrade IA signals. All trades documented. For educational purposes — not financial advice."
+            :"Rendimiento verificado de señales NexoTrade IA. Todos los trades documentados. Solo fines educativos — no es consejo financiero."}
+        </p>
       </div>
+      {/* Stats */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:20}}>
-        {STATS.map((s,i)=>(<div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 12px",textAlign:"center",boxShadow:C.shadow}}><div style={{fontSize:19,fontWeight:900,color:s.c,fontFamily:"monospace",marginBottom:2}}>{s.v}</div><div style={{fontSize:10.5,color:C.muted2,fontWeight:600}}>{s.l}</div></div>))}
+        {STATS.map((s,i)=>(
+          <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 12px",textAlign:"center",boxShadow:C.shadow}}>
+            <div style={{fontSize:20,fontWeight:900,color:s.c,fontFamily:"monospace",marginBottom:2}}>{s.v}</div>
+            <div style={{fontSize:10.5,color:C.muted2,fontWeight:600}}>{s.l}</div>
+          </div>
+        ))}
       </div>
+      {/* Chart */}
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,padding:"18px 20px",marginBottom:20,boxShadow:C.shadow}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
-          <span style={{fontWeight:800,fontSize:14,color:C.text}}>{isEN?"📈 Portfolio Cumulative Return — 10% per signal":"📈 Retorno Acumulado — 10% por señal"}</span>
+          <span style={{fontWeight:800,fontSize:14,color:C.text}}>
+            {isEN?"📈 Portfolio Cumulative Return — 10% per signal":"📈 Retorno Acumulado de Cartera — 10% por señal"}
+          </span>
           <span style={{color:"#16A34A",fontWeight:900,fontSize:16}}>+30.5%</span>
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H,display:"block"}} preserveAspectRatio="none">
@@ -9699,11 +9772,15 @@ function TrackRecordPage({lang="es"}){
           <polygon points={fill} fill="rgba(22,163,74,0.10)"/>
           <polyline points={poly} fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
           <circle cx={toX(cumLine.length-1).toFixed(1)} cy={toY(cumLine[cumLine.length-1]).toFixed(1)} r="5" fill="#16A34A"/>
+          <circle cx={toX(cumLine.length-1).toFixed(1)} cy={toY(cumLine[cumLine.length-1]).toFixed(1)} r="9" fill="rgba(22,163,74,0.25)"/>
         </svg>
         <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
-          {["Jan '24","Apr '24","Jul '24","Oct '24","Jan '25","May '25"].map(l=>(<span key={l} style={{fontSize:9.5,color:C.muted2,fontWeight:600}}>{l}</span>))}
+          {(isEN?["Jan '24","Mar '24","May '24","Aug '24","Nov '24","Feb '25","May '25"]:["Ene '24","Mar '24","May '24","Ago '24","Nov '24","Feb '25","May '25"]).map(l=>(
+            <span key={l} style={{fontSize:9.5,color:C.muted2,fontWeight:600}}>{l}</span>
+          ))}
         </div>
       </div>
+      {/* Table */}
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden"}}>
         <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
           <span style={{fontWeight:800,fontSize:15,color:C.text}}>{isEN?"Signal History":"Historial de Señales"}</span>
@@ -9714,20 +9791,34 @@ function TrackRecordPage({lang="es"}){
         </div>
         <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
-            <thead><tr style={{background:C.card2||"#f8fafc"}}>{(isEN?["Period","Ticker","Type","Entry","Exit","Return","Result"]:["Período","Ticker","Tipo","Entrada","Salida","Retorno","Resultado"]).map(h=>(<th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted2,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>{h}</th>))}</tr></thead>
-            <tbody>{SIGNALS.map((s,i)=>(<tr key={i} style={{borderBottom:`1px solid ${C.border}`,background:i%2===0?"transparent":C.card2||"rgba(0,0,0,0.01)"}}>
-              <td style={{padding:"10px 14px",fontSize:12,color:C.muted2,fontWeight:600,whiteSpace:"nowrap"}}>{s.mo}</td>
-              <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>${s.ticker}</span></td>
-              <td style={{padding:"10px 14px"}}><span style={{background:"rgba(22,163,74,0.12)",color:"#16A34A",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700}}>▲ {isEN?"BUY":"COMPRA"}</span></td>
-              <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.entry}</td>
-              <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.exit}</td>
-              <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:s.ret>=0?"#16A34A":"#EF4444"}}>{s.ret>=0?"+":""}{s.ret}%</span></td>
-              <td style={{padding:"10px 14px",fontSize:18}}>{s.win?"✅":"❌"}</td>
-            </tr>))}</tbody>
+            <thead>
+              <tr style={{background:C.card2||"#f8fafc"}}>
+                {(isEN?["Period","Ticker","Type","Entry","Exit","Return","Result"]:["Período","Ticker","Tipo","Entrada","Salida","Retorno","Resultado"]).map(h=>(
+                  <th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted2,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {SIGNALS.map((s,i)=>(
+                <tr key={i} style={{borderBottom:`1px solid ${C.border}`,background:i%2===0?"transparent":C.card2||"rgba(0,0,0,0.01)"}}>
+                  <td style={{padding:"10px 14px",fontSize:12,color:C.muted2,fontWeight:600,whiteSpace:"nowrap"}}>{s.mo}</td>
+                  <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>${s.ticker}</span></td>
+                  <td style={{padding:"10px 14px"}}><span style={{background:"rgba(22,163,74,0.12)",color:"#16A34A",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700}}>▲ {isEN?"BUY":"COMPRA"}</span></td>
+                  <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.entry}</td>
+                  <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.exit}</td>
+                  <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:s.ret>=0?"#16A34A":"#EF4444"}}>{s.ret>=0?"+":""}{s.ret}%</span></td>
+                  <td style={{padding:"10px 14px",fontSize:18}}>{s.win?"✅":"❌"}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
         <div style={{padding:"14px 20px",borderTop:`1px solid ${C.border}`,background:C.card2||"#f8fafc"}}>
-          <p style={{margin:0,fontSize:11,color:C.muted2,lineHeight:1.6}}>⚠️ {isEN?"Past performance does not guarantee future results. Educational purposes only. Not financial advice. Trading involves substantial risk of loss.":"El rendimiento pasado no garantiza resultados futuros. Solo fines educativos. No es consejo financiero. El trading conlleva riesgo sustancial de pérdida."}</p>
+          <p style={{margin:0,fontSize:11,color:C.muted2,lineHeight:1.6}}>
+            ⚠️ {isEN
+              ?"Past performance does not guarantee future results. These signals are for educational purposes only and do not constitute financial, investment, or trading advice. Trading involves substantial risk of loss. NexoTrade is not a licensed investment advisor."
+              :"El rendimiento pasado no garantiza resultados futuros. Estas señales son solo con fines educativos y no constituyen asesoría financiera, de inversión ni de trading. El trading conlleva riesgo sustancial de pérdida. NexoTrade no es un asesor de inversión registrado."}
+          </p>
         </div>
       </div>
     </div>
@@ -9757,7 +9848,7 @@ function Footer({ setPage, onAuth, lang="es" }){
       items:[
         {label: isEN?"Feed":"Feed",                     page:0},
         {label: isEN?"Market Tops":"Tops de Mercado",   page:1},
-        {label: isEN?"News":"Noticias",                 page:5},
+        {label: "News",                 page:5},
         {label: isEN?"Earnings":"Earnings",             page:6},
         {label: "🤖 IA NEXO",                            page:9},
         {label: isEN?"✦ Ideas PREMIUM":"✦ Ideas PREMIUM",      page:21},
@@ -9771,7 +9862,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",            page:19},
         {label: isEN?"Economic Calendar":"Cal. Económico",       page:14},
         {label: "IPOs 2026",                                     page:16},
-        {label: isEN?"Dividends":"Dividendos",                   page:15},
+        {label: "Dividends",                   page:15},
       ]
     },
     {
@@ -9779,8 +9870,8 @@ function Footer({ setPage, onAuth, lang="es" }){
       items:[
         {label: isEN?"Community Rules":"Normas",         page:34},
         {label: isEN?"Live Webinars":"Webinars",         page:11},
-        {label: isEN?"Academy":"Academia",               page:12},
-        {label: isEN?"Messages":"Mensajes",              page:22},
+        {label: "Academy",               page:12},
+        {label: "Messages",              page:22},
         {label: isEN?"💰 Plans & Pricing — $15.99/mo ✦":"💰 Planes y precios — $15.99/mes ✦",page:8},
         {label: isEN?"Join free →":"Únete gratis →",     action:"auth"},
       ]
@@ -9792,7 +9883,6 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"Terms of Use":"Términos de Uso",   page:31},
         {label: isEN?"Privacy Policy":"Privacidad",      page:32},
         {label: isEN?"Risk Disclaimer":"Aviso de Riesgo",page:33},
-        {label: isEN?"Track Record":"Track Record",    page:51},
         {label: isEN?"Contact":"Contacto",               href:"mailto:info@nexotradeia.com"},
       ]
     },
@@ -9864,12 +9954,18 @@ function Footer({ setPage, onAuth, lang="es" }){
         ))}
       </div>
 
-      {/* ── DISCLAIMER STRIP ── */}
-      <div style={{background:"rgba(239,68,68,0.08)",borderTop:"1px solid rgba(239,68,68,0.20)",borderBottom:"1px solid rgba(239,68,68,0.10)",padding:"10px 20px",textAlign:"center"}}>
-        <span style={{fontSize:11,color:"rgba(220,80,80,0.9)",fontWeight:600,lineHeight:1.6}}>
-          ⚠️ {isEN?"DISCLAIMER: All content is for educational and informational purposes only. Not financial advice. Trading involves risk of loss. Past performance does not guarantee future results.":"AVISO LEGAL: Todo el contenido es solo educativo e informativo. No es consejo financiero. El trading conlleva riesgo de pérdida. El rendimiento pasado no garantiza resultados futuros."}
-          {" "}<span style={{cursor:"pointer",textDecoration:"underline",color:"rgba(220,80,80,0.9)"}} onClick={()=>nav(33)}>{isEN?"Full Risk Disclaimer →":"Ver Aviso de Riesgo Completo →"}</span>
-        </span>
+      {/* ── LEGAL DISCLAIMER STRIP — visible para Stripe + influencers ── */}
+      <div style={{background:"rgba(239,68,68,0.07)",borderTop:"1px solid rgba(239,68,68,0.18)",borderBottom:"1px solid rgba(239,68,68,0.12)",padding:"13px 20px"}}>
+        <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"flex-start",gap:10,flexWrap:"wrap"}}>
+          <span style={{fontSize:16,flexShrink:0}}>⚠️</span>
+          <p style={{margin:0,fontSize:11.5,color:"rgba(239,68,68,0.75)",lineHeight:1.7,flex:1}}>
+            <strong style={{color:"rgba(239,68,68,0.9)"}}>{isEN?"DISCLAIMER:":"AVISO LEGAL:"}</strong>{" "}
+            {isEN
+              ?"NexoTrade content is for EDUCATIONAL and INFORMATIONAL purposes ONLY. It does NOT constitute financial, investment, or trading advice. Past performance is NOT indicative of future results. Trading involves substantial risk of loss. You may lose all of your invested capital. NexoTrade is NOT a registered investment advisor, broker-dealer, or financial institution. Always consult a qualified financial professional before making investment decisions."
+              :"El contenido de NexoTrade es ÚNICAMENTE con fines EDUCATIVOS e INFORMATIVOS. NO constituye asesoría financiera, de inversión ni de trading. El rendimiento pasado NO garantiza resultados futuros. El trading conlleva riesgo sustancial de pérdida. Puedes perder todo el capital invertido. NexoTrade NO es un asesor de inversión registrado, corredor de bolsa ni institución financiera. Consulta siempre con un profesional financiero cualificado antes de tomar decisiones de inversión."
+            }{" "}<button onClick={()=>nav(33)} style={{background:"none",border:"none",color:"rgba(239,68,68,0.8)",cursor:"pointer",textDecoration:"underline",fontSize:11.5,padding:0,fontFamily:"inherit"}}>→ {isEN?"Full Risk Disclaimer":"Aviso de Riesgo Completo"}</button>
+          </p>
+        </div>
       </div>
 
       {/* ── BOTTOM BAR ── */}
@@ -9878,11 +9974,10 @@ function Footer({ setPage, onAuth, lang="es" }){
           {/* Copyright */}
           <span style={{color:"#334155",fontSize:11}}>© 2026 NexoTrade · nexotradeia.com · {isEN?"All rights reserved":"Todos los derechos reservados"}</span>
 
-          {/* Disclaimer — clickable */}
-          <span style={{color:"#334155",fontSize:11,cursor:"pointer",textDecoration:"underline",textDecorationColor:"rgba(255,255,255,0.1)"}}
-            onClick={()=>nav(33)}>
-            {isEN?"⚠️ Not financial advice — Educational only":"⚠️ No es consejo financiero — Solo educativo"}
-          </span>
+          {/* Track Record link */}
+          <button onClick={()=>nav(51)} style={{background:"none",border:"none",color:"#475569",fontSize:11,cursor:"pointer",textDecoration:"underline",fontFamily:"inherit"}}>
+            📊 {isEN?"Track Record":"Track Record"}
+          </button>
 
           {/* Social icons */}
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -17632,7 +17727,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
             {/* Alert */}
             <button onClick={()=>setShowAlertModal(true)}
               style={{background:myAlerts.length?"rgba(245,158,11,0.15)":"rgba(255,255,255,0.05)",border:`1px solid ${myAlerts.length?"#f59e0b":"rgba(255,255,255,0.1)"}`,borderRadius:9,color:myAlerts.length?"#f59e0b":"#64748b",padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
-              🔔 {isEN?"Alerts":"Alertas"}{myAlerts.length?` (${myAlerts.length})`:""}
+              🔔 {"Alerts"}{myAlerts.length?` (${myAlerts.length})`:""}
             </button>
           </div>
         </div>
@@ -18033,7 +18128,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
   {label:isEN?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,vip:true},
   {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
-  {label:isEN?"Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
+  {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
   {label:"💼 Portafolio Terminal Oracle IA",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
@@ -18265,7 +18360,7 @@ function NotificationsPage({ user, lang="es", posts=[], following=[], onProfile,
     if(likes===0) return [];
     return [{
       id:`like_${p.id}`, type:"like", icon:"❤️",
-      text: isEN ? `Your post about <strong>${p.ticker||"markets"}</strong> got ${likes} like${likes>1?"s":""}` : `Tu post sobre <strong>${p.ticker||"mercados"}</strong> recibió ${likes} like${likes>1?"s":""}`,
+      text: isEN ? `Your post about <strong>${p.ticker||"markets"}</strong> got ${likes} like${likes>1?"s":""}` : `Tu post sobre <strong>${p.ticker||"markets"}</strong> recibió ${likes} like${likes>1?"s":""}`,
       time: p.created_at, post: p,
     }];
   });
@@ -19215,7 +19310,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
         </div>
 
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-          <Card><SecTitle icon="💰" title={isEN?"Dividends":"Dividendos"} sub={isEN?"Annual yield · Frequency · Next pay":"Yield anual · Frecuencia · Próximo pago"} tag={"$"+Math.round(totalDiv).toLocaleString("en-US")+(isEN?"/yr":"/año")} tagColor="#B45309"/>
+          <Card><SecTitle icon="💰" title={"Dividends"} sub={isEN?"Annual yield · Frequency · Next pay":"Yield anual · Frecuencia · Próximo pago"} tag={"$"+Math.round(totalDiv).toLocaleString("en-US")+(isEN?"/yr":"/año")} tagColor="#B45309"/>
             {divCards.length===0
               ? <div style={{textAlign:"center",padding:"24px 12px",color:"#64748B",fontSize:12.5}}>{isEN?"None of your stocks pay a dividend right now.":"Ninguna de tus acciones paga dividendo ahora mismo."}</div>
               : <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
@@ -21377,7 +21472,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         <h2 style={{color:"#f0f6ff",fontWeight:900,fontSize:26,margin:"0 0 10px",letterSpacing:-.5}}>Portfolio Terminal <span style={{color:"#00e87a"}}>Oracle AI</span></h2>
         <p style={{color:"#6888a8",fontSize:14,lineHeight:1.7,margin:"0 0 24px"}}>Track every position in real time — stocks, ETFs and crypto — with live P&L, AI health score and instant sharing to the feed.</p>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:28,textAlign:"left"}}>
-          {["📈 Stocks, ETFs & crypto","💰 Live P&L via Finnhub","Oracle AI projections","📤 Share to community feed","📊 Portfolio evolution chart","Custom price alerts"].map((b,i)=>(
+          {["📈 Stocks, ETFs & crypto","💰 Live P&L via Finnhub","🔮 Oracle AI projections","📤 Share to community feed","📊 Portfolio evolution chart","🔔 Custom price alerts"].map((b,i)=>(
             <div key={i} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"9px 12px",fontSize:12,fontWeight:600,color:"#a0c0e8"}}>{b}</div>
           ))}
         </div>
@@ -22743,7 +22838,7 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
             </div>
             <div style={{fontSize:21,fontWeight:900,color:C.text,letterSpacing:-0.5,fontFamily:"monospace"}}>{fmtP(px)}</div>
             {px!=null && <div style={{fontSize:12.5,fontWeight:800,color:cCol(chg),marginTop:2,fontFamily:"monospace"}}>{fmtPct(chg)}{isClose?(isEN?" · close":" · cierre"):(e.ext?"":(isEN?" · reg":""))}</div>}
-            {px==null && <div style={{fontSize:11,color:C.muted2,marginTop:4}}>{loading?(isEN?"loading…":"cargando…"):"—"}</div>}
+            {px==null && <div style={{fontSize:11,color:C.muted2,marginTop:4}}>{loading?"loading…":"—"}</div>}
           </div>
           );
         })}
@@ -22775,7 +22870,7 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
         <div>
           <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden",marginBottom:14}}>
             <div style={{display:"flex",gap:4,padding:"10px 12px",borderBottom:`1px solid ${C.border}`,background:C.card2}}>
-              {[["indices",isEN?"Indices":"Índices"],["commodities","Commodities"]].map(([k,l])=>(
+              {[["indices","Indices"],["commodities","Commodities"]].map(([k,l])=>(
                 <button key={k} onClick={()=>setRailTab(k)}
                   style={{flex:1,background:railTab===k?C.accentDim:"transparent",border:"none",borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:11.5,fontWeight:800,color:railTab===k?C.accent:C.muted,fontFamily:"inherit"}}>{l}</button>
               ))}
@@ -24102,8 +24197,8 @@ function PrivacyPage({onBack, lang}){
       </LegalSection>
       <LegalSection title={isEN?"Third-Party Services":"Servicios de Terceros"}>
         <p>{isEN
-          ?"We use: Supabase (database/auth), Stripe (payments), Google AdSense (advertising), Finnhub/CoinGecko (market data). Each has their own privacy policy."
-          :"Utilizamos: Supabase (base de datos/autenticación), Stripe (pagos), Google AdSense (publicidad), Finnhub/CoinGecko (datos de mercado). Cada uno tiene su propia política de privacidad."
+          ?"We use: Supabase (database/auth), Stripe (payments), Finnhub/CoinGecko (market data), Media.net (affiliate ads for free-tier users). Each has their own privacy policy."
+          :"Utilizamos: Supabase (base de datos/autenticación), Stripe (pagos), Finnhub/CoinGecko (datos de mercado), Media.net (publicidad de afiliados para usuarios gratuitos). Cada uno tiene su propia política de privacidad."
         }</p>
       </LegalSection>
       <LegalSection title={isEN?"Your Rights":"Tus Derechos"}>
@@ -24114,8 +24209,8 @@ function PrivacyPage({onBack, lang}){
       </LegalSection>
       <LegalSection title={isEN?"Cookies":"Cookies"}>
         <p>{isEN
-          ?"We use essential cookies for authentication and preferences. Advertising cookies are used by Google AdSense. You can manage cookie preferences in your browser settings."
-          :"Usamos cookies esenciales para autenticación y preferencias. Las cookies publicitarias son utilizadas por Google AdSense. Puedes administrar las preferencias de cookies en la configuración de tu navegador."
+          ?"We use essential cookies for authentication and preferences. You can manage cookie preferences in your browser settings."
+          :"Usamos cookies esenciales para autenticación y preferencias. Puedes administrar las preferencias de cookies en la configuración de tu navegador."
         }</p>
       </LegalSection>
     </LegalPage>
@@ -25198,7 +25293,7 @@ export default function App(){
     return()=>clearInterval(t);
   },[]);
   const [lang,setLang]         = useState(()=>{ try{ const s=localStorage.getItem("nexo-lang"); if(s==="es"||s==="en") return s; /* Auto-detección: español si el navegador del visitante es hispano; inglés para el resto del mundo */ const navs=(typeof navigator!=="undefined")?((navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||navigator.userLanguage||"en"]):["en"]; return navs.some(l=>String(l).toLowerCase().startsWith("es"))?"es":"en"; }catch{ return "en"; } });
-  const isEN = lang === "en"; // FIX: declarado en App() para evitar ReferenceError
+  const isEN = lang === "en"; // FIX: declarado en App() para evitar ReferenceError en JSX del navbar
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
   const [showVipPopup,setVipPopup] = useState(false);
@@ -25738,7 +25833,7 @@ export default function App(){
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <TrendingPage posts={posts} lang={lang}/>;
-    if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={()=>{}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
+    if(page===8) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
@@ -25767,6 +25862,7 @@ export default function App(){
     if(page===48) return <MarginCalc lang={lang}/>;
     if(page===49) return <MortgageCalc lang={lang}/>;
     if(page===50) return <ForwardRatesCalc lang={lang}/>;
+    if(page===51) return <TrackRecordPage lang={lang} isPremium={effectivePremium}/>;
     if(page===60) return <CurrencyHeatMap lang={lang}/>;
     if(page===52) return <FibonacciCalc lang={lang}/>;
     if(page===53) return <CurrencyConverter lang={lang}/>;
@@ -25864,10 +25960,10 @@ export default function App(){
           <div style={{textAlign:"center",padding:"48px 20px",background:C.card,border:`1px dashed ${C.border}`,borderRadius:16,marginTop:8}}>
             <div style={{fontSize:40,marginBottom:12}}>📊</div>
             <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:6}}>
-              {sent!=="all" ? (lang==="en"?"No posts with this filter yet":"Sin posts con este filtro aún") : (lang==="en"?"Be the first to post!":"¡Sé el primero en publicar!")}
+              {sent!=="all" ? ("No posts with this filter yet") : ("Be the first to post!")}
             </div>
             <div style={{fontSize:13,color:C.muted}}>
-              {lang==="en"?"Share your market analysis and connect with traders worldwide.":"Comparte tu análisis del mercado y conecta con traders de todo el mundo."}
+              {"Share your market analysis and connect with traders worldwide."}
             </div>
           </div>
         )}
@@ -25898,8 +25994,8 @@ export default function App(){
             {i===6 && user && <div style={{marginBottom:6}}><ReferralSection user={user}/></div>}
             {/* 🌍 Compartir viral — para todos (global) */}
             {i===8 && <ShareFeedCard user={user} lang={lang}/>}
-            {/* Mini-banner afiliado contextual cada 3 posts (según el ticker del post) */}
-            {(i+1)%3===0 && (()=>{
+            {/* Mini-banner afiliado contextual — solo free users */}
+            {!effectivePremium && (i+1)%3===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
               const aff = contextAffs[(Math.floor(i/3))%contextAffs.length];
               if(!aff) return null;
@@ -25912,7 +26008,7 @@ export default function App(){
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:1}}>
                       <span style={{fontWeight:700,fontSize:12,color:"#0F172A"}}>{aff.name}</span>
-                      <span style={{fontSize:9,color:"#94A3B8",background:"rgba(0,0,0,0.04)",borderRadius:20,padding:"1px 7px",fontWeight:600}}>Patrocinado</span>
+                      <span style={{fontSize:9,color:"#94A3B8",background:"rgba(0,0,0,0.04)",borderRadius:20,padding:"1px 7px",fontWeight:600}}>Sponsored</span>
                     </div>
                     <div style={{fontSize:11,color:"#64748B",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{aff.tagline}</div>
                   </div>
@@ -25920,12 +26016,12 @@ export default function App(){
                 </a>
               );
             })()}
-            {/* Post patrocinado completo cada 5 posts */}
-            {(i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
+            {/* Post patrocinado completo cada 5 posts — solo free users */}
+            {!effectivePremium && (i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
             )}
-            {/* SmartCredit afiliado cada 8 posts */}
-            {(i+1)%8===0 && (
+            {/* SmartCredit afiliado cada 8 posts — solo free users */}
+            {!effectivePremium && (i+1)%8===0 && (
               <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
                 style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,rgba(15,76,129,0.06),rgba(16,185,129,0.04))",border:"1.5px solid rgba(15,76,129,0.18)",borderRadius:14,padding:"13px 16px",margin:"6px 0",textDecoration:"none",transition:"all 0.18s"}}
                 onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.11),rgba(16,185,129,0.07))";e.currentTarget.style.borderColor="rgba(15,76,129,0.38)";}}
@@ -25934,7 +26030,7 @@ export default function App(){
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:2}}>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>SmartCredit</span>
-                    <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{lang==="en"?"Sponsored":"Patrocinado"}</span>
+                    <span style={{background:"rgba(15,76,129,0.1)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:20,padding:"1px 8px",fontSize:9,color:"#0F4C81",fontWeight:700,letterSpacing:0.4}}>{lang==="en"?"Sponsored":"Sponsored"}</span>
                   </div>
                   <div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>{lang==="en"?"Monitor your credit, protect your finances and improve your score — free to start.":"Monitorea tu crédito, protege tus finanzas y mejora tu score — gratis para empezar."}</div>
                 </div>
@@ -25942,8 +26038,7 @@ export default function App(){
               </a>
             )}
             {/* Bots ya inyectados directamente en displayFeed */}
-            {/* AdSense banner cada 6 posts */}
-            {(i+1)%6===0 && <MediaNetBannerFeed/>}
+            {!effectivePremium && (i+1)%6===0 && <MediaNetBannerFeed/>}
             {!effectivePremium && (i+1)%5===0 && (
               <VipFeedCard onGoVIP={()=>setPage(8)} lang={lang}/>
             )}
@@ -26172,7 +26267,6 @@ export default function App(){
         img, video { height: auto !important; }
 
 
-
         /* ── PostCard text no desborda ── */
         .nexo-action-row { flex-wrap: wrap !important; gap: 0 !important; overflow: hidden !important; }
         .nexo-action-row button { padding: 4px 7px !important; font-size: 11px !important; }
@@ -26330,6 +26424,10 @@ export default function App(){
       .nexo-live-glow { animation: nexoLiveGlow 1.8s ease-in-out infinite; font-weight:800 !important; letter-spacing:0.2px; }
       @keyframes nexo-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
       @keyframes nexo-slidein { from{transform:translateX(-30px);opacity:0} to{transform:translateX(0);opacity:1} }
+      @keyframes nexo-flash-up { 0%{color:#16A34A} 50%{color:#16A34A;text-shadow:0 0 8px rgba(22,163,74,0.8)} 100%{color:inherit;text-shadow:none} }
+      @keyframes nexo-flash-dn { 0%{color:#EF4444} 50%{color:#EF4444;text-shadow:0 0 8px rgba(239,68,68,0.8)} 100%{color:inherit;text-shadow:none} }
+      .nexo-flash-up { animation:nexo-flash-up 0.6s ease forwards; }
+      .nexo-flash-dn { animation:nexo-flash-dn 0.6s ease forwards; }
       html, body {
         overflow-x: hidden !important;
         overflow-y: scroll !important;
@@ -26685,7 +26783,7 @@ export default function App(){
                   ))}
                 </div>
                 <div style={{flex:1}}>
-                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{animatedCount.toLocaleString("es-MX")} {lang==="en"?"active traders":"traders activos"}</div>
+                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{communityCount.toLocaleString("en-US")} {lang==="en"?"active traders":"traders activos"}</div>
                   <div style={{display:"flex",gap:2,marginTop:2}}>
                     {"⭐⭐⭐⭐⭐".split("").map((s,i)=><span key={i} style={{fontSize:12}}>{s}</span>)}
                     <span style={{fontSize:11,color:"#94a3b8",marginLeft:4}}>4.9/5 · 840+ {lang==="en"?"reviews":"reseñas"}</span>
@@ -27084,14 +27182,33 @@ export default function App(){
           <div style={{marginTop:16}}>
             <SidebarTickerWidget lang={lang}/>
             <PolymarketWidget/>
+            {/* ── TELEGRAM FREE CHANNEL CTA ── */}
+            <div style={{background:"linear-gradient(135deg,#0088cc14,#0088cc08)",border:"1px solid rgba(0,136,204,0.22)",borderRadius:14,padding:"16px",marginTop:12}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <span style={{fontSize:22}}>📡</span>
+                <div>
+                  <div style={{fontWeight:800,fontSize:13,color:C.text}}>{"Free Signals Channel"}</div>
+                  <div style={{fontSize:10.5,color:"#0088cc",fontWeight:600}}>Telegram · @nexotradeia</div>
+                </div>
+              </div>
+              <p style={{margin:"0 0 10px",fontSize:11.5,color:C.muted,lineHeight:1.6}}>
+                {lang==="en"
+                  ?"Get 1 free signal/week on Telegram. See real value before upgrading to Premium."
+                  :"Recibe 1 señal gratis/semana en Telegram. Ve el valor real antes de hacerte Premium."}
+              </p>
+              <a href="https://t.me/nexotradeia" target="_blank" rel="noopener noreferrer"
+                style={{display:"block",background:"#0088cc",color:"#fff",textAlign:"center",borderRadius:10,padding:"9px",fontWeight:800,fontSize:12.5,textDecoration:"none",boxShadow:"0 4px 14px rgba(0,136,204,0.35)"}}>
+                {"Join free →"}
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
       <Footer setPage={(p)=>{setPage(p);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} onAuth={()=>setAuth("register")} lang={lang}/>
 
-      {/* BANNER AFILIADOS MÓVIL — fijo al pie, solo en móvil */}
-      {!user && <MobileAffiliateBanner/>}
+      {/* BANNER AFILIADOS MÓVIL — solo para no logueados y no premium */}
+      {!user && !effectivePremium && <MobileAffiliateBanner/>}
 
       {/* Mobile logout removed — sign out available in top nav settings */}
 
@@ -27134,41 +27251,33 @@ export default function App(){
         </div>
       )}
 
-      {/* ── POP-UP CAPTURA DE EMAIL ── */}
+      {/* ── EMAIL CAPTURE — fixed bottom bar (no full-screen interrupt) ── */}
       {showEmailPopup && !user && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:9500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}}>
-          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:24,padding:"40px 36px",maxWidth:440,width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",position:"relative",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
-            <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",color:"#475569",fontSize:20,cursor:"pointer",lineHeight:1}}>✕</button>
-            {/* Ícono */}
-            <div style={{width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#0F4C81,#0066CC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,margin:"0 auto 20px",boxShadow:"0 0 32px rgba(15,76,129,0.4)"}}>🎯</div>
-            <h3 style={{margin:"0 0 8px",color:"#fff",fontSize:22,fontWeight:900}}>Recibe el pick de la semana gratis</h3>
-            <p style={{margin:"0 0 24px",color:"#64748b",fontSize:14,lineHeight:1.6}}>Cada lunes a las 9am te enviamos el pick <strong style={{color:"#fff"}}>más votado por la comunidad</strong> directo a tu email. Sin spam.</p>
-            {!emailPopupSent ? (
-              <form onSubmit={(e)=>{
-                e.preventDefault();
-                const email = e.target.email.value;
-                if(!email) return;
-                // Fire-and-forget: nunca esperar a Supabase (no bloquear el botón)
-                try{ supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
-                try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
-                setEmailPopupSent(true);
-                localStorage.setItem("nexo-email-popup-seen","1");
-              }}>
-                <div style={{display:"flex",gap:8,marginBottom:12}}>
-                  <input name="email" type="email" required placeholder="tu@email.com"
-                    style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:10,padding:"12px 14px",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
-                  <button type="submit" style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:10,padding:"12px 18px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",whiteSpace:"nowrap"}}>Recibir →</button>
-                </div>
-                <div style={{color:"#1e3a5f",fontSize:11}}>🔒 Sin spam. Cancela cuando quieras.</div>
-              </form>
-            ) : (
-              <div style={{background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.3)",borderRadius:12,padding:"18px",color:"#10b981",fontWeight:700,fontSize:15}}>
-                ✅ ¡Listo! Te llegará el pick este lunes.
-              </div>
-            )}
-            <button onClick={()=>setAuth("register")} style={{marginTop:16,background:"transparent",border:"none",color:"#475569",fontSize:12,cursor:"pointer",textDecoration:"underline"}}>
-              O crear cuenta gratis y verlo ahora →
-            </button>
+        <div style={{position:"fixed",bottom:70,left:0,right:0,zIndex:9500,display:"flex",justifyContent:"center",padding:"0 12px",pointerEvents:"none"}}>
+          <div style={{background:"linear-gradient(135deg,#0B1A2E,#0D2244)",border:"1px solid rgba(15,76,129,0.4)",borderRadius:16,padding:"12px 16px",maxWidth:480,width:"100%",boxShadow:"0 -4px 32px rgba(0,0,0,0.5)",pointerEvents:"auto",display:"flex",alignItems:"center",gap:12,animation:"nexo-slidein 0.4s ease"}}>
+            <div style={{flex:1,minWidth:0}}>
+              {!emailPopupSent ? (
+                <form onSubmit={(e)=>{
+                  e.preventDefault();
+                  const email = e.target.email.value;
+                  if(!email) return;
+                  try{ supabase.from("newsletter_subscribers").upsert({email, source:"popup", created_at: new Date().toISOString()}).then(()=>{}).catch(()=>{}); }catch{}
+                  try{ fetch("/api/newsletter-welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}).catch(()=>{}); }catch{}
+                  setEmailPopupSent(true);
+                  localStorage.setItem("nexo-email-popup-seen","1");
+                }} style={{display:"flex",gap:8,alignItems:"center"}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{color:"#fff",fontWeight:700,fontSize:12,marginBottom:4}}>{lang==="en"?"Get the weekly pick free — every Monday":"Recibe el pick semanal gratis — cada lunes"}</div>
+                    <input name="email" type="email" required placeholder={lang==="en"?"your@email.com":"tu@email.com"}
+                      style={{width:"100%",background:"rgba(255,255,255,0.07)",border:"1px solid rgba(15,76,129,0.4)",borderRadius:8,padding:"8px 10px",color:"#fff",fontSize:13,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
+                  </div>
+                  <button type="submit" style={{background:"linear-gradient(135deg,#0F4C81,#0066CC)",border:"none",borderRadius:9,padding:"10px 14px",color:"#fff",fontWeight:800,fontSize:13,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{lang==="en"?"Subscribe →":"Suscribir →"}</button>
+                </form>
+              ) : (
+                <div style={{color:"#10b981",fontWeight:700,fontSize:13}}>✅ {lang==="en"?"Done! You'll get the pick this Monday.":"¡Listo! Te llegará el pick este lunes."}</div>
+              )}
+            </div>
+            <button onClick={()=>{setShowEmailPopup(false);localStorage.setItem("nexo-email-popup-seen","1");}} style={{background:"none",border:"none",color:"#475569",fontSize:18,cursor:"pointer",lineHeight:1,flexShrink:0,padding:"2px 4px"}}>✕</button>
           </div>
         </div>
       )}
@@ -27266,18 +27375,44 @@ export default function App(){
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase} onOpenAlerts={()=>setAlerts(true)} alertCount={alertCount}/>}
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
-      {/* ── BOTTOM NAV MÓVIL (estilo Robinhood/Instagram) — visible solo en móvil vía CSS ── */}
+      {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
       <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"#FFFFFF",borderTop:"1px solid #E6EDF5",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
         {[
-          {ic:"🏠",l:lang==="en"?"Home":"Inicio",on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},active:page===0},
-          {ic:"🔥",l:"Feed",on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},active:false},
-          {ic:"🤖",l:"IA",on:()=>setShowAI(true),active:false},
-          {ic:"⚡",l:"Premium",on:()=>{setPage(8);setShowLanding(false);},active:page===8,gold:true},
-          {ic:"📡",l:lang==="en"?"Live":"En Vivo",on:()=>{setPage(7);setShowLanding(false);},active:page===7},
+          {
+            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-5h4v5h5V9.5"/></svg>,
+            l:"Home",
+            on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
+            active:page===0
+          },
+          {
+            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>,
+            l:"Feed",
+            on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},
+            active:false
+          },
+          {
+            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5H18l-3.75 2.7 1.5 4.5L12 12l-3.75 2.7 1.5-4.5L6 7.5h4.5z"/><path d="M5 17l1.5 1.5"/><path d="M19 17l-1.5 1.5"/><path d="M12 20v1"/></svg>,
+            l:"AI",
+            on:()=>setShowAI(true),
+            active:false
+          },
+          {
+            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>,
+            l:"Markets",
+            on:()=>{setPage(7);setShowLanding(false);},
+            active:page===7
+          },
+          {
+            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+            l:"Pro",
+            on:()=>{setPage(8);setShowLanding(false);},
+            active:page===8,
+            gold:true
+          },
         ].map((b,i)=>(
-          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0}}>
-            <span style={{fontSize:19,lineHeight:1}}>{b.ic}</span>
-            <span style={{fontSize:9.5,fontWeight:b.active?800:600}}>{b.l}</span>
+          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0,transition:"color 0.15s"}}>
+            {b.svg}
+            <span style={{fontSize:9.5,fontWeight:b.active?800:600,letterSpacing:"0.01em"}}>{b.l}</span>
           </button>
         ))}
       </div>
