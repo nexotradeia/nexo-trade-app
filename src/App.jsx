@@ -25443,7 +25443,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
   ];
 
   return(
-    <div style={{background:PAGE,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+    <div style={{background:PAGE,minHeight:"100vh",padding:"24px 16px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
       <div style={{maxWidth:960,margin:"0 auto"}}>
 
         {/* Page header */}
@@ -25454,7 +25454,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
 
         {/* Upgrade banner — only for free users */}
         {!isPremium&&(
-          <div style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"22px 26px",display:"flex",alignItems:"center",gap:20,marginBottom:22,position:"relative",overflow:"hidden",flexWrap:"wrap"}}>
+          <div className="nexo-pro-banner" style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"22px 26px",display:"flex",alignItems:"center",gap:20,marginBottom:22,position:"relative",overflow:"hidden",flexWrap:"wrap"}}>
             <div style={{position:"absolute",right:-40,top:-60,width:260,height:260,borderRadius:"50%",background:"rgba(255,255,255,.08)",pointerEvents:"none"}}/>
             <div style={{flex:1,position:"relative",zIndex:1,minWidth:200}}>
               <h2 style={{fontSize:19,fontWeight:800,color:"#fff",letterSpacing:"-0.02em"}}>Unlock all 6 Pro tools</h2>
@@ -25472,7 +25472,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
 
         {/* Pro welcome banner — for premium users */}
         {isPremium&&(
-          <div style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"18px 26px",display:"flex",alignItems:"center",gap:16,marginBottom:22,position:"relative",overflow:"hidden"}}>
+          <div className="nexo-pro-banner" style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"18px 26px",display:"flex",alignItems:"center",gap:16,marginBottom:22,position:"relative",overflow:"hidden"}}>
             <div style={{position:"absolute",right:-40,top:-60,width:260,height:260,borderRadius:"50%",background:"rgba(255,255,255,.08)",pointerEvents:"none"}}/>
             <div style={{position:"relative",zIndex:1,flex:1}}>
               <div style={{fontSize:17,fontWeight:800,color:"#fff"}}>All 6 Pro tools unlocked</div>
@@ -25485,7 +25485,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
         )}
 
         {/* Tools grid */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
+        <div className="nexo-pro-tools-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
           {tools.map((tool,i)=>{
             var locked=!isPremium;
             var iconBg=locked?GOLDBG:BLUEBG;
@@ -25682,8 +25682,8 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   );
 
   // ── Non-overview tabs: full width ──
-  if(tab==="news")     return <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><NoticiasPage lang={lang}/></div></div>;
-  if(tab==="earnings") return <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><EarningsPage lang={lang}/></div></div>;
+  if(tab==="news")     return <div style={{background:PAGE,minHeight:"100vh",padding:"16px 12px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:20,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><NoticiasPage lang={lang}/></div></div>;
+  if(tab==="earnings") return <div style={{background:PAGE,minHeight:"100vh",padding:"16px 12px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:20,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><EarningsPage lang={lang}/></div></div>;
   if(tab==="calendars"){
     var calComponents={
       economic:  <EconCalendarPage lang={lang}/>,
@@ -25694,12 +25694,12 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
       futures:   <FuturesExpiryCalendar lang={lang}/>,
     };
     return(
-      <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <div style={{background:PAGE,minHeight:"100vh",padding:"16px 12px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:20}}>
+          <div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:16,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div>
+          <div className="nexo-mkt-regions" style={{display:"flex",gap:8,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",marginBottom:20}}>
             {["economic","dividends","ipos","splits","holidays","futures"].map(c=>(
-              <button key={c} style={regBtn(calTab===c)} onClick={()=>setCalTab(c)}>{c.charAt(0).toUpperCase()+c.slice(1)}</button>
+              <button key={c} style={{...regBtn(calTab===c),flexShrink:0}} onClick={()=>setCalTab(c)}>{c.charAt(0).toUpperCase()+c.slice(1)}</button>
             ))}
           </div>
           {calComponents[calTab]||null}
@@ -25711,8 +25711,8 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   // ── OVERVIEW ──
   var idxList=(REGIONS[region]||REGIONS.global);
   return(
-    <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
-      <div style={{maxWidth:1100,margin:"0 auto",display:"grid",gridTemplateColumns:"minmax(0,1fr) 300px",gap:22,alignItems:"start"}}>
+    <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <div className="nexo-markets-layout" style={{maxWidth:1100,margin:"0 auto",display:"grid",gridTemplateColumns:"minmax(0,1fr) 300px",gap:22,alignItems:"start"}}>
 
         {/* ── LEFT / MAIN ── */}
         <div style={{display:"flex",flexDirection:"column",gap:18,minWidth:0}}>
@@ -25727,21 +25727,21 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
           </div>
 
           {/* Sub-nav tabs */}
-          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          <div className="nexo-mkt-subnav" style={{display:"flex",gap:6,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
             {["overview","news","earnings","calendars"].map(t=>(
-              <button key={t} style={tabBtn(tab===t)} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>
+              <button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>
             ))}
           </div>
 
           {/* Region chips */}
-          <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+          <div className="nexo-mkt-regions" style={{display:"flex",gap:7,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
             {["global","europe","asia","latam"].map(r=>(
-              <button key={r} style={regBtn(region===r)} onClick={()=>setRegion(r)}>{r.charAt(0).toUpperCase()+r.slice(1)}</button>
+              <button key={r} style={{...regBtn(region===r),flexShrink:0}} onClick={()=>setRegion(r)}>{r.charAt(0).toUpperCase()+r.slice(1)}</button>
             ))}
           </div>
 
           {/* Indices + Crypto side-by-side */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
+          <div className="nexo-markets-duo" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
             <div style={BLOCK}>
               <div style={BH}>Indices</div>
               {idxList.map((idx,i)=>{
@@ -25773,7 +25773,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
           {/* Sector heatmap */}
           <div style={BLOCK}>
             <div style={BH}>Sector heatmap</div>
-            <div style={{padding:14,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:7}}>
+            <div className="nexo-heat-grid" style={{padding:14,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:7}}>
               {SECTORS.map((sec,i)=>(
                 <div key={i} style={{borderRadius:9,padding:"11px 10px",background:secBg(sec.c),color:"#fff"}}>
                   <div style={{fontSize:12.5,fontWeight:700}}>{sec.s}</div>
@@ -25867,8 +25867,8 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
   var RAD16={borderRadius:16}, RAD18={borderRadius:18};
 
   return(
-    <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 80px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
-      <div style={{maxWidth:1100,margin:"0 auto",display:"grid",gridTemplateColumns:"minmax(0,1fr) 300px",gap:22,alignItems:"start"}}>
+    <div style={{background:PAGE,minHeight:"100vh",padding:"20px 16px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <div className="nexo-ai-layout" style={{maxWidth:1100,margin:"0 auto",display:"grid",gridTemplateColumns:"minmax(0,1fr) 300px",gap:22,alignItems:"start"}}>
 
         {/* ── MAIN COLUMN ── */}
         <div style={{display:"flex",flexDirection:"column",gap:18,minWidth:0}}>
@@ -27085,6 +27085,18 @@ export default function App(){
 
         /* ── SEÑALES / SIGNALS grid → 1 col ── */
         .nexo-signals-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+
+        /* ── NEW PAGE GRIDS → 1-col on mobile ── */
+        .nexo-ai-layout { grid-template-columns: 1fr !important; }
+        .nexo-markets-layout { grid-template-columns: 1fr !important; }
+        .nexo-markets-duo { grid-template-columns: 1fr !important; }
+        .nexo-heat-grid { grid-template-columns: repeat(2,1fr) !important; }
+        .nexo-pro-tools-grid { grid-template-columns: repeat(2,1fr) !important; }
+        .nexo-pro-banner { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+        .nexo-mkt-subnav { flex-wrap: nowrap !important; overflow-x: auto !important; }
+        .nexo-mkt-subnav::-webkit-scrollbar { display: none !important; }
+        .nexo-mkt-regions { flex-wrap: nowrap !important; overflow-x: auto !important; }
+        .nexo-mkt-regions::-webkit-scrollbar { display: none !important; }
 
         /* ── WEBINARS / ACADEMIA grid → 1 col ── */
         .nexo-webinars-grid { grid-template-columns: 1fr !important; }
