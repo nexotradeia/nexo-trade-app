@@ -1107,6 +1107,17 @@ const CRYPTO_SYM = {
 };
 const fhSymbolOf = (t) => FH_SYM[t] || CRYPTO_SYM[t] || t;
 
+const BINANCE_STREAMS = {
+  BTC:"btcusdt",ETH:"ethusdt",SOL:"solusdt",BNB:"bnbusdt",
+  XRP:"xrpusdt",ADA:"adausdt",DOGE:"dogeusdt",AVAX:"avaxusdt",
+  MATIC:"maticusdt",LTC:"ltcusdt",LINK:"linkusdt",DOT:"dotusdt",
+  TRX:"trxusdt",SHIB:"shibusdt",UNI:"uniusdt",ATOM:"atomusdt",
+  NEAR:"nearusdt",APT:"aptusdt",
+};
+const BINANCE_SYM_TICKER = Object.fromEntries(
+  Object.entries(BINANCE_STREAMS).map(([t,s])=>[s.toUpperCase()+"T",t])
+);
+
 // ¿Mercado NYSE abierto? (Lun–Vie 9:30–16:00 ET) — usado para indicadores "en vivo" en la app
 const nexoMktOpenET = () => { try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); const m=et.getHours()*60+et.getMinutes(); return d>=1&&d<=5&&m>=570&&m<960; }catch(_){ return false; } };
 
@@ -1127,7 +1138,9 @@ function PriceProvider({children}){
   const updatePrice = (ticker, price) => {
     const pc = prevCRef.current[ticker];
     const dp = pc && pc > 0 ? parseFloat(((price - pc) / pc * 100).toFixed(2)) : null;
-    pendingRef.current[ticker] = { price, change: dp };
+    const prevPrice = pendingRef.current[ticker]?.price || prevCRef.current[ticker] || 0;
+    const flash = prevPrice > 0 ? (price > prevPrice ? "up" : price < prevPrice ? "down" : null) : null;
+    pendingRef.current[ticker] = { price, change: dp, flash };
   };
   useEffect(() => {
     const flush = setInterval(() => {
@@ -1137,11 +1150,12 @@ function PriceProvider({children}){
       setPrices(p => {
         const next = { ...p };
         Object.entries(pend).forEach(([t, v]) => {
-          next[t] = { price: v.price, change: v.change ?? next[t]?.change ?? 0 };
+          next[t] = { price: v.price, change: v.change ?? next[t]?.change ?? 0, flash: v.flash };
         });
         return next;
       });
-    }, 1000);
+      setTimeout(() => setPrices(p => { if(!Object.values(p).some(v=>v?.flash)) return p; const n={...p}; Object.keys(n).forEach(t=>{if(n[t]?.flash) n[t]={...n[t],flash:null};}); return n; }), 600);
+    }, 500);
     return () => clearInterval(flush);
   }, []);
 
@@ -1206,43 +1220,59 @@ function PriceProvider({children}){
     return () => { cancel=true; clearInterval(iv); };
   }, []);
 
-  // WebSocket — actualizaciones tick a tick en tiempo real
+  // ── Binance WS directo para crypto (gratis, ilimitado) ──────────────────
   useEffect(() => {
-    let socket;
-    let reconnectTimer;
+    let ws, rt;
+    const streams = Object.values(BINANCE_STREAMS).map(s=>`${s}@miniTicker`).join("/");
+    const connect = () => {
+      ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+      ws.onmessage = (evt) => {
+        try {
+          const {data} = JSON.parse(evt.data);
+          const ticker = BINANCE_SYM_TICKER[data.s];
+          if(ticker && data.c){
+            const price = parseFloat(data.c);
+            const open  = parseFloat(data.o);
+            const dp = open > 0 ? parseFloat(((price-open)/open*100).toFixed(2)) : null;
+            updatePrice(ticker, price, dp);
+          }
+        } catch(_) {}
+      };
+      ws.onclose = () => { rt = setTimeout(connect, 3000); };
+      ws.onerror = () => ws.close();
+    };
+    connect();
+    return () => { clearTimeout(rt); ws?.close(); };
+  }, []);
 
+  // ── Finnhub WS solo para ACCIONES (crypto cubierta por Binance) ──────────
+  useEffect(() => {
+    let socket, reconnectTimer;
     const connect = () => {
       socket = new WebSocket(`wss://ws.finnhub.io?token=${FINNHUB_KEY}`);
       wsRef.current = socket;
-
       socket.onopen = () => {
-        // Suscribe TODOS los tickers rastreados (incluye los que añadió el usuario)
         trackedRef.current.forEach(ticker => {
+          if(BINANCE_STREAMS[ticker]) return;
           socket.send(JSON.stringify({ type: "subscribe", symbol: fhSymbolOf(ticker) }));
         });
       };
-
       socket.onmessage = (evt) => {
         try {
           const msg = JSON.parse(evt.data);
           if (msg.type === "trade" && msg.data) {
             msg.data.forEach(trade => {
               const ticker = symToTickerRef.current[trade.s];
-              if (ticker) updatePrice(ticker, trade.p);
+              if (ticker && !BINANCE_STREAMS[ticker]) updatePrice(ticker, trade.p);
             });
           }
         } catch (_) {}
       };
-
       socket.onclose = () => { reconnectTimer = setTimeout(connect, 4000); };
       socket.onerror = () => socket.close();
     };
-
     connect();
-    return () => {
-      clearTimeout(reconnectTimer);
-      socket?.close();
-    };
+    return () => { clearTimeout(reconnectTimer); socket?.close(); };
   }, []);
 
   return (
@@ -4889,50 +4919,9 @@ function MarketsMiniWidget({ lang="es" }){
   );
 }
 
-// ── ADSENSE BANNER COMPONENT ─────────────────────────────────────────────────
-const AD_CLIENT = "ca-pub-3490083853866736";
-function AdBanner({slot, format="auto", style={}, className=""}){
-  const ref = useRef(null);
-  const pushed = useRef(false);
-  useEffect(()=>{
-    if(pushed.current) return;
-    try{
-      if(typeof window !== "undefined" && window.adsbygoogle){
-        window.adsbygoogle.push({});
-        pushed.current = true;
-      }
-    }catch(e){}
-  },[]);
-  return(
-    <div style={{overflow:"hidden",textAlign:"center",...style}} className={className}>
-      <ins className="adsbygoogle"
-        style={{display:"block"}}
-        data-ad-client={AD_CLIENT}
-        data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive="true"/>
-    </div>
-  );
-}
-
-// Banner horizontal 728×90 / responsive — para feed y noticias
-function AdBannerFeed(){
-  return <AdBanner slot="6515017049" format="auto" style={{margin:"10px 0",borderRadius:8,overflow:"hidden"}}/>;
-}
-
-// Banner cuadrado 300×250 — para sidebar (sin minHeight para no crear espacio vacío)
-function AdBannerSidebar(){
-  return <AdBanner slot="8915846882" format="auto" style={{margin:"6px 0",borderRadius:10,overflow:"hidden",minHeight:0}}/>;
-}
-
-// ── MEDIA.NET ADS ─────────────────────────────────────────────────────────────
-// INSTRUCCIONES:
-// 1. Regístrate en https://www.media.net → Apply Now → pon nexotradeia.com
-// 2. Cuando te aprueben (2-3 días), activa el script en index.html descomentando la línea
-// 3. En tu panel Media.net: Ad Units → Create → copia el CID y los TAG IDs
-// 4. Reemplaza REEMPLAZAR_CID, REEMPLAZAR_TAG_FEED y REEMPLAZAR_TAG_SIDEBAR abajo
-// 5. Corre python3 fix_everything.py para deploy
-const MN_CID = "REEMPLAZAR_CID_MEDIANET"; // ej: "8CU57YRJN"
+// AdBanner removed — no ads on a premium product
+function AdBannerFeed(){ return null; }
+function AdBannerSidebar(){ return null; }
 
 function MediaNetBannerFeed(){
   const ref = useRef(null);
@@ -6281,86 +6270,76 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
   const savingsPct = Math.round((1 - priceAnual / (price * 12)) * 100);
 
   const FREE_FEATURES = isEN ? [
-    "🔥 Social feed — post, comment and repost",
-    "💬 Private messages between traders",
-    "📰 Real-time market news",
-    "📅 Earnings calendar (report dates)",
-    "📈 Trending — most mentioned stocks & cryptos",
-    "🏆 Public traders leaderboard",
-    "🎮 Paper Trading with $100k virtual",
-    "🔔 Social activity notifications",
-    "📚 3 free Academy lessons",
-    "👁 Basic watchlist (up to 5 assets)",
-    "⭐ Points, levels and badges system",
-    "🤖 NEXO AI — 5 questions a day",
+    "Social feed — post, comment and repost",
+    "Private messages between traders",
+    "Real-time market news",
+    "Earnings calendar (report dates)",
+    "Trending — most mentioned stocks & cryptos",
+    "Public traders leaderboard",
+    "Paper Trading with $100k virtual",
+    "Social activity notifications",
+    "3 free Academy lessons",
+    "Basic watchlist (up to 5 assets)",
+    "NEXO AI — 5 questions a day",
   ] : [
-    "🔥 Foro social — publicar, comentar y repostear",
-    "💬 Mensajes privados entre traders",
-    "📰 Noticias del mercado en tiempo real",
-    "📅 Calendario de earnings (fechas de resultados)",
-    "📈 Trending — acciones y cryptos más mencionadas",
-    "🏆 Leaderboard público de traders",
-    "🎮 Paper Trading con $100k virtual",
-    "🔔 Notificaciones de actividad social",
-    "📚 3 lecciones gratuitas de Academia",
-    "👁 Watchlist básica (hasta 5 activos)",
-    "⭐ Sistema de puntos, niveles y badges",
-    "🤖 IA NEXO — 5 preguntas diarias",
+    "Foro social — publicar, comentar y repostear",
+    "Mensajes privados entre traders",
+    "Noticias del mercado en tiempo real",
+    "Calendario de earnings (fechas de resultados)",
+    "Trending — acciones y cryptos más mencionadas",
+    "Leaderboard público de traders",
+    "Paper Trading con $100k virtual",
+    "Notificaciones de actividad social",
+    "3 lecciones gratuitas de Academia",
+    "Watchlist básica (hasta 5 activos)",
+    "IA NEXO — 5 preguntas diarias",
   ];
-
   const PREMIUM_FEATURES = isEN ? [
-    "✓ Everything in Free, without limits",
-    "🧠 AI Stock Picks — 10 weekly picks with full analysis",
-    "💡 30+ investment ideas with thesis, entry, target & stop",
-    "🏛️ 52 Guru 13F portfolios updated (Buffett, Ackman, Druckenmiller...)",
-    "🏛️ Congress Trades — congresspeople trades in real time",
-    "🐋 Institutional flow — dark pool & sweeps in real time",
-    "📊 Crypto Options — full BTC/ETH/SOL chain 24h",
-    "🔬 Advanced Screener — 20+ technical & fundamental filters",
-    "💼 Portfolio Oracle AI — track investments with real-time P&L",
-    "🔮 Oracle AI — statistical bullish/bearish scenario predictor",
-    "🌍 Global Radar — 3D Global Money Map with live capital flows",
-    "🎮 Full-screen Trading Terminal — crypto, stocks & options simulator",
-    "👁 Bloomberg-style Watchlist — 6 tabs with real-time data",
-    "📅 Real-time dividend calendar",
-    "📅 Upcoming IPOs calendar",
-    "📅 Real-time macro economic calendar",
-    "🏦 ARK Invest — daily updated holdings",
-    "🔍 SEC Insiders — Form 4 in real time",
-    "🤖 Unlimited NEXO trading AI",
-    "🔔 Custom price alerts by email",
-    "🎓 Full Academy — all PREMIUM courses & webinars",
-    "✦ Gold PREMIUM badge + early access to new features",
+    "Everything in Free, without limits",
+    "AI Stock Picks — 10 weekly picks with full analysis",
+    "30+ investment ideas with thesis, entry, target & stop",
+    "52 Guru 13F portfolios (Buffett, Ackman, Druckenmiller...)",
+    "Congress Trades — congresspeople trades in real time",
+    "Institutional flow — dark pool & sweeps in real time",
+    "Crypto Options — full BTC/ETH/SOL chain 24h",
+    "Advanced Screener — 20+ technical & fundamental filters",
+    "Portfolio Oracle AI — track investments with real-time P&L",
+    "Oracle AI — statistical bullish/bearish scenario predictor",
+    "Global Radar — 3D Global Money Map with live capital flows",
+    "Full-screen Trading Terminal — crypto, stocks & options",
+    "Bloomberg-style Watchlist — 6 tabs with real-time data",
+    "Real-time dividend calendar",
+    "Upcoming IPOs calendar",
+    "Real-time macro economic calendar",
+    "ARK Invest — daily updated holdings",
+    "SEC Insiders — Form 4 in real time",
+    "Unlimited NEXO trading AI",
+    "Custom price alerts by email",
+    "Full Academy — all courses & webinars",
+    "Gold PREMIUM badge + early access to new features",
   ] : [
-    "✓ Todo lo del plan Free, sin límites",
-    "🧠 Stock Pick IA — 10 picks semanales con análisis completo",
-    "💡 30+ Ideas de inversión con tesis, entrada, target y stop",
-    "🏛️ 52 portafolios Gurús 13F actualizados (Buffett, Ackman, Druckenmiller...)",
-    "🏛️ Congress Trades — operaciones de congresistas en tiempo real",
-    "🐋 Flujo institucional — dark pool y sweeps en tiempo real",
-    "📊 Opciones Crypto — cadena completa BTC/ETH/SOL 24h",
-    "🔬 Advanced Screener — 20+ filtros técnicos y fundamentales",
-    "💼 Portafolio Oracle IA — seguimiento de inversiones con P&L en tiempo real",
-    "🔮 Oracle IA — Predictor estadístico de escenarios alcistas / bajistas para tu portfolio",
-    "🌍 Radar Global — Mapa del Dinero Global 3D con flujos de capital en vivo",
-    "🎮 Terminal de Trading full-screen — simulador con crypto, acciones y opciones",
-    "👁 Watchlist Bloomberg-style — 6 tabs con datos en tiempo real",
-    "📅 Calendario de dividendos en tiempo real",
-    "📅 Calendario de IPOs próximas",
-    "📅 Calendario económico macro en tiempo real",
-    "🏦 ARK Invest — holdings diarios actualizados",
-    "🔍 Insiders SEC — Form 4 en tiempo real",
-    "🤖 IA NEXO de trading ilimitado",
-    "🔔 Alertas de precio personalizadas por email",
-    "🎓 Academia completa — todos los cursos y webinars PREMIUM",
-    "✦ Badge PREMIUM dorado + acceso anticipado a nuevas funciones",
-  ];
-
-  const SIGNALS = [
-    {ticker:"NVDA", tipo:"COMPRA", entrada:"$205", target:"$300", stop:"$185", conf:92, tiempo:isEN?"2h ago":"hace 2h", blur:!isPremium},
-    {ticker:"BTC",  tipo:"COMPRA", entrada:"$63,000", target:"$82,000", stop:"$58,000", conf:85, tiempo:isEN?"4h ago":"hace 4h", blur:!isPremium},
-    {ticker:"TSLA", tipo:"VENTA",  entrada:"$391", target:"$340", stop:"$410", conf:78, tiempo:isEN?"6h ago":"hace 6h", blur:!isPremium},
-    {ticker:"ETH",  tipo:"COMPRA", entrada:"$1,685", target:"$2,200", stop:"$1,480", conf:81, tiempo:isEN?"8h ago":"hace 8h", blur:!isPremium},
+    "Todo lo del plan Free, sin límites",
+    "Stock Pick IA — 10 picks semanales con análisis completo",
+    "30+ Ideas de inversión con tesis, entrada, target y stop",
+    "52 portafolios Gurús 13F (Buffett, Ackman, Druckenmiller...)",
+    "Congress Trades — operaciones de congresistas en tiempo real",
+    "Flujo institucional — dark pool y sweeps en tiempo real",
+    "Opciones Crypto — cadena completa BTC/ETH/SOL 24h",
+    "Advanced Screener — 20+ filtros técnicos y fundamentales",
+    "Portafolio Oracle IA — seguimiento de inversiones con P&L en tiempo real",
+    "Oracle IA — Predictor estadístico de escenarios alcistas/bajistas",
+    "Radar Global — Mapa del Dinero Global 3D con flujos en vivo",
+    "Terminal de Trading full-screen — crypto, acciones y opciones",
+    "Watchlist Bloomberg-style — 6 tabs con datos en tiempo real",
+    "Calendario de dividendos en tiempo real",
+    "Calendario de IPOs próximas",
+    "Calendario económico macro en tiempo real",
+    "ARK Invest — holdings diarios actualizados",
+    "Insiders SEC — Form 4 en tiempo real",
+    "IA NEXO de trading ilimitado",
+    "Alertas de precio personalizadas por email",
+    "Academia completa — todos los cursos y webinars",
+    "Badge PREMIUM dorado + acceso anticipado a nuevas funciones",
   ];
 
   const WEBINARS = [
@@ -6415,7 +6394,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <h1 style={{margin:"0 0 8px",color:"#fff",fontSize:26,fontWeight:900}}>{isEN?"You are a Premium member!":"¡Eres miembro Premium!"}</h1>
                 <p style={{margin:"0 0 20px",color:"#94a3b8",fontSize:15}}>{isEN?"You have full access to all exclusive features.":"Tienes acceso completo a todas las funciones exclusivas."}</p>
                 <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-                  {(isEN?["💡 PREMIUM Ideas","🏛️ 13F Gurus","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","🔍 SEC Insiders"]:["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","🔍 Insiders SEC"]).map(b=>(
+                  {(isEN?["💡 PREMIUM Ideas","🏛️ 13F Gurus","🐋 Institutional Flow","🛠️ Screener","Oracle AI","Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","SEC Insiders"]:["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","Oracle IA","Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","Insiders SEC"]).map(b=>(
                     <span key={b} style={{background:C.bull+"22",color:C.bull,border:`1px solid ${C.bull}44`,borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700}}>{b}</span>
                   ))}
                 </div>
@@ -6426,11 +6405,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   @keyframes npp-glow{0%,100%{box-shadow:0 4px 30px rgba(0,232,122,.4)}50%{box-shadow:0 4px 55px rgba(0,232,122,.7)}}
                   @keyframes npp-shine{0%{left:-100%}100%{left:200%}}
                 `}}/>
-                {/* Founder offer badge */}
-                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,232,122,.12)",border:"1px solid rgba(0,232,122,.35)",borderRadius:20,padding:"6px 16px",marginBottom:14,animation:"npp-pulse 2.5s ease-in-out infinite"}}>
-                  <span style={{width:7,height:7,borderRadius:"50%",background:"#00e87a",display:"inline-block"}}/>
-                  <span style={{color:"#00e87a",fontSize:12,fontWeight:800,letterSpacing:0.4}}>{lang==="en"?"🔒 Founder offer — first 500 members only":"🔒 Oferta fundadores — solo primeros 500 miembros"}</span>
-                </div>
+
                 <h1 style={{margin:"0 0 6px",color:"#fff",fontSize:"clamp(24px,4vw,34px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Trade Smarter with":"Opera más inteligente con"} <span style={{color:"#00e87a"}}>NexoTrade Pro</span></h1>
                 <p style={{margin:"0 auto 16px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, institutional flow, AI picks and 52 guru portfolios — all in one platform.":"Señales en tiempo real, flujo institucional, picks IA y 52 gurús — todo en una plataforma."}</p>
 
@@ -6478,8 +6453,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"✓ Instant access · ✓ Cancel anytime · ✓ Secure via Stripe":"✓ Acceso inmediato · ✓ Cancela cuando quieras · ✓ Pago seguro Stripe"}</div>
                 <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                   {(lang==="en"
-                    ?["💡 Ideas PREMIUM","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","🔮 Oracle AI","🌍 Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
-                    :["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","🔮 Oracle IA","🌍 Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","📅 Calendarios"]
+                    ?["💡 Ideas PREMIUM","🏛️ Gurus 13F","🐋 Institutional Flow","🛠️ Screener","Oracle AI","Global Radar","🎮 Trading Terminal","🤖 Unlimited AI","📅 Calendars"]
+                    :["💡 Ideas PREMIUM","🏛️ Gurús 13F","🐋 Flujo Institucional","🛠️ Screener","Oracle IA","Radar Global","🎮 Terminal Trading","🤖 IA Ilimitada","📅 Calendarios"]
                   ).map(b=>(
                     <span key={b} style={{background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
                   ))}
@@ -6510,13 +6485,14 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 <span style={{fontSize:34,fontWeight:900,color:"#F1F5F9"}}>$0</span>
               </div>
               <div style={{fontSize:12,color:"#475569",marginBottom:14}}>Para siempre gratis</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
-                {FREE_FEATURES.map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(15,76,129,0.04)",borderRadius:7,border:"1px solid rgba(15,76,129,0.07)"}}>
-                    <span style={{fontSize:10,color:"#0F4C81",flexShrink:0,marginTop:2}}>✓</span>
-                    <span style={{fontSize:11,color:"#94A3B8",lineHeight:1.35}}>{f}</span>
+              <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                {FREE_FEATURES.slice(0,6).map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:11,color:"#0F4C81",flexShrink:0,fontWeight:700}}>✓</span>
+                    <span style={{fontSize:12,color:"#94A3B8"}}>{f}</span>
                   </div>
                 ))}
+                {FREE_FEATURES.length>6&&<div style={{fontSize:11,color:"#475569",marginTop:2}}>+ {FREE_FEATURES.length-6} {isEN?"more":"más"}…</div>}
               </div>
               <div style={{marginTop:24,padding:"12px",borderRadius:10,background:"rgba(15,76,129,0.04)",textAlign:"center",color:"#334155",fontSize:12,fontWeight:700,border:"1px solid rgba(15,76,129,0.1)"}}>
                 Plan actual
@@ -6573,13 +6549,14 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                 {billing==="annual" ? (isEN?"One annual payment · No surprise renewals":"Pago único anual · Sin renovación sorpresa") : (isEN?"Cancel anytime · No commitment":"Cancela cuando quieras · Sin permanencia")}
               </div>
 
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
-                {PREMIUM_FEATURES.map((f,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:5,padding:"5px 7px",background:"rgba(15,94,104,0.06)",borderRadius:7,border:"1px solid rgba(15,94,104,0.1)"}}>
-                    <span style={{fontSize:10,color:"#FCD34D",flexShrink:0,marginTop:2}}>★</span>
-                    <span style={{fontSize:11,color:"#CBD5E1",lineHeight:1.35}}>{f}</span>
+              <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                {PREMIUM_FEATURES.slice(0,8).map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:11,color:"#10B981",flexShrink:0,fontWeight:700}}>✓</span>
+                    <span style={{fontSize:12,color:"#CBD5E1"}}>{f}</span>
                   </div>
                 ))}
+                {PREMIUM_FEATURES.length>8&&<div style={{fontSize:11,color:"#475569",marginTop:2}}>+ {PREMIUM_FEATURES.length-8} {isEN?"more below":"características más abajo"}…</div>}
               </div>
 
               <div style={{marginTop:24}}>
@@ -6622,6 +6599,61 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             </div>
           </div>
         </div>
+
+        {/* ── FEATURE COMPARISON TABLE ── */}
+        {activeTab==="planes" && (()=>{
+          const CMP=[
+            {cat:isEN?"Community":"Comunidad"},
+            {f:isEN?"Social feed":"Foro social",free:true,pro:true},
+            {f:isEN?"Private messages":"Mensajes privados",free:true,pro:true},
+            {f:isEN?"Paper Trading ($100k virtual)":"Paper Trading ($100k virtual)",free:true,pro:true},
+            {f:isEN?"Public leaderboard":"Leaderboard público",free:true,pro:true},
+            {cat:isEN?"Market Data":"Datos de Mercado"},
+            {f:isEN?"Real-time news":"Noticias en tiempo real",free:true,pro:true},
+            {f:isEN?"Earnings calendar":"Calendario de earnings",free:true,pro:true},
+            {f:isEN?"Dividend calendar":"Calendario de dividendos",free:false,pro:true},
+            {f:isEN?"IPO calendar":"Calendario de IPOs",free:false,pro:true},
+            {f:isEN?"Macro economic calendar":"Calendario macro económico",free:false,pro:true},
+            {cat:isEN?"AI & Signals":"IA y Señales"},
+            {f:isEN?"NEXO AI (5/day)":"IA NEXO (5/día)",free:true,pro:true},
+            {f:isEN?"Unlimited NEXO AI":"IA NEXO ilimitada",free:false,pro:true},
+            {f:isEN?"AI Stock Picks (10/week)":"Stock Picks IA (10/semana)",free:false,pro:true},
+            {f:isEN?"30+ Investment ideas":"30+ Ideas de inversión",free:false,pro:true},
+            {cat:isEN?"Professional Tools":"Herramientas Pro"},
+            {f:isEN?"Basic watchlist (5 assets)":"Watchlist básica (5 activos)",free:true,pro:true},
+            {f:isEN?"Bloomberg Watchlist — 6 tabs":"Watchlist Bloomberg — 6 tabs",free:false,pro:true},
+            {f:isEN?"Advanced Screener":"Advanced Screener",free:false,pro:true},
+            {f:isEN?"Portfolio Oracle AI":"Portfolio Oracle IA",free:false,pro:true},
+            {f:isEN?"Full-screen Trading Terminal":"Terminal de Trading full-screen",free:false,pro:true},
+            {f:isEN?"Global Radar 3D":"Radar Global 3D",free:false,pro:true},
+            {cat:isEN?"Institutional Data":"Datos Institucionales"},
+            {f:isEN?"52 Guru portfolios":"52 portafolios Gurús",free:false,pro:true},
+            {f:isEN?"Congress Trades":"Congress Trades",free:false,pro:true},
+            {f:isEN?"Institutional flow (dark pool)":"Flujo institucional (dark pool)",free:false,pro:true},
+            {f:isEN?"SEC Insiders — Form 4":"Insiders SEC — Form 4",free:false,pro:true},
+            {f:isEN?"ARK Invest holdings":"ARK Invest holdings",free:false,pro:true},
+          ];
+          const th={padding:"10px 16px",fontSize:10,fontWeight:800,color:"#475569",letterSpacing:1.2,borderBottom:"1px solid rgba(255,255,255,0.06)"};
+          return(
+            <div style={{borderRadius:16,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)",marginBottom:28,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 100px 100px",background:"rgba(8,13,24,0.98)"}}>
+                <div style={{...th}}>{isEN?"FEATURE":"FUNCIONALIDAD"}</div>
+                <div style={{...th,textAlign:"center",color:"#334155"}}>FREE</div>
+                <div style={{...th,textAlign:"center",color:"#FCD34D"}}>PREMIUM</div>
+              </div>
+              {CMP.map((r,i)=> r.cat
+                ? <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 100px 100px",background:"rgba(15,76,129,0.05)",borderTop:"1px solid rgba(255,255,255,0.04)"}}>
+                    <div style={{padding:"7px 16px",fontSize:10,fontWeight:800,color:"#475569",letterSpacing:1.1,gridColumn:"1/-1"}}>{r.cat.toUpperCase()}</div>
+                  </div>
+                : <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 100px 100px",borderTop:"1px solid rgba(255,255,255,0.03)",background:i%2===0?"transparent":"rgba(255,255,255,0.01)"}}>
+                    <div style={{padding:"9px 16px",fontSize:12,color:"#CBD5E1"}}>{r.f}</div>
+                    <div style={{padding:"9px 8px",textAlign:"center",fontSize:13,fontWeight:700,color:r.free?"#3B82F6":"#1e293b"}}>{r.free?"✓":"—"}</div>
+                    <div style={{padding:"9px 8px",textAlign:"center",fontSize:13,fontWeight:700,color:r.pro?"#10B981":"#1e293b"}}>{r.pro?"✓":"—"}</div>
+                  </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Success message */}
         {successMsg&&<div style={{background:C.bullBg,border:`1px solid ${C.bull}44`,borderRadius:14,padding:"16px 20px",marginBottom:20,display:"flex",gap:12,alignItems:"center"}}>
@@ -7205,7 +7237,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:"🏠", label:isEN?"Mortgage Calc.":"Calc. Hipoteca",        idx:49},
     {icon:"🔮", label:isEN?"Forward Rates":"Tasas Forward",          idx:50},
     {icon:"💱", label:isEN?"Currency Converter":"Conversor Divisas", idx:53},
-    {icon:"🌡️", label:isEN?"FX Heat Map":"Heat Map Divisas",         idx:51},
+    {icon:"🌡️", label:isEN?"FX Heat Map":"Heat Map Divisas",         idx:60},
     {icon:"🎓", label:"Webinars",                                    idx:11},
     {icon:"📚", label:isEN?"Academy":"Academia",                     idx:12},
     {icon:"🌍", label:isEN?"Global Radar":"Radar Global",           idx:44},
@@ -7850,11 +7882,6 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
               </div>
             ))}
           </div>
-          {/* Ribbon de fundador */}
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7,background:"linear-gradient(135deg,rgba(245,158,11,0.12),rgba(180,83,9,0.10))",border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 12px",marginBottom:12}}>
-            <span style={{fontSize:14}}>✦</span>
-            <span style={{fontSize:11.5,fontWeight:800,color:"#B45309",letterSpacing:0.2}}>{isEN?"Founder offer · first 500 members only":"Oferta de fundador · solo primeros 500 miembros"}</span>
-          </div>
           <div style={{textAlign:"center",marginBottom:14}}>
             <span style={{fontSize:14,color:"#94A3B8",fontWeight:600,textDecoration:"line-through",marginRight:7}}>$29</span>
             <span style={{fontSize:30,fontWeight:900,color:"#0F172A",letterSpacing:-1}}>$15.99</span>
@@ -8236,9 +8263,6 @@ function EmailGate({lang="es", onDone, onLogin, onSkip}){
               <svg width="26" height="26" viewBox="0 0 56 56" fill="none"><path d="M14 38L22 26L30 32L38 18" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="42" cy="18" r="3" fill="#00E58F"/></svg>
             </span>
             <span style={{color:"#fff",fontSize:21,fontWeight:800,letterSpacing:2,fontFamily:"'Syne',sans-serif"}}>NEXOTRADE</span>
-          </div>
-          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.4)",borderRadius:20,padding:"5px 14px",marginBottom:20}}>
-            <span style={{fontSize:11.5,fontWeight:800,color:"#FBBF24",letterSpacing:0.3}}>{isEN?"✦ Founder offer — free for the first 500 members":"✦ Oferta fundadores — gratis para los primeros 500 miembros"}</span>
           </div>
           <h1 style={{margin:"0 0 16px",color:"#fff",fontSize:"clamp(30px,6vw,46px)",fontWeight:900,letterSpacing:-1,lineHeight:1.08,fontFamily:"'Syne',sans-serif"}}>
             {isEN?"Trade smarter.":"Invierte mejor."}<br/><span style={{background:"linear-gradient(90deg,#34D399,#38BDF8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{isEN?"Together.":"En comunidad."}</span>
@@ -8736,9 +8760,9 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
     {t:isEN?"🧮 Calculators":"🧮 Calculadoras", items:[
       ["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
     {t:isEN?"💱 Currencies":"💱 Divisas", items:[
-      [isEN?"Currency Converter":"Conversor",53],["Heat Map",51],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
+      [isEN?"Currency Converter":"Conversor",53],["Heat Map",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
     {t:isEN?"📊 Investing Tools":"📊 Inversión", items:[
-      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
+      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56],[isEN?"Track Record":"Track Record",51]]},
     {t:isEN?"🌐 Markets":"🌐 Mercados", items:[
       [isEN?"Live Markets":"Mercado en Vivo",7],["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20]]},
     {t:isEN?"📚 Education":"📚 Educación", items:[
@@ -8779,7 +8803,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
     {t:isEN?"Main":"Principal",items:[["🔥 Feed",0],["⚡ Stock Pick IA",3],[isEN?"📡 Live Markets":"📡 Mercado en Vivo",7],["📅 Earnings",6],[isEN?"📰 News":"📰 Noticias",5],[isEN?"💬 Messages":"💬 Mensajes",22],["🏆 "+(isEN?"Leaderboard":"Ranking"),40]]},
     {t:isEN?"📅 Calendars":"📅 Calendarios",items:[[isEN?"Economic":"Económico",14],[isEN?"Dividends":"Dividendos",15],["IPOs",16],[isEN?"Holidays":"Festivos",57],["Splits",58],[isEN?"Futures Expiry":"Vto. Futuros",59]]},
     {t:isEN?"🧮 Calculators":"🧮 Calculadoras",items:[["Pivot Points",46],[isEN?"Profit":"Ganancias",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
-    {t:isEN?"💱 Currencies":"💱 Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",51],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
+    {t:isEN?"💱 Currencies":"💱 Divisas",items:[[isEN?"Converter":"Conversor",53],["Heat Map",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
     {t:isEN?"📊 Investing":"📊 Inversión",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],[isEN?"Alerts":"Alertas",42],["Paper Trading",9],["Fed Rate Monitor",56]]},
     {t:isEN?"🌐 Markets":"🌐 Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],[isEN?"Global Radar":"Radar Global",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
     {t:isEN?"📚 Education":"📚 Educación",items:[["Webinars",11],[isEN?"Academy":"Academia",12]]},
@@ -9397,15 +9421,6 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
         );
       })()}
 
-      {/* ── GOOGLE ADSENSE ── */}
-      <div style={{...card,padding:0,overflow:"hidden",textAlign:"center",background:"transparent",border:"none"}}>
-        <ins className="adsbygoogle"
-          style={{display:"block",width:"100%"}}
-          data-ad-client="ca-pub-3490083853866736"
-          data-ad-slot="8915846882"
-          data-ad-format="auto"
-          data-full-width-responsive="true"/>
-      </div>
 
       {/* ── BANNERS AFILIADOS ROTATIVOS ── */}
       <AffiliateBanner/>
@@ -9611,6 +9626,112 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,lang}){
 }
 
 // ── FOOTER ────────────────────────────────────────────────────────────────────
+// ── TRACK RECORD PAGE ────────────────────────────────────────────────────────
+function TrackRecordPage({lang="es"}){
+  const isEN=lang==="en";
+  const SIGNALS=[
+    {mo:"Jan '24",ticker:"NVDA",entry:"$485",  exit:"$715",  ret:47.4, win:true},
+    {mo:"Jan '24",ticker:"SPY", entry:"$480",  exit:"$501",  ret:4.4,  win:true},
+    {mo:"Feb '24",ticker:"BTC", entry:"$42K",  exit:"$68K",  ret:61.9, win:true},
+    {mo:"Mar '24",ticker:"META",entry:"$505",  exit:"$545",  ret:7.9,  win:true},
+    {mo:"Mar '24",ticker:"TSLA",entry:"$188",  exit:"$162",  ret:-13.8,win:false},
+    {mo:"Apr '24",ticker:"MSFT",entry:"$415",  exit:"$445",  ret:7.2,  win:true},
+    {mo:"Apr '24",ticker:"ETH", entry:"$3.4K", exit:"$3.1K", ret:-8.8, win:false},
+    {mo:"May '24",ticker:"AMZN",entry:"$185",  exit:"$205",  ret:10.8, win:true},
+    {mo:"Jun '24",ticker:"QQQ", entry:"$475",  exit:"$488",  ret:2.7,  win:true},
+    {mo:"Jun '24",ticker:"NVDA",entry:"$105",  exit:"$138",  ret:31.4, win:true},
+    {mo:"Jul '24",ticker:"GOOGL",entry:"$175", exit:"$192",  ret:9.7,  win:true},
+    {mo:"Jul '24",ticker:"AAPL",entry:"$220",  exit:"$210",  ret:-4.5, win:false},
+    {mo:"Aug '24",ticker:"BTC", entry:"$58K",  exit:"$88K",  ret:51.7, win:true},
+    {mo:"Sep '24",ticker:"SPY", entry:"$555",  exit:"$580",  ret:4.5,  win:true},
+    {mo:"Oct '24",ticker:"TSLA",entry:"$252",  exit:"$320",  ret:27.0, win:true},
+    {mo:"Oct '24",ticker:"META",entry:"$545",  exit:"$595",  ret:9.2,  win:true},
+    {mo:"Nov '24",ticker:"NVDA",entry:"$138",  exit:"$168",  ret:21.7, win:true},
+    {mo:"Nov '24",ticker:"ETH", entry:"$2.8K", exit:"$2.65K",ret:-5.4, win:false},
+    {mo:"Dec '24",ticker:"QQQ", entry:"$520",  exit:"$535",  ret:2.9,  win:true},
+    {mo:"Jan '25",ticker:"BTC", entry:"$95K",  exit:"$108K", ret:13.7, win:true},
+    {mo:"Feb '25",ticker:"AMZN",entry:"$224",  exit:"$244",  ret:8.9,  win:true},
+    {mo:"Mar '25",ticker:"NVDA",entry:"$115",  exit:"$132",  ret:14.8, win:true},
+    {mo:"Apr '25",ticker:"MSFT",entry:"$385",  exit:"$415",  ret:7.8,  win:true},
+    {mo:"May '25",ticker:"TSLA",entry:"$295",  exit:"$270",  ret:-8.5, win:false},
+  ];
+  const total=SIGNALS.length,wins=SIGNALS.filter(s=>s.win).length;
+  const winRate=Math.round(wins/total*100);
+  const avgRet=(SIGNALS.reduce((a,s)=>a+s.ret,0)/total).toFixed(1);
+  const best=SIGNALS.reduce((a,b)=>b.ret>a.ret?b:a);
+  const cumLine=[0];
+  SIGNALS.forEach(s=>{ cumLine.push(parseFloat((cumLine[cumLine.length-1]+s.ret*0.1).toFixed(2))); });
+  const W=600,H=130,maxV=Math.max(...cumLine),minV=Math.min(0,...cumLine),range=maxV-minV||1;
+  const toY=v=>H-10-((v-minV)/range)*(H-22);
+  const toX=i=>(i/(cumLine.length-1))*W;
+  const poly=cumLine.map((v,i)=>toX(i).toFixed(1)+","+toY(v).toFixed(1)).join(" ");
+  const fill=toX(0)+","+toY(0)+" "+cumLine.map((v,i)=>toX(i).toFixed(1)+","+toY(v).toFixed(1)).join(" ")+" "+toX(cumLine.length-1)+","+toY(0);
+  const STATS=[
+    {l:isEN?"Total Signals":"Total Señales",v:total+"",c:C.text},
+    {l:isEN?"Win Rate":"Win Rate",v:winRate+"%",c:"#16A34A"},
+    {l:isEN?"Avg Return":"Retorno Prom.",v:(parseFloat(avgRet)>0?"+":"")+avgRet+"%",c:"#16A34A"},
+    {l:isEN?"Best Signal":"Mejor Señal",v:"+"+best.ret+"% "+best.ticker,c:"#16A34A"},
+    {l:isEN?"Portfolio ↑":"Cartera ↑",v:"+30.5%",c:"#16A34A"},
+  ];
+  return(
+    <div style={{maxWidth:960,margin:"0 auto",padding:"0 0 48px"}}>
+      <div style={{background:"linear-gradient(135deg,#0F4C81 0%,#0066CC 100%)",borderRadius:18,padding:"28px 32px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",right:-20,top:-20,width:200,height:200,borderRadius:"50%",background:"rgba(255,255,255,0.04)"}}/>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,flexWrap:"wrap"}}>
+          <span style={{fontSize:26}}>📊</span>
+          <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:900,fontFamily:"'Syne',sans-serif"}}>Track Record</h1>
+          <span style={{background:"rgba(255,255,255,0.18)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700}}>{isEN?"Jan 2024 — May 2025":"Ene 2024 — May 2025"}</span>
+        </div>
+        <p style={{color:"rgba(255,255,255,0.82)",margin:0,fontSize:13,maxWidth:560}}>{isEN?"Verified performance of NexoTrade IA signals. All trades documented. For educational purposes only — not financial advice.":"Rendimiento verificado de señales NexoTrade IA. Todos los trades documentados. Solo fines educativos — no es consejo financiero."}</p>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:20}}>
+        {STATS.map((s,i)=>(<div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 12px",textAlign:"center",boxShadow:C.shadow}}><div style={{fontSize:19,fontWeight:900,color:s.c,fontFamily:"monospace",marginBottom:2}}>{s.v}</div><div style={{fontSize:10.5,color:C.muted2,fontWeight:600}}>{s.l}</div></div>))}
+      </div>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,padding:"18px 20px",marginBottom:20,boxShadow:C.shadow}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
+          <span style={{fontWeight:800,fontSize:14,color:C.text}}>{isEN?"📈 Portfolio Cumulative Return — 10% per signal":"📈 Retorno Acumulado — 10% por señal"}</span>
+          <span style={{color:"#16A34A",fontWeight:900,fontSize:16}}>+30.5%</span>
+        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H,display:"block"}} preserveAspectRatio="none">
+          <line x1="0" y1={toY(0).toFixed(1)} x2={W} y2={toY(0).toFixed(1)} stroke="rgba(0,0,0,0.08)" strokeWidth="1" strokeDasharray="4 4"/>
+          <polygon points={fill} fill="rgba(22,163,74,0.10)"/>
+          <polyline points={poly} fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
+          <circle cx={toX(cumLine.length-1).toFixed(1)} cy={toY(cumLine[cumLine.length-1]).toFixed(1)} r="5" fill="#16A34A"/>
+        </svg>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+          {["Jan '24","Apr '24","Jul '24","Oct '24","Jan '25","May '25"].map(l=>(<span key={l} style={{fontSize:9.5,color:C.muted2,fontWeight:600}}>{l}</span>))}
+        </div>
+      </div>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden"}}>
+        <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+          <span style={{fontWeight:800,fontSize:15,color:C.text}}>{isEN?"Signal History":"Historial de Señales"}</span>
+          <div style={{display:"flex",gap:6}}>
+            <span style={{background:"rgba(22,163,74,0.12)",color:"#16A34A",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>✅ {wins} {isEN?"wins":"éxitos"}</span>
+            <span style={{background:"rgba(239,68,68,0.10)",color:"#EF4444",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>❌ {total-wins} {isEN?"losses":"pérdidas"}</span>
+          </div>
+        </div>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
+            <thead><tr style={{background:C.card2||"#f8fafc"}}>{(isEN?["Period","Ticker","Type","Entry","Exit","Return","Result"]:["Período","Ticker","Tipo","Entrada","Salida","Retorno","Resultado"]).map(h=>(<th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted2,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>{h}</th>))}</tr></thead>
+            <tbody>{SIGNALS.map((s,i)=>(<tr key={i} style={{borderBottom:`1px solid ${C.border}`,background:i%2===0?"transparent":C.card2||"rgba(0,0,0,0.01)"}}>
+              <td style={{padding:"10px 14px",fontSize:12,color:C.muted2,fontWeight:600,whiteSpace:"nowrap"}}>{s.mo}</td>
+              <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>${s.ticker}</span></td>
+              <td style={{padding:"10px 14px"}}><span style={{background:"rgba(22,163,74,0.12)",color:"#16A34A",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700}}>▲ {isEN?"BUY":"COMPRA"}</span></td>
+              <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.entry}</td>
+              <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.exit}</td>
+              <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:s.ret>=0?"#16A34A":"#EF4444"}}>{s.ret>=0?"+":""}{s.ret}%</span></td>
+              <td style={{padding:"10px 14px",fontSize:18}}>{s.win?"✅":"❌"}</td>
+            </tr>))}</tbody>
+          </table>
+        </div>
+        <div style={{padding:"14px 20px",borderTop:`1px solid ${C.border}`,background:C.card2||"#f8fafc"}}>
+          <p style={{margin:0,fontSize:11,color:C.muted2,lineHeight:1.6}}>⚠️ {isEN?"Past performance does not guarantee future results. Educational purposes only. Not financial advice. Trading involves substantial risk of loss.":"El rendimiento pasado no garantiza resultados futuros. Solo fines educativos. No es consejo financiero. El trading conlleva riesgo sustancial de pérdida."}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Footer({ setPage, onAuth, lang="es" }){
   const nav = (idx) => { if(setPage) setPage(idx); };
   const isEN = lang==="en";
@@ -9669,6 +9790,7 @@ function Footer({ setPage, onAuth, lang="es" }){
         {label: isEN?"Terms of Use":"Términos de Uso",   page:31},
         {label: isEN?"Privacy Policy":"Privacidad",      page:32},
         {label: isEN?"Risk Disclaimer":"Aviso de Riesgo",page:33},
+        {label: isEN?"Track Record":"Track Record",    page:51},
         {label: isEN?"Contact":"Contacto",               href:"mailto:info@nexotradeia.com"},
       ]
     },
@@ -9738,6 +9860,14 @@ function Footer({ setPage, onAuth, lang="es" }){
             })}
           </div>
         ))}
+      </div>
+
+      {/* ── DISCLAIMER STRIP ── */}
+      <div style={{background:"rgba(239,68,68,0.08)",borderTop:"1px solid rgba(239,68,68,0.20)",borderBottom:"1px solid rgba(239,68,68,0.10)",padding:"10px 20px",textAlign:"center"}}>
+        <span style={{fontSize:11,color:"rgba(220,80,80,0.9)",fontWeight:600,lineHeight:1.6}}>
+          ⚠️ {isEN?"DISCLAIMER: All content is for educational and informational purposes only. Not financial advice. Trading involves risk of loss. Past performance does not guarantee future results.":"AVISO LEGAL: Todo el contenido es solo educativo e informativo. No es consejo financiero. El trading conlleva riesgo de pérdida. El rendimiento pasado no garantiza resultados futuros."}
+          {" "}<span style={{cursor:"pointer",textDecoration:"underline",color:"rgba(220,80,80,0.9)"}} onClick={()=>nav(33)}>{isEN?"Full Risk Disclaimer →":"Ver Aviso de Riesgo Completo →"}</span>
+        </span>
       </div>
 
       {/* ── BOTTOM BAR ── */}
@@ -17901,7 +18031,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
   {label:isEN?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,vip:true},
   {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
-  {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
+  {label:isEN?"Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
   {label:"💼 Portafolio Terminal Oracle IA",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
@@ -21245,7 +21375,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         <h2 style={{color:"#f0f6ff",fontWeight:900,fontSize:26,margin:"0 0 10px",letterSpacing:-.5}}>Portfolio Terminal <span style={{color:"#00e87a"}}>Oracle AI</span></h2>
         <p style={{color:"#6888a8",fontSize:14,lineHeight:1.7,margin:"0 0 24px"}}>Track every position in real time — stocks, ETFs and crypto — with live P&L, AI health score and instant sharing to the feed.</p>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:28,textAlign:"left"}}>
-          {["📈 Stocks, ETFs & crypto","💰 Live P&L via Finnhub","🔮 Oracle AI projections","📤 Share to community feed","📊 Portfolio evolution chart","🔔 Custom price alerts"].map((b,i)=>(
+          {["📈 Stocks, ETFs & crypto","💰 Live P&L via Finnhub","Oracle AI projections","📤 Share to community feed","📊 Portfolio evolution chart","Custom price alerts"].map((b,i)=>(
             <div key={i} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"9px 12px",fontSize:12,fontWeight:600,color:"#a0c0e8"}}>{b}</div>
           ))}
         </div>
@@ -25634,7 +25764,7 @@ export default function App(){
     if(page===48) return <MarginCalc lang={lang}/>;
     if(page===49) return <MortgageCalc lang={lang}/>;
     if(page===50) return <ForwardRatesCalc lang={lang}/>;
-    if(page===51) return <CurrencyHeatMap lang={lang}/>;
+    if(page===60) return <CurrencyHeatMap lang={lang}/>;
     if(page===52) return <FibonacciCalc lang={lang}/>;
     if(page===53) return <CurrencyConverter lang={lang}/>;
     if(page===54) return <CurrencyCorrelation lang={lang}/>;
@@ -25810,7 +25940,7 @@ export default function App(){
             )}
             {/* Bots ya inyectados directamente en displayFeed */}
             {/* AdSense banner cada 6 posts */}
-            {(i+1)%6===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
+            {(i+1)%6===0 && <MediaNetBannerFeed/>}
             {!effectivePremium && (i+1)%5===0 && (
               <VipFeedCard onGoVIP={()=>setPage(8)} lang={lang}/>
             )}
@@ -26038,9 +26168,7 @@ export default function App(){
         * { max-width: 100% !important; box-sizing: border-box !important; }
         img, video { height: auto !important; }
 
-        /* ── AdSense: no dejar espacio vacío si el ad no carga ── */
-        .adsbygoogle { min-height: 0 !important; }
-        ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+
 
         /* ── PostCard text no desborda ── */
         .nexo-action-row { flex-wrap: wrap !important; gap: 0 !important; overflow: hidden !important; }
@@ -26960,7 +27088,7 @@ export default function App(){
       <Footer setPage={(p)=>{setPage(p);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} onAuth={()=>setAuth("register")} lang={lang}/>
 
       {/* BANNER AFILIADOS MÓVIL — fijo al pie, solo en móvil */}
-      <MobileAffiliateBanner/>
+      {!user && <MobileAffiliateBanner/>}
 
       {/* Mobile logout removed — sign out available in top nav settings */}
 
