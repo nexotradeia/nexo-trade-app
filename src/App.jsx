@@ -25196,6 +25196,250 @@ function MarketStatusDot({ lang }) {
   );
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOBILE HOME DASHBOARD — Greetting + AI Pick + Movers + Watchlist
+// Shows only on mobile (page===0). Desktop keeps the existing feed layout.
+// ─────────────────────────────────────────────────────────────────────────────
+function MobileHomeDashboard({user, isPremium, onNavigate, onAI, onPremium, lang="en"}){
+  const lp = useContext(PriceCtx);
+
+  // ── Greeting ──────────────────────────────────────────────────────────────
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const firstName = user?.name ? user.name.split(" ")[0] : (user?.username || "");
+  const today = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+
+  // ── Market open status (NYSE: 9:30–16:00 ET Mon–Fri) ─────────────────────
+  const isMarketOpen = (()=>{
+    const now = new Date();
+    const et = new Date(now.toLocaleString("en-US",{timeZone:"America/New_York"}));
+    const day = et.getDay(); // 0=Sun 6=Sat
+    const mins = et.getHours()*60 + et.getMinutes();
+    return day>=1 && day<=5 && mins>=570 && mins<960; // 9:30–16:00
+  })();
+
+  // ── Live prices helper ────────────────────────────────────────────────────
+  const live = (sym, fallback) => {
+    const d = lp[sym];
+    return { price: d?.price ?? fallback.p, change: d?.change ?? fallback.c };
+  };
+
+  const spyD  = live("SPY",  {p:737.6,  c:-0.20});
+  const qqqD  = live("QQQ",  {p:705.1,  c:-0.30});
+  const btcD  = live("BTC",  {p:62060,  c:+0.05});
+  const nvdaD = live("NVDA", {p:205.1,  c:+0.90});
+
+  // ── Format helpers ────────────────────────────────────────────────────────
+  const fmtPrice = (p, sym) => {
+    if(sym==="BTC") return p>=1000 ? (p/1000).toFixed(1)+"k" : p.toFixed(0);
+    if(p>=1000) return p.toLocaleString("en-US",{maximumFractionDigits:2});
+    if(p>=100)  return p.toFixed(2);
+    return p.toFixed(2);
+  };
+  const fmtChg = c => (c>=0?"+":"")+c.toFixed(2)+"%";
+
+  // ── Today's AI Pick (top pick from fallback) ──────────────────────────────
+  const pick = WEEKLY_PICKS_FALLBACK.corto[0]; // NVDA
+  const pickLive = live(pick.ticker, {p:parseFloat((pick.entrada||"$205").replace(/[$,]/g,"")), c:0.9});
+  const updateTime = isMarketOpen ? new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",hour12:true,timeZone:"America/New_York"})+" ET" : "Pre-market";
+
+  // ── Movers (top 4 by abs change from TICKER_DATA_INIT + live overlay) ─────
+  const allTickers = TICKER_DATA_INIT.map(t=>{
+    const d = lp[t.s];
+    return {...t, price: d?.price ?? t.p, chg: d?.change ?? t.c};
+  });
+  const movers = [...allTickers]
+    .sort((a,b) => Math.abs(b.chg) - Math.abs(a.chg))
+    .slice(0,4);
+
+  // ── Watchlist (user's saved tickers or fallback) ──────────────────────────
+  const [wlTickers] = useState(()=>{
+    try{
+      const saved = JSON.parse(localStorage.getItem("nexo-watchlist-v2")||"[]");
+      return saved.length ? saved.slice(0,5) : ["AAPL","MSFT","BTC"];
+    }catch{ return ["AAPL","MSFT","BTC"]; }
+  });
+  const wlData = wlTickers.map(sym=>{
+    const init = TICKER_DATA_INIT.find(t=>t.s===sym) || {s:sym,n:sym,p:0,c:0};
+    const d = lp[sym];
+    return {sym, name:init.n, price:d?.price??init.p, chg:d?.change??init.c};
+  });
+
+  // ── Styles (matching the HTML spec exactly) ───────────────────────────────
+  const S = {
+    wrap: {padding:"6px 20px 90px"},
+    // Greeting
+    greetH1: {fontSize:26,fontWeight:700,letterSpacing:"-0.028em",color:"#0a0d14",margin:0},
+    greetStatus: {marginTop:6,display:"inline-flex",alignItems:"center",gap:7,fontSize:13,color:"#646a76",fontWeight:500},
+    gdot: {width:7,height:7,borderRadius:"50%",background:isMarketOpen?"#10935a":"#9aa0ab",flexShrink:0},
+    // Pulse cards
+    pulseGrid: {display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,margin:"18px 0"},
+    pcard: {border:"1px solid #eef0f3",borderRadius:16,padding:"13px 13px 12px",background:"#fff"},
+    plabel: {fontSize:11.5,color:"#646a76",fontWeight:600,letterSpacing:"0.01em"},
+    pval: {marginTop:7,fontSize:17,fontWeight:700,letterSpacing:"-0.02em",color:"#0a0d14"},
+    // Hero card
+    hero: {background:"#06080e",borderRadius:24,padding:"22px 22px 20px",color:"#fff",position:"relative",overflow:"hidden",marginBottom:18},
+    heroGlow: {position:"absolute",inset:0,background:"radial-gradient(420px 200px at 88% -20%, rgba(10,92,255,0.32), transparent 70%)",pointerEvents:"none"},
+    chip: {display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,letterSpacing:"0.05em",textTransform:"uppercase",color:"#bcd0ff",background:"rgba(10,92,255,0.16)",border:"1px solid rgba(10,92,255,0.32)",padding:"6px 11px",borderRadius:999},
+    heroTime: {fontSize:11.5,color:"#7a8398",fontWeight:500},
+    heroTkr: {fontSize:13,color:"#8a93a6",fontWeight:600,letterSpacing:"0.03em"},
+    heroName: {fontSize:30,fontWeight:800,letterSpacing:"-0.03em",marginTop:2,color:"#fff"},
+    heroConv: {marginTop:9,display:"inline-flex",alignItems:"center",gap:7,fontSize:12.5,fontWeight:600,color:"#27d391"},
+    heroThesis: {marginTop:16,fontSize:14,lineHeight:1.5,color:"#c9ced9",position:"relative",zIndex:1},
+    heroCtaWrap: {marginTop:18,display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:1},
+    heroBtn: {display:"inline-flex",alignItems:"center",gap:8,background:"#fff",color:"#06080e",fontSize:14,fontWeight:600,padding:"11px 16px",borderRadius:12,border:"none",cursor:"pointer",fontFamily:"inherit"},
+    heroNote: {fontSize:10.5,color:"#5e6677",letterSpacing:"0.02em"},
+    // Section header
+    secH: {display:"flex",alignItems:"center",justifyContent:"space-between",margin:"4px 0 12px"},
+    secTitle: {fontSize:15,fontWeight:700,letterSpacing:"-0.01em",color:"#0a0d14"},
+    secLink: {fontSize:13,color:"#0a5cff",fontWeight:600,background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",padding:0},
+    // Movers grid
+    moversGrid: {display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:22},
+    mvCard: {border:"1px solid #eef0f3",borderRadius:16,padding:"13px 14px",background:"#fff",display:"flex",flexDirection:"column",gap:6,cursor:"pointer"},
+    mvTop: {display:"flex",alignItems:"center",justifyContent:"space-between"},
+    mvSym: {fontSize:14,fontWeight:700,letterSpacing:"-0.01em",color:"#0a0d14"},
+    mvPx: {fontSize:13,color:"#646a76",fontWeight:600},
+    // Watchlist
+    wlCard: {border:"1px solid #eef0f3",borderRadius:18,overflow:"hidden",background:"#fff",marginBottom:8},
+    wlRow: {display:"flex",alignItems:"center",gap:13,padding:"13px 15px",borderBottom:"1px solid #eef0f3"},
+    wlRowLast: {display:"flex",alignItems:"center",gap:13,padding:"13px 15px"},
+    wlTile: {width:34,height:34,borderRadius:9,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,background:"#f1f3f6",color:"#0a0d14"},
+    wlSym: {fontSize:14,fontWeight:700,letterSpacing:"-0.01em",color:"#0a0d14"},
+    wlName: {fontSize:12,color:"#9aa0ab",fontWeight:500,marginTop:1},
+    wlPx: {fontSize:14,fontWeight:700,letterSpacing:"-0.01em",color:"#0a0d14"},
+  };
+
+  const chgColor = c => c>=0 ? "#10935a" : "#e0463d";
+  const chgBg    = c => c>=0 ? "rgba(16,147,90,0.10)" : "rgba(224,70,61,0.10)";
+  const tileStr  = sym => sym==="BTC"?"₿":sym==="ETH"?"Ξ":sym[0];
+
+  return(
+    <div style={S.wrap}>
+
+      {/* ── Greeting ── */}
+      <div style={{margin:"8px 0 18px"}}>
+        <h1 style={S.greetH1}>{greeting}{firstName?`, ${firstName}`:""}</h1>
+        <span style={S.greetStatus}>
+          <span style={S.gdot}/>
+          {isMarketOpen?"Markets open":"Markets closed"} · {today}
+        </span>
+      </div>
+
+      {/* ── Market Pulse ── */}
+      <div style={S.pulseGrid}>
+        {[
+          {label:"S&P 500",    d:spyD,  sym:"SPY"},
+          {label:"Nasdaq 100", d:qqqD,  sym:"QQQ"},
+          {label:"Bitcoin",    d:btcD,  sym:"BTC"},
+        ].map(({label,d,sym})=>(
+          <div key={sym} style={S.pcard}>
+            <div style={S.plabel}>{label}</div>
+            <div style={{...S.pval}}>{fmtPrice(d.price,sym)}</div>
+            <div style={{marginTop:2,fontSize:12,fontWeight:600,color:chgColor(d.change)}}>{fmtChg(d.change)}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Today's AI Pick Hero ── */}
+      <div style={S.hero}>
+        <div style={S.heroGlow}/>
+        {/* top row */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:1}}>
+          <span style={S.chip}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#bcd0ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/>
+              <path d="M19 14l.7 1.7 1.8.7-1.8.7-.7 1.7-.7-1.7-1.8-.7 1.8-.7z"/>
+            </svg>
+            Today's AI Pick
+          </span>
+          <span style={S.heroTime}>Updated {updateTime}</span>
+        </div>
+        {/* main row: ticker + sparkline */}
+        <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",marginTop:18,position:"relative",zIndex:1,gap:14}}>
+          <div>
+            <div style={S.heroTkr}>{pick.ticker}</div>
+            <div style={S.heroName}>{pick.nombre}</div>
+            <div style={S.heroConv}>
+              {/* conviction bars */}
+              <span style={{display:"flex",gap:2.5,alignItems:"flex-end"}}>
+                {[7,10,13,16].map((h,i)=>(
+                  <span key={i} style={{width:3,height:h,background:"#27d391",borderRadius:2,display:"block"}}/>
+                ))}
+              </span>
+              High conviction
+            </div>
+          </div>
+          {/* Mini sparkline SVG */}
+          <svg width="118" height="56" viewBox="0 0 118 56" fill="none" style={{flexShrink:0}}>
+            <defs>
+              <linearGradient id="nhg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#27d391" stopOpacity="0.35"/>
+                <stop offset="1" stopColor="#27d391" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M2 44 L20 40 L36 43 L52 30 L68 33 L84 20 L100 22 L116 8" stroke="#27d391" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 44 L20 40 L36 43 L52 30 L68 33 L84 20 L100 22 L116 8 L116 56 L2 56 Z" fill="url(#nhg)"/>
+            <circle cx="116" cy="8" r="3" fill="#27d391"/>
+          </svg>
+        </div>
+        {/* thesis */}
+        <p style={S.heroThesis}>{pick.razonEn?.split(".")[0]}.</p>
+        {/* CTA */}
+        <div style={S.heroCtaWrap}>
+          <button style={S.heroBtn} onClick={()=>onNavigate&&onNavigate(3)}>
+            See full analysis
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#06080e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <span style={S.heroNote}>AI signal · not financial advice</span>
+        </div>
+      </div>
+
+      {/* ── Today's Movers ── */}
+      <div style={S.secH}>
+        <span style={S.secTitle}>Today's movers</span>
+        <button style={S.secLink} onClick={()=>onNavigate&&onNavigate(7)}>See all</button>
+      </div>
+      <div style={S.moversGrid}>
+        {movers.map(m=>(
+          <div key={m.s} style={S.mvCard} onClick={()=>onNavigate&&onNavigate(7)}>
+            <div style={S.mvTop}>
+              <span style={S.mvSym}>{m.s}</span>
+              <span style={S.mvPx}>${fmtPrice(m.price,m.s)}</span>
+            </div>
+            <span style={{alignSelf:"flex-start",fontSize:12,fontWeight:600,padding:"3px 8px",borderRadius:7,color:chgColor(m.chg),background:chgBg(m.chg)}}>
+              {m.chg>=0?"▲ ":"▼ "}{Math.abs(m.chg).toFixed(2)}%
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── My Watchlist ── */}
+      <div style={S.secH}>
+        <span style={S.secTitle}>My Watchlist</span>
+        <button style={S.secLink} onClick={()=>onNavigate&&onNavigate(38)}>See all</button>
+      </div>
+      <div style={S.wlCard}>
+        {wlData.map((w,i)=>(
+          <div key={w.sym} style={i===wlData.length-1?S.wlRowLast:S.wlRow}>
+            <div style={S.wlTile}>{tileStr(w.sym)}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={S.wlSym}>{w.sym}</div>
+              <div style={S.wlName}>{w.name}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={S.wlPx}>{w.sym==="BTC"?`$${w.price.toLocaleString("en-US",{maximumFractionDigits:0})}`:w.price>=100?`$${w.price.toFixed(2)}`:`$${w.price.toFixed(2)}`}</div>
+              <div style={{fontSize:12,fontWeight:600,marginTop:1,color:chgColor(w.chg)}}>{fmtChg(w.chg)}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function App(){
   const [posts,setPosts]       = useState([]);
   const [newPostId,setNewPostId]= useState(null);
@@ -27149,10 +27393,17 @@ export default function App(){
         </div>
       )}
 
-      {/* MI WATCHLIST — solo móvil (en desktop va en el sidebar derecho) */}
+      {/* MOBILE HOME DASHBOARD — solo móvil página 0 */}
       {page===0 && !showLanding && page!==99 && (
-        <div className="nexo-show-mobile" style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0",boxSizing:"border-box"}}>
-          <MiWatchlistWidget user={user} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}} lang={lang}/>
+        <div className="nexo-only-mobile" style={{maxWidth:480,margin:"0 auto",boxSizing:"border-box"}}>
+          <MobileHomeDashboard
+            user={user}
+            isPremium={effectivePremium}
+            onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}}
+            onAI={()=>setShowAI&&setShowAI(true)}
+            onPremium={()=>{setPage(8);setShowLanding(false);}}
+            lang={lang}
+          />
         </div>
       )}
 
