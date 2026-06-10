@@ -25387,7 +25387,7 @@ export default function App(){
     if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
     if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===43) return <PaperTradingFullPage user={user} lang={lang} onBack={()=>setPage(0)}/>;
-    if(page===44) return <RadarGlobalPage lang={lang} onBack={()=>setPage(0)}/>;
+    if(page===44) return null; // rendered outside body-grid as full-screen overlay
     if(page===45) return <PreMarketPage lang={lang} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
     if(page===46) return <PivotCalc lang={lang}/>;
     if(page===47) return <ProfitCalc lang={lang}/>;
@@ -26687,8 +26687,11 @@ export default function App(){
         </div>
       )}
 
+      {/* RADAR GLOBAL — full-screen overlay, fuera del body-grid */}
+      {page===44&&<RadarGlobalPage lang={lang} onBack={()=>{setPage(0);setShowLanding(false);}}/>}
+
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
         <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onlineUsers={onlineUsers} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
