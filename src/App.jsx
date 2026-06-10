@@ -19872,6 +19872,30 @@ const RADAR_V2_CAPITAL_FLOWS = [
   {route:'USA → Asia',     amount:'+$1.8B', pos:true,  pct:70},
   {route:'Global → BTC',   amount:'+$3.1B', pos:true,  pct:95},
 ];
+const RADAR_V2_STATS_COUNTRIES=[
+  {flag:'🇨🇳',name:'China',       vol:'$2.84T',pct:24.1,chg:+0.8, open:true},
+  {flag:'🇺🇸',name:'USA',         vol:'$2.31T',pct:19.6,chg:-0.3, open:true},
+  {flag:'🇯🇵',name:'Japan',       vol:'$0.98T',pct:8.3, chg:+1.2, open:true},
+  {flag:'🇬🇧',name:'UK',          vol:'$0.81T',pct:6.9, chg:-0.5, open:true},
+  {flag:'🇩🇪',name:'Germany',     vol:'$0.72T',pct:6.1, chg:+0.3, open:true},
+  {flag:'🇮🇳',name:'India',       vol:'$0.61T',pct:5.2, chg:+2.1, open:false},
+  {flag:'🇫🇷',name:'France',      vol:'$0.54T',pct:4.6, chg:-0.1, open:true},
+  {flag:'🇭🇰',name:'Hong Kong',   vol:'$0.49T',pct:4.2, chg:+0.9, open:true},
+  {flag:'🇰🇷',name:'South Korea', vol:'$0.41T',pct:3.5, chg:+0.6, open:true},
+  {flag:'🇧🇷',name:'Brazil',      vol:'$0.38T',pct:3.2, chg:+1.8, open:false},
+  {flag:'🇨🇦',name:'Canada',      vol:'$0.35T',pct:3.0, chg:-0.4, open:false},
+  {flag:'🇦🇺',name:'Australia',   vol:'$0.31T',pct:2.6, chg:+0.2, open:true},
+  {flag:'🇸🇬',name:'Singapore',   vol:'$0.28T',pct:2.4, chg:+1.1, open:true},
+  {flag:'🇨🇭',name:'Switzerland', vol:'$0.24T',pct:2.0, chg:-0.2, open:true},
+  {flag:'🇮🇩',name:'Indonesia',   vol:'$0.19T',pct:1.6, chg:+3.2, open:false},
+  {flag:'🇸🇦',name:'Saudi Arabia',vol:'$0.17T',pct:1.4, chg:+0.5, open:false},
+  {flag:'🇲🇽',name:'Mexico',      vol:'$0.14T',pct:1.2, chg:-1.1, open:false},
+  {flag:'🇿🇦',name:'South Africa',vol:'$0.11T',pct:0.9, chg:+0.7, open:true},
+  {flag:'🇳🇱',name:'Netherlands', vol:'$0.10T',pct:0.8, chg:-0.3, open:true},
+  {flag:'🇷🇺',name:'Russia',      vol:'$0.08T',pct:0.7, chg:-2.1, open:false},
+  {flag:'🇦🇷',name:'Argentina',   vol:'$0.06T',pct:0.5, chg:+4.5, open:false},
+  {flag:'🇹🇷',name:'Turkey',      vol:'$0.05T',pct:0.4, chg:-1.8, open:false},
+];
 
 function RadarGlobalPage({lang="es",onBack}){
   const isEN=lang==="en";
@@ -19967,12 +19991,35 @@ function RadarGlobalPage({lang="es",onBack}){
       if(!t.showDayNight)return;
       const now=new Date(),hours=now.getUTCHours()+now.getUTCMinutes()/60;
       const sunLon=(hours-12)*-15,sunLat=23.4*Math.sin(Date.now()/1000/86400/365.25*Math.PI*2);
-      ctx.save();ctx.globalAlpha=.4;
-      for(let lon=-180;lon<=180;lon+=4){for(let lat=-90;lat<=90;lat+=4){
+      // Day side: warm glow overlay
+      ctx.save();
+      for(let lon=-180;lon<=180;lon+=3){for(let lat=-90;lat<=90;lat+=3){
         const dLon=lon-sunLon;
         const dot=Math.sin(lat*Math.PI/180)*Math.sin(sunLat*Math.PI/180)+Math.cos(lat*Math.PI/180)*Math.cos(sunLat*Math.PI/180)*Math.cos(dLon*Math.PI/180);
-        if(dot<0){const r=rot3(ll3d(lat,lon,t.R*.999),t.rotY,t.rotX),p=proj(r);if(p.visible&&p.z>0){ctx.fillStyle='rgba(0,0,20,.55)';ctx.fillRect(p.x-3,p.y-3,6,6);}}
-      }}ctx.restore();
+        const rp=rot3(ll3d(lat,lon,t.R*.999),t.rotY,t.rotX),p=proj(rp);
+        if(!p.visible||p.z<0)continue;
+        if(dot>0.08){// day
+          const strength=Math.min(1,dot*1.4);
+          ctx.fillStyle=`rgba(80,140,200,${strength*.18})`;ctx.fillRect(p.x-3,p.y-3,6,6);
+        }else if(dot<-0.08){// night
+          const strength=Math.min(1,-dot*1.5);
+          ctx.fillStyle=`rgba(0,0,15,${strength*.65})`;ctx.fillRect(p.x-3,p.y-3,6,6);
+        }
+      }}
+      ctx.restore();
+      // Terminator glow line
+      ctx.save();
+      for(let lat=-90;lat<=90;lat+=2){
+        const dLon2=sunLon+90;
+        const terminLon=dLon2+Math.acos(-Math.tan(lat*Math.PI/180)*Math.tan(sunLat*Math.PI/180))*180/Math.PI;
+        for(const tlon of[terminLon,terminLon-180]){
+          const rp=rot3(ll3d(lat,tlon,t.R*.999),t.rotY,t.rotX),p=proj(rp);
+          if(!p.visible||p.z<0)continue;
+          ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);
+          ctx.fillStyle='rgba(180,220,255,.35)';ctx.fill();
+        }
+      }
+      ctx.restore();
     }
     function drawMarkets(ts){RADAR_V2_MARKETS.forEach((m,i)=>{const r=rot3(ll3d(m.lat,m.lon,t.R),t.rotY,t.rotX),p=proj(r);if(!p.visible||p.z<0)return;const pulse=(Math.sin(ts*.002+dotPulse[i])+1)/2,size=m.size*(.8+pulse*.4)*(.5+p.z/(t.R*2)),glow=m.size*2.5*(.7+pulse*.3);const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,glow);g.addColorStop(0,m.color+'aa');g.addColorStop(1,m.color+'00');ctx.beginPath();ctx.arc(p.x,p.y,glow,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.beginPath();ctx.arc(p.x,p.y,size,0,Math.PI*2);ctx.fillStyle=m.color;ctx.shadowColor=m.color;ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;if(m.activity>.7){const rs=size+pulse*size*2;ctx.beginPath();ctx.arc(p.x,p.y,rs,0,Math.PI*2);ctx.strokeStyle=m.color+Math.floor((1-pulse)*255).toString(16).padStart(2,'0');ctx.lineWidth=1;ctx.stroke();}if(p.z>t.R*.2){ctx.fillStyle=m.color;ctx.font='bold 9px IBM Plex Mono,monospace';ctx.textAlign='left';ctx.fillText(m.name,p.x+size+3,p.y-4);ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='8px IBM Plex Mono,monospace';ctx.fillText(m.label,p.x+size+3,p.y+6);}});}
     function drawFlows(){
@@ -20008,30 +20055,58 @@ function RadarGlobalPage({lang="es",onBack}){
     const onMD=(e)=>{t.isDragging=true;t.autoRotate=false;t.lastMX=e.clientX;t.lastMY=e.clientY;cvs.style.cursor='grabbing';};
     const onMM=(e)=>{if(!t.isDragging)return;t.rotY+=(e.clientX-t.lastMX)*.005;t.rotX+=(e.clientY-t.lastMY)*.005;t.rotX=Math.max(-1.2,Math.min(1.2,t.rotX));t.lastMX=e.clientX;t.lastMY=e.clientY;};
     const onMU=()=>{t.isDragging=false;cvs.style.cursor='grab';setTimeout(()=>t.autoRotate=true,3000);};
+    // click market dot → show local time tooltip
+    const onCLICK=(e)=>{
+      if(t.isDragging)return;
+      const rect=cvs.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+      let hit=null;
+      RADAR_V2_MARKETS.forEach(m=>{
+        const rp=rot3(ll3d(m.lat,m.lon,t.R),t.rotY,t.rotX),p=proj(rp);
+        if(p.visible&&p.z>0&&Math.hypot(p.x-mx,p.y-my)<m.size*2+12)hit=m;
+      });
+      // use setClickedMkt via T.current callback
+      if(t.onMarketClick)t.onMarketClick(hit);
+    };
     cvs.style.cursor='grab';
     cvs.addEventListener('mousedown',onMD);window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);
+    cvs.addEventListener('click',onCLICK);
+    // ── touch events (mobile swipe to rotate) ──
+    const onTD=(e)=>{e.preventDefault();const touch=e.touches[0];t.isDragging=true;t.autoRotate=false;t.lastMX=touch.clientX;t.lastMY=touch.clientY;};
+    const onTM=(e)=>{e.preventDefault();if(!t.isDragging)return;const touch=e.touches[0];t.rotY+=(touch.clientX-t.lastMX)*.005;t.rotX+=(touch.clientY-t.lastMY)*.005;t.rotX=Math.max(-1.2,Math.min(1.2,t.rotX));t.lastMX=touch.clientX;t.lastMY=touch.clientY;};
+    const onTU=(e)=>{t.isDragging=false;setTimeout(()=>t.autoRotate=true,3000);};
+    cvs.addEventListener('touchstart',onTD,{passive:false});
+    cvs.addEventListener('touchmove',onTM,{passive:false});
+    cvs.addEventListener('touchend',onTU);
     const onResize=()=>resize();window.addEventListener('resize',onResize);
 
-    return()=>{cancelAnimationFrame(animId);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);window.removeEventListener('resize',onResize);};
+    return()=>{cancelAnimationFrame(animId);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);cvs.removeEventListener('click',onCLICK);cvs.removeEventListener('touchstart',onTD);cvs.removeEventListener('touchmove',onTM);cvs.removeEventListener('touchend',onTU);window.removeEventListener('resize',onResize);};
   },[]);
 
   // sync toggle state → T ref
   useEffect(()=>{T.current.showDayNight=dayNightOn;},[dayNightOn]);
   useEffect(()=>{T.current.showFlows=flowsOn;},[flowsOn]);
+  useEffect(()=>{T.current.onMarketClick=(m)=>setClickedMkt(m);},[]);
 
-  // ── Fear & Greed gauge (draws to canvas once) ──────────────────────────────
+  // ── Fear & Greed gauge — live from alternative.me ────────────────────────
   const fgRef=useRef(null);
-  const FG_SCORE=72;
+  const [fgScore,setFgScore]=useState(72);
+  const [fgLabel,setFgLabel]=useState('GREED');
+  useEffect(()=>{
+    fetch('https://api.alternative.me/fng/?limit=1')
+      .then(r=>r.json())
+      .then(d=>{const v=parseInt(d.data[0].value);setFgScore(v);setFgLabel(d.data[0].value_classification.toUpperCase());})
+      .catch(()=>{});
+  },[]);
   useEffect(()=>{
     const fc=fgRef.current;if(!fc)return;
     const c=fc.getContext('2d'),cx=70,cy=76,r=54;
     c.clearRect(0,0,140,80);
     c.beginPath();c.arc(cx,cy,r,Math.PI,0);c.strokeStyle='rgba(255,255,255,.08)';c.lineWidth=8;c.stroke();
-    const pct=FG_SCORE/100,color=FG_SCORE<25?'#ff3355':FG_SCORE<45?'#ff6040':FG_SCORE<55?'#ffc040':FG_SCORE<75?'#80e040':'#00f090';
+    const pct=fgScore/100,color=fgScore<25?'#ff3355':fgScore<45?'#ff6040':fgScore<55?'#ffc040':fgScore<75?'#80e040':'#00f090';
     c.beginPath();c.arc(cx,cy,r,Math.PI,Math.PI+pct*Math.PI);c.strokeStyle=color;c.lineWidth=8;c.lineCap='round';c.stroke();
     const angle=Math.PI+pct*Math.PI;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(angle)*(r-10),cy+Math.sin(angle)*(r-10));c.strokeStyle='#fff';c.lineWidth=2;c.stroke();
     c.beginPath();c.arc(cx,cy,4,0,Math.PI*2);c.fillStyle='#fff';c.fill();
-  },[]);
+  },[fgScore]);
 
   // ── v2 styles (shared) ────────────────────────────────────────────────────
   const MONO="'IBM Plex Mono',monospace";
@@ -20212,39 +20287,89 @@ function RadarGlobalPage({lang="es",onBack}){
   // ── v2 RENDER ────────────────────────────────────────────────────────────────
   const MONO2="'IBM Plex Mono',monospace";
   const C={bg:'#020408',bg2:'#060c14',bg3:'#0a1520',br:'rgba(255,255,255,.07)',br2:'rgba(255,255,255,.12)',grn:'#00f090',red:'#ff3355',gold:'#ffc040',blue:'#4090ff',cyan:'#00d8ff',txt:'#d0e8f8',mid:'#5880a0',dim:'#304860'};
+  const refreshGlobe=useCallback(()=>{
+    const t=T.current;
+    t.rotY=0.3;t.rotX=-0.1;t.autoRotate=true;
+    t.particles=RADAR_V2_FLOWS.flatMap((f,fi)=>Array.from({length:4},(_,i)=>({flowIdx:fi,t:i/4,speed:0.003+Math.random()*0.002})));
+    setOrdersPerSec(8706);
+  },[]);
+  const [statsHover,setStatsHover]=useState(null);
+  // live tickers
+  const [liveTk,setLiveTk]=useState({});
+  useEffect(()=>{
+    const stocks=['NVDA','AAPL','SPY','META','TSLA','MSFT','AMZN'];
+    const fetchStocks=async()=>{
+      const results={};
+      await Promise.allSettled(stocks.map(sym=>
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`)
+          .then(r=>r.json())
+          .then(d=>{if(d.c){results[sym]={p:d.c,chg:((d.c-d.pc)/d.pc*100).toFixed(2),up:d.c>=d.pc};}})
+          .catch(()=>{})
+      ));
+      return results;
+    };
+    const fetchCrypto=()=>
+      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true')
+        .then(r=>r.json())
+        .then(d=>({
+          BTC:{p:d.bitcoin?.usd,chg:d.bitcoin?.usd_24h_change?.toFixed(2),up:(d.bitcoin?.usd_24h_change||0)>=0},
+          ETH:{p:d.ethereum?.usd,chg:d.ethereum?.usd_24h_change?.toFixed(2),up:(d.ethereum?.usd_24h_change||0)>=0},
+          SOL:{p:d.solana?.usd,chg:d.solana?.usd_24h_change?.toFixed(2),up:(d.solana?.usd_24h_change||0)>=0},
+        })).catch(()=>({}));
+    const load=async()=>{
+      const [s,c]=await Promise.all([fetchStocks(),fetchCrypto()]);
+      setLiveTk({...s,...c});
+    };
+    load();
+    const iv=setInterval(load,60000);
+    return()=>clearInterval(iv);
+  },[]);
+  // market click tooltip
+  const [clickedMkt,setClickedMkt]=useState(null);
   const tbBtn=(active,accent='#00f090')=>({display:'flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:7,border:`1px solid ${active?`rgba(0,240,144,.25)`:C.br2}`,background:active?`rgba(0,240,144,.1)`:C.bg3,fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?accent:C.mid,cursor:'pointer',letterSpacing:'.5px'});
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div style={{width:'100%',height:'calc(100vh - 52px)',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'}}>
-      <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
+    <div className="nexo-radar-wrap" style={{width:'100%',height:'calc(100vh - 52px)',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,display:'grid',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'}}>
+      <style>{`
+        @keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        @media(max-width:700px){
+          .nexo-radar-wrap{grid-template-columns:1fr!important;grid-template-rows:44px 1fr 30px!important;height:calc(100vh - 52px)!important;}
+          .nexo-radar-left,.nexo-radar-right{display:none!important;}
+          .nexo-radar-topbar{padding:0 10px!important;gap:6px!important;}
+          .nexo-radar-topbar .nexo-radar-logo{display:none!important;}
+          .nexo-radar-topbar .nexo-radar-title{font-size:10px!important;}
+          .nexo-radar-topbar .nexo-radar-live{display:none!important;}
+          .nexo-radar-topbar .nexo-radar-btns button{padding:4px 8px!important;font-size:9px!important;}
+        }
+      `}</style>
       {/* ── TOPBAR ── */}
-      <div style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 20px',gap:12,zIndex:100}}>
+      <div className="nexo-radar-topbar" style={{gridColumn:'1/-1',background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 20px',gap:12,zIndex:100}}>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           {onBack&&<button onClick={onBack} style={{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:7,border:`1px solid ${C.br2}`,background:'rgba(0,240,144,.08)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:C.grn,cursor:'pointer',letterSpacing:'.5px'}}>← Back</button>}
-          <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <div className="nexo-radar-logo" style={{display:'flex',alignItems:'center',gap:8}}>
             <div style={{width:26,height:26,background:C.grn,clipPath:'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:900,color:'#020408'}}>N</div>
             <div style={{fontFamily:MONO2,fontSize:12,fontWeight:700,letterSpacing:2,color:C.txt}}>NEXO<span style={{color:C.grn}}>TRADE</span></div>
           </div>
           <div style={{width:1,height:18,background:C.br2}}/>
-          <div style={{fontFamily:MONO2,fontSize:11,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn}}>🌍 Global Capital Radar</div>
+          <div className="nexo-radar-title" style={{fontFamily:MONO2,fontSize:11,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn}}>🌍 Global Capital Radar</div>
           <div style={{fontFamily:MONO2,fontSize:11,color:C.mid}}>{utcClock}</div>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:8}}>
+        <div className="nexo-radar-live" style={{display:'flex',alignItems:'center',gap:8}}>
           <div style={{display:'flex',alignItems:'center',gap:5,background:'rgba(0,240,144,.1)',border:'1px solid rgba(0,240,144,.2)',padding:'4px 10px',borderRadius:100,fontFamily:MONO2,fontSize:10,fontWeight:600,color:C.grn}}>
             <div style={{width:5,height:5,borderRadius:'50%',background:C.grn,boxShadow:`0 0 6px ${C.grn}`,animation:'nexo-pulse 2s ease-in-out infinite'}}/>LIVE · CoinGecko + Finnhub
           </div>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:6}}>
+        <div className="nexo-radar-btns" style={{display:'flex',alignItems:'center',gap:6}}>
           <button style={tbBtn(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>🌙 Day/Night</button>
           <button style={tbBtn(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>⚡ Flows</button>
-          <button style={tbBtn(false)}>↺ Refresh</button>
-          <button style={tbBtn(false)}>📊 Stats</button>
+          <button style={tbBtn(false)} onClick={refreshGlobe}>↺ Refresh</button>
+          <button style={tbBtn(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>📊 Stats</button>
         </div>
       </div>
 
       {/* ── LEFT PANEL ── */}
-      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+      <div className="nexo-radar-left" style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
         {/* Countdown */}
         <div style={{background:'rgba(0,240,144,.06)',border:'1px solid rgba(0,240,144,.15)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
           <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,marginBottom:4}}>⏰ Next market opens</div>
@@ -20277,9 +20402,9 @@ function RadarGlobalPage({lang="es",onBack}){
           <div style={{padding:'10px 12px 12px'}}>
             <div style={{position:'relative',width:140,height:80,margin:'0 auto 8px'}}>
               <canvas ref={fgRef} width={140} height={80} style={{position:'absolute',top:0,left:0}}/>
-              <div style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',fontFamily:MONO2,fontSize:28,fontWeight:700,color:'#ffc040',textAlign:'center'}}>72</div>
+              <div style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',fontFamily:MONO2,fontSize:28,fontWeight:700,color:fgScore<25?'#ff3355':fgScore<45?'#ff6040':fgScore<55?'#ffc040':fgScore<75?'#80e040':'#00f090',textAlign:'center'}}>{fgScore}</div>
             </div>
-            <div style={{textAlign:'center',fontFamily:MONO2,fontSize:11,fontWeight:600,letterSpacing:'.5px',color:'#ffc040'}}>GREED</div>
+            <div style={{textAlign:'center',fontFamily:MONO2,fontSize:11,fontWeight:600,letterSpacing:'.5px',color:fgScore<25?'#ff3355':fgScore<45?'#ff6040':fgScore<55?'#ffc040':fgScore<75?'#80e040':'#00f090'}}>{fgLabel}</div>
             <div style={{display:'flex',height:4,borderRadius:2,overflow:'hidden',marginTop:8,gap:1}}>
               {['#ff3355','#ff6040','#ffc040','#80e040','#00f090'].map(c=><div key={c} style={{flex:1,borderRadius:1,background:c,opacity:.8}}/>)}
             </div>
@@ -20332,10 +20457,78 @@ function RadarGlobalPage({lang="es",onBack}){
             </div>
           ))}
         </div>
+        {/* ── MARKET CLICK TOOLTIP ── */}
+        {clickedMkt&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-60%)',zIndex:30,background:'rgba(2,6,14,.96)',backdropFilter:'blur(20px)',border:`1px solid ${C.br2}`,borderRadius:14,padding:'16px 20px',minWidth:220,boxShadow:'0 8px 32px rgba(0,0,0,.6)'}}>
+          <button onClick={()=>setClickedMkt(null)} style={{position:'absolute',top:8,right:10,background:'none',border:'none',color:C.mid,cursor:'pointer',fontFamily:MONO2,fontSize:12}}>✕</button>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+            <div style={{width:10,height:10,borderRadius:'50%',background:clickedMkt.color,boxShadow:`0 0 10px ${clickedMkt.color}`,flexShrink:0}}/>
+            <div style={{fontFamily:MONO2,fontSize:13,fontWeight:700,color:C.txt}}>{clickedMkt.name}</div>
+            <div style={{fontFamily:MONO2,fontSize:10,color:C.mid}}>{clickedMkt.label}</div>
+          </div>
+          {[
+            {tz:'America/New_York',   label:'New York'},
+            {tz:'Europe/London',      label:'London'},
+            {tz:'Europe/Paris',       label:'Frankfurt'},
+            {tz:'Asia/Tokyo',         label:'Tokyo'},
+            {tz:'Asia/Hong_Kong',     label:'Hong Kong'},
+            {tz:'Asia/Kolkata',       label:'Mumbai'},
+          ].filter(s=>clickedMkt.name.match(/NYSE|B3|CME/)?s.tz.includes('America'):clickedMkt.name.match(/LSE|DAX|Euronext/)?s.tz.includes('Europe'):clickedMkt.name.match(/TSE|HKEX|SGX|NSE/)?s.tz.includes('Asia'):true).slice(0,1).concat([{tz:clickedMkt.name.match(/NYSE|B3/)?'America/New_York':clickedMkt.name.match(/LSE/)?'Europe/London':clickedMkt.name.match(/DAX/)?'Europe/Berlin':clickedMkt.name.match(/TSE/)?'Asia/Tokyo':clickedMkt.name.match(/HKEX|SGX/)?'Asia/Hong_Kong':clickedMkt.name.match(/NSE/)?'Asia/Kolkata':clickedMkt.name.match(/JSE/)?'Africa/Johannesburg':clickedMkt.name.match(/Binance/)?'UTC':'UTC',label:'Local time'}]).slice(-1).map(s=>{
+              const localTime=new Intl.DateTimeFormat('en-US',{timeZone:s.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
+              const localDate=new Intl.DateTimeFormat('en-US',{timeZone:s.tz,weekday:'short',month:'short',day:'numeric'}).format(new Date());
+              return(<div key={s.tz}>
+                <div style={{fontFamily:MONO2,fontSize:28,fontWeight:700,color:C.grn,textShadow:`0 0 16px rgba(0,240,144,.4)`,letterSpacing:2,lineHeight:1}}>{localTime}</div>
+                <div style={{fontFamily:MONO2,fontSize:11,color:C.mid,marginTop:3}}>{localDate}</div>
+              </div>);
+            })
+          }
+          <div style={{marginTop:10,display:'flex',gap:8,alignItems:'center'}}>
+            <div style={{width:7,height:7,borderRadius:'50%',background:getSessStatus(SESSIONS.find(s=>clickedMkt.name.includes(s.name))||SESSIONS[0])?.open?C.grn:C.dim}}/>
+            <div style={{fontFamily:MONO2,fontSize:10,color:C.mid}}>{getSessStatus(SESSIONS.find(s=>clickedMkt.name.includes(s.name))||{name:'',tz:'UTC',o:0,c:24,flag:''})?.label||'24/7 Open'}</div>
+          </div>
+        </div>}
+        {/* ── STATS OVERLAY ── */}
+        {showStats&&<div style={{position:'absolute',inset:0,background:'rgba(2,4,8,.92)',backdropFilter:'blur(18px)',zIndex:20,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 20px',borderBottom:`1px solid ${C.br}`,flexShrink:0}}>
+            <div style={{fontFamily:MONO2,fontSize:11,fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:C.grn}}>📊 Global Market Stats — Trading Volume by Country</div>
+            <button onClick={()=>setShowStats(false)} style={{background:'rgba(255,80,80,.12)',border:'1px solid rgba(255,80,80,.25)',borderRadius:7,padding:'4px 12px',fontFamily:MONO2,fontSize:11,fontWeight:600,color:'#ff5050',cursor:'pointer'}}>✕ Close</button>
+          </div>
+          <div style={{overflowY:'auto',padding:'8px 16px',flex:1}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+              {RADAR_V2_STATS_COUNTRIES.map((c,i)=>(
+                <div key={c.name}
+                  onMouseEnter={()=>setStatsHover(i)}
+                  onMouseLeave={()=>setStatsHover(null)}
+                  style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',borderRadius:10,border:`1px solid ${statsHover===i?'rgba(0,240,144,.3)':C.br}`,background:statsHover===i?'rgba(0,240,144,.06)':'rgba(255,255,255,.02)',cursor:'default',transition:'all .15s'}}>
+                  <span style={{fontFamily:MONO2,fontSize:11,color:C.dim,width:20,flexShrink:0}}>{i+1}</span>
+                  <span style={{fontSize:18,flexShrink:0}}>{c.flag}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontFamily:MONO2,fontSize:11,fontWeight:700,color:C.txt,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.name}</div>
+                    <div style={{height:3,background:'rgba(255,255,255,.06)',borderRadius:2,marginTop:5,overflow:'hidden'}}>
+                      <div style={{height:'100%',borderRadius:2,background:c.chg>=0?C.grn:C.red,width:`${c.pct/24.1*100}%`,transition:'width .3s'}}/>
+                    </div>
+                  </div>
+                  <div style={{textAlign:'right',flexShrink:0}}>
+                    <div style={{fontFamily:MONO2,fontSize:11,fontWeight:600,color:C.txt}}>{c.vol}</div>
+                    <div style={{fontFamily:MONO2,fontSize:10,color:c.chg>=0?C.grn:C.red,marginTop:1}}>{c.chg>=0?'▲':'▼'}{Math.abs(c.chg)}%</div>
+                  </div>
+                  <div style={{width:8,height:8,borderRadius:'50%',background:c.open?C.grn:C.dim,boxShadow:c.open?`0 0 6px ${C.grn}`:'none',flexShrink:0}}/>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:16,padding:'10px 14px',borderRadius:10,background:'rgba(0,240,144,.05)',border:`1px solid rgba(0,240,144,.12)`,display:'flex',gap:24,justifyContent:'center',flexWrap:'wrap'}}>
+              {[['Total Markets','22 countries'],['Open Now',`${RADAR_V2_STATS_COUNTRIES.filter(c=>c.open).length} markets`],['Global Vol','$11.8T/day'],['Trending','🇮🇳 India +2.1%']].map(([k,v])=>(
+                <div key={k} style={{textAlign:'center'}}>
+                  <div style={{fontFamily:MONO2,fontSize:9,letterSpacing:'1.5px',color:C.mid,textTransform:'uppercase'}}>{k}</div>
+                  <div style={{fontFamily:MONO2,fontSize:13,fontWeight:700,color:C.grn,marginTop:3}}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>}
       </div>
 
       {/* ── RIGHT PANEL ── */}
-      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
+      <div className="nexo-radar-right" style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:`1px solid ${C.br}`,display:'flex',flexDirection:'column',overflowY:'auto',padding:12,gap:12}}>
         {/* Traders by country */}
         <div style={pc}>
           <div style={pchd}>Traders by Country (M)</div>
@@ -20391,14 +20584,18 @@ function RadarGlobalPage({lang="es",onBack}){
         <div style={{flexShrink:0,padding:'0 12px',fontFamily:MONO2,fontSize:9,fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,borderRight:`1px solid ${C.br}`,zIndex:6}}>MARKETS</div>
         <div style={{overflow:'hidden',flex:1}}>
           <div style={{display:'flex',gap:32,alignItems:'center',fontFamily:MONO2,fontSize:11,whiteSpace:'nowrap',padding:'0 16px',animation:'tickRun 40s linear infinite'}}>
-            {[...RADAR_V2_TICKERS,...RADAR_V2_TICKERS].map((tk,i)=>(
-              <span key={i} style={{display:'flex',gap:6,alignItems:'center'}}>
+            {[...RADAR_V2_TICKERS,...RADAR_V2_TICKERS].map((tk,i)=>{
+              const live=liveTk[tk.sym];
+              const price=live?.p!=null?(live.p>1000?`$${live.p.toLocaleString('en-US',{maximumFractionDigits:0})}`:live.p>10?`$${live.p.toFixed(2)}`:`$${live.p.toFixed(4)}`):tk.p;
+              const chg=live?.chg!=null?`${live.up?'+':''}${live.chg}%`:tk.c;
+              const up=live?.up!=null?live.up:tk.up;
+              return(<span key={i} style={{display:'flex',gap:6,alignItems:'center'}}>
                 <span style={{color:'#a0c8e8',fontWeight:600,letterSpacing:'.5px'}}>{tk.sym}</span>
-                <span style={{color:C.mid}}>{tk.p}</span>
-                <span style={{color:tk.up?C.grn:C.red,fontWeight:600}}>{tk.up?'▲':'▼'}{tk.c}</span>
+                <span style={{color:C.mid}}>{price}</span>
+                <span style={{color:up?C.grn:C.red,fontWeight:600}}>{up?'▲':'▼'}{chg}</span>
                 <span style={{color:C.dim}}>·</span>
-              </span>
-            ))}
+              </span>);
+            })}
           </div>
         </div>
       </div>
