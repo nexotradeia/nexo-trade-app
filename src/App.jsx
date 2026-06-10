@@ -3504,7 +3504,7 @@ function PostCard({post,onProfile,onPoints,onTickerClick,lang,isNew,onRepost,use
             <MiniPostChart ticker={post.ticker} isBull={isBull} fallbackSpark={spark}/>
           )}
           {/* Imagen / GIF */}
-          {post.image&&!locked&&<img src={post.image} alt="" style={{maxWidth:"100%",maxHeight:280,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block"}} onError={e=>e.target.style.display="none"}/>}
+          {post.image&&!locked&&<img src={post.image} alt="" style={{width:"100%",maxWidth:"100%",maxHeight:420,borderRadius:12,marginBottom:10,border:"1px solid var(--c-border)",display:"block",objectFit:"contain",background:"#0d1117"}} onError={e=>e.target.style.display="none"}/>}
           {/* Link preview card */}
           {post.link&&!locked ? <LinkPreviewCard url={post.link}/> : null}
           {/* Tags */}
@@ -3941,11 +3941,11 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
             );})}
           </div>
           {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ {isEN?"Searching GIFs...":"Buscando GIFs..."}</div>:(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,maxHeight:260,overflowY:"auto"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,maxHeight:340,overflowY:"auto"}}>
               {gifs.map(g=>(
-                <div key={g.id} style={{borderRadius:7,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:"#f1f5f9"}}
+                <div key={g.id} style={{borderRadius:9,overflow:"hidden",cursor:"pointer",aspectRatio:"16/9",background:"#0d1117"}}
                   onClick={()=>onSelect(g.full||g.preview)}>
-                  <img src={g.preview} alt={g.title} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={e=>{e.target.parentElement.style.display="none";}}/>
+                  <img src={g.preview} alt={g.title} style={{width:"100%",height:"100%",objectFit:"contain",display:"block"}} onError={e=>{e.target.parentElement.style.display="none";}}/>
                 </div>
               ))}
             </div>
@@ -25066,7 +25066,6 @@ export default function App(){
     return()=>clearInterval(t);
   },[]);
   const [lang,setLang]         = useState(()=>{ try{ const s=localStorage.getItem("nexo-lang"); if(s==="es"||s==="en") return s; /* Auto-detección: español si el navegador del visitante es hispano; inglés para el resto del mundo */ const navs=(typeof navigator!=="undefined")?((navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||navigator.userLanguage||"en"]):["en"]; return navs.some(l=>String(l).toLowerCase().startsWith("es"))?"es":"en"; }catch{ return "en"; } });
-  const [toast,setToast]       = useState({show:false,points:0,reason:""});
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
   const [showVipPopup,setVipPopup] = useState(false);
@@ -25477,10 +25476,7 @@ export default function App(){
     return()=>{ if(sub) supabase.removeChannel(sub); clearInterval(refreshTimer); document.removeEventListener("visibilitychange", onVis); };
   },[]);
 
-  const showPoints = (pts, reason) => {
-    setToast({show:true,points:pts,reason});
-    setTimeout(()=>setToast({show:false,points:0,reason:""}),3000);
-  };
+  const showPoints = () => {};
 
   const toggleFollow = async(id) => {
     if(!user){setAuth("register");return;}
@@ -27154,7 +27150,6 @@ export default function App(){
           </button>
         ))}
       </div>
-      <PointToast show={toast.show} points={toast.points} reason={toast.reason}/>
     </div>
     </PriceProvider>
   );
