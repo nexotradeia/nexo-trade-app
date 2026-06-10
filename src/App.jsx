@@ -4930,9 +4930,7 @@ function MarketsMiniWidget({ lang="es" }){
 function AdBannerFeed(){ return null; }
 
 // Banner cuadrado 300×250 — para sidebar (sin minHeight para no crear espacio vacío)
-function AdBannerSidebar(){
-  return <AdBanner slot="8915846882" format="auto" style={{margin:"6px 0",borderRadius:10,overflow:"hidden",minHeight:0}}/>;
-}
+function AdBannerSidebar(){ return null; }
 
 // ── MEDIA.NET ADS ─────────────────────────────────────────────────────────────
 // INSTRUCCIONES:
