@@ -25905,7 +25905,7 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
           {/* Today's AI Pick */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <span style={{fontSize:16,fontWeight:700,color:INK}}>Today's AI Pick</span>
-            <button onClick={()=>onNavigate&&onNavigate(3)} style={{fontSize:12.5,color:BLUE,fontWeight:600,background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>View all picks</button>
+            <button onClick={()=>onNavigate&&onNavigate(51)} style={{fontSize:12.5,color:BLUE,fontWeight:600,background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>View all picks</button>
           </div>
           <div style={{background:SURFACE,border:`1px solid ${HAIR}`,...RAD18,padding:20,boxShadow:SH}}>
             <div style={{display:"flex",gap:22,alignItems:"center",flexWrap:"wrap"}}>
