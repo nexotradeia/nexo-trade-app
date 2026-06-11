@@ -25235,8 +25235,13 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
   var qqq  = liveP("QQQ",  705.1,  -0.30);
   var btc  = liveP("BTC",  62060,  +0.05);
 
-  // ── AI Pick
-  var pick = (WEEKLY_PICKS_FALLBACK && WEEKLY_PICKS_FALLBACK.corto && WEEKLY_PICKS_FALLBACK.corto[0]) || {ticker:"NVDA", nombre:"NVIDIA", razonEn:"Strong Buy consensus.", confianza:93};
+  // ── AI Pick — rotate daily (Mon=NVDA, Tue=META, Wed=PLTR, Thu=UBER, Fri=MSFT)
+  var _allCorto = (WEEKLY_PICKS_FALLBACK && WEEKLY_PICKS_FALLBACK.corto) || [];
+  var _allLargo = (WEEKLY_PICKS_FALLBACK && WEEKLY_PICKS_FALLBACK.largo) || [];
+  var _allPools = _allCorto.concat(_allLargo);
+  var _dayIdx   = new Date().getDay(); // 0=Sun, 1=Mon ... 6=Sat
+  var _pickIdx  = (_dayIdx === 0 || _dayIdx === 6) ? 0 : (_dayIdx - 1) % _allPools.length;
+  var pick = _allPools[_pickIdx] || {ticker:"NVDA", nombre:"NVIDIA", razonEn:"Strong Buy consensus.", confianza:93};
   var pickThesis = pick.razonEn ? pick.razonEn.split(".")[0] + "." : "";
 
   // ── Movers
@@ -25322,7 +25327,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
         <p style={{position:"relative",zIndex:1,marginTop:12,fontSize:13.5,lineHeight:1.5,color:"#c9ced9"}}>{pickThesis}</p>
         {/* CTA */}
         <div style={{position:"relative",zIndex:1,marginTop:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <button onClick={function(){onNavigate&&onNavigate(3);}}
+          <button onClick={function(){onNavigate&&onNavigate(51);}}
             style={{display:"inline-flex",alignItems:"center",gap:8,background:"#fff",color:"#06080e",fontSize:13.5,fontWeight:600,padding:"10px 15px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
             See full analysis
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06080e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -25830,15 +25835,18 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
 function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
   var [qry,setQry] = useState("");
 
-  // AI Pick data
-  var pick = (WEEKLY_PICKS_FALLBACK&&WEEKLY_PICKS_FALLBACK.corto&&WEEKLY_PICKS_FALLBACK.corto[0])||{};
-  var sym   = pick.symbol||"NVDA";
-  var nm    = pick.name||"NVIDIA";
-  var dir   = ((pick.direction||"long")+"").toUpperCase();
-  var entry = pick.price||198;
-  var tgt   = pick.target||215;
-  var stp   = pick.stop||189;
-  var thesis= pick.thesis_en||pick.thesis||"Our model flagged unusual options flow and a 3-day momentum build ahead of next week's catalyst. Volume confirms accumulation.";
+  // AI Pick data — rotate daily same as MobileHomeDashboard
+  var _aip   = (WEEKLY_PICKS_FALLBACK&&WEEKLY_PICKS_FALLBACK.corto||[]).concat(WEEKLY_PICKS_FALLBACK&&WEEKLY_PICKS_FALLBACK.largo||[]);
+  var _aiDay = new Date().getDay();
+  var _aiIdx = (_aiDay===0||_aiDay===6)?0:(_aiDay-1)%_aip.length;
+  var pick = _aip[_aiIdx]||{};
+  var sym   = pick.ticker||"NVDA";
+  var nm    = pick.nombre||pick.name||"NVIDIA";
+  var dir   = (pick.tipo||"COMPRA").toUpperCase()==="COMPRA"?"LONG":"SHORT";
+  var entry = pick.entrada||"$198";
+  var tgt   = pick.target||"$215";
+  var stp   = pick.stop_loss||"$189";
+  var thesis= pick.razonEn||pick.thesis||"Our model flagged unusual options flow and a 3-day momentum build ahead of next week's catalyst. Volume confirms accumulation.";
   var ret   = pick.return_pct||8.4;
   var hdays = pick.hold_days||5;
 
@@ -25926,11 +25934,11 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
                 <p style={{marginTop:9,fontSize:13.5,lineHeight:1.5,color:INK2,maxWidth:"48ch"}}>{(thesis||"").slice(0,160)}</p>
                 <div style={{marginTop:13,display:"flex",gap:8,flexWrap:"wrap"}}>
                   <span style={{fontSize:12,fontWeight:600,padding:"6px 11px",borderRadius:8,background:UPBG,border:"1px solid rgba(10,157,92,.3)",color:UP}}>{dir}</span>
-                  {[["Entry","$"+entry],["Target","$"+tgt],["Stop","$"+stp]].map(([k,v])=>(
+                  {[["Entry",entry],["Target",tgt],["Stop",stp]].map(([k,v])=>(
                     <span key={k} style={{fontSize:12,fontWeight:600,padding:"6px 11px",borderRadius:8,background:S2,border:`1px solid ${HAIR}`,color:INK2}}>{k} <strong style={{color:INK}}>{v}</strong></span>
                   ))}
                 </div>
-                <button onClick={()=>onNavigate&&onNavigate(3)} style={{marginTop:16,display:"inline-flex",alignItems:"center",gap:8,background:BLUE,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 17px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+                <button onClick={()=>onNavigate&&onNavigate(51)} style={{marginTop:16,display:"inline-flex",alignItems:"center",gap:8,background:BLUE,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 17px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
                   See full analysis <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </button>
               </div>
