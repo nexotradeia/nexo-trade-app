@@ -25346,7 +25346,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
   function tile(sym){ return sym==="BTC"?"₿":sym==="ETH"?"Ξ":sym[0]; }
 
   return (
-    <div style={{padding:"6px 20px 90px",background:"var(--c-bg)"}}>
+    <div style={{padding:"6px 20px 8px",background:"var(--c-bg)"}}>
 
       {/* Greeting */}
       <div style={{margin:"8px 0 18px"}}>
@@ -26949,7 +26949,7 @@ export default function App(){
     return(
       <>
         {/* Feed tabs */}
-        <div style={{position:"relative",background:"#FFFFFF",border:"1px solid rgba(0,0,0,0.07)",borderRadius:14,padding:"0 12px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",display:"flex",gap:0,alignItems:"center",overflowX:"auto"}}>
+        <div className="nexo-feed-tabs-bar" style={{position:"relative",background:"#FFFFFF",border:"1px solid rgba(0,0,0,0.07)",borderRadius:14,padding:"0 12px",marginBottom:12,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",display:"flex",gap:0,alignItems:"center",overflowX:"auto"}}>
           {[
             {v:"all",   l:lang==="en"?"🏠 For You":"🏠 Para Ti", pri:true},
             {v:"viral", l:lang==="en"?"🔥 Trending":"🔥 Trending", pri:true},
@@ -27267,6 +27267,8 @@ export default function App(){
         /* Feed: en móvil solo 3 tabs (Para Ti / Trending / Cripto); el resto en el dropdown de filtros */
         .nexo-tab-2nd { display: none !important; }
         .nexo-only-mobile-inline { display: block !important; }
+        /* ── FEED TABS — allow Filters dropdown to escape overflow on mobile ── */
+        .nexo-feed-tabs-bar { overflow: visible !important; }
         .nexo-only-mobile { display: flex !important; }
 
         /* ── TABS ── */
