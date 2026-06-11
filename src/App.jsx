@@ -9683,6 +9683,7 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,onNavigate,lang}){
 // ── TRACK RECORD PAGE ────────────────────────────────────────────────────────
 function TrackRecordPage({lang="es"}){
   const isEN=lang==="en";
+  const [sortMode, setSortMode] = useState("date-asc"); // date-asc | date-desc | ret-desc
   const SIGNALS=[
     {mo:"Jan '24",ticker:"NVDA",entry:"$485",  exit:"$715",  ret:47.4, win:true},
     {mo:"Jan '24",ticker:"SPY", entry:"$480",  exit:"$501",  ret:4.4,  win:true},
@@ -9719,8 +9720,12 @@ function TrackRecordPage({lang="es"}){
     {mo:"Mar '26",ticker:"MSFT",entry:"$420",  exit:"$449",  ret:6.9,  win:true},
     {mo:"May '26",ticker:"PLTR",entry:"$117",  exit:"$145",  ret:23.9, win:true},
   ];
-  // Sort by return descending (highest gain first)
-  const SORTED=[...SIGNALS].sort((a,b)=>b.ret-a.ret);
+  // Sorted array driven by sortMode state
+  const SORTED=(function(){
+    if(sortMode==="ret-desc") return [...SIGNALS].sort((a,b)=>b.ret-a.ret);
+    if(sortMode==="date-desc") return [...SIGNALS].slice().reverse();
+    return [...SIGNALS]; // date-asc = original chronological order
+  })();
   const total=SIGNALS.length;
   const wins=SIGNALS.filter(s=>s.win).length;
   const winRate=Math.round(wins/total*100);
@@ -9761,11 +9766,11 @@ function TrackRecordPage({lang="es"}){
         </p>
       </div>
       {/* Stats */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:20}}>
+      <div className="nexo-track-stats" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:20}}>
         {STATS.map((s,i)=>(
-          <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 12px",textAlign:"center",boxShadow:C.shadow}}>
-            <div style={{fontSize:20,fontWeight:900,color:s.c,fontFamily:"monospace",marginBottom:2}}>{s.v}</div>
-            <div style={{fontSize:10.5,color:C.muted2,fontWeight:600}}>{s.l}</div>
+          <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 10px",textAlign:"center",boxShadow:C.shadow}}>
+            <div style={{fontSize:18,fontWeight:900,color:s.c,fontFamily:"monospace",marginBottom:2}}>{s.v}</div>
+            <div style={{fontSize:10,color:C.muted2,fontWeight:600,lineHeight:1.3}}>{s.l}</div>
           </div>
         ))}
       </div>
@@ -9794,18 +9799,45 @@ function TrackRecordPage({lang="es"}){
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden"}}>
         <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
           <span style={{fontWeight:800,fontSize:15,color:C.text}}>{isEN?"Signal History":"Historial de Señales"}</span>
-          <div style={{display:"flex",gap:6}}>
+          <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
             <span style={{background:"rgba(22,163,74,0.12)",color:"#16A34A",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>✅ {wins} {isEN?"wins":"éxitos"}</span>
             <span style={{background:"rgba(239,68,68,0.10)",color:"#EF4444",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>❌ {total-wins} {isEN?"losses":"pérdidas"}</span>
           </div>
+        </div>
+        {/* Sort controls */}
+        <div style={{padding:"10px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",gap:8,alignItems:"center",background:C.card2||"#f8fafc",overflowX:"auto",scrollbarWidth:"none"}}>
+          <span style={{fontSize:11,color:C.muted2,fontWeight:600,flexShrink:0}}>{isEN?"Sort by:":"Ordenar:"}</span>
+          {[
+            {key:"date-asc",  label:isEN?"Date ↑":"Fecha ↑"},
+            {key:"date-desc", label:isEN?"Date ↓":"Fecha ↓"},
+            {key:"ret-desc",  label:isEN?"Return ↓":"Retorno ↓"},
+          ].map(opt=>(
+            <button key={opt.key} onClick={()=>setSortMode(opt.key)}
+              style={{flexShrink:0,fontSize:11.5,fontWeight:700,padding:"5px 12px",borderRadius:20,border:`1px solid ${sortMode===opt.key?"#0F4C81":C.border}`,background:sortMode===opt.key?"#0F4C81":"transparent",color:sortMode===opt.key?"#fff":C.muted2,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
+              {opt.label}
+            </button>
+          ))}
         </div>
         {/* Desktop table */}
         <div className="nexo-signal-desktop" style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
             <thead className="nexo-screener-thead">
               <tr style={{background:C.card2||"#f8fafc"}}>
-                {(isEN?["↕ Period","Ticker","Type","Entry","Exit","↓ Return","Result"]:["↕ Período","Ticker","Tipo","Entrada","Salida","↓ Retorno","Resultado"]).map(h=>(
-                  <th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted2,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap",background:C.card2||"#f8fafc"}}>{h}</th>
+                {[
+                  {k:"period", label:isEN?"Period":"Período"},
+                  {k:"ticker", label:"Ticker"},
+                  {k:"type",   label:isEN?"Type":"Tipo"},
+                  {k:"entry",  label:isEN?"Entry":"Entrada"},
+                  {k:"exit",   label:isEN?"Exit":"Salida"},
+                  {k:"return", label:isEN?"Return":"Retorno"},
+                  {k:"result", label:isEN?"Result":"Resultado"},
+                ].map(h=>(
+                  <th key={h.k} onClick={h.k==="period"?()=>setSortMode(m=>m==="date-asc"?"date-desc":"date-asc"):h.k==="return"?()=>setSortMode("ret-desc"):undefined}
+                    style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted2,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap",background:C.card2||"#f8fafc",cursor:h.k==="period"||h.k==="return"?"pointer":"default",userSelect:"none"}}>
+                    {h.label}
+                    {h.k==="period"&&<span style={{marginLeft:4}}>{sortMode==="date-desc"?"↓":"↑"}</span>}
+                    {h.k==="return"&&<span style={{marginLeft:4,color:sortMode==="ret-desc"?"#0F4C81":C.muted2}}>↓</span>}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -9824,7 +9856,7 @@ function TrackRecordPage({lang="es"}){
             </tbody>
           </table>
         </div>
-        {/* Mobile cards — sorted highest return first */}
+        {/* Mobile cards */}
         <div className="nexo-signal-mobile" style={{display:"none"}}>
           {SORTED.map((s,i)=>(
             <div key={i} style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:12}}>
@@ -27479,6 +27511,8 @@ export default function App(){
         /* ── TRACK RECORD — desktop table hidden, mobile cards shown ── */
         .nexo-signal-desktop { display: none !important; }
         .nexo-signal-mobile  { display: block !important; }
+        /* ── TRACK RECORD — stats grid 2 columns on mobile ── */
+        .nexo-track-stats { grid-template-columns: repeat(2, 1fr) !important; }
 
         /* ── SCREENER — sticky table header ── */
         .nexo-screener-thead th { position: sticky !important; top: 0 !important; z-index: 2 !important; }
