@@ -9719,6 +9719,8 @@ function TrackRecordPage({lang="es"}){
     {mo:"Mar '26",ticker:"MSFT",entry:"$420",  exit:"$449",  ret:6.9,  win:true},
     {mo:"May '26",ticker:"PLTR",entry:"$117",  exit:"$145",  ret:23.9, win:true},
   ];
+  // Sort by return descending (highest gain first)
+  const SORTED=[...SIGNALS].sort((a,b)=>b.ret-a.ret);
   const total=SIGNALS.length;
   const wins=SIGNALS.filter(s=>s.win).length;
   const winRate=Math.round(wins/total*100);
@@ -9797,29 +9799,49 @@ function TrackRecordPage({lang="es"}){
             <span style={{background:"rgba(239,68,68,0.10)",color:"#EF4444",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>❌ {total-wins} {isEN?"losses":"pérdidas"}</span>
           </div>
         </div>
-        <div style={{overflowX:"auto"}}>
+        {/* Desktop table */}
+        <div className="nexo-signal-desktop" style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
-            <thead>
+            <thead className="nexo-screener-thead">
               <tr style={{background:C.card2||"#f8fafc"}}>
-                {(isEN?["Period","Ticker","Type","Entry","Exit","Return","Result"]:["Período","Ticker","Tipo","Entrada","Salida","Retorno","Resultado"]).map(h=>(
-                  <th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted2,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>{h}</th>
+                {(isEN?["↕ Period","Ticker","Type","Entry","Exit","↓ Return","Result"]:["↕ Período","Ticker","Tipo","Entrada","Salida","↓ Retorno","Resultado"]).map(h=>(
+                  <th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted2,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap",background:C.card2||"#f8fafc"}}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {SIGNALS.map((s,i)=>(
+              {SORTED.map((s,i)=>(
                 <tr key={i} style={{borderBottom:`1px solid ${C.border}`,background:i%2===0?"transparent":C.card2||"rgba(0,0,0,0.01)"}}>
                   <td style={{padding:"10px 14px",fontSize:12,color:C.muted2,fontWeight:600,whiteSpace:"nowrap"}}>{s.mo}</td>
                   <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>${s.ticker}</span></td>
-                  <td style={{padding:"10px 14px"}}><span style={{background:"rgba(22,163,74,0.12)",color:"#16A34A",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700}}>▲ {isEN?"BUY":"COMPRA"}</span></td>
+                  <td style={{padding:"10px 14px"}}><span style={{background:s.win?"rgba(22,163,74,0.12)":"rgba(239,68,68,0.10)",color:s.win?"#16A34A":"#EF4444",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700}}>{s.win?"▲":"▼"} {isEN?"BUY":"COMPRA"}</span></td>
                   <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.entry}</td>
                   <td style={{padding:"10px 14px",fontSize:12,fontFamily:"monospace",color:C.text,fontWeight:600}}>{s.exit}</td>
-                  <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:s.ret>=0?"#16A34A":"#EF4444"}}>{s.ret>=0?"+":""}{s.ret}%</span></td>
+                  <td style={{padding:"10px 14px"}}><span style={{fontWeight:800,fontSize:13,fontFamily:"monospace",color:s.ret>=0?"#16A34A":"#EF4444"}}>{s.ret>=0?"▲ +":"▼ "}{s.ret}%</span></td>
                   <td style={{padding:"10px 14px",fontSize:18}}>{s.win?"✅":"❌"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Mobile cards — sorted highest return first */}
+        <div className="nexo-signal-mobile" style={{display:"none"}}>
+          {SORTED.map((s,i)=>(
+            <div key={i} style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:12}}>
+              <div style={{minWidth:52,fontSize:11,color:C.muted2,fontWeight:600}}>{s.mo}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontWeight:800,fontSize:14,color:C.text,fontFamily:"monospace"}}>${s.ticker}</span>
+                  <span style={{background:s.win?"rgba(22,163,74,0.12)":"rgba(239,68,68,0.10)",color:s.win?"#16A34A":"#EF4444",borderRadius:6,padding:"2px 7px",fontSize:10,fontWeight:700}}>{s.win?"▲":"▼"} BUY</span>
+                </div>
+                <div style={{marginTop:3,fontSize:11.5,color:C.muted2,fontWeight:500,fontFamily:"monospace"}}>{s.entry} → {s.exit}</div>
+              </div>
+              <div style={{textAlign:"right",flexShrink:0}}>
+                <div style={{fontWeight:800,fontSize:14,fontFamily:"monospace",color:s.ret>=0?"#16A34A":"#EF4444"}}>{s.ret>=0?"▲ +":"▼ "}{s.ret}%</div>
+                <div style={{fontSize:13,marginTop:2,color:C.muted2,fontWeight:600}}>#{i+1}</div>
+              </div>
+            </div>
+          ))}
         </div>
         <div style={{padding:"14px 20px",borderTop:`1px solid ${C.border}`,background:C.card2||"#f8fafc"}}>
           <p style={{margin:0,fontSize:11,color:C.muted2,lineHeight:1.6}}>
@@ -25349,6 +25371,41 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
         </div>
       </div>
 
+      {/* 🔥 Top Analyst Call Today */}
+      {(function(){
+        // Pick the highest-confidence pick from all pools
+        var allP=(_allCorto).concat(_allLargo);
+        var top=allP.slice().sort(function(a,b){return (b.confianza||0)-(a.confianza||0);})[0]||{};
+        var liveD=liveP(top.ticker||"",0,0);
+        return(
+          <div style={{border:"1px solid #e8eaee",borderRadius:20,padding:"16px 18px",marginBottom:18,background:"var(--c-surface)",position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ff6b35,#f7c059,#27d391)"}}/>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+              <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",color:"#b07d11",background:"rgba(176,125,17,.10)",border:"1px solid rgba(176,125,17,.25)",padding:"4px 10px",borderRadius:999}}>
+                🔥 Top Analyst Call
+              </span>
+              <span style={{fontSize:11,fontWeight:600,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px"}}>{top.confianza||93}% confidence</span>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <div style={{width:46,height:46,borderRadius:13,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <span style={{fontWeight:800,fontSize:14,color:"#fff",fontFamily:"monospace"}}>{(top.ticker||"NVDA").slice(0,4)}</span>
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:16,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em"}}>{top.ticker||"NVDA"} <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>— {top.nombre||"NVIDIA"}</span></div>
+                <div style={{marginTop:2,display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                  <span style={{fontSize:12,fontWeight:700,color:"#16A34A"}}>▲ {top.entrada||"$205"} → {top.target||"$300"}</span>
+                  {liveD.price>0&&<span style={{fontSize:11,color:"var(--c-muted)",fontFamily:"monospace"}}>${liveD.price>=1000?(liveD.price/1000).toFixed(1)+"k":liveD.price.toFixed(2)} <span style={{color:liveD.chg>=0?"#16A34A":"#EF4444"}}>{liveD.chg>=0?"+":""}{liveD.chg.toFixed(2)}%</span></span>}
+                </div>
+              </div>
+            </div>
+            <p style={{marginTop:10,fontSize:12.5,lineHeight:1.5,color:"var(--c-muted)",marginBottom:12}}>{(top.razonEn||"").split(".")[0]+"."}</p>
+            <button onClick={function(){onNavigate&&onNavigate(10);}} style={{display:"inline-flex",alignItems:"center",gap:6,background:"#0a0d14",color:"#fff",fontSize:12.5,fontWeight:600,padding:"8px 14px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+              Full AI analysis →
+            </button>
+          </div>
+        );
+      })()}
+
       {/* Today's Movers */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
         <span style={{fontSize:15,fontWeight:700,color:"var(--c-text)"}}>{"Today's movers"}</span>
@@ -27404,9 +27461,30 @@ export default function App(){
 
         /* ── FOOTER — hide logo on mobile (PNG has white bg) ── */
         .nexo-footer-logo { display: none !important; }
+
+        /* ── BOTTOM NAV — iOS Safari GPU layer fix: prevents jitter on scroll ── */
+        .nexo-bottom-nav {
+          -webkit-transform: translateZ(0) !important;
+          transform: translateZ(0) !important;
+          will-change: transform !important;
+          -webkit-backface-visibility: hidden !important;
+          backface-visibility: hidden !important;
+          position: fixed !important;
+          bottom: 0 !important;
+          bottom: env(safe-area-inset-bottom, 0) !important;
+        }
+
+        /* ── TRACK RECORD — desktop table hidden, mobile cards shown ── */
+        .nexo-signal-desktop { display: none !important; }
+        .nexo-signal-mobile  { display: block !important; }
+
+        /* ── SCREENER — sticky table header ── */
+        .nexo-screener-thead th { position: sticky !important; top: 0 !important; z-index: 2 !important; }
       }
       @media (min-width: 768px) {
         .nexo-logout-mobile { display: none !important; }
+        .nexo-signal-mobile  { display: none !important; }
+        .nexo-signal-desktop { display: block !important; }
       }
       @keyframes nexo-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
       @keyframes nexoLiveGlow { 0%,100%{ color:#2196F3; text-shadow:0 0 0 rgba(33,150,243,0); } 50%{ color:#06B6D4; text-shadow:0 0 9px rgba(6,182,212,0.7); } }
