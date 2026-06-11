@@ -10082,6 +10082,59 @@ function TrackRecordPage({lang="es"}){
   );
 }
 
+function JoinCard({ onAuth, lang="es" }){
+  const isEN = lang==="en";
+  const feats = isEN
+    ? ["AI stock picks every week","Real institutional flow","Live global radar — 52 markets","Community of 8,400+ traders"]
+    : ["Picks con IA cada semana","Flujo institucional en tiempo real","Radar global en vivo — 52 mercados","Comunidad de +8,400 traders"];
+  return(
+    <div style={{background:"#0C111E",border:"1px solid #19202F",borderRadius:16,overflow:"hidden",marginBottom:14}}>
+      {/* Header band */}
+      <div style={{background:"linear-gradient(135deg,#0B1A3D 0%,#0D2752 100%)",padding:"16px 16px 14px",borderBottom:"1px solid #19202F",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(11,92,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(11,92,255,.06) 1px,transparent 1px)",backgroundSize:"24px 24px",pointerEvents:"none"}}/>
+        <div style={{position:"relative"}}>
+          <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:"#0EA46B",display:"inline-block",animation:"nexo-pulse 1.6s infinite"}}/>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:"0.18em",color:"#9FC0FF",fontWeight:600}}>
+              {isEN?"FREE ACCOUNT":"CUENTA GRATIS"}
+            </span>
+          </div>
+          <div style={{fontSize:17,fontWeight:800,color:"#fff",lineHeight:1.2,marginBottom:4}}>
+            {isEN?"Start investing smarter":"Invierte con ventaja"}
+          </div>
+          <div style={{fontSize:12,color:"#67769A"}}>
+            {isEN?"No credit card · Cancel anytime":"Sin tarjeta · Cancela cuando quieras"}
+          </div>
+        </div>
+      </div>
+      {/* Features */}
+      <div style={{padding:"14px 16px 0"}}>
+        {feats.map((f,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:9,marginBottom:9}}>
+            <div style={{width:16,height:16,borderRadius:5,background:"rgba(11,164,107,.15)",border:"1px solid rgba(11,164,107,.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 4.2l2 2L7 1.5" stroke="#0EA46B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <span style={{fontSize:12,color:"#C9D6F2",lineHeight:1.4}}>{f}</span>
+          </div>
+        ))}
+      </div>
+      {/* CTAs */}
+      <div style={{padding:"14px 16px 16px",display:"flex",flexDirection:"column",gap:8}}>
+        <button onClick={()=>onAuth("register")}
+          style={{width:"100%",background:"#0B5CFF",color:"#fff",fontWeight:700,fontSize:13.5,padding:"12px",borderRadius:11,border:"none",cursor:"pointer",boxShadow:"0 8px 24px -8px rgba(11,92,255,.7)",letterSpacing:0.2}}>
+          {isEN?"Join free →":"Unirse gratis →"}
+        </button>
+        <button onClick={()=>onAuth("login")}
+          style={{width:"100%",background:"transparent",color:"#67769A",fontWeight:600,fontSize:12.5,padding:"9px",borderRadius:11,border:"1px solid #19202F",cursor:"pointer",transition:"all .15s"}}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor="#2A3A5C";e.currentTarget.style.color="#C9D6F2";}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor="#19202F";e.currentTarget.style.color="#67769A";}}>
+          {isEN?"Already have an account? Log in":"¿Ya tienes cuenta? Inicia sesión"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TerminalLiveTicker(){
   const [px, setPx] = React.useState(291.58);
   React.useEffect(()=>{
@@ -28360,7 +28413,20 @@ export default function App(){
   try{ await supabase.auth.signOut(); }catch(e){}
   window.location.replace("/");
 }} onProfile={setProfUser} onAlerts={()=>{setPage(39);setShowLanding(false);}} onAdmin={()=>{setPage(99);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} lang={lang}/>
-              : <div className="nexo-auth-btns"><Btn variant="ghost" small onClick={()=>setAuth("login")}>{t.login}</Btn><Btn small onClick={()=>setAuth("register")}>{t.register}</Btn></div>
+              : <div style={{display:"flex",gap:7,alignItems:"center"}}>
+                  <button onClick={()=>setAuth("login")}
+                    style={{padding:"8px 15px",borderRadius:10,border:"1.5px solid rgba(21,101,192,0.28)",background:"transparent",color:darkMode?"#9FC0FF":"#1565C0",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit",transition:"all .15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(21,101,192,0.55)";e.currentTarget.style.background="rgba(21,101,192,0.07)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(21,101,192,0.28)";e.currentTarget.style.background="transparent";}}>
+                    {t.login}
+                  </button>
+                  <button onClick={()=>setAuth("register")}
+                    style={{padding:"8px 16px",borderRadius:10,border:"none",background:"#0B5CFF",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit",boxShadow:"0 4px 16px -6px rgba(11,92,255,.7)",letterSpacing:0.1,transition:"all .15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.background="#1466FF";e.currentTarget.style.boxShadow="0 6px 20px -6px rgba(11,92,255,.9)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="#0B5CFF";e.currentTarget.style.boxShadow="0 4px 16px -6px rgba(11,92,255,.7)";}}>
+                    {isEN?"Join free →":"Unirse gratis →"}
+                  </button>
+                </div>
             }
           </div>
         </div>
@@ -28955,6 +29021,7 @@ export default function App(){
 /></div>
         <div style={{gridColumn:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
         <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}>
+          {!user && <JoinCard onAuth={(mode)=>setAuth(mode)} lang={lang}/>}
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
