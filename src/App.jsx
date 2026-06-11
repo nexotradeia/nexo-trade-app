@@ -27464,16 +27464,16 @@ export default function App(){
         /* ── FOOTER — hide logo on mobile (PNG has white bg) ── */
         .nexo-footer-logo { display: none !important; }
 
-        /* ── BOTTOM NAV — iOS Safari GPU layer fix: prevents jitter on scroll ── */
+        /* ── BOTTOM NAV — iOS Safari fix: GPU compositing without will-change ── */
         .nexo-bottom-nav {
           -webkit-transform: translateZ(0) !important;
           transform: translateZ(0) !important;
-          will-change: transform !important;
           -webkit-backface-visibility: hidden !important;
           backface-visibility: hidden !important;
           position: fixed !important;
           bottom: 0 !important;
-          bottom: env(safe-area-inset-bottom, 0) !important;
+          bottom: constant(safe-area-inset-bottom) !important;
+          bottom: env(safe-area-inset-bottom) !important;
         }
 
         /* ── TRACK RECORD — desktop table hidden, mobile cards shown ── */
