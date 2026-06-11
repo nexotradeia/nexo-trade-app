@@ -16567,20 +16567,48 @@ function BotChart({ticker="SPY", sentiment="bull", chartType="candle", seed=42})
   );
 }
 
-/* ── AI SIGNAL CARD — Señal fijada NexoTrade IA ── */
-const AI_SIGNALS = [
-  {ticker:"META", entry:"$560–565", target:"$640", stop:"$538", conf:92, bull:true,
-   es:"Acumulación institucional confirmada en $META. Tres semanas de flujo entrante, volumen 2.4× sobre promedio y ruptura del rango.",
-   en:"Institutional accumulation confirmed on $META. Three weeks of inflow, volume 2.4× above average and range breakout.",
-   likes:214, comments:48, time:"MON 9:30"},
-];
-
-function AiSignalCard({lang, onTickerClick, onUpgrade, isPremium}){
+/* ── AI SIGNAL CARD — Señal automática del día (FMP upgrades) ── */
+function AiSignalCard({lang, onTickerClick}){
   const isEN = lang==="en";
-  const sig = AI_SIGNALS[0];
-  const [liked, setLiked] = React.useState(false);
-  const [likes, setLikes] = React.useState(sig.likes);
+  const [sig, setSig]   = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [liked, setLiked]     = React.useState(false);
+  const [likes, setLikes]     = React.useState(214);
+
+  React.useEffect(()=>{
+    let cancelled = false;
+    fetch('/api/ai-signal')
+      .then(r=>r.json())
+      .then(d=>{ if(!cancelled){ setSig(d); setLikes(180+Math.floor(Math.random()*80)); setLoading(false); } })
+      .catch(()=>{ if(!cancelled) setLoading(false); });
+    return ()=>{ cancelled=true; };
+  },[]);
+
   const handleLike = () => { setLiked(l=>!l); setLikes(n=>liked?n-1:n+1); };
+
+  if(loading) return(
+    <div style={{background:"var(--c-card)",border:"2px solid #1565C0",borderRadius:16,padding:"18px 16px",marginBottom:6,opacity:0.6}}>
+      <div style={{display:"flex",gap:10,alignItems:"center"}}>
+        <div style={{width:40,height:40,borderRadius:"50%",background:"#1565C0",opacity:0.3,flexShrink:0}}/>
+        <div style={{flex:1}}>
+          <div style={{height:12,width:"45%",background:"var(--c-card2)",borderRadius:6,marginBottom:7,animation:"nexo-pulse 1.5s infinite"}}/>
+          <div style={{height:10,width:"65%",background:"var(--c-card2)",borderRadius:6,animation:"nexo-pulse 1.5s infinite"}}/>
+        </div>
+      </div>
+    </div>
+  );
+
+  if(!sig) return null;
+
+  const ticker = sig.ticker || "NVDA";
+  const body   = isEN ? sig.en : sig.es;
+  const entry  = sig.entry  || `$${sig.price}`;
+  const target = sig.target || "—";
+  const stop   = sig.stop   || "—";
+  const conf   = sig.conf   || sig.confidence || 80;
+  const n      = sig.n      || sig.upgradeCount || 1;
+  const upside = sig.upside || sig.up || "—";
+
   return(
     <div style={{background:"var(--c-card)",border:"2px solid #1565C0",borderRadius:16,padding:"14px 16px",boxShadow:"0 2px 16px rgba(21,101,192,0.10)",marginBottom:6}}>
       {/* Header */}
@@ -16591,38 +16619,44 @@ function AiSignalCard({lang, onTickerClick, onUpgrade, isPremium}){
             <span style={{fontSize:13,fontWeight:800,color:"var(--c-text)"}}>NexoTrade AI</span>
             <span style={{fontSize:10,background:"#EFF4FB",color:"#1565C0",padding:"2px 8px",borderRadius:6,fontWeight:700,border:"1px solid #BFDBFE"}}>{isEN?"PINNED":"FIJADO"}</span>
             <span style={{fontSize:10,background:"#F0FDF4",color:"#16A34A",padding:"2px 8px",borderRadius:6,fontWeight:700}}>▲ {isEN?"BUY":"COMPRA"}</span>
-            <span style={{fontSize:10,background:"#EFF4FB",color:"#1565C0",padding:"2px 8px",borderRadius:6,fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(sig.ticker)}>${sig.ticker}</span>
-            <span style={{fontSize:11,color:"var(--c-muted2)",marginLeft:"auto",whiteSpace:"nowrap"}}>{sig.time}</span>
+            <span style={{fontSize:10,background:"#EFF4FB",color:"#1565C0",padding:"2px 8px",borderRadius:6,fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(ticker)}>${ticker}</span>
+            <span style={{fontSize:9,background:"rgba(22,163,74,0.08)",color:"#16A34A",padding:"2px 7px",borderRadius:6,fontWeight:700}}>{n} {isEN?"upgrades":"upgrades hoy"}</span>
+            <span style={{fontSize:11,color:"var(--c-muted2)",marginLeft:"auto",whiteSpace:"nowrap"}}>{isEN?"Today":"Hoy"}</span>
           </div>
         </div>
       </div>
       {/* Body */}
       <div style={{fontSize:13.5,color:"var(--c-text)",lineHeight:1.65,marginBottom:12}}>
-        {(isEN?sig.en:sig.es).split(`$${sig.ticker}`).map((part,i,arr)=>(
-          <React.Fragment key={i}>{part}{i<arr.length-1&&<span style={{color:"#1565C0",fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(sig.ticker)}>${sig.ticker}</span>}</React.Fragment>
-        ))}
+        {body ? body.split(`$${ticker}`).map((part,i,arr)=>(
+          <React.Fragment key={i}>{part}{i<arr.length-1&&<span style={{color:"#1565C0",fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(ticker)}>${ticker}</span>}</React.Fragment>
+        )) : "—"}
       </div>
       {/* Signal boxes */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
         {[
-          {label:isEN?"Entry":"Entrada",  val:sig.entry,  color:"var(--c-text)"},
-          {label:isEN?"Target":"Objetivo",val:sig.target, color:"#16A34A"},
-          {label:"Stop",                  val:sig.stop,   color:"#DC2626"},
-          {label:isEN?"Confidence":"Confianza", val:`${sig.conf}/100`, color:"#1565C0"},
+          {label:isEN?"Entry":"Entrada",    val:entry,         color:"var(--c-text)"},
+          {label:isEN?"Target":"Objetivo",  val:target,        color:"#16A34A"},
+          {label:"Stop",                    val:stop,          color:"#DC2626"},
+          {label:isEN?"Confidence":"Confianza", val:`${conf}/100`, color:"#1565C0"},
         ].map(({label,val,color})=>(
           <div key={label} style={{background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,padding:"9px 10px"}}>
             <div style={{fontSize:9.5,fontWeight:700,color:"var(--c-muted2)",letterSpacing:0.7,textTransform:"uppercase",marginBottom:4}}>{label}</div>
-            <div style={{fontSize:16,fontWeight:800,color,fontVariantNumeric:"tabular-nums",lineHeight:1.1}}>{val}</div>
+            <div style={{fontSize:15,fontWeight:800,color,fontVariantNumeric:"tabular-nums",lineHeight:1.1}}>{val}</div>
           </div>
         ))}
       </div>
+      {/* Upside strip */}
+      {upside!=="—" && <div style={{background:"rgba(22,163,74,0.07)",border:"1px solid rgba(22,163,74,0.18)",borderRadius:8,padding:"6px 12px",marginBottom:10,fontSize:12,color:"#16A34A",fontWeight:700,display:"flex",alignItems:"center",gap:6}}>
+        📈 {isEN?`Analyst consensus upside: +${upside}%`:`Upside consenso analistas: +${upside}%`}
+      </div>}
       {/* Footer */}
       <div style={{display:"flex",alignItems:"center",gap:12,paddingTop:10,borderTop:"1px solid var(--c-border)"}}>
         <span onClick={handleLike} style={{fontSize:12,color:liked?"#16A34A":"var(--c-muted2)",fontWeight:liked?700:400,cursor:"pointer",display:"flex",alignItems:"center",gap:4,transition:"color 0.15s"}}>▲ {likes}</span>
-        <span style={{fontSize:12,color:"var(--c-muted2)",cursor:"pointer"}}>{sig.comments} {isEN?"comments":"comentarios"}</span>
-        <button onClick={()=>onTickerClick&&onTickerClick(sig.ticker)}
+        <span style={{fontSize:12,color:"var(--c-muted2)"}}>·</span>
+        <span style={{fontSize:11,color:"var(--c-muted2)"}}>{isEN?"Auto-updated daily":"Actualizado automáticamente"}</span>
+        <button onClick={()=>onTickerClick&&onTickerClick(ticker)}
           style={{marginLeft:"auto",background:"var(--c-card2)",border:"1.5px solid var(--c-border)",borderRadius:9,padding:"6px 14px",fontSize:12,fontWeight:700,color:"var(--c-text)",cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
-          {isEN?`View $${sig.ticker} →`:`Ver $${sig.ticker} →`}
+          {isEN?`View $${ticker} →`:`Ver $${ticker} →`}
         </button>
       </div>
     </div>
