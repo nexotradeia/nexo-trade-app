@@ -4856,26 +4856,26 @@ function MarketsMiniWidget({ lang="es" }){
         <div className="nexo-scroll-x" style={{padding:"10px 10px 12px",display:"flex",gap:8,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
           {prices.map((t)=>{
             const up = t.c >= 0;
-            const borderCol = up ? "#22c55e" : "#ef4444";
-            const bgCol = up ? "rgba(220,252,231,0.55)" : "rgba(254,226,226,0.55)";
+            const borderCol = up ? "#16a34a" : "#dc2626";
+            const bgCol = up ? "rgba(220,252,231,0.60)" : "rgba(254,226,226,0.60)";
             const fmtPrice = t.p>=1000
               ? t.p.toLocaleString("en-US",{maximumFractionDigits:0})
               : t.p<1 ? t.p.toFixed(4) : t.p.toFixed(2);
             return(
               <a key={t.s} href={`https://www.tradingview.com/symbols/${t.s}/`} target="_blank" rel="noopener noreferrer"
-                style={{flexShrink:0,width:120,display:"flex",flexDirection:"column",gap:6,padding:"12px 10px",borderRadius:14,background:bgCol,border:`1.5px solid ${borderCol}55`,textDecoration:"none",transition:"all 0.18s",cursor:"pointer"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 18px ${borderCol}30`;e.currentTarget.style.borderColor=borderCol;}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor=`${borderCol}55`;}}>
-                {/* Badge — logo oficial con respaldo a la inicial */}
-                <LogoBadge sym={t.s} col={t.col} size={38}/>
+                style={{flexShrink:0,width:136,display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"14px 10px 12px",borderRadius:16,background:bgCol,border:`1.5px solid ${borderCol}44`,textDecoration:"none",transition:"all 0.18s",cursor:"pointer",boxShadow:`0 2px 8px ${borderCol}12`}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 8px 22px ${borderCol}30`;e.currentTarget.style.borderColor=borderCol;}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow=`0 2px 8px ${borderCol}12`;e.currentTarget.style.borderColor=`${borderCol}44`;}}>
+                {/* Logo oficial centrado */}
+                <LogoBadge sym={t.s} col={t.col} size={44} radius={12}/>
                 {/* Nombre */}
-                <div style={{fontSize:10,color:"#64748b",fontWeight:500,lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.n}</div>
+                <div style={{fontSize:10.5,color:"#64748b",fontWeight:500,lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:116,textAlign:"center"}}>{t.n}</div>
                 {/* Precio */}
-                <div style={{fontWeight:800,fontSize:14,color:"#0f172a",letterSpacing:-0.5,lineHeight:1,fontFamily:"monospace"}}>
+                <div style={{fontWeight:800,fontSize:14.5,color:"#0f172a",letterSpacing:-0.5,lineHeight:1,fontFamily:"monospace",textAlign:"center"}}>
                   {fmtPrice}
                 </div>
-                {/* Cambio */}
-                <div style={{display:"inline-flex",alignItems:"center",gap:3,fontSize:11,fontWeight:700,color:up?"#16a34a":"#dc2626"}}>
+                {/* Cambio — chip coloreado */}
+                <div style={{display:"inline-flex",alignItems:"center",gap:3,fontSize:11,fontWeight:800,color:up?"#fff":"#fff",background:up?"#16a34a":"#dc2626",borderRadius:20,padding:"3px 9px"}}>
                   {up?"▲":"▼"} {Math.abs(t.c).toFixed(2)}%
                 </div>
               </a>
@@ -9066,12 +9066,12 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 
   // Estilo base de cada tarjeta
   const card={
-    background:"#FFFFFF",
-    border:"1px solid rgba(0,0,0,0.06)",
+    background:"var(--c-surface)",
+    border:"1px solid var(--c-border)",
     borderRadius:16,
     padding:"16px",
     marginBottom:10,
-    boxShadow:"0 2px 16px rgba(0,0,0,0.05)",
+    boxShadow:"var(--c-shadowMd)",
   };
 
   // Widget afiliado destacado — rota entre los 3 mejores pagadores
@@ -27211,25 +27211,26 @@ export default function App(){
   return(
     <PriceProvider>
     <style>{`
-      /* ── LIGHT MODE — Ultra-clean Apple/Google ── */
+      /* ── LIGHT MODE — White + Blue Premium ── */
       :root, [data-dark="false"] {
-        --c-bg:         #FAFAFA;
+        --c-bg:         #EFF4FB;
         --c-surface:    #FFFFFF;
         --c-card:       #FFFFFF;
-        --c-card2:      #FAFAFA;
-        --c-border:     rgba(0,0,0,0.07);
-        --c-text:       #111827;
-        --c-muted:      #6B7280;
-        --c-muted2:     #9CA3AF;
-        --c-glass:      rgba(255,255,255,0.95);
-        --c-glassBorder:rgba(0,0,0,0.06);
-        --c-shadow:     0 1px 3px rgba(0,0,0,0.06);
-        --c-shadowMd:   0 4px 16px rgba(0,0,0,0.07);
+        --c-card2:      #F5F9FF;
+        --c-border:     rgba(21,101,192,0.10);
+        --c-text:       #0D1B2E;
+        --c-muted:      #4A637F;
+        --c-muted2:     #819BB5;
+        --c-glass:      rgba(255,255,255,0.96);
+        --c-glassBorder:rgba(21,101,192,0.10);
+        --c-shadow:     0 1px 4px rgba(21,101,192,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --c-shadowMd:   0 4px 20px rgba(21,101,192,0.10), 0 1px 4px rgba(0,0,0,0.05);
         --c-nav:        #FFFFFF;
-        --c-navBorder:  rgba(0,0,0,0.06);
-        --c-inputBg:    #F9FAFB;
-        --c-inputBorder:rgba(0,0,0,0.09);
-        --c-accent:     #0F4C81;
+        --c-navBorder:  rgba(21,101,192,0.10);
+        --c-inputBg:    #F4F8FF;
+        --c-inputBorder:rgba(21,101,192,0.18);
+        --c-accent:     #1565C0;
+        --c-accentHover:#1976D2;
       }
       /* ── DARK MODE ── */
       [data-dark="true"] {
@@ -27736,8 +27737,8 @@ export default function App(){
       )}
 
       {/* NAVBAR */}
-      <nav style={{background:"var(--c-nav)",borderBottom:"1px solid var(--c-navBorder)",padding:"0 12px",position:"sticky",top:trialDaysLeft!==null?32:0,zIndex:100,boxShadow:"var(--c-shadow)",width:"100%",boxSizing:"border-box"}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,height:52,maxWidth:1200,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
+      <nav style={{background:"var(--c-nav)",borderTop:`3px solid ${darkMode?"#1565C0":"#1565C0"}`,borderBottom:"1px solid var(--c-navBorder)",padding:"0 16px",position:"sticky",top:trialDaysLeft!==null?32:0,zIndex:100,boxShadow:darkMode?"0 2px 12px rgba(0,0,0,0.35)":"0 1px 6px rgba(21,101,192,0.10)",width:"100%",boxSizing:"border-box"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,height:60,maxWidth:1280,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
           {/* Hamburger — solo móvil */}
           <button className="nexo-only-mobile" onClick={()=>setShowMobileMenu(true)} title="Menú"
@@ -27779,13 +27780,13 @@ export default function App(){
 
             {/* Alertas → movidas a Configuración para ahorrar espacio en la barra */}
 
-            {/* Dark mode toggle */}
+            {/* Dark mode toggle — pill con label */}
             <button className="nexo-hide-mobile" onClick={()=>setDarkMode(!darkMode)}
-              title={darkMode ? "Modo claro" : "Modo oscuro"}
-              style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${darkMode?"rgba(250,204,21,0.45)":"rgba(100,116,139,0.22)"}`,background:darkMode?"rgba(250,204,21,0.07)":"rgba(100,116,139,0.05)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:darkMode?"#FCD34D":"#64748B",transition:"all 0.2s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.15)":"rgba(100,116,139,0.12)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.07)":"rgba(100,116,139,0.05)";}}>
-              {darkMode ? <IcoSun/> : <IcoMoon/>}
+              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              style={{display:"flex",alignItems:"center",gap:5,padding:"7px 13px",borderRadius:20,border:`1.5px solid ${darkMode?"rgba(250,204,21,0.45)":"rgba(21,101,192,0.22)"}`,background:darkMode?"rgba(250,204,21,0.08)":"rgba(21,101,192,0.05)",cursor:"pointer",fontSize:12,fontWeight:700,color:darkMode?"#FCD34D":"#1565C0",transition:"all 0.2s",whiteSpace:"nowrap",flexShrink:0,fontFamily:"inherit"}}
+              onMouseEnter={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.16)":"rgba(21,101,192,0.12)";e.currentTarget.style.borderColor=darkMode?"rgba(250,204,21,0.7)":"rgba(21,101,192,0.45)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=darkMode?"rgba(250,204,21,0.08)":"rgba(21,101,192,0.05)";e.currentTarget.style.borderColor=darkMode?"rgba(250,204,21,0.45)":"rgba(21,101,192,0.22)";}}>
+              {darkMode ? "🌙 Dark" : "☀️ Light"}
             </button>
 
             {/* Settings panel */}
@@ -27800,8 +27801,14 @@ export default function App(){
             {/* Compartir / Invitar (viral, global) */}
             <span className="nexo-hide-mobile"><ShareNavButton user={user} lang={lang}/></span>
 
-            {/* Idioma */}
-            <span className="nexo-hide-mobile"><LangSelector lang={lang} setLang={setLang}/></span>
+            {/* Idioma — pill EN/ES */}
+            <button className="nexo-hide-mobile"
+              onClick={()=>{const nl=lang==="en"?"es":"en";setLang(nl);try{localStorage.setItem("nexo-lang",nl);}catch{}}}
+              style={{display:"flex",alignItems:"center",gap:5,padding:"7px 13px",borderRadius:20,border:"1.5px solid rgba(21,101,192,0.22)",background:"rgba(21,101,192,0.05)",cursor:"pointer",fontSize:12,fontWeight:700,color:"#1565C0",transition:"all 0.2s",whiteSpace:"nowrap",flexShrink:0,fontFamily:"inherit"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(21,101,192,0.12)";e.currentTarget.style.borderColor="rgba(21,101,192,0.45)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="rgba(21,101,192,0.05)";e.currentTarget.style.borderColor="rgba(21,101,192,0.22)";}}>
+              🌐 {lang==="en"?"EN":"ES"}
+            </button>
 
             {/* Auth / User */}
             {user
@@ -27821,7 +27828,7 @@ export default function App(){
           </div>
         </div>
         {/* ── ROW 1: FREE TABS ── */}
-        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",background:"#FFFFFF",borderTop:"1px solid #EEF4FA",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:52}}>
+        <div className="nexo-tabs" style={{display:"flex",alignItems:"center",justifyContent:"center",background:"#FFFFFF",borderTop:"1px solid rgba(21,101,192,0.08)",overflowX:"auto",maxWidth:1400,margin:"0 auto",width:"100%",boxSizing:"border-box",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",height:50}}>
           <span style={{flexShrink:0,fontSize:10,fontWeight:800,letterSpacing:1.4,color:"#2196F3",background:"rgba(33,150,243,0.07)",border:"1.5px solid rgba(33,150,243,0.22)",borderRadius:7,padding:"3px 10px",margin:"0 20px 0 0",whiteSpace:"nowrap"}}>FREE</span>
           {[
             {label:t.feed,idx:0,icon:"feed"},
