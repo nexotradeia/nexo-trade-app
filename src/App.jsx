@@ -10082,6 +10082,24 @@ function TrackRecordPage({lang="es"}){
   );
 }
 
+function TerminalLiveTicker(){
+  const [px, setPx] = React.useState(291.58);
+  React.useEffect(()=>{
+    const id=setInterval(()=>{
+      setPx(p=>{ const d=(Math.random()-0.42)*0.18; return Math.max(290.8,Math.min(292.6,+(p+d).toFixed(2))); });
+    },1400);
+    return ()=>clearInterval(id);
+  },[]);
+  const pct=(((px-285.95)/285.95)*100).toFixed(2);
+  return(
+    <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:0}}>
+      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"#67769A"}}>AAPL</span>
+      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:23,fontWeight:600,letterSpacing:"-0.02em",color:"#fff"}}>${px.toFixed(2)}</span>
+      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,fontWeight:600,color:"#34D399"}}>+{pct}%</span>
+    </div>
+  );
+}
+
 function Footer({ setPage, onAuth, lang="es", setLang }){
   const nav = (idx) => { if(setPage) setPage(idx); };
   const isEN = lang==="en";
@@ -27782,6 +27800,7 @@ export default function App(){
         .nexo-bottom-nav { display: flex !important; }
         /* Footer grid: 2 cols on mobile */
         .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 24px 16px !important; }
+        .nexo-hero-stage { grid-template-columns: 1fr !important; }
         .nexo-body-grid {
           padding: 6px 8px !important;
           gap: 8px !important;
@@ -28090,6 +28109,12 @@ export default function App(){
       @keyframes nexo-flash-dn { 0%{color:#EF4444} 50%{color:#EF4444;text-shadow:0 0 8px rgba(239,68,68,0.8)} 100%{color:inherit;text-shadow:none} }
       .nexo-flash-up { animation:nexo-flash-up 0.6s ease forwards; }
       .nexo-flash-dn { animation:nexo-flash-dn 0.6s ease forwards; }
+      @keyframes nexo-draw { to { stroke-dashoffset: 0; } }
+      @keyframes nexo-fadein { to { opacity: 1; } }
+      @keyframes nexo-toast { to { transform: none; opacity: 1; } }
+      @keyframes nexo-radar-spin { to { transform: rotate(360deg); } }
+      @keyframes nexo-ping { 0%{transform:translate(-50%,-50%) scale(.4);opacity:.9} 70%{transform:translate(-50%,-50%) scale(1.8);opacity:0} 100%{opacity:0} }
+      @keyframes nexo-tape { from{transform:translateX(0)} to{transform:translateX(-50%)} }
       html, body {
         overflow-y: scroll !important;
         -webkit-overflow-scrolling: touch !important;
@@ -28413,106 +28438,175 @@ export default function App(){
       {showLanding && page===0 && (
         <div>
 
-        {/* ── HERO ── */}
-        <div style={{background:`linear-gradient(135deg,#0B1A2E 0%,#0D2244 50%,#0B1A2E 100%)`,borderBottom:`1px solid rgba(15,76,129,0.15)`,padding:"64px 20px 56px",overflow:"hidden",position:"relative"}}>
-          <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 20% 50%,#00D26A08,transparent 50%),radial-gradient(circle at 80% 30%,#3B8EFA08,transparent 50%)",pointerEvents:"none"}}/>
-          <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",gap:48,flexWrap:"wrap",position:"relative"}}>
+        {/* ── HERO v2 — Terminal + Radar ── */}
+        <div style={{background:"#06080E",position:"relative",overflow:"hidden"}}>
+          {/* Background glow */}
+          <div style={{position:"absolute",width:900,height:900,borderRadius:"50%",background:"radial-gradient(circle,rgba(11,92,255,.14),rgba(34,211,238,.04) 45%,transparent 65%)",top:-320,left:"50%",transform:"translateX(-50%)",pointerEvents:"none",zIndex:0}}/>
 
-            {/* LEFT — Text */}
-            <div style={{flex:"1 1 300px",minWidth:0}}>
-              <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(0,210,106,0.1)",border:`1px solid ${C.accent}33`,borderRadius:30,padding:"6px 16px",marginBottom:28}}>
-                <span style={{width:7,height:7,borderRadius:"50%",background:C.accent,display:"inline-block",boxShadow:`0 0 10px ${C.accent}`}}/>
-                <span style={{color:C.accent,fontSize:11,fontWeight:700,letterSpacing:1.2}}>{lang==="en"?"🌍 GLOBAL TRADING COMMUNITY":"🌍 COMUNIDAD GLOBAL DE TRADING"}</span>
-              </div>
-              <h1 style={{fontSize:"clamp(36px,5vw,62px)",fontWeight:900,letterSpacing:-2,lineHeight:1.05,margin:"0 0 18px",color:"#fff"}}>
-                {lang==="en"?"Invest smarter.":"Invierte mejor."}<br/>
-                <span style={{background:`linear-gradient(90deg,${C.accent} 0%,#3B8EFA 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>{lang==="en"?"Learn together.":"Aprende en comunidad."}</span>
-              </h1>
-              <p style={{fontSize:17,color:"#94a3b8",lineHeight:1.75,margin:"0 0 32px",maxWidth:480}}>
-                {lang==="en"
-                  ? <>The <strong style={{color:"#fff"}}>global</strong> social trading platform where thousands of investors worldwide share analysis, weekly picks, and real strategies — powered by AI.</>
-                  : <>La plataforma de trading social <strong style={{color:"#fff"}}>global</strong> donde miles de inversores del mundo comparten análisis, picks semanales y estrategias reales — potenciada por IA.</>
-                }
-              </p>
-              {/* CTA principal — más grande y urgente */}
-              <div style={{marginBottom:20}}>
-                <button onClick={()=>setAuth("register")}
-                  style={{display:"block",width:"100%",maxWidth:420,background:`linear-gradient(135deg,${C.accent} 0%,#00c070 100%)`,border:"none",borderRadius:16,padding:"20px 38px",fontSize:18,fontWeight:900,color:"#000",cursor:"pointer",boxShadow:`0 4px 40px ${C.accent}55, 0 0 0 1px ${C.accent}33`,letterSpacing:0.2,transition:"transform 0.15s, box-shadow 0.15s",textAlign:"center"}}
-                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 48px ${C.accent}70, 0 0 0 1px ${C.accent}55`;}}
-                  onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=`0 4px 40px ${C.accent}55, 0 0 0 1px ${C.accent}33`;}}>
-                  {lang==="en"?"🚀 Create free account — 30 seconds":"🚀 Crear cuenta gratis — 30 segundos"}
-                </button>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginTop:10,paddingLeft:4}}>
-                  <span style={{fontSize:12,color:"#64748b"}}>{lang==="en"?"✓ No credit card":"✓ Sin tarjeta de crédito"}</span>
-                  <span style={{fontSize:12,color:"#334155"}}>·</span>
-                  <span style={{fontSize:12,color:"#64748b"}}>{lang==="en"?"✓ Cancel anytime":"✓ Cancela cuando quieras"}</span>
-                  <span style={{fontSize:12,color:"#334155"}}>·</span>
-                  <span style={{fontSize:12,color:"#64748b"}}>{lang==="en"?"✓ Free forever":"✓ Gratis para siempre"}</span>
-                </div>
-              </div>
+          {/* Hero text block */}
+          <div style={{position:"relative",zIndex:2,maxWidth:840,margin:"0 auto",textAlign:"center",padding:"52px 24px 0"}}>
+            {/* Badge */}
+            <div style={{display:"inline-flex",alignItems:"center",gap:8,fontFamily:"'JetBrains Mono',monospace",fontSize:9.5,letterSpacing:"0.18em",fontWeight:600,color:"#9FC0FF",border:"1px solid #1B2A52",background:"rgba(11,92,255,0.07)",borderRadius:99,padding:"7px 15px",marginBottom:24}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#0EA46B",display:"inline-block",animation:"nexo-pulse 1.6s infinite"}}/>
+              {lang==="en"?"LIVE DATA · AI SIGNALS · 52 MARKETS":"DATOS EN VIVO · SEÑALES IA · 52 MERCADOS"}
+            </div>
+            {/* H1 */}
+            <h1 style={{fontSize:"clamp(38px,6.6vw,70px)",lineHeight:1.03,letterSpacing:"-0.045em",fontWeight:900,margin:"0",color:"#fff"}}>
+              {lang==="en"?"Invest smarter.":"Invierte mejor."}<br/>
+              <span style={{background:"linear-gradient(95deg,#2E6BFF,#22D3EE 60%,#9FC0FF 120%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",color:"transparent"}}>
+                {lang==="en"?"Together.":"Juntos."}
+              </span>
+            </h1>
+            <p style={{fontSize:16,color:"#67769A",maxWidth:520,margin:"18px auto 0",lineHeight:1.65}}>
+              {lang==="en"
+                ?<>The global community for stocks &amp; crypto. <strong style={{color:"#C9D6F2",fontWeight:600}}>AI-powered picks</strong>, institutional flow and global radar — weekly, in your inbox.</>
+                :<>La comunidad global de acciones &amp; cripto. <strong style={{color:"#C9D6F2",fontWeight:600}}>Picks con IA</strong>, flujo institucional y radar global — cada semana en tu correo.</>
+              }
+            </p>
+            {/* Email + CTA */}
+            <div style={{display:"flex",gap:10,maxWidth:460,margin:"26px auto 0",flexWrap:"wrap",justifyContent:"center"}}>
+              <input type="email" placeholder={lang==="en"?"your@email.com":"tu@email.com"}
+                style={{flex:1,minWidth:180,background:"#0C111E",border:"1px solid #19202F",borderRadius:13,padding:"14px 17px",fontFamily:"inherit",fontSize:14,color:"#fff",outline:"none"}}/>
+              <button onClick={()=>setAuth("register")}
+                style={{background:"#0B5CFF",color:"#fff",fontWeight:700,fontSize:14,padding:"14px 24px",borderRadius:11,border:"none",cursor:"pointer",boxShadow:"0 10px 30px -10px rgba(11,92,255,.6)",whiteSpace:"nowrap",flexShrink:0}}>
+                {lang==="en"?"Get access →":"Obtener acceso →"}
+              </button>
+            </div>
+            <div style={{display:"flex",justifyContent:"center",gap:18,marginTop:12,fontSize:11.5,color:"#67769A",flexWrap:"wrap"}}>
+              <span>✓ {lang==="en"?"No spam":"Sin spam"}</span>
+              <span>✓ {lang==="en"?"3-day free trial":"3 días gratis"}</span>
+              <span>✓ {lang==="en"?"Cancel anytime":"Cancela cuando quieras"}</span>
+            </div>
+          </div>
 
-              {/* Social proof — avatares + contador + estrellas */}
-              <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",padding:"14px 16px",background:"rgba(0,210,106,0.05)",border:"1px solid rgba(0,210,106,0.12)",borderRadius:14}}>
-                <div style={{display:"flex"}}>
-                  {["#00D26A","#3B8EFA","#FFB800","#FF4D6A","#a78bfa"].map((c,i)=>(
-                    <div key={i} style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(135deg,${c},${c}88)`,border:"2.5px solid #0B1020",marginLeft:i>0?-11:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"#fff",boxShadow:"0 2px 8px rgba(0,0,0,0.4)"}}>{["MC","JR","AT","FP","LG"][i]}</div>
-                  ))}
-                </div>
-                <div style={{flex:1}}>
-                  <div style={{color:"#fff",fontWeight:800,fontSize:14}}>🔥 +{communityCount.toLocaleString("en-US")} {lang==="en"?"active traders":"traders activos"}</div>
-                  <div style={{display:"flex",gap:2,marginTop:2}}>
-                    {"⭐⭐⭐⭐⭐".split("").map((s,i)=><span key={i} style={{fontSize:12}}>{s}</span>)}
-                    <span style={{fontSize:11,color:"#94a3b8",marginLeft:4}}>4.9/5 · 840+ {lang==="en"?"reviews":"reseñas"}</span>
+          {/* Dual stage — Terminal + Radar */}
+          <div className="nexo-hero-stage" style={{position:"relative",zIndex:2,maxWidth:1100,margin:"46px auto 0",padding:"0 24px 0",display:"grid",gridTemplateColumns:"1.12fr 0.88fr",gap:18,alignItems:"stretch"}}>
+
+            {/* ── TERMINAL CARD ── */}
+            <div style={{background:"#0C111E",border:"1px solid #19202F",borderRadius:18,overflow:"hidden",boxShadow:"0 40px 80px -30px rgba(11,92,255,.28)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 16px",borderBottom:"1px solid #19202F"}}>
+                {[0,1,2].map(i=><span key={i} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#222B3F",marginRight:3}}/>)}
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"#67769A",letterSpacing:"0.08em",marginLeft:4}}>NEXO TERMINAL · AAPL · 1D</span>
+                <span style={{flex:1}}/>
+                <span style={{display:"flex",alignItems:"center",gap:5,fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:"0.16em",color:"#0EA46B",fontWeight:600}}>
+                  <span style={{width:5,height:5,borderRadius:"50%",background:"#0EA46B",animation:"nexo-pulse 1.6s infinite",display:"inline-block"}}/>LIVE
+                </span>
+              </div>
+              <div style={{padding:"16px 16px 12px",position:"relative"}}>
+                <TerminalLiveTicker/>
+                <svg viewBox="0 0 560 150" width="100%" height="150" fill="none" style={{marginTop:8}}>
+                  <defs>
+                    <linearGradient id="nexo-ar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0B5CFF" stopOpacity="0.30"/>
+                      <stop offset="100%" stopColor="#0B5CFF" stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <g stroke="#11182A" strokeWidth="1"><path d="M0 38h560M0 76h560M0 114h560"/></g>
+                  <path d="M0 122 L40 112 L78 118 L116 98 L154 105 L192 82 L230 90 L268 68 L306 76 L344 54 L382 62 L420 40 L458 48 L496 28 L534 36 L560 18 L560 150 L0 150 Z" fill="url(#nexo-ar)" style={{opacity:0,animation:"nexo-fadein 1s 2.4s forwards"}}/>
+                  <path d="M0 122 L40 112 L78 118 L116 98 L154 105 L192 82 L230 90 L268 68 L306 76 L344 54 L382 62 L420 40 L458 48 L496 28 L534 36 L560 18" stroke="#4D8DFF" strokeWidth="2.4" strokeLinejoin="round" style={{strokeDasharray:1100,strokeDashoffset:1100,animation:"nexo-draw 2.4s cubic-bezier(.4,0,.2,1) .7s forwards"}}/>
+                  <g style={{opacity:0,animation:"nexo-fadein .4s 2.9s forwards"}}>
+                    <circle cx="560" cy="18" r="4" fill="#4D8DFF"/>
+                    <circle cx="560" cy="18" r="9" fill="#4D8DFF" fillOpacity="0.18"/>
+                  </g>
+                </svg>
+                {/* AI signal toast */}
+                <div style={{position:"absolute",top:54,right:18,background:"#0F1D42",border:"1px solid #1D3266",borderRadius:12,padding:"10px 13px",boxShadow:"0 14px 36px -12px rgba(0,0,0,.6)",opacity:0,animation:"nexo-toast .5s cubic-bezier(.2,.9,.3,1.2) 3.2s forwards",zIndex:3}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'JetBrains Mono',monospace",fontSize:8,letterSpacing:"0.14em",color:"#9FC0FF"}}>
+                    <span style={{width:4,height:4,borderRadius:"50%",background:"#4D8DFF",display:"inline-block"}}/>AI SIGNAL · 92/100
+                  </div>
+                  <div style={{fontSize:12.5,fontWeight:700,color:"#fff",marginTop:4}}>
+                    $META — Entry $560
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8.5,color:"#34D399",background:"rgba(14,164,107,.14)",borderRadius:5,padding:"2px 6px",marginLeft:6}}>▲ BUY</span>
                   </div>
                 </div>
-                <button onClick={()=>setShowLanding(false)}
-                  style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 16px",fontSize:13,fontWeight:700,color:"#94a3b8",cursor:"pointer",whiteSpace:"nowrap"}}>
-                  {lang==="en"?"See feed →":"Ver feed →"}
-                </button>
+                {/* P&L rows */}
+                {[
+                  {a:"AAPL × 120",b:"+$694.80",delay:"1.3s",bold:false},
+                  {a:"NVDA × 85", b:"+$417.35",delay:"1.55s",bold:false},
+                  {a:lang==="en"?"P&L TODAY":"P&L HOY",b:"+$1,541.35",delay:"1.8s",bold:true},
+                ].map((r,i)=>(
+                  <div key={i} style={{display:"flex",justifyContent:"space-between",fontFamily:"'JetBrains Mono',monospace",fontSize:11,padding:"7px 2px",borderTop:"1px solid #19202F",color:"#C9D6F2",fontWeight:r.bold?700:400,opacity:0,animation:`nexo-fadein .4s ${r.delay} forwards`}}>
+                    <span style={{color:r.bold?"#fff":"inherit"}}>{r.a}</span>
+                    <span style={{color:"#34D399"}}>{r.b}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* RIGHT — Feed Mockup */}
-            <div className="nexo-landing-mockup" style={{flex:"0 0 auto",position:"relative",width:370}}>
-              <div style={{background:"rgba(15,23,42,0.95)",border:`1px solid rgba(0,210,106,0.2)`,borderRadius:20,padding:"20px",backdropFilter:"blur(20px)",boxShadow:"0 24px 64px rgba(0,0,0,0.7)"}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16,paddingBottom:14,borderBottom:"1px solid #1e293b"}}>
-                  <span style={{width:8,height:8,borderRadius:"50%",background:C.accent,boxShadow:`0 0 8px ${C.accent}`,display:"inline-block"}}/>
-                  <span style={{fontSize:12,color:"#64748b",fontWeight:600}}>{lang==="en"?"Live feed":"Feed en vivo"}</span>
-                  <span style={{marginLeft:"auto",fontSize:11,color:"#64748b",background:"#1e293b",padding:"2px 8px",borderRadius:6}}>{lang==="en"?"2 min ago":"hace 2 min"}</span>
+            {/* ── RADAR CARD ── */}
+            <div style={{background:"#0C111E",border:"1px solid #19202F",borderRadius:18,overflow:"hidden",boxShadow:"0 40px 80px -30px rgba(11,92,255,.28)",display:"flex",flexDirection:"column"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 16px",borderBottom:"1px solid #19202F"}}>
+                {[0,1,2].map(i=><span key={i} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#222B3F",marginRight:3}}/>)}
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"#67769A",letterSpacing:"0.08em",marginLeft:4}}>{lang==="en"?"GLOBAL RADAR · 52 MARKETS":"RADAR GLOBAL · 52 MERCADOS"}</span>
+                <span style={{flex:1}}/>
+                <span style={{display:"flex",alignItems:"center",gap:5,fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:"0.16em",color:"#0EA46B",fontWeight:600}}>
+                  <span style={{width:5,height:5,borderRadius:"50%",background:"#0EA46B",animation:"nexo-pulse 1.6s infinite",display:"inline-block"}}/>SCANNING
+                </span>
+              </div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"20px 12px 8px",flex:1}}>
+                <div style={{position:"relative",width:"min(280px,70vw)",aspectRatio:"1/1"}}>
+                  {[{inset:0},{inset:"17%"},{inset:"34%"}].map((r,i)=>(
+                    <div key={i} style={{position:"absolute",...r,border:"1px solid #1B2A52",borderRadius:"50%"}}/>
+                  ))}
+                  <div style={{position:"absolute",left:0,right:0,top:"50%",height:1,background:"#141C30"}}/>
+                  <div style={{position:"absolute",top:0,bottom:0,left:"50%",width:1,background:"#141C30"}}/>
+                  <div style={{position:"absolute",inset:0,borderRadius:"50%",background:"conic-gradient(from 0deg,rgba(34,211,238,0) 0deg,rgba(34,211,238,0) 300deg,rgba(34,211,238,.28) 354deg,rgba(77,141,255,.45) 360deg)",animation:"nexo-radar-spin 4.5s linear infinite",WebkitMaskImage:"radial-gradient(circle,transparent 4%,black 5%)",maskImage:"radial-gradient(circle,transparent 4%,black 5%)"}}/>
+                  <div style={{position:"absolute",left:"50%",top:"50%",width:8,height:8,borderRadius:"50%",background:"#22D3EE",transform:"translate(-50%,-50%)",boxShadow:"0 0 16px rgba(34,211,238,.9)"}}/>
+                  {[
+                    {lx:"71%",ly:"30%",color:"#22D3EE",label:"NIKKEI",val:"▲1.18",tx:"71%",ty:"20%",delay:"0.4s"},
+                    {lx:"30%",ly:"38%",color:"#4D8DFF",label:"NYSE",  val:"▲0.42",tx:"30%",ty:"48%",delay:"1.1s"},
+                    {lx:"62%",ly:"68%",color:"#34D399",label:"BTC",   val:"▲1.92",tx:"62%",ty:"78%",delay:"1.8s"},
+                    {lx:"24%",ly:"70%",color:"#22D3EE",label:"DAX",   val:"▲0.72",tx:"24%",ty:"60%",delay:"2.5s"},
+                  ].map((b,i)=>(
+                    <React.Fragment key={i}>
+                      <div style={{position:"absolute",left:b.lx,top:b.ly,width:9,height:9,borderRadius:"50%",background:b.color,transform:"translate(-50%,-50%)"}}/>
+                      <div style={{position:"absolute",left:b.lx,top:b.ly,width:21,height:21,borderRadius:"50%",border:`1.5px solid ${b.color}`,opacity:0,transform:"translate(-50%,-50%) scale(0.4)",animation:`nexo-ping 3s ${b.delay} infinite`}}/>
+                      <span style={{position:"absolute",left:b.tx,top:b.ty,transform:"translate(-50%,-50%)",fontFamily:"'JetBrains Mono',monospace",fontSize:8.5,letterSpacing:"0.1em",color:"#C9D6F2",background:"rgba(12,17,30,.85)",border:"1px solid #19202F",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>
+                        {b.label} <strong style={{color:"#34D399"}}>{b.val}</strong>
+                      </span>
+                    </React.Fragment>
+                  ))}
                 </div>
+              </div>
+              <div style={{margin:"0 14px",borderTop:"1px solid #19202F",padding:"11px 4px",display:"flex",alignItems:"center",gap:8,fontSize:11.5,color:"#C9D6F2",opacity:0,animation:"nexo-fadein .5s 2.6s forwards"}}>
+                <div style={{width:22,height:22,borderRadius:7,background:"rgba(11,92,255,.14)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8.5l2.6-3.2 2 1.6L9.8 3" stroke="#4D8DFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                <span><strong style={{color:"#fff"}}>{lang==="en"?"Unusual volume detected":"Volumen inusual detectado"}</strong> {lang==="en"?"in Asia tech · AI confidence 88":"en tech Asia · IA confianza 88"}</span>
+              </div>
+              <div style={{display:"flex",gap:7,justifyContent:"center",flexWrap:"wrap",padding:"10px 14px 16px"}}>
                 {[
-                  {u:"SPY_Trader",e:"🦅",c:"#00D26A",t:"NVDA rompiendo resistencia en $205. Target $230 en 2 semanas. Stop en $195. R:R 3:1 🚀",bull:true,likes:47},
-                  {u:"CryptoWolf",e:"🐺",c:"#0F5E68",t:"BTC acumulando en $62k. On-chain muestra manos fuertes comprando. Bullish largo plazo. ₿",bull:true,likes:82},
-                  {u:"NvidiaChad",e:"🦁",c:"#F59E0B",t:"TSLA reporta earnings la próxima semana. Cuidado con la volatilidad. Yo flat hasta el dato 📊",bull:false,likes:31},
-                ].map((p,i)=>(
-                  <div key={i} style={{marginBottom:12,paddingBottom:12,borderBottom:i<2?"1px solid #1e293b":"none"}}>
-                    <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-                      <div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${p.c},${p.c}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{p.e}</div>
-                      <div style={{flex:1}}>
-                        <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
-                          <span style={{color:"#fff",fontWeight:700,fontSize:12}}>@{p.u}</span>
-                          <span style={{background:p.bull?"#10b98122":"#ef444422",color:p.bull?"#10b981":"#ef4444",border:`1px solid ${p.bull?"#10b98144":"#ef444444"}`,borderRadius:4,padding:"0px 5px",fontSize:10,fontWeight:700}}>{p.bull?"ALCISTA":"BAJISTA"}</span>
-                        </div>
-                        <p style={{margin:"0 0 6px",color:"#94a3b8",fontSize:12,lineHeight:1.5}}>{p.t}</p>
-                        <div style={{display:"flex",gap:12}}>
-                          <span style={{color:"#475569",fontSize:11}}>❤️ {p.likes}</span>
-                          <span style={{color:"#475569",fontSize:11}}>💬 comentar</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {label:lang==="en"?"AMERICA · OPEN":"AMERICA · ABIERTO",on:true},
+                  {label:lang==="en"?"EUROPE · OPEN":"EUROPA · ABIERTO",on:true},
+                  {label:"ASIA · 7H 30M",on:false},
+                  {label:"CRYPTO · 24/7",on:true},
+                ].map((c,i)=>(
+                  <span key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8.5,letterSpacing:"0.1em",color:c.on?"#fff":"#67769A",border:`1px solid ${c.on?"#1D3266":"#19202F"}`,borderRadius:7,padding:"4px 9px",background:c.on?"#0F1D42":"transparent"}}>
+                    {c.label}
+                  </span>
                 ))}
-                <button onClick={()=>setAuth("register")} style={{width:"100%",background:`linear-gradient(135deg,${C.accent},#00a060)`,border:"none",borderRadius:10,padding:"10px",color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",marginTop:4}}>
-                  {lang==="en"?"Join to see more →":"Unirme para ver más →"}
-                </button>
               </div>
-              <div style={{position:"absolute",top:-12,right:-12,background:"rgba(15,23,42,0.97)",border:"1px solid #10b98144",borderRadius:12,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
-                <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>NVDA</div>
-                <div style={{fontSize:18,fontWeight:900,color:"#10b981"}}>+2.8%</div>
-              </div>
-              <div style={{position:"absolute",bottom:-12,left:-12,background:"rgba(15,23,42,0.97)",border:"1px solid #0F5E6844",borderRadius:12,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
-                <div style={{fontSize:10,color:"#64748b",fontWeight:600}}>{lang==="en"?"PREMIUM this week":"PREMIUM esta semana"}</div>
-                <div style={{fontSize:13,fontWeight:800,color:"#E0B64B"}}>{lang==="en"?"✦ 10 picks ready":"✦ 10 picks listos"}</div>
+            </div>
+          </div>
+
+          {/* Ticker tape */}
+          <div style={{maxWidth:1100,margin:"20px auto 0",padding:"0 24px 56px"}}>
+            <div style={{border:"1px solid #19202F",borderRadius:12,background:"#0C111E",overflow:"hidden",whiteSpace:"nowrap",padding:"9px 0"}}>
+              <div style={{display:"inline-block",animation:"nexo-tape 30s linear infinite",fontFamily:"'JetBrains Mono',monospace",fontSize:11}}>
+                {[
+                  {s:"NVDA",p:"202.10",c:"+2.41%",up:true},{s:"AAPL",p:"291.58",c:"+1.96%",up:true},
+                  {s:"BTC",p:"63,844",c:"+1.92%",up:true},{s:"META",p:"566.41",c:"-0.80%",up:false},
+                  {s:"TSLA",p:"392.32",c:"+2.81%",up:true},{s:"SPY",p:"734.52",c:"+1.25%",up:true},
+                  {s:"NIKKEI",p:"42,180",c:"+1.18%",up:true},{s:"DAX",p:"24,610",c:"+0.72%",up:true},
+                  {s:"NVDA",p:"202.10",c:"+2.41%",up:true},{s:"AAPL",p:"291.58",c:"+1.96%",up:true},
+                  {s:"BTC",p:"63,844",c:"+1.92%",up:true},{s:"META",p:"566.41",c:"-0.80%",up:false},
+                  {s:"TSLA",p:"392.32",c:"+2.81%",up:true},{s:"SPY",p:"734.52",c:"+1.25%",up:true},
+                  {s:"NIKKEI",p:"42,180",c:"+1.18%",up:true},{s:"DAX",p:"24,610",c:"+0.72%",up:true},
+                ].map((t,i)=>(
+                  <span key={i} style={{margin:"0 18px",color:"#67769A"}}>
+                    <strong style={{color:"#fff",fontWeight:500}}>{t.s}</strong> {t.p} <span style={{color:t.up?"#34D399":"#F87171"}}>{t.c}</span>
+                  </span>
+                ))}
               </div>
             </div>
           </div>
