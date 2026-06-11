@@ -1937,12 +1937,14 @@ function MercadosEnVivoWidget(){
 }
 
 // ── AI ASSISTANT ──────────────────────────────────────────────────────────────
-function AIAssistant({lang,onClose}){
+function AIAssistant({lang,onClose,initialQuery=""}){
   const t=LANGS[lang];
   const [msgs,setMsgs]=useState([{role:"ai",text:t.aiHello}]);
   const [input,setInput]=useState(""),[loading,setLoading]=useState(false);
   const endRef=useRef();
+  const _initFired=useRef(false);
   useEffect(()=>endRef.current?.scrollIntoView({behavior:"smooth"}),[msgs]);
+  useEffect(()=>{if(initialQuery&&!_initFired.current){_initFired.current=true;setTimeout(()=>send(initialQuery),350);}},[]);// eslint-disable-line
 
   const respuestaLocal = (msg) => {
     const m = msg.toLowerCase();
@@ -25580,7 +25582,7 @@ class MobileDashErrorBoundary extends Component {
 // ─────────────────────────────────────────────────────────────────────────────
 // MOBILE HOME DASHBOARD — Greeting + AI Pick + Movers + Watchlist
 // ─────────────────────────────────────────────────────────────────────────────
-function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
+function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, lang="en"}){
   const lp = useContext(PriceCtx) || {};
 
   // ── Greeting
@@ -25710,7 +25712,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
         <p style={{position:"relative",zIndex:1,marginTop:12,fontSize:13.5,lineHeight:1.5,color:"#c9ced9"}}>{pickThesis}</p>
         {/* CTA */}
         <div style={{position:"relative",zIndex:1,marginTop:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <button onClick={function(){onNavigate&&onNavigate(51);}}
+          <button onClick={function(){onOpenAI?onOpenAI(sig.ticker):onNavigate&&onNavigate(51);}}
             style={{display:"inline-flex",alignItems:"center",gap:8,background:"#fff",color:"#06080e",fontSize:13.5,fontWeight:600,padding:"10px 15px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
             See full analysis
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06080e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -25742,7 +25744,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
             </div>
           </div>
           <p style={{marginTop:10,fontSize:12.5,lineHeight:1.5,color:"var(--c-muted)",marginBottom:12}}>{(_topPick.razonEn||"").split(".")[0]+"."}</p>
-          <button onClick={function(){onNavigate&&onNavigate(10);}} style={{display:"inline-flex",alignItems:"center",gap:6,background:"#0a0d14",color:"#fff",fontSize:12.5,fontWeight:600,padding:"8px 14px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+          <button onClick={function(){onOpenAI?onOpenAI(_topPick.ticker):onNavigate&&onNavigate(10);}} style={{display:"inline-flex",alignItems:"center",gap:6,background:"#0a0d14",color:"#fff",fontSize:12.5,fontWeight:600,padding:"8px 14px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
             Full AI analysis →
           </button>
         </div>
@@ -26738,6 +26740,7 @@ export default function App(){
   const presenceChRef = useRef(null);
   const [profUser,setProfUser] = useState(null);
   const [showAI,setShowAI]           = useState(false);
+  const [aiInitQuery,setAiInitQuery] = useState("");
   const [showMobileMenu,setShowMobileMenu] = useState(false);
   const [aiHidden,setAiHidden]       = useState(false);
   // Ocultar bot flotante al scrollear hacia abajo (patrón Instagram/TikTok) — crítico en mobile
@@ -28737,6 +28740,7 @@ export default function App(){
               user={user}
               isPremium={effectivePremium}
               onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}}
+              onOpenAI={(ticker)=>{setAiInitQuery("Give me a complete investment analysis for $"+ticker+": current price context, key fundamentals, recent performance, analyst consensus, and your buy/hold/sell recommendation. Be concise.");setShowAI(true);}}
               lang={lang}
             />
           </MobileDashErrorBoundary>
@@ -28825,7 +28829,7 @@ export default function App(){
         </div>
       )}
       {profUser&&<ProfilePage user={profUser} currentUser={user} isFollowing={following.includes(profUser.id)} onFollow={toggleFollow} onClose={()=>setProfUser(null)} onUserUpdate={(updated)=>saveUser(updated)} lang={lang}/>}
-      {showAI&&<AIAssistant lang={lang} onClose={()=>setShowAI(false)}/>}
+      {showAI&&<AIAssistant lang={lang} onClose={()=>{setShowAI(false);setAiInitQuery("");}} initialQuery={aiInitQuery}/>}
 
       {/* ── SOCIAL PROOF TOAST (esquina inferior izquierda) ── */}
       {socialProofMsg && (
