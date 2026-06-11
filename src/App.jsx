@@ -25698,8 +25698,15 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   );
 
   // ── Non-overview tabs: full width ──
-  if(tab==="news")     return <div style={{background:PAGE,minHeight:"100vh",padding:"16px 12px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:20,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><NoticiasPage lang={lang}/></div></div>;
-  if(tab==="earnings") return <div style={{background:PAGE,minHeight:"100vh",padding:"16px 12px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}><div style={{maxWidth:1100,margin:"0 auto"}}><div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:20,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div><EarningsPage lang={lang}/></div></div>;
+  var _subNav=(
+    <div style={{padding:"16px 12px 0"}}>
+      <div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:20,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",maxWidth:1100,margin:"0 auto 20px"}}>
+        {["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}
+      </div>
+    </div>
+  );
+  if(tab==="news")     return <div style={{minHeight:"100vh",paddingBottom:120,fontFamily:"'Inter',-apple-system,sans-serif"}}>{_subNav}<NoticiasPage lang={lang}/></div>;
+  if(tab==="earnings") return <div style={{minHeight:"100vh",paddingBottom:120,fontFamily:"'Inter',-apple-system,sans-serif"}}>{_subNav}<EarningsPage lang={lang}/></div>;
   if(tab==="calendars"){
     var calComponents={
       economic:  <EconCalendarPage lang={lang}/>,
@@ -25834,6 +25841,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
 // ── AI PAGE ──────────────────────────────────────────────────────────────────
 function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
   var [qry,setQry] = useState("");
+  var [aiResult,setAiResult] = useState(null);
 
   // AI Pick data — rotate daily same as MobileHomeDashboard
   var _aip   = (WEEKLY_PICKS_FALLBACK&&WEEKLY_PICKS_FALLBACK.corto||[]).concat(WEEKLY_PICKS_FALLBACK&&WEEKLY_PICKS_FALLBACK.largo||[]);
@@ -25870,8 +25878,21 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
   try{var rc=JSON.parse(localStorage.getItem("nexo-ai-chats")||"null");if(rc&&rc.length)chats=rc.slice(0,3);}catch{}
 
   function ask(q){
-    try{if(q)sessionStorage.setItem("nexo-ai-prefill",q);}catch{}
-    if(onAI)onAI();
+    if(!q||!q.trim())return;
+    // Find matching ticker in query
+    var upper=q.toUpperCase();
+    var allPicks=(_aip||[]);
+    var match=allPicks.find(function(p){ return upper.indexOf(p.ticker)!==-1; });
+    if(match){
+      setAiResult({type:"pick",pick:match,query:q});
+    } else if(!isPremium){
+      setAiResult({type:"gate",query:q});
+    } else {
+      // Pro user — open real AI
+      try{if(q)sessionStorage.setItem("nexo-ai-prefill",q);}catch{}
+      if(onAI)onAI();
+    }
+    setQry("");
   }
 
   // ── CSS tokens (light theme matching mockup) ──
@@ -25920,6 +25941,43 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
               ))}
             </div>
           </div>
+
+          {/* AI inline result */}
+          {aiResult&&(
+            <div style={{background:SURFACE,border:`1.5px solid ${aiResult.type==="gate"?GOLD:BLUE}`,borderRadius:16,padding:20,boxShadow:SH,position:"relative"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                <div style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.05em",color:aiResult.type==="gate"?GOLD:BLUE,background:aiResult.type==="gate"?GOLDBG:BLUEBG,padding:"5px 10px",borderRadius:999}}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>
+                  {aiResult.type==="gate"?"Pro AI Analysis":"NexoTrade AI"}
+                </div>
+                <button onClick={()=>setAiResult(null)} style={{background:"none",border:"none",cursor:"pointer",color:INK3,fontSize:18,lineHeight:1,fontFamily:"inherit"}}>×</button>
+              </div>
+              <div style={{fontSize:13,color:INK3,marginBottom:6}}>"{aiResult.query}"</div>
+              {aiResult.type==="pick"&&(()=>{var p=aiResult.pick; return(
+                <div>
+                  <div style={{fontSize:20,fontWeight:800,color:INK,letterSpacing:"-0.02em"}}>{p.ticker} <span style={{fontSize:13,fontWeight:600,color:INK2}}>{p.nombre}</span></div>
+                  <div style={{marginTop:8,display:"flex",gap:8,flexWrap:"wrap"}}>
+                    <span style={{background:UPBG,color:UP,border:"1px solid rgba(10,157,92,.3)",borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:700}}>{p.tipo||"BUY"}</span>
+                    <span style={{background:S2,color:INK2,border:`1px solid ${HAIR}`,borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:600}}>Entry {p.entrada}</span>
+                    <span style={{background:S2,color:INK2,border:`1px solid ${HAIR}`,borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:600}}>Target {p.target}</span>
+                    <span style={{background:S2,color:INK2,border:`1px solid ${HAIR}`,borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:600}}>Stop {p.stop_loss}</span>
+                    <span style={{background:BLUEBG,color:BLUE,border:"1px solid rgba(31,107,255,.2)",borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:700}}>{p.confianza||85}% confidence</span>
+                  </div>
+                  <p style={{marginTop:12,fontSize:13.5,lineHeight:1.55,color:INK2}}>{p.razonEn||p.razon||""}</p>
+                  <button onClick={()=>onNavigate&&onNavigate(51)} style={{marginTop:12,display:"inline-flex",alignItems:"center",gap:7,background:BLUE,color:"#fff",fontSize:13,fontWeight:700,padding:"10px 16px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Full track record <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+                </div>
+              );})()}
+              {aiResult.type==="gate"&&(
+                <div>
+                  <p style={{fontSize:13.5,lineHeight:1.55,color:INK2,marginBottom:16}}>Oracle AI can analyze any ticker, compare positions, and give you portfolio recommendations — exclusively for Pro members.</p>
+                  <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                    <button onClick={()=>onNavigate&&onNavigate(8)} style={{display:"inline-flex",alignItems:"center",gap:7,background:`linear-gradient(135deg,${GOLD},#8a5e10)`,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 18px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>✦ Unlock Pro — $6.58/mo</button>
+                    <button onClick={()=>{if(onAI)onAI();}} style={{display:"inline-flex",alignItems:"center",gap:7,background:S2,color:INK2,fontSize:13,fontWeight:600,padding:"11px 16px",borderRadius:10,border:`1px solid ${HAIR}`,cursor:"pointer",fontFamily:"inherit"}}>Try AI chat anyway</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Today's AI Pick */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -26245,17 +26303,23 @@ export default function App(){
     }catch(_){}
   },[]);
 
-  // ── BACK BUTTON: evitar que la flecha del navegador salga del sitio ──────────
+  // ── BACK BUTTON: cada cambio de página empuja un estado; popstate navega dentro del SPA ──
   useEffect(()=>{
-    // Empuja un estado inicial para que haya algo a lo que volver
-    window.history.pushState({page:0},"",window.location.pathname);
-    const onPop = ()=>{
-      // En lugar de salir, volvemos al feed (página 0)
-      setPage(0);
-      window.history.pushState({page:0},"",window.location.pathname);
+    // Estado inicial
+    window.history.replaceState({page:0},"",window.location.pathname);
+  },[]);
+  useEffect(()=>{
+    // Empuja nuevo estado con cada cambio de página para que el back funcione
+    window.history.pushState({page},"",window.location.pathname);
+  },[page]);
+  useEffect(()=>{
+    const onPop=(e)=>{
+      var dest = (e.state&&e.state.page!=null) ? e.state.page : 0;
+      setPage(dest);
+      setShowLanding(false);
     };
-    window.addEventListener("popstate", onPop);
-    return ()=> window.removeEventListener("popstate", onPop);
+    window.addEventListener("popstate",onPop);
+    return ()=>window.removeEventListener("popstate",onPop);
   },[]);
 
   // ── VIP POP-UP: aparece a los 2 minutos para usuarios no-premium ─────────────
