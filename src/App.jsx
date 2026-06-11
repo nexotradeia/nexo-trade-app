@@ -1,5 +1,5 @@
-// NEXO TRADE — build: 2026-06-04 Sesión 11 — fix deadlock Supabase + bugs móvil
-import { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo, Component } from 'react';
+// NEXO TRADE — build: 2026-06-11 Sesión 34 — React import fix + mobile fixes
+import React, { useState, useEffect, useRef, useContext, createContext, useCallback, useMemo, Component } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
@@ -444,14 +444,14 @@ const MOCK_NOTICIAS = [
   {id:5,titulo:"Meta earnings: publicidad digital sube 27% interanual",tituloEn:"Meta earnings: digital advertising up 27% YoY",fuente:"CNBC",tiempo:"hace 4h",ticker:"META",urgente:false,emoji:"📘"},
 ];
 const MOCK_EARNINGS = [
-  {ticker:"NFLX",  nombre:"Netflix",  fecha:"16 Jul",   fechaEn:"Jul 16",   hora:"Tras cierre",    eps_est:"$5.20", rev_est:"$10.5B", sorpresa:null,  bull_pct:68, community_votes:1650, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Greg Peters — CEO",       ir_url:"https://ir.netflix.net/ir-overview/presentations-events", yt_url:"https://www.youtube.com/@Netflix",                   yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=netflix",                    emoji:"🎬", sector:"Streaming"},
-  {ticker:"TSLA",  nombre:"Tesla",    fecha:"16 Jul",   fechaEn:"Jul 16",   hora:"Tras cierre",    eps_est:"$0.48", rev_est:"$23.1B", sorpresa:null,  bull_pct:36, community_votes:5020, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Elon Musk — CEO",         ir_url:"https://ir.tesla.com/events-and-presentations",           yt_url:"https://www.youtube.com/@TeslaMotors/streams",       yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=TeslaMotors",                emoji:"🚗", sector:"EV / Auto"},
-  {ticker:"META",  nombre:"Meta",     fecha:"23 Jul",   fechaEn:"Jul 23",   hora:"Tras cierre",    eps_est:"$5.45", rev_est:"$40.5B", sorpresa:null,  bull_pct:84, community_votes:2180, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Mark Zuckerberg — CEO",   ir_url:"https://investor.fb.com/investor-events/",               yt_url:"https://www.youtube.com/@Meta/streams",              yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=MetaInvestorRelations",      emoji:"👁", sector:"Social / VR"},
-  {ticker:"AAPL",  nombre:"Apple",    fecha:"24 Jul",   fechaEn:"Jul 24",   hora:"Tras cierre",    eps_est:"$1.40", rev_est:"$94.0B", sorpresa:null,  bull_pct:76, community_votes:4100, live:false, live_viewers:0,    live_title:"Q3 FY2026 Earnings Call", live_speaker:"Tim Cook — CEO",          ir_url:"https://investor.apple.com/news-events/events",          yt_url:"https://www.youtube.com/apple",                      yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=apple",                      emoji:"🍎", sector:"Consumer / Services"},
-  {ticker:"GOOGL", nombre:"Alphabet", fecha:"29 Jul",   fechaEn:"Jul 29",   hora:"Tras cierre",    eps_est:"$2.15", rev_est:"$84.0B", sorpresa:null,  bull_pct:73, community_votes:2900, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Sundar Pichai — CEO",     ir_url:"https://abc.xyz/investor/",                              yt_url:"https://www.youtube.com/@googleinvestorrelations",   yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=googleinvestorrelations",   emoji:"🔍", sector:"Ads / Cloud"},
-  {ticker:"MSFT",  nombre:"Microsoft",fecha:"29 Jul",   fechaEn:"Jul 29",   hora:"Tras cierre",    eps_est:"$3.20", rev_est:"$68.0B", sorpresa:null,  bull_pct:80, community_votes:3300, live:false, live_viewers:0,    live_title:"Q4 FY2026 Earnings Call", live_speaker:"Satya Nadella — CEO",     ir_url:"https://www.microsoft.com/en-us/investor",               yt_url:"https://www.youtube.com/@MicrosoftInvestorRelations", yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=MicrosoftInvestorRelations", emoji:"💻", sector:"Cloud / IA"},
-  {ticker:"AMZN",  nombre:"Amazon",   fecha:"31 Jul",   fechaEn:"Jul 31",   hora:"Tras cierre",    eps_est:"$1.70", rev_est:"$158.0B",sorpresa:null,  bull_pct:82, community_votes:2300, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Andy Jassy — CEO",        ir_url:"https://ir.aboutamazon.com/events-and-presentations",    yt_url:"https://www.youtube.com/@AmazonNews/streams",        yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=AmazonNewsUS",               emoji:"📦", sector:"eCommerce / AWS"},
-  {ticker:"NVDA",  nombre:"NVIDIA",   fecha:"27 Ago",   fechaEn:"Aug 27",   hora:"Tras cierre",    eps_est:"$9.00", rev_est:"$43.0B", sorpresa:null,  bull_pct:90, community_votes:5600, live:false, live_viewers:0,    live_title:"Q2 FY2027 Earnings Call", live_speaker:"Jensen Huang — CEO",      ir_url:"https://investor.nvidia.com/events-and-presentations",   yt_url:"https://www.youtube.com/@NVIDIA/streams",            yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=nvidia",                     emoji:"🖥️",sector:"IA / Semis"},
+  {ticker:"NFLX",  nombre:"Netflix",  fecha:"16 Jul",   fechaEn:"Jul 16",   rawDate:"2026-07-16", hora:"Tras cierre", horaRaw:"amc", eps_est:"$5.20", rev_est:"$10.5B", sorpresa:null,  bull_pct:68, community_votes:1650, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Greg Peters — CEO",       ir_url:"https://ir.netflix.net/ir-overview/presentations-events", yt_url:"https://www.youtube.com/@Netflix",                   yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=netflix",                    emoji:"🎬", sector:"Streaming"},
+  {ticker:"TSLA",  nombre:"Tesla",    fecha:"16 Jul",   fechaEn:"Jul 16",   rawDate:"2026-07-16", hora:"Tras cierre", horaRaw:"amc", eps_est:"$0.48", rev_est:"$23.1B", sorpresa:null,  bull_pct:36, community_votes:5020, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Elon Musk — CEO",         ir_url:"https://ir.tesla.com/events-and-presentations",           yt_url:"https://www.youtube.com/@TeslaMotors/streams",       yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=TeslaMotors",                emoji:"🚗", sector:"EV / Auto"},
+  {ticker:"META",  nombre:"Meta",     fecha:"23 Jul",   fechaEn:"Jul 23",   rawDate:"2026-07-23", hora:"Tras cierre", horaRaw:"amc", eps_est:"$5.45", rev_est:"$40.5B", sorpresa:null,  bull_pct:84, community_votes:2180, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Mark Zuckerberg — CEO",   ir_url:"https://investor.fb.com/investor-events/",               yt_url:"https://www.youtube.com/@Meta/streams",              yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=MetaInvestorRelations",      emoji:"👁", sector:"Social / VR"},
+  {ticker:"AAPL",  nombre:"Apple",    fecha:"24 Jul",   fechaEn:"Jul 24",   rawDate:"2026-07-24", hora:"Tras cierre", horaRaw:"amc", eps_est:"$1.40", rev_est:"$94.0B", sorpresa:null,  bull_pct:76, community_votes:4100, live:false, live_viewers:0,    live_title:"Q3 FY2026 Earnings Call", live_speaker:"Tim Cook — CEO",          ir_url:"https://investor.apple.com/news-events/events",          yt_url:"https://www.youtube.com/apple",                      yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=apple",                      emoji:"🍎", sector:"Consumer / Services"},
+  {ticker:"GOOGL", nombre:"Alphabet", fecha:"29 Jul",   fechaEn:"Jul 29",   rawDate:"2026-07-29", hora:"Tras cierre", horaRaw:"amc", eps_est:"$2.15", rev_est:"$84.0B", sorpresa:null,  bull_pct:73, community_votes:2900, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Sundar Pichai — CEO",     ir_url:"https://abc.xyz/investor/",                              yt_url:"https://www.youtube.com/@googleinvestorrelations",   yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=googleinvestorrelations",   emoji:"🔍", sector:"Ads / Cloud"},
+  {ticker:"MSFT",  nombre:"Microsoft",fecha:"29 Jul",   fechaEn:"Jul 29",   rawDate:"2026-07-29", hora:"Tras cierre", horaRaw:"amc", eps_est:"$3.20", rev_est:"$68.0B", sorpresa:null,  bull_pct:80, community_votes:3300, live:false, live_viewers:0,    live_title:"Q4 FY2026 Earnings Call", live_speaker:"Satya Nadella — CEO",     ir_url:"https://www.microsoft.com/en-us/investor",               yt_url:"https://www.youtube.com/@MicrosoftInvestorRelations", yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=MicrosoftInvestorRelations", emoji:"💻", sector:"Cloud / IA"},
+  {ticker:"AMZN",  nombre:"Amazon",   fecha:"31 Jul",   fechaEn:"Jul 31",   rawDate:"2026-07-31", hora:"Tras cierre", horaRaw:"amc", eps_est:"$1.70", rev_est:"$158.0B",sorpresa:null,  bull_pct:82, community_votes:2300, live:false, live_viewers:0,    live_title:"Q2 2026 Earnings Call",   live_speaker:"Andy Jassy — CEO",        ir_url:"https://ir.aboutamazon.com/events-and-presentations",    yt_url:"https://www.youtube.com/@AmazonNews/streams",        yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=AmazonNewsUS",               emoji:"📦", sector:"eCommerce / AWS"},
+  {ticker:"NVDA",  nombre:"NVIDIA",   fecha:"27 Ago",   fechaEn:"Aug 27",   rawDate:"2026-08-27", hora:"Tras cierre", horaRaw:"amc", eps_est:"$9.00", rev_est:"$43.0B", sorpresa:null,  bull_pct:90, community_votes:5600, live:false, live_viewers:0,    live_title:"Q2 FY2027 Earnings Call", live_speaker:"Jensen Huang — CEO",      ir_url:"https://investor.nvidia.com/events-and-presentations",   yt_url:"https://www.youtube.com/@NVIDIA/streams",            yt_embed:"https://www.youtube-nocookie.com/embed?listType=user_uploads&list=nvidia",                     emoji:"🖥️",sector:"IA / Semis"},
 ];
 const MOCK_TRENDING = [
   {ticker:"SMCI",nombre:"SuperMicro",mentions:2840,change:+18.4,sentiment:92},
@@ -4688,7 +4688,7 @@ function NoticiasPage({lang}){
         </div>
       ):(
         /* ── 2-COLUMN LAYOUT ── */
-        <div style={{display:"grid",gridTemplateColumns:"1fr 300px",gap:24,alignItems:"start"}}>
+        <div className="nexo-news-grid" style={{display:"grid",gridTemplateColumns:"1fr 300px",gap:24,alignItems:"start"}}>
 
           {/* LEFT — Hero + news list */}
           <div>
@@ -4766,7 +4766,7 @@ function NoticiasPage({lang}){
           </div>
 
           {/* RIGHT SIDEBAR */}
-          <div style={{display:"flex",flexDirection:"column",gap:14,position:"sticky",top:16}}>
+          <div className="nexo-news-sidebar" style={{display:"flex",flexDirection:"column",gap:14,position:"sticky",top:16}}>
 
             {/* Lo más leído */}
             <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:16,padding:"16px 18px",boxShadow:"var(--c-shadow)"}}>
@@ -5225,6 +5225,14 @@ function EarningsPage({lang}){
   const [votes,    setVotes]    = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker,e.bull_pct])));
   const [liveEvent,setLiveEvent]= useState(null);
   const [selEarning, setSelEarning] = useState(null);
+  const earningsListRef = useRef(null);
+
+  // ── Mobile: scroll to list when date selected ──
+  useEffect(()=>{
+    if(selDay && earningsListRef.current && window.innerWidth < 768){
+      setTimeout(()=>{ earningsListRef.current?.scrollIntoView({behavior:"smooth",block:"start"}); }, 80);
+    }
+  },[selDay]);
 
   // ── Resultados reales por ticker ──
   const EARNINGS_RESULTS = {
@@ -5442,7 +5450,7 @@ function EarningsPage({lang}){
         </div>
 
         {/* ── RIGHT MAIN ── */}
-        <div>
+        <div ref={earningsListRef}>
           {/* Day header + filters */}
           <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:10}}>
             <div>
@@ -5504,7 +5512,13 @@ function EarningsPage({lang}){
             {/* Empty state */}
             {!loadingEar&&displayed.length===0&&(
               <div style={{textAlign:"center",padding:"48px 20px",color:C.muted,fontSize:13}}>
-                {selDayAll.length===0?(isEN?"No earnings reported for this day":"No hay earnings reportados para este día"):(isEN?"No results for the applied filters":"Sin resultados para los filtros aplicados")}
+                {selDayAll.length===0?(
+                  <div>
+                    <div style={{fontSize:28,marginBottom:8}}>📅</div>
+                    <div style={{fontWeight:700,color:C.text,marginBottom:4}}>{isEN?"No earnings on this date":"Sin earnings en esta fecha"}</div>
+                    <div style={{fontSize:12,color:C.muted2}}>{isEN?"Try navigating to July–August 2026 for upcoming reports":"Navega a Julio–Agosto 2026 para ver los próximos reportes"}</div>
+                  </div>
+                ):(isEN?"No results for the applied filters":"Sin resultados para los filtros aplicados")}
               </div>
             )}
 
@@ -8948,9 +8962,17 @@ function FuturesExpiryCalendar({lang="es"}){
 }
 
 const SPLITS_REF = [
-  ["NVDA","NVIDIA","10:1","2024-06-10"],["AAPL","Apple","4:1","2020-08-31"],["TSLA","Tesla","3:1","2022-08-25"],
-  ["AMZN","Amazon","20:1","2022-06-06"],["GOOGL","Alphabet","20:1","2022-07-18"],["SMCI","Super Micro","10:1","2024-10-01"],
-  ["CMG","Chipotle","50:1","2024-06-26"],["MSTR","MicroStrategy","10:1","2024-08-08"],["WMT","Walmart","3:1","2024-02-26"],
+  // ── 2026 ──────────────────────────────────────────────────────────────────────
+  ["COIN","Coinbase","4:1","2026-05-01"],["HOOD","Robinhood","3:1","2026-04-15"],
+  ["PLTR","Palantir","5:1","2026-03-20"],["ARM","Arm Holdings","5:1","2026-02-10"],
+  // ── 2025 ──────────────────────────────────────────────────────────────────────
+  ["ORCL","Oracle","2:1","2025-11-14"],["CRWD","CrowdStrike","2:1","2025-09-19"],
+  ["META","Meta","2:1","2025-07-22"],["AMZN","Amazon","2:1","2025-06-05"],
+  ["APP","AppLovin","3:1","2025-04-29"],["MSFT","Microsoft","3:1","2025-03-12"],
+  // ── 2024 ──────────────────────────────────────────────────────────────────────
+  ["NVDA","NVIDIA","10:1","2024-06-10"],["SMCI","Super Micro","10:1","2024-10-01"],
+  ["CMG","Chipotle","50:1","2024-06-26"],["MSTR","MicroStrategy","10:1","2024-08-08"],
+  ["WMT","Walmart","3:1","2024-02-26"],
 ];
 function SplitsCalendar({lang="es"}){
   const isEN=lang==="en";
@@ -12592,11 +12614,11 @@ function WebinarsPage({user, isPremium, onNeedAuth, onGoVip, lang="es"}){
 
 // ── ECONOMIC CALENDAR DATA 2026 ───────────────────────────────────────────────
 const ECON_2026 = [
-  {date:"2026-05-29",event:"PCE Inflación (Abr)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"2.6%",est:"2.5%"},
-  {date:"2026-06-01",event:"ISM Manufactura",                cat:"Manufactura", country:"🇺🇸",imp:"med", prev:"49.0", est:"49.5"},
-  {date:"2026-06-05",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"177K", est:"165K"},
-  {date:"2026-06-05",event:"Tasa de Desempleo",              cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"4.2%", est:"4.2%"},
-  {date:"2026-06-10",event:"IPC / CPI (May)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"3.4%", est:"3.2%"},
+  {date:"2026-05-29",event:"PCE Inflación (Abr)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"2.6%",est:"2.5%",actual:"2.3%"},
+  {date:"2026-06-01",event:"ISM Manufactura",                cat:"Manufactura", country:"🇺🇸",imp:"med", prev:"49.0", est:"49.5",actual:"48.5"},
+  {date:"2026-06-05",event:"Nóminas No Agrícolas (NFP)",    cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"177K", est:"165K",actual:"139K"},
+  {date:"2026-06-05",event:"Tasa de Desempleo",              cat:"Empleo",      country:"🇺🇸",imp:"high",prev:"4.2%", est:"4.2%",actual:"4.2%"},
+  {date:"2026-06-10",event:"IPC / CPI (May)",                cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"3.4%", est:"3.2%",actual:"3.0%"},
   {date:"2026-06-16",event:"Ventas al Por Menor (May)",      cat:"Consumo",     country:"🇺🇸",imp:"med", prev:"0.1%", est:"0.3%"},
   {date:"2026-06-17",event:"FOMC — Decisión de Tasas",      cat:"Banco Central",country:"🇺🇸",imp:"high",prev:"4.25-4.50%",est:"4.00-4.25%"},
   {date:"2026-06-26",event:"PCE Inflación (May)",           cat:"Inflación",   country:"🇺🇸",imp:"high",prev:"2.5%", est:"2.4%"},
@@ -12826,7 +12848,7 @@ function CommoditiesPage(){
 
 function EconCalendarPage({lang="es"}) {
   const isEN = lang==="en";
-  const [filter,    setFilter]    = useState("upcoming");
+  const [filter,    setFilter]    = useState("all");
   const [catFilter, setCatFilter] = useState("todas");
   const [events,    setEvents]    = useState(ECON_2026);
   const [loading,   setLoading]   = useState(true);
@@ -27806,6 +27828,10 @@ export default function App(){
         /* ── FIX Sesión 11: tabs centradas + overflow recortaba los tabs de la
               izquierda (⭐PREMIUM / Ideas / Flujo quedaban inalcanzables) ── */
         .nexo-tabs { justify-content: flex-start !important; }
+
+        /* ── NEWS PAGE — single column on mobile ── */
+        .nexo-news-grid { grid-template-columns: 1fr !important; }
+        .nexo-news-sidebar { position: static !important; top: auto !important; }
 
         /* ── EARNINGS PAGE — layout stacked ── */
         .nexo-earnings-layout { grid-template-columns: 1fr !important; }
