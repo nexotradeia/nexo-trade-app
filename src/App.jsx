@@ -6975,7 +6975,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   {s.tipo==="COMPRA"?(isEN?"▲ BUY":"▲ COMPRA"):(isEN?"▼ SELL":"▼ VENTA")}
                 </span>
                 <div style={{display:"flex",gap:16,marginLeft:"auto",flexWrap:"wrap"}}>
-                  {isEN?[["Entry",s.entrada,C.text],["Target",s.target,C.bull],["Stop",s.stop,C.bear]]:[["Entrada",s.entrada,C.text],["Target",s.target,C.bull],["Stop",s.stop,C.bear]].map(([l,v,c])=>(
+                  {(isEN?[["Entry",s.entrada,C.text],["Target",s.target,C.bull],["Stop",s.stop,C.bear]]:[["Entrada",s.entrada,C.text],["Target",s.target,C.bull],["Stop",s.stop,C.bear]]).map(([l,v,c])=>(
                     <div key={l} style={{textAlign:"center"}}>
                       <div style={{fontFamily:"monospace",fontSize:14,fontWeight:800,color:c}}>{v}</div>
                       <div style={{fontSize:10,color:C.muted2}}>{l}</div>
@@ -14304,24 +14304,24 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
       {/* Whale Alert popup disabled — too intrusive on mobile */}
 
       {/* Header */}
-      <div style={{background:"#E8F4FF",border:"1px solid #BFDBFE",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+      <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
 
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
               <span style={{fontSize:28}}>🐋</span>
-              <div style={{fontSize:20,fontWeight:900,color:"#0F172A",letterSpacing:-0.5}}>{isEN?"Smart Money":"Smart Money"}</div>
+              <div style={{fontSize:20,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.5}}>{isEN?"Smart Money":"Smart Money"}</div>
               <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800,display:"flex",alignItems:"center",gap:4}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
               </span>
             </div>
-            <div style={{fontSize:12,color:"#1A5FAD"}}>Options flow · Dark Pool prints · {isEN?"Institutional sweeps":"Sweeps institucionales"}</div>
+            <div style={{fontSize:12,color:"var(--c-muted)"}}>Options flow · Dark Pool prints · {isEN?"Institutional sweeps":"Sweeps institucionales"}</div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
               {PREM_FILTERS.map(p=>(
                 <button key={p.k} onClick={()=>setMinPrem(p.k)}
-                  style={{background:minPrem===p.k?"#1A5FAD":"#fff",border:`1px solid ${minPrem===p.k?"#1A5FAD":"#BFDBFE"}`,borderRadius:20,padding:"5px 10px",fontSize:11,fontWeight:700,color:minPrem===p.k?"#fff":"#1A5FAD",cursor:"pointer"}}>
+                  style={{background:minPrem===p.k?"#1565C0":"var(--c-surface)",border:`1px solid ${minPrem===p.k?"#1565C0":"var(--c-border)"}`,borderRadius:20,padding:"5px 10px",fontSize:11,fontWeight:700,color:minPrem===p.k?"#fff":"#1565C0",cursor:"pointer"}}>
                   {p.l}
                 </button>
               ))}
@@ -14332,9 +14332,9 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
             </button>
             {/* Full-screen toggle */}
             <button onClick={()=>setFullscreen(v=>!v)} title={fullscreen?"Salir de pantalla completa":"Pantalla completa"}
-              style={{background:fullscreen?"#1A5FAD":"#fff",border:`1px solid ${fullscreen?"#1A5FAD":"#BFDBFE"}`,borderRadius:10,padding:"7px 10px",fontSize:16,cursor:"pointer",lineHeight:1,color:fullscreen?"#fff":"#1A5FAD",transition:"all 0.2s"}}
+              style={{background:fullscreen?"#1565C0":"var(--c-surface)",border:`1px solid ${fullscreen?"#1565C0":"var(--c-border)"}`,borderRadius:10,padding:"7px 10px",fontSize:16,cursor:"pointer",lineHeight:1,color:fullscreen?"#fff":"#1565C0",transition:"all 0.2s"}}
               onMouseEnter={e=>e.currentTarget.style.background=fullscreen?"#0C447C":"#F0F7FF"}
-              onMouseLeave={e=>e.currentTarget.style.background=fullscreen?"#1A5FAD":"#fff"}>
+              onMouseLeave={e=>e.currentTarget.style.background=fullscreen?"#1565C0":"var(--c-surface)"}>
               {fullscreen?"⊠":"⛶"}
             </button>
           </div>
@@ -16937,7 +16937,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
             <div style={{fontSize:12,color:"#475569"}}>{isEN?"Signals analyzed by NexoTrade Research · Real-time prices":"Señales analizadas por NexoTrade Research · Precios en tiempo real"} · {IDEAS_DATA.length} {isEN?"active ideas":"ideas activas"}</div>
           </div>
           <div style={{marginLeft:"auto",display:"flex",gap:8,flexWrap:"wrap"}}>
-            {isEN?[{l:`${compras} Buys`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Sells`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Hold`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}]:[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}].map(s=>(
+            {(isEN?[{l:`${compras} Buys`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Sells`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Hold`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}]:[{l:`${compras} Compras`,c:"#10B981",bg:"rgba(16,185,129,0.1)"},{l:`${ventas} Ventas`,c:"#EF4444",bg:"rgba(239,68,68,0.1)"},{l:`${neutros} Neutro`,c:"#F59E0B",bg:"rgba(245,158,11,0.1)"}]).map(s=>(
               <div key={s.l} style={{background:s.bg,border:`1px solid ${s.c}30`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:800,color:s.c}}>{s.l}</div>
             ))}
             {loading && <div style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,color:"#818CF8"}}>{isEN?"⟳ Loading prices…":"⟳ Cargando precios…"}</div>}
@@ -16949,7 +16949,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
         {/* Signal filter */}
         <div style={{display:"flex",gap:4}}>
-          {isEN?[["todos","🌐 All"],["compra","↑ Buys"],["venta","↓ Sells"],["neutro","→ Hold"]]:[["todos","🌐 Todos"],["compra","↑ Compras"],["venta","↓ Ventas"],["neutro","→ Neutro"]].map(([k,l])=>(
+          {(isEN?[["todos","🌐 All"],["compra","↑ Buys"],["venta","↓ Sells"],["neutro","→ Hold"]]:[["todos","🌐 Todos"],["compra","↑ Compras"],["venta","↓ Ventas"],["neutro","→ Neutro"]]).map(([k,l])=>(
             <button key={k} onClick={()=>{setFilter(k);setPage(1);}}
               style={{background:filter===k?"linear-gradient(135deg,#0F5E68,#4F46E5)":"transparent",border:`1.5px solid ${filter===k?"transparent":C.border}`,borderRadius:20,padding:"6px 13px",fontSize:11,fontWeight:700,color:filter===k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
               {l}
@@ -16958,7 +16958,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         </div>
         <div style={{width:1,height:24,background:C.border}}/>
         {/* Risk filter */}
-        {isEN?[["todos","⚡ All risk"],["1","🟢 Low"],["2","🟡 Med"],["3","🔴 High"]]:[["todos","⚡ Todo riesgo"],["1","🟢 Bajo"],["2","🟡 Medio"],["3","🔴 Alto"]].map(([k,l])=>(
+        {(isEN?[["todos","⚡ All risk"],["1","🟢 Low"],["2","🟡 Med"],["3","🔴 High"]]:[["todos","⚡ Todo riesgo"],["1","🟢 Bajo"],["2","🟡 Medio"],["3","🔴 Alto"]]).map(([k,l])=>(
           <button key={k} onClick={()=>{setRiskF(k);setPage(1);}}
             style={{background:riskF===k?"rgba(15,94,104,0.2)":"transparent",border:`1.5px solid ${riskF===k?"#0F5E68":C.border}`,borderRadius:20,padding:"6px 12px",fontSize:11,fontWeight:700,color:riskF===k?"#A5B4FC":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
             {l}
