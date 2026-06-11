@@ -25683,14 +25683,15 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
 // ─────────────────────────────────────────────────────────────────────────────
 // ── PRO PAGE ─────────────────────────────────────────────────────────────────
 function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"}){
+  var isEN = lang==="en";
   var [showMemberInfo, setShowMemberInfo] = useState(false);
-  // ── design tokens ──
-  var PAGE="#f6f7f9",SURFACE="#fff",S2="#f3f4f7";
-  var HAIR="#e8eaee";
-  var INK="#0a0d14",INK2="#5b616e",INK3="#9aa0ab";
-  var BLUE="#1f6bff",BLUEBG="rgba(31,107,255,.10)";
+  // ── design tokens — CSS variables for dark mode ──
+  var PAGE="var(--c-bg)",SURFACE="var(--c-surface)",S2="var(--c-card2)";
+  var HAIR="var(--c-border)";
+  var INK="var(--c-text)",INK2="var(--c-muted)",INK3="var(--c-muted2)";
+  var BLUE="#1565C0",BLUEBG="rgba(21,101,192,.10)";
   var GOLD="#b07d11",GOLDBG="rgba(176,125,17,.12)";
-  var SH="0 1px 2px rgba(10,13,20,.04),0 8px 24px rgba(10,13,20,.05)";
+  var SH="var(--c-shadow)";
 
   // ── lock icon SVG ──
   var LockIcon=(
@@ -25744,68 +25745,158 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
     },
   ];
 
+  // Feature lists
+  var FREE_FEATS = isEN ? [
+    {t:"Live market feed",               ok:true},
+    {t:"Trader community",               ok:true},
+    {t:"Paper trading ($100k virtual)",  ok:true},
+    {t:"Watchlist (4 assets)",           ok:true},
+    {t:"Weekly AI signals",              ok:false},
+    {t:"Smart Money Flow",               ok:false},
+    {t:"NEXO Terminal Pro",              ok:false},
+  ] : [
+    {t:"Feed de mercado en vivo",        ok:true},
+    {t:"Comunidad de traders",           ok:true},
+    {t:"Paper trading ($100k virtual)",  ok:true},
+    {t:"Watchlist (4 activos)",          ok:true},
+    {t:"Señales IA semanales",           ok:false},
+    {t:"Smart Money Flow",               ok:false},
+    {t:"Nexo Terminal completo",         ok:false},
+  ];
+  var VIP_FEATS = isEN ? [
+    {t:"Everything in the Free plan",              bold:true},
+    {t:"Weekly AI signals with entry & target",    bold:false},
+    {t:"Institutional Smart Money Flow",           bold:false},
+    {t:"NEXO Terminal Pro complete",               bold:false},
+    {t:"Unlimited alerts & watchlist",             bold:false},
+    {t:"Global Radar · 52 exchanges",              bold:false},
+    {t:"Exclusive Monday newsletter",              bold:false},
+  ] : [
+    {t:"Todo lo del plan Free",                    bold:true},
+    {t:"Señales IA semanales con entrada y objetivo",bold:false},
+    {t:"Smart Money Flow institucional",           bold:false},
+    {t:"Nexo Terminal Pro completo",               bold:false},
+    {t:"Alertas y watchlist ilimitadas",           bold:false},
+    {t:"Radar Global avanzado · 52 bolsas",        bold:false},
+    {t:"Newsletter exclusiva de los lunes",        bold:false},
+  ];
+
+  function openStripe(){
+    if(!user){onNeedAuth&&onNeedAuth();return;}
+    var url=STRIPE_LINKS.vipAnual+(user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:"");
+    window.open(url,"_blank");
+  }
+
   return(
-    <div style={{background:PAGE,minHeight:"100vh",padding:"24px 16px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
-      <div style={{maxWidth:960,margin:"0 auto"}}>
+    <div style={{background:PAGE,minHeight:"100vh",padding:"32px 16px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <div style={{maxWidth:900,margin:"0 auto"}}>
 
         {/* Page header */}
-        <div style={{marginBottom:18}}>
-          <h1 style={{fontSize:24,fontWeight:800,letterSpacing:"-0.03em",color:INK}}>Pro tools</h1>
-          <p style={{fontSize:14,color:INK2,marginTop:6}}>Institutional-grade tools used by serious traders. Unlock all of them with Pro.</p>
+        <div style={{textAlign:"center",marginBottom:36}}>
+          <div style={{fontSize:11,fontWeight:800,color:BLUE,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>/// {isEN?"PRICING":"PRECIOS"}</div>
+          <h1 style={{fontSize:28,fontWeight:900,letterSpacing:"-0.04em",color:INK,margin:"0 0 10px"}}>{isEN?"Choose your plan":"Elige tu plan"}</h1>
+          <p style={{fontSize:15,color:INK2,margin:0}}>{isEN?"Start free, upgrade when you're ready. Cancel anytime.":"Empieza gratis, actualiza cuando quieras. Cancela en cualquier momento."}</p>
         </div>
 
-        {/* Upgrade banner — only for free users */}
+        {/* ── PRICING CARDS ── */}
         {!isPremium&&(
-          <div className="nexo-pro-banner" style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"22px 26px",display:"flex",alignItems:"center",gap:20,marginBottom:22,position:"relative",overflow:"hidden",flexWrap:"wrap"}}>
-            <div style={{position:"absolute",right:-40,top:-60,width:260,height:260,borderRadius:"50%",background:"rgba(255,255,255,.08)",pointerEvents:"none"}}/>
-            <div style={{flex:1,position:"relative",zIndex:1,minWidth:200}}>
-              <h2 style={{fontSize:19,fontWeight:800,color:"#fff",letterSpacing:"-0.02em"}}>Unlock all 6 Pro tools</h2>
-              <p style={{fontSize:13.5,color:"rgba(255,255,255,.85)",marginTop:5}}>Terminal, Screener, Smart Money Flow, 13F Gurus, SEC Insiders &amp; Global Radar.</p>
+          <div className="nexo-pricing-duo" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginBottom:48,alignItems:"start"}}>
+
+            {/* FREE card */}
+            <div style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:20,padding:"32px 28px",boxShadow:SH}}>
+              <div style={{fontSize:10,fontWeight:800,color:INK3,letterSpacing:2,textTransform:"uppercase",marginBottom:20}}>FREE</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:8,marginBottom:6}}>
+                <span style={{fontSize:52,fontWeight:900,color:INK,letterSpacing:"-0.04em",lineHeight:1}}>$0</span>
+                <span style={{fontSize:15,color:INK2,fontWeight:500}}>{isEN?"forever":"para siempre"}</span>
+              </div>
+              <div style={{height:1,background:HAIR,margin:"22px 0"}}/>
+              <div style={{display:"flex",flexDirection:"column",gap:13,marginBottom:28}}>
+                {FREE_FEATS.map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:10}}>
+                    {f.ok
+                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={INK3} strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    }
+                    <span style={{fontSize:14,color:f.ok?INK:INK3,fontWeight:f.ok?500:400}}>{f.t}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={()=>{if(!user){onNeedAuth&&onNeedAuth();}}}
+                style={{width:"100%",background:SURFACE,border:`1.5px solid ${HAIR}`,borderRadius:12,padding:"14px",fontSize:14,fontWeight:700,color:INK,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=BLUE;e.currentTarget.style.color=BLUE;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=HAIR;e.currentTarget.style.color=INK;}}>
+                {isEN?"Get started free":"Empezar gratis"}
+              </button>
             </div>
-            <div style={{position:"relative",zIndex:1,textAlign:"right",color:"#fff",flexShrink:0}}>
-              <div style={{fontSize:26,fontWeight:800,fontVariantNumeric:"tabular-nums"}}>$6.58<span style={{fontSize:14,fontWeight:600,opacity:.85}}>/mo</span></div>
-              <div style={{fontSize:11.5,opacity:.85,marginTop:1}}>billed annually · 3 days free</div>
+
+            {/* VIP ANUAL card */}
+            <div style={{background:SURFACE,border:`2px solid ${BLUE}`,borderRadius:20,padding:"32px 28px",boxShadow:`0 4px 32px rgba(21,101,192,0.18)`,position:"relative"}}>
+              {/* MÁS POPULAR badge */}
+              <div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:BLUE,color:"#fff",fontSize:11,fontWeight:800,letterSpacing:1,textTransform:"uppercase",padding:"5px 16px",borderRadius:20}}>
+                {isEN?"MOST POPULAR":"MÁS POPULAR"}
+              </div>
+
+              <div style={{fontSize:10,fontWeight:800,color:BLUE,letterSpacing:2,textTransform:"uppercase",marginBottom:20}}>VIP ANUAL</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:8,marginBottom:4}}>
+                <span style={{fontSize:52,fontWeight:900,color:INK,letterSpacing:"-0.04em",lineHeight:1}}>$6.58</span>
+                <span style={{fontSize:15,color:INK2,fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
+                <span style={{fontSize:15,color:INK3,fontWeight:400,textDecoration:"line-through"}}>$12.99</span>
+              </div>
+              <div style={{fontSize:13,color:INK2,marginBottom:14}}>{isEN?"Billed $79/year":"Facturado $79 al año"}</div>
+              <div style={{display:"inline-block",background:"rgba(22,163,74,0.10)",border:"1px solid rgba(22,163,74,0.25)",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:800,color:"#16A34A",letterSpacing:0.5,marginBottom:20}}>
+                {isEN?"YOU SAVE 49% WITH THE ANNUAL PLAN":"AHORRAS 49% CON EL PLAN ANUAL"}
+              </div>
+              <div style={{height:1,background:`rgba(21,101,192,0.12)`,margin:"0 0 20px"}}/>
+              <div style={{display:"flex",flexDirection:"column",gap:13,marginBottom:28}}>
+                {VIP_FEATS.map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:10}}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span style={{fontSize:14,color:INK,fontWeight:f.bold?700:500}}>{f.t}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={openStripe}
+                style={{width:"100%",background:BLUE,border:"none",borderRadius:12,padding:"15px",fontSize:15,fontWeight:800,color:"#fff",cursor:"pointer",fontFamily:"inherit",boxShadow:`0 4px 18px rgba(21,101,192,0.35)`,transition:"all 0.15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="#1976D2";e.currentTarget.style.boxShadow="0 6px 24px rgba(21,101,192,0.45)";}}
+                onMouseLeave={e=>{e.currentTarget.style.background=BLUE;e.currentTarget.style.boxShadow="0 4px 18px rgba(21,101,192,0.35)";}}>
+                {isEN?"Try VIP free for 3 days →":"Probar VIP 3 días gratis →"}
+              </button>
+              <div style={{textAlign:"center",marginTop:10,fontSize:12,color:INK3}}>
+                {isEN?"No card required · Cancel anytime":"Sin tarjeta · Cancela cuando quieras"}
+              </div>
             </div>
-            <button onClick={()=>{
-              if(!user){onNeedAuth&&onNeedAuth();return;}
-              var url=STRIPE_LINKS.vipAnual+(user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:"");
-              window.open(url,"_blank");
-            }} style={{position:"relative",zIndex:1,background:"#fff",color:"#0a2c7a",fontSize:14,fontWeight:700,padding:"13px 22px",borderRadius:11,border:"none",cursor:"pointer",flexShrink:0,fontFamily:"inherit"}}>
-              Start free trial
-            </button>
           </div>
         )}
 
-        {/* Pro welcome banner — for premium users */}
+        {/* Premium member view */}
         {isPremium&&(
-          <div className="nexo-pro-banner" style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"18px 26px",display:"flex",flexDirection:"column",gap:12,marginBottom:22,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",right:-40,top:-60,width:260,height:260,borderRadius:"50%",background:"rgba(255,255,255,.08)",pointerEvents:"none"}}/>
-            <div style={{position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:16}}>
-              <div style={{flex:1}}>
-                <div style={{fontSize:17,fontWeight:800,color:"#fff"}}>All 6 Pro tools unlocked</div>
-                <div style={{fontSize:13,color:"rgba(255,255,255,.85)",marginTop:3}}>Click any card to open the tool directly.</div>
-              </div>
-              <button onClick={()=>setShowMemberInfo(function(v){return !v;})} style={{position:"relative",zIndex:1,background:"rgba(255,255,255,.18)",border:"1px solid rgba(255,255,255,.35)",borderRadius:9,padding:"7px 15px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",flexShrink:0}} onMouseEnter={function(e){e.currentTarget.style.background="rgba(255,255,255,.28)";}} onMouseLeave={function(e){e.currentTarget.style.background="rgba(255,255,255,.18)";}}>
-                ★ Pro member ▾
-              </button>
+          <div style={{background:`linear-gradient(120deg,#0a2c7a,${BLUE})`,borderRadius:18,padding:"22px 26px",display:"flex",alignItems:"center",gap:20,marginBottom:32,flexWrap:"wrap"}}>
+            <div style={{flex:1,minWidth:200}}>
+              <div style={{fontSize:17,fontWeight:800,color:"#fff"}}>{isEN?"All Pro tools unlocked ✓":"Todas las herramientas Pro desbloqueadas ✓"}</div>
+              <div style={{fontSize:13,color:"rgba(255,255,255,.85)",marginTop:3}}>{isEN?"Click any card below to open it.":"Haz clic en cualquier tarjeta para abrirla."}</div>
             </div>
+            <button onClick={()=>setShowMemberInfo(v=>!v)}
+              style={{background:"rgba(255,255,255,.18)",border:"1px solid rgba(255,255,255,.35)",borderRadius:9,padding:"8px 16px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>
+              ★ {isEN?"Pro member":"Miembro Pro"} ▾
+            </button>
             {showMemberInfo&&(
-              <div style={{position:"relative",zIndex:2,background:"rgba(255,255,255,.12)",border:"1px solid rgba(255,255,255,.2)",borderRadius:10,padding:"12px 14px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                  <span style={{color:"#4ade80",fontSize:15}}>✓</span>
-                  <span style={{color:"#fff",fontWeight:700,fontSize:13}}>VIP Annual Plan — Active</span>
-                </div>
-                <div style={{fontSize:12,color:"rgba(255,255,255,.70)",marginBottom:10}}>{user?.email||""}</div>
-                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                  <button onClick={function(){window.open("https://billing.stripe.com","_blank");}} style={{background:"rgba(255,255,255,.20)",border:"1px solid rgba(255,255,255,.3)",color:"#fff",borderRadius:8,padding:"6px 13px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Manage billing →</button>
-                  {onSettings&&<button onClick={onSettings} style={{background:"rgba(255,255,255,.10)",border:"1px solid rgba(255,255,255,.2)",color:"rgba(255,255,255,.75)",borderRadius:8,padding:"6px 13px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Account settings</button>}
+              <div style={{width:"100%",background:"rgba(255,255,255,.12)",border:"1px solid rgba(255,255,255,.2)",borderRadius:10,padding:"12px 14px"}}>
+                <div style={{fontSize:13,color:"rgba(255,255,255,.85)",marginBottom:8}}>{user?.email||""}</div>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>window.open("https://billing.stripe.com","_blank")} style={{background:"rgba(255,255,255,.20)",border:"1px solid rgba(255,255,255,.3)",color:"#fff",borderRadius:8,padding:"6px 13px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{isEN?"Manage billing →":"Gestionar facturación →"}</button>
+                  {onSettings&&<button onClick={onSettings} style={{background:"rgba(255,255,255,.10)",border:"1px solid rgba(255,255,255,.2)",color:"rgba(255,255,255,.75)",borderRadius:8,padding:"6px 13px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{isEN?"Settings":"Ajustes"}</button>}
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Tools grid */}
+        {/* ── PRO TOOLS GRID ── */}
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:11,fontWeight:800,color:INK3,letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>{isEN?"INCLUDED WITH VIP":"INCLUIDO CON VIP"}</div>
+          <h2 style={{fontSize:20,fontWeight:800,color:INK,margin:"0 0 18px",letterSpacing:"-0.02em"}}>{isEN?"Pro tools":"Herramientas Pro"}</h2>
+        </div>
         <div className="nexo-pro-tools-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
           {tools.map((tool,i)=>{
             var locked=!isPremium;
@@ -25815,44 +25906,29 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
               <div key={i}
                 onClick={()=>{
                   if(!locked&&onNavigate){ onNavigate(tool.page); return; }
-                  if(locked){
-                    if(!user){ onNeedAuth&&onNeedAuth(); return; }
-                    var url=STRIPE_LINKS.vipAnual+(user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:"");
-                    window.open(url,"_blank");
-                  }
+                  if(locked){ openStripe(); }
                 }}
-                style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:16,padding:18,boxShadow:SH,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",minHeight:190,cursor:"pointer",transition:"box-shadow 0.15s"}}
-                onMouseEnter={e=>{ e.currentTarget.style.boxShadow=locked?"0 4px 28px rgba(176,125,17,.18)":"0 4px 28px rgba(31,107,255,.18)"; }}
-                onMouseLeave={e=>{ e.currentTarget.style.boxShadow=SH; }}
+                style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:16,padding:18,boxShadow:SH,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",minHeight:190,cursor:"pointer",transition:"box-shadow 0.15s,transform 0.15s"}}
+                onMouseEnter={e=>{ e.currentTarget.style.boxShadow=locked?"0 4px 28px rgba(176,125,17,.18)":`0 4px 28px rgba(21,101,192,.18)`; e.currentTarget.style.transform="translateY(-2px)"; }}
+                onMouseLeave={e=>{ e.currentTarget.style.boxShadow=SH; e.currentTarget.style.transform=""; }}
               >
-                {/* Icon */}
                 <div style={{width:42,height:42,borderRadius:12,background:iconBg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                   <svg width="22" height="22" viewBox={tool.icon.props.viewBox} fill="none" stroke={iconClr} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     {tool.icon.props.children}
                   </svg>
                 </div>
-
-                {/* Name + lock */}
                 <div style={{fontSize:15.5,fontWeight:700,marginTop:13,color:INK,display:"flex",alignItems:"center",gap:8}}>
                   {tool.name}
                   {locked&&<span style={{display:"inline-flex"}}>{LockIcon}</span>}
                 </div>
-
-                {/* Description */}
                 <div style={{fontSize:12.5,color:INK2,marginTop:6,lineHeight:1.45,flex:1}}>{tool.desc}</div>
-
-                {/* Footer link */}
                 <div style={{marginTop:14}}>
                   {locked
-                    ? <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12.5,fontWeight:700,color:GOLD}}>Unlock {ArrowIcon(GOLD)}</span>
-                    : <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12.5,fontWeight:700,color:BLUE}}>Open {ArrowIcon(BLUE)}</span>
+                    ? <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12.5,fontWeight:700,color:GOLD}}>{isEN?"Unlock":"Desbloquear"} {ArrowIcon(GOLD)}</span>
+                    : <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12.5,fontWeight:700,color:BLUE}}>{isEN?"Open":"Abrir"} {ArrowIcon(BLUE)}</span>
                   }
                 </div>
-
-                {/* Blurred preview strip for locked tools */}
-                {locked&&(
-                  <div style={{position:"absolute",left:0,right:0,bottom:0,height:52,background:"repeating-linear-gradient(100deg,"+S2+" 0 9px,#eceef2 9px 18px)",filter:"blur(3px)",opacity:0.5,pointerEvents:"none"}}/>
-                )}
+                {locked&&<div style={{position:"absolute",left:0,right:0,bottom:0,height:52,background:"repeating-linear-gradient(100deg,"+S2+" 0 9px,#eceef2 9px 18px)",filter:"blur(3px)",opacity:0.5,pointerEvents:"none"}}/>}
               </div>
             );
           })}
