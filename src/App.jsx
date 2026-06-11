@@ -10127,7 +10127,7 @@ function Footer({ setPage, onAuth, lang="es" }){
       <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)",padding:"22px 20px"}}>
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
           <div className="nexo-footer-logo" style={{display:"flex",alignItems:"center",gap:10}}>
-            <img src="/logo_nexo_dark.svg" alt="NexoTrade" style={{height:36,width:"auto",objectFit:"contain"}}/>
+            <img src="/logo_nexo_full.svg" alt="NexoTrade" style={{height:36,width:"auto",objectFit:"contain"}}/>
           </div>
           {/* Tagline */}
           <p style={{color:"#475569",fontSize:12,margin:0,lineHeight:1.6,maxWidth:420,textAlign:"center"}}>
@@ -25886,14 +25886,14 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   );
   var prices             = useContext(PriceCtx)||{};
 
-  // ── design tokens (light) ──
-  var PAGE="#f6f7f9",SURFACE="#fff",S2="#f3f4f7";
-  var HAIR="#e8eaee",HAIR2="#dfe2e7";
-  var INK="#0a0d14",INK2="#5b616e",INK3="#9aa0ab";
-  var BLUE="#1f6bff",BLUEBG="rgba(31,107,255,.10)";
+  // ── design tokens — CSS variables for dark mode support ──
+  var PAGE="var(--c-bg)",SURFACE="var(--c-surface)",S2="var(--c-card2)";
+  var HAIR="var(--c-border)",HAIR2="var(--c-border)";
+  var INK="var(--c-text)",INK2="var(--c-muted)",INK3="var(--c-muted2)";
+  var BLUE="#1565C0",BLUEBG="rgba(21,101,192,.10)";
   var UP="#0a9d5c",UPBG="rgba(10,157,92,.10)";
   var DN="#e0463d",DNBG="rgba(224,70,61,.10)";
-  var SH="0 1px 2px rgba(10,13,20,.04),0 8px 24px rgba(10,13,20,.05)";
+  var SH="var(--c-shadow)";
 
   // ── live price helpers ──
   function liveP(sym,fp,fc){
@@ -26029,7 +26029,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
               </div>
             ))}
           </div>
-          {EVENTS.length>3&&<div style={{position:"absolute",bottom:0,left:0,right:0,height:32,background:"linear-gradient(transparent,#fff)",pointerEvents:"none",borderRadius:"0 0 16px 16px"}}/>}
+          {EVENTS.length>3&&<div style={{position:"absolute",bottom:0,left:0,right:0,height:32,background:"linear-gradient(transparent,var(--c-surface))",pointerEvents:"none",borderRadius:"0 0 16px 16px"}}/>}
         </div>
         {/* View all link → Economic Calendar */}
         <button onClick={()=>{setTab("calendars");setCalTab("economic");}}
@@ -26283,15 +26283,15 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
     setQry("");
   }
 
-  // ── CSS tokens (light theme matching mockup) ──
-  var PAGE="#f6f7f9", SURFACE="#fff", S2="#f3f4f7";
-  var HAIR="#e8eaee", HAIR2="#dfe2e7";
-  var INK="#0a0d14", INK2="#5b616e", INK3="#9aa0ab";
-  var BLUE="#1f6bff", BLUEBG="rgba(31,107,255,.10)";
+  // ── CSS tokens — CSS variables for dark mode support ──
+  var PAGE="var(--c-bg)", SURFACE="var(--c-surface)", S2="var(--c-card2)";
+  var HAIR="var(--c-border)", HAIR2="var(--c-border)";
+  var INK="var(--c-text)", INK2="var(--c-muted)", INK3="var(--c-muted2)";
+  var BLUE="#1565C0", BLUEBG="rgba(21,101,192,.10)";
   var UP="#0a9d5c", UPBG="rgba(10,157,92,.10)";
   var DN="#e0463d";
   var GOLD="#b07d11", GOLDBG="rgba(176,125,17,.12)";
-  var SH="0 1px 2px rgba(10,13,20,.04),0 8px 24px rgba(10,13,20,.05)";
+  var SH="var(--c-shadow)";
   var RAD16={borderRadius:16}, RAD18={borderRadius:18};
 
   return(
@@ -26302,8 +26302,8 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
         <div style={{display:"flex",flexDirection:"column",gap:18,minWidth:0}}>
 
           {/* Ask the AI hero */}
-          <div style={{background:"linear-gradient(155deg,#eef4ff 0%,#ffffff 60%)",border:"1px solid rgba(31,107,255,.22)",...RAD18,padding:24,boxShadow:SH,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",inset:0,background:"radial-gradient(420px 200px at 90% -30%,rgba(31,107,255,.18),transparent 70%)",pointerEvents:"none"}}/>
+          <div style={{background:"var(--c-surface)",border:"1px solid rgba(21,101,192,.22)",...RAD18,padding:24,boxShadow:SH,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",inset:0,background:"radial-gradient(420px 200px at 90% -30%,rgba(21,101,192,.10),transparent 70%)",pointerEvents:"none"}}/>
             <div style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:11,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:BLUE,background:BLUEBG,border:"1px solid rgba(31,107,255,.3)",padding:"6px 11px",borderRadius:999,position:"relative",zIndex:1}}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>
               NexoTrade AI
@@ -27939,7 +27939,12 @@ export default function App(){
 
           {/* Logo — integrado al navbar */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}>
-            <img src="/logo_nexo.svg" alt="NexoTrade" className="nexo-logo-img" style={{height:44,width:"auto",objectFit:"contain"}}/>
+            <img
+              src={darkMode?"/logo_nexo_full.svg":"/logo_nexo_t.png"}
+              alt="NexoTrade"
+              className="nexo-logo-img"
+              style={{height:40,width:"auto",objectFit:"contain"}}
+            />
           </div>
 
           {/* Market status */}
