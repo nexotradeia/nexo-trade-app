@@ -25464,7 +25464,11 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
               <div style={{fontSize:26,fontWeight:800,fontVariantNumeric:"tabular-nums"}}>$6.58<span style={{fontSize:14,fontWeight:600,opacity:.85}}>/mo</span></div>
               <div style={{fontSize:11.5,opacity:.85,marginTop:1}}>billed annually · 3 days free</div>
             </div>
-            <button onClick={()=>{if(!user&&onNeedAuth)onNeedAuth();}} style={{position:"relative",zIndex:1,background:"#fff",color:"#0a2c7a",fontSize:14,fontWeight:700,padding:"13px 22px",borderRadius:11,border:"none",cursor:"pointer",flexShrink:0,fontFamily:"inherit"}}>
+            <button onClick={()=>{
+              if(!user){onNeedAuth&&onNeedAuth();return;}
+              var url=STRIPE_LINKS.vipAnual+(user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:"");
+              window.open(url,"_blank");
+            }} style={{position:"relative",zIndex:1,background:"#fff",color:"#0a2c7a",fontSize:14,fontWeight:700,padding:"13px 22px",borderRadius:11,border:"none",cursor:"pointer",flexShrink:0,fontFamily:"inherit"}}>
               Start free trial
             </button>
           </div>
@@ -25492,9 +25496,16 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
             var iconClr=locked?GOLD:BLUE;
             return(
               <div key={i}
-                onClick={()=>{ if(!locked&&onNavigate){ onNavigate(tool.page); } else if(locked&&onNeedAuth&&!user){ onNeedAuth(); } }}
-                style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:16,padding:18,boxShadow:SH,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",minHeight:190,cursor:locked?"default":"pointer",transition:"box-shadow 0.15s"}}
-                onMouseEnter={e=>{ if(!locked) e.currentTarget.style.boxShadow="0 4px 28px rgba(31,107,255,.18)"; }}
+                onClick={()=>{
+                  if(!locked&&onNavigate){ onNavigate(tool.page); return; }
+                  if(locked){
+                    if(!user){ onNeedAuth&&onNeedAuth(); return; }
+                    var url=STRIPE_LINKS.vipAnual+(user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:"");
+                    window.open(url,"_blank");
+                  }
+                }}
+                style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:16,padding:18,boxShadow:SH,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",minHeight:190,cursor:"pointer",transition:"box-shadow 0.15s"}}
+                onMouseEnter={e=>{ e.currentTarget.style.boxShadow=locked?"0 4px 28px rgba(176,125,17,.18)":"0 4px 28px rgba(31,107,255,.18)"; }}
                 onMouseLeave={e=>{ e.currentTarget.style.boxShadow=SH; }}
               >
                 {/* Icon */}
