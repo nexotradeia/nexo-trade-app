@@ -25283,6 +25283,15 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
   });
   var movers = allT.slice().sort(function(a,b){ return Math.abs(b.chg)-Math.abs(a.chg); }).slice(0,4);
 
+  // ── Top Analyst Call (highest confidence across all pools)
+  var _topPick = (function(){
+    try{
+      var all=(_allCorto||[]).concat(_allLargo||[]);
+      if(!all.length) return null;
+      return all.slice().sort(function(a,b){return (b.confianza||0)-(a.confianza||0);})[0];
+    }catch(e){ return null; }
+  })();
+
   // ── Watchlist
   var wlSyms = (function(){
     try{ var s=JSON.parse(localStorage.getItem("nexo-watchlist-v2")||"[]"); return s.length?s.slice(0,5):["AAPL","MSFT","BTC"]; }catch{ return ["AAPL","MSFT","BTC"]; }
@@ -25372,39 +25381,33 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
       </div>
 
       {/* 🔥 Top Analyst Call Today */}
-      {(function(){
-        // Pick the highest-confidence pick from all pools
-        var allP=(_allCorto).concat(_allLargo);
-        var top=allP.slice().sort(function(a,b){return (b.confianza||0)-(a.confianza||0);})[0]||{};
-        var liveD=liveP(top.ticker||"",0,0);
-        return(
-          <div style={{border:"1px solid #e8eaee",borderRadius:20,padding:"16px 18px",marginBottom:18,background:"var(--c-surface)",position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ff6b35,#f7c059,#27d391)"}}/>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-              <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",color:"#b07d11",background:"rgba(176,125,17,.10)",border:"1px solid rgba(176,125,17,.25)",padding:"4px 10px",borderRadius:999}}>
-                🔥 Top Analyst Call
-              </span>
-              <span style={{fontSize:11,fontWeight:600,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px"}}>{top.confianza||93}% confidence</span>
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:46,height:46,borderRadius:13,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                <span style={{fontWeight:800,fontSize:14,color:"#fff",fontFamily:"monospace"}}>{(top.ticker||"NVDA").slice(0,4)}</span>
-              </div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:16,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em"}}>{top.ticker||"NVDA"} <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>— {top.nombre||"NVIDIA"}</span></div>
-                <div style={{marginTop:2,display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-                  <span style={{fontSize:12,fontWeight:700,color:"#16A34A"}}>▲ {top.entrada||"$205"} → {top.target||"$300"}</span>
-                  {liveD.price>0&&<span style={{fontSize:11,color:"var(--c-muted)",fontFamily:"monospace"}}>${liveD.price>=1000?(liveD.price/1000).toFixed(1)+"k":liveD.price.toFixed(2)} <span style={{color:liveD.chg>=0?"#16A34A":"#EF4444"}}>{liveD.chg>=0?"+":""}{liveD.chg.toFixed(2)}%</span></span>}
-                </div>
-              </div>
-            </div>
-            <p style={{marginTop:10,fontSize:12.5,lineHeight:1.5,color:"var(--c-muted)",marginBottom:12}}>{(top.razonEn||"").split(".")[0]+"."}</p>
-            <button onClick={function(){onNavigate&&onNavigate(10);}} style={{display:"inline-flex",alignItems:"center",gap:6,background:"#0a0d14",color:"#fff",fontSize:12.5,fontWeight:600,padding:"8px 14px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
-              Full AI analysis →
-            </button>
+      {_topPick&&(
+        <div style={{border:"1px solid #e8eaee",borderRadius:20,padding:"16px 18px",marginBottom:18,background:"var(--c-surface)",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ff6b35,#f7c059,#27d391)"}}/>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+            <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",color:"#b07d11",background:"rgba(176,125,17,.10)",border:"1px solid rgba(176,125,17,.25)",padding:"4px 10px",borderRadius:999}}>
+              🔥 Top Analyst Call
+            </span>
+            <span style={{fontSize:11,fontWeight:600,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px"}}>{_topPick.confianza}% confidence</span>
           </div>
-        );
-      })()}
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{width:46,height:46,borderRadius:13,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <span style={{fontWeight:800,fontSize:14,color:"#fff",fontFamily:"monospace"}}>{_topPick.ticker.slice(0,4)}</span>
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:16,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em"}}>{_topPick.ticker} <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>— {_topPick.nombre}</span></div>
+              <div style={{marginTop:2,display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                <span style={{fontSize:12,fontWeight:700,color:"#16A34A"}}>▲ {_topPick.entrada} → {_topPick.target}</span>
+                {(function(){var ld=liveP(_topPick.ticker,0,0);return ld.price>0?<span style={{fontSize:11,color:"var(--c-muted)",fontFamily:"monospace"}}>${ld.price>=1000?(ld.price/1000).toFixed(1)+"k":ld.price.toFixed(2)} <span style={{color:ld.chg>=0?"#16A34A":"#EF4444"}}>{ld.chg>=0?"+":""}{ld.chg.toFixed(2)}%</span></span>:null;})()}
+              </div>
+            </div>
+          </div>
+          <p style={{marginTop:10,fontSize:12.5,lineHeight:1.5,color:"var(--c-muted)",marginBottom:12}}>{(_topPick.razonEn||"").split(".")[0]+"."}</p>
+          <button onClick={function(){onNavigate&&onNavigate(10);}} style={{display:"inline-flex",alignItems:"center",gap:6,background:"#0a0d14",color:"#fff",fontSize:12.5,fontWeight:600,padding:"8px 14px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+            Full AI analysis →
+          </button>
+        </div>
+      )}
 
       {/* Today's Movers */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
@@ -25978,7 +25981,6 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
       GOOGL:{h:"$GOOGL — Buy",b:"Google Cloud and Gemini growing fast. Search advertising still dominant. Reasonable valuation vs other AI megacaps. Steady buybacks. Majority analyst Buy rating. Target range: $420-$460."},
       PLTR:{h:"$PLTR — Aggressive Buy",b:"Rosenblatt raised target to $225 (Jun 5 2026, +68% upside). Consensus $174. Unprecedented government + AI contract pipeline. AIP platform adopted by Fortune 500. High beta — size according to risk tolerance."},
       UBER:{h:"$UBER — Strong Buy",b:"'Strong Buy' consensus (27 Buy, 2 Hold). Avg target $106 (+43% upside). Consolidated profitability with free cash flow growing. Mobility + delivery + advertising flywheel is underappreciated."},
-      MSFT:{h:"$MSFT — Lowest-Risk AI Play",b:"Azure AI accelerating, Copilot in 85% of Fortune 500. TD Cowen target $540. The most consistent upside in big tech."},
       BTC:{h:"$BTC — Accumulate",b:"BTC consolidating near $62K. BlackRock + Fidelity ETF inflows continue. Forecasts for Q3 2026 point to $71K-$82K range. Central bank adoption narrative gaining traction. High volatility — scale in over weeks, not in one entry."},
       ETH:{h:"$ETH — Risk/Reward Play",b:"ETH consolidating after correction. Ethereum ETF narrative regaining traction. On-chain activity (L2, staking) remains solid. Higher risk/reward vs BTC in this zone. Target: $2,200."},
       SPY:{h:"$SPY / S&P 500 — Neutral",b:"Markets in consolidation after recent highs. Earnings season supports floor but rate uncertainty caps upside. Institutional flow: rotation from tech to energy and healthcare. Range-bound near-term."},
