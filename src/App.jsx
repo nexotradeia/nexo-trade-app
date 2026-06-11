@@ -28017,16 +28017,19 @@ export default function App(){
         /* ── FOOTER — hide logo on mobile (PNG has white bg) ── */
         .nexo-footer-logo { display: none !important; }
 
-        /* ── BOTTOM NAV — iOS Safari fix: GPU compositing without will-change ── */
+        /* ── BOTTOM NAV — iOS Safari fix ── */
         .nexo-bottom-nav {
-          -webkit-transform: translateZ(0) !important;
-          transform: translateZ(0) !important;
-          -webkit-backface-visibility: hidden !important;
-          backface-visibility: hidden !important;
           position: fixed !important;
           bottom: 0 !important;
-          bottom: constant(safe-area-inset-bottom) !important;
-          bottom: env(safe-area-inset-bottom) !important;
+          left: 0 !important;
+          right: 0 !important;
+          -webkit-transform: translate3d(0,0,0) !important;
+          transform: translate3d(0,0,0) !important;
+          -webkit-backface-visibility: hidden !important;
+          backface-visibility: hidden !important;
+          will-change: transform;
+          height: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+          padding-bottom: env(safe-area-inset-bottom, 0px) !important;
         }
 
         /* ── TRACK RECORD — desktop table hidden, mobile cards shown ── */
@@ -29019,7 +29022,7 @@ export default function App(){
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
-      <div className="nexo-bottom-nav" style={{display:"none",position:"fixed",bottom:0,left:0,right:0,zIndex:1300,background:"var(--c-surface)",borderTop:"1px solid var(--c-border)",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",height:58,justifyContent:"space-around",paddingBottom:"env(safe-area-inset-bottom)"}}>
+      <div className="nexo-bottom-nav" style={{display:"none",zIndex:1300,background:"var(--c-surface)",borderTop:"1px solid var(--c-border)",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",justifyContent:"space-around"}}>
         {[
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-5h4v5h5V9.5"/></svg>,
