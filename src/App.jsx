@@ -11025,7 +11025,7 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
           )}
 
           {/* TradingView Chart */}
-          <div style={{flex:1,position:"relative",minHeight:0}}>
+          <div className="nexo-paper-chart" style={{flex:1,position:"relative",minHeight:0}}>
             <iframe
               key={`${tvSym}-${interval}`}
               ref={iframeRef}
@@ -25677,6 +25677,22 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   var [tab,setTab]       = useState("overview");
   var [region,setRegion] = useState("global");
   var [calTab,setCalTab] = useState("economic");
+  var [evSpin,setEvSpin] = useState(false);
+  var [refreshSpin,setRefreshSpin] = useState(false);
+  function triggerRefresh(){setRefreshSpin(true);setTimeout(()=>setRefreshSpin(false),700);}
+  var RefBtn = (
+    <button onClick={triggerRefresh}
+      style={{background:"none",border:"none",cursor:"pointer",padding:"2px 4px",color:"#9aa0ab",lineHeight:1,display:"flex",alignItems:"center"}}
+      title="Refresh">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+        style={{transition:"transform 0.7s",transform:refreshSpin?"rotate(360deg)":"rotate(0deg)"}}>
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M8 16H3v5"/>
+      </svg>
+    </button>
+  );
   var prices             = useContext(PriceCtx)||{};
 
   // ── design tokens (light) ──
@@ -25759,10 +25775,19 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   var moversRaw=(TICKER_DATA_INIT||[]).filter(t=>t.symbol&&t.change!==undefined).sort((a,b)=>Math.abs(b.change)-Math.abs(a.change)).slice(0,6);
 
   // ── right rail data ──
-  var EVENTS=[
-    {tm:"8:30",  t:"CPI inflation (May)",   m:"Forecast 3.2% YoY",      imp:"High"},
-    {tm:"10:00", t:"Fed Chair speech",      m:"Monetary policy outlook", imp:"High"},
-    {tm:"2:00",  t:"FOMC minutes",          m:"From last meeting",       imp:"High"},
+  var _todayStr=(function(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
+  var _econToday=(ECON_2026||[]).filter(function(e){return e.date===_todayStr;}).map(function(e,i){
+    var times=["8:30 AM","9:45 AM","10:00 AM","10:30 AM","2:00 PM","3:00 PM"];
+    return {tm:times[i]||"TBD",t:e.event,m:e.cat+(e.est&&e.est!=="—"?" · Est: "+e.est:""),imp:e.imp==="high"?"High":e.imp==="med"?"Med":"Low"};
+  });
+  // Also pull next 3 upcoming events (if today has none)
+  var _econUpcoming=(ECON_2026||[]).filter(function(e){return e.date>_todayStr;}).slice(0,3).map(function(e){
+    return {tm:new Date(e.date).toLocaleDateString("en-US",{month:"short",day:"numeric"}),t:e.event,m:e.cat+(e.est&&e.est!=="—"?" · Est: "+e.est:""),imp:e.imp==="high"?"High":e.imp==="med"?"Med":"Low"};
+  });
+  var EVENTS = _econToday.length ? _econToday : _econUpcoming.length ? _econUpcoming : [
+    {tm:"8:30 AM", t:"CPI inflation (May)",   m:"Inflation · Est: 3.2%",  imp:"High"},
+    {tm:"10:00 AM",t:"Fed Chair speech",      m:"Monetary policy outlook",imp:"High"},
+    {tm:"2:00 PM", t:"FOMC minutes",          m:"From last meeting",      imp:"High"},
   ];
   var MARKET_NEWS=[
     {t:"Tech leads selloff as yields climb ahead of inflation print",   src:"Reuters · 22m"},
@@ -25785,17 +25810,42 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
     <div style={{display:"flex",flexDirection:"column",gap:16,minWidth:0}}>
       {/* Today's events */}
       <div style={{...BLOCK,borderRadius:16}}>
-        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Today's events</div>
-        {EVENTS.map((ev,i)=>(
-          <div key={i} style={{padding:"12px 15px",borderBottom:i<EVENTS.length-1?`1px solid ${HAIR}`:"none",display:"flex",gap:11,alignItems:"flex-start"}}>
-            <span style={{fontSize:11.5,fontWeight:700,color:BLUE,width:54,flexShrink:0,fontVariantNumeric:"tabular-nums"}}>{ev.tm}</span>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:12.5,fontWeight:600,color:INK}}>{ev.t}</div>
-              <div style={{fontSize:11,color:INK3,marginTop:1}}>{ev.m}</div>
-            </div>
-            <span style={{fontSize:9.5,fontWeight:700,color:DN,background:DNBG,padding:"2px 6px",borderRadius:5,flexShrink:0}}>{ev.imp}</span>
+        <div style={{padding:"11px 15px",borderBottom:`1px solid ${HAIR}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <span style={{fontSize:13.5,fontWeight:700,color:INK}}>{_econToday.length?"Today's events":"Upcoming events"}</span>
+          <button onClick={triggerRefresh}
+            style={{background:"none",border:"none",cursor:"pointer",padding:"2px 6px",color:INK3,lineHeight:1,display:"flex",alignItems:"center",gap:4,fontSize:11,fontWeight:600}}
+            title="Refresh">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+              style={{transition:"transform 0.7s",transform:refreshSpin?"rotate(360deg)":"rotate(0deg)"}}>
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M8 16H3v5"/>
+            </svg>
+          </button>
+        </div>
+        {/* Scroll container with fade indicator when more than 3 events */}
+        <div style={{position:"relative"}}>
+          <div style={{maxHeight:EVENTS.length>3?210:undefined,overflowY:EVENTS.length>3?"auto":"visible",scrollbarWidth:"none"}}>
+            {EVENTS.map((ev,i)=>(
+              <div key={i} style={{padding:"11px 15px",borderBottom:i<EVENTS.length-1?`1px solid ${HAIR}`:"none",display:"flex",gap:11,alignItems:"flex-start"}}>
+                <span style={{fontSize:11,fontWeight:700,color:BLUE,width:58,flexShrink:0,fontVariantNumeric:"tabular-nums"}}>{ev.tm}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:12,fontWeight:600,color:INK}}>{ev.t}</div>
+                  <div style={{fontSize:11,color:INK3,marginTop:1}}>{ev.m}</div>
+                </div>
+                <span style={{fontSize:9,fontWeight:700,color:ev.imp==="High"?DN:ev.imp==="Med"?"#d97706":INK3,background:ev.imp==="High"?DNBG:ev.imp==="Med"?"rgba(217,119,6,.10)":"rgba(0,0,0,.05)",padding:"2px 6px",borderRadius:5,flexShrink:0}}>{ev.imp}</span>
+              </div>
+            ))}
           </div>
-        ))}
+          {EVENTS.length>3&&<div style={{position:"absolute",bottom:0,left:0,right:0,height:32,background:"linear-gradient(transparent,#fff)",pointerEvents:"none",borderRadius:"0 0 16px 16px"}}/>}
+        </div>
+        {/* View all link → Economic Calendar */}
+        <button onClick={()=>{setTab("calendars");setCalTab("economic");}}
+          style={{width:"100%",background:"none",border:"none",borderTop:`1px solid ${HAIR}`,padding:"10px 15px",cursor:"pointer",fontSize:12,fontWeight:600,color:BLUE,textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"inherit"}}>
+          View Economic Calendar
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </div>
       {/* Market-moving news */}
       <div style={{...BLOCK,borderRadius:16}}>
@@ -25887,7 +25937,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
           {/* Indices + Crypto side-by-side */}
           <div className="nexo-markets-duo" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
             <div style={BLOCK}>
-              <div style={BH}>Indices</div>
+              <div style={{...BH,display:"flex",alignItems:"center",justifyContent:"space-between"}}>Indices{RefBtn}</div>
               {idxList.map((idx,i)=>{
                 var live=liveP(idx.sym,idx.fp,idx.fc);
                 return(
@@ -25900,7 +25950,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
               })}
             </div>
             <div style={BLOCK}>
-              <div style={BH}>Crypto</div>
+              <div style={{...BH,display:"flex",alignItems:"center",justifyContent:"space-between"}}>Crypto{RefBtn}</div>
               {CRYPTO.map((c,i)=>{
                 var live=liveP(c.sym,c.fp,c.fc);
                 return(
@@ -25916,7 +25966,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
 
           {/* Sector heatmap */}
           <div style={BLOCK}>
-            <div style={BH}>Sector heatmap</div>
+            <div style={{...BH,display:"flex",alignItems:"center",justifyContent:"space-between"}}>Sector heatmap{RefBtn}</div>
             <div className="nexo-heat-grid" style={{padding:14,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:7}}>
               {SECTORS.map((sec,i)=>(
                 <div key={i} style={{borderRadius:9,padding:"11px 10px",background:secBg(sec.c),color:"#fff"}}>
@@ -25929,7 +25979,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
 
           {/* Top movers */}
           <div style={BLOCK}>
-            <div style={BH}>Top movers</div>
+            <div style={{...BH,display:"flex",alignItems:"center",justifyContent:"space-between"}}>Top movers{RefBtn}</div>
             {(moversRaw.length>0?moversRaw.slice(0,6):[
               {symbol:"COST",price:981.73,change:+1.36},
               {symbol:"NOW", price:108.77,change:+1.68},
@@ -27412,7 +27462,8 @@ export default function App(){
 
         /* ── PAPER TRADING — layout stacked ── */
         .nexo-paper-main { flex-direction: column !important; height: auto !important; overflow: visible !important; min-height: 0 !important; }
-        .nexo-paper-panel { width: 100% !important; max-width: 100% !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; max-height: 50vh !important; overflow-y: auto !important; }
+        .nexo-paper-chart { flex: none !important; height: 260px !important; min-height: 260px !important; }
+        .nexo-paper-panel { width: 100% !important; max-width: 100% !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; max-height: none !important; overflow-y: auto !important; }
 
         /* ── GURUS 13F — detail stats 4-col → 2-col ── */
         .nexo-guru-detail-stats { grid-template-columns: repeat(2,1fr) !important; }
@@ -27602,7 +27653,7 @@ export default function App(){
         50%     { box-shadow:-10px 0 14px 6px #0B1F3F, 0 3px 28px rgba(224,182,75,0.85), 0 0 0 4px rgba(224,182,75,0.18); transform:scale(1.05); }
       }
     `}</style>
-    <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s",overflowX:"hidden"}}>
+    <div data-dark={String(darkMode)} style={{minHeight:"100vh",background:"var(--c-bg)",color:"var(--c-text)",fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.25s,color 0.25s"}}>
       {/* 📧 Email gate obligatorio en primera visita (no usuarios logueados) */}
       {!user && !emailGateDone && (
         <EmailGate lang={lang}
