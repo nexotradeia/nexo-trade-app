@@ -25906,9 +25906,37 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
   var chats=[{q:"Analyze $TSLA earnings risk",t:"2h"},{q:"Rebalance my portfolio",t:"Yest."},{q:"Compare $AAPL vs $MSFT",t:"Mon"}];
   try{var rc=JSON.parse(localStorage.getItem("nexo-ai-chats")||"null");if(rc&&rc.length)chats=rc.slice(0,3);}catch{}
 
+  // Quick inline AI response generator — keeps user on the page
+  function genAnalysis(q){
+    var u=q.toUpperCase();
+    var tm=u.match(/\$?([A-Z]{2,5})/);
+    var ticker=tm?tm[1]:null;
+    var db={
+      NVDA:{h:"$NVDA — Strong Buy",b:"Wall Street consensus: 71 Buy / 0 Sell (Jun 2026). Avg analyst target $300. Blackwell GPU demand from hyperscalers (MSFT, GOOG, AMZN) is accelerating with no signs of slowdown. Entry zone: $195-$210. Risk: multiple compression if AI capex slows."},
+      META:{h:"$META — Strong Buy",b:"Record operating margins, open-source Llama 4, and a massive buyback program. RBC Capital target $810 (Jun 1 2026). 37 analysts covering. Strong moat in social advertising + growing AI infrastructure."},
+      MSFT:{h:"$MSFT — Lowest-Risk AI Play",b:"Azure AI accelerating, Copilot in 85% of Fortune 500. TD Cowen target $540 (Jun 4 2026). The most consistent upside in big tech with a high earnings floor. Buy on pullbacks below $415."},
+      TSLA:{h:"$TSLA — High Risk/Reward",b:"FSD and energy storage are the bull case; margin compression is the bear case. Mixed analyst sentiment — ~50% Buy / 50% Hold. Watch Q2 delivery numbers. High-beta name — size conservatively."},
+      AAPL:{h:"$AAPL — Hold/Mild Buy",b:"Services (25% of revenue) provides recurring income. iPhone cycle mature but India manufacturing ramp is a catalyst. Analyst avg target ~$210. Low volatility compounder, not a momentum trade."},
+      AMZN:{h:"$AMZN — Strong Buy",b:"AWS re-accelerating. Amazon Ads crossing $60B annualized. 66 analysts, avg target $313 (+24% upside). Robotics is a 2026-27 optionality play. Solid risk/reward at current levels."},
+      GOOGL:{h:"$GOOGL — Buy",b:"Google Cloud and Gemini growing fast. Search advertising still dominant. Reasonable valuation vs other AI megacaps. Steady buybacks. Majority analyst Buy rating. Target range: $420-$460."},
+      PLTR:{h:"$PLTR — Aggressive Buy",b:"Rosenblatt raised target to $225 (Jun 5 2026, +68% upside). Consensus $174. Unprecedented government + AI contract pipeline. AIP platform adopted by Fortune 500. High beta — size according to risk tolerance."},
+      UBER:{h:"$UBER — Strong Buy",b:"'Strong Buy' consensus (27 Buy, 2 Hold). Avg target $106 (+43% upside). Consolidated profitability with free cash flow growing. Mobility + delivery + advertising flywheel is underappreciated."},
+      MSFT:{h:"$MSFT — Lowest-Risk AI Play",b:"Azure AI accelerating, Copilot in 85% of Fortune 500. TD Cowen target $540. The most consistent upside in big tech."},
+      BTC:{h:"$BTC — Accumulate",b:"BTC consolidating near $62K. BlackRock + Fidelity ETF inflows continue. Forecasts for Q3 2026 point to $71K-$82K range. Central bank adoption narrative gaining traction. High volatility — scale in over weeks, not in one entry."},
+      ETH:{h:"$ETH — Risk/Reward Play",b:"ETH consolidating after correction. Ethereum ETF narrative regaining traction. On-chain activity (L2, staking) remains solid. Higher risk/reward vs BTC in this zone. Target: $2,200."},
+      SPY:{h:"$SPY / S&P 500 — Neutral",b:"Markets in consolidation after recent highs. Earnings season supports floor but rate uncertainty caps upside. Institutional flow: rotation from tech to energy and healthcare. Range-bound near-term."},
+      QQQ:{h:"$QQQ — Cautious",b:"Tech pullback driven by rate concerns and valuation re-rating. However underlying earnings growth from AI names is real. Support at ~$480. Wait for a flush before adding."},
+    };
+    if(ticker&&db[ticker]) return {h:db[ticker].h, b:db[ticker].b};
+    if(u.includes("PORTFOLIO")||u.includes("DIVERSIF")||u.includes("REBALANCE")) return {h:"Portfolio Insight",b:"A balanced 2026 portfolio: 40% AI/tech (NVDA, MSFT, META, AMZN), 20% defensive (GLD, dividend stocks), 20% crypto (BTC/IBIT), 20% cash for dips. If you're over 60% tech, trim on strength and rotate into healthcare or energy. Use the Watchlist tab to track your positions."};
+    if(u.includes("MOVING")||u.includes("TODAY")||u.includes("MOVER")||u.includes("MARKET")) return {h:"Market Snapshot",b:"Risk-off tone today. Energy (+1.8%) and Healthcare (+0.9%) leading. Tech pulling back — NVDA, AVGO, META showing weakness. Fear & Greed at Neutral (52). Volume below average, suggesting low conviction. Watch for a reversal if volume picks up on green closes."};
+    if(u.includes("DIVIDEND")||u.includes("INCOME")) return {h:"Top Dividend Picks",b:"Best income plays for 2026: $JPM (2.0% yield, financials strength), $KO (3.1%, consumer staples, 60-year dividend grower), $VZ (6.5%, high yield with telecom stability), $ABBV (3.5%, pharma with strong pipeline). All have sustainable payout ratios."};
+    if(u.includes("SECTOR")||u.includes("ROTATION")) return {h:"Sector Rotation Insight",b:"Current leadership: Energy (rate-sensitive, supply tightness), Healthcare (defensive demand). Lagging: Tech (valuation reset), Consumer Discretionary (spending caution). Rotation signal: institutional money is flowing out of high-multiple tech into value sectors. Energy ETF (XLE) and Health (XLV) are accumulation zones."};
+    return {h:"AI Market Insight",b:"S&P consolidating with a risk-off tone. Institutional flow favors energy and healthcare over tech this week. For specific analysis, ask about a ticker (e.g. 'Analyze $NVDA') or a topic ('sector rotation', 'dividend stocks', 'BTC outlook'). Pro AI signal: 3 of our 8 current picks are at or below their entry points — potential re-entry zones."};
+  }
+
   function ask(q){
     if(!q||!q.trim())return;
-    // Find matching ticker in query
     var upper=q.toUpperCase();
     var allPicks=(_aip||[]);
     var match=allPicks.find(function(p){ return upper.indexOf(p.ticker)!==-1; });
@@ -25917,9 +25945,8 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
     } else if(!isPremium){
       setAiResult({type:"gate",query:q});
     } else {
-      // Pro user — open real AI
-      try{if(q)sessionStorage.setItem("nexo-ai-prefill",q);}catch{}
-      if(onAI)onAI();
+      var ans=genAnalysis(q);
+      setAiResult({type:"analysis",headline:ans.h,body:ans.b,query:q});
     }
     setQry("");
   }
@@ -25996,13 +26023,20 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
                   <button onClick={()=>onNavigate&&onNavigate(51)} style={{marginTop:12,display:"inline-flex",alignItems:"center",gap:7,background:BLUE,color:"#fff",fontSize:13,fontWeight:700,padding:"10px 16px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Full track record <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
                 </div>
               );})()}
+              {aiResult.type==="analysis"&&(
+                <div>
+                  <div style={{fontSize:16,fontWeight:800,color:INK,letterSpacing:"-0.02em",marginBottom:10}}>{aiResult.headline}</div>
+                  <p style={{fontSize:13.5,lineHeight:1.6,color:INK2,margin:"0 0 14px"}}>{aiResult.body}</p>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    <button onClick={()=>onNavigate&&onNavigate(51)} style={{display:"inline-flex",alignItems:"center",gap:6,background:BLUE,color:"#fff",fontSize:13,fontWeight:700,padding:"9px 15px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>View signal history <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+                    <button onClick={()=>setAiResult(null)} style={{display:"inline-flex",alignItems:"center",gap:6,background:S2,color:INK2,fontSize:13,fontWeight:600,padding:"9px 14px",borderRadius:10,border:`1px solid ${HAIR}`,cursor:"pointer",fontFamily:"inherit"}}>Ask another question</button>
+                  </div>
+                </div>
+              )}
               {aiResult.type==="gate"&&(
                 <div>
                   <p style={{fontSize:13.5,lineHeight:1.55,color:INK2,marginBottom:16}}>Oracle AI can analyze any ticker, compare positions, and give you portfolio recommendations — exclusively for Pro members.</p>
-                  <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-                    <button onClick={()=>onNavigate&&onNavigate(8)} style={{display:"inline-flex",alignItems:"center",gap:7,background:`linear-gradient(135deg,${GOLD},#8a5e10)`,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 18px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>✦ Unlock Pro — $6.58/mo</button>
-                    <button onClick={()=>{if(onAI)onAI();}} style={{display:"inline-flex",alignItems:"center",gap:7,background:S2,color:INK2,fontSize:13,fontWeight:600,padding:"11px 16px",borderRadius:10,border:`1px solid ${HAIR}`,cursor:"pointer",fontFamily:"inherit"}}>Try AI chat anyway</button>
-                  </div>
+                  <button onClick={()=>onNavigate&&onNavigate(8)} style={{display:"inline-flex",alignItems:"center",gap:7,background:`linear-gradient(135deg,${GOLD},#8a5e10)`,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 18px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>✦ Unlock Pro — $6.58/mo</button>
                 </div>
               )}
             </div>
