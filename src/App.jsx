@@ -2033,6 +2033,7 @@ function AIAssistant({lang,onClose,initialQuery=""}){
         .nexo-ai-cat:hover{background:rgba(15,94,104,0.18)!important;border-color:rgba(15,94,104,0.4)!important;color:#A5B4FC!important;transform:translateY(-2px)}
         .nexo-ai-send:hover{opacity:0.85}
         .nexo-ai-hist:hover{background:rgba(255,255,255,0.06)!important}
+        @media(max-width:640px){.nexo-ai-sidebar{display:none!important}}
       `}</style>
 
       {/* ── TOP NAV ── */}
@@ -2063,7 +2064,7 @@ function AIAssistant({lang,onClose,initialQuery=""}){
       <div style={{flex:1,display:"flex",overflow:"hidden"}}>
 
         {/* Sidebar history */}
-        <div style={{width:220,flexShrink:0,borderRight:"1px solid rgba(255,255,255,0.06)",padding:"16px 10px",overflowY:"auto",display:"flex",flexDirection:"column",gap:4}}>
+        <div className="nexo-ai-sidebar" style={{width:220,flexShrink:0,borderRight:"1px solid rgba(255,255,255,0.06)",padding:"16px 10px",overflowY:"auto",display:"flex",flexDirection:"column",gap:4}}>
           <div style={{fontSize:10,fontWeight:700,color:"#334155",letterSpacing:1,textTransform:"uppercase",marginBottom:8,paddingLeft:6}}>Recientes</div>
           {[
             lang==="en"?"Best dividend stocks":"Las mejores acciones de dividendo",
@@ -26607,7 +26608,7 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
                     <span key={k} style={{fontSize:12,fontWeight:600,padding:"6px 11px",borderRadius:8,background:S2,border:`1px solid ${HAIR}`,color:INK2}}>{k} <strong style={{color:INK}}>{v}</strong></span>
                   ))}
                 </div>
-                <button onClick={()=>onNavigate&&onNavigate(51)} style={{marginTop:16,display:"inline-flex",alignItems:"center",gap:8,background:BLUE,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 17px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+                <button onClick={()=>onAI?onAI(sym):onNavigate&&onNavigate(51)} style={{marginTop:16,display:"inline-flex",alignItems:"center",gap:8,background:BLUE,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 17px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
                   See full analysis <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </button>
               </div>
@@ -27360,7 +27361,7 @@ export default function App(){
     if(page===8) return <ProPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onNeedAuth={()=>setAuth("login")} onSettings={()=>setShowSettings(true)} lang={lang}/>;
     if(page===808) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;{/* old PremiumPage preserved */}
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
-    if(page===10) return <AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={()=>setShowAI(true)} lang={lang}/>;
+    if(page===10) return <AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={(ticker)=>{if(ticker){setAiInitQuery("Give me a complete investment analysis for $"+ticker+": fundamentals, recent performance, analyst consensus, and your buy/hold/sell recommendation. Be concise.");}setShowAI(true);}} lang={lang}/>;
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===14) return <EconCalendarPage lang={lang}/>;
