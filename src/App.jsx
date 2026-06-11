@@ -25922,7 +25922,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
           <div className="nexo-pricing-duo" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginBottom:48,alignItems:"start"}}>
 
             {/* FREE card */}
-            <div style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:20,padding:"32px 28px",boxShadow:SH}}>
+            <div className="nexo-pricing-card" style={{background:SURFACE,border:`1px solid ${HAIR}`,borderRadius:20,padding:"32px 28px",boxShadow:SH}}>
               <div style={{fontSize:10,fontWeight:800,color:INK3,letterSpacing:2,textTransform:"uppercase",marginBottom:20}}>FREE</div>
               <div style={{display:"flex",alignItems:"baseline",gap:8,marginBottom:6}}>
                 <span style={{fontSize:52,fontWeight:900,color:INK,letterSpacing:"-0.04em",lineHeight:1}}>$0</span>
@@ -25950,7 +25950,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
             </div>
 
             {/* VIP ANUAL card */}
-            <div style={{background:SURFACE,border:`2px solid ${BLUE}`,borderRadius:20,padding:"32px 28px",boxShadow:`0 4px 32px rgba(21,101,192,0.18)`,position:"relative"}}>
+            <div className="nexo-pricing-card" style={{background:SURFACE,border:`2px solid ${BLUE}`,borderRadius:20,padding:"32px 28px",boxShadow:`0 4px 32px rgba(21,101,192,0.18)`,position:"relative"}}>
               {/* MÁS POPULAR badge */}
               <div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:BLUE,color:"#fff",fontSize:11,fontWeight:800,letterSpacing:1,textTransform:"uppercase",padding:"5px 16px",borderRadius:20}}>
                 {isEN?"MOST POPULAR":"MÁS POPULAR"}
@@ -27844,7 +27844,9 @@ export default function App(){
         .nexo-markets-layout { grid-template-columns: 1fr !important; }
         .nexo-markets-duo { grid-template-columns: 1fr !important; }
         .nexo-heat-grid { grid-template-columns: repeat(2,1fr) !important; }
-        .nexo-pro-tools-grid { grid-template-columns: repeat(2,1fr) !important; }
+        .nexo-pricing-duo { grid-template-columns: 1fr !important; gap: 20px !important; }
+        .nexo-pricing-card { padding: 22px 18px !important; border-radius: 16px !important; }
+        .nexo-pro-tools-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
         .nexo-pro-banner { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
         .nexo-mkt-subnav { flex-wrap: nowrap !important; overflow-x: auto !important; }
         .nexo-mkt-subnav::-webkit-scrollbar { display: none !important; }
