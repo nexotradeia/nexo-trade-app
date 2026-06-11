@@ -1,25 +1,20 @@
-import { defineConfig } from 'vite'
+import { defineConfig, transformWithEsbuild } from 'vite'
 import react from '@vitejs/plugin-react'
 import legacy from '@vitejs/plugin-legacy'
-import esbuild from 'esbuild'
 
 // Post-process: catches any ?? that slipped through Babel's AST handoff
-// Uses generateBundle (runs after legacy plugin emits legacy chunks)
 function patchNullishCoalescing() {
   return {
     name: 'patch-nullish-coalescing',
     apply: 'build',
     enforce: 'post',
     async generateBundle(_, bundle) {
-      for (const [fileName, chunk] of Object.entries(bundle)) {
-        if (chunk.type !== 'chunk') continue;
-        if (!chunk.code.includes('??')) continue;
+      for (const [, chunk] of Object.entries(bundle)) {
+        if (chunk.type !== 'chunk' || !chunk.code.includes('??')) continue;
         try {
-          const result = await esbuild.transform(chunk.code, { target: 'es2015', loader: 'js', minify: false });
+          const result = await transformWithEsbuild(chunk.code, 'chunk.js', { target: 'es2015', minify: false });
           chunk.code = result.code;
-        } catch (e) {
-          // never break the build
-        }
+        } catch (e) { /* never break the build */ }
       }
     }
   }
