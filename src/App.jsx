@@ -15594,27 +15594,24 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
   return (
     <div style={{maxWidth:980,margin:"0 auto"}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(139,92,246,0.2)",borderRadius:20,padding:"20px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,background:"radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)"}}/>
-        <div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
-          <span style={{fontSize:32}}>👁️</span>
-          <div>
-            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>🏛️ Wall St. & Capitol</div>
-            <div style={{fontSize:12,color:"#475569"}}>{isEN?"13F Gurus · ARK Daily · SEC Insiders · Congress":"Gurús 13F · ARK Daily · Insiders SEC · Congresistas"}</div>
-          </div>
-          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-            {pxUpdated && <span style={{fontSize:10,color:"#334155"}}>Act. {pxUpdated}</span>}
-            <button onClick={fetchLivePrices} disabled={pxLoading}
-              style={{display:"flex",alignItems:"center",gap:5,background:"rgba(15,94,104,0.15)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:20,padding:"5px 14px",fontSize:11,fontWeight:700,color:"#818CF8",cursor:"pointer",transition:"all 0.2s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(15,94,104,0.25)"}
-              onMouseLeave={e=>e.currentTarget.style.background="rgba(15,94,104,0.15)"}>
-              <span style={{display:"inline-block",animation:pxLoading?"spin 1s linear infinite":"none"}}>🔄</span>
-              {pxLoading?"Actualizando…":"Refresh precios"}
-            </button>
-            <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(0,210,106,0.1)",border:"1px solid rgba(0,210,106,0.2)",borderRadius:20,padding:"5px 12px"}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>
-              <span style={{fontSize:11,fontWeight:700,color:"#00D26A"}}>{GURUS_13F.length} GURÚS</span>
-            </div>
+      <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:16,padding:"18px 22px",marginBottom:16,display:"flex",alignItems:"center",gap:14,boxShadow:"var(--c-shadow)"}}>
+        <div style={{width:46,height:46,borderRadius:14,background:"rgba(21,101,192,0.10)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>🏛️</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:18,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.4}}>Wall St. & Capitol</div>
+          <div style={{fontSize:12,color:"var(--c-muted)",marginTop:2}}>{isEN?"13F Gurus · ARK Daily · SEC Insiders · Congress":"Gurús 13F · ARK Daily · Insiders SEC · Congresistas"}</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+          {pxUpdated && <span style={{fontSize:10,color:"var(--c-muted)"}}>Act. {pxUpdated}</span>}
+          <button onClick={fetchLivePrices} disabled={pxLoading}
+            style={{display:"flex",alignItems:"center",gap:5,background:"rgba(21,101,192,0.07)",border:"1px solid rgba(21,101,192,0.2)",borderRadius:20,padding:"5px 14px",fontSize:11,fontWeight:700,color:"#1565C0",cursor:"pointer",transition:"all 0.2s"}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(21,101,192,0.14)"}
+            onMouseLeave={e=>e.currentTarget.style.background="rgba(21,101,192,0.07)"}>
+            <span style={{display:"inline-block",animation:pxLoading?"nexo-spin 1s linear infinite":"none"}}>🔄</span>
+            {pxLoading?(isEN?"Updating…":"Actualizando…"):(isEN?"Refresh prices":"Refresh precios")}
+          </button>
+          <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(16,185,129,0.07)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:20,padding:"5px 12px"}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:"#10B981",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>
+            <span style={{fontSize:11,fontWeight:700,color:"#10B981"}}>{GURUS_13F.length} {isEN?"GURUS":"GURÚS"}</span>
           </div>
         </div>
       </div>
@@ -15623,9 +15620,9 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
         {TABS.map(t => (
           <button key={t.k} onClick={()=>{ if(t.vip&&!isPremium){onNeedPremium();return;} setTab(t.k); }}
-            style={{background:tab===t.k?"linear-gradient(135deg,#F59E0B,#B45309)":"transparent",border:`1.5px solid ${tab===t.k?"transparent":C.border}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(15,94,104,0.3)":"none",display:"flex",alignItems:"center",gap:6}}>
+            style={{background:tab===t.k?"#1565C0":"var(--c-surface)",border:`1.5px solid ${tab===t.k?"#1565C0":"var(--c-border)"}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":"var(--c-muted)",cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(21,101,192,0.25)":"none",display:"flex",alignItems:"center",gap:6}}>
             {t.l}
-            {t.vip&&<span style={{fontSize:9,fontWeight:800,background:"linear-gradient(135deg,#f59e0b,#ef4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:0.5}}>PREMIUM</span>}
+            {t.vip&&<span style={{fontSize:9,fontWeight:800,color:"#F59E0B",background:"rgba(245,158,11,0.12)",padding:"1px 5px",borderRadius:4,letterSpacing:0.5}}>VIP</span>}
           </button>
         ))}
         {/* Search bar */}
@@ -15633,7 +15630,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
           <div style={{marginLeft:"auto",position:"relative"}}>
             <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:12,color:C.muted2}}>🔍</span>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==="en"?"Search investor…":"Buscar inversor…"}
-              style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${C.border}`,borderRadius:20,padding:"7px 12px 7px 30px",fontSize:12,color:C.text,outline:"none",width:180}}/>
+              style={{background:"var(--c-surface)",border:`1px solid var(--c-border)`,borderRadius:20,padding:"7px 12px 7px 30px",fontSize:12,color:"var(--c-text)",outline:"none",width:180}}/>
           </div>
         )}
       </div>
@@ -15654,59 +15651,59 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                       style={{filter:isLocked?"blur(5px)":"none",pointerEvents:isLocked?"none":"auto",transition:"filter 0.2s"}}
                       onClick={()=>{ if(!isLocked){setSelGuru(g.id);setDetailTab("holdings");} }}>
                       <div
-                        style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden"}}
-                        onMouseEnter={e=>{if(!isLocked){e.currentTarget.style.border=`1px solid ${g.color}60`;e.currentTarget.style.boxShadow=`0 8px 24px ${g.color}15`;}}}
-                        onMouseLeave={e=>{e.currentTarget.style.border=`1px solid ${g.color}30`;e.currentTarget.style.boxShadow="none";}}>
-                        <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:`radial-gradient(circle,${g.color}12 0%,transparent 70%)`,pointerEvents:"none"}}/>
-                        {!search && !isLocked && idx<3 && <div style={{position:"absolute",top:12,right:12,background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",fontSize:9,fontWeight:900,letterSpacing:0.4,borderRadius:20,padding:"3px 9px",zIndex:2,boxShadow:"0 2px 10px rgba(200,144,31,0.5)"}}>⭐ TOP GURU</div>}
-                        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                          <div style={{width:46,height:46,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,position:"relative",overflow:"hidden",flexShrink:0}}>
+                        style={{background:"var(--c-surface)",border:`1px solid var(--c-border)`,borderRadius:16,padding:"18px",cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden",boxShadow:"var(--c-shadow)"}}
+                        onMouseEnter={e=>{if(!isLocked){e.currentTarget.style.borderColor="#1565C0";e.currentTarget.style.boxShadow=`0 6px 20px rgba(21,101,192,0.12)`;}}}
+                        onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--c-border)";e.currentTarget.style.boxShadow="var(--c-shadow)";}}>
+                        <div style={{position:"absolute",top:0,left:0,bottom:0,width:4,borderRadius:"16px 0 0 16px",background:g.color}}/>
+                        {!search && !isLocked && idx<3 && <div style={{position:"absolute",top:12,right:12,background:"rgba(245,158,11,0.1)",color:"#B45309",fontSize:9,fontWeight:900,letterSpacing:0.4,borderRadius:20,padding:"3px 9px",zIndex:2,border:"1px solid rgba(245,158,11,0.3)"}}>⭐ TOP</div>}
+                        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,paddingLeft:8}}>
+                          <div style={{width:44,height:44,borderRadius:12,background:`${g.color}18`,border:`1px solid ${g.color}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,position:"relative",overflow:"hidden",flexShrink:0}}>
                             <span>{g.emoji}</span>
-                            {GURU_PHOTOS[g.id]&&<img src={GURU_PHOTOS[g.id]} alt={g.name} onError={e=>{e.target.style.display="none";}} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",borderRadius:14}}/>}
+                            {GURU_PHOTOS[g.id]&&<img src={GURU_PHOTOS[g.id]} alt={g.name} onError={e=>{e.target.style.display="none";}} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",borderRadius:12}}/>}
                           </div>
                           <div>
-                            <div style={{fontWeight:800,color:"#F1F5F9",fontSize:14}}>{g.name}</div>
-                            <div style={{fontSize:11,color:"#475569"}}>{g.fund}</div>
+                            <div style={{fontWeight:800,color:"var(--c-text)",fontSize:14}}>{g.name}</div>
+                            <div style={{fontSize:11,color:"var(--c-muted)"}}>{g.fund}</div>
                           </div>
                         </div>
-                        <div style={{display:"flex",gap:10,marginBottom:10}}>
-                          <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
-                            <div style={{fontSize:11,fontWeight:800,color:g.color}}>{g.aum}</div>
-                            <div style={{fontSize:9,color:"#475569"}}>AUM</div>
+                        <div style={{display:"flex",gap:8,marginBottom:10,paddingLeft:8}}>
+                          <div style={{background:"var(--c-card)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                            <div style={{fontSize:11,fontWeight:800,color:"#1565C0"}}>{g.aum}</div>
+                            <div style={{fontSize:9,color:"var(--c-muted)"}}>AUM</div>
                           </div>
-                          <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
-                            <div style={{fontSize:11,fontWeight:800,color:"#F1F5F9"}}>{g.numStocks}</div>
-                            <div style={{fontSize:9,color:"#475569"}}>Posiciones</div>
+                          <div style={{background:"var(--c-card)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                            <div style={{fontSize:11,fontWeight:800,color:"var(--c-text)"}}>{g.numStocks}</div>
+                            <div style={{fontSize:9,color:"var(--c-muted)"}}>{isEN?"Positions":"Posiciones"}</div>
                           </div>
-                          <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
-                            <div style={{fontSize:10,fontWeight:700,color:"#F1F5F9"}}>{g.period}</div>
-                            <div style={{fontSize:9,color:"#475569"}}>{isEN?"Period":"Período"}</div>
+                          <div style={{background:"var(--c-card)",borderRadius:8,padding:"6px 10px",flex:1,textAlign:"center"}}>
+                            <div style={{fontSize:10,fontWeight:700,color:"var(--c-text)"}}>{g.period}</div>
+                            <div style={{fontSize:9,color:"var(--c-muted)"}}>{isEN?"Period":"Período"}</div>
                           </div>
                         </div>
-                        <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{g.bio || `${g.fund} · ${g.period} · ${g.numStocks} posiciones`}</div>
-                        <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                        <div style={{fontSize:11,color:"var(--c-muted)",lineHeight:1.5,marginBottom:10,paddingLeft:8}}>{g.bio || `${g.fund} · ${g.period} · ${g.numStocks} posiciones`}</div>
+                        <div style={{display:"flex",gap:4,flexWrap:"wrap",paddingLeft:8}}>
                           {g.holdings.slice(0,5).map(h=>{
                             const px=livePx[h.t]; const pos=(px?.change||0)>=0;
-                            return(<span key={h.t} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:g.color}}>
-                              {h.t} <span style={{color:pos?"#00D26A":"#FF4D6A",fontSize:9}}>{px?`${pos?"+":""}${px.change.toFixed(1)}%`:""}</span>
+                            return(<span key={h.t} style={{background:`${g.color}10`,border:`1px solid ${g.color}30`,borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:g.color}}>
+                              {h.t} <span style={{color:pos?"#10B981":"#EF4444",fontSize:9}}>{px?`${pos?"+":""}${px.change.toFixed(1)}%`:""}</span>
                             </span>);
                           })}
                         </div>
-                        <div style={{marginTop:10,textAlign:"right",fontSize:10,color:g.color,fontWeight:700}}>Ver portafolio completo →</div>
+                        <div style={{marginTop:10,textAlign:"right",fontSize:11,color:"#1565C0",fontWeight:700,paddingLeft:8}}>{isEN?"View full portfolio →":"Ver portafolio completo →"}</div>
                       </div>
                     </div>
                     {/* Lock overlay — solo en el 6to elemento */}
                     {isLocked && idx === FREE_LIMIT && (
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:2}}>
-                        <div style={{background:"rgba(12,10,30,0.96)",border:"1px solid rgba(15,94,104,0.4)",borderRadius:16,padding:"18px 22px",textAlign:"center",maxWidth:220,boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}}>
+                        <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:16,padding:"18px 22px",textAlign:"center",maxWidth:220,boxShadow:"0 8px 40px rgba(0,0,0,0.15)"}}>
                           <div style={{fontSize:26,marginBottom:6}}>🔒</div>
-                          <div style={{fontWeight:800,color:"#fff",fontSize:13,marginBottom:5}}>{GURUS_13F.length - FREE_LIMIT} {isEN?"more gurus locked":"gurús más bloqueados"}</div>
-                          <div style={{fontSize:11,color:"#94a3b8",marginBottom:12}}>{isEN?"Unlock them all: Buffett, Ackman, Burry, ARK and more":"Desbloquea todos: Buffett, Ackman, Burry, ARK y más"}</div>
+                          <div style={{fontWeight:800,color:"var(--c-text)",fontSize:13,marginBottom:5}}>{GURUS_13F.length - FREE_LIMIT} {isEN?"more gurus locked":"gurús más bloqueados"}</div>
+                          <div style={{fontSize:11,color:"var(--c-muted)",marginBottom:12}}>{isEN?"Unlock: Buffett, Ackman, Burry, ARK and more":"Desbloquea: Buffett, Ackman, Burry, ARK y más"}</div>
                           <button onClick={onNeedPremium}
-                            style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:900,cursor:"pointer",width:"100%",boxShadow:"0 4px 16px rgba(200,144,31,0.4)"}}>
-                            ✦ {isEN?"See all gurus":"Ver todos los gurús"}
+                            style={{background:"#1565C0",color:"#fff",border:"none",borderRadius:10,padding:"9px 18px",fontSize:12,fontWeight:700,cursor:"pointer",width:"100%",boxShadow:"0 4px 14px rgba(21,101,192,0.35)"}}>
+                            🔓 {isEN?"Unlock all gurus":"Ver todos los gurús"}
                           </button>
-                          <div style={{fontSize:10,color:"#94a3b8",marginTop:5}}>{isEN?"$15.99/mo or $79/yr · 3-day free trial":"$15.99/mes o $79/año · 3 días gratis"}</div>
+                          <div style={{fontSize:10,color:"var(--c-muted)",marginTop:6}}>VIP · {isEN?"3-day free trial":"3 días gratis"}</div>
                         </div>
                       </div>
                     )}
@@ -15716,12 +15713,12 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             </div>
             {/* Banner CTA si es free */}
             {!isPremium && (
-              <div style={{background:"linear-gradient(135deg,rgba(15,94,104,0.1),rgba(15,94,104,0.07))",border:"1px solid rgba(15,94,104,0.22)",borderRadius:16,padding:"18px 24px",marginTop:16,textAlign:"center"}}>
-                <div style={{fontWeight:800,color:"#FCD34D",fontSize:14,marginBottom:4}}>🏛️ Accede a los {GURUS_13F.length} portafolios institucionales con PREMIUM</div>
-                <div style={{fontSize:12,color:"#64748b",marginBottom:12}}>Buffett · Ackman · Burry · ARK · Insiders SEC · Dark Pools</div>
+              <div style={{background:"var(--c-surface)",border:"1px solid rgba(21,101,192,0.2)",borderRadius:16,padding:"20px 24px",marginTop:16,textAlign:"center",boxShadow:"0 2px 12px rgba(21,101,192,0.06)"}}>
+                <div style={{fontWeight:800,color:"var(--c-text)",fontSize:15,marginBottom:4}}>🏛️ {isEN?`Access all ${GURUS_13F.length} institutional portfolios`:`Accede a los ${GURUS_13F.length} portafolios institucionales`}</div>
+                <div style={{fontSize:12,color:"var(--c-muted)",marginBottom:14}}>Buffett · Ackman · Burry · ARK · Insiders SEC</div>
                 <button onClick={onNeedPremium}
-                  style={{background:"linear-gradient(135deg,#E0B64B,#C8901F)",color:"#1B1303",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:900,cursor:"pointer",boxShadow:"0 4px 20px rgba(200,144,31,0.4)"}}>
-                  ✦ {isEN?"Go PREMIUM — from $79/yr →":"Activar PREMIUM — desde $79/año →"}
+                  style={{background:"#1565C0",color:"#fff",border:"none",borderRadius:10,padding:"11px 28px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 14px rgba(21,101,192,0.3)"}}>
+                  🔓 {isEN?"Go VIP — 3 days free →":"Activar VIP — 3 días gratis →"}
                 </button>
               </div>
             )}
@@ -15745,38 +15742,38 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               ← Volver a todos los inversores
             </button>
             {/* Guru header */}
-            <div style={{background:"linear-gradient(145deg,rgba(15,23,42,0.98),rgba(20,30,50,0.95))",border:`1px solid ${g.color}30`,borderRadius:18,padding:"20px 24px",marginBottom:16}}>
+            <div style={{background:"var(--c-surface)",border:`1px solid var(--c-border)`,borderRadius:16,padding:"18px 22px",marginBottom:14,boxShadow:"var(--c-shadow)",borderLeft:`4px solid ${g.color}`}}>
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-                <div style={{width:52,height:52,borderRadius:14,background:`linear-gradient(135deg,${g.color}30,${g.color}10)`,border:`1px solid ${g.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>{g.emoji}</div>
+                <div style={{width:50,height:50,borderRadius:14,background:`${g.color}18`,border:`1px solid ${g.color}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>{g.emoji}</div>
                 <div>
-                  <div style={{fontWeight:900,color:"#F1F5F9",fontSize:18}}>{g.name}</div>
-                  <div style={{fontSize:12,color:"#475569"}}>{g.fund}</div>
+                  <div style={{fontWeight:900,color:"var(--c-text)",fontSize:18}}>{g.name}</div>
+                  <div style={{fontSize:12,color:"var(--c-muted)"}}>{g.fund}</div>
                 </div>
               </div>
-              <div className="nexo-guru-detail-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+              <div className="nexo-guru-detail-stats" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
                 {[[isEN?"Period":"Período",g.period],[isEN?"Portfolio date":"Fecha portafolio",g.portfolioDate],[isEN?"# of stocks":"N° de acciones",g.numStocks],[isEN?"Portfolio value":"Valor portafolio",g.aum]].map(([l,v])=>(
-                  <div key={l} style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 14px"}}>
-                    <div style={{fontSize:10,color:"#475569",marginBottom:3}}>{l}</div>
-                    <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{v}</div>
+                  <div key={l} style={{background:"var(--c-card)",borderRadius:10,padding:"10px 14px",border:"1px solid var(--c-border)"}}>
+                    <div style={{fontSize:10,color:"var(--c-muted)",marginBottom:3}}>{l}</div>
+                    <div style={{fontWeight:800,color:"var(--c-text)",fontSize:13}}>{v}</div>
                   </div>
                 ))}
               </div>
             </div>
             {/* Sub-tabs */}
             <div style={{display:"flex",gap:6,marginBottom:14}}>
-              {[["holdings","📊 Holdings"],["buys","🟢 Compras"],["sells","🔴 Ventas"]].map(([k,l])=>(
+              {[["holdings","📊 Holdings"],["buys","🟢 "+(isEN?"Buys":"Compras")],["sells","🔴 "+(isEN?"Sells":"Ventas")]].map(([k,l])=>(
                 <button key={k} onClick={()=>setDetailTab(k)}
-                  style={{background:detailTab===k?g.color+"20":"transparent",border:`1.5px solid ${detailTab===k?g.color:C.border}`,borderRadius:20,padding:"6px 16px",fontSize:12,fontWeight:700,color:detailTab===k?g.color:C.muted,cursor:"pointer",transition:"all 0.15s"}}>
+                  style={{background:detailTab===k?"#1565C0":"var(--c-surface)",border:`1.5px solid ${detailTab===k?"#1565C0":"var(--c-border)"}`,borderRadius:20,padding:"6px 16px",fontSize:12,fontWeight:700,color:detailTab===k?"#fff":"var(--c-muted)",cursor:"pointer",transition:"all 0.15s"}}>
                   {l}
                 </button>
               ))}
               <div style={{marginLeft:"auto",fontSize:11,color:C.muted2,alignSelf:"center"}}>Fuente: SEC 13F · {g.period} · Precios en vivo: Finnhub</div>
             </div>
             {/* Table — scroll wrapper unificado */}
-            <div className="nexo-scroll-x" style={{borderRadius:12}}>
+            <div className="nexo-scroll-x" style={{borderRadius:12,border:"1px solid var(--c-border)",overflow:"hidden"}}>
             <div style={{minWidth:900}}>
             {/* Table header */}
-            <div style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 90px 90px 80px 80px",gap:6,padding:"8px 14px",background:C.card2,borderRadius:"12px 12px 0 0",marginBottom:6,border:`1px solid ${C.border}`}}>
+            <div style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 90px 90px 80px 80px",gap:6,padding:"8px 14px",background:"var(--c-card)",borderRadius:"12px 12px 0 0",marginBottom:0,border:`1px solid var(--c-border)`,borderBottom:"none"}}>
               {isEN?["STOCK","COMPANY","% PORT.","ACTIVITY","SHARES","REP. PRICE","VALUE","TODAY","+/- REP.","52W RANGE"]:["ACCIÓN","EMPRESA","% PORT.","ACTIVIDAD","ACCIONES","PRECIO REP.","VALOR","PRECIO HOY","+/- REP.","52W RANGO"].map(h=>(
                 <div key={h} style={{fontSize:9,fontWeight:700,color:C.muted2,letterSpacing:0.5,whiteSpace:"nowrap"}}>{h}</div>
               ))}
@@ -15790,23 +15787,23 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 const pos  = (diff||0)>=0;
                 const actColor = h.act==="Buy"||h.act==="Add"||h.act==="New"?"#00D26A":h.act==="Reduce"||h.act==="Sold"?"#FF4D6A":"#64748B";
                 return(
-                  <div key={h.t} style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 100px 90px 90px 80px",gap:6,padding:"11px 14px",background:i%2===0?"rgba(255,255,255,0.01)":"transparent",borderRadius:10,marginBottom:3,border:"1px solid rgba(255,255,255,0.03)",transition:"background 0.15s",minWidth:900}}
-                    onMouseEnter={e=>e.currentTarget.style.background=`${g.color}08`}
-                    onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"rgba(255,255,255,0.01)":"transparent"}>
-                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:g.color}}>{h.t}</div>
-                    <div style={{fontSize:11,color:C.muted,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.n}</div>
-                    <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{h.pct?.toFixed(2)}%</div>
+                  <div key={h.t} style={{display:"grid",gridTemplateColumns:"130px 1fr 60px 110px 90px 100px 100px 90px 90px 80px",gap:6,padding:"11px 14px",background:i%2===0?"var(--c-card)":"var(--c-surface)",borderRadius:0,marginBottom:0,border:"none",borderBottom:"1px solid var(--c-border)",transition:"background 0.15s",minWidth:900}}
+                    onMouseEnter={e=>e.currentTarget.style.background=`rgba(21,101,192,0.04)`}
+                    onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"var(--c-card)":"var(--c-surface)"}>
+                    <div style={{fontFamily:"monospace",fontWeight:800,fontSize:13,color:"#1565C0"}}>{h.t}</div>
+                    <div style={{fontSize:11,color:"var(--c-muted)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.n}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:"var(--c-text)"}}>{h.pct?.toFixed(2)}%</div>
                     <div style={{fontSize:11,fontWeight:700,color:actColor}}>
                       {h.act?`${h.act}${h.actPct?` ${h.actPct>0?"+":""}${h.actPct?.toFixed(2)}%`:""}`:"—"}
                     </div>
-                    <div style={{fontSize:11,color:C.muted}}>{h.shares?.toLocaleString()||"—"}</div>
-                    <div style={{fontSize:12,fontWeight:600,color:"#F1F5F9"}}>${h.rPrice?.toFixed(2)||"—"}</div>
-                    <div style={{fontSize:11,color:C.muted}}>{fmt$B(h.val)}</div>
-                    <div style={{fontSize:12,fontWeight:700,color:"#F1F5F9"}}>{curr?`$${curr.toFixed(2)}`:"—"}</div>
+                    <div style={{fontSize:11,color:"var(--c-muted)"}}>{h.shares?.toLocaleString()||"—"}</div>
+                    <div style={{fontSize:12,fontWeight:600,color:"var(--c-text)"}}>${h.rPrice?.toFixed(2)||"—"}</div>
+                    <div style={{fontSize:11,color:"var(--c-muted)"}}>{fmt$B(h.val)}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:"var(--c-text)"}}>{curr?`$${curr.toFixed(2)}`:"—"}</div>
                     <div style={{fontSize:12,fontWeight:700,color:diff===null?"#64748B":pos?"#00D26A":"#FF4D6A"}}>
                       {diff!==null?`${pos?"+":""}${diff.toFixed(2)}%`:"—"}
                     </div>
-                    <div style={{fontSize:10,color:"#475569",whiteSpace:"nowrap"}}>
+                    <div style={{fontSize:10,color:"var(--c-muted)",whiteSpace:"nowrap"}}>
                       {h.w52l&&h.w52h?`$${h.w52l} - $${h.w52h}`:"—"}
                     </div>
                   </div>
@@ -15816,7 +15813,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             </div>{/* /minWidth:900 */}
             </div>{/* /nexo-scroll-x */}
             <div style={{textAlign:"center",padding:"12px 0",fontSize:11,color:C.muted2}}>
-              {isEN?"* Reported price = quarter-close price · Current price in real time via Finnhub":"* Precio reportado = precio al cierre del trimestre · Precio actual en tiempo real vía Finnhub"}
+              {isEN?"* Reported price = quarter-close · Live price via Finnhub":"* Precio reportado = cierre trimestre · Precio en vivo vía Finnhub"}
             </div>
           </div>
         );
@@ -16567,6 +16564,68 @@ function BotChart({ticker="SPY", sentiment="bull", chartType="candle", seed=42})
       <text x={padL+4} y={padT+11} fill="#94a3b8" fontSize="8.5" fontWeight="700" fontFamily="monospace">${ticker} · 1D</text>
       <text x={W-padR-38} y={padT+11} fill={sentiment==="bull"?"#16a34a":"#dc2626"} fontSize="8.5" fontWeight="700" fontFamily="monospace">{sentiment==="bull"?"▲ +trend":"▼ -trend"}</text>
     </svg>
+  );
+}
+
+/* ── AI SIGNAL CARD — Señal fijada NexoTrade IA ── */
+const AI_SIGNALS = [
+  {ticker:"META", entry:"$560–565", target:"$640", stop:"$538", conf:92, bull:true,
+   es:"Acumulación institucional confirmada en $META. Tres semanas de flujo entrante, volumen 2.4× sobre promedio y ruptura del rango.",
+   en:"Institutional accumulation confirmed on $META. Three weeks of inflow, volume 2.4× above average and range breakout.",
+   likes:214, comments:48, time:"MON 9:30"},
+];
+
+function AiSignalCard({lang, onTickerClick, onUpgrade, isPremium}){
+  const isEN = lang==="en";
+  const sig = AI_SIGNALS[0];
+  const [liked, setLiked] = React.useState(false);
+  const [likes, setLikes] = React.useState(sig.likes);
+  const handleLike = () => { setLiked(l=>!l); setLikes(n=>liked?n-1:n+1); };
+  return(
+    <div style={{background:"var(--c-card)",border:"2px solid #1565C0",borderRadius:16,padding:"14px 16px",boxShadow:"0 2px 16px rgba(21,101,192,0.10)",marginBottom:6}}>
+      {/* Header */}
+      <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}>
+        <div style={{width:40,height:40,borderRadius:"50%",background:"#1565C0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:"#fff",flexShrink:0,letterSpacing:0.5}}>IA</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+            <span style={{fontSize:13,fontWeight:800,color:"var(--c-text)"}}>NexoTrade AI</span>
+            <span style={{fontSize:10,background:"#EFF4FB",color:"#1565C0",padding:"2px 8px",borderRadius:6,fontWeight:700,border:"1px solid #BFDBFE"}}>{isEN?"PINNED":"FIJADO"}</span>
+            <span style={{fontSize:10,background:"#F0FDF4",color:"#16A34A",padding:"2px 8px",borderRadius:6,fontWeight:700}}>▲ {isEN?"BUY":"COMPRA"}</span>
+            <span style={{fontSize:10,background:"#EFF4FB",color:"#1565C0",padding:"2px 8px",borderRadius:6,fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(sig.ticker)}>${sig.ticker}</span>
+            <span style={{fontSize:11,color:"var(--c-muted2)",marginLeft:"auto",whiteSpace:"nowrap"}}>{sig.time}</span>
+          </div>
+        </div>
+      </div>
+      {/* Body */}
+      <div style={{fontSize:13.5,color:"var(--c-text)",lineHeight:1.65,marginBottom:12}}>
+        {(isEN?sig.en:sig.es).split(`$${sig.ticker}`).map((part,i,arr)=>(
+          <React.Fragment key={i}>{part}{i<arr.length-1&&<span style={{color:"#1565C0",fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(sig.ticker)}>${sig.ticker}</span>}</React.Fragment>
+        ))}
+      </div>
+      {/* Signal boxes */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+        {[
+          {label:isEN?"Entry":"Entrada",  val:sig.entry,  color:"var(--c-text)"},
+          {label:isEN?"Target":"Objetivo",val:sig.target, color:"#16A34A"},
+          {label:"Stop",                  val:sig.stop,   color:"#DC2626"},
+          {label:isEN?"Confidence":"Confianza", val:`${sig.conf}/100`, color:"#1565C0"},
+        ].map(({label,val,color})=>(
+          <div key={label} style={{background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,padding:"9px 10px"}}>
+            <div style={{fontSize:9.5,fontWeight:700,color:"var(--c-muted2)",letterSpacing:0.7,textTransform:"uppercase",marginBottom:4}}>{label}</div>
+            <div style={{fontSize:16,fontWeight:800,color,fontVariantNumeric:"tabular-nums",lineHeight:1.1}}>{val}</div>
+          </div>
+        ))}
+      </div>
+      {/* Footer */}
+      <div style={{display:"flex",alignItems:"center",gap:12,paddingTop:10,borderTop:"1px solid var(--c-border)"}}>
+        <span onClick={handleLike} style={{fontSize:12,color:liked?"#16A34A":"var(--c-muted2)",fontWeight:liked?700:400,cursor:"pointer",display:"flex",alignItems:"center",gap:4,transition:"color 0.15s"}}>▲ {likes}</span>
+        <span style={{fontSize:12,color:"var(--c-muted2)",cursor:"pointer"}}>{sig.comments} {isEN?"comments":"comentarios"}</span>
+        <button onClick={()=>onTickerClick&&onTickerClick(sig.ticker)}
+          style={{marginLeft:"auto",background:"var(--c-card2)",border:"1.5px solid var(--c-border)",borderRadius:9,padding:"6px 14px",fontSize:12,fontWeight:700,color:"var(--c-text)",cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+          {isEN?`View $${sig.ticker} →`:`Ver $${sig.ticker} →`}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -27310,6 +27369,8 @@ export default function App(){
           <span style={{marginLeft:tickerFilter?"4px":"auto",color:"#94A3B8",fontSize:11,whiteSpace:"nowrap",flexShrink:0,paddingRight:4}}>{filtered2.length} posts</span>
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
+        {/* 🤖 AI Signal Card — pinned */}
+        <AiSignalCard lang={lang} onTickerClick={(tk)=>setTickerPage(tk)} onUpgrade={()=>{setPage(8);setShowLanding(false);}} isPremium={effectivePremium}/>
         {/* Banner de error de conexión */}
         {feedError && (
           <div style={{margin:"4px 0 12px",padding:"14px 16px",background:"rgba(220,38,38,0.06)",border:"1px solid rgba(220,38,38,0.2)",borderRadius:12,display:"flex",alignItems:"center",gap:12}}>
