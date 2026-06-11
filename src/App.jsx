@@ -26204,7 +26204,7 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
                   See full analysis <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </button>
               </div>
-              <div style={{flexShrink:0,textAlign:"right"}}>
+              <div className="nexo-ai-sparkline" style={{flexShrink:0,textAlign:"right"}}>
                 <div style={{fontSize:13,color:UP,fontWeight:700,marginBottom:4,fontVariantNumeric:"tabular-nums"}}>+{ret}% · {hdays}d</div>
                 <svg width="180" height="84" viewBox="0 0 180 84" fill="none">
                   <defs><linearGradient id="aip-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={BLUE} stopOpacity="0.28"/><stop offset="1" stopColor={BLUE} stopOpacity="0"/></linearGradient></defs>
@@ -27376,6 +27376,7 @@ export default function App(){
         .nexo-signals-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
 
         /* ── NEW PAGE GRIDS → 1-col on mobile ── */
+        .nexo-ai-sparkline { display: none !important; }
         .nexo-ai-layout { grid-template-columns: 1fr !important; }
         .nexo-markets-layout { grid-template-columns: 1fr !important; }
         .nexo-markets-duo { grid-template-columns: 1fr !important; }
@@ -28320,7 +28321,7 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo */}
-      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box",overflowX:"hidden"}}>
+      <div className="nexo-body-grid" style={{maxWidth:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box"}}>
         <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onlineUsers={onlineUsers} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
