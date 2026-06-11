@@ -16570,12 +16570,12 @@ function BotChart({ticker="SPY", sentiment="bull", chartType="candle", seed=42})
 /* ── AI SIGNAL CARD — Señal automática del día (FMP upgrades) ── */
 function AiSignalCard({lang, onTickerClick}){
   const isEN = lang==="en";
-  const [sig, setSig]   = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [liked, setLiked]     = React.useState(false);
-  const [likes, setLikes]     = React.useState(214);
+  const [sig, setSig]   = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [liked, setLiked]     = useState(false);
+  const [likes, setLikes]     = useState(214);
 
-  React.useEffect(()=>{
+  useEffect(()=>{
     let cancelled = false;
     fetch('/api/ai-signal')
       .then(r=>r.json())
@@ -16627,9 +16627,10 @@ function AiSignalCard({lang, onTickerClick}){
       </div>
       {/* Body */}
       <div style={{fontSize:13.5,color:"var(--c-text)",lineHeight:1.65,marginBottom:12}}>
-        {body ? body.split(`$${ticker}`).map((part,i,arr)=>(
-          <React.Fragment key={i}>{part}{i<arr.length-1&&<span style={{color:"#1565C0",fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(ticker)}>${ticker}</span>}</React.Fragment>
-        )) : "—"}
+        {body ? body.split(`$${ticker}`).map((part,i,arr)=>[
+          <span key={`p${i}`}>{part}</span>,
+          i<arr.length-1 && <span key={`t${i}`} style={{color:"#1565C0",fontWeight:700,cursor:"pointer"}} onClick={()=>onTickerClick&&onTickerClick(ticker)}>${ticker}</span>
+        ]) : "—"}
       </div>
       {/* Signal boxes */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
