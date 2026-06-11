@@ -13,6 +13,18 @@
       ]
     },
     {
+      "source": "/app",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/app.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
@@ -27,7 +39,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/track-ref", "destination": "/api/auth?type=track-ref" },
     { "source": "/app", "destination": "/app.html" },
     { "source": "/((?!api/)(?!.*\\.html$)(?!.*\\.png$)(?!.*\\.svg$)(?!.*\\.ico$)(?!.*\\.txt$).+)", "destination": "/app.html" }
   ],
