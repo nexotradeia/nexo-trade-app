@@ -1,4 +1,4 @@
-// NexoTrade Service Worker — v5 (SIN caché de app: siempre carga de la red; solo Push Notifications)
+// NexoTrade Service Worker — v6 (SIN caché de app: siempre carga de la red; solo Push Notifications)
 
 // Instalar: activar de inmediato la versión nueva
 self.addEventListener('install', () => {

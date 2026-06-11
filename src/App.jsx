@@ -10508,6 +10508,39 @@ function SocialProofBar({user, onRegister, lang="es"}){
   );
 }
 
+// ── NAV PREDICTION (compact inline, for the nav row center) ─────────────────
+function NavPrediction({lang="es", isPremium=false, onUpgrade}){
+  const [votes,setVotes]=useState({up:2847,down:912});
+  const [voted,setVoted]=useState(null);
+  const total=votes.up+votes.down;
+  const isEN=lang==="en";
+  const vote=(dir)=>{
+    if(voted)return;
+    setVotes(v=>({...v,[dir]:v[dir]+1}));
+    setVoted(dir);
+  };
+  const upPct=Math.round(votes.up/(votes.up+votes.down)*100);
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:7,flex:"1 1 0",justifyContent:"center",minWidth:0,padding:"0 10px"}}>
+      <span style={{background:"#2196F3",color:"#fff",borderRadius:20,padding:"2px 9px",fontSize:9.5,fontWeight:800,letterSpacing:0.5,flexShrink:0,whiteSpace:"nowrap"}}>
+        🔥 {isEN?"PREDICTION":"PREDICCIÓN"}
+      </span>
+      <span style={{color:"var(--c-text)",fontWeight:600,fontSize:11.5,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:200}}>
+        {isEN?"Will NVDA go up or down tomorrow?":"¿NVDA sube o baja mañana?"}
+      </span>
+      <button onClick={()=>vote("up")}
+        style={{background:voted==="up"?"#DCFCE7":"transparent",border:`1.5px solid #16A34A`,borderRadius:7,padding:"3px 10px",color:"#16A34A",cursor:voted?"default":"pointer",fontSize:10.5,fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>
+        ▲ {isEN?"Up":"Sube"}{voted?` (${upPct}%)`:""}
+      </button>
+      <button onClick={()=>vote("down")}
+        style={{background:voted==="down"?"#FEE2E2":"transparent",border:`1.5px solid #DC2626`,borderRadius:7,padding:"3px 10px",color:"#DC2626",cursor:voted?"default":"pointer",fontSize:10.5,fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>
+        ▼ {isEN?"Down":"Baja"}{voted?` (${100-upPct}%)`:""}
+      </button>
+      <span style={{color:"#94A3B8",fontSize:9.5,flexShrink:0,whiteSpace:"nowrap"}}>{(total).toLocaleString()} {isEN?"votes":"votos"}</span>
+    </div>
+  );
+}
+
 function PredictionBanner({lang="es", isPremium=false, onUpgrade}){
   const [votes,setVotes]=useState({up:2847,down:912});
   const [voted,setVoted]=useState(null);
@@ -28578,118 +28611,133 @@ export default function App(){
           </div>
         </div>
 
-        {/* ── LAYER 2: NAV ROW with dropdowns ── */}
-        <div className="nexo-nav-row-v4" style={{top:trialDaysLeft!==null?32+62:62}}>
-          {/* Direct tabs */}
-          {[
-            {label:isEN?"Feed":t.feed,idx:0,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
-            {label:"News",idx:5,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>},
-            {label:"Earnings",idx:6,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>},
-            {label:"Markets",idx:2,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
-            {label:"Messages",idx:22,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>},
-          ].map(n=>(
-            <button key={n.idx} className={`nexo-ntab${page===n.idx?" nact":""}`}
-              onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}>
-              {n.svg}{n.label}
-            </button>
-          ))}
+        {/* ── LAYER 2: NAV ROW — 3 sections: tabs | prediction | dropdowns+premium ── */}
+        <div className="nexo-nav-row-v4 nexo-hide-mobile" style={{top:trialDaysLeft!==null?32+62:62,justifyContent:"space-between",gap:0}}>
 
-          <div className="nexo-nav-sep"/>
-
-          {/* IA dropdown */}
-          <div className="nexo-mega">
-            <button className="nexo-mega-btn ia-v">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
-              AI <span style={{fontSize:9,opacity:.7}}>▾</span>
-            </button>
-            <div className="nexo-mega-drop">
-              <div className="nexo-drop-label">Artificial Intelligence</div>
-              {[
-                {label:"Oracle AI",sub:"AI trading chat assistant",idx:null,fn:()=>setShowAI(true),ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>},
-                {label:"Stock Pick AI",sub:"Automated recommendations",idx:3,badge:"NEW",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>},
-                {label:"Signals",sub:"Entry & exit alerts",idx:29,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>},
-                {label:"Screener",sub:"Advanced stock filter",idx:36,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>},
-              ].map((it,i)=>(
-                <div key={i} className="nexo-ditem" onClick={()=>{ it.fn?it.fn():(it.idx!=null&&(setPage(it.idx),setShowLanding(false))); }}>
-                  <div className="nexo-dico nexo-dico-ia">{it.ico}</div>
-                  <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
-                  {it.badge&&<span className="nexo-dbadge-new">{it.badge}</span>}
-                </div>
-              ))}
-            </div>
+          {/* ── LEFT: direct page tabs ── */}
+          <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0}}>
+            {[
+              {label:isEN?"Feed":t.feed,idx:0,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
+              {label:"News",idx:5,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>},
+              {label:"Earnings",idx:6,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>},
+              {label:"Markets",idx:2,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+              {label:"Messages",idx:22,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>},
+            ].map(n=>(
+              <button key={n.idx} className={`nexo-ntab${page===n.idx?" nact":""}`}
+                onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}>
+                {n.svg}{n.label}
+              </button>
+            ))}
           </div>
 
-          {/* Market dropdown */}
-          <div className="nexo-mega">
-            <button className="nexo-mega-btn mkt-v">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-              Market <span style={{fontSize:9,opacity:.7}}>▾</span>
-            </button>
-            <div className="nexo-mega-drop">
-              <div className="nexo-drop-label">Market Analysis</div>
-              {[
-                {label:"Global Radar",sub:"16 exchanges live",idx:44,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>},
-                {label:"Smart Money",sub:"Live institutional flow",idx:20,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
-                {label:"Wall St. & Capitol",sub:"13F Gurus · Congress",idx:19,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>},
-                {label:"Trending",sub:"Top movers today",idx:7,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
-              ].map((it,i)=>(
-                <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
-                  <div className="nexo-dico nexo-dico-mkt">{it.ico}</div>
-                  <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* ── CENTER: Prediction of the Day (inline compact) ── */}
+          <NavPrediction lang={lang} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
 
-          {/* Tools dropdown */}
-          <div className="nexo-mega">
-            <button className="nexo-mega-btn ops-v">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-              Tools <span style={{fontSize:9,opacity:.7}}>▾</span>
+          {/* ── RIGHT: dropdowns + Premium ── */}
+          <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0}}>
+            {/* Premium CTA — left of dropdowns */}
+            <button onClick={()=>{setPage(8);setShowLanding(false);}}
+              style={{flexShrink:0,marginRight:6,background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"7px 16px",cursor:"pointer",color:"#1B1303",fontSize:12,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:"0 3px 14px rgba(224,182,75,0.5)",animation:effectivePremium?"none":"nexoPremiumPulse 1.8s ease-in-out infinite"}}>
+              {effectivePremium?"✦ Premium":(isEN?"⭐ Premium →":"⭐ Premium →")}
             </button>
-            <div className="nexo-mega-drop">
-              <div className="nexo-drop-label">Trading Tools</div>
-              {[
-                {label:"Watchlist",sub:"My favorite stocks",idx:38,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>},
-                {label:"Alerts",sub:"Price notifications",idx:42,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>},
-                {label:"Paper Trading",sub:"Risk-free simulator",idx:9,badge:"AI",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>},
-                {label:"Portfolio Terminal",sub:"Oracle AI · Charts · Journal",idx:37,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>},
-              ].map((it,i)=>(
-                <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
-                  <div className="nexo-dico nexo-dico-ops">{it.ico}</div>
-                  <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
-                  {it.badge==="AI"&&<span className="nexo-dbadge-ai">AI</span>}
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* VIP dropdown */}
-          <div className="nexo-mega">
-            <button className="nexo-mega-btn vip-v">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              VIP <span style={{fontSize:9,opacity:.7}}>▾</span>
+            <div className="nexo-nav-sep"/>
+
+            {/* IA dropdown */}
+            <div className="nexo-mega">
+              <button className="nexo-mega-btn ia-v">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
+                AI <span style={{fontSize:9,opacity:.7}}>▾</span>
+              </button>
+              <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
+                <div className="nexo-drop-label">Artificial Intelligence</div>
+                {[
+                  {label:"Oracle AI",sub:"AI trading chat assistant",fn:()=>setShowAI(true),ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>},
+                  {label:"Stock Pick AI",sub:"Automated recommendations",idx:3,badge:"NEW",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>},
+                  {label:"Signals",sub:"Entry & exit alerts",idx:29,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>},
+                  {label:"Screener",sub:"Advanced stock filter",idx:36,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>},
+                ].map((it,i)=>(
+                  <div key={i} className="nexo-ditem" onClick={()=>{ it.fn?it.fn():(it.idx!=null&&(setPage(it.idx),setShowLanding(false))); }}>
+                    <div className="nexo-dico nexo-dico-ia">{it.ico}</div>
+                    <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
+                    {it.badge&&<span className="nexo-dbadge-new">{it.badge}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Market dropdown */}
+            <div className="nexo-mega">
+              <button className="nexo-mega-btn mkt-v">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                Market <span style={{fontSize:9,opacity:.7}}>▾</span>
+              </button>
+              <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
+                <div className="nexo-drop-label">Market Analysis</div>
+                {[
+                  {label:"Global Radar",sub:"16 exchanges live",idx:44,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>},
+                  {label:"Smart Money",sub:"Live institutional flow",idx:20,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
+                  {label:"Wall St. & Capitol",sub:"13F Gurus · Congress",idx:19,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>},
+                  {label:"Trending",sub:"Top movers today",idx:7,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+                ].map((it,i)=>(
+                  <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
+                    <div className="nexo-dico nexo-dico-mkt">{it.ico}</div>
+                    <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tools dropdown */}
+            <div className="nexo-mega">
+              <button className="nexo-mega-btn ops-v">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Tools <span style={{fontSize:9,opacity:.7}}>▾</span>
+              </button>
+              <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
+                <div className="nexo-drop-label">Trading Tools</div>
+                {[
+                  {label:"Watchlist",sub:"My favorite stocks",idx:38,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>},
+                  {label:"Alerts",sub:"Price notifications",idx:42,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>},
+                  {label:"Paper Trading",sub:"Risk-free simulator",idx:9,badge:"AI",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>},
+                  {label:"Portfolio Terminal",sub:"Oracle AI · Charts · Journal",idx:37,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>},
+                ].map((it,i)=>(
+                  <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
+                    <div className="nexo-dico nexo-dico-ops">{it.ico}</div>
+                    <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
+                    {it.badge==="AI"&&<span className="nexo-dbadge-ai">AI</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* VIP dropdown */}
+            <div className="nexo-mega">
+              <button className="nexo-mega-btn vip-v">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                VIP <span style={{fontSize:9,opacity:.7}}>▾</span>
+              </button>
+              <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
+                <div className="nexo-drop-label">Premium Access</div>
+                {[
+                  {label:"Premium Ideas",sub:"Exclusive team picks",idx:21,badge:"VIP",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>},
+                  {label:"Activate VIP",sub:"From $6.58/mo · 3 days free",idx:8,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>},
+                ].map((it,i)=>(
+                  <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
+                    <div className="nexo-dico nexo-dico-vip">{it.ico}</div>
+                    <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
+                    {it.badge==="VIP"&&<span className="nexo-dbadge-vip">VIP</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Premium CTA — also on the far right */}
+            <button onClick={()=>{setPage(8);setShowLanding(false);}}
+              style={{flexShrink:0,marginLeft:6,background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"7px 16px",cursor:"pointer",color:"#1B1303",fontSize:12,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:"0 3px 14px rgba(224,182,75,0.5)",animation:effectivePremium?"none":"nexoPremiumPulse 1.8s ease-in-out infinite"}}>
+              {effectivePremium?"✦ Premium":(isEN?"⭐ Premium →":"⭐ Premium →")}
             </button>
-            <div className="nexo-mega-drop">
-              <div className="nexo-drop-label">Premium Access</div>
-              {[
-                {label:"Premium Ideas",sub:"Exclusive team picks",idx:21,badge:"VIP",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>},
-                {label:"Activate VIP",sub:"From $6.58/mo · 3 days free",idx:8,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>},
-              ].map((it,i)=>(
-                <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
-                  <div className="nexo-dico nexo-dico-vip">{it.ico}</div>
-                  <div><div className="nexo-dname">{it.label}</div><div className="nexo-dsub">{it.sub}</div></div>
-                  {it.badge==="VIP"&&<span className="nexo-dbadge-vip">VIP</span>}
-                </div>
-              ))}
-            </div>
           </div>
-
-          {/* Premium CTA — sticky right */}
-          <button className="nexo-hide-mobile" onClick={()=>{setPage(8);setShowLanding(false);}}
-            style={{flexShrink:0,position:"sticky",right:8,zIndex:6,marginLeft:"auto",background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"7px 18px",cursor:"pointer",color:"#1B1303",fontSize:12.5,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:"0 3px 16px rgba(224,182,75,0.55)",animation:effectivePremium?"none":"nexoPremiumPulse 1.8s ease-in-out infinite"}}>
-            {effectivePremium?"✦ Premium":(isEN?"⭐ Premium — $6.58/mo →":"⭐ Premium — $6.58/mes →")}
-          </button>
         </div>
       </nav>
 
@@ -29164,9 +29212,7 @@ export default function App(){
       )}
 
 
-      {/* PREDICCIÓN DEL DÍA — oculta en móvil (#9) */}
-      {page===0 && !showLanding && page!==99 && <div className="nexo-hide-mobile"><PredictionBanner lang={lang} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
-</div>}
+      {/* PredictionBanner moved into nav row center (NavPrediction component) */}
 
       {/* SOCIAL PROOF STATS BAR — oculta en móvil (#9) */}
       {/* SocialProofBar removed */}
