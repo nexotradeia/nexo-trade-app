@@ -4550,6 +4550,7 @@ function TopsPage({posts=[],lang="es"}){
 }
 
 function NoticiasPage({lang}){
+  const isEN=lang==="en";
   const [cat,setCat]=useState("general");
   const [news,setNews]=useState([]);
   const [loading,setLoading]=useState(true);
@@ -4573,90 +4574,259 @@ function NoticiasPage({lang}){
   useEffect(()=>{ fetchNews(cat); },[cat]);
 
   const cats=[
-    {k:"general",  l:lang==="en"?"📰 Macro News":"📰 Macro",     color:C.accent},
-    {k:"crypto",   l:lang==="en"?"₿ Crypto":"₿ Crypto",           color:"#F59E0B"},
-    {k:"forex",    l:lang==="en"?"💱 Forex":"💱 Forex",           color:"#16A34A"},
-    {k:"merger",   l:lang==="en"?"🏦 M&A":"🏦 M&A",              color:C.purple},
+    {k:"general", l:isEN?"📰 Macro":"📰 Macro",     color:"#1565C0"},
+    {k:"crypto",  l:"₿ Crypto",                      color:"#F59E0B"},
+    {k:"forex",   l:"💱 Forex",                      color:"#16A34A"},
+    {k:"merger",  l:"🏦 M&A",                        color:"#7C3AED"},
   ];
+
+  const catColor = cats.find(c=>c.k===cat)?.color||"#1565C0";
 
   const timeAgo=(ts)=>{
     const diff=Math.floor((Date.now()/1000)-ts);
-    if(diff<60) return lang==="en"?`${diff}s ago`:`hace ${diff}s`;
-    if(diff<3600) return lang==="en"?`${Math.floor(diff/60)}m ago`:`hace ${Math.floor(diff/60)}m`;
-    if(diff<86400) return lang==="en"?`${Math.floor(diff/3600)}h ago`:`hace ${Math.floor(diff/3600)}h`;
-    return lang==="en"?`${Math.floor(diff/86400)}d ago`:`hace ${Math.floor(diff/86400)}d`;
+    if(diff<60) return isEN?`${diff}s ago`:`hace ${diff}s`;
+    if(diff<3600) return isEN?`${Math.floor(diff/60)}m ago`:`hace ${Math.floor(diff/60)}m`;
+    if(diff<86400) return isEN?`${Math.floor(diff/3600)}h ago`:`hace ${Math.floor(diff/3600)}h`;
+    return isEN?`${Math.floor(diff/86400)}d ago`:`hace ${Math.floor(diff/86400)}d`;
   };
+
+  // Derive simple sentiment from headline keywords
+  const getSentiment=(h="")=>{
+    const pos=/(record|surge|rally|gain|rise|profit|beat|bull|strong|growth|up|high|boost|soar)/i;
+    const neg=/(fall|drop|crash|loss|decline|bear|weak|cut|miss|down|low|risk|fear|sell|warning)/i;
+    if(pos.test(h)) return {label:isEN?"POSITIVE SENTIMENT":"SENTIMIENTO POSITIVO", color:"#16A34A", bg:"rgba(22,163,74,0.12)"};
+    if(neg.test(h)) return {label:isEN?"NEGATIVE SENTIMENT":"SENTIMIENTO NEGATIVO", color:"#DC2626", bg:"rgba(220,38,38,0.10)"};
+    return {label:isEN?"NEUTRAL":"NEUTRAL",                                           color:"#64748B", bg:"rgba(100,116,139,0.10)"};
+  };
+
+  // Extract unique tickers from news
+  const topTickers = useMemo(()=>{
+    const map={};
+    news.forEach(n=>{
+      if(n.related) n.related.split(",").forEach(t=>{
+        const tk=t.trim().toUpperCase();
+        if(tk&&tk.length<=5&&/^[A-Z]+$/.test(tk)){ map[tk]=(map[tk]||0)+1; }
+      });
+    });
+    return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+  },[news]);
+
+  // Build AI summary from top tickers & first headlines
+  const aiSummary = useMemo(()=>{
+    if(news.length===0) return null;
+    const tks = topTickers.slice(0,4);
+    const first = news[0];
+    const sentType = getSentiment(first?.headline||"");
+    const tickerStr = tks.map(t=>`$${t}`).join(", ");
+    if(cat==="crypto") return isEN
+      ? `Crypto markets showing volatility. Institutional flows remain mixed. Watch ${tickerStr} for directional cues.`
+      : `Los mercados cripto muestran volatilidad. El flujo institucional sigue mixto. Atentos a ${tickerStr}.`;
+    if(cat==="forex") return isEN
+      ? `Currency markets reacting to macro data. Key pairs under pressure. Monitor ${tickerStr||"DXY, EUR/USD"}.`
+      : `Mercados de divisas reaccionando a datos macro. Pares clave bajo presión. Monitorear ${tickerStr||"DXY, EUR/USD"}.`;
+    if(cat==="merger") return isEN
+      ? `M&A activity picks up. ${tks[0]?`$${tks[0]} in focus.`:""} Premiums remain elevated in tech.`
+      : `La actividad de M&A se acelera. ${tks[0]?`$${tks[0]} en foco.`:""} Primas elevadas en tech.`;
+    return isEN
+      ? `${sentType.label==="POSITIVE SENTIMENT"?"Markets in risk-on mode.":"Caution ahead."} ${tickerStr?`Key names: ${tickerStr}.`:""} Earnings and macro data driving price action today.`
+      : `${sentType.label==="SENTIMIENTO POSITIVO"?"Mercado en modo risk-on.":"Cautela en el mercado."} ${tickerStr?`Nombres clave: ${tickerStr}.`:""} Earnings y datos macro mueven precios hoy.`;
+  },[news,cat,topTickers,isEN]);
+
+  const hero   = news[0]||null;
+  const topRead= news.slice(1,6);
+  const rest   = news.slice(1);
 
   return(
     <div>
-      {/* Header */}
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
-        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📰 {lang==="en"?"Market News":"Noticias del Mercado"}</h2>
-        {lastUp
-          ? <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(34,197,94,0.1)",color:"#16a34a",border:"1px solid rgba(34,197,94,0.3)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>LIVE
-            </span>
-          : loading
-            ? <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(148,163,184,0.1)",color:"#64748b",border:"1px solid rgba(148,163,184,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
-                <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>Loading
-              </span>
-            : <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(148,163,184,0.1)",color:"#64748b",border:"1px solid rgba(148,163,184,0.2)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>
-                <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>Finnhub
-              </span>
-        }
-        <span style={{color:C.muted2,fontSize:11}}>{lastUp?`${lang==="en"?"Updated":"Actualizado"} ${lastUp}`:""}</span>
-        <button onClick={()=>fetchNews(cat)} disabled={loading}
-          style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:5,background:C.card2,border:`1px solid ${C.border}`,borderRadius:20,padding:"6px 14px",cursor:loading?"not-allowed":"pointer",color:C.muted,fontSize:12,fontWeight:700,transition:"all 0.2s"}}>
-          <span style={{display:"inline-block",transition:"transform 0.6s",transform:spinning?"rotate(360deg)":"rotate(0deg)"}}>⟳</span>
-          {loading?(lang==="en"?"Loading...":"Cargando..."):(lang==="en"?"Refresh":"Actualizar")}
-        </button>
+      {/* ── PAGE HEADER ── */}
+      <div style={{marginBottom:16}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:catColor,letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>/// {isEN?"NEWS":"NOTICIAS"}</div>
+            <h2 style={{margin:0,color:C.text,fontSize:22,fontWeight:900,letterSpacing:"-0.5px"}}>{isEN?"Market News":"Noticias del Mercado"}</h2>
+            <p style={{margin:"4px 0 0",color:C.muted,fontSize:13}}>{isEN?"What matters, with sentiment and affected tickers — no noise.":"Lo importante, con el sentimiento y los tickers afectados — sin ruido."}</p>
+          </div>
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            {lastUp
+              ? <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(34,197,94,0.1)",color:"#16a34a",border:"1px solid rgba(34,197,94,0.3)",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700}}>
+                  <span style={{width:6,height:6,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite"}}/>LIVE
+                </span>
+              : <span style={{display:"flex",alignItems:"center",gap:5,background:"rgba(148,163,184,0.1)",color:"#64748b",border:"1px solid rgba(148,163,184,0.2)",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700}}>
+                  <span style={{width:6,height:6,borderRadius:"50%",background:"#64748b",display:"inline-block"}}/>{loading?"Loading":"Finnhub"}
+                </span>
+            }
+            <span style={{color:C.muted2,fontSize:11}}>{lastUp?`${isEN?"Updated":"Actualizado"} ${lastUp}`:""}</span>
+            <button onClick={()=>fetchNews(cat)} disabled={loading}
+              style={{display:"flex",alignItems:"center",gap:5,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:20,padding:"6px 14px",cursor:loading?"not-allowed":"pointer",color:C.muted,fontSize:12,fontWeight:700,transition:"all 0.2s",fontFamily:"inherit"}}>
+              <span style={{display:"inline-block",transition:"transform 0.6s",transform:spinning?"rotate(360deg)":"rotate(0deg)"}}>⟳</span>
+              {loading?(isEN?"Loading...":"Cargando..."):(isEN?"Refresh":"Actualizar")}
+            </button>
+          </div>
+        </div>
+
+        {/* Category tabs */}
+        <div style={{display:"flex",gap:6,marginTop:14,flexWrap:"wrap"}}>
+          {cats.map(c=>(
+            <button key={c.k} onClick={()=>setCat(c.k)}
+              style={{background:cat===c.k?c.color:"var(--c-surface)",border:`1.5px solid ${cat===c.k?c.color:"var(--c-border)"}`,borderRadius:24,padding:"7px 18px",cursor:"pointer",color:cat===c.k?"#fff":C.muted,fontSize:13,fontWeight:700,transition:"all 0.15s",fontFamily:"inherit",boxShadow:cat===c.k?`0 2px 10px ${c.color}44`:"none"}}>
+              {c.l}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Category tabs */}
-      <div style={{display:"flex",gap:6,marginBottom:18,flexWrap:"wrap"}}>
-        {cats.map(c=>(
-          <button key={c.k} onClick={()=>setCat(c.k)}
-            style={{background:cat===c.k?c.color:"transparent",border:`1.5px solid ${cat===c.k?c.color:C.border}`,borderRadius:20,padding:"6px 16px",cursor:"pointer",color:cat===c.k?"#fff":C.muted,fontSize:13,fontWeight:700,transition:"all 0.15s"}}>
-            {c.l}
-          </button>
-        ))}
-      </div>
-
-      {/* News list */}
+      {/* ── LOADING / EMPTY ── */}
       {loading?(
-        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>
-          <div style={{fontSize:28,marginBottom:8}}>⏳</div>
-          <div style={{fontSize:14}}>{lang==="en"?"Loading news...":"Cargando noticias..."}</div>
+        <div style={{textAlign:"center",padding:"60px 0",color:C.muted}}>
+          <div style={{width:36,height:36,borderRadius:"50%",border:`3px solid rgba(21,101,192,0.2)`,borderTopColor:catColor,animation:"spin 1s linear infinite",margin:"0 auto 12px"}}/>
+          <div style={{fontSize:14}}>{isEN?"Loading news...":"Cargando noticias..."}</div>
         </div>
       ):news.length===0?(
-        <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>
-          <div style={{fontSize:28,marginBottom:8}}>📭</div>
-          <div style={{fontSize:14}}>{lang==="en"?"No news at the moment":"No hay noticias en este momento"}</div>
+        <div style={{textAlign:"center",padding:"60px 0",color:C.muted}}>
+          <div style={{fontSize:32,marginBottom:8}}>📭</div>
+          <div style={{fontSize:14}}>{isEN?"No news at the moment":"No hay noticias en este momento"}</div>
         </div>
       ):(
-        news.map((n,i)=>(
-          <div key={i}>
-          {i>0 && i%5===0 && <>{<AdBannerFeed/>}<MediaNetBannerFeed/></>}
-          <a href={n.url} target="_blank" rel="noopener noreferrer"
-            style={{display:"block",textDecoration:"none",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:10,boxShadow:C.shadow,borderLeft:`4px solid ${cat==="crypto"?"#F59E0B":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accent}`,transition:"box-shadow 0.2s,transform 0.15s"}}
-            onMouseEnter={e=>{e.currentTarget.style.boxShadow=C.shadowMd;e.currentTarget.style.transform="translateY(-1px)";}}
-            onMouseLeave={e=>{e.currentTarget.style.boxShadow=C.shadow;e.currentTarget.style.transform="translateY(0)";}}>
-            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-              {/* Imagen */}
-              {n.image&&<img src={n.image} alt="" style={{width:72,height:52,objectFit:"cover",borderRadius:8,flexShrink:0,background:"#F1F5F9"}} onError={e=>{e.target.style.display="none";}}/>}
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
-                  <span style={{background:cat==="crypto"?"rgba(245,158,11,0.1)":cat==="forex"?"rgba(22,163,74,0.1)":cat==="merger"?"rgba(15,94,104,0.08)":C.accentDim,color:cat==="crypto"?"#0F5E68":cat==="forex"?"#16A34A":cat==="merger"?C.purple:C.accentText,borderRadius:5,padding:"2px 8px",fontSize:10.5,fontWeight:700}}>{n.source}</span>
-                  {n.related&&n.related.trim()&&<span style={{background:"rgba(0,0,0,0.04)",color:C.muted,borderRadius:4,padding:"2px 6px",fontSize:10.5,fontFamily:"monospace",fontWeight:600}}>{n.related.split(",")[0]}</span>}
-                  <span style={{color:C.muted2,fontSize:10.5,marginLeft:"auto"}}>{timeAgo(n.datetime)}</span>
+        /* ── 2-COLUMN LAYOUT ── */
+        <div style={{display:"grid",gridTemplateColumns:"1fr 300px",gap:24,alignItems:"start"}}>
+
+          {/* LEFT — Hero + news list */}
+          <div>
+            {/* HERO ARTICLE */}
+            {hero&&(()=>{
+              const sent=getSentiment(hero.headline);
+              const tickers=(hero.related||"").split(",").map(t=>t.trim()).filter(t=>t&&t.length<=5&&/^[A-Z]+$/.test(t)).slice(0,4);
+              return(
+                <a href={hero.url} target="_blank" rel="noopener noreferrer"
+                  style={{display:"block",textDecoration:"none",background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:18,marginBottom:20,overflow:"hidden",boxShadow:"var(--c-shadowMd)",transition:"transform 0.15s,box-shadow 0.15s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 32px rgba(21,101,192,0.14)";}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="var(--c-shadowMd)";}}>
+                  {/* Hero image */}
+                  <div style={{position:"relative",height:220,background:`linear-gradient(135deg,#0A1633 0%,#0D2A5E 100%)`,overflow:"hidden"}}>
+                    {hero.image&&<img src={hero.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.55}} onError={e=>{e.target.style.display="none";}}/>}
+                    <div style={{position:"absolute",inset:0,background:"linear-gradient(to top, rgba(10,22,51,0.85) 0%, transparent 60%)"}}/>
+                    {/* Sentiment badge */}
+                    <div style={{position:"absolute",top:16,left:16,background:sent.bg,border:`1px solid ${sent.color}55`,borderRadius:20,padding:"5px 12px",display:"flex",alignItems:"center",gap:5}}>
+                      <span style={{width:6,height:6,borderRadius:"50%",background:sent.color,display:"inline-block"}}/>
+                      <span style={{fontSize:10,fontWeight:800,color:sent.color,letterSpacing:1,textTransform:"uppercase"}}>{sent.label}</span>
+                    </div>
+                  </div>
+                  {/* Hero body */}
+                  <div style={{padding:"18px 20px 20px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+                      <span style={{background:catColor,color:"#fff",borderRadius:6,padding:"2px 9px",fontSize:10.5,fontWeight:800}}>{hero.source}</span>
+                      {tickers.map(t=>(
+                        <span key={t} style={{background:"rgba(21,101,192,0.08)",color:"#1565C0",borderRadius:5,padding:"2px 7px",fontSize:10.5,fontWeight:700,fontFamily:"monospace"}}>${t}</span>
+                      ))}
+                      <span style={{color:C.muted2,fontSize:11,marginLeft:"auto"}}>{timeAgo(hero.datetime)}</span>
+                    </div>
+                    <h3 style={{margin:"0 0 8px",color:C.text,fontSize:17,fontWeight:800,lineHeight:1.4,letterSpacing:"-0.3px"}}>{hero.headline}</h3>
+                    {hero.summary&&<p style={{margin:"0 0 14px",color:C.muted,fontSize:13,lineHeight:1.6,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{hero.summary}</p>}
+                    <span style={{display:"inline-flex",alignItems:"center",gap:5,background:"rgba(21,101,192,0.07)",color:"#1565C0",border:"1px solid rgba(21,101,192,0.2)",borderRadius:8,padding:"7px 14px",fontSize:12,fontWeight:700}}>
+                      {isEN?"Read analysis →":"Leer análisis →"}
+                    </span>
+                  </div>
+                </a>
+              );
+            })()}
+
+            {/* REST OF NEWS */}
+            {rest.map((n,i)=>{
+              const sent=getSentiment(n.headline);
+              const tickers=(n.related||"").split(",").map(t=>t.trim()).filter(t=>t&&t.length<=5&&/^[A-Z]+$/.test(t)).slice(0,3);
+              return(
+                <div key={i}>
+                  {i>0 && i%5===0 && <><AdBannerFeed/><MediaNetBannerFeed/></>}
+                  <a href={n.url} target="_blank" rel="noopener noreferrer"
+                    style={{display:"block",textDecoration:"none",background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:14,padding:"14px 16px",marginBottom:10,boxShadow:"var(--c-shadow)",transition:"box-shadow 0.2s,transform 0.15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.boxShadow="var(--c-shadowMd)";e.currentTarget.style.transform="translateY(-1px)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.boxShadow="var(--c-shadow)";e.currentTarget.style.transform="";}}>
+                    <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+                      {n.image&&<img src={n.image} alt="" style={{width:76,height:56,objectFit:"cover",borderRadius:10,flexShrink:0,background:"#F1F5F9"}} onError={e=>{e.target.style.display="none";}}/>}
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5,flexWrap:"wrap"}}>
+                          <span style={{background:"rgba(21,101,192,0.08)",color:"#1565C0",borderRadius:5,padding:"2px 8px",fontSize:10.5,fontWeight:800}}>{n.source}</span>
+                          {tickers.map(t=>(
+                            <span key={t} style={{background:"rgba(0,0,0,0.04)",color:C.muted,borderRadius:4,padding:"2px 6px",fontSize:10,fontFamily:"monospace",fontWeight:700}}>${t}</span>
+                          ))}
+                          <span style={{display:"inline-flex",alignItems:"center",gap:3,background:sent.bg,borderRadius:4,padding:"2px 7px",fontSize:10,fontWeight:700,color:sent.color}}>
+                            <span style={{width:5,height:5,borderRadius:"50%",background:sent.color,display:"inline-block"}}/>
+                            {sent.label.split(" ")[0].charAt(0).toUpperCase()+sent.label.split(" ")[0].slice(1).toLowerCase()}
+                          </span>
+                          <span style={{color:C.muted2,fontSize:10.5,marginLeft:"auto"}}>{timeAgo(n.datetime)}</span>
+                        </div>
+                        <p style={{margin:0,color:C.text,fontSize:13.5,fontWeight:600,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{n.headline}</p>
+                        {n.summary&&<p style={{margin:"4px 0 0",color:C.muted,fontSize:12,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical"}}>{n.summary}</p>}
+                      </div>
+                    </div>
+                  </a>
                 </div>
-                <p style={{margin:0,color:C.text,fontSize:13.5,fontWeight:600,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{n.headline}</p>
-                {n.summary&&<p style={{margin:"4px 0 0",color:C.muted,fontSize:12,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical"}}>{n.summary}</p>}
+              );
+            })}
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div style={{display:"flex",flexDirection:"column",gap:14,position:"sticky",top:16}}>
+
+            {/* Lo más leído */}
+            <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:16,padding:"16px 18px",boxShadow:"var(--c-shadow)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:catColor,letterSpacing:2,textTransform:"uppercase",marginBottom:12}}>
+                {isEN?"TOP STORIES TODAY":"LO MÁS LEÍDO HOY"}
+              </div>
+              {topRead.map((n,i)=>(
+                <a key={i} href={n.url} target="_blank" rel="noopener noreferrer"
+                  style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:i<topRead.length-1?12:0,textDecoration:"none",padding:"8px 0",borderBottom:i<topRead.length-1?"1px solid var(--c-border)":"none"}}>
+                  <span style={{fontWeight:800,color:catColor,fontSize:20,lineHeight:1,minWidth:24,flexShrink:0,opacity:0.8}}>0{i+1}</span>
+                  <p style={{margin:0,color:C.text,fontSize:12.5,fontWeight:600,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{n.headline}</p>
+                </a>
+              ))}
+            </div>
+
+            {/* Resumen IA */}
+            <div style={{background:"var(--c-surface)",border:`1.5px solid ${catColor}33`,borderRadius:16,padding:"16px 18px",boxShadow:`0 2px 16px ${catColor}14`}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+                <div style={{width:28,height:28,borderRadius:8,background:`linear-gradient(135deg,${catColor},${catColor}cc)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>🤖</div>
+                <div>
+                  <div style={{fontSize:10,fontWeight:800,color:catColor,letterSpacing:1.5,textTransform:"uppercase"}}>{isEN?"AI SUMMARY":"RESUMEN IA"}</div>
+                  <div style={{fontSize:9.5,color:C.muted2}}>
+                    {new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})}
+                  </div>
+                </div>
+              </div>
+              {aiSummary?(
+                <p style={{margin:"0 0 10px",color:C.text,fontSize:12.5,lineHeight:1.65}}>
+                  {aiSummary.split(/(\$[A-Z]{1,5})/g).map((p,i)=>
+                    /^\$[A-Z]{1,5}$/.test(p)
+                      ? <strong key={i} style={{color:catColor}}>{p}</strong>
+                      : p
+                  )}
+                </p>
+              ):<p style={{margin:"0 0 10px",color:C.muted,fontSize:12.5,lineHeight:1.65}}>Loading summary...</p>}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {topTickers.slice(0,5).map(t=>(
+                  <span key={t} style={{background:`${catColor}11`,color:catColor,borderRadius:6,padding:"3px 8px",fontSize:11,fontWeight:700,fontFamily:"monospace"}}>${t}</span>
+                ))}
+              </div>
+              <div style={{marginTop:10,fontSize:10,color:C.muted2,display:"flex",alignItems:"center",gap:4}}>
+                🤖 {isEN?`Generated by NEXO AI · ${news.length} sources`:`Generado por NEXO IA · ${news.length} fuentes`}
               </div>
             </div>
-          </a>
+
+            {/* Top tickers found in news */}
+            {topTickers.length>0&&(
+              <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 18px",boxShadow:"var(--c-shadow)"}}>
+                <div style={{fontSize:10,fontWeight:800,color:C.muted,letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>
+                  {isEN?"TICKERS IN NEWS":"TICKERS EN NOTICIAS"}
+                </div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                  {topTickers.map(t=>(
+                    <span key={t} style={{background:"rgba(21,101,192,0.07)",color:"#1565C0",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:800,fontFamily:"monospace",border:"1px solid rgba(21,101,192,0.15)"}}>${t}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        ))
+        </div>
       )}
     </div>
   );
