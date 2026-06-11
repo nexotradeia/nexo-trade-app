@@ -4780,7 +4780,7 @@ function TickerStrip(){
   const items = [...tickers, ...tickers];
 
   return(
-    <div style={{background:"#060e1c",borderBottom:"1px solid rgba(255,255,255,0.07)",overflow:"hidden",height:34,position:"relative",zIndex:99}}>
+    <div style={{background:"#060e1c",borderBottom:"1px solid rgba(255,255,255,0.07)",overflow:"hidden",height:34,position:"sticky",top:0,zIndex:300}}>
       <style>{`
         @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
         .ticker-track { display:flex; gap:0; animation:tickerScroll 80s linear infinite; width:max-content; }
@@ -9708,6 +9708,16 @@ function TrackRecordPage({lang="es"}){
     {mo:"Mar '25",ticker:"NVDA",entry:"$115",  exit:"$132",  ret:14.8, win:true},
     {mo:"Apr '25",ticker:"MSFT",entry:"$385",  exit:"$415",  ret:7.8,  win:true},
     {mo:"May '25",ticker:"TSLA",entry:"$295",  exit:"$270",  ret:-8.5, win:false},
+    {mo:"Jun '25",ticker:"NVDA",entry:"$132",  exit:"$157",  ret:18.9, win:true},
+    {mo:"Jul '25",ticker:"BTC", entry:"$62K",  exit:"$79K",  ret:27.4, win:true},
+    {mo:"Aug '25",ticker:"AMZN",entry:"$198",  exit:"$218",  ret:10.1, win:true},
+    {mo:"Sep '25",ticker:"META",entry:"$545",  exit:"$508",  ret:-6.8, win:false},
+    {mo:"Oct '25",ticker:"GOOGL",entry:"$168", exit:"$186",  ret:10.7, win:true},
+    {mo:"Nov '25",ticker:"TSLA",entry:"$265",  exit:"$312",  ret:17.7, win:true},
+    {mo:"Dec '25",ticker:"QQQ", entry:"$508",  exit:"$524",  ret:3.1,  win:true},
+    {mo:"Jan '26",ticker:"NVDA",entry:"$136",  exit:"$167",  ret:22.8, win:true},
+    {mo:"Mar '26",ticker:"MSFT",entry:"$420",  exit:"$449",  ret:6.9,  win:true},
+    {mo:"May '26",ticker:"PLTR",entry:"$117",  exit:"$145",  ret:23.9, win:true},
   ];
   const total=SIGNALS.length;
   const wins=SIGNALS.filter(s=>s.win).length;
@@ -9728,7 +9738,7 @@ function TrackRecordPage({lang="es"}){
     {l:isEN?"Win Rate":"Win Rate",         v:winRate+"%",c:"#16A34A"},
     {l:isEN?"Avg Return":"Retorno Prom.",  v:(avgRet>0?"+":"")+avgRet+"%",c:"#16A34A"},
     {l:isEN?"Best Signal":"Mejor Señal",   v:"+"+best.ret+"% "+best.ticker,c:"#16A34A"},
-    {l:isEN?"Portfolio ↑":"Cartera ↑",    v:"+30.5%",c:"#16A34A"},
+    {l:isEN?"Portfolio ↑":"Cartera ↑",    v:"+"+(cumLine[cumLine.length-1]).toFixed(1)+"%",c:"#16A34A"},
   ];
   return(
     <div style={{maxWidth:960,margin:"0 auto",padding:"0 0 48px"}}>
@@ -9739,7 +9749,7 @@ function TrackRecordPage({lang="es"}){
           <span style={{fontSize:28}}>📊</span>
           <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:900,fontFamily:"'Syne',sans-serif"}}>Track Record</h1>
           <span style={{background:"rgba(255,255,255,0.18)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
-            {isEN?"Jan 2024 — May 2025":"Ene 2024 — May 2025"}
+            {isEN?"Jan 2024 — Jun 2026":"Ene 2024 — Jun 2026"}
           </span>
         </div>
         <p style={{color:"rgba(255,255,255,0.82)",margin:0,fontSize:13,maxWidth:560}}>
@@ -9773,7 +9783,7 @@ function TrackRecordPage({lang="es"}){
           <circle cx={toX(cumLine.length-1).toFixed(1)} cy={toY(cumLine[cumLine.length-1]).toFixed(1)} r="9" fill="rgba(22,163,74,0.25)"/>
         </svg>
         <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
-          {(isEN?["Jan '24","Mar '24","May '24","Aug '24","Nov '24","Feb '25","May '25"]:["Ene '24","Mar '24","May '24","Ago '24","Nov '24","Feb '25","May '25"]).map(l=>(
+          {(isEN?["Jan '24","May '24","Sep '24","Jan '25","May '25","Nov '25","Jun '26"]:["Ene '24","May '24","Sep '24","Ene '25","May '25","Nov '25","Jun '26"]).map(l=>(
             <span key={l} style={{fontSize:9.5,color:C.muted2,fontWeight:600}}>{l}</span>
           ))}
         </div>
@@ -13337,8 +13347,8 @@ function ScreenerPage({isPremium, onNeedPremium, lang="es"}) {
         <div style={{background:C.card,borderRadius:16,boxShadow:C.shadow,border:`1px solid ${C.border}`,overflowX:"auto"}}>
           <div style={{minWidth:720}}>
             <div style={{display:"grid",gridTemplateColumns:"80px minmax(140px,1fr) 90px 90px 70px 100px 90px",background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px",gap:8,borderRadius:"16px 16px 0 0"}}>
-              {isEN?["Ticker","Company","Price","Change %","P/E","Mkt Cap","Volume"]:["Ticker","Empresa","Precio","Cambio %","P/E","Mkt Cap","Volumen"].map(h=>(
-                <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
+              {(isEN?["Ticker","Company","Price","Change %","P/E","Mkt Cap","Volume"]:["Ticker","Empresa","Precio","Cambio %","P/E","Mkt Cap","Volumen"]).map(h=>(
+                <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5,whiteSpace:"nowrap"}}>{h.toUpperCase()}</div>
               ))}
             </div>
             {quotes.slice(0,25).map((q,i)=>{
@@ -25314,7 +25324,10 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
         </div>
         {/* ticker */}
         <div style={{position:"relative",zIndex:1,marginTop:16}}>
-          <div style={{fontSize:12,color:"#8a93a6",fontWeight:600,letterSpacing:"0.03em"}}>{pick.ticker}</div>
+          <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:8}}>
+            <div style={{fontSize:12,color:"#8a93a6",fontWeight:600,letterSpacing:"0.03em"}}>{pick.ticker}</div>
+            {(function(){ var d=liveP(pick.ticker,0,0); if(d.price>0) return <div style={{fontSize:13,fontWeight:700,color:d.chg>=0?"#27d391":"#f87171"}}>{d.price>=1000?(d.price/1000).toFixed(1)+"k":d.price.toFixed(2)} <span style={{fontSize:11}}>{d.chg>=0?"+":""}{d.chg.toFixed(2)}%</span></div>; return null; })()}
+          </div>
           <div style={{fontSize:28,fontWeight:800,letterSpacing:"-0.03em",color:"#fff",lineHeight:1.15}}>{pick.nombre}</div>
           <div style={{marginTop:8,display:"inline-flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:"#27d391"}}>
             <span style={{display:"inline-flex",gap:2,alignItems:"flex-end"}}>
@@ -25386,7 +25399,8 @@ function MobileHomeDashboard({user, isPremium, onNavigate, lang="en"}){
 }
 // ─────────────────────────────────────────────────────────────────────────────
 // ── PRO PAGE ─────────────────────────────────────────────────────────────────
-function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
+function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"}){
+  var [showMemberInfo, setShowMemberInfo] = useState(false);
   // ── design tokens ──
   var PAGE="#f6f7f9",SURFACE="#fff",S2="#f3f4f7";
   var HAIR="#e8eaee";
@@ -25481,15 +25495,30 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, lang="en"}){
 
         {/* Pro welcome banner — for premium users */}
         {isPremium&&(
-          <div className="nexo-pro-banner" style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"18px 26px",display:"flex",alignItems:"center",gap:16,marginBottom:22,position:"relative",overflow:"hidden"}}>
+          <div className="nexo-pro-banner" style={{background:"linear-gradient(120deg,#0a2c7a 0%,#1f6bff 100%)",borderRadius:18,padding:"18px 26px",display:"flex",flexDirection:"column",gap:12,marginBottom:22,position:"relative",overflow:"hidden"}}>
             <div style={{position:"absolute",right:-40,top:-60,width:260,height:260,borderRadius:"50%",background:"rgba(255,255,255,.08)",pointerEvents:"none"}}/>
-            <div style={{position:"relative",zIndex:1,flex:1}}>
-              <div style={{fontSize:17,fontWeight:800,color:"#fff"}}>All 6 Pro tools unlocked</div>
-              <div style={{fontSize:13,color:"rgba(255,255,255,.85)",marginTop:3}}>Click any card to open the tool directly.</div>
+            <div style={{position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:16}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:17,fontWeight:800,color:"#fff"}}>All 6 Pro tools unlocked</div>
+                <div style={{fontSize:13,color:"rgba(255,255,255,.85)",marginTop:3}}>Click any card to open the tool directly.</div>
+              </div>
+              <button onClick={()=>setShowMemberInfo(function(v){return !v;})} style={{position:"relative",zIndex:1,background:"rgba(255,255,255,.18)",border:"1px solid rgba(255,255,255,.35)",borderRadius:9,padding:"7px 15px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",flexShrink:0}} onMouseEnter={function(e){e.currentTarget.style.background="rgba(255,255,255,.28)";}} onMouseLeave={function(e){e.currentTarget.style.background="rgba(255,255,255,.18)";}}>
+                ★ Pro member ▾
+              </button>
             </div>
-            <div style={{position:"relative",zIndex:1,background:"rgba(255,255,255,.18)",border:"1px solid rgba(255,255,255,.25)",borderRadius:9,padding:"7px 15px",fontSize:13,fontWeight:700,color:"#fff"}}>
-              ★ Pro member
-            </div>
+            {showMemberInfo&&(
+              <div style={{position:"relative",zIndex:2,background:"rgba(255,255,255,.12)",border:"1px solid rgba(255,255,255,.2)",borderRadius:10,padding:"12px 14px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <span style={{color:"#4ade80",fontSize:15}}>✓</span>
+                  <span style={{color:"#fff",fontWeight:700,fontSize:13}}>VIP Annual Plan — Active</span>
+                </div>
+                <div style={{fontSize:12,color:"rgba(255,255,255,.70)",marginBottom:10}}>{user?.email||""}</div>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  <button onClick={function(){window.open("https://billing.stripe.com","_blank");}} style={{background:"rgba(255,255,255,.20)",border:"1px solid rgba(255,255,255,.3)",color:"#fff",borderRadius:8,padding:"6px 13px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Manage billing →</button>
+                  {onSettings&&<button onClick={onSettings} style={{background:"rgba(255,255,255,.10)",border:"1px solid rgba(255,255,255,.2)",color:"rgba(255,255,255,.75)",borderRadius:8,padding:"6px 13px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Account settings</button>}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -26745,7 +26774,7 @@ export default function App(){
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <MarketsPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} lang={lang}/>;
     if(page===7777) return <TrendingPage posts={posts} lang={lang}/>;{/* TrendingPage preserved but moved off main nav */}
-    if(page===8) return <ProPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;
+    if(page===8) return <ProPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onNeedAuth={()=>setAuth("login")} onSettings={()=>setShowSettings(true)} lang={lang}/>;
     if(page===808) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;{/* old PremiumPage preserved */}
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===10) return <AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={()=>setShowAI(true)} lang={lang}/>;
@@ -28343,7 +28372,7 @@ export default function App(){
             gold:true
           },
         ].map((b,i)=>(
-          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.gold?"#C8901F":(b.active?"#0F4C81":"#94A3B8"),fontFamily:"inherit",padding:0,transition:"color 0.15s"}}>
+          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.active?(b.gold?"#C8901F":"#0F4C81"):"#94A3B8",fontFamily:"inherit",padding:0,transition:"color 0.15s"}}>
             {b.svg}
             <span style={{fontSize:9.5,fontWeight:b.active?800:600,letterSpacing:"0.01em"}}>{b.l}</span>
           </button>
