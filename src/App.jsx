@@ -28381,7 +28381,7 @@ export default function App(){
           onSkip={()=>{setEmailGateDone(true);setPage(0);setShowLanding(false);try{window.scrollTo({top:0});}catch{}}}
           onLogin={()=>{setEmailGateDone(true);setAuth("login");}}/>
       )}
-      <TickerTape lang={lang} onPremium={()=>{setPage(8);setShowLanding(false);}}/>
+      {/* TickerTape removed — using nexo-ticker-v4 inside nav */}
       <MarketCrisisBanner lang={lang} onCTA={()=>{setShowLanding(false);setPage(7);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BANNER NEWSLETTER — solo para visitantes sin cuenta ── */}
@@ -28453,6 +28453,30 @@ export default function App(){
           }} title="Close">×</button>
         </div>
       )}
+
+      {/* TICKER TAPE v4 — muy arriba, antes del topbar */}
+      <div className="nexo-ticker-v4">
+        <div className="nexo-ticker-v4-track">
+          {[
+            {s:"BTC",p:"$67,240",c:"+1.2%",up:true},{s:"AAPL",p:"$295.38",c:"+1.30%",up:true},
+            {s:"NVDA",p:"$202.10",c:"+0.84%",up:true},{s:"SPY",p:"$734.52",c:"+1.25%",up:true},
+            {s:"TSLA",p:"$392.32",c:"+2.81%",up:true},{s:"MSFT",p:"$387.69",c:"-2.43%",up:false},
+            {s:"AMZN",p:"$239.10",c:"+0.46%",up:true},{s:"ETH",p:"$1,617",c:"+3.0%",up:true},
+            {s:"META",p:"$566.41",c:"-0.80%",up:false},{s:"GOLD",p:"$2,320",c:"-0.2%",up:false},
+            {s:"QQQ",p:"$714.00",c:"+2.33%",up:true},{s:"GOOGL",p:"$178.40",c:"+0.91%",up:true},
+            {s:"BTC",p:"$67,240",c:"+1.2%",up:true},{s:"AAPL",p:"$295.38",c:"+1.30%",up:true},
+            {s:"NVDA",p:"$202.10",c:"+0.84%",up:true},{s:"SPY",p:"$734.52",c:"+1.25%",up:true},
+            {s:"TSLA",p:"$392.32",c:"+2.81%",up:true},{s:"MSFT",p:"$387.69",c:"-2.43%",up:false},
+            {s:"AMZN",p:"$239.10",c:"+0.46%",up:true},{s:"ETH",p:"$1,617",c:"+3.0%",up:true},
+          ].map((it,i)=>(
+            <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0}}>
+              <span style={{fontWeight:700,color:"rgba(255,255,255,0.8)",fontSize:10.5}}>{it.s}</span>
+              <span style={{fontSize:10.5}}>{it.p}</span>
+              <span style={{fontSize:10.5,fontWeight:700,color:it.up?"#22C55E":"#F87171"}}>{it.c}</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* NAVBAR v4 */}
       <nav style={{position:"sticky",top:trialDaysLeft!==null?32:0,zIndex:100,width:"100%",boxSizing:"border-box"}}>
@@ -28554,32 +28578,8 @@ export default function App(){
           </div>
         </div>
 
-        {/* ── LAYER 2: TICKER TAPE ── */}
-        <div className="nexo-ticker-v4">
-          <div className="nexo-ticker-v4-track">
-            {[
-              {s:"BTC",p:"$67,240",c:"+1.2%",up:true},{s:"AAPL",p:"$295.38",c:"+1.30%",up:true},
-              {s:"NVDA",p:"$202.10",c:"+0.84%",up:true},{s:"SPY",p:"$734.52",c:"+1.25%",up:true},
-              {s:"TSLA",p:"$392.32",c:"+2.81%",up:true},{s:"MSFT",p:"$387.69",c:"-2.43%",up:false},
-              {s:"AMZN",p:"$239.10",c:"+0.46%",up:true},{s:"ETH",p:"$1,617",c:"+3.0%",up:true},
-              {s:"META",p:"$566.41",c:"-0.80%",up:false},{s:"GOLD",p:"$2,320",c:"-0.2%",up:false},
-              {s:"QQQ",p:"$714.00",c:"+2.33%",up:true},{s:"GOOGL",p:"$178.40",c:"+0.91%",up:true},
-              {s:"BTC",p:"$67,240",c:"+1.2%",up:true},{s:"AAPL",p:"$295.38",c:"+1.30%",up:true},
-              {s:"NVDA",p:"$202.10",c:"+0.84%",up:true},{s:"SPY",p:"$734.52",c:"+1.25%",up:true},
-              {s:"TSLA",p:"$392.32",c:"+2.81%",up:true},{s:"MSFT",p:"$387.69",c:"-2.43%",up:false},
-              {s:"AMZN",p:"$239.10",c:"+0.46%",up:true},{s:"ETH",p:"$1,617",c:"+3.0%",up:true},
-            ].map((it,i)=>(
-              <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0}}>
-                <span style={{fontWeight:700,color:"rgba(255,255,255,0.8)",fontSize:10.5}}>{it.s}</span>
-                <span style={{fontSize:10.5}}>{it.p}</span>
-                <span style={{fontSize:10.5,fontWeight:700,color:it.up?"#22C55E":"#F87171"}}>{it.c}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ── LAYER 3: NAV ROW with dropdowns ── */}
-        <div className="nexo-nav-row-v4" style={{top:trialDaysLeft!==null?32+92:92}}>
+        {/* ── LAYER 2: NAV ROW with dropdowns ── */}
+        <div className="nexo-nav-row-v4" style={{top:trialDaysLeft!==null?32+62:62}}>
           {/* Direct tabs */}
           {[
             {label:isEN?"Feed":t.feed,idx:0,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
