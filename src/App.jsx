@@ -29169,7 +29169,7 @@ export default function App(){
 </div>}
 
       {/* SOCIAL PROOF STATS BAR — oculta en móvil (#9) */}
-      {page===0 && !showLanding && page!==99 && <div className="nexo-hide-mobile"><SocialProofBar user={user} onRegister={()=>setAuth("register")} lang={lang}/></div>}
+      {/* SocialProofBar removed */}
 
       {/* MARKETS STRIP v4 — desktop only, shown on feed pages */}
       {!(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99) && (
