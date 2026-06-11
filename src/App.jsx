@@ -26053,6 +26053,57 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
           })}
         </div>
 
+        {/* ── PORTFOLIO ORACLE HERO ── */}
+        <div style={{marginTop:36,background:"linear-gradient(135deg,#0a1628 0%,#0d2444 50%,#0a1c3d 100%)",borderRadius:22,padding:"28px 26px",position:"relative",overflow:"hidden",boxShadow:"0 8px 40px rgba(21,101,192,0.25)"}}>
+          <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(21,101,192,0.3) 0%,transparent 70%)",pointerEvents:"none"}}/>
+          <div style={{position:"absolute",bottom:-30,left:-20,width:150,height:150,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 70%)",pointerEvents:"none"}}/>
+
+          <div style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:11,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",color:"#818CF8",background:"rgba(129,140,248,0.12)",border:"1px solid rgba(129,140,248,0.25)",padding:"6px 12px",borderRadius:999,marginBottom:16,position:"relative",zIndex:1}}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+            {isEN?"ORACLE AI — EXCLUSIVE VIP":"ORACLE IA — EXCLUSIVO VIP"}
+          </div>
+
+          <div style={{position:"relative",zIndex:1,fontSize:24,fontWeight:900,color:"#fff",letterSpacing:"-0.03em",lineHeight:1.2,marginBottom:10}}>
+            {isEN?"Portfolio Oracle AI":"Portfolio Oracle IA"}<br/>
+            <span style={{background:"linear-gradient(135deg,#818CF8,#38BDF8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+              {isEN?"Know before the market does.":"Anticípate al mercado."}
+            </span>
+          </div>
+
+          <p style={{position:"relative",zIndex:1,fontSize:13.5,color:"rgba(255,255,255,0.65)",lineHeight:1.55,marginBottom:22,maxWidth:"52ch"}}>
+            {isEN
+              ?"Track your portfolio P&L in real time, get AI bullish/bearish scenarios, and receive alerts when your positions hit key levels."
+              :"Monitorea el P&L de tu portafolio en tiempo real, obtén escenarios alcistas/bajistas IA y recibe alertas cuando tus posiciones alcancen niveles clave."}
+          </p>
+
+          <div style={{position:"relative",zIndex:1,display:"flex",flexWrap:"wrap",gap:9,marginBottom:24}}>
+            {[
+              {icon:"📊",label:isEN?"Real-time P&L":"P&L en tiempo real"},
+              {icon:"🔮",label:isEN?"AI Scenarios":"Escenarios IA"},
+              {icon:"🔔",label:isEN?"Smart Alerts":"Alertas Inteligentes"},
+              {icon:"📈",label:isEN?"Performance Charts":"Gráficos de Rendimiento"},
+            ].map(function(f,i){return(
+              <div key={i} style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,fontWeight:600,color:"rgba(255,255,255,0.85)",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",padding:"7px 13px",borderRadius:999}}>
+                <span>{f.icon}</span> {f.label}
+              </div>
+            );})}
+          </div>
+
+          <div style={{position:"relative",zIndex:1}}>
+            {isPremium?(
+              <button onClick={function(){onNavigate&&onNavigate(37);}}
+                style={{display:"inline-flex",alignItems:"center",gap:10,background:"linear-gradient(135deg,#4F46E5,#1565C0)",border:"none",borderRadius:12,padding:"14px 24px",fontSize:15,fontWeight:800,color:"#fff",cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 20px rgba(79,70,229,0.4)"}}>
+                {isEN?"Open Portfolio Oracle →":"Abrir Portfolio Oracle →"}
+              </button>
+            ):(
+              <button onClick={openStripe}
+                style={{display:"inline-flex",alignItems:"center",gap:10,background:"linear-gradient(135deg,#4F46E5,#1565C0)",border:"none",borderRadius:12,padding:"14px 24px",fontSize:15,fontWeight:800,color:"#fff",cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 20px rgba(79,70,229,0.4)"}}>
+                🔒 {isEN?"Unlock with VIP →":"Desbloquear con VIP →"}
+              </button>
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   );
