@@ -26443,12 +26443,34 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
     var match=allPicks.find(function(p){ return upper.indexOf(p.ticker)!==-1; });
     if(match){
       setAiResult({type:"pick",pick:match,query:q});
-    } else if(!isPremium){
-      setAiResult({type:"gate",query:q});
-    } else {
-      var ans=genAnalysis(q);
-      setAiResult({type:"analysis",headline:ans.h,body:ans.b,query:q});
+      setQry("");
+      return;
     }
+    // Try static DB first (instant), then fall back to Groq API
+    var ans=genAnalysis(q);
+    if(ans&&ans.h){
+      setAiResult({type:"analysis",headline:ans.h,body:ans.b,query:q});
+      setQry("");
+      return;
+    }
+    // Call real AI — free for everyone via Groq
+    setAiResult({type:"loading",query:q});
+    var isEN=lang==="en";
+    var sysPrompt=isEN
+      ? "You are NexoTrade AI, a professional financial analyst assistant for nexotradeia.com. Answer concisely in English (max 3 paragraphs). Focus on actionable insights: price levels, analyst consensus, catalysts, risks. End with: ⚠️ Not financial advice."
+      : "Eres NexoTrade AI, asistente financiero profesional de nexotradeia.com. Responde de forma concisa en español (máx 3 párrafos). Da niveles de precio, consenso de analistas, catalizadores y riesgos. Termina con: ⚠️ Esto no es consejo financiero.";
+    fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message:q, systemPrompt:sysPrompt, lang})
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      setAiResult({type:"analysis",headline:"NexoTrade AI",body:d.reply||"...",query:q});
+    })
+    .catch(function(){
+      setAiResult({type:"analysis",headline:"NexoTrade AI",body:isEN?"Sorry, AI is temporarily unavailable. Check the feed for community analysis.":"Lo sentimos, la IA no está disponible momentáneamente. Revisa el feed de la comunidad.",query:q});
+    });
     setQry("");
   }
 
@@ -26534,10 +26556,10 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
                   </div>
                 </div>
               )}
-              {aiResult.type==="gate"&&(
-                <div>
-                  <p style={{fontSize:13.5,lineHeight:1.55,color:INK2,marginBottom:16}}>Oracle AI can analyze any ticker, compare positions, and give you portfolio recommendations — exclusively for Pro members.</p>
-                  <button onClick={()=>onNavigate&&onNavigate(8)} style={{display:"inline-flex",alignItems:"center",gap:7,background:`linear-gradient(135deg,${GOLD},#8a5e10)`,color:"#fff",fontSize:13.5,fontWeight:700,padding:"11px 18px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>✦ Unlock Pro — $6.58/mo</button>
+              {aiResult.type==="loading"&&(
+                <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0"}}>
+                  <div style={{display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:7,height:7,borderRadius:"50%",background:BLUE,animation:`bounce 1.2s ${i*0.2}s infinite`}}/>)}</div>
+                  <span style={{fontSize:13,color:INK2}}>{lang==="en"?"Analyzing…":"Analizando…"}</span>
                 </div>
               )}
             </div>
