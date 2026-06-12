@@ -26030,6 +26030,7 @@ class MobileDashErrorBoundary extends Component {
 // MOBILE HOME DASHBOARD — Greeting + AI Pick + Movers + Watchlist
 // ─────────────────────────────────────────────────────────────────────────────
 function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, lang="en"}){
+  const isEN = lang === "en";
   const lp = useContext(PriceCtx) || {};
 
   // ── Greeting
@@ -28156,7 +28157,7 @@ export default function App(){
     );
   };
 
-  const [showLanding, setShowLanding] = useState(()=>{ try{ return !_getSavedUser(); }catch{ return true; } }); // landing solo para visitantes nuevos; los logueados entran directo al home
+  const [showLanding, setShowLanding] = useState(true); // landing ("Invest smarter. Together.") aparece al entrar
   const [emailGateDone, setEmailGateDone] = useState(true); // EmailGate removed — real landing is at /
   const [marketOpen, setMarketOpen] = useState(false); // NYSE abierto → nav "Markets"/"Market" en verde
   useEffect(()=>{
