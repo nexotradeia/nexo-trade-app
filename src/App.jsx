@@ -10717,7 +10717,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
       {/* ── TOP STRIP — logo + tagline + CTA ── */}
       <div className="nexo-footer-top" style={{borderBottom:"1px solid rgba(21,101,192,0.10)",padding:"28px 24px"}}>
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:20,flexWrap:"wrap"}}>
-          <img src="/logo_nexo_full.svg" alt="NexoTrade" style={{height:38,width:"auto",objectFit:"contain",flexShrink:0}}/>
+          <img className="nexo-foot-logo" src="/logo_nexo_full.svg" alt="NexoTrade" style={{height:34,width:"auto",objectFit:"contain",flexShrink:0}}/>
           <p style={{color:"#475569",fontSize:13,margin:0,lineHeight:1.6,maxWidth:400,textAlign:"center",flex:"1 1 200px"}}>
             {isEN?"The most active global investor community.":"La comunidad de inversores más activa del mundo."}<br/>
             <span style={{color:"rgba(59,130,246,0.7)"}}>{isEN?"Real signals · Integrated AI · No commissions":"Señales reales · IA integrada · Sin comisiones"}</span>
@@ -28439,7 +28439,7 @@ export default function App(){
         .nexo-bottom-nav { display: flex !important; }
         /* Footer mucho más compacto en móvil + hueco para la bottom-nav */
         footer { margin-top: 14px !important; padding-bottom: 76px !important; }
-        footer img { height: 22px !important; width: auto !important; }
+        .nexo-foot-logo { height: 22px !important; max-height: 22px !important; width: auto !important; }
         .nexo-footer-top { padding: 12px 16px !important; }
         .nexo-footer-top p { font-size: 10.5px !important; max-width: none !important; }
         .nexo-footer-top button { padding: 8px 16px !important; font-size: 12px !important; }
