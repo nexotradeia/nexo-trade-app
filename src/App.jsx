@@ -4067,7 +4067,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
             );})}
           </div>
           {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ {isEN?"Searching GIFs...":"Buscando GIFs..."}</div>:(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:3,maxHeight:360,overflowY:"auto"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:3,maxHeight:190,overflowY:"auto"}}>
               {gifs.map(g=>(
                 <div key={g.id} style={{borderRadius:6,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:C.card2||"#f1f5f9",position:"relative"}}
                   onClick={()=>onSelect(g.full||g.preview)}>
