@@ -4699,15 +4699,18 @@ function TopsPage({posts=[],lang="es"}){
   return(
     <div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
-        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800}}>📊 Market Tops</h2>
+        <h2 style={{margin:0,color:C.text,fontSize:18,fontWeight:800,display:"flex",alignItems:"center",gap:9}}>
+          <span style={{width:30,height:30,borderRadius:9,background:"rgba(21,101,192,.1)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#1565C0"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="18" y1="20" x2="18" y2="10"/></svg></span>
+          Market Tops
+        </h2>
         {loading
-          ?<span style={{fontSize:11,color:C.muted}}>⏳ Loading prices...</span>
+          ?<span style={{fontSize:11,color:C.muted}}>Loading prices…</span>
           :marketClosed
-            ?<span style={{fontSize:11,color:C.gold,fontWeight:700}}>🟡 Markets closed · Last close prices</span>
-            :<span style={{fontSize:11,color:C.bull,fontWeight:700}}>🟢 Live prices · Finnhub</span>}
+            ?<span style={{fontSize:11,color:C.gold,fontWeight:700,display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:6,height:6,borderRadius:"50%",background:C.gold}}/>Markets closed · Last close</span>
+            :<span style={{fontSize:11,color:C.bull,fontWeight:700,display:"inline-flex",alignItems:"center",gap:5}}><span style={{width:6,height:6,borderRadius:"50%",background:C.bull,boxShadow:`0 0 5px ${C.bull}`}}/>Live · Finnhub</span>}
         <button onClick={fetchData}
-          style={{marginLeft:"auto",background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"4px 10px",cursor:"pointer",fontSize:11,color:C.muted,fontWeight:600}}
-          title="Actualizar">🔄 Refresh</button>
+          style={{marginLeft:"auto",background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"5px 11px",cursor:"pointer",fontSize:11,color:C.muted,fontWeight:600,display:"inline-flex",alignItems:"center",gap:5}}
+          title="Actualizar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
       </div>
       <div style={{display:"flex",gap:6,marginBottom:20}}>
         {tabs.map(([k,l])=><button key={k} onClick={()=>setTab(k)} style={{background:tab===k?C.accent:"transparent",border:`1.5px solid ${tab===k?C.accent:C.border}`,borderRadius:10,padding:"7px 14px",cursor:"pointer",color:tab===k?"#fff":C.muted,fontSize:12,fontWeight:700,whiteSpace:"nowrap",transition:"all 0.15s"}}>{l}</button>)}
@@ -4720,8 +4723,8 @@ function TopsPage({posts=[],lang="es"}){
       ):(
         <>
           {tab==="activas"&&(activas.length>0?activas.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32}}>No data available</div>)}
-          {tab==="ganadoras"&&(ganadoras.length>0?ganadoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32,fontSize:13}}>🟡 No gainers detected — market may be closed or prices unchanged</div>)}
-          {tab==="perdedoras"&&(perdedoras.length>0?perdedoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32,fontSize:13}}>🟡 No losers detected — market may be closed or prices unchanged</div>)}
+          {tab==="ganadoras"&&(ganadoras.length>0?ganadoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32,fontSize:13}}>No gainers detected — market may be closed or prices unchanged</div>)}
+          {tab==="perdedoras"&&(perdedoras.length>0?perdedoras.map((q,i)=><Row key={q.ticker} q={q} rank={i+1}/>):<div style={{color:C.muted,textAlign:"center",padding:32,fontSize:13}}>No losers detected — market may be closed or prices unchanged</div>)}
           {tab==="leaderboard"&&(()=>{
             // Calcular top traders esta semana por posts
             const weekAgo=Date.now()-7*24*60*60*1000;
@@ -4734,10 +4737,10 @@ function TopsPage({posts=[],lang="es"}){
               if(p.sentiment==="bull") map[p.user].bull++; else map[p.user].bear++;
               if(p.likes) map[p.user].pts+=p.likes*5;
             });
-            const lb=Object.values(map).sort((a,b)=>b.pts-a.pts).slice(0,10);
-            const medals=["🥇","🥈","🥉"];
+            const lb=Object.values(map).sort((a,b)=>b.pts-a.pts).slice(0,5);
+            const rankBg=i=>i===0?"linear-gradient(135deg,#FFD86B,#F0B429)":i===1?"linear-gradient(135deg,#E2E8F0,#94A3B8)":i===2?"linear-gradient(135deg,#E8A87C,#B45309)":"transparent";
             if(lb.length===0) return <div style={{textAlign:"center",padding:40,color:C.muted}}>
-              <div style={{fontSize:32,marginBottom:8}}>🏆</div>
+              <div style={{width:56,height:56,borderRadius:16,margin:"0 auto 12px",background:"rgba(21,101,192,.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#1565C0"}}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div>
               <div>{lang==="en"?"Post your first analysis to show up here!":"¡Publica tu primer análisis para aparecer aquí!"}</div>
             </div>;
             return lb.map((u,i)=>{
@@ -4747,7 +4750,7 @@ function TopsPage({posts=[],lang="es"}){
                 <div key={u.user} style={{background:i===0?`linear-gradient(135deg,rgba(15,94,104,0.06),rgba(245,158,11,0.03))`:C.surface,border:`1px solid ${i===0?"rgba(15,94,104,0.25)":C.border}`,borderRadius:14,padding:"14px 16px",marginBottom:8,display:"flex",alignItems:"center",gap:12,transition:"all 0.15s"}}
                   onMouseEnter={e=>{e.currentTarget.style.borderColor=C.borderHover;e.currentTarget.style.boxShadow=C.shadow;}}
                   onMouseLeave={e=>{e.currentTarget.style.borderColor=i===0?"rgba(15,94,104,0.25)":C.border;e.currentTarget.style.boxShadow="none";}}>
-                  <span style={{fontWeight:900,fontSize:i<3?22:15,width:28,textAlign:"center",flexShrink:0}}>{medals[i]||<span style={{color:C.muted2}}>{i+1}</span>}</span>
+                  <span style={{width:26,height:26,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:12,color:i<3?"#2a1e00":C.muted2,background:rankBg(i),border:i<3?"none":`1px solid ${C.border}`}}>{i+1}</span>
                   <InitialsAvatar name={u.user} color={u.color} size={38}/>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
