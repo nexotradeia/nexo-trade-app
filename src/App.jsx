@@ -28602,7 +28602,7 @@ export default function App(){
       .nexo-ticker-v4-track { display:inline-flex; align-items:center; width:max-content; padding:7px 0; gap:0; font-size:11.5px; color:#94a3b8; animation:nexo-tape 38s linear infinite; }
       .nexo-ticker-v4:hover .nexo-ticker-v4-track { animation-play-state:paused; }
       @keyframes nexo-tick-v4 { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-      .nexo-nav-row-v4 { height:50px; display:flex; align-items:center; padding:0 20px; overflow-x:auto; scrollbar-width:none; gap:2px; background:var(--c-nav); border-bottom:1px solid var(--c-navBorder); position:sticky; z-index:99; }
+      .nexo-nav-row-v4 { height:50px; display:flex; align-items:center; padding:0 20px; overflow:visible; gap:2px; background:var(--c-nav); border-bottom:1px solid var(--c-navBorder); position:sticky; z-index:99; }
       .nexo-nav-row-v4::-webkit-scrollbar { display:none; }
       .nexo-ntab { height:50px; padding:0 14px; background:transparent; border:none; border-bottom:2.5px solid transparent; font-size:13px; font-weight:600; color:var(--c-muted); display:flex; align-items:center; gap:6px; cursor:pointer; transition:all .15s; white-space:nowrap; font-family:inherit; }
       .nexo-ntab:hover { color:var(--c-text); background:var(--c-card2); }
