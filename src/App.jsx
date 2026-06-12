@@ -9344,6 +9344,7 @@ function MarketOverview({lang="es"}){
 }
 
 function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[],isPremium=false,onUpgrade}){
+  const isEN = lang==="en";
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
   const SIDEBAR_STATIC=[
@@ -25092,6 +25093,7 @@ const _getSavedUser = () => {
    ADMIN DASHBOARD — solo visible para emails admin
 ═══════════════════════════════════════════════════════════════ */
 function AdminDashboard(){
+  const isEN = (()=>{try{return (localStorage.getItem("nexo-lang")||"en")==="en";}catch{return true;}})();
   const [stats,setStats]   = useState(null);
   const [users,setUsers]   = useState([]);
   const [posts,setPosts]   = useState([]);
