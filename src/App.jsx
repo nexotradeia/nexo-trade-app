@@ -28519,8 +28519,8 @@ export default function App(){
 
       /* ─── NAV v4 ─── */
       .nexo-topbar-v4 { height:62px; display:flex; align-items:center; padding:0 22px; gap:12px; background:#080F1F; border-bottom:1px solid rgba(255,255,255,0.07); }
-      .nexo-ticker-v4 { overflow:hidden; white-space:nowrap; padding:6px 0; border-top:1px solid rgba(255,255,255,0.06); background:#0B1F3F; }
-      .nexo-ticker-v4-track { display:inline-flex; gap:28px; animation:nexo-tick-v4 40s linear infinite; font-size:11px; color:#94a3b8; }
+      .nexo-ticker-v4 { overflow:hidden; white-space:nowrap; background:#080F1F; border-bottom:1px solid rgba(255,255,255,0.08); }
+      .nexo-ticker-v4-track { display:flex; align-items:center; justify-content:space-between; width:100%; padding:7px 24px; gap:0; font-size:11.5px; color:#94a3b8; }
       @keyframes nexo-tick-v4 { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
       .nexo-nav-row-v4 { height:50px; display:flex; align-items:center; padding:0 20px; overflow-x:auto; scrollbar-width:none; gap:2px; background:var(--c-nav); border-bottom:1px solid var(--c-navBorder); position:sticky; z-index:99; }
       .nexo-nav-row-v4::-webkit-scrollbar { display:none; }
@@ -28664,25 +28664,24 @@ export default function App(){
         </div>
       )}
 
-      {/* TICKER TAPE v4 — muy arriba, antes del topbar */}
-      <div className="nexo-ticker-v4">
+      {/* TICKER TAPE v4 — fila estática, sin animación, ítems distribuidos */}
+      <div className="nexo-ticker-v4 nexo-hide-mobile">
         <div className="nexo-ticker-v4-track">
           {[
-            {s:"BTC",p:"$67,240",c:"+1.2%",up:true},{s:"AAPL",p:"$295.38",c:"+1.30%",up:true},
-            {s:"NVDA",p:"$202.10",c:"+0.84%",up:true},{s:"SPY",p:"$734.52",c:"+1.25%",up:true},
-            {s:"TSLA",p:"$392.32",c:"+2.81%",up:true},{s:"MSFT",p:"$387.69",c:"-2.43%",up:false},
-            {s:"AMZN",p:"$239.10",c:"+0.46%",up:true},{s:"ETH",p:"$1,617",c:"+3.0%",up:true},
-            {s:"META",p:"$566.41",c:"-0.80%",up:false},{s:"GOLD",p:"$2,320",c:"-0.2%",up:false},
-            {s:"QQQ",p:"$714.00",c:"+2.33%",up:true},{s:"GOOGL",p:"$178.40",c:"+0.91%",up:true},
-            {s:"BTC",p:"$67,240",c:"+1.2%",up:true},{s:"AAPL",p:"$295.38",c:"+1.30%",up:true},
-            {s:"NVDA",p:"$202.10",c:"+0.84%",up:true},{s:"SPY",p:"$734.52",c:"+1.25%",up:true},
-            {s:"TSLA",p:"$392.32",c:"+2.81%",up:true},{s:"MSFT",p:"$387.69",c:"-2.43%",up:false},
-            {s:"AMZN",p:"$239.10",c:"+0.46%",up:true},{s:"ETH",p:"$1,617",c:"+3.0%",up:true},
+            {s:"ETH",  p:"$1,617",  c:"▲3%",    up:true},
+            {s:"META", p:"$566.41", c:"▼0.80%",  up:false},
+            {s:"GOLD", p:"$2,320",  c:"▼0.2%",   up:false},
+            {s:"BTC",  p:"$67,240", c:"▲1.2%",   up:true},
+            {s:"AAPL", p:"$295.38", c:"▲1.30%",  up:true},
+            {s:"NVDA", p:"$202.10", c:"▲0.84%",  up:true},
+            {s:"SPY",  p:"$734.52", c:"▲1.25%",  up:true},
+            {s:"TSLA", p:"$392.32", c:"▲2.81%",  up:true},
+            {s:"MSFT", p:"$387.69", c:"▼2.43%",  up:false},
           ].map((it,i)=>(
-            <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0}}>
-              <span style={{fontWeight:700,color:"rgba(255,255,255,0.8)",fontSize:10.5}}>{it.s}</span>
-              <span style={{fontSize:10.5}}>{it.p}</span>
-              <span style={{fontSize:10.5,fontWeight:700,color:it.up?"#22C55E":"#F87171"}}>{it.c}</span>
+            <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0,padding:"0 4px"}}>
+              <span style={{fontWeight:800,color:"rgba(255,255,255,0.85)",fontSize:11.5,letterSpacing:0.2}}>{it.s}</span>
+              <span style={{fontSize:11.5,color:"rgba(255,255,255,0.6)"}}>{it.p}</span>
+              <span style={{fontSize:11.5,fontWeight:700,color:it.up?"#22C55E":"#F87171"}}>{it.c}</span>
             </span>
           ))}
         </div>
@@ -28736,32 +28735,30 @@ export default function App(){
           </div>
 
           {/* Right controls */}
-          <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
-            {/* Dark mode */}
-            <button className="nexo-hide-mobile" onClick={()=>setDarkMode(!darkMode)}
-              title={darkMode?"Light mode":"Dark mode"}
-              style={{width:34,height:34,borderRadius:9,border:"1.5px solid rgba(255,255,255,0.16)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.7)",fontSize:15,transition:"all .2s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.1)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
-              {darkMode?"☀️":"🌙"}
-            </button>
-            {/* Lang */}
-            <button className="nexo-hide-mobile"
-              onClick={()=>{const nl=lang==="en"?"es":"en";setLang(nl);try{localStorage.setItem("nexo-lang",nl);}catch{}}}
-              style={{height:34,padding:"0 12px",borderRadius:9,border:"1.5px solid rgba(255,255,255,0.16)",background:"transparent",cursor:"pointer",fontSize:11.5,fontWeight:700,color:"rgba(255,255,255,0.7)",transition:"all .2s",whiteSpace:"nowrap",fontFamily:"inherit"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.1)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
-              🌐 {lang==="en"?"EN":"ES"}
-            </button>
-            {/* Settings */}
+          <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0,marginLeft:"auto"}}>
+            {/* ⚡ Activate VIP — solo si no es premium */}
+            {!effectivePremium && user && (
+              <button onClick={()=>{setPage(8);setShowLanding(false);}}
+                className="nexo-hide-mobile"
+                style={{height:36,padding:"0 18px",borderRadius:10,border:"none",background:"#0B5CFF",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit",boxShadow:"0 4px 18px -4px rgba(11,92,255,.7)",letterSpacing:0.1,display:"flex",alignItems:"center",gap:6,transition:"all .15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="#1466FF";e.currentTarget.style.boxShadow="0 4px 24px -4px rgba(11,92,255,.9)";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="#0B5CFF";e.currentTarget.style.boxShadow="0 4px 18px -4px rgba(11,92,255,.7)";}}>
+                ⚡ {isEN?"Activate VIP":"Activar VIP"}
+              </button>
+            )}
+            {effectivePremium && user && (
+              <span className="nexo-hide-mobile" style={{height:36,padding:"0 14px",borderRadius:10,background:"rgba(224,182,75,0.12)",border:"1px solid rgba(224,182,75,0.3)",color:"#E0B64B",fontSize:12,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>
+                ✦ Premium
+              </span>
+            )}
+            {/* Settings — small icon button, hidden when user logged in on desktop (accessible via avatar) */}
             <button onClick={()=>setShowSettings(true)} title={isEN?"Settings":"Configuración"}
-              style={{width:34,height:34,borderRadius:9,border:"1.5px solid rgba(255,255,255,0.16)",background:showSettings?"rgba(255,255,255,0.12)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.7)",transition:"all .15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.12)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background=showSettings?"rgba(255,255,255,0.12)":"transparent";}}>
+              className="nexo-hide-mobile"
+              style={{width:36,height:36,borderRadius:9,border:"1.5px solid rgba(255,255,255,0.14)",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.6)",transition:"all .15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)";e.currentTarget.style.color="rgba(255,255,255,0.9)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="rgba(255,255,255,0.6)";}}>
               <IcoSettings/>
             </button>
-            {/* Share */}
-            <span className="nexo-hide-mobile"><ShareNavButton user={user} lang={lang}/></span>
             {/* Auth */}
             {user
               ? <UserMenu user={user} onLogout={async()=>{
@@ -28781,7 +28778,7 @@ export default function App(){
                     style={{height:34,padding:"0 16px",borderRadius:9,border:"none",background:"#0B5CFF",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit",boxShadow:"0 4px 16px -6px rgba(11,92,255,.8)",transition:"all .15s"}}
                     onMouseEnter={e=>{e.currentTarget.style.background="#1466FF";}}
                     onMouseLeave={e=>{e.currentTarget.style.background="#0B5CFF";}}>
-                    {isEN?"Join free →":"Unirse gratis →"}
+                    ⚡ {isEN?"Activate VIP":"Activar VIP"}
                   </button>
                 </div>
             }
@@ -28807,24 +28804,15 @@ export default function App(){
             ))}
           </div>
 
-          {/* ── CENTER: Prediction of the Day (inline compact) ── */}
-          <NavPrediction lang={lang} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
-
-          {/* ── RIGHT: dropdowns + Premium ── */}
+          {/* ── RIGHT: dropdowns ── */}
           <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0}}>
-            {/* Premium CTA — left of dropdowns */}
-            <button onClick={()=>{setPage(8);setShowLanding(false);}}
-              style={{flexShrink:0,marginRight:6,background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"7px 16px",cursor:"pointer",color:"#1B1303",fontSize:12,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:"0 3px 14px rgba(224,182,75,0.5)",animation:effectivePremium?"none":"nexoPremiumPulse 1.8s ease-in-out infinite"}}>
-              {effectivePremium?"✦ Premium":(isEN?"⭐ Premium →":"⭐ Premium →")}
-            </button>
-
             <div className="nexo-nav-sep"/>
 
             {/* IA dropdown */}
             <div className="nexo-mega">
               <button className="nexo-mega-btn ia-v">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
-                AI <span style={{fontSize:9,opacity:.7}}>▾</span>
+                IA <span style={{fontSize:9,opacity:.7}}>▾</span>
               </button>
               <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
                 <div className="nexo-drop-label">Artificial Intelligence</div>
@@ -28909,10 +28897,14 @@ export default function App(){
               </div>
             </div>
 
-            {/* Premium CTA — also on the far right */}
-            <button onClick={()=>{setPage(8);setShowLanding(false);}}
-              style={{flexShrink:0,marginLeft:6,background:"linear-gradient(135deg,#E0B64B,#C8901F)",border:"none",borderRadius:14,padding:"7px 16px",cursor:"pointer",color:"#1B1303",fontSize:12,fontWeight:900,whiteSpace:"nowrap",letterSpacing:0.3,boxShadow:"0 3px 14px rgba(224,182,75,0.5)",animation:effectivePremium?"none":"nexoPremiumPulse 1.8s ease-in-out infinite"}}>
-              {effectivePremium?"✦ Premium":(isEN?"⭐ Premium →":"⭐ Premium →")}
+            {/* Search shortcut — ⌘K */}
+            <div className="nexo-nav-sep"/>
+            <button onClick={()=>document.querySelector(".nexo-search-input")?.focus()}
+              style={{display:"flex",alignItems:"center",gap:6,height:32,padding:"0 10px",borderRadius:8,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.04)",color:"rgba(255,255,255,0.45)",fontSize:11.5,fontWeight:500,cursor:"pointer",flexShrink:0,transition:"all .15s",fontFamily:"inherit"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)";e.currentTarget.style.color="rgba(255,255,255,0.7)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.color="rgba(255,255,255,0.45)";}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              Search <kbd style={{fontSize:9,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:4,padding:"1px 5px",marginLeft:2,fontFamily:"inherit"}}>⌘K</kbd>
             </button>
           </div>
         </div>
