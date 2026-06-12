@@ -4637,7 +4637,7 @@ function TopsPage({posts=[],lang="es"}){
   const [quotes,setQuotes]=useState([]);
   const [loading,setLoading]=useState(true);
   const [marketClosed,setMarketClosed]=useState(false);
-  const tabs=[["activas","🔥 Most Active"],["ganadoras","📈 Top Gainers"],["perdedoras","📉 Top Losers"],["leaderboard","🏆 Leaderboard"]];
+  const tabs=[["activas","Most Active"],["ganadoras","Top Gainers"],["perdedoras","Top Losers"],["leaderboard","Leaderboard"]];
 
   const fetchData=()=>{
     setLoading(true);
