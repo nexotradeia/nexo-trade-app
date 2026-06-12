@@ -2754,7 +2754,9 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
               </div>}
               {/* Avatar picker dropdown */}
               {showAvatarEdit && isOwn && (
-                <div style={{position:"absolute",top:80,left:0,zIndex:50,background:"#1e293b",border:"1px solid rgba(139,92,246,0.4)",borderRadius:14,padding:12,boxShadow:"0 12px 40px rgba(0,0,0,0.7)",width:220}} onClick={e=>e.stopPropagation()}>
+                <>
+                <div onClick={()=>setShowAvatarEdit(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:9998}}/>
+                <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:9999,background:"#1e293b",border:"1px solid rgba(139,92,246,0.4)",borderRadius:16,padding:16,boxShadow:"0 20px 60px rgba(0,0,0,0.7)",width:300,maxWidth:"90vw",maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                     <span style={{fontSize:11,fontWeight:700,color:"#FCD34D"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
                     <button onClick={()=>setShowAvatarEdit(false)} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:14}}>✕</button>
@@ -2823,6 +2825,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                   </div>
                   {savingAvatar && <div style={{textAlign:"center",fontSize:11,color:"#FCD34D",marginTop:6}}>Guardando...</div>}
                 </div>
+                </>
               )}
             </div>
 
