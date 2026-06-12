@@ -10380,12 +10380,12 @@ function JoinCard({ onAuth, lang="es" }){
         <div style={{display:"flex",gap:7,marginBottom:10}}>
           <button className="nexo-jc-social-btn" onClick={()=>onAuth("register")}
             style={{flex:1,background:"#fff",border:"1.5px solid #E6EDF5",borderRadius:9,padding:"8px",display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:11.5,fontWeight:700,color:"#0A1628",cursor:"pointer",fontFamily:"inherit"}}>
-            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Google
           </button>
           <button className="nexo-jc-social-btn" onClick={()=>onAuth("register")}
             style={{flex:1,background:"#fff",border:"1.5px solid #E6EDF5",borderRadius:9,padding:"8px",display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:11.5,fontWeight:700,color:"#0A1628",cursor:"pointer",fontFamily:"inherit"}}>
-            <svg width="13" height="14" viewBox="0 0 814 1000" fill="#0F172A"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 383.9 44.5 200.1 128.6 87.9 173 32.2 235.7 0 295.3 0c69.3 0 110.7 40.8 164 40.8 51.5 0 100.5-42.6 164-42.6zM543.1 0c3.2 29.5-10.3 59.4-26.6 80.8-17.3 22.9-47.7 41.3-74.3 41.3-3.5 0-7.1-.3-10.6-.9-2.9-28.6 9.9-58.5 25.5-79.1 17.9-24 48.4-42.3 86-42.1z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#0A1628" style={{flexShrink:0}}><path d="M17.05 12.04c-.02-2.05 1.68-3.03 1.75-3.08-.95-1.4-2.44-1.59-2.97-1.61-1.26-.13-2.47.74-3.11.74-.64 0-1.63-.72-2.69-.7-1.38.02-2.66.8-3.37 2.04-1.44 2.5-.37 6.2 1.03 8.23.69.99 1.5 2.1 2.57 2.06 1.03-.04 1.42-.67 2.67-.67 1.24 0 1.6.67 2.69.65 1.11-.02 1.81-1.01 2.49-2 .78-1.15 1.11-2.26 1.13-2.32-.02-.01-2.17-.83-2.19-3.29zM15.5 6.2c.57-.69.95-1.65.85-2.6-.82.03-1.81.54-2.39 1.23-.52.61-.98 1.58-.86 2.51.91.07 1.84-.46 2.4-1.14z"/></svg>
             Apple
           </button>
         </div>
@@ -10625,19 +10625,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
         </div>
       </div>
 
-      {/* ── LEGAL DISCLAIMER STRIP ── */}
-      <div style={{background:"rgba(239,68,68,0.06)",borderTop:"1px solid rgba(239,68,68,0.15)",borderBottom:"1px solid rgba(239,68,68,0.10)",padding:"12px 24px"}}>
-        <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"flex-start",gap:10,flexWrap:"wrap"}}>
-          <span style={{fontSize:16,flexShrink:0}}>⚠️</span>
-          <p style={{margin:0,fontSize:11,color:"rgba(239,68,68,0.7)",lineHeight:1.7,flex:1}}>
-            <strong style={{color:"rgba(239,68,68,0.85)"}}>{isEN?"DISCLAIMER:":"AVISO LEGAL:"}</strong>{" "}
-            {isEN
-              ?"NexoTrade content is for EDUCATIONAL and INFORMATIONAL purposes ONLY. It does NOT constitute financial, investment, or trading advice. Past performance is NOT indicative of future results. Trading involves substantial risk of loss. You may lose all of your invested capital. NexoTrade is NOT a registered investment advisor, broker-dealer, or financial institution. Always consult a qualified financial professional before making investment decisions."
-              :"El contenido de NexoTrade es ÚNICAMENTE con fines EDUCATIVOS e INFORMATIVOS. NO constituye asesoría financiera, de inversión ni de trading. El rendimiento pasado NO garantiza resultados futuros. El trading conlleva riesgo sustancial de pérdida. Puedes perder todo el capital invertido. NexoTrade NO es un asesor de inversión registrado, corredor de bolsa ni institución financiera. Consulta siempre con un profesional financiero cualificado antes de tomar decisiones de inversión."
-            }{" "}<button onClick={()=>nav(33)} style={{background:"none",border:"none",color:"rgba(239,68,68,0.75)",cursor:"pointer",textDecoration:"underline",fontSize:11,padding:0,fontFamily:"inherit"}}>→ {isEN?"Full Risk Disclaimer":"Aviso de Riesgo Completo"}</button>
-          </p>
-        </div>
-      </div>
+      {/* ── LEGAL DISCLAIMER STRIP removido a pedido (el aviso de riesgo completo sigue en el footer y en pág. 33) ── */}
 
       {/* ── BOTTOM BAR ── */}
       <div style={{padding:"14px 24px"}}>
@@ -28877,10 +28865,10 @@ export default function App(){
         </div>
 
         {/* ── LAYER 2: NAV ROW — 3 sections: tabs | prediction | dropdowns+premium ── */}
-        <div className="nexo-nav-row-v4 nexo-hide-mobile" style={{top:trialDaysLeft!==null?32+62:62,justifyContent:"center",gap:30}}>
+        <div className="nexo-nav-row-v4 nexo-hide-mobile" style={{top:trialDaysLeft!==null?32+62:62,justifyContent:"space-between",gap:8}}>
 
           {/* ── LEFT: direct page tabs ── */}
-          <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:0,flex:1,justifyContent:"space-around"}}>
             {[
               {label:isEN?"Feed":t.feed,idx:0,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
               {label:"News",idx:5,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>},
@@ -28896,7 +28884,7 @@ export default function App(){
           </div>
 
           {/* ── RIGHT: dropdowns ── */}
-          <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:0,flex:1,justifyContent:"space-around"}}>
             <div className="nexo-nav-sep"/>
 
             {/* IA dropdown */}
