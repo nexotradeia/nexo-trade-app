@@ -9495,9 +9495,20 @@ function MarketOverview({lang="es"}){
     {id:"asia",  label:"Asia-Pacific",flag:"🌏"},
     {id:"latam", label:"Latin America",flag:"🌎"},
   ];
+  // Market Overview vía /api/prices (Finnhub) con ETF-proxies + respaldo (nunca vacío)
+  const MO_GROUPS = {
+    indices:     [["SPY","S&P 500",662],["QQQ","Nasdaq 100",595],["DIA","Dow Jones",447],["IWM","Russell 2000",242]],
+    commodities: [["GLD","Gold",243],["SLV","Silver",30],["USO","Oil (WTI)",78],["UNG","Nat Gas",14]],
+    crypto:      [["BTC","Bitcoin",98000],["ETH","Ethereum",3400],["SOL","Solana",195]],
+  };
   useEffect(()=>{
     let c=false;
-    const load=()=>{fetch("/api/data?type=quotes&set=overview").then(r=>r.json()).then(j=>{if(!c){setD(j);setLoading(false);}}).catch(()=>{if(!c)setLoading(false);});};
+    const syms=[...MO_GROUPS.indices,...MO_GROUPS.commodities,...MO_GROUPS.crypto].map(x=>x[0]).join(",");
+    const build=(prices)=>{
+      const mk=(grp)=>grp.map(([s,n,fb])=>{const q=prices&&prices[s];return {s,n,p:(q&&q.c)||fb,chg:(q&&typeof q.dp==="number")?q.dp:0};});
+      return {indices:mk(MO_GROUPS.indices),commodities:mk(MO_GROUPS.commodities),crypto:mk(MO_GROUPS.crypto)};
+    };
+    const load=()=>{fetch("/api/prices?tickers="+syms).then(r=>r.json()).then(j=>{if(!c){setD(build(j.prices||{}));setLoading(false);}}).catch(()=>{if(!c){setD(build({}));setLoading(false);}});};
     load(); const iv=setInterval(load,60000); return()=>{c=true;clearInterval(iv);};
   },[]);
   useEffect(()=>{
