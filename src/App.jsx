@@ -6605,57 +6605,61 @@ function VipPopup({onClose, onGoVIP, lang="es"}){
         @keyframes nvp-glow{0%,100%{box-shadow:0 4px 30px rgba(0,232,122,.35)}50%{box-shadow:0 4px 50px rgba(0,232,122,.65)}}
         @keyframes nvp-shine{0%{left:-100%}100%{left:200%}}
       `}}/>
-      <div onClick={e=>e.stopPropagation()} style={{background:"linear-gradient(160deg,#04090f,#06100e,#040c18)",border:"1.5px solid rgba(0,232,122,.25)",borderRadius:24,padding:"28px 24px",maxWidth:400,width:"100%",position:"relative",boxShadow:"0 8px 60px rgba(0,232,122,.12)"}}>
-        {/* Top glow line */}
-        <div style={{position:"absolute",top:0,left:0,right:0,height:2,borderRadius:"24px 24px 0 0",background:"linear-gradient(90deg,transparent,#00e87a,transparent)"}}/>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#fff",border:"1px solid #E2EAF4",borderRadius:24,padding:"26px 22px",maxWidth:400,width:"100%",position:"relative",boxShadow:"0 30px 80px rgba(10,22,60,.35)"}}>
+        {/* Top line */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:3,borderRadius:"24px 24px 0 0",background:"linear-gradient(90deg,#1A56DB,#2563EB,#60A5FA)"}}/>
         {/* Close */}
-        <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"rgba(255,255,255,.06)",border:"none",color:"rgba(255,255,255,.5)",fontSize:16,cursor:"pointer",lineHeight:1,borderRadius:6,width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"rgba(15,23,42,.06)",border:"none",color:"#475569",fontSize:15,cursor:"pointer",lineHeight:1,borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 
-        {/* Icon */}
-        <div style={{textAlign:"center",fontSize:44,marginBottom:8,animation:"nvp-float 3s ease-in-out infinite"}}>🚀</div>
+        {/* Logo */}
+        <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
+          <div style={{padding:"12px 18px",borderRadius:16,background:"#0A1628",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <img src="/logo_nexo_full.svg" alt="NexoTrade" style={{width:92,height:"auto",display:"block"}}/>
+          </div>
+        </div>
 
         {/* Badge */}
         <div style={{textAlign:"center",marginBottom:12}}>
-          <span style={{display:"inline-block",background:"rgba(0,232,122,.12)",border:"1px solid rgba(0,232,122,.35)",borderRadius:20,padding:"3px 14px",fontSize:10,fontWeight:800,color:"#00e87a",letterSpacing:2}}>NEXO TRADE VIP</span>
+          <span style={{display:"inline-block",background:"rgba(26,86,219,.1)",border:"1px solid rgba(26,86,219,.28)",borderRadius:20,padding:"3px 14px",fontSize:10,fontWeight:800,color:"#1A56DB",letterSpacing:2}}>NEXO TRADE VIP</span>
         </div>
 
         {/* Title */}
-        <div style={{textAlign:"center",fontWeight:900,color:"#fff",fontSize:22,marginBottom:6,letterSpacing:-0.5,lineHeight:1.2}}>
+        <div style={{textAlign:"center",fontWeight:900,color:"#0A1628",fontSize:22,marginBottom:6,letterSpacing:-0.5,lineHeight:1.2}}>
           {lang==="en"?"Unlock the full platform":"Desbloquea la plataforma completa"}
         </div>
-        <div style={{textAlign:"center",color:"rgba(255,255,255,.5)",fontSize:13,marginBottom:18,lineHeight:1.5}}>
+        <div style={{textAlign:"center",color:"#64748B",fontSize:13,marginBottom:18,lineHeight:1.5}}>
           {lang==="en"?"Real signals, institutional flow, AI picks — all in one place.":"Señales reales, flujo institucional, picks IA — todo en un lugar."}
         </div>
 
         {/* Benefits grid */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:20}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:18}}>
           {(lang==="en"
             ?["Smart Money Flow","Weekly AI Picks","52 Guru Portfolios","Pro Screener","Oracle AI Signals","Earnings Alerts"]
             :["Smart Money Flow","Picks IA semanales","52 Portafolios Gurús","Screener Pro","Señales Oracle IA","Alertas de Earnings"]
           ).map(t=>(
-            <div key={t} style={{display:"flex",alignItems:"center",background:"rgba(0,232,122,.06)",border:"1px solid rgba(0,232,122,.12)",borderRadius:10,padding:"8px 12px"}}>
-              <span style={{fontSize:11,fontWeight:700,color:"#e0eaf8"}}>{t}</span>
+            <div key={t} style={{display:"flex",alignItems:"center",gap:6,background:"#F0F5FF",border:"1px solid #DCE6FB",borderRadius:10,padding:"8px 10px"}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A56DB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><polyline points="20 6 9 17 4 12"/></svg>
+              <span style={{fontSize:11,fontWeight:700,color:"#0A1628"}}>{t}</span>
             </div>
           ))}
         </div>
 
         {/* Price */}
-        <div style={{background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:14,padding:"12px 20px",textAlign:"center",marginBottom:14}}>
-          <div style={{fontSize:10,color:"#64748b",marginBottom:4,letterSpacing:1}}>ANNUAL PLAN — BEST VALUE</div>
+        <div style={{background:"#F0F5FF",border:"1px solid #DCE6FB",borderRadius:14,padding:"12px 20px",textAlign:"center",marginBottom:14}}>
+          <div style={{fontSize:10,color:"#64748b",marginBottom:4,letterSpacing:1}}>{lang==="en"?"ANNUAL PLAN — BEST VALUE":"PLAN ANUAL — MEJOR VALOR"}</div>
           <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:6}}>
-            <span style={{fontSize:38,fontWeight:900,color:"#00e87a",fontFamily:"monospace"}}>$6.58</span>
+            <span style={{fontSize:38,fontWeight:900,color:"#1A56DB",fontFamily:"monospace"}}>$6.58</span>
             <span style={{fontSize:13,color:"#64748b"}}>/mo · $79/year</span>
           </div>
-          <div style={{fontSize:11,color:"#00e87a",fontWeight:700,marginTop:4}}>Save $113 vs monthly · Cancel anytime</div>
+          <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:4}}>{lang==="en"?"Save $113 vs monthly · Cancel anytime":"Ahorra $113 vs mensual · Cancela cuando quieras"}</div>
         </div>
 
         {/* CTA */}
-        <div onClick={onGoVIP} style={{animation:"nvp-glow 2s ease-in-out infinite",position:"relative",overflow:"hidden",background:"linear-gradient(135deg,#00e87a,#00b85e)",borderRadius:14,padding:"14px 20px",textAlign:"center",color:"#000",fontWeight:900,fontSize:15,cursor:"pointer",letterSpacing:.3}}>
-          <div style={{position:"absolute",top:0,bottom:0,width:"40%",background:"rgba(255,255,255,.2)",filter:"blur(12px)",animation:"nvp-shine 2.5s ease-in-out infinite",transform:"skewX(-20deg)"}}/>
+        <div onClick={onGoVIP} style={{background:"linear-gradient(135deg,#1A56DB,#0B32B8)",borderRadius:14,padding:"14px 20px",textAlign:"center",color:"#fff",fontWeight:900,fontSize:15,cursor:"pointer",letterSpacing:.3,boxShadow:"0 8px 24px -8px rgba(26,86,219,.6)"}}>
           {lang==="en"?"Get Annual VIP — $79/year →":"Obtener VIP Anual — $79/año →"}
         </div>
-        <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"rgba(255,255,255,.25)"}}>
-          ✓ Instant access &nbsp;✓ Cancel anytime &nbsp;✓ Secure via Stripe
+        <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"#94A3B8"}}>
+          {lang==="en"?"✓ Instant access · ✓ Cancel anytime · ✓ Secure via Stripe":"✓ Acceso inmediato · ✓ Cancela cuando quieras · ✓ Pago seguro Stripe"}
         </div>
       </div>
     </div>
@@ -28438,18 +28442,19 @@ export default function App(){
         body { padding-bottom: 122px; }
         /* Bottom nav móvil tipo Robinhood */
         .nexo-bottom-nav { display: flex !important; }
-        /* Footer mucho más compacto en móvil + hueco para la bottom-nav */
-        footer { margin-top: 14px !important; padding-bottom: 76px !important; }
-        .nexo-foot-logo { width: 44px !important; height: auto !important; max-height: none !important; }
-        .nexo-footer-top { padding: 12px 16px !important; }
-        .nexo-footer-top p { font-size: 10.5px !important; max-width: none !important; }
-        .nexo-footer-top button { padding: 8px 16px !important; font-size: 12px !important; }
-        .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 8px 12px !important; padding: 12px 16px 6px !important; }
-        .nexo-footer-grid > div > div:first-child { font-size: 9px !important; margin-bottom: 5px !important; }
-        .nexo-footer-grid a, .nexo-footer-grid button { font-size: 11px !important; line-height: 1.25 !important; padding: 2px 0 !important; margin: 0 !important; display: block !important; }
-        .nexo-footer-grid > div { line-height: 1.2 !important; }
-        .nexo-footer-news { margin-top: 10px !important; padding: 10px 12px !important; }
-        .nexo-footer-bottom { padding: 10px 16px 12px !important; }
+        /* Footer súper compacto en móvil + hueco para la bottom-nav */
+        footer { margin-top: 8px !important; padding-bottom: 74px !important; }
+        .nexo-foot-logo { width: 38px !important; height: auto !important; max-height: none !important; }
+        .nexo-footer-top { padding: 8px 14px !important; }
+        .nexo-footer-top p { font-size: 9.5px !important; max-width: none !important; line-height: 1.35 !important; }
+        .nexo-footer-top button { padding: 6px 13px !important; font-size: 11px !important; }
+        .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 3px 10px !important; padding: 9px 14px 4px !important; }
+        .nexo-footer-grid > div > div:first-child { font-size: 8px !important; margin-bottom: 3px !important; letter-spacing: 0.08em !important; }
+        .nexo-footer-grid a, .nexo-footer-grid button { font-size: 10px !important; line-height: 1.08 !important; padding: 1px 0 !important; margin: 0 !important; display: block !important; }
+        .nexo-footer-grid > div { line-height: 1.05 !important; margin-bottom: 4px !important; }
+        .nexo-footer-news { margin-top: 8px !important; padding: 8px 10px !important; }
+        .nexo-footer-news input { padding: 6px 9px !important; font-size: 11px !important; }
+        .nexo-footer-bottom { padding: 8px 14px 10px !important; }
         .nexo-hero-stage { grid-template-columns: 1fr !important; }
         .nexo-body-grid {
           padding: 6px 8px !important;
