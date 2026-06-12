@@ -26194,7 +26194,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
       {_dailyFive.length>0 && (
         <div style={{marginBottom:18}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:3}}>
-            <span style={{fontSize:16,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em"}}>{isEN?"Hottest stocks today":"Las más calientes de hoy"}</span>
+            <span style={{fontSize:16,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em",display:"inline-flex",alignItems:"center",gap:6}}><svg width="16" height="16" viewBox="0 0 24 24" fill="#FF6B35"><path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5 0.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>{isEN?"On fire today":"En fuego hoy"}</span>
             <span style={{fontSize:10.5,fontWeight:800,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px",letterSpacing:0.3}}>{isEN?"FREE":"GRATIS"}</span>
           </div>
           <div style={{fontSize:12,color:"var(--c-muted)",marginBottom:12}}>{isEN?"Most talked-about by Wall St. analysts — and why":"Las más sonadas por analistas de Wall St. — y por qué"}</div>
@@ -26205,9 +26205,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
               return (
                 <div key={p.ticker+i} style={{padding:"13px 14px",borderBottom:i<_dailyFive.length-1?"1px solid var(--c-border)":"none"}}>
                   <div style={{display:"flex",alignItems:"center",gap:11}}>
-                    <div style={{width:38,height:38,borderRadius:10,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      <span style={{fontWeight:800,fontSize:12,color:"#fff",fontFamily:"monospace"}}>{p.ticker.slice(0,4)}</span>
-                    </div>
+                    <LogoBadge sym={p.ticker} size={38} radius={10}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:14,fontWeight:700,color:"var(--c-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}><span style={{color:"var(--c-muted)",fontWeight:800,marginRight:5}}>{i+1}</span>{p.ticker} <span style={{fontSize:12,fontWeight:500,color:"var(--c-muted)"}}>{p.nombre}</span></div>
                       <div style={{fontSize:12,fontWeight:600,color:"#16A34A",marginTop:1}}>▲ {p.entrada} → {p.target} · {p.confianza}% {isEN?"conviction":"convicción"}</div>
@@ -26241,9 +26239,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
             <span style={{fontSize:11,fontWeight:600,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px"}}>{_topPick.confianza}% {isEN?"conviction":"convicción"}</span>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{width:48,height:48,borderRadius:13,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              <span style={{fontWeight:800,fontSize:14,color:"#fff",fontFamily:"monospace"}}>{_topPick.ticker.slice(0,4)}</span>
-            </div>
+            <LogoBadge sym={_topPick.ticker} size={48} radius={13}/>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:17,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em"}}>{_topPick.ticker} <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>— {_topPick.nombre}</span></div>
               <div style={{marginTop:2,display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
