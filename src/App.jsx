@@ -26174,34 +26174,47 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
         </div>
       )}
 
-      {/* 🔥 Top Analyst Call Today */}
-      {_topPick&&(
-        <div style={{border:"1px solid #e8eaee",borderRadius:20,padding:"16px 18px",marginBottom:18,background:"var(--c-surface)",position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ff6b35,#f7c059,#27d391)"}}/>
+      {/* La #1 de hoy — destacado de la acción más fuerte (acción primero, IA como 2ª opción) */}
+      {_topPick&&(function(){
+        var d=liveP(_topPick.ticker,0,0);
+        var upside=(function(){ try{ var e=parseFloat(String(_topPick.entrada).replace(/[^0-9.]/g,"")); var t=parseFloat(String(_topPick.target).replace(/[^0-9.]/g,"")); if(e>0&&t>0) return Math.round((t-e)/e*100); }catch(_){} return null; })();
+        var why=((isEN?(_topPick.razonEn||_topPick.razon):(_topPick.razon||_topPick.razonEn))||"");
+        var whyShort=why.split(".").slice(0,2).join(".").trim(); if(whyShort&&!whyShort.endsWith(".")) whyShort+=".";
+        return (
+        <div style={{border:"1px solid var(--c-border)",borderRadius:20,padding:"16px 18px",marginBottom:18,background:"var(--c-surface)",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#1A56DB,#27d391)"}}/>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-            <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",color:"#b07d11",background:"rgba(176,125,17,.10)",border:"1px solid rgba(176,125,17,.25)",padding:"4px 10px",borderRadius:999}}>
-              🔥 Top Analyst Call
+            <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:800,letterSpacing:"0.04em",textTransform:"uppercase",color:"#1A56DB",background:"rgba(26,86,219,.10)",border:"1px solid rgba(26,86,219,.25)",padding:"4px 10px",borderRadius:999}}>
+              {isEN?"Today's #1":"La #1 de hoy"}
             </span>
-            <span style={{fontSize:11,fontWeight:600,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px"}}>{_topPick.confianza}% confidence</span>
+            <span style={{fontSize:11,fontWeight:600,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px"}}>{_topPick.confianza}% {isEN?"conviction":"convicción"}</span>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{width:46,height:46,borderRadius:13,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <div style={{width:48,height:48,borderRadius:13,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               <span style={{fontWeight:800,fontSize:14,color:"#fff",fontFamily:"monospace"}}>{_topPick.ticker.slice(0,4)}</span>
             </div>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:16,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em"}}>{_topPick.ticker} <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>— {_topPick.nombre}</span></div>
-              <div style={{marginTop:2,display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-                <span style={{fontSize:12,fontWeight:700,color:"#16A34A"}}>▲ {_topPick.entrada} → {_topPick.target}</span>
-                {(function(){var ld=liveP(_topPick.ticker,0,0);return ld.price>0?<span style={{fontSize:11,color:"var(--c-muted)",fontFamily:"monospace"}}>${ld.price>=1000?(ld.price/1000).toFixed(1)+"k":ld.price.toFixed(2)} <span style={{color:ld.chg>=0?"#16A34A":"#EF4444"}}>{ld.chg>=0?"+":""}{ld.chg.toFixed(2)}%</span></span>:null;})()}
+              <div style={{fontSize:17,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em"}}>{_topPick.ticker} <span style={{fontSize:12,fontWeight:600,color:"var(--c-muted)"}}>— {_topPick.nombre}</span></div>
+              <div style={{marginTop:2,display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+                <span style={{fontSize:12,fontWeight:800,color:"#16A34A"}}>{isEN?"Strong Buy":"Compra Fuerte"}</span>
+                {d.price>0&&<span style={{fontSize:12,color:"var(--c-muted)",fontFamily:"monospace"}}>${fmtP(d.price,_topPick.ticker)} <span style={{color:upC(d.chg)}}>{fmtC(d.chg)}</span></span>}
               </div>
             </div>
           </div>
-          <p style={{marginTop:10,fontSize:12.5,lineHeight:1.5,color:"var(--c-muted)",marginBottom:12}}>{(_topPick.razonEn||"").split(".")[0]+"."}</p>
-          <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI?onOpenAI(_topPick.ticker):onNavigate&&onNavigate(10); }} style={{display:"inline-flex",alignItems:"center",gap:6,background:"#0a0d14",color:"#fff",fontSize:12.5,fontWeight:600,padding:"8px 14px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
-            {isPremium?"Full AI analysis →":"Unlock full analysis →"}
+          {whyShort&&<p style={{marginTop:11,fontSize:12.5,lineHeight:1.5,color:"var(--c-muted)",marginBottom:12}}>{whyShort}</p>}
+          <div style={{display:"flex",gap:7,flexWrap:"wrap",marginBottom:14}}>
+            {_topPick.entrada&&<span style={{fontSize:11,fontWeight:700,color:"#1A56DB",background:"rgba(26,86,219,0.08)",border:"1px solid rgba(26,86,219,0.22)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Entry":"Entrada"} {_topPick.entrada}</span>}
+            {_topPick.target&&<span style={{fontSize:11,fontWeight:700,color:"#16A34A",background:"rgba(22,163,74,0.08)",border:"1px solid rgba(22,163,74,0.22)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Target":"Objetivo"} {_topPick.target}</span>}
+            {_topPick.stop_loss&&<span style={{fontSize:11,fontWeight:700,color:"#e0463d",background:"rgba(224,70,61,0.08)",border:"1px solid rgba(224,70,61,0.22)",borderRadius:8,padding:"4px 9px"}}>Stop {_topPick.stop_loss}</span>}
+            {upside!=null&&<span style={{fontSize:11,fontWeight:800,color:"#16A34A",background:"rgba(22,163,74,0.12)",border:"1px solid rgba(22,163,74,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Upside":"Potencial"} +{upside}%</span>}
+            {_topPick.sector&&<span style={{fontSize:11,fontWeight:700,color:"#9aa6bf",background:"rgba(154,166,191,0.12)",border:"1px solid rgba(154,166,191,0.26)",borderRadius:8,padding:"4px 9px"}}>{_topPick.sector}</span>}
+          </div>
+          <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI?onOpenAI(_topPick.ticker):onNavigate&&onNavigate(10); }} style={{display:"inline-flex",alignItems:"center",gap:6,background:"transparent",color:"#1A56DB",fontSize:12.5,fontWeight:700,padding:0,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+            {isPremium?(isEN?"Ask the AI about $"+_topPick.ticker+" →":"Pregúntale a la IA sobre $"+_topPick.ticker+" →"):(isEN?"Unlock AI deep-dive →":"Desbloquear análisis IA →")}
           </button>
         </div>
-      )}
+        );
+      })()}
 
       {/* Today's Movers */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
