@@ -185,8 +185,8 @@ const LANG_META = [
 
 const LANGS = {
   es: {
-    feed:"Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
-    macro:"🌍 Macro", noticias:"📰 Noticias", earnings:"📅 Earnings", trending:"📡 Mercado en Vivo",
+    feed:"Feed", tops:"Tops", crypto:"Crypto", acciones:"Stock Pick IA",
+    macro:"Macro", noticias:"Noticias", earnings:"Earnings", trending:"📡 Mercado en Vivo",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrarse →",
     publish:"Publicar →", bullish:"▲ ALCISTA", bearish:"▼ BAJISTA",
     followers:"Seguidores", following:"Siguiendo", points:"Puntos", posts:"Posts",
@@ -209,8 +209,8 @@ const LANGS = {
     aiErr:"Lo siento, no pude conectarme. Inténtalo de nuevo.",
   },
   en: {
-    feed:"Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
-    macro:"🌍 Macro", noticias:"📰 News", earnings:"📅 Earnings", trending:"📡 Live Markets",
+    feed:"Feed", tops:"Tops", crypto:"Crypto", acciones:"Stock Pick IA",
+    macro:"Macro", noticias:"News", earnings:"Earnings", trending:"📡 Live Markets",
     search:"Search ticker... AAPL, BTC, NVDA", login:"Sign in", register:"Sign up →",
     publish:"Post →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
     followers:"Followers", following:"Following", points:"Points", posts:"Posts",
@@ -233,8 +233,8 @@ const LANGS = {
     aiErr:"Sorry, I couldn't connect. Please try again.",
   },
   pt: {
-    feed:"Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Ações",
-    macro:"🌍 Macro", noticias:"📰 Notícias", earnings:"📅 Resultados", trending:"Trending",
+    feed:"Feed", tops:"Tops", crypto:"Crypto", acciones:"Ações",
+    macro:"Macro", noticias:"Notícias", earnings:"Resultados", trending:"Trending",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrar →",
     publish:"Publicar →", bullish:"▲ ALTA", bearish:"▼ BAIXA",
     followers:"Seguidores", following:"Seguindo", points:"Pontos", posts:"Posts",
@@ -257,8 +257,8 @@ const LANGS = {
     aiErr:"Desculpe, não consegui conectar. Tente novamente.",
   },
   fr: {
-    feed:"Fil", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Actions",
-    macro:"🌍 Macro", noticias:"📰 Actualités", earnings:"📅 Résultats", trending:"Tendances",
+    feed:"Fil", tops:"Tops", crypto:"Crypto", acciones:"Actions",
+    macro:"Macro", noticias:"Actualités", earnings:"Résultats", trending:"Tendances",
     search:"Rechercher ticker... AAPL, BTC, NVDA", login:"Connexion", register:"S'inscrire →",
     publish:"Publier →", bullish:"▲ HAUSSIER", bearish:"▼ BAISSIER",
     followers:"Abonnés", following:"Abonnements", points:"Points", posts:"Posts",
@@ -281,8 +281,8 @@ const LANGS = {
     aiErr:"Désolé, je n'ai pas pu me connecter. Réessayez.",
   },
   de: {
-    feed:"Feed", tops:"📊 Tops", crypto:"₿ Krypto", acciones:"📈 Aktien",
-    macro:"🌍 Makro", noticias:"📰 Nachrichten", earnings:"📅 Ergebnisse", trending:"Trending",
+    feed:"Feed", tops:"Tops", crypto:"Krypto", acciones:"Aktien",
+    macro:"Makro", noticias:"Nachrichten", earnings:"Ergebnisse", trending:"Trending",
     search:"Ticker suchen... AAPL, BTC, NVDA", login:"Anmelden", register:"Registrieren →",
     publish:"Veröffentlichen →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
     followers:"Follower", following:"Folge ich", points:"Punkte", posts:"Beiträge",
@@ -305,8 +305,8 @@ const LANGS = {
     aiErr:"Entschuldigung, keine Verbindung. Bitte erneut versuchen.",
   },
   it: {
-    feed:"Feed", tops:"📊 Top", crypto:"₿ Crypto", acciones:"📈 Azioni",
-    macro:"🌍 Macro", noticias:"📰 Notizie", earnings:"📅 Risultati", trending:"Tendenze",
+    feed:"Feed", tops:"Top", crypto:"Crypto", acciones:"Azioni",
+    macro:"Macro", noticias:"Notizie", earnings:"Risultati", trending:"Tendenze",
     search:"Cerca ticker... AAPL, BTC, NVDA", login:"Accedi", register:"Registrati →",
     publish:"Pubblica →", bullish:"▲ RIALZISTA", bearish:"▼ RIBASSISTA",
     followers:"Follower", following:"Seguiti", points:"Punti", posts:"Post",
@@ -329,8 +329,8 @@ const LANGS = {
     aiErr:"Spiacente, connessione fallita. Riprova.",
   },
   ja: {
-    feed:"フィード", tops:"📊 トップ", crypto:"₿ 仮想通貨", acciones:"📈 株式",
-    macro:"🌍 マクロ", noticias:"📰 ニュース", earnings:"📅 決算", trending:"トレンド",
+    feed:"フィード", tops:"トップ", crypto:"仮想通貨", acciones:"株式",
+    macro:"マクロ", noticias:"ニュース", earnings:"決算", trending:"トレンド",
     search:"ティッカー検索... AAPL, BTC, NVDA", login:"ログイン", register:"登録 →",
     publish:"投稿 →", bullish:"▲ 強気", bearish:"▼ 弱気",
     followers:"フォロワー", following:"フォロー中", points:"ポイント", posts:"投稿",
