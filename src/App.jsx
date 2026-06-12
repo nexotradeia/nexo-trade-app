@@ -8165,7 +8165,7 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
       <div style={{background:"var(--c-surface)",borderRadius:22,width:380,maxWidth:"94vw",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.5)",position:"relative"}}>
         <button onClick={onClose} style={{position:"absolute",top:14,right:14,background:"rgba(15,23,42,0.06)",border:"none",borderRadius:"50%",width:30,height:30,cursor:"pointer",color:"#475569",fontSize:15,zIndex:2}}>✕</button>
         {/* Header */}
-        <div style={{background:"linear-gradient(150deg,#0F4C81 0%,#0F5E68 100%)",padding:"26px 22px 22px",borderRadius:"22px 22px 0 0",textAlign:"center"}}>
+        <div style={{background:"linear-gradient(150deg,#1A56DB 0%,#0B32B8 100%)",padding:"26px 22px 22px",borderRadius:"22px 22px 0 0",textAlign:"center"}}>
           <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.15)",borderRadius:20,padding:"4px 12px",marginBottom:12}}>
             <span style={{fontSize:12,fontWeight:800,color:"#fff",letterSpacing:0.5}}>✦ PREMIUM</span>
           </div>
@@ -8181,7 +8181,7 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
           <div style={{display:"flex",flexDirection:"column",gap:9,marginBottom:18}}>
             {benefits.map((b,i)=>(
               <div key={i} style={{display:"flex",alignItems:"flex-start",gap:9}}>
-                <span style={{width:18,height:18,borderRadius:"50%",background:"rgba(15,94,104,0.12)",color:"#0F5E68",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>✓</span>
+                <span style={{width:18,height:18,borderRadius:"50%",background:"rgba(26,86,219,0.12)",color:"#1A56DB",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>✓</span>
                 <span style={{fontSize:12.5,color:"#334155",lineHeight:1.45}}>{b}</span>
               </div>
             ))}
@@ -8193,7 +8193,7 @@ function PaywallModal({open, onClose, onUpgrade, lang="es", reason="watchlist"})
             <div style={{fontSize:11,color:"#16A34A",fontWeight:700,marginTop:4}}>{isEN?"3 days free · cancel anytime":"3 días gratis · cancela cuando quieras"}</div>
           </div>
           <button onClick={onUpgrade}
-            style={{width:"100%",background:"linear-gradient(135deg,#0F4C81,#0F5E68)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontWeight:800,fontSize:14.5,cursor:"pointer",boxShadow:"0 6px 20px rgba(15,76,129,0.35)",fontFamily:"inherit"}}>
+            style={{width:"100%",background:"linear-gradient(135deg,#1A56DB,#0B32B8)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontWeight:800,fontSize:14.5,cursor:"pointer",boxShadow:"0 6px 20px rgba(26,86,219,0.35)",fontFamily:"inherit"}}>
             ✦ {isEN?"Start free trial →":"Empezar gratis →"}
           </button>
           <div style={{textAlign:"center",fontSize:10,color:"#94A3B8",marginTop:10}}>
