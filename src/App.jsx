@@ -26126,19 +26126,6 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
         </div>
       </div>
 
-      {/* Market Pulse */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
-        {[{label:"S&P 500",d:spy,sym:"SPY"},{label:"Nasdaq",d:qqq,sym:"QQQ"},{label:"Bitcoin",d:btc,sym:"BTC"}].map(function(item){
-          return (
-            <div key={item.sym} style={{border:"1px solid var(--c-border)",borderRadius:16,padding:"13px 10px 11px",background:"var(--c-surface)"}}>
-              <div style={{fontSize:11,color:"var(--c-muted)",fontWeight:600}}>{item.label}</div>
-              <div style={{marginTop:6,fontSize:16,fontWeight:700,letterSpacing:"-0.02em",color:"var(--c-text)"}}>{fmtP(item.d.price,item.sym)}</div>
-              <div style={{marginTop:2,fontSize:12,fontWeight:600,color:upC(item.d.chg)}}>{fmtC(item.d.chg)}</div>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Today's AI Pick */}
       <div style={{background:"#06080e",borderRadius:24,padding:"20px 20px 18px",marginBottom:18,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(420px 200px at 88% -20%, rgba(10,92,255,0.28), transparent 70%)",pointerEvents:"none"}}/>
@@ -26159,6 +26146,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
             {(function(){ var d=liveP(pick.ticker,0,0); if(d.price>0) return <div style={{fontSize:13,fontWeight:700,color:d.chg>=0?"#27d391":"#f87171"}}>{d.price>=1000?(d.price/1000).toFixed(1)+"k":d.price.toFixed(2)} <span style={{fontSize:11}}>{d.chg>=0?"+":""}{d.chg.toFixed(2)}%</span></div>; return null; })()}
           </div>
           <div style={{fontSize:28,fontWeight:800,letterSpacing:"-0.03em",color:"#fff",lineHeight:1.15}}>{pick.nombre}</div>
+          {(function(){ try{ var e=parseFloat(String(pick.entrada).replace(/[^0-9.]/g,"")); var t=parseFloat(String(pick.target).replace(/[^0-9.]/g,"")); if(e>0&&t>0){ var up=Math.round((t-e)/e*100); if(up>0) return <div style={{marginTop:7,display:"flex",alignItems:"baseline",gap:7}}><span style={{fontSize:26,fontWeight:900,color:"#27d391",letterSpacing:"-0.02em",lineHeight:1}}>+{up}%</span><span style={{fontSize:12,color:"#8a93a6",fontWeight:600}}>{isEN?"upside to target":"potencial al objetivo"}</span></div>; } }catch(_){} return null; })()}
           <div style={{marginTop:8,display:"inline-flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:"#27d391"}}>
             <span style={{display:"inline-flex",gap:2,alignItems:"flex-end"}}>
               {[7,9,12,15].map(function(h,i){ return <span key={i} style={{width:3,height:h,background:"#27d391",borderRadius:2,display:"inline-block"}}/>; })}
@@ -26186,6 +26174,19 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
           </button>
           <span style={{fontSize:10,color:"#5e6677",letterSpacing:"0.02em"}}>AI signal &bull; not financial advice</span>
         </div>
+      </div>
+
+      {/* Market Pulse */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
+        {[{label:"S&P 500",d:spy,sym:"SPY"},{label:"Nasdaq",d:qqq,sym:"QQQ"},{label:"Bitcoin",d:btc,sym:"BTC"}].map(function(item){
+          return (
+            <div key={item.sym} style={{border:"1px solid var(--c-border)",borderRadius:16,padding:"13px 10px 11px",background:"var(--c-surface)"}}>
+              <div style={{fontSize:11,color:"var(--c-muted)",fontWeight:600}}>{item.label}</div>
+              <div style={{marginTop:6,fontSize:16,fontWeight:700,letterSpacing:"-0.02em",color:"var(--c-text)"}}>{fmtP(item.d.price,item.sym)}</div>
+              <div style={{marginTop:2,fontSize:12,fontWeight:600,color:upC(item.d.chg)}}>{fmtC(item.d.chg)}</div>
+            </div>
+          );
+        })}
       </div>
 
       {/* 5 stocks del día — analistas, automático por fecha, GRATIS */}
