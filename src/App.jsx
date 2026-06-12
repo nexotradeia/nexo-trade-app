@@ -26029,7 +26029,7 @@ class MobileDashErrorBoundary extends Component {
 // ─────────────────────────────────────────────────────────────────────────────
 // MOBILE HOME DASHBOARD — Greeting + AI Pick + Movers + Watchlist
 // ─────────────────────────────────────────────────────────────────────────────
-function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, lang="en"}){
+function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, onTicker, lang="en"}){
   const isEN = lang === "en";
   const lp = useContext(PriceCtx) || {};
 
@@ -26166,15 +26166,20 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
             {pick.sector && <span style={{fontSize:11,fontWeight:700,color:"#9aa6bf",background:"rgba(154,166,191,0.12)",border:"1px solid rgba(154,166,191,0.26)",borderRadius:8,padding:"4px 9px"}}>{pick.sector}</span>}
           </div>
         )}
-        {/* CTA */}
-        <div style={{position:"relative",zIndex:1,marginTop:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI?onOpenAI(pick.ticker):onNavigate&&onNavigate(51); }}
-            style={{display:"inline-flex",alignItems:"center",gap:8,background:"#fff",color:"#06080e",fontSize:13.5,fontWeight:600,padding:"10px 15px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
-            {isPremium?"See full analysis":"Unlock full analysis"}
+        {/* CTA — 1º la acción, 2º el robot IA */}
+        <div style={{position:"relative",zIndex:1,marginTop:16,display:"flex",alignItems:"center",gap:9,flexWrap:"wrap"}}>
+          <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onTicker?onTicker(pick.ticker):onNavigate&&onNavigate(51); }}
+            style={{display:"inline-flex",alignItems:"center",gap:8,background:"#fff",color:"#06080e",fontSize:13.5,fontWeight:700,padding:"10px 15px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+            {isPremium?(isEN?"See full analysis":"Ver análisis completo"):(isEN?"Unlock full analysis":"Desbloquear análisis")}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06080e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </button>
-          <span style={{fontSize:10,color:"#5e6677",letterSpacing:"0.02em"}}>AI signal &bull; not financial advice</span>
+          <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI&&onOpenAI(pick.ticker); }}
+            style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.08)",color:"#bcd0ff",fontSize:12.5,fontWeight:600,padding:"10px 13px",borderRadius:11,border:"1px solid rgba(188,208,255,0.28)",cursor:"pointer",fontFamily:"inherit"}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#bcd0ff"><path d="M12 2l1.55 4.65L18 8l-4.45 1.35L12 14l-1.55-4.65L6 8l4.45-1.35L12 2z"/></svg>
+            {isEN?"Ask the AI":"Pregunta a la IA"}
+          </button>
         </div>
+        <div style={{position:"relative",zIndex:1,marginTop:9,fontSize:10,color:"#5e6677",letterSpacing:"0.02em"}}>{isEN?"AI signal · not financial advice":"Señal IA · no es consejo financiero"}</div>
       </div>
 
       {/* Market Pulse */}
@@ -29290,6 +29295,7 @@ export default function App(){
               user={user}
               isPremium={effectivePremium}
               onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}}
+              onTicker={(tk)=>{setTickerPage(tk);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}
               onOpenAI={(ticker)=>{setAiInitQuery("Give me a complete investment analysis for $"+ticker+": current price context, key fundamentals, recent performance, analyst consensus, and your buy/hold/sell recommendation. Be concise.");setShowAI(true);}}
               onPremium={openPaywall}
               lang={lang}
