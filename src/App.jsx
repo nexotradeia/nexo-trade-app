@@ -26181,7 +26181,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
         {[{label:"S&P 500",d:spy,sym:"SPY"},{label:"Nasdaq",d:qqq,sym:"QQQ"},{label:"Bitcoin",d:btc,sym:"BTC"}].map(function(item){
           return (
-            <div key={item.sym} style={{border:"1px solid var(--c-border)",borderRadius:16,padding:"13px 10px 11px",background:"var(--c-surface)"}}>
+            <div key={item.sym} style={{border:`1px solid ${item.d.chg>=0?"rgba(22,163,74,0.28)":"rgba(224,70,61,0.28)"}`,borderRadius:16,padding:"13px 10px 11px",background:item.d.chg>=0?"rgba(22,163,74,0.06)":"rgba(224,70,61,0.06)",transition:"background .3s,border-color .3s"}}>
               <div style={{fontSize:11,color:"var(--c-muted)",fontWeight:600}}>{item.label}</div>
               <div style={{marginTop:6,fontSize:16,fontWeight:700,letterSpacing:"-0.02em",color:"var(--c-text)"}}>{fmtP(item.d.price,item.sym)}</div>
               <div style={{marginTop:2,fontSize:12,fontWeight:600,color:upC(item.d.chg)}}>{fmtC(item.d.chg)}</div>
