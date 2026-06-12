@@ -10697,7 +10697,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
         {label:"Academy",                               page:12},
         {label:"Messages",                              page:22},
         {label:isEN?"Community Rules":"Normas",         page:34},
-        {label:isEN?"💰 VIP Plans":"💰 Planes VIP",       page:8},
+        {label:isEN?"VIP Plans":"Planes VIP",       page:8},
         {label:isEN?"Join free →":"Únete gratis →",     action:"auth"},
       ]
     },
@@ -10748,8 +10748,9 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
 
           {/* Email capture */}
           <div className="nexo-footer-news" style={{marginTop:18,padding:"14px 16px",background:"rgba(21,101,192,0.07)",border:"1px solid rgba(21,101,192,0.18)",borderRadius:12}}>
-            <div style={{fontSize:12,fontWeight:800,color:"#E2E8F0",marginBottom:3}}>
-              {isEN?"🗓 Monday Signal":"🗓 La señal de los lunes"}
+            <div style={{fontSize:12,fontWeight:800,color:"#E2E8F0",marginBottom:3,display:"flex",alignItems:"center",gap:6}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {isEN?"Monday Signal":"La señal de los lunes"}
             </div>
             <div style={{fontSize:11,color:"#64748B",marginBottom:11,lineHeight:1.5}}>
               {isEN?"AI analysis in your inbox. Free.":"Análisis IA en tu correo. Gratis."}
@@ -28445,7 +28446,8 @@ export default function App(){
         .nexo-footer-top button { padding: 8px 16px !important; font-size: 12px !important; }
         .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 8px 12px !important; padding: 12px 16px 6px !important; }
         .nexo-footer-grid > div > div:first-child { font-size: 9px !important; margin-bottom: 5px !important; }
-        .nexo-footer-grid a, .nexo-footer-grid button { font-size: 12px !important; line-height: 1.55 !important; }
+        .nexo-footer-grid a, .nexo-footer-grid button { font-size: 11px !important; line-height: 1.25 !important; padding: 2px 0 !important; margin: 0 !important; display: block !important; }
+        .nexo-footer-grid > div { line-height: 1.2 !important; }
         .nexo-footer-news { margin-top: 10px !important; padding: 10px 12px !important; }
         .nexo-footer-bottom { padding: 10px 16px 12px !important; }
         .nexo-hero-stage { grid-template-columns: 1fr !important; }
