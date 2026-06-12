@@ -10756,7 +10756,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
   const BLU = "#1565C0";
   const BLU2 = "rgba(148,163,184,0.55)";
 
-  const LINK = {display:"block",fontSize:13,textDecoration:"none",marginBottom:9,transition:"color 0.15s",lineHeight:1.4,cursor:"pointer",background:"none",border:"none",padding:0,fontFamily:"inherit",textAlign:"left"};
+  const LINK = {display:"block",fontSize:12.5,textDecoration:"none",marginBottom:6,transition:"color 0.15s",lineHeight:1.35,cursor:"pointer",background:"none",border:"none",padding:0,fontFamily:"inherit",textAlign:"left"};
 
   function FLink({item}){
     const isVip  = item.label?.includes("✦");
@@ -10786,14 +10786,14 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
         {label:isEN?"AI Signals":"Señales IA",           page:10},
         {label:"News",                                   page:5},
         {label:"Earnings",                               page:6},
-        {label:isEN?"Premium Ideas ✦":"Ideas Premium ✦", page:21},
+        {label:isEN?"Premium Ideas":"Ideas Premium", page:21},
       ]
     },
     {
       title: isEN?"TOOLS":"HERRAMIENTAS",
       items:[
-        {label:isEN?"Stock Screener ✦":"Screener ✦",          page:17},
-        {label:isEN?"Smart Money ✦":"Smart Money ✦",           page:20},
+        {label:isEN?"Stock Screener":"Screener",          page:17},
+        {label:isEN?"Smart Money":"Smart Money",           page:20},
         {label:isEN?"Wall St. & Capitol":"Wall St. & Capitol", page:19},
         {label:isEN?"Economic Calendar":"Cal. Económico",      page:14},
         {label:"IPOs 2026",                                    page:16},
@@ -10805,7 +10805,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
       items:[
         {label:isEN?"Live Webinars":"Webinars en vivo", page:11},
         {label:"Academy",                               page:12},
-        {label:"🔥 Trending",                          page:7777},
+        {label:"Trending",                          page:7777},
         {label:isEN?"Community Rules":"Normas",         page:34},
         {label:isEN?"VIP Plans":"Planes VIP",       page:8},
         {label:isEN?"Join free →":"Únete gratis →",     action:"auth"},
@@ -10822,38 +10822,38 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
   ];
 
   return(
-    <footer style={{background:"#0b0d12",borderTop:"1px solid rgba(148,163,184,0.10)",marginTop:48,fontFamily:"Inter,sans-serif"}}>
+    <footer style={{background:"#0b0d12",borderTop:"1px solid rgba(148,163,184,0.10)",marginTop:28,fontFamily:"Inter,sans-serif"}}>
 
       {/* ── TOP STRIP — logo + tagline + CTA ── */}
-      <div className="nexo-footer-top" style={{borderBottom:"1px solid rgba(21,101,192,0.10)",padding:"28px 24px"}}>
-        <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:20,flexWrap:"wrap"}}>
-          <img className="nexo-foot-logo" src="/logo_nexo_full.svg" alt="NexoTrade" style={{width:54,height:"auto",objectFit:"contain",flexShrink:0}}/>
-          <p style={{color:"#475569",fontSize:13,margin:0,lineHeight:1.6,maxWidth:400,textAlign:"center",flex:"1 1 200px"}}>
-            {isEN?"The most active global investor community.":"La comunidad de inversores más activa del mundo."}<br/>
-            <span style={{color:"rgba(59,130,246,0.7)"}}>{isEN?"Real signals · Integrated AI · No commissions":"Señales reales · IA integrada · Sin comisiones"}</span>
+      <div className="nexo-footer-top" style={{borderBottom:"1px solid rgba(21,101,192,0.10)",padding:"13px 24px"}}>
+        <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
+          <div className="nexo-foot-logo" style={{display:"flex",alignItems:"center",fontWeight:900,fontSize:17,letterSpacing:-0.5,flexShrink:0,fontFamily:"Inter,sans-serif"}}>
+            <span style={{color:"#fff"}}>NEXO</span><span style={{color:"#1d9bff"}}>TRADE</span>
+          </div>
+          <p style={{color:"#475569",fontSize:11.5,margin:0,lineHeight:1.5,maxWidth:380,textAlign:"center",flex:"1 1 200px"}}>
+            {isEN?"The most active global investor community.":"La comunidad de inversores más activa del mundo."}{" · "}
+            <span style={{color:"rgba(59,130,246,0.7)"}}>{isEN?"Real signals · AI · No commissions":"Señales reales · IA · Sin comisiones"}</span>
           </p>
           <button onClick={()=>onAuth&&onAuth()}
-            style={{background:"linear-gradient(135deg,#1565C0,#0D47A1)",border:"none",borderRadius:10,padding:"10px 24px",fontSize:13,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 4px 18px rgba(21,101,192,0.35)",whiteSpace:"nowrap",transition:"box-shadow 0.2s",flexShrink:0}}
-            onMouseEnter={e=>e.currentTarget.style.boxShadow="0 4px 28px rgba(21,101,192,0.55)"}
-            onMouseLeave={e=>e.currentTarget.style.boxShadow="0 4px 18px rgba(21,101,192,0.35)"}>
+            style={{background:"linear-gradient(135deg,#1565C0,#0D47A1)",border:"none",borderRadius:9,padding:"8px 18px",fontSize:12.5,fontWeight:800,color:"#fff",cursor:"pointer",boxShadow:"0 4px 14px rgba(21,101,192,0.3)",whiteSpace:"nowrap",flexShrink:0}}>
             {isEN?"Start free →":"Empieza gratis →"}
           </button>
         </div>
       </div>
 
       {/* ── MAIN GRID — 4 columns ── */}
-      <div className="nexo-footer-grid" style={{maxWidth:1140,margin:"0 auto",padding:"40px 24px 32px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:"28px 32px"}}>
+      <div className="nexo-footer-grid" style={{maxWidth:1140,margin:"0 auto",padding:"22px 24px 18px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:"16px 26px"}}>
 
         {cols.map(col=>(
           <div key={col.title}>
-            <div style={{fontSize:10,fontWeight:800,color:BLU2,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:16}}>{col.title}</div>
+            <div style={{fontSize:10,fontWeight:800,color:BLU2,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:9}}>{col.title}</div>
             {col.items.map(item=><FLink key={item.label} item={item}/>)}
           </div>
         ))}
 
         {/* Col 4 — LEGAL + EMAIL CAPTURE */}
         <div>
-          <div style={{fontSize:10,fontWeight:800,color:BLU2,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:16}}>{isEN?"LEGAL & COMPANY":"LEGAL & EMPRESA"}</div>
+          <div style={{fontSize:10,fontWeight:800,color:BLU2,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:9}}>{isEN?"LEGAL & COMPANY":"LEGAL & EMPRESA"}</div>
           {legalItems.map(item=><FLink key={item.label} item={item}/>)}
 
           {/* Email capture */}
