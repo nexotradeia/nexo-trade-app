@@ -9903,7 +9903,9 @@ function ReferralSection({ user }) {
         </svg>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative"}}>
           <div style={{display:"flex",alignItems:"center",gap:13}}>
-            <div style={{width:46,height:46,borderRadius:13,background:"rgba(255,255,255,0.12)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🔗</div>
+            <div style={{width:46,height:46,borderRadius:13,background:"rgba(255,255,255,0.12)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
             <div>
               <div style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:-0.5,lineHeight:1.1}}>{isEN?"Invite & Earn":"Invitar y Ganar"}</div>
               <div style={{fontSize:12,color:"rgba(255,255,255,0.75)",marginTop:4,lineHeight:1.4,maxWidth:220}}>
@@ -9925,15 +9927,19 @@ function ReferralSection({ user }) {
         {/* Reward cards */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
           <div style={{background:"#F0F4FF",borderRadius:14,padding:"14px 12px",border:"1px solid #E0E8FF"}}>
-            <div style={{width:34,height:34,borderRadius:10,background:"#1565C0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,marginBottom:10}}>⭐</div>
+            <div style={{width:34,height:34,borderRadius:10,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff" stroke="none"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
+            </div>
             <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOU EARN":"TÚ GANAS"}</div>
-            <div style={{fontSize:17,fontWeight:900,color:"#1565C0",lineHeight:1.1,marginBottom:4}}>1 month VIP</div>
+            <div style={{fontSize:17,fontWeight:900,color:"#2563EB",lineHeight:1.1,marginBottom:4}}>1 month VIP</div>
             <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?"per paid referral · no limit":"por referido pago · sin límite"}</div>
           </div>
           <div style={{background:"#ECFEFF",borderRadius:14,padding:"14px 12px",border:"1px solid #CFFAFE"}}>
-            <div style={{width:34,height:34,borderRadius:10,background:"#0891B2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,marginBottom:10}}>🎁</div>
+            <div style={{width:34,height:34,borderRadius:10,background:"#14B8A6",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            </div>
             <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOUR FRIEND GETS":"TU AMIGO RECIBE"}</div>
-            <div style={{fontSize:17,fontWeight:900,color:"#0891B2",lineHeight:1.1,marginBottom:4}}>3 days free</div>
+            <div style={{fontSize:17,fontWeight:900,color:"#0D9488",lineHeight:1.1,marginBottom:4}}>3 days free</div>
             <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?"full VIP access on signup":"acceso VIP completo al registrarse"}</div>
           </div>
         </div>
@@ -9963,8 +9969,9 @@ function ReferralSection({ user }) {
             nexotradeia.com/?ref={refCode||user.id?.slice(0,8)||"…"}
           </div>
           <button onClick={handleCopy}
-            style={{background:copied?"#10b981":"#1565C0",border:"none",borderRadius:10,padding:"9px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:6}}>
-            <span>📋</span>{copied?(isEN?"✓ Copied":"✓ Copiado"):(isEN?"Copy link":"Copiar link")}
+            style={{background:copied?"#10b981":"#2563EB",border:"none",borderRadius:10,padding:"9px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:7}}>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            {copied?(isEN?"✓ Copied":"✓ Copiado"):(isEN?"Copy link":"Copiar link")}
           </button>
         </div>
 
@@ -10005,8 +10012,8 @@ function ReferralSection({ user }) {
         </div>
 
         {/* Disclaimer */}
-        <div style={{marginTop:14,display:"flex",gap:7,alignItems:"flex-start"}}>
-          <span style={{fontSize:13,flexShrink:0,marginTop:1}}>ℹ️</span>
+        <div style={{marginTop:14,display:"flex",gap:8,alignItems:"flex-start"}}>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           <span style={{fontSize:10.5,color:"#94A3B8",lineHeight:1.5}}>
             {isEN?"Your free month is credited after your referral's first payment. Unlimited referrals.":"Tu mes gratis se acredita tras el primer pago del referido. Sin límite."}
           </span>
