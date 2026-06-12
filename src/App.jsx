@@ -28094,6 +28094,13 @@ export default function App(){
     const check=()=>{ try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); const t=et.getHours()*100+et.getMinutes(); setMarketOpen(d>=1&&d<=5&&t>=930&&t<1600); }catch(_){ setMarketOpen(false); } };
     check(); const iv=setInterval(check,30000); return ()=>clearInterval(iv);
   },[]);
+  // Bottom-nav móvil: anclarla al viewport VISUAL de Safari (evita que "se mueva" al hacer scroll en iOS)
+  useEffect(()=>{
+    const vv = window.visualViewport; if(!vv) return;
+    const upd = ()=>{ try{ const off = Math.max(0, window.innerHeight - vv.height - vv.offsetTop); document.documentElement.style.setProperty("--botnav-offset", off+"px"); }catch(_){ } };
+    vv.addEventListener("resize",upd); vv.addEventListener("scroll",upd); upd();
+    return ()=>{ vv.removeEventListener("resize",upd); vv.removeEventListener("scroll",upd); };
+  },[]);
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
@@ -28489,7 +28496,7 @@ export default function App(){
         /* ── BOTTOM NAV — iOS Safari fix ── */
         .nexo-bottom-nav {
           position: fixed !important;
-          bottom: 0 !important;
+          bottom: var(--botnav-offset, 0px) !important;
           left: 0 !important;
           right: 0 !important;
           -webkit-transform: translate3d(0,0,0) !important;
