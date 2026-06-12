@@ -9908,7 +9908,7 @@ function ReferralSection({ user }) {
   return (
     <div id="nexo-referral-section" style={{borderRadius:20,overflow:"hidden",border:"1px solid #E2EAF4",boxShadow:"0 2px 16px rgba(0,0,0,0.07)"}}>
       {/* ── Hero header ── */}
-      <div style={{background:"linear-gradient(135deg,#0D1F3C 0%,#1565C0 60%,#1E40AF 100%)",padding:"14px 16px 12px",position:"relative",overflow:"hidden"}}>
+      <div style={{background:"linear-gradient(135deg,#0D1F3C 0%,#1565C0 60%,#1E40AF 100%)",padding:"9px 13px 8px",position:"relative",overflow:"hidden"}}>
         {/* Grid texture overlay */}
         <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px)",backgroundSize:"24px 24px",pointerEvents:"none"}}/>
         {/* Sparkline decoration */}
@@ -9916,13 +9916,13 @@ function ReferralSection({ user }) {
           <polyline points="0,40 20,30 40,35 60,15 80,20 100,8 120,14" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative"}}>
-          <div style={{display:"flex",alignItems:"center",gap:13}}>
-            <div style={{width:46,height:46,borderRadius:13,background:"rgba(255,255,255,0.12)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:34,height:34,borderRadius:10,background:"rgba(255,255,255,0.12)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
             <div>
-              <div style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:-0.5,lineHeight:1.1}}>{isEN?"Invite & Earn":"Invitar y Ganar"}</div>
-              <div style={{fontSize:12,color:"rgba(255,255,255,0.75)",marginTop:4,lineHeight:1.4,maxWidth:220}}>
+              <div style={{fontSize:15,fontWeight:900,color:"#fff",letterSpacing:-0.4,lineHeight:1.1}}>{isEN?"Invite & Earn":"Invitar y Ganar"}</div>
+              <div style={{fontSize:10,color:"rgba(255,255,255,0.75)",marginTop:2,lineHeight:1.35,maxWidth:210}}>
                 {isEN?"1 month of VIP free for every friend who subscribes":"1 mes VIP gratis por cada amigo que se suscriba"}
               </div>
             </div>
@@ -9937,24 +9937,24 @@ function ReferralSection({ user }) {
       </div>
 
       {/* ── Body ── */}
-      <div style={{background:"#fff",padding:"12px 14px 12px"}}>
+      <div style={{background:"#fff",padding:"9px 12px 9px"}}>
         {/* Reward cards */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:10}}>
-          <div style={{background:"#F0F4FF",borderRadius:12,padding:"10px 10px",border:"1px solid #E0E8FF"}}>
-            <div style={{width:30,height:30,borderRadius:9,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:6}}>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff" stroke="none"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+          <div style={{background:"#F0F4FF",borderRadius:11,padding:"8px 9px",border:"1px solid #E0E8FF"}}>
+            <div style={{width:24,height:24,borderRadius:7,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:5}}>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="#fff" stroke="none"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
             </div>
-            <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOU EARN":"TÚ GANAS"}</div>
-            <div style={{fontSize:17,fontWeight:900,color:"#2563EB",lineHeight:1.1,marginBottom:4}}>1 month VIP</div>
-            <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?"per paid referral · no limit":"por referido pago · sin límite"}</div>
+            <div style={{fontSize:9,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:2}}>{isEN?"YOU EARN":"TÚ GANAS"}</div>
+            <div style={{fontSize:13.5,fontWeight:900,color:"#2563EB",lineHeight:1.1,marginBottom:2}}>1 month VIP</div>
+            <div style={{fontSize:9.5,color:"#64748B"}}>{isEN?"per paid referral · no limit":"por referido pago · sin límite"}</div>
           </div>
-          <div style={{background:"#ECFEFF",borderRadius:12,padding:"10px 10px",border:"1px solid #CFFAFE"}}>
-            <div style={{width:30,height:30,borderRadius:9,background:"#14B8A6",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:6}}>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+          <div style={{background:"#ECFEFF",borderRadius:11,padding:"8px 9px",border:"1px solid #CFFAFE"}}>
+            <div style={{width:24,height:24,borderRadius:7,background:"#14B8A6",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:5}}>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
             </div>
-            <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOUR FRIEND GETS":"TU AMIGO RECIBE"}</div>
-            <div style={{fontSize:17,fontWeight:900,color:"#0D9488",lineHeight:1.1,marginBottom:4}}>3 days free</div>
-            <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?"full VIP access on signup":"acceso VIP completo al registrarse"}</div>
+            <div style={{fontSize:9,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:2}}>{isEN?"YOUR FRIEND GETS":"TU AMIGO RECIBE"}</div>
+            <div style={{fontSize:13.5,fontWeight:900,color:"#0D9488",lineHeight:1.1,marginBottom:2}}>3 days free</div>
+            <div style={{fontSize:9.5,color:"#64748B"}}>{isEN?"full VIP access on signup":"acceso VIP completo al registrarse"}</div>
           </div>
         </div>
 
@@ -27926,16 +27926,16 @@ export default function App(){
         {/* Feed tabs */}
         <div className="nexo-feed-tabs-bar" style={{position:"relative",background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:14,padding:"0",marginBottom:12,boxShadow:"0 1px 4px rgba(0,0,0,0.04)",display:"flex",gap:0,alignItems:"center",overflowX:"auto"}}>
           {[
-            {v:"all",   l:lang==="en"?"For You":"Para Ti", icon:"🏠", pri:true, color:null},
-            {v:"viral", l:"Trending", icon:"🔥", pri:true, color:null},
-            {v:"crypto",l:"Crypto", icon:"₿", pri:true, color:null},
-            {v:"bull",  l:"Bullish", icon:"📈", pri:false, color:"#16a34a"},
-            {v:"bear",  l:"Bearish", icon:"📉", pri:false, color:"#dc2626"},
-            {v:"stocks",l:lang==="en"?"Stocks":"Acciones", icon:"🏦", pri:false, color:null},
+            {v:"all",   l:lang==="en"?"For You":"Para Ti", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>, pri:true, color:null},
+            {v:"viral", l:"Trending", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, pri:true, color:null},
+            {v:"crypto",l:"Crypto", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m1-12v2m0 12v2m2-16v2m0 12v2"/></svg>, pri:true, color:null},
+            {v:"bull",  l:"Bullish", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, pri:false, color:"#16a34a"},
+            {v:"bear",  l:"Bearish", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>, pri:false, color:"#dc2626"},
+            {v:"stocks",l:lang==="en"?"Stocks":"Acciones", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>, pri:false, color:null},
           ].map(({v,l,icon,pri,color})=>(
             <button key={v} onClick={()=>setSent(v)} className={pri?undefined:"nexo-tab-2nd"}
-              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?(color||"#1565C0"):"transparent"}`,height:44,padding:"0 18px",cursor:"pointer",color:sent===v?(color||"#1565C0"):"#64748B",fontSize:13,fontWeight:600,transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:5}}>
-              <span>{icon}</span><span>{l}</span>
+              style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?(color||"#1565C0"):"transparent"}`,height:44,padding:"0 18px",cursor:"pointer",color:sent===v?(color||"#1565C0"):"#64748B",fontSize:13,fontWeight:600,transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:6}}>
+              <span style={{display:"flex",alignItems:"center"}}>{icon}</span><span>{l}</span>
             </button>
           ))}
           {/* Filtros extra — solo móvil (Alcistas/Bajistas/Acciones van aquí) */}
