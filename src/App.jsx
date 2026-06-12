@@ -210,7 +210,7 @@ const LANG_META = [
 const LANGS = {
   es: {
     feed:"Feed", tops:"Tops", crypto:"Crypto", acciones:"Stock Pick IA",
-    macro:"Macro", noticias:"Noticias", earnings:"Earnings", trending:"📡 Mercado en Vivo",
+    macro:"Macro", noticias:"Noticias", earnings:"Earnings", trending:"Mercado en Vivo",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrarse →",
     publish:"Publicar →", bullish:"▲ ALCISTA", bearish:"▼ BAJISTA",
     followers:"Seguidores", following:"Siguiendo", points:"Puntos", posts:"Posts",
@@ -234,7 +234,7 @@ const LANGS = {
   },
   en: {
     feed:"Feed", tops:"Tops", crypto:"Crypto", acciones:"Stock Pick IA",
-    macro:"Macro", noticias:"News", earnings:"Earnings", trending:"📡 Live Markets",
+    macro:"Macro", noticias:"News", earnings:"Earnings", trending:"Live Markets",
     search:"Search ticker... AAPL, BTC, NVDA", login:"Sign in", register:"Sign up →",
     publish:"Post →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
     followers:"Followers", following:"Following", points:"Points", posts:"Posts",
@@ -1492,7 +1492,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[],
         <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:12,boxShadow:"0 8px 30px rgba(0,0,0,0.15)",zIndex:200,overflow:"hidden"}}>
           {/* Tabs de búsqueda */}
           <div style={{display:"flex",borderBottom:"1px solid var(--c-border)",background:"var(--c-card)"}}>
-            {[["tickers","📊 Tickers"],["posts","✍️ Posts"],["users","👤 Traders"]].map(([k,l])=>(
+            {[["tickers","Tickers"],["posts","Posts"],["users","Traders"]].map(([k,l])=>(
               <button key={k} onClick={()=>setSearchTab(k)}
                 style={{flex:1,padding:"8px 4px",border:"none",borderBottom:`2px solid ${searchTab===k?"#0F4C81":"transparent"}`,background:"transparent",fontSize:11,fontWeight:searchTab===k?700:500,color:searchTab===k?"#0F4C81":"#64748B",cursor:"pointer"}}>
                 {l}
@@ -5240,7 +5240,7 @@ function MarketsMiniWidget({ lang="es" }){
     <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:"var(--c-shadow)"}}>
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:"1px solid var(--c-border)",padding:"0 8px"}}>
-        {[["markets", isEN?"📈 Markets":"📈 Mercados"],["predicciones", isEN?"🎯 Predictions":"🎯 Predicciones"],["tendencias","🔥 Trending"]].map(([k,l])=>(
+        {[["markets", isEN?"Markets":"Mercados"],["predicciones", isEN?"Predictions":"Predicciones"],["tendencias","Trending"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
             style={{flex:1,padding:"9px 4px",border:"none",borderBottom:`2px solid ${tab===k?"#0F4C81":"transparent"}`,background:"transparent",color:tab===k?"#0F4C81":"var(--c-muted)",fontSize:10,fontWeight:tab===k?700:500,cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
             {l}{k==="markets"&&isLive&&<span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"nexo-pulse 1.5s infinite",flexShrink:0}}/>}
@@ -9575,7 +9575,7 @@ function MarketOverview({lang="es"}){
   return(
     <div style={{marginBottom:20}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
-        <h2 style={{margin:0,fontSize:16,fontWeight:800,color:C.text}}>🌐 {"Market Overview"}</h2>
+        <h2 style={{margin:0,fontSize:16,fontWeight:800,color:C.text}}>{isEN?"Market Overview":"Resumen del Mercado"}</h2>
         <span style={{fontSize:10.5,fontWeight:700,color:busy?"#F59E0B":"#16A34A"}}>{busy?(isEN?"loading…":"loading…"):"● "+("live")}</span>
       </div>
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
@@ -10407,7 +10407,6 @@ function TrackRecordPage({lang="es"}){
       <div style={{background:"linear-gradient(135deg,#0F4C81 0%,#0066CC 100%)",borderRadius:18,padding:"28px 32px",marginBottom:20,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",right:-20,top:-20,width:200,height:200,borderRadius:"50%",background:"rgba(255,255,255,0.04)"}}/>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,flexWrap:"wrap"}}>
-          <span style={{fontSize:28}}>📊</span>
           <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:900,fontFamily:"'Syne',sans-serif"}}>Track Record</h1>
           <span style={{background:"rgba(255,255,255,0.18)",color:"#fff",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
             {isEN?"Jan 2024 — Jun 2026":"Ene 2024 — Jun 2026"}
@@ -25659,7 +25658,7 @@ function AdminDashboard(){
     </div>
   );
 
-  const TABS=[{k:"dashboard",l:"Dashboard"},{k:"usuarios",l:"Usuarios"},{k:"actividad",l:"Actividad"},{k:"reportes",l:"Reportes"},{k:"influencers",l:"🤝 Influencers"}];
+  const TABS=[{k:"dashboard",l:"Dashboard"},{k:"usuarios",l:"Usuarios"},{k:"actividad",l:"Actividad"},{k:"reportes",l:"Reportes"},{k:"influencers",l:"Influencers"}];
   const maxLogins = Math.max(...users.map(u=>u.logins),1);
   const filtered = users.filter(u=>!search||u.username?.toLowerCase().includes(search.toLowerCase()));
   const top4 = [...users].slice(0,4);
@@ -25746,7 +25745,7 @@ function AdminDashboard(){
 
         {/* ── QUIÉN ENTRÓ — visitantes registrados (sin contar admin) ── */}
         <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:14,padding:"18px 22px",marginBottom:20,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
-          <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>👥 Quién entró — miembros registrados (últimos 30 días)</div>
+          <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>Quién entró — miembros registrados (últimos 30 días)</div>
           {(stats.regVisitors||[]).length>0 ? (
             <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
               {stats.regVisitors.map((v,i)=>(
@@ -25763,7 +25762,7 @@ function AdminDashboard(){
 
         {/* ── DE DÓNDE VIENEN — canales de tráfico (referrer) ── */}
         <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:14,padding:"18px 22px",marginBottom:20,boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
-          <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>🌐 De dónde vienen — canales (últimos 30 días)</div>
+          <div style={{fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>De dónde vienen — canales (últimos 30 días)</div>
           {(stats.sources||[]).length>0 ? (
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
               {stats.sources.map((s,i)=>{
@@ -25854,7 +25853,7 @@ function AdminDashboard(){
 
             {/* Más activos */}
             <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:16,padding:"20px",boxShadow:"0 1px 3px rgba(0,0,0,0.05)"}}>
-              <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:4}}>🏆 Más activos este mes</div>
+              <div style={{fontWeight:800,fontSize:14,color:"#111827",marginBottom:4}}>Más activos este mes</div>
               <div style={{fontSize:11,color:"#9CA3AF",marginBottom:16}}>Top 4 usuarios</div>
               {top4.map((u,i)=>(
                 <div key={u.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<3?12:0}}>
