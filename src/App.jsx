@@ -23,6 +23,30 @@ const supabase      = createClient(SUPABASE_URL, SUPABASE_KEY, {
   }
 });
 
+// ── OAUTH SOCIAL (Google / Apple) ───────────────────────────────────────────
+// Lanza el flujo OAuth de Supabase. Al volver, detectSessionInUrl + onAuthStateChange
+// inician sesión automáticamente. REQUIERE activar el proveedor en el panel de
+// Supabase (Authentication → Providers) con sus credenciales (Google OAuth Client,
+// Apple Service ID) y añadir la URL del sitio en Redirect URLs.
+async function nexoOAuth(provider){
+  try{
+    const redirectTo = (typeof window!=="undefined" && window.location && window.location.origin)
+      ? window.location.origin : "https://nexotradeia.com";
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options:{ redirectTo, queryParams: provider==="google" ? { prompt:"select_account" } : undefined }
+    });
+    if(error){
+      console.error("[oauth] "+provider+":", error.message);
+      alert("No se pudo iniciar con "+(provider==="google"?"Google":"Apple")+". "+
+            "El proveedor aún no está activado en Supabase. ("+error.message+")");
+    }
+  }catch(e){
+    console.error("[oauth] "+provider+":", e?.message||e);
+    alert("Error al conectar con "+(provider==="google"?"Google":"Apple")+".");
+  }
+}
+
 // ── WEB PUSH (Sesión 12) ──────────────────────────────────────────────────────
 const VAPID_PUBLIC_KEY = "BHEABdZbcAr7ka890b3KOA15ZwgKVBrMxMWxUw217-tE-BmDz11HFjzWzPbuoHmm7-Rbh6m9NPZD5zjevUCHtOY";
 const _urlB64ToUint8 = (s)=>{const p="=".repeat((4-s.length%4)%4);const b=(s+p).replace(/-/g,"+").replace(/_/g,"/");const r=atob(b);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)));};
@@ -1635,6 +1659,38 @@ function Btn({children,variant="primary",onClick,style={},small=false}){
   return <button onClick={onClick} style={{...v[variant],borderRadius:10,cursor:"pointer",fontWeight:700,fontSize:fs,padding:pad,fontFamily:"inherit",transition:"opacity 0.15s",...style}} onMouseEnter={e=>e.currentTarget.style.opacity="0.85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>{children}</button>;
 }
 
+// ── ÍCONOS DE TRADING SERIOS — avatares profesionales estilo terminal financiero ──
+// Glifos monocromáticos (blancos sobre círculo de color). Nada de emojis infantiles.
+const TRADE_GLYPHS = {
+  chartup:`<polyline points="3,16.5 9,10.5 13,13.5 21,5.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,5.5 21,5.5 21,11.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`,
+  candles:`<line x1="8" y1="3" x2="8" y2="21" stroke="#fff" stroke-width="1.6"/><rect x="5.4" y="7" width="5.2" height="8" rx="1" fill="#fff"/><line x1="16" y1="2" x2="16" y2="22" stroke="#fff" stroke-width="1.6"/><rect x="13.4" y="10" width="5.2" height="7" rx="1" fill="#fff"/>`,
+  bars:`<rect x="4" y="12" width="3.6" height="8" rx="1" fill="#fff"/><rect x="10.2" y="8" width="3.6" height="12" rx="1" fill="#fff"/><rect x="16.4" y="4" width="3.6" height="16" rx="1" fill="#fff"/>`,
+  bull:`<path d="M12 4 L20.5 18.5 H3.5 Z" fill="#fff"/>`,
+  bear:`<path d="M12 20 L3.5 5.5 H20.5 Z" fill="#fff"/>`,
+  dollar:`<text x="12" y="17.5" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" font-family="Inter,Arial,sans-serif">$</text>`,
+  percent:`<text x="12" y="17" text-anchor="middle" font-size="15" font-weight="900" fill="#fff" font-family="Inter,Arial,sans-serif">%</text>`,
+  coins:`<ellipse cx="12" cy="7" rx="7" ry="3" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M5 7v6c0 1.7 3.1 3 7 3s7-1.3 7-3V7" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M5 13v3c0 1.7 3.1 3 7 3s7-1.3 7-3v-3" fill="none" stroke="#fff" stroke-width="1.8"/>`,
+  globe:`<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.7"/><ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="#fff" stroke-width="1.5"/><line x1="3" y1="12" x2="21" y2="12" stroke="#fff" stroke-width="1.5"/>`,
+  shield:`<path d="M12 3 L19 6 V11 C19 16 15.5 19.5 12 21 C8.5 19.5 5 16 5 11 V6 Z" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"/><polyline points="9,12 11.2,14.2 15.2,9.5" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>`,
+};
+// Lista para el selector (con color serio por defecto)
+const TRADE_ICONS = [
+  {kind:"chartup", color:"#185FA5", label:"Tendencia alcista"},
+  {kind:"candles", color:"#0F4C81", label:"Velas japonesas"},
+  {kind:"bars",    color:"#0F5E68", label:"Volumen"},
+  {kind:"bull",    color:"#1D9E75", label:"Bull"},
+  {kind:"bear",    color:"#993556", label:"Bear"},
+  {kind:"dollar",  color:"#B45309", label:"Dólar"},
+  {kind:"percent", color:"#534AB7", label:"Rendimiento"},
+  {kind:"coins",   color:"#0C447C", label:"Capital"},
+  {kind:"globe",   color:"#0F4C81", label:"Mercado global"},
+  {kind:"shield",  color:"#444441", label:"Gestión de riesgo"},
+];
+// emoji sentinel "ic:<kind>" → kind del glifo, o null si son iniciales/emoji normal
+const iconFromAvatar = (e) => {
+  const s = String(e||"");
+  return s.startsWith("ic:") && TRADE_GLYPHS[s.slice(3)] ? s.slice(3) : null;
+};
 // Iniciales estilo Robinhood/Bloomberg: "SofiaWallSt"→"SW", "Carlos M."→"CM", "tokyo"→"TO"
 const nexoInitials=(name)=>{
   const s=String(name||"").replace(/^@/,"").trim();
@@ -1646,13 +1702,17 @@ const nexoInitials=(name)=>{
   return s.slice(0,2).toUpperCase();
 };
 // Círculo de color con iniciales — avatar profesional (con soporte de foto real)
-function InitialsAvatar({name,color="#0F4C81",size=40,photo=null}){
+function InitialsAvatar({name,color="#0F4C81",size=40,photo=null,icon=null}){
   const ring=Math.max(2,Math.round(size*0.07));
   const [imgErr,setImgErr]=useState(false);
   if(photo&&!imgErr) return(
     <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`${ring}px solid ${color}55`,boxSizing:"border-box",flexShrink:0,boxShadow:`0 3px 10px ${color}40`,background:"#EBF3FF"}}>
       <img src={photo} alt={name||"avatar"} onError={()=>setImgErr(true)} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
     </div>
+  );
+  if(icon&&TRADE_GLYPHS[icon]) return(
+    <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(140deg,${color} 0%,${color}DD 55%,${color}99 100%)`,border:`${ring}px solid ${color}55`,boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 3px 10px ${color}40`}}
+      dangerouslySetInnerHTML={{__html:`<svg viewBox="0 0 24 24" width="${Math.round(size*0.56)}" height="${Math.round(size*0.56)}" style="display:block">${TRADE_GLYPHS[icon]}</svg>`}}/>
   );
   return(
     <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(140deg,${color} 0%,${color}DD 55%,${color}99 100%)`,border:`${ring}px solid ${color}55`,boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 3px 10px ${color}40`}}>
@@ -1667,11 +1727,12 @@ function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=fals
   const finalEmoji = avData?.emoji || emoji;
   const finalColor = avData?.color || color;
   const finalStyle = avData?.style || avatarStyle || "minimal";
+  const glyphKind = iconFromAvatar(emoji);
   const svgContent = generateAvatarSVG(avatarId||"def", finalEmoji, finalColor, finalStyle, size);
   return(
     <div style={{position:"relative",flexShrink:0}}>
-      {name
-        ? <InitialsAvatar name={name} color={finalColor||"#0F4C81"} size={size} photo={photo}/>
+      {(name||glyphKind)
+        ? <InitialsAvatar name={name} color={finalColor||"#0F4C81"} size={size} photo={photo} icon={photo?null:glyphKind}/>
         : <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`2.5px solid ${finalColor}66`,display:"flex",alignItems:"center",justifyContent:"center",background:finalColor+"11"}}
             dangerouslySetInnerHTML={{__html:svgContent}}/>}
       {online&&<span style={{position:"absolute",bottom:1,right:1,width:Math.max(7,size*0.2),height:Math.max(7,size*0.2),borderRadius:"50%",background:C.bull,border:"2px solid white",zIndex:2}}/>}
@@ -2412,16 +2473,33 @@ function AuthModal({mode,onClose,onAuth,lang}){
         </div>
         {tab==="register"&&<>
           <label style={{color:C.muted,fontSize:12,fontWeight:700}}>{t.chooseAvatar.toUpperCase()}</label>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"8px 0 18px",padding:"12px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>
-            {["#0F4C81","#0F5E68","#185FA5","#1D9E75","#534AB7","#D85A30","#993556","#B45309","#0C447C","#444441"].map(col=>(
-              <button key={col} type="button" onClick={()=>setAvatar({emoji:"",color:col})} title={col}
-                style={{width:44,height:44,borderRadius:"50%",background:col,border:`3px solid ${avatar.color===col?"#0F172A":"transparent"}`,cursor:"pointer",color:"#fff",fontWeight:900,fontSize:16,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
-                {nexoInitials(name||"NT")}
-              </button>
-            ))}
+          <div style={{margin:"8px 0 16px",padding:"12px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>
+            {/* Iniciales por color */}
+            <div style={{fontSize:10,color:C.muted2,fontWeight:700,letterSpacing:0.4,marginBottom:7}}>{lang==="en"?"INITIALS · COLOR":"INICIALES · COLOR"}</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+              {["#0F4C81","#185FA5","#0F5E68","#1D9E75","#534AB7","#993556","#B45309","#0C447C","#444441"].map(col=>{
+                const sel = avatar.color===col && !iconFromAvatar(avatar.emoji);
+                return(
+                <button key={col} type="button" onClick={()=>setAvatar({emoji:"",color:col})} title={col}
+                  style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(140deg,${col},${col}cc)`,border:`3px solid ${sel?"#0F172A":"transparent"}`,boxShadow:sel?`0 2px 8px ${col}66`:"none",cursor:"pointer",color:"#fff",fontWeight:900,fontSize:15,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+                  {nexoInitials(name||"NT")}
+                </button>
+              );})}
+            </div>
+            {/* Íconos de trading serios */}
+            <div style={{fontSize:10,color:C.muted2,fontWeight:700,letterSpacing:0.4,marginBottom:7}}>{lang==="en"?"TRADING ICONS":"ÍCONOS DE TRADING"}</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {TRADE_ICONS.map(ic=>{
+                const sel = avatar.emoji===("ic:"+ic.kind);
+                return(
+                <button key={ic.kind} type="button" onClick={()=>setAvatar({emoji:"ic:"+ic.kind,color:ic.color})} title={ic.label}
+                  style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(140deg,${ic.color},${ic.color}cc)`,border:`3px solid ${sel?"#0F172A":"transparent"}`,boxShadow:sel?`0 2px 8px ${ic.color}66`:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",padding:0}}
+                  dangerouslySetInnerHTML={{__html:`<svg viewBox="0 0 24 24" width="22" height="22" style="display:block">${TRADE_GLYPHS[ic.kind]}</svg>`}}/>
+              );})}
+            </div>
           </div>
           {avatar&&<div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,padding:"10px 14px",background:C.card2,borderRadius:10,border:`1px solid ${C.border}`}}>
-            <AvatarBubble name={name||"NT"} color={avatar.color} size={36}/>
+            <AvatarBubble name={name||"NT"} emoji={avatar.emoji} color={avatar.color} size={38}/>
             <span style={{color:C.muted,fontSize:13}}>{lang==="en"?"Your avatar":"Tu avatar seleccionado"}</span>
           </div>}
           <label style={{color:C.muted,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:4}}>
@@ -3941,7 +4019,10 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
 
   const search = (query) => {
     setLoading(true);
-    const url = `/api/gifs${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ""}`;
+    // Si no hay búsqueda, usar un término aleatorio para que se vean GIFs nuevos cada vez
+    const SEEDS = ["money","cash","rich","bull market","stocks up","crypto moon","celebrate","diamond hands","stonks","to the moon","bitcoin","wealth","trading","profits"];
+    const term = query.trim() || SEEDS[Math.floor(Math.random()*SEEDS.length)];
+    const url = `/api/gifs?q=${encodeURIComponent(term)}`;
     fetch(url)
       .then(r=>r.json())
       .then(d=>{ setGifs(d.gifs&&d.gifs.length>0?d.gifs:GIF_CLIENT_FALLBACK); setApiSrc(d.source||"fallback"); setLoading(false); })
@@ -3986,11 +4067,11 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
             );})}
           </div>
           {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ {isEN?"Searching GIFs...":"Buscando GIFs..."}</div>:(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,maxHeight:340,overflowY:"auto"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:3,maxHeight:360,overflowY:"auto"}}>
               {gifs.map(g=>(
-                <div key={g.id} style={{borderRadius:9,overflow:"hidden",cursor:"pointer",aspectRatio:"16/9",background:"#0d1117"}}
+                <div key={g.id} style={{borderRadius:6,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:C.card2||"#f1f5f9",position:"relative"}}
                   onClick={()=>onSelect(g.full||g.preview)}>
-                  <img src={g.preview} alt={g.title} style={{width:"100%",height:"100%",objectFit:"contain",display:"block"}} onError={e=>{e.target.parentElement.style.display="none";}}/>
+                  <img src={g.preview} alt={g.title} loading="lazy" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={e=>{e.target.parentElement.style.display="none";}}/>
                 </div>
               ))}
             </div>
@@ -10520,14 +10601,14 @@ function JoinCard({ onAuth, lang="es" }){
           <div style={{fontSize:8.5,fontWeight:700,letterSpacing:"0.8px",color:"#94a3b8"}}>{isEN?"OR CONTINUE WITH":"O CONTINÚA CON"}</div>
           <div style={{flex:1,height:1,background:"#E6EDF5"}}/>
         </div>
-        {/* Social login */}
+        {/* Social login — OAuth real vía Supabase */}
         <div style={{display:"flex",gap:7,marginBottom:10}}>
-          <button className="nexo-jc-social-btn" onClick={()=>onAuth("register")}
+          <button className="nexo-jc-social-btn" onClick={()=>nexoOAuth("google")}
             style={{flex:1,background:"#fff",border:"1.5px solid #E6EDF5",borderRadius:9,padding:"8px",display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:11.5,fontWeight:700,color:"#0A1628",cursor:"pointer",fontFamily:"inherit"}}>
             <svg width="15" height="15" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Google
           </button>
-          <button className="nexo-jc-social-btn" onClick={()=>onAuth("register")}
+          <button className="nexo-jc-social-btn" onClick={()=>nexoOAuth("apple")}
             style={{flex:1,background:"#fff",border:"1.5px solid #E6EDF5",borderRadius:9,padding:"8px",display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:11.5,fontWeight:700,color:"#0A1628",cursor:"pointer",fontFamily:"inherit"}}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="#0A1628" style={{flexShrink:0}}><path d="M17.05 12.04c-.02-2.05 1.68-3.03 1.75-3.08-.95-1.4-2.44-1.59-2.97-1.61-1.26-.13-2.47.74-3.11.74-.64 0-1.63-.72-2.69-.7-1.38.02-2.66.8-3.37 2.04-1.44 2.5-.37 6.2 1.03 8.23.69.99 1.5 2.1 2.57 2.06 1.03-.04 1.42-.67 2.67-.67 1.24 0 1.6.67 2.69.65 1.11-.02 1.81-1.01 2.49-2 .78-1.15 1.11-2.26 1.13-2.32-.02-.01-2.17-.83-2.19-3.29zM15.5 6.2c.57-.69.95-1.65.85-2.6-.82.03-1.81.54-2.39 1.23-.52.61-.98 1.58-.86 2.51.91.07 1.84-.46 2.4-1.14z"/></svg>
             Apple
@@ -17290,7 +17371,7 @@ function BotPostCard({post,onTickerClick,lang}){
       onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
         {/* Avatar */}
-        <InitialsAvatar name={post.user} color={post.avatarColor} size={40} photo={post.photo||null}/>
+        <InitialsAvatar name={post.user} color={post.avatarColor} size={40} photo={post.photo||null} icon={post.photo?null:iconFromAvatar(post.avatar)}/>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,flexWrap:"wrap"}}>
             <span style={{fontWeight:800,color:C.text,fontSize:14}}>@{post.user}</span>
