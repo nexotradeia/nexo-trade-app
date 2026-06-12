@@ -29294,8 +29294,8 @@ export default function App(){
         </div>
       )}
 
-      {/* MOBILE HOME DASHBOARD — solo móvil página 0 */}
-      {page===0 && !showLanding && page!==99 && (
+      {/* MOBILE HOME DASHBOARD — solo móvil página 0 (se oculta si hay un ticker abierto para que se vea su análisis) */}
+      {page===0 && !showLanding && page!==99 && !tickerPage && (
         <div className="nexo-only-mobile" style={{display:"none",maxWidth:480,margin:"0 auto",boxSizing:"border-box"}}>
           <MobileDashErrorBoundary>
             <MobileHomeDashboard
