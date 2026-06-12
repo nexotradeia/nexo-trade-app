@@ -2903,12 +2903,11 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
           </div>
 
           {/* ── QUICK STATS BAR ── */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(15,76,129,0.08)",borderRadius:"14px 14px 0 0",overflow:"hidden",position:"relative",zIndex:2}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(15,76,129,0.08)",borderRadius:"14px 14px 0 0",overflow:"hidden",position:"relative",zIndex:2}}>
             {[
               {label:lang==="en"?"Followers":"Seguidores", value:fmtNum(displayStats.followers), color:"#0F4C81"},
               {label:lang==="en"?"Following":"Siguiendo",  value:fmtNum(displayStats.following),  color:"#6B7280"},
               {label:"Posts",                              value:fmtNum(displayStats.posts),       color:"#16A34A"},
-              {label:"XP",                                 value:fmtNum(displayStats.points),      color:"#0F5E68"},
             ].map((s,i)=>(
               <div key={i} style={{padding:"10px 6px",textAlign:"center",background:"rgba(255,255,255,0.5)"}}>
                 <div style={{fontWeight:800,color:s.color,fontSize:16,letterSpacing:"-0.5px"}}>{s.value}</div>
@@ -2985,7 +2984,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
 
           {/* ── TABS ── */}
           <div style={{display:"flex",gap:4,marginBottom:16,background:C.card2,borderRadius:12,padding:4,border:`1px solid ${C.border}`}}>
-            {[["posts","✍️ Posts"],["badges","🏆 Logros"]].map(([k,l])=>(
+            {[["posts","Posts"],["badges","Logros"]].map(([k,l])=>(
               <button key={k} onClick={()=>setActiveTab(k)}
                 style={{flex:1,background:activeTab===k?C.surface:"transparent",border:activeTab===k?`1px solid ${C.border}`:"1px solid transparent",borderRadius:9,padding:"8px 0",cursor:"pointer",color:activeTab===k?C.text:C.muted,fontSize:13,fontWeight:activeTab===k?800:600,transition:"all 0.15s",boxShadow:activeTab===k?"0 1px 4px rgba(0,0,0,0.08)":"none"}}>
                 {l}
@@ -4637,7 +4636,7 @@ function TopsPage({posts=[],lang="es"}){
   const [quotes,setQuotes]=useState([]);
   const [loading,setLoading]=useState(true);
   const [marketClosed,setMarketClosed]=useState(false);
-  const tabs=[["activas","Most Active"],["ganadoras","Top Gainers"],["perdedoras","Top Losers"],["leaderboard","Leaderboard"]];
+  const tabs=[["activas","Most Active"],["ganadoras","Top Gainers"],["perdedoras","Top Losers"]];
 
   const fetchData=()=>{
     setLoading(true);
@@ -7791,7 +7790,6 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:Ico('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>'), label:"Notifications", idx:39},
     {icon:Ico('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>'), label:isEN?"Alert Center":"Centro Alertas", idx:42},
     {icon:Ico('<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'), label:isEN?"Paper Trading Sim":"Paper Trading Sim", idx:9, vip:true},
-    {icon:Ico('<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>'), label:"Leaderboard", idx:40},
     {icon:Ico('<path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l6 6v8a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/>'), label:"News", idx:5},
     {icon:Ico('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/>'), label:"Earnings", idx:6},
     {icon:Ico('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'), label:"Live Markets", idx:7},
@@ -9432,7 +9430,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
   const isEN=lang==="en";
   const go=idx=>{onClose();onNavigate(idx);};
   const SECTIONS=[
-    {t:isEN?"Main":"Principal",items:[["Feed",0],["Stock Pick AI",3],["Live Markets",7],["Earnings",6],["News",5],["Trending",7777],["Leaderboard",40]]},
+    {t:isEN?"Main":"Principal",items:[["Feed",0],["Stock Pick AI",3],["Live Markets",7],["Earnings",6],["News",5],["Trending",7777]]},
     {t:"Calendars",items:[["Economic",14],["Dividends",15],["IPOs",16],["Holidays",57],["Splits",58],["Futures Expiry",59]]},
     {t:"Calculators",items:[["Pivot Points",46],["Profit",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],["Mortgage",49]]},
     {t:"Currencies",items:[["Converter",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
@@ -10308,21 +10306,29 @@ function UserMenu({user,onLogout,onProfile,onAlerts,onAdmin,onNavigate,lang}){
         <AvatarBubble name={user.name||user.username} emoji={user.emoji} color={user.avatarColor||C.accent} photo={user.avatarUrl||null} size={28} online/>
         <div className="nexo-logo-text">
           <div style={{color:C.text,fontSize:13,fontWeight:700,lineHeight:1}}>{user.name}</div>
-          <div style={{color:lvl.color,fontSize:9,fontWeight:700}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</div>
+          <div style={{color:C.muted2,fontSize:9,fontWeight:600,marginTop:2}}>@{user.username||user.name}</div>
         </div>
         <span className="nexo-usermenu-arrow" style={{color:C.muted2,fontSize:9}}>▾</span>
       </div>
       {open&&(
-        <div className="nexo-usermenu-dropdown" style={{position:"absolute",right:0,top:"calc(100% + 8px)",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:8,minWidth:195,zIndex:150,boxShadow:C.shadowMd}}>
-          <div style={{padding:"10px 12px",marginBottom:6,background:C.card2,borderRadius:10}}>
-            <div style={{color:C.muted2,fontSize:11,marginBottom:4}}>{lang==="en"?"Your points":"Tus puntos"}</div>
-            <LevelBadge points={user.points} lang={lang}/>
-          </div>
-          {[{label:`👤 ${t.profile}`,fn:()=>{onProfile(user);setOpen(false);}},{label:`🔗 Referidos & Ganancias`,fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},{label:`🔔 ${t.alerts}`,fn:()=>{onAlerts();setOpen(false);}},{label:`💬 Messages`,fn:()=>{if(onNavigate)onNavigate(22);setOpen(false);}},{label:`💼 Portfolio`,fn:()=>{if(onNavigate)onNavigate(37);setOpen(false);}},{label:`⚙️ ${t.settings}`,fn:()=>setOpen(false)},...(ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase())?[{label:"🤝 Affiliate Dashboard",fn:()=>{window.open("/affiliates.html","_blank");setOpen(false);},affiliate:true},{label:"🛡️ Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}]:[]),{label:`🚪 ${t.logout}`,fn:()=>{onLogout();setOpen(false);},red:true}].map(item=>(
-            <button key={item.label} onClick={item.fn} style={{display:"block",width:"100%",textAlign:"left",background:item.admin?"linear-gradient(135deg,#0F5E6822,#4c1d9511)":item.affiliate?"linear-gradient(135deg,#00c87a18,#00c87a08)":"none",border:item.admin?"1px solid #0F5E6844":item.affiliate?"1px solid #00c87a33":"none",cursor:"pointer",color:item.red?C.bear:item.admin?"#a78bfa":item.affiliate?"#00c87a":C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s",marginBottom:(item.admin||item.affiliate)?4:0}}
+        <div className="nexo-usermenu-dropdown" style={{position:"absolute",right:0,top:"calc(100% + 8px)",background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,padding:8,minWidth:205,zIndex:150,boxShadow:C.shadowMd}}>
+          {[
+            {ico:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',label:t.profile,fn:()=>{onProfile(user);setOpen(false);}},
+            {ico:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',label:"Referidos & Ganancias",fn:()=>{setOpen(false);const el=document.getElementById("nexo-referral-section");if(el)el.scrollIntoView({behavior:"smooth"});else{navigator.clipboard.writeText(`https://nexotradeia.com?ref=${user.id}`).then(()=>alert("✅ Link copiado: nexotradeia.com?ref="+user.id));}}},
+            {ico:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',label:t.alerts,fn:()=>{onAlerts();setOpen(false);}},
+            {ico:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',label:"Portfolio",fn:()=>{if(onNavigate)onNavigate(37);setOpen(false);}},
+            {ico:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',label:t.settings,fn:()=>setOpen(false)},
+            ...(ADMIN_EMAILS_CONST.includes((user?.email||"").toLowerCase())?[
+              {ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',label:"Affiliate Dashboard",fn:()=>{window.open("/affiliates.html","_blank");setOpen(false);},affiliate:true},
+              {ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',label:"Admin Dashboard",fn:()=>{if(onAdmin)onAdmin();setOpen(false);},admin:true}
+            ]:[]),
+            {ico:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',label:t.logout,fn:()=>{onLogout();setOpen(false);},red:true}
+          ].map(item=>(
+            <button key={item.label} onClick={item.fn} style={{display:"flex",alignItems:"center",gap:10,width:"100%",textAlign:"left",background:item.admin?"linear-gradient(135deg,#0F5E6822,#4c1d9511)":item.affiliate?"linear-gradient(135deg,#00c87a18,#00c87a08)":"none",border:item.admin?"1px solid #0F5E6844":item.affiliate?"1px solid #00c87a33":"none",cursor:"pointer",color:item.red?C.bear:item.admin?"#a78bfa":item.affiliate?"#00c87a":C.text,fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:9,fontFamily:"inherit",transition:"background 0.1s",marginBottom:(item.admin||item.affiliate)?4:0}}
               onMouseEnter={e=>e.currentTarget.style.background=C.card2}
-              onMouseLeave={e=>e.currentTarget.style.background="none"}>
-              {item.label}
+              onMouseLeave={e=>e.currentTarget.style.background=item.admin?"linear-gradient(135deg,#0F5E6822,#4c1d9511)":item.affiliate?"linear-gradient(135deg,#00c87a18,#00c87a08)":"none"}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}} dangerouslySetInnerHTML={{__html:item.ico}}/>
+              <span>{item.label}</span>
             </button>
           ))}
         </div>
