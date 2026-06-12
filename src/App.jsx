@@ -4275,6 +4275,16 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
   const [quote,setQuote]=useState(null);
   const [loadingQ,setLoadingQ]=useState(true);
   const [showChart,setShowChart]=useState(true);
+  const [metric,setMetric]=useState(null);   // fundamentos (P/E, div, crecimiento) Finnhub
+  const [cnews,setCnews]=useState(null);      // noticias recientes Finnhub
+  useEffect(()=>{
+    setMetric(null); setCnews(null);
+    try{
+      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`).then(r=>r.json()).then(d=>setMetric((d&&d.metric)?d.metric:{})).catch(()=>setMetric({}));
+      const f=d=>d.toISOString().slice(0,10);
+      fetch(`https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${f(new Date(Date.now()-30*864e5))}&to=${f(new Date())}&token=${FINNHUB_KEY}`).then(r=>r.json()).then(d=>setCnews(Array.isArray(d)?d.slice(0,4):[])).catch(()=>setCnews([]));
+    }catch(_){ setMetric({}); setCnews([]); }
+  },[ticker]);
 
   const tkPosts=posts.filter(p=>
     p.ticker===ticker||
@@ -4426,6 +4436,53 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
               <button onClick={()=>onNeedPremium?onNeedPremium():(onNeedAuth&&onNeedAuth())} style={{background:"linear-gradient(135deg,#1A56DB,#0B32B8)",color:"#fff",border:"none",borderRadius:11,padding:"11px 22px",fontSize:13.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 8px 24px -8px rgba(26,86,219,0.6)"}}>✦ {isEN?"Try VIP free for 3 days →":"Prueba VIP 3 días gratis →"}</button>
             </div>
           </div>}
+          </div>
+        </div>
+        );
+      })()}
+
+      {/* ── FUNDAMENTOS + NOTICIAS RECIENTES (Finnhub) ── */}
+      {(function(){
+        var isEN=lang==="en";
+        var m=metric||{};
+        var fmtCap=function(v){ if(!v) return "—"; if(v>=1e6) return "$"+(v/1e6).toFixed(2)+"T"; if(v>=1e3) return "$"+(v/1e3).toFixed(1)+"B"; return "$"+Number(v).toFixed(0)+"M"; };
+        var pe=m.peTTM||m.peBasicExclExtraTTM;
+        var divY=m.dividendYieldIndicatedAnnual!=null?m.dividendYieldIndicatedAnnual:m.currentDividendYieldTTM;
+        var revG=m.revenueGrowthTTMYoy, epsG=m.epsGrowthTTMYoy, hi=m["52WeekHigh"], lo=m["52WeekLow"];
+        var rows=[
+          ["P/E (TTM)", pe!=null?Number(pe).toFixed(1):"—"],
+          [isEN?"Dividend yield":"Rentab. dividendo", (divY!=null&&divY>0)?Number(divY).toFixed(2)+"%":(isEN?"No dividend":"No paga")],
+          [isEN?"Revenue growth (YoY)":"Crec. ingresos (YoY)", revG!=null?((revG>=0?"+":"")+Number(revG).toFixed(1)+"%"):"—"],
+          [isEN?"EPS growth (YoY)":"Crec. BPA (YoY)", epsG!=null?((epsG>=0?"+":"")+Number(epsG).toFixed(1)+"%"):"—"],
+          [isEN?"Market cap":"Capitalización", fmtCap(m.marketCapitalization)],
+          [isEN?"52-wk range":"Rango 52 sem", (lo&&hi)?("$"+Number(lo).toFixed(0)+" – $"+Number(hi).toFixed(0)):"—"],
+        ];
+        return (
+        <div style={{marginBottom:20}}>
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 18px",marginBottom:14}}>
+            <div style={{fontWeight:800,fontSize:15,color:C.text,marginBottom:12,letterSpacing:"-0.01em"}}>{isEN?"Fundamentals":"Fundamentos"}</div>
+            {!metric ? <div style={{fontSize:13,color:C.muted,padding:"6px 0"}}>{isEN?"Loading…":"Cargando…"}</div> :
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px 18px"}}>
+              {rows.map(function(r,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8,borderBottom:`1px solid ${C.border}`,paddingBottom:8}}>
+                <span style={{fontSize:12.5,color:C.muted}}>{r[0]}</span>
+                <span style={{fontSize:13.5,fontWeight:800,color:C.text,fontFamily:"monospace"}}>{r[1]}</span>
+              </div>;})}
+            </div>}
+          </div>
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 18px"}}>
+            <div style={{fontWeight:800,fontSize:15,color:C.text,marginBottom:12,letterSpacing:"-0.01em"}}>{isEN?"Recent news":"Noticias recientes"}</div>
+            {!cnews ? <div style={{fontSize:13,color:C.muted,padding:"6px 0"}}>{isEN?"Loading…":"Cargando…"}</div> :
+             cnews.length===0 ? <div style={{fontSize:13,color:C.muted,padding:"6px 0"}}>{isEN?"No recent news.":"Sin noticias recientes."}</div> :
+             cnews.map(function(n,i){
+               var dt=n.datetime?new Date(n.datetime*1000):null;
+               return <a key={i} href={n.url} target="_blank" rel="noopener noreferrer" style={{display:"flex",gap:12,padding:"11px 0",borderBottom:i<cnews.length-1?`1px solid ${C.border}`:"none",textDecoration:"none"}}>
+                 {n.image && <img src={n.image} alt="" loading="lazy" style={{width:56,height:56,borderRadius:10,objectFit:"cover",flexShrink:0,background:C.card2}} onError={e=>{e.target.style.display="none";}}/>}
+                 <div style={{flex:1,minWidth:0}}>
+                   <div style={{fontSize:13.5,fontWeight:600,color:C.text,lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{n.headline}</div>
+                   <div style={{fontSize:11,color:C.muted2,marginTop:4}}>{n.source}{dt?" · "+dt.toLocaleDateString(isEN?"en-US":"es-ES",{month:"short",day:"numeric"}):""}</div>
+                 </div>
+               </a>;
+             })}
           </div>
         </div>
         );
