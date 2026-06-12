@@ -1574,7 +1574,7 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[],
                     <AvatarBubble name={u.name||u.username} emoji={u.emoji} color={u.avatarColor||C.accent} size={34}/>
                     <div style={{flex:1}}>
                       <div style={{fontWeight:700,color:"var(--c-text)",fontSize:13}}>{u.name}</div>
-                      <div style={{fontSize:10,color:lvl.color,fontWeight:600}}>{lvl.emoji} {lvl.name} · {fmtNum(u.followers)} seguidores</div>
+                      <div style={{fontSize:10,color:"var(--c-muted)",fontWeight:600}}>{fmtNum(u.followers)} {isEN?"followers":"seguidores"}</div>
                     </div>
                     {u.badges?.includes("verified")&&<span style={{fontSize:14}}>✅</span>}
                   </div>
@@ -1736,7 +1736,7 @@ function AvatarBubble({emoji,color,name,avatarId,avatarStyle,size=40,online=fals
         : <div style={{width:size,height:size,borderRadius:"50%",overflow:"hidden",border:`2.5px solid ${finalColor}66`,display:"flex",alignItems:"center",justifyContent:"center",background:finalColor+"11"}}
             dangerouslySetInnerHTML={{__html:svgContent}}/>}
       {online&&<span style={{position:"absolute",bottom:1,right:1,width:Math.max(7,size*0.2),height:Math.max(7,size*0.2),borderRadius:"50%",background:C.bull,border:"2px solid white",zIndex:2}}/>}
-      {lvl&&<span style={{position:"absolute",top:-5,right:-5,background:lvl.color,color:"#fff",borderRadius:20,padding:"1px 5px",fontSize:8,fontWeight:800,border:"1.5px solid white",whiteSpace:"nowrap",zIndex:3}}>{lvl.emoji}</span>}
+      {false&&lvl&&<span style={{position:"absolute",top:-5,right:-5,background:lvl.color,color:"#fff",borderRadius:20,padding:"1px 5px",fontSize:8,fontWeight:800,border:"1.5px solid white",whiteSpace:"nowrap",zIndex:3}}>{lvl.emoji}</span>}
     </div>
   );
 }
@@ -2887,9 +2887,6 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                 {user.badges?.includes("vip")&&<span style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.3)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:800,color:"#0F5E68"}}>PREMIUM ✦</span>}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-                <span style={{background:"rgba(15,76,129,0.1)",border:`1px solid rgba(15,76,129,0.2)`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#0F4C81",display:"flex",alignItems:"center",gap:4}}>
-                  {lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}
-                </span>
                 <span style={{fontSize:11,color:"#6B7280"}}>{tradeStyle}</span>
                 <span style={{fontSize:11,color:"#9CA3AF"}}>{lang==="en"?"Since":"Desde"} {joinYear}</span>
               </div>
@@ -7642,11 +7639,6 @@ function Top5Foristas({user,following,onFollow,onProfile,lang}){
             <AvatarBubble name={u.name||u.username} emoji={u.emoji} color={u.color} size={34} level={u.points}/>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontWeight:700,color:C.text,fontSize:13,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.name}</div>
-              <div style={{color:lvl.color,fontSize:10,fontWeight:700}}>{lvl.emoji} {lang==="en"?lvl.nameEn:lvl.name}</div>
-            </div>
-            <div style={{textAlign:"right"}}>
-              <div style={{color:C.accentText,fontWeight:800,fontSize:12}}>{fmtNum(u.points)}</div>
-              <div style={{color:C.muted2,fontSize:10}}>pts</div>
             </div>
             {user&&user.id!==u.id&&(
               <button onClick={e=>{e.stopPropagation();onFollow(u.id);}} style={{background:following.includes(u.id)?C.card2:C.accentDim,border:`1px solid ${following.includes(u.id)?C.border:C.accent+"55"}`,borderRadius:8,padding:"3px 8px",cursor:"pointer",color:following.includes(u.id)?C.muted2:C.accentText,fontSize:10,fontWeight:700,flexShrink:0}}>
@@ -10052,7 +10044,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
                     {u.username||"Usuario"}
                   </div>
                   <div style={{color:"var(--c-muted2)",fontSize:10}}>
-                    {fmtNum(u.followers_count||0)} {t.followers} · {fmtNum(u.points||0)} pts
+                    {fmtNum(u.followers_count||0)} {t.followers}
                   </div>
                 </div>
                 <button onClick={()=>handleFollow(u.id)}
@@ -10081,6 +10073,7 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
 function PointsBenefitsCard({user, lang="es"}){
   const isEN = lang==="en";
   const [open,setOpen]=useState(false);
+  return null; // sistema de puntos retirado
   if(!user) return null;
   const pts = user.points||0;
   const lvl = getLevel(pts);
