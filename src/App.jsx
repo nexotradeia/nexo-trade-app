@@ -9408,7 +9408,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
   const isEN=lang==="en";
   const go=idx=>{onClose();onNavigate(idx);};
   const SECTIONS=[
-    {t:isEN?"Main":"Principal",items:[["Feed",0],["Stock Pick AI",3],["Live Markets",7],["Earnings",6],["News",5],["Messages",22],["Leaderboard",40]]},
+    {t:isEN?"Main":"Principal",items:[["Feed",0],["Stock Pick AI",3],["Live Markets",7],["Earnings",6],["News",5],["Trending",7777],["Leaderboard",40]]},
     {t:"Calendars",items:[["Economic",14],["Dividends",15],["IPOs",16],["Holidays",57],["Splits",58],["Futures Expiry",59]]},
     {t:"Calculators",items:[["Pivot Points",46],["Profit",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],["Mortgage",49]]},
     {t:"Currencies",items:[["Converter",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
@@ -10773,7 +10773,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
       items:[
         {label:isEN?"Live Webinars":"Webinars en vivo", page:11},
         {label:"Academy",                               page:12},
-        {label:"Messages",                              page:22},
+        {label:"🔥 Trending",                          page:7777},
         {label:isEN?"Community Rules":"Normas",         page:34},
         {label:isEN?"VIP Plans":"Planes VIP",       page:8},
         {label:isEN?"Join free →":"Únete gratis →",     action:"auth"},
@@ -19213,7 +19213,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:isEN?"🌅 Pre-Market":"🌅 Pre-Market",idx:45},
   {label:t.noticias,idx:5},
   // ── Comunidad ──
-  {label:isEN?"💬 Messages":"💬 Mensajes",idx:22},
+  {label:"🔥 Trending",idx:7777},
   {label:isEN?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,vip:true},
   {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
   {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
@@ -24920,47 +24920,52 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
   return (
     <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 16px", fontFamily: "system-ui,-apple-system,sans-serif" }}>
 
-      {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(15,76,129,0.12)", border: "1.5px solid rgba(15,76,129,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔔</div>
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 22, color: C.text, letterSpacing: -0.5 }}>
-              {isEN ? "Alert Center" : "Centro de Alertas"}
+      {/* Header — banner con degradado */}
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ position:"relative", overflow:"hidden", borderRadius:18, padding:"22px 22px", marginBottom:14, background:"linear-gradient(135deg,#0F4C81 0%,#1565C0 55%,#1d9bff 100%)", boxShadow:"0 14px 34px -12px rgba(15,76,129,.55)" }}>
+          <div style={{position:"absolute",right:-34,top:-34,width:160,height:160,borderRadius:"50%",background:"rgba(255,255,255,.08)"}}/>
+          <div style={{position:"absolute",right:50,bottom:-40,width:110,height:110,borderRadius:"50%",background:"rgba(255,255,255,.06)"}}/>
+          <div style={{position:"relative",display:"flex",alignItems:"center",gap:14}}>
+            <div style={{ width:54, height:54, borderRadius:16, background:"rgba(255,255,255,.18)", border:"1px solid rgba(255,255,255,.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
             </div>
-            <div style={{ fontSize: 13, color: C.muted }}>
-              {isEN ? "Get notified when prices hit your targets" : "Recibe alertas cuando los precios lleguen a tus objetivos"}
+            <div>
+              <div style={{ fontWeight: 900, fontSize: 23, color: "#fff", letterSpacing: -0.5 }}>{isEN ? "Alert Center" : "Centro de Alertas"}</div>
+              <div style={{ fontSize: 13, color: "rgba(255,255,255,.82)" }}>{isEN ? "Get notified when prices hit your targets" : "Recibe alertas cuando los precios lleguen a tus objetivos"}</div>
             </div>
           </div>
         </div>
 
-        {/* Stats row */}
-        <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+        {/* Stats row — con color e íconos */}
+        <div style={{ display: "flex", gap: 10 }}>
           {[
-            { label: isEN ? "Active" : "Activas", value: activeCount, color: C.accent },
-            { label: isEN ? "Triggered" : "Disparadas", value: firedCount, color: C.bull },
-            { label: isEN ? "Total" : "Total", value: alerts.length, color: C.muted },
+            { label: isEN ? "Active" : "Activas", value: activeCount, color:"#1565C0", bg:"rgba(21,101,192,.07)", bd:"rgba(21,101,192,.2)", ic:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> },
+            { label: isEN ? "Triggered" : "Disparadas", value: firedCount, color:"#16a34a", bg:"rgba(22,163,74,.07)", bd:"rgba(22,163,74,.2)", ic:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg> },
+            { label: isEN ? "Total" : "Total", value: alerts.length, color:"#7c3aed", bg:"rgba(124,58,237,.07)", bd:"rgba(124,58,237,.2)", ic:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 3 21 8 12 13 3 8 12 3"/><polyline points="3 13 12 18 21 13"/></svg> },
           ].map(s => (
-            <div key={s.label} style={{ flex: 1, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 14px", textAlign: "center" }}>
-              <div style={{ fontWeight: 900, fontSize: 20, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{s.label}</div>
+            <div key={s.label} style={{ flex: 1, background: s.bg, border: `1px solid ${s.bd}`, borderRadius: 14, padding: "14px 12px", textAlign: "center" }}>
+              <div style={{ display:"inline-flex", marginBottom:5, color:s.color }}>{s.ic}</div>
+              <div style={{ fontWeight: 900, fontSize: 24, color: s.color, lineHeight:1 }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: C.muted, fontWeight: 700, marginTop:3 }}>{s.label}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Notification permission banner */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: "14px 16px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 22 }}>🔕</span>
+      <div style={{ background: notifPerm==="denied"?"rgba(220,38,38,.06)":notifPerm==="granted"?"rgba(22,163,74,.06)":"rgba(245,158,11,.07)", border:`1px solid ${notifPerm==="denied"?"rgba(220,38,38,.25)":notifPerm==="granted"?"rgba(22,163,74,.25)":"rgba(245,158,11,.3)"}`, borderRadius: 14, padding: "13px 16px", marginBottom: 18, display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width:38, height:38, borderRadius:11, background:permColor+"1f", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:permColor }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>{notifPerm==="denied"&&<line x1="2" y1="2" x2="22" y2="22"/>}</svg>
+        </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 2 }}>
+          <div style={{ fontWeight: 800, fontSize: 13, color: C.text, marginBottom: 2 }}>
             {isEN ? "Browser Notifications" : "Notificaciones del navegador"}
           </div>
-          <div style={{ fontSize: 12, color: permColor, fontWeight: 600 }}>{permLabel}</div>
+          <div style={{ fontSize: 12, color: permColor, fontWeight: 700 }}>{permLabel}</div>
         </div>
         {notifPerm !== "granted" && notifPerm !== "denied" && (
           <button onClick={requestPermission}
-            style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 10, padding: "8px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+            style={{ background: "linear-gradient(135deg,#1565C0,#0F4C81)", color: "#fff", border: "none", borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap", boxShadow:"0 6px 16px -6px rgba(15,76,129,.6)" }}>
             {isEN ? "Enable" : "Activar"}
           </button>
         )}
@@ -24992,8 +24997,11 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
 
       {/* Add alert form */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: "18px 18px 20px", marginBottom: 20 }}>
-        <div style={{ fontWeight: 800, fontSize: 15, color: C.text, marginBottom: 14 }}>
-          {isEN ? "➕ New Price Alert" : "➕ Nueva Alerta de Precio"}
+        <div style={{ display:"flex", alignItems:"center", gap:9, fontWeight: 800, fontSize: 15, color: C.text, marginBottom: 14 }}>
+          <span style={{ width:26, height:26, borderRadius:8, background:"rgba(21,101,192,.12)", display:"inline-flex", alignItems:"center", justifyContent:"center", color:"#1565C0" }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </span>
+          {isEN ? "New Price Alert" : "Nueva Alerta de Precio"}
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
           {/* Ticker */}
@@ -25036,7 +25044,7 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
           </div>
           {/* Add button */}
           <button onClick={addAlert}
-            style={{ flex: "0 0 auto", background: C.accent, color: "#fff", border: "none", borderRadius: 10, padding: "10px 22px", fontSize: 13, fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap", alignSelf: "flex-end" }}>
+            style={{ flex: "0 0 auto", background: "linear-gradient(135deg,#1d9bff,#0F4C81)", color: "#fff", border: "none", borderRadius: 10, padding: "11px 24px", fontSize: 13, fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap", alignSelf: "flex-end", boxShadow:"0 8px 20px -6px rgba(15,76,129,.6)" }}>
             {isEN ? "Add Alert" : "Agregar"}
           </button>
         </div>
@@ -25056,14 +25064,12 @@ function AlertCenterPage({ lang="es", user, onNeedAuth }) {
 
       {/* Alerts list */}
       {alerts.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px 20px", background: C.card, border: `1px dashed ${C.border}`, borderRadius: 16 }}>
-          <div style={{ fontSize: 36, marginBottom: 10 }}>🔔</div>
-          <div style={{ fontWeight: 700, color: C.text, marginBottom: 4 }}>
-            {isEN ? "No alerts yet" : "Sin alertas aún"}
+        <div style={{ textAlign: "center", padding: "44px 20px", background: C.card, border: `1px dashed ${C.border}`, borderRadius: 16 }}>
+          <div style={{ width:64, height:64, borderRadius:18, margin:"0 auto 14px", background:"linear-gradient(135deg,rgba(29,155,255,.14),rgba(15,76,129,.1))", border:"1px solid rgba(21,101,192,.18)", display:"flex", alignItems:"center", justifyContent:"center", color:"#1565C0" }}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
           </div>
-          <div style={{ fontSize: 13, color: C.muted }}>
-            {isEN ? "Add a price alert above to get started." : "Agrega una alerta de precio arriba para empezar."}
-          </div>
+          <div style={{ fontWeight: 800, fontSize:16, color: C.text, marginBottom: 5 }}>{isEN ? "No alerts yet" : "Sin alertas aún"}</div>
+          <div style={{ fontSize: 13, color: C.muted, maxWidth:320, margin:"0 auto", lineHeight:1.5 }}>{isEN ? "Add a price alert above and we'll ping you the moment your target hits." : "Crea una alerta arriba y te avisamos en el momento en que tu objetivo se cumpla."}</div>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -29264,7 +29270,7 @@ export default function App(){
               {label:"News",idx:5,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>},
               {label:"Earnings",idx:6,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>},
               {label:"Markets",idx:2,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
-              {label:"Messages",idx:22,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>},
+              {label:"Trending",idx:7777,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
             ].map(n=>(
               <button key={n.idx} className={`nexo-ntab${page===n.idx?" nact":""}`}
                 style={(n.idx===2&&marketOpen)?{color:"#16a34a"}:undefined}
