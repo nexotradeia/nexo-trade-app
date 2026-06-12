@@ -26139,6 +26139,55 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
         })}
       </div>
 
+      {/* Today's AI Pick */}
+      <div style={{background:"#06080e",borderRadius:24,padding:"20px 20px 18px",marginBottom:18,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(420px 200px at 88% -20%, rgba(10,92,255,0.28), transparent 70%)",pointerEvents:"none"}}/>
+        {/* header row */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:1}}>
+          <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,letterSpacing:"0.05em",textTransform:"uppercase",color:"#bcd0ff",background:"rgba(10,92,255,0.16)",border:"1px solid rgba(10,92,255,0.32)",padding:"5px 10px",borderRadius:999}}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#bcd0ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            {"Today's AI Pick"}
+          </span>
+          <span style={{fontSize:11,color:"#7a8398"}}>{isMarketOpen?"Live":"Pre-market"}</span>
+        </div>
+        {/* ticker */}
+        <div style={{position:"relative",zIndex:1,marginTop:16}}>
+          <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:8}}>
+            <div style={{fontSize:12,color:"#8a93a6",fontWeight:600,letterSpacing:"0.03em"}}>{pick.ticker}</div>
+            {(function(){ var d=liveP(pick.ticker,0,0); if(d.price>0) return <div style={{fontSize:13,fontWeight:700,color:d.chg>=0?"#27d391":"#f87171"}}>{d.price>=1000?(d.price/1000).toFixed(1)+"k":d.price.toFixed(2)} <span style={{fontSize:11}}>{d.chg>=0?"+":""}{d.chg.toFixed(2)}%</span></div>; return null; })()}
+          </div>
+          <div style={{fontSize:28,fontWeight:800,letterSpacing:"-0.03em",color:"#fff",lineHeight:1.15}}>{pick.nombre}</div>
+          <div style={{marginTop:8,display:"inline-flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:"#27d391"}}>
+            <span style={{display:"inline-flex",gap:2,alignItems:"flex-end"}}>
+              {[7,9,12,15].map(function(h,i){ return <span key={i} style={{width:3,height:h,background:"#27d391",borderRadius:2,display:"inline-block"}}/>; })}
+            </span>
+            High conviction &bull; {pick.confianza||93}% confidence
+          </div>
+        </div>
+        {/* thesis */}
+        <p style={{position:"relative",zIndex:1,marginTop:12,fontSize:13.5,lineHeight:1.5,color:"#c9ced9"}}>{pickThesis}</p>
+        {/* entry / target / stop — todo sobre la acción */}
+        {(pick.entrada||pick.target||pick.stop_loss) && (
+          <div style={{position:"relative",zIndex:1,marginTop:12,display:"flex",gap:7,flexWrap:"wrap"}}>
+            {pick.entrada && <span style={{fontSize:11,fontWeight:700,color:"#bcd0ff",background:"rgba(10,92,255,0.16)",border:"1px solid rgba(10,92,255,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Entry":"Entrada"} {pick.entrada}</span>}
+            {pick.target && <span style={{fontSize:11,fontWeight:700,color:"#27d391",background:"rgba(39,211,145,0.12)",border:"1px solid rgba(39,211,145,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Target":"Objetivo"} {pick.target}</span>}
+            {pick.stop_loss && <span style={{fontSize:11,fontWeight:700,color:"#f87171",background:"rgba(248,113,113,0.12)",border:"1px solid rgba(248,113,113,0.30)",borderRadius:8,padding:"4px 9px"}}>Stop {pick.stop_loss}</span>}
+            {pick.sector && <span style={{fontSize:11,fontWeight:700,color:"#9aa6bf",background:"rgba(154,166,191,0.12)",border:"1px solid rgba(154,166,191,0.26)",borderRadius:8,padding:"4px 9px"}}>{pick.sector}</span>}
+          </div>
+        )}
+        {/* CTA */}
+        <div style={{position:"relative",zIndex:1,marginTop:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI?onOpenAI(pick.ticker):onNavigate&&onNavigate(51); }}
+            style={{display:"inline-flex",alignItems:"center",gap:8,background:"#fff",color:"#06080e",fontSize:13.5,fontWeight:600,padding:"10px 15px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+            {isPremium?"See full analysis":"Unlock full analysis"}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06080e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <span style={{fontSize:10,color:"#5e6677",letterSpacing:"0.02em"}}>AI signal &bull; not financial advice</span>
+        </div>
+      </div>
+
       {/* 5 stocks del día — analistas, automático por fecha, GRATIS */}
       {_dailyFive.length>0 && (
         <div style={{marginBottom:18}}>
