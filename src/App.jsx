@@ -6612,10 +6612,8 @@ function VipPopup({onClose, onGoVIP, lang="es"}){
         <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"rgba(15,23,42,.06)",border:"none",color:"#475569",fontSize:15,cursor:"pointer",lineHeight:1,borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 
         {/* Logo */}
-        <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
-          <div style={{padding:"12px 18px",borderRadius:16,background:"#0A1628",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <img src="/logo_nexo_full.svg" alt="NexoTrade" style={{width:92,height:"auto",display:"block"}}/>
-          </div>
+        <div style={{display:"flex",justifyContent:"center",marginBottom:10}}>
+          <img src="/logo_nexo_white.svg" alt="NexoTrade" style={{width:128,height:"auto",display:"block"}}/>
         </div>
 
         {/* Badge */}
@@ -10648,14 +10646,14 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
   ];
 
   const BLU = "#1565C0";
-  const BLU2 = "rgba(21,101,192,0.55)";
+  const BLU2 = "rgba(148,163,184,0.55)";
 
   const LINK = {display:"block",fontSize:13,textDecoration:"none",marginBottom:9,transition:"color 0.15s",lineHeight:1.4,cursor:"pointer",background:"none",border:"none",padding:0,fontFamily:"inherit",textAlign:"left"};
 
   function FLink({item}){
     const isVip  = item.label?.includes("✦");
     const isJoin = item.action==="auth";
-    const clr = isVip?"rgba(59,130,246,0.85)":isJoin?"#F59E0B":"#64748B";
+    const clr = isVip?"#9aa6bf":isJoin?"#F59E0B":"#64748B";
     const hov  = isVip?"#60A5FA":isJoin?"#FCD34D":"#94A3B8";
     if(item.page!==undefined)
       return <button style={{...LINK,color:clr,fontWeight:isJoin?700:400}} onClick={()=>nav(item.page)} onMouseEnter={e=>e.currentTarget.style.color=hov} onMouseLeave={e=>e.currentTarget.style.color=clr}>{item.label}</button>;
@@ -10716,7 +10714,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
   ];
 
   return(
-    <footer style={{background:"#0a1628",borderTop:"1px solid rgba(21,101,192,0.15)",marginTop:48,fontFamily:"Inter,sans-serif"}}>
+    <footer style={{background:"#0b0d12",borderTop:"1px solid rgba(148,163,184,0.10)",marginTop:48,fontFamily:"Inter,sans-serif"}}>
 
       {/* ── TOP STRIP — logo + tagline + CTA ── */}
       <div className="nexo-footer-top" style={{borderBottom:"1px solid rgba(21,101,192,0.10)",padding:"28px 24px"}}>
@@ -28450,7 +28448,7 @@ export default function App(){
         .nexo-footer-top button { padding: 6px 13px !important; font-size: 11px !important; }
         .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 3px 10px !important; padding: 9px 14px 4px !important; }
         .nexo-footer-grid > div > div:first-child { font-size: 8px !important; margin-bottom: 3px !important; letter-spacing: 0.08em !important; }
-        .nexo-footer-grid a, .nexo-footer-grid button { font-size: 10px !important; line-height: 1.08 !important; padding: 1px 0 !important; margin: 0 !important; display: block !important; }
+        .nexo-footer-grid a, .nexo-footer-grid button { font-size: 9.5px !important; line-height: 1.05 !important; padding: 0 !important; margin: 0 !important; display: block !important; }
         .nexo-footer-grid > div { line-height: 1.05 !important; margin-bottom: 4px !important; }
         .nexo-footer-news { margin-top: 8px !important; padding: 8px 10px !important; }
         .nexo-footer-news input { padding: 6px 9px !important; font-size: 11px !important; }
