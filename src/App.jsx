@@ -7770,7 +7770,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
   const isEN = lang==="en";
   const navItems = [
     {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-5h4v5h5V9.5"/></svg>, label:"Feed", idx:0},
-    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>, label:"Top Traders", idx:1},
+    {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>, label:"Market Tops", idx:1},
     {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>, label:"Crypto", idx:2},
     {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>, label:"Markets", idx:3},
     {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>, label:"Paper Trading", idx:9, vip:true, ai:true},
@@ -11118,7 +11118,7 @@ function TopTradersFeedCard({lang="es", isPremium, onLeaderboard, onPremium}){
     <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.05),rgba(15,76,129,0.04))",border:"1px solid rgba(245,158,11,0.25)",borderRadius:16,padding:"14px 16px",margin:"6px 0"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
         <span style={{fontSize:16}}>🏆</span>
-        <span style={{fontWeight:900,fontSize:13.5,color:"var(--c-text)",letterSpacing:-0.2}}>{isEN?"Top Traders of the month":"Top Traders del mes"}</span>
+        <span style={{fontWeight:900,fontSize:13.5,color:"var(--c-text)",letterSpacing:-0.2}}>{isEN?"Market Tops of the month":"Market Tops del mes"}</span>
         <span style={{fontSize:9.5,fontWeight:700,color:"#94A3B8",background:"rgba(148,163,184,0.12)",borderRadius:20,padding:"2px 8px"}}>{isEN?"Paper trading ranking":"Ranking paper trading"}</span>
         <button onClick={onLeaderboard} style={{marginLeft:"auto",background:"none",border:"none",color:"#0F4C81",fontSize:11.5,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
           {isEN?"Full ranking →":"Ranking completo →"}
@@ -29318,7 +29318,7 @@ export default function App(){
                 {[
                   {label:"Oracle AI",sub:"AI trading chat assistant",fn:()=>setShowAI(true),ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>},
                   {label:"Stock Pick AI",sub:"Automated recommendations",idx:3,badge:"NEW",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>},
-                  {label:"Signals",sub:"Entry & exit alerts",idx:29,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>},
+                  {label:"Market Top",sub:isEN?"Top movers right now":"Líderes del momento",idx:29,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>},
                   {label:"Screener",sub:"Advanced stock filter",idx:36,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>},
                 ].map((it,i)=>(
                   <div key={i} className="nexo-ditem" onClick={()=>{ it.fn?it.fn():(it.idx!=null&&(setPage(it.idx),setShowLanding(false))); }}>
