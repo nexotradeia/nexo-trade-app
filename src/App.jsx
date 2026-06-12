@@ -26261,9 +26261,16 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
             {upside!=null&&<span style={{fontSize:11,fontWeight:800,color:"#16A34A",background:"rgba(22,163,74,0.12)",border:"1px solid rgba(22,163,74,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Upside":"Potencial"} +{upside}%</span>}
             {_topPick.sector&&<span style={{fontSize:11,fontWeight:800,color:"#fff",background:"linear-gradient(135deg,#7C3AED,#1A56DB)",border:"none",borderRadius:8,padding:"4px 10px",letterSpacing:0.2,boxShadow:"0 3px 10px -3px rgba(124,58,237,0.5)"}}>{_topPick.sector}</span>}
           </div>
-          <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI?onOpenAI(_topPick.ticker):onNavigate&&onNavigate(10); }} style={{display:"inline-flex",alignItems:"center",gap:6,background:"transparent",color:"#1A56DB",fontSize:12.5,fontWeight:700,padding:0,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
-            {isPremium?(isEN?"Ask the AI about $"+_topPick.ticker+" →":"Pregúntale a la IA sobre $"+_topPick.ticker+" →"):(isEN?"Unlock AI deep-dive →":"Desbloquear análisis IA →")}
-          </button>
+          <div style={{display:"flex",alignItems:"center",gap:9,flexWrap:"wrap"}}>
+            <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onTicker?onTicker(_topPick.ticker):onNavigate&&onNavigate(10); }} style={{display:"inline-flex",alignItems:"center",gap:7,background:"#1A56DB",color:"#fff",fontSize:12.5,fontWeight:700,padding:"9px 14px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+              {isPremium?(isEN?"See full analysis":"Ver análisis completo"):(isEN?"Unlock full analysis":"Desbloquear análisis")}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI&&onOpenAI(_topPick.ticker); }} style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(26,86,219,0.08)",color:"#1A56DB",fontSize:12.5,fontWeight:600,padding:"9px 13px",borderRadius:10,border:"1px solid rgba(26,86,219,0.22)",cursor:"pointer",fontFamily:"inherit"}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="#1A56DB"><path d="M12 2l1.55 4.65L18 8l-4.45 1.35L12 14l-1.55-4.65L6 8l4.45-1.35L12 2z"/></svg>
+              {isEN?"Ask the AI":"Pregunta a la IA"}
+            </button>
+          </div>
         </div>
         );
       })()}
