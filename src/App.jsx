@@ -6198,14 +6198,17 @@ function NexoTermometro({lang="es"}) {
   const [loading,  setLoading]  = useState(true);
   const [updated,  setUpdated]  = useState(null);
 
+  const [hist, setHist] = useState(null); // {y,w,m}
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    // 1. Crypto Fear & Greed (alternative.me — gratis, sin API key)
+    // 1. Crypto Fear & Greed + historial (alternative.me — gratis, sin API key)
     try {
-      const r = await fetch("https://api.alternative.me/fng/?limit=1");
+      const r = await fetch("https://api.alternative.me/fng/?limit=30");
       const d = await r.json();
-      if(d?.data?.[0]) setCryptoFG(parseInt(d.data[0].value));
-    } catch(e) { setCryptoFG(55); }
+      const arr = d?.data || [];
+      if(arr[0]) setCryptoFG(parseInt(arr[0].value));
+      setHist({ y: arr[1]?parseInt(arr[1].value):null, w: arr[7]?parseInt(arr[7].value):null, m: arr[29]?parseInt(arr[29].value):null });
+    } catch(e) { setCryptoFG(40); setHist(null); }
     // 2. Stock sentiment: SPY + QQQ desde Finnhub
     try {
       const [spy, qqq] = await Promise.all([
@@ -6216,7 +6219,7 @@ function NexoTermometro({lang="es"}) {
       // -3% = 0, 0% = 50, +3% = 100 (clamped)
       setStockFG(Math.min(100, Math.max(0, Math.round(50 + avg/3*50))));
     } catch(e) { setStockFG(50); }
-    setUpdated(new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"}));
+    setUpdated(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+" ET");
     setLoading(false);
   }, []);
 
@@ -6224,96 +6227,116 @@ function NexoTermometro({lang="es"}) {
   useEffect(()=>{ const id=setInterval(fetchAll,3600000); return()=>clearInterval(id); },[fetchAll]);
 
   const combined = cryptoFG!==null && stockFG!==null ? Math.round((cryptoFG+stockFG)/2) : cryptoFG??stockFG??50;
-  const label  = isEN
-    ? (combined>=80?"Extreme Greed":combined>=60?"Greed":combined>=45?"Neutral":combined>=25?"Fear":"Extreme Fear")
-    : (combined>=80?"Codicia Extrema":combined>=60?"Codicia":combined>=45?"Neutral":combined>=25?"Miedo":"Pánico Extremo");
-  const color  = combined>=80?"#22C55E":combined>=60?"#84CC16":combined>=45?"#EAB308":combined>=25?"#F97316":"#EF4444";
-  const emoji  = combined>=80?"🤑":combined>=60?"😄":combined>=45?"😐":combined>=25?"😨":"😱";
+  const lblOf=(v)=> isEN ? (v>=75?"Extreme Greed":v>=55?"Greed":v>=45?"Neutral":v>=25?"Fear":"Extreme Fear") : (v>=75?"Codicia Extrema":v>=55?"Codicia":v>=45?"Neutral":v>=25?"Miedo":"Pánico Extremo");
+  const colOf=(v)=> v>=75?"#22C55E":v>=55?"#84CC16":v>=45?"#EAB308":v>=25?"#F97316":"#EF4444";
+  const color=colOf(combined), label=lblOf(combined);
 
-  // SVG helpers — center (110,108), R=88
-  const CX=110, CY=108, R=88, R2=68;
-  const arc=(r,p1,p2)=>{
-    const a1=Math.PI*(1-p1/100), a2=Math.PI*(1-p2/100);
-    const x1=CX+r*Math.cos(a1), y1=CY-r*Math.sin(a1);
-    const x2=CX+r*Math.cos(a2), y2=CY-r*Math.sin(a2);
-    return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
-  };
-  const needleX=(val)=>CX+R2*Math.cos(Math.PI*(1-val/100));
-  const needleY=(val)=>CY-R2*Math.sin(Math.PI*(1-val/100));
+  const CX=110, CY=104, R=86;
+  const arc=(r,p1,p2)=>{ const a1=Math.PI*(1-p1/100), a2=Math.PI*(1-p2/100); const x1=CX+r*Math.cos(a1), y1=CY-r*Math.sin(a1); const x2=CX+r*Math.cos(a2), y2=CY-r*Math.sin(a2); return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`; };
+  const ptAt=(r,v)=>({x:CX+r*Math.cos(Math.PI*(1-v/100)), y:CY-r*Math.sin(Math.PI*(1-v/100))});
+  const ZONES=[[0,20,"#EF4444"],[20,40,"#F97316"],[40,60,"#EAB308"],[60,80,"#84CC16"],[80,100,"#22C55E"]];
+  const knob=ptAt(R,combined);
 
-  const ZONES=[
-    [0,20,"#EF4444"],[20,40,"#F97316"],[40,60,"#EAB308"],[60,80,"#84CC16"],[80,100,"#22C55E"],
-  ];
-
-  const MiniGauge=({val,label:lbl,icon})=>{
-    const c=val>=80?"#22C55E":val>=60?"#84CC16":val>=45?"#EAB308":val>=25?"#F97316":"#EF4444";
+  const MiniGauge=({val,top})=>{
+    const c=colOf(val??50);
     const bar=(v)=>{const a=Math.PI*(1-v/100);return{x:50+40*Math.cos(a),y:50-40*Math.sin(a)};};
-    const p1=bar(0), p2=bar(100);
+    const p1=bar(0), p2=bar(100), kn=bar(val??50);
     return(
-      <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"8px 10px",textAlign:"center"}}>
-        <div style={{fontSize:10,color:"#475569",fontWeight:700,marginBottom:5,textTransform:"uppercase",letterSpacing:0.5}}>{icon} {lbl}</div>
-        <svg viewBox="0 0 100 55" width="74" height="41" style={{margin:"0 auto",display:"block"}}>
-          <path d={`M${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A40 40 0 0 1 ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`} stroke="rgba(255,255,255,0.08)" strokeWidth="8" fill="none" strokeLinecap="round"/>
-          {ZONES.map(([s,e,cl])=>(
-            <path key={s} d={`M${bar(s).x.toFixed(1)} ${bar(s).y.toFixed(1)} A40 40 0 0 1 ${bar(e).x.toFixed(1)} ${bar(e).y.toFixed(1)}`} stroke={cl} strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.7"/>
-          ))}
-          <line x1="50" y1="50" x2={bar(val).x.toFixed(1)} y2={bar(val).y.toFixed(1)} stroke="white" strokeWidth="2.5" strokeLinecap="round" style={{filter:"drop-shadow(0 0 3px white)"}}/>
-          <circle cx="50" cy="50" r="3.5" fill="white"/>
+      <div style={{flex:1,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"10px 10px 8px",textAlign:"center"}}>
+        <div style={{fontSize:9,color:"#5b6b7e",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>{top}</div>
+        <svg viewBox="0 0 100 58" width="84" height="49" style={{margin:"0 auto",display:"block"}}>
+          <path d={`M${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A40 40 0 0 1 ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`} stroke="rgba(255,255,255,0.08)" strokeWidth="7" fill="none" strokeLinecap="round"/>
+          {ZONES.map(([s,e,cl])=>(<path key={s} d={`M${bar(s).x.toFixed(1)} ${bar(s).y.toFixed(1)} A40 40 0 0 1 ${bar(e).x.toFixed(1)} ${bar(e).y.toFixed(1)}`} stroke={cl} strokeWidth="7" fill="none" strokeLinecap="round" opacity="0.45"/>))}
+          {val!==null&&<path d={`M${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A40 40 0 0 1 ${kn.x.toFixed(1)} ${kn.y.toFixed(1)}`} stroke={c} strokeWidth="3.5" fill="none" strokeLinecap="round" style={{filter:`drop-shadow(0 0 4px ${c})`}}/>}
+          {val!==null&&<circle cx={kn.x.toFixed(1)} cy={kn.y.toFixed(1)} r="4.5" fill="#fff" style={{filter:`drop-shadow(0 0 4px ${c})`}}/>}
         </svg>
         {val===null?<div style={{color:"#334155",fontSize:11}}>--</div>:<>
-          <div style={{fontWeight:900,fontSize:17,color:c,fontFamily:"monospace",lineHeight:1}}>{val}</div>
-          <div style={{fontSize:9.5,color:c,fontWeight:700,marginTop:2}}>{isEN?(val>=80?"Ext. Greed":val>=60?"Greed":val>=45?"Neutral":val>=25?"Fear":"Panic"):(val>=80?"Codicia Ext.":val>=60?"Codicia":val>=45?"Neutral":val>=25?"Miedo":"Pánico")}</div>
+          <div style={{fontWeight:900,fontSize:18,color:c,fontFamily:"monospace",lineHeight:1}}>{val}</div>
+          <div style={{fontSize:9,color:c,fontWeight:800,marginTop:2,textTransform:"uppercase",letterSpacing:.5}}>{lblOf(val)}</div>
         </>}
       </div>
     );
   };
 
+  const TLItem=({v,lbl})=>(
+    <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"7px 3px",textAlign:"center"}}>
+      <div style={{fontWeight:900,fontSize:17,color:colOf(v??50),fontFamily:"monospace",lineHeight:1}}>{v??"—"}</div>
+      <div style={{fontSize:7.5,color:"#5b6b7e",fontWeight:700,letterSpacing:.5,marginTop:3,textTransform:"uppercase"}}>{lbl}</div>
+    </div>
+  );
+
+  const oracle = isEN
+    ? `Fear is in control — main index at ${combined}, crypto at ${cryptoFG??"—"}. Historically, readings under 35 have marked accumulation zones more often than exits. Watch volume for confirmation.`
+    : `El miedo manda — índice principal en ${combined}, crypto en ${cryptoFG??"—"}. Históricamente, lecturas bajo 35 marcan zonas de acumulación más que de salida. Vigila el volumen para confirmar.`;
+
   return(
-    <div style={{background:"linear-gradient(145deg,rgba(15,23,42,0.92),rgba(20,30,55,0.88))",border:"1px solid rgba(255,255,255,0.1)",borderRadius:18,padding:"11px 14px",marginBottom:14,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:-30,right:-30,width:150,height:150,background:`radial-gradient(circle,${color}15,transparent 70%)`,pointerEvents:"none"}}/>
-      {/* Title */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,position:"relative"}}>
-        <div>
-          <div style={{fontWeight:900,color:"#F1F5F9",fontSize:13}}>🌡️ {isEN?"NexoTrade Thermometer":"Termómetro NexoTrade"}</div>
-          <div style={{fontSize:9.5,color:"#64748B",marginTop:1}}>{isEN?"Market Fear/Greed index":"Índice Miedo/Codicia del mercado"}</div>
+    <div style={{background:"linear-gradient(160deg,#0a0f1a,#0d1424)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:18,padding:"14px 15px 12px",marginBottom:14,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:-44,left:"36%",width:210,height:170,background:`radial-gradient(circle,${color}22,transparent 70%)`,pointerEvents:"none"}}/>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,position:"relative",borderBottom:"1px solid rgba(255,255,255,0.06)",paddingBottom:11}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:34,height:34,borderRadius:10,background:"linear-gradient(180deg,#1d7fff,#0a5fe0)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 4px 14px rgba(29,127,255,.4)"}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div>
+            <div style={{fontWeight:900,color:"#f1f6fc",fontSize:15,letterSpacing:-.3}}>Market Pulse</div>
+            <div style={{fontSize:9,color:"#5b6b7e",fontWeight:700,letterSpacing:1.4,marginTop:1}}>FEAR & GREED · ORACLE AI</div>
+          </div>
         </div>
-        <div style={{textAlign:"right",display:"flex",alignItems:"center",gap:8}}>
-          {updated&&<div style={{fontSize:10,color:"#64748B",fontWeight:600}}>🕐 {updated}</div>}
-          <button onClick={fetchAll} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:7,padding:"3px 9px",color:"#94A3B8",fontSize:10,fontWeight:600,cursor:"pointer"}}>🔄</button>
+        <div style={{textAlign:"right",fontSize:9,color:"#5b6b7e",fontWeight:700,letterSpacing:1}}>
+          {updated&&<div>{updated}</div>}
+          <div style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,cursor:"pointer"}} onClick={fetchAll}><span style={{width:5,height:5,borderRadius:"50%",background:"#22d3ee"}}/>HOURLY</div>
         </div>
       </div>
-      {/* Main gauge */}
-      <div style={{textAlign:"center",marginBottom:8}}>
-        {loading
-          ?<div style={{height:76,display:"flex",alignItems:"center",justifyContent:"center",color:"#475569",fontSize:11}}>⏳ {isEN?"Calculating index...":"Calculando índice..."}</div>
-          :<>
-            <svg viewBox="0 0 220 115" width="150" height="78" style={{margin:"0 auto",display:"block"}}>
-              <path d={arc(R,0,100)} stroke="rgba(255,255,255,0.06)" strokeWidth="14" fill="none" strokeLinecap="round"/>
-              {ZONES.map(([s,e,cl])=>(
-                <path key={s} d={arc(R,s,e)} stroke={cl} strokeWidth="14" fill="none" strokeLinecap="round" opacity="0.8"/>
-              ))}
-              <path d={arc(R,0,combined)} stroke={color} strokeWidth="5" fill="none" strokeLinecap="round" style={{filter:`drop-shadow(0 0 5px ${color}80)`}}/>
-              <line x1={CX} y1={CY} x2={needleX(combined).toFixed(1)} y2={needleY(combined).toFixed(1)} stroke="white" strokeWidth="2.5" strokeLinecap="round" style={{filter:"drop-shadow(0 0 4px rgba(255,255,255,0.8))"}}/>
-              <circle cx={CX} cy={CY} r="5" fill="white"/>
-              <circle cx={CX} cy={CY} r="2.5" fill="#0F172A"/>
-              <text x={CX} y={CY-12} textAnchor="middle" fill="#F1F5F9" fontSize="30" fontWeight="900" fontFamily="monospace">{combined}</text>
-              <text x="18" y="108" textAnchor="middle" fill="#EF4444" fontSize="7.5" fontWeight="700">{isEN?"FEAR":"PÁNICO"}</text>
-              <text x="202" y="108" textAnchor="middle" fill="#22C55E" fontSize="7.5" fontWeight="700">{isEN?"GREED":"CODICIA"}</text>
-            </svg>
-            <div style={{marginTop:-4}}>
-              <span style={{fontSize:14}}>{emoji}</span>
-              <span style={{fontSize:13,fontWeight:900,color:color,fontFamily:"monospace",marginLeft:6}}>{label}</span>
-            </div>
-          </>
-        }
-      </div>
-      {/* Mini gauges */}
-      {!loading&&<div style={{display:"flex",gap:8}}>
-        <MiniGauge val={cryptoFG} label="Crypto" icon="₿"/>
-        <MiniGauge val={stockFG}  label={isEN?"Stocks (S&P)":"Acciones (S&P)"} icon="📈"/>
-      </div>}
-      <div style={{textAlign:"center",fontSize:9,color:"#475569",marginTop:8,fontWeight:600}}>
-        {isEN?"Crypto: Alternative.me Fear & Greed · Stocks: SPY+QQQ Finnhub · Hourly update":"Crypto: Alternative.me Fear & Greed · Acciones: SPY+QQQ Finnhub · Actualización horaria"}
+
+      {loading
+        ? <div style={{height:130,display:"flex",alignItems:"center",justifyContent:"center",color:"#475569",fontSize:11}}>{isEN?"Calculating index…":"Calculando índice…"}</div>
+        : <>
+        {/* Main gauge */}
+        <div style={{textAlign:"center",position:"relative"}}>
+          <svg viewBox="0 0 220 120" width="190" height="104" style={{margin:"0 auto",display:"block"}}>
+            <path d={arc(R,0,100)} stroke="rgba(255,255,255,0.06)" strokeWidth="12" fill="none" strokeLinecap="round"/>
+            {ZONES.map(([s,e,cl])=>(<path key={s} d={arc(R,s,e)} stroke={cl} strokeWidth="12" fill="none" strokeLinecap="round" opacity="0.32"/>))}
+            <path d={arc(R,0,combined)} stroke={color} strokeWidth="6" fill="none" strokeLinecap="round" style={{filter:`drop-shadow(0 0 6px ${color})`}}/>
+            {Array.from({length:11}).map((_,i)=>{const v=i*10;const a=ptAt(R-12,v);const b=ptAt(R-7,v);return <line key={i} x1={a.x.toFixed(1)} y1={a.y.toFixed(1)} x2={b.x.toFixed(1)} y2={b.y.toFixed(1)} stroke="rgba(255,255,255,0.18)" strokeWidth="1.4"/>;})}
+            <circle cx={knob.x.toFixed(1)} cy={knob.y.toFixed(1)} r="9" fill={color} opacity="0.35" style={{transition:"all .8s ease"}}/>
+            <circle cx={knob.x.toFixed(1)} cy={knob.y.toFixed(1)} r="6" fill="#fff" style={{filter:`drop-shadow(0 0 6px ${color})`,transition:"all .8s ease"}}/>
+            <text x={CX} y={CY-12} textAnchor="middle" fill={color} fontSize="40" fontWeight="900">{combined}</text>
+            <text x={CX} y={CY+5} textAnchor="middle" fill={color} fontSize="11" fontWeight="800" letterSpacing="2">{label.toUpperCase()}</text>
+          </svg>
+          <div style={{display:"flex",justifyContent:"space-between",margin:"-8px 14px 0",fontSize:8,color:"#5b6b7e",fontWeight:700,letterSpacing:1}}>
+            <span>{isEN?"EXTREME FEAR":"PÁNICO EXTREMO"}</span><span>{isEN?"EXTREME GREED":"CODICIA EXTREMA"}</span>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div style={{display:"flex",gap:7,marginTop:14}}>
+          <TLItem v={combined} lbl={isEN?"Now":"Ahora"}/>
+          <TLItem v={hist?.y} lbl={isEN?"Yesterday":"Ayer"}/>
+          <TLItem v={hist?.w} lbl={isEN?"Last week":"Sem. pasada"}/>
+          <TLItem v={hist?.m} lbl={isEN?"Last month":"Mes pasado"}/>
+        </div>
+
+        {/* Oracle read */}
+        <div style={{display:"flex",gap:10,alignItems:"flex-start",marginTop:14,background:"rgba(29,127,255,.06)",border:"1px solid rgba(29,127,255,.2)",borderRadius:13,padding:"12px 13px"}}>
+          <div style={{width:26,height:26,borderRadius:8,background:"linear-gradient(180deg,#1d7fff,#0a5fe0)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+          </div>
+          <div>
+            <div style={{fontSize:8.5,color:"#7fb8ff",fontWeight:800,letterSpacing:1.2,marginBottom:4}}>ORACLE AI · {isEN?"LIVE READ":"LECTURA EN VIVO"}</div>
+            <div style={{fontSize:11.5,color:"#c7d6e8",lineHeight:1.55}}>{oracle}</div>
+          </div>
+        </div>
+
+        {/* Mini gauges */}
+        <div style={{display:"flex",gap:8,marginTop:12}}>
+          <MiniGauge val={cryptoFG} top={isEN?"CRYPTO · FEAR & GREED":"CRYPTO · MIEDO Y CODICIA"}/>
+          <MiniGauge val={stockFG}  top="STOCKS · S&P + QQQ"/>
+        </div>
+        </>
+      }
+      <div style={{textAlign:"center",fontSize:8,color:"#3a4a5c",marginTop:11,fontWeight:600,letterSpacing:.5}}>
+        {isEN?"CRYPTO: ALTERNATIVE.ME · STOCKS: SPY+QQQ · UPDATED HOURLY · EDUCATIONAL, NOT FINANCIAL ADVICE":"CRYPTO: ALTERNATIVE.ME · ACCIONES: SPY+QQQ · ACTUALIZADO POR HORA · EDUCATIVO, NO ES CONSEJO FINANCIERO"}
       </div>
     </div>
   );
