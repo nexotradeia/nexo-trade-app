@@ -28437,14 +28437,17 @@ export default function App(){
         body { padding-bottom: 122px; }
         /* Bottom nav móvil tipo Robinhood */
         .nexo-bottom-nav { display: flex !important; }
-        /* Footer compacto en móvil */
-        footer { margin-top: 22px !important; }
-        .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 14px 14px !important; padding: 18px 16px 12px !important; }
-        .nexo-footer-grid > div > div:first-child { margin-bottom: 8px !important; }
-        .nexo-footer-top { padding: 16px 16px !important; }
-        .nexo-footer-news { margin-top: 12px !important; padding: 11px 12px !important; }
-        .nexo-footer-bottom { padding: 12px 16px 16px !important; }
-        .nexo-footer-disc { padding: 12px 16px !important; font-size: 9.5px !important; }
+        /* Footer mucho más compacto en móvil + hueco para la bottom-nav */
+        footer { margin-top: 14px !important; padding-bottom: 76px !important; }
+        footer img { height: 22px !important; width: auto !important; }
+        .nexo-footer-top { padding: 12px 16px !important; }
+        .nexo-footer-top p { font-size: 10.5px !important; max-width: none !important; }
+        .nexo-footer-top button { padding: 8px 16px !important; font-size: 12px !important; }
+        .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 8px 12px !important; padding: 12px 16px 6px !important; }
+        .nexo-footer-grid > div > div:first-child { font-size: 9px !important; margin-bottom: 5px !important; }
+        .nexo-footer-grid a, .nexo-footer-grid button { font-size: 12px !important; line-height: 1.55 !important; }
+        .nexo-footer-news { margin-top: 10px !important; padding: 10px 12px !important; }
+        .nexo-footer-bottom { padding: 10px 16px 12px !important; }
         .nexo-hero-stage { grid-template-columns: 1fr !important; }
         .nexo-body-grid {
           padding: 6px 8px !important;
@@ -28719,7 +28722,7 @@ export default function App(){
         /* ── BOTTOM NAV — iOS Safari fix ── */
         .nexo-bottom-nav {
           position: fixed !important;
-          bottom: var(--botnav-offset, 0px) !important;
+          bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
           -webkit-transform: translate3d(0,0,0) !important;
