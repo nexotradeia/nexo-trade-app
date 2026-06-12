@@ -185,7 +185,7 @@ const LANG_META = [
 
 const LANGS = {
   es: {
-    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
+    feed:"Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
     macro:"🌍 Macro", noticias:"📰 Noticias", earnings:"📅 Earnings", trending:"📡 Mercado en Vivo",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrarse →",
     publish:"Publicar →", bullish:"▲ ALCISTA", bearish:"▼ BAJISTA",
@@ -209,7 +209,7 @@ const LANGS = {
     aiErr:"Lo siento, no pude conectarme. Inténtalo de nuevo.",
   },
   en: {
-    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
+    feed:"Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Stock Pick IA",
     macro:"🌍 Macro", noticias:"📰 News", earnings:"📅 Earnings", trending:"📡 Live Markets",
     search:"Search ticker... AAPL, BTC, NVDA", login:"Sign in", register:"Sign up →",
     publish:"Post →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
@@ -233,8 +233,8 @@ const LANGS = {
     aiErr:"Sorry, I couldn't connect. Please try again.",
   },
   pt: {
-    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Ações",
-    macro:"🌍 Macro", noticias:"📰 Notícias", earnings:"📅 Resultados", trending:"🔥 Trending",
+    feed:"Feed", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Ações",
+    macro:"🌍 Macro", noticias:"📰 Notícias", earnings:"📅 Resultados", trending:"Trending",
     search:"Buscar ticker... AAPL, BTC, NVDA", login:"Entrar", register:"Registrar →",
     publish:"Publicar →", bullish:"▲ ALTA", bearish:"▼ BAIXA",
     followers:"Seguidores", following:"Seguindo", points:"Pontos", posts:"Posts",
@@ -257,8 +257,8 @@ const LANGS = {
     aiErr:"Desculpe, não consegui conectar. Tente novamente.",
   },
   fr: {
-    feed:"🔥 Fil", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Actions",
-    macro:"🌍 Macro", noticias:"📰 Actualités", earnings:"📅 Résultats", trending:"🔥 Tendances",
+    feed:"Fil", tops:"📊 Tops", crypto:"₿ Crypto", acciones:"📈 Actions",
+    macro:"🌍 Macro", noticias:"📰 Actualités", earnings:"📅 Résultats", trending:"Tendances",
     search:"Rechercher ticker... AAPL, BTC, NVDA", login:"Connexion", register:"S'inscrire →",
     publish:"Publier →", bullish:"▲ HAUSSIER", bearish:"▼ BAISSIER",
     followers:"Abonnés", following:"Abonnements", points:"Points", posts:"Posts",
@@ -281,8 +281,8 @@ const LANGS = {
     aiErr:"Désolé, je n'ai pas pu me connecter. Réessayez.",
   },
   de: {
-    feed:"🔥 Feed", tops:"📊 Tops", crypto:"₿ Krypto", acciones:"📈 Aktien",
-    macro:"🌍 Makro", noticias:"📰 Nachrichten", earnings:"📅 Ergebnisse", trending:"🔥 Trending",
+    feed:"Feed", tops:"📊 Tops", crypto:"₿ Krypto", acciones:"📈 Aktien",
+    macro:"🌍 Makro", noticias:"📰 Nachrichten", earnings:"📅 Ergebnisse", trending:"Trending",
     search:"Ticker suchen... AAPL, BTC, NVDA", login:"Anmelden", register:"Registrieren →",
     publish:"Veröffentlichen →", bullish:"▲ BULLISH", bearish:"▼ BEARISH",
     followers:"Follower", following:"Folge ich", points:"Punkte", posts:"Beiträge",
@@ -305,8 +305,8 @@ const LANGS = {
     aiErr:"Entschuldigung, keine Verbindung. Bitte erneut versuchen.",
   },
   it: {
-    feed:"🔥 Feed", tops:"📊 Top", crypto:"₿ Crypto", acciones:"📈 Azioni",
-    macro:"🌍 Macro", noticias:"📰 Notizie", earnings:"📅 Risultati", trending:"🔥 Tendenze",
+    feed:"Feed", tops:"📊 Top", crypto:"₿ Crypto", acciones:"📈 Azioni",
+    macro:"🌍 Macro", noticias:"📰 Notizie", earnings:"📅 Risultati", trending:"Tendenze",
     search:"Cerca ticker... AAPL, BTC, NVDA", login:"Accedi", register:"Registrati →",
     publish:"Pubblica →", bullish:"▲ RIALZISTA", bearish:"▼ RIBASSISTA",
     followers:"Follower", following:"Seguiti", points:"Punti", posts:"Post",
@@ -329,8 +329,8 @@ const LANGS = {
     aiErr:"Spiacente, connessione fallita. Riprova.",
   },
   ja: {
-    feed:"🔥 フィード", tops:"📊 トップ", crypto:"₿ 仮想通貨", acciones:"📈 株式",
-    macro:"🌍 マクロ", noticias:"📰 ニュース", earnings:"📅 決算", trending:"🔥 トレンド",
+    feed:"フィード", tops:"📊 トップ", crypto:"₿ 仮想通貨", acciones:"📈 株式",
+    macro:"🌍 マクロ", noticias:"📰 ニュース", earnings:"📅 決算", trending:"トレンド",
     search:"ティッカー検索... AAPL, BTC, NVDA", login:"ログイン", register:"登録 →",
     publish:"投稿 →", bullish:"▲ 強気", bearish:"▼ 弱気",
     followers:"フォロワー", following:"フォロー中", points:"ポイント", posts:"投稿",
@@ -2201,7 +2201,7 @@ function AuthModal({mode,onClose,onAuth,lang}){
   const isEN = lang==="en";
   const t=LANGS[lang];
   const [tab,setTab]=useState(mode),[name,setName]=useState(""),[email,setEmail]=useState(""),[pass,setPass]=useState("");
-  const [avatar,setAvatar]=useState(AVATAR_OPTIONS[0]);
+  const [avatar,setAvatar]=useState({emoji:"",color:"#0F4C81"});
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState("");
   const [resetSent,setResetSent]=useState(false);
@@ -2413,13 +2413,16 @@ function AuthModal({mode,onClose,onAuth,lang}){
         {tab==="register"&&<>
           <label style={{color:C.muted,fontSize:12,fontWeight:700}}>{t.chooseAvatar.toUpperCase()}</label>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"8px 0 18px",padding:"12px",background:C.card2,borderRadius:12,border:`1px solid ${C.border}`}}>
-            {AVATAR_OPTIONS.map(av=>(
-              <button key={av.emoji} onClick={()=>setAvatar(av)} style={{width:44,height:44,borderRadius:"50%",background:avatar.emoji===av.emoji?`${av.color}33`:"transparent",border:`2.5px solid ${avatar.emoji===av.emoji?av.color:C.border}`,cursor:"pointer",fontSize:20,transition:"all 0.15s"}}>{av.emoji}</button>
+            {["#0F4C81","#0F5E68","#185FA5","#1D9E75","#534AB7","#D85A30","#993556","#B45309","#0C447C","#444441"].map(col=>(
+              <button key={col} type="button" onClick={()=>setAvatar({emoji:"",color:col})} title={col}
+                style={{width:44,height:44,borderRadius:"50%",background:col,border:`3px solid ${avatar.color===col?"#0F172A":"transparent"}`,cursor:"pointer",color:"#fff",fontWeight:900,fontSize:16,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+                {nexoInitials(name||"NT")}
+              </button>
             ))}
           </div>
           {avatar&&<div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,padding:"10px 14px",background:C.card2,borderRadius:10,border:`1px solid ${C.border}`}}>
-            <AvatarBubble emoji={avatar.emoji} color={avatar.color} size={36}/>
-            <span style={{color:C.muted,fontSize:13}}>Tu avatar seleccionado</span>
+            <AvatarBubble name={name||"NT"} color={avatar.color} size={36}/>
+            <span style={{color:C.muted,fontSize:13}}>{lang==="en"?"Your avatar":"Tu avatar seleccionado"}</span>
           </div>}
           <label style={{color:C.muted,fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:4}}>
             {lang==="en"?"USERNAME":"NOMBRE DE USUARIO"}
@@ -28623,8 +28626,9 @@ export default function App(){
       [data-dark="true"] .nexo-mega-btn.mkt-v { color:#38BDF8; }
       [data-dark="true"] .nexo-mega-btn.ops-v { color:#34D399; }
       [data-dark="true"] .nexo-mega-btn.vip-v { color:#FCD34D; }
-      .nexo-mega-drop { position:absolute; top:calc(100% + 2px); left:0; background:var(--c-surface); border:1px solid var(--c-border); border-radius:14px; padding:8px; min-width:240px; z-index:1000; display:none; box-shadow:0 12px 40px rgba(0,0,0,0.14); }
-      .nexo-mega:hover .nexo-mega-drop { display:block; }
+      .nexo-mega-drop { position:absolute; top:calc(100% + 4px); left:0; background:var(--c-surface); border:1px solid var(--c-border); border-radius:14px; padding:8px; min-width:240px; z-index:1000; opacity:0; visibility:hidden; transform:translateY(-4px); transition:opacity .14s ease, visibility .14s ease, transform .14s ease; box-shadow:0 12px 40px rgba(0,0,0,0.14); }
+      .nexo-mega:hover .nexo-mega-drop, .nexo-mega-drop:hover { opacity:1; visibility:visible; transform:translateY(0); }
+      .nexo-mega:hover::after { content:""; position:absolute; top:100%; left:0; width:100%; height:16px; }
       .nexo-ditem { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer; transition:background .1s; }
       .nexo-ditem:hover { background:var(--c-card2); }
       .nexo-dico { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
