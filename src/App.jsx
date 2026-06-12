@@ -26230,8 +26230,8 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
         var why=((isEN?(_topPick.razonEn||_topPick.razon):(_topPick.razon||_topPick.razonEn))||"");
         var whyShort=why.split(".").slice(0,2).join(".").trim(); if(whyShort&&!whyShort.endsWith(".")) whyShort+=".";
         return (
-        <div style={{border:"1px solid var(--c-border)",borderRadius:20,padding:"16px 18px",marginBottom:18,background:"var(--c-surface)",position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#1A56DB,#27d391)"}}/>
+        <div style={{border:"1px solid #D6E2FF",borderRadius:20,padding:"16px 18px",marginBottom:18,background:"linear-gradient(135deg,#EEF4FF 0%,#F5FBF8 100%)",position:"relative",overflow:"hidden",boxShadow:"0 8px 26px -12px rgba(26,86,219,0.35)"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:4,background:"linear-gradient(90deg,#7C3AED,#1A56DB,#27d391)"}}/>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
             <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,fontWeight:800,letterSpacing:"0.04em",textTransform:"uppercase",color:"#1A56DB",background:"rgba(26,86,219,.10)",border:"1px solid rgba(26,86,219,.25)",padding:"4px 10px",borderRadius:999}}>
               {isEN?"Today's #1":"La #1 de hoy"}
@@ -26254,7 +26254,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
             {_topPick.target&&<span style={{fontSize:11,fontWeight:700,color:"#16A34A",background:"rgba(22,163,74,0.08)",border:"1px solid rgba(22,163,74,0.22)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Target":"Objetivo"} {_topPick.target}</span>}
             {_topPick.stop_loss&&<span style={{fontSize:11,fontWeight:700,color:"#e0463d",background:"rgba(224,70,61,0.08)",border:"1px solid rgba(224,70,61,0.22)",borderRadius:8,padding:"4px 9px"}}>Stop {_topPick.stop_loss}</span>}
             {upside!=null&&<span style={{fontSize:11,fontWeight:800,color:"#16A34A",background:"rgba(22,163,74,0.12)",border:"1px solid rgba(22,163,74,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Upside":"Potencial"} +{upside}%</span>}
-            {_topPick.sector&&<span style={{fontSize:11,fontWeight:700,color:"#9aa6bf",background:"rgba(154,166,191,0.12)",border:"1px solid rgba(154,166,191,0.26)",borderRadius:8,padding:"4px 9px"}}>{_topPick.sector}</span>}
+            {_topPick.sector&&<span style={{fontSize:11,fontWeight:800,color:"#fff",background:"linear-gradient(135deg,#7C3AED,#1A56DB)",border:"none",borderRadius:8,padding:"4px 10px",letterSpacing:0.2,boxShadow:"0 3px 10px -3px rgba(124,58,237,0.5)"}}>{_topPick.sector}</span>}
           </div>
           <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI?onOpenAI(_topPick.ticker):onNavigate&&onNavigate(10); }} style={{display:"inline-flex",alignItems:"center",gap:6,background:"transparent",color:"#1A56DB",fontSize:12.5,fontWeight:700,padding:0,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
             {isPremium?(isEN?"Ask the AI about $"+_topPick.ticker+" →":"Pregúntale a la IA sobre $"+_topPick.ticker+" →"):(isEN?"Unlock AI deep-dive →":"Desbloquear análisis IA →")}
