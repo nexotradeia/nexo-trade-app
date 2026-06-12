@@ -7563,8 +7563,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
   return(
     <div style={{position:"sticky",top:96,display:"flex",flexDirection:"column",gap:10}}>
 
-      {/* ── PROFILE CARD (logueado) / JOIN CARD v4 (invitado) ── */}
-      {!user ? <JoinCard onAuth={()=>onNeedAuth&&onNeedAuth()} lang={lang}/> :
+      {/* ── JOIN CARD v4 (siempre, reemplaza el card de perfil) ── */}
+      {true ? <JoinCard onAuth={()=>onNeedAuth&&onNeedAuth()} lang={lang}/> :
       <div style={{borderRadius:18,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,0.08)",border:"1px solid rgba(0,0,0,0.07)"}}>
 
         {/* ── COVER + BODY — dark navy + candlestick ── */}
@@ -28093,7 +28093,7 @@ export default function App(){
     );
   };
 
-  const [showLanding, setShowLanding] = useState(false); // Feed visible siempre, sin obligar registro
+  const [showLanding, setShowLanding] = useState(true); // landing ("Invest smarter. Together.") aparece al entrar a la página
   const [emailGateDone, setEmailGateDone] = useState(true); // EmailGate removed — real landing is at /
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
