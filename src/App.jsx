@@ -1415,7 +1415,7 @@ function TickerTape({lang="es", onPremium}) {
 }
 
 // ── SEARCH BAR ────────────────────────────────────────────────────────────────
-function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[], bare=false}) {
+function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[], bare=false, placeholder}) {
   const t = LANGS[lang];
   const isEN = lang === "en";
   const [q,setQ]=useState(""),[res,setRes]=useState([]),[foc,setFoc]=useState(false);
@@ -1447,18 +1447,20 @@ function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[],
   const NAMES={"AAPL":"Apple Inc.","MSFT":"Microsoft","GOOGL":"Alphabet","AMZN":"Amazon","NVDA":"NVIDIA","TSLA":"Tesla","META":"Meta Platforms","BTC":"Bitcoin","ETH":"Ethereum","SPY":"S&P 500 ETF","AMD":"AMD","NFLX":"Netflix","COIN":"Coinbase","PLTR":"Palantir","JPM":"JPMorgan","V":"Visa","BABA":"Alibaba","RIVN":"Rivian","ARM":"ARM Holdings","SMCI":"Super Micro","QQQ":"Nasdaq ETF","INTC":"Intel","ORCL":"Oracle","SHOP":"Shopify","UBER":"Uber","SNAP":"Snap","TWLO":"Twilio","SQ":"Block Inc","PYPL":"PayPal","DIS":"Disney","GS":"Goldman Sachs","WMT":"Walmart","BAC":"Bank of America","XOM":"ExxonMobil","JNJ":"Johnson & Johnson","KO":"Coca-Cola","PFE":"Pfizer","LMT":"Lockheed Martin","CVX":"Chevron","F":"Ford","GME":"GameStop","AMC":"AMC Entertainment"};
 
   return(
-    <div ref={ref} style={{position:"relative",width:"100%",maxWidth:420}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,background:"var(--c-surface)",border:`1px solid ${foc?"rgba(15,76,129,0.45)":"var(--c-border)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(15,76,129,0.1)":"none"}}>
-        <span style={{fontSize:13,color:"var(--c-muted)"}}>⌕</span>
-        <input value={q} onChange={e=>{setQ(e.target.value);setSelected(null);}} onFocus={()=>setFoc(true)} placeholder={t.search}
+    <div ref={ref} style={{position:"relative",width:"100%",maxWidth:bare?"none":420}}>
+      <div style={bare
+        ? {display:"flex",alignItems:"center",gap:8,background:"transparent",border:"none",borderRadius:10,padding:0,flex:1}
+        : {display:"flex",alignItems:"center",gap:8,background:"var(--c-surface)",border:`1px solid ${foc?"rgba(15,76,129,0.45)":"var(--c-border)"}`,borderRadius:10,padding:"8px 14px",transition:"all 0.18s",boxShadow:foc?"0 0 0 3px rgba(15,76,129,0.1)":"none"}}>
+        {!bare && <span style={{fontSize:13,color:"var(--c-muted)"}}>⌕</span>}
+        <input className="nexo-search-input" value={q} onChange={e=>{setQ(e.target.value);setSelected(null);}} onFocus={()=>setFoc(true)} placeholder={placeholder||t.search}
           onKeyDown={e=>{
             if(e.key==="Enter"&&q.trim()){
               const ticker=q.replace(/[@$\s]/g,"").toUpperCase();
               if(ticker){setQ("");setRes([]);setFoc(false);if(onTickerNav)onTickerNav(ticker);}
             }
           }}
-          style={{flex:1,background:"none",border:"none",outline:"none",color:"var(--c-text)",fontSize:13,fontFamily:"'Inter',sans-serif",fontWeight:400,letterSpacing:0.1}}/>
-        {q&&<button onClick={()=>{setQ("");setRes([]);setSelected(null);}} style={{background:"none",border:"none",cursor:"pointer",color:"#334155",fontSize:16,lineHeight:1}}>×</button>}
+          style={{flex:1,minWidth:0,background:"none",border:"none",outline:"none",color:bare?"#fff":"var(--c-text)",fontSize:13,fontFamily:"'Inter',sans-serif",fontWeight:400,letterSpacing:0.1}}/>
+        {q&&<button onClick={()=>{setQ("");setRes([]);setSelected(null);}} style={{background:"none",border:"none",cursor:"pointer",color:bare?"rgba(255,255,255,0.6)":"#334155",fontSize:16,lineHeight:1}}>×</button>}
       </div>
 
       {/* Dropdown de resultados */}
@@ -2946,7 +2948,7 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                 <div key={a.id} style={{background:a.unlocked?C.card2:"#f8fafc",border:`1px solid ${a.unlocked?accent+"44":C.border}`,borderRadius:14,padding:"14px 16px",display:"flex",gap:12,alignItems:"flex-start",opacity:a.unlocked?1:0.5,transition:"transform 0.15s",cursor:a.unlocked?"default":"not-allowed"}}
                   onMouseEnter={e=>{if(a.unlocked)e.currentTarget.style.transform="translateY(-2px)";}}
                   onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                  <div style={{width:40,height:40,borderRadius:12,background:a.unlocked?`${accent}22`:"#f1f5f9",border:`1px solid ${a.unlocked?accent+"44":"#e2e8f0"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+                  <div style={{width:32,height:32,borderRadius:10,background:a.unlocked?`${accent}22`:"#f1f5f9",border:`1px solid ${a.unlocked?accent+"44":"#e2e8f0"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
                     {a.unlocked?a.emoji:"🔒"}
                   </div>
                   <div style={{flex:1,minWidth:0}}>
@@ -8214,6 +8216,8 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
   const [showPaywall,setShowPaywall]=useState(false);
   const [feedback,setFeedback]=useState(null); // null|exists|invalid|added
   const [wlFilter,setWlFilter]=useState("all"); // all|stocks|crypto|top
+  const [wlExpanded,setWlExpanded]=useState(false); // máx 10 visibles, flecha para ver el resto
+  const WL_CAP=10;
   const CRYPTO_SET=new Set(["BTC","ETH","BNB","XRP","SOL","ADA","DOT","AVAX","MATIC","LINK","LTC","BCH","ATOM","NEAR","UNI","AAVE","DOGE","SHIB","TRX","XLM","ALGO","ICP","FTM","SAND","MANA","CRO","VET","THETA","EOS","ZEC","DASH","XMR","CAKE","COMP","MKR","SNX","YFI","1INCH","RUNE","LUNA","UST","FTT","SRM","SUSHI","BAL","CRV","ZIL","REN","KNC","BAT","OMG","ENJ","CHZ","HOT","TFUEL"]);
   // Gancho: cuenta gratis ve TODAS las filas en vivo menos la ÚLTIMA (esa con candado)
   const visibleCount=isPremium?tickers.length:Math.max(0,tickers.length-1);
@@ -8340,7 +8344,7 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
 
       {/* ── Rows ── */}
       <div>
-        {filteredTickers.map((tk,i)=>{
+        {(wlExpanded?filteredTickers:filteredTickers.slice(0,WL_CAP)).map((tk,i)=>{
           const locked = !isPremium && i===filteredTickers.length-1 && filteredTickers.length>1;
           const live=lp[tk];
           const chg = live?.change ?? null;
@@ -8402,6 +8406,15 @@ function MiWatchlistWidget({user, isPremium=false, onUpgrade, lang="es", card}){
           );
         })}
       </div>
+
+      {/* ── Ver más / menos (máx 10 visibles) ── */}
+      {filteredTickers.length>WL_CAP && (
+        <button onClick={()=>setWlExpanded(v=>!v)}
+          style={{width:"100%",background:"transparent",border:"none",borderTop:"1px solid rgba(15,23,42,0.05)",padding:"9px",display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",fontFamily:"inherit",fontSize:11.5,fontWeight:700,color:"#1565C0"}}>
+          {wlExpanded?(isEN?"Show less":"Ver menos"):(isEN?`Show ${filteredTickers.length-WL_CAP} more`:`Ver ${filteredTickers.length-WL_CAP} más`)}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1565C0" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{transform:wlExpanded?"rotate(180deg)":"none",transition:"transform .2s"}}><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      )}
 
       {/* ── Footer ── */}
       {!isPremium&&(
@@ -9895,7 +9908,7 @@ function ReferralSection({ user }) {
   return (
     <div id="nexo-referral-section" style={{borderRadius:20,overflow:"hidden",border:"1px solid #E2EAF4",boxShadow:"0 2px 16px rgba(0,0,0,0.07)"}}>
       {/* ── Hero header ── */}
-      <div style={{background:"linear-gradient(135deg,#0D1F3C 0%,#1565C0 60%,#1E40AF 100%)",padding:"22px 20px 18px",position:"relative",overflow:"hidden"}}>
+      <div style={{background:"linear-gradient(135deg,#0D1F3C 0%,#1565C0 60%,#1E40AF 100%)",padding:"14px 16px 12px",position:"relative",overflow:"hidden"}}>
         {/* Grid texture overlay */}
         <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px)",backgroundSize:"24px 24px",pointerEvents:"none"}}/>
         {/* Sparkline decoration */}
@@ -9924,19 +9937,19 @@ function ReferralSection({ user }) {
       </div>
 
       {/* ── Body ── */}
-      <div style={{background:"#fff",padding:"18px 18px 16px"}}>
+      <div style={{background:"#fff",padding:"12px 14px 12px"}}>
         {/* Reward cards */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
-          <div style={{background:"#F0F4FF",borderRadius:14,padding:"14px 12px",border:"1px solid #E0E8FF"}}>
-            <div style={{width:34,height:34,borderRadius:10,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:10}}>
+          <div style={{background:"#F0F4FF",borderRadius:12,padding:"10px 10px",border:"1px solid #E0E8FF"}}>
+            <div style={{width:30,height:30,borderRadius:9,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:6}}>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff" stroke="none"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
             </div>
             <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOU EARN":"TÚ GANAS"}</div>
             <div style={{fontSize:17,fontWeight:900,color:"#2563EB",lineHeight:1.1,marginBottom:4}}>1 month VIP</div>
             <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?"per paid referral · no limit":"por referido pago · sin límite"}</div>
           </div>
-          <div style={{background:"#ECFEFF",borderRadius:14,padding:"14px 12px",border:"1px solid #CFFAFE"}}>
-            <div style={{width:34,height:34,borderRadius:10,background:"#14B8A6",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
+          <div style={{background:"#ECFEFF",borderRadius:12,padding:"10px 10px",border:"1px solid #CFFAFE"}}>
+            <div style={{width:30,height:30,borderRadius:9,background:"#14B8A6",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:6}}>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
             </div>
             <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOUR FRIEND GETS":"TU AMIGO RECIBE"}</div>
@@ -9946,7 +9959,7 @@ function ReferralSection({ user }) {
         </div>
 
         {/* Progress bar */}
-        <div style={{marginBottom:16}}>
+        <div style={{marginBottom:10}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
             <span style={{fontSize:9.5,fontWeight:700,color:"#94A3B8",letterSpacing:0.6}}>{isEN?"NEXT REWARD":"PRÓXIMA RECOMPENSA"}</span>
             <span style={{fontSize:10,fontWeight:700,color:"#1565C0"}}>{refCount??0} / {nextGoal} · 1 MONTH VIP</span>
@@ -9958,14 +9971,14 @@ function ReferralSection({ user }) {
 
         {/* Referral code */}
         {refCode && (
-          <div style={{border:"2px dashed #BAE6FD",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",background:"#F0F9FF"}}>
+          <div style={{border:"2px dashed #BAE6FD",borderRadius:12,padding:"8px 14px",marginBottom:9,display:"flex",alignItems:"center",justifyContent:"space-between",background:"#F0F9FF"}}>
             <span style={{fontFamily:"monospace",fontSize:16,fontWeight:900,color:"#1565C0",letterSpacing:3}}>{refCode}</span>
             <span style={{fontSize:10,fontWeight:700,color:"#94A3B8",letterSpacing:0.8}}>{isEN?"YOUR CODE":"TU CÓDIGO"}</span>
           </div>
         )}
 
         {/* Link + copy */}
-        <div style={{display:"flex",gap:8,marginBottom:14}}>
+        <div style={{display:"flex",gap:8,marginBottom:10}}>
           <div style={{flex:1,background:"#F8FAFC",border:"1px solid #E2EAF4",borderRadius:10,padding:"9px 12px",fontSize:11,color:"#64748B",fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
             nexotradeia.com/?ref={refCode||user.id?.slice(0,8)||"…"}
           </div>
@@ -9982,29 +9995,29 @@ function ReferralSection({ user }) {
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
             <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("📈 Join me on NexoTrade — the AI trading platform. Use my link for 3 days VIP free: ")}${refLink}`}
               target="_blank" rel="noopener noreferrer"
-              style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,background:"#fff",border:"1.5px solid #E2EAF4",borderRadius:14,padding:"14px 10px",textDecoration:"none",cursor:"pointer",transition:"border-color 0.15s"}}
+              style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,background:"#fff",border:"1.5px solid #E2EAF4",borderRadius:11,padding:"9px 7px",textDecoration:"none",cursor:"pointer",transition:"border-color 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="#1565C0"}
               onMouseLeave={e=>e.currentTarget.style.borderColor="#E2EAF4"}>
-              <div style={{width:40,height:40,borderRadius:12,background:"#0F172A",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{width:32,height:32,borderRadius:10,background:"#0F172A",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.734-8.849L1.254 2.25H8.08l4.261 5.636 5.902-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </div>
               <span style={{fontSize:11,fontWeight:600,color:"#334155"}}>Twitter / X</span>
             </a>
             <a href={`https://www.instagram.com/?url=${encodeURIComponent(refLink)}`}
               target="_blank" rel="noopener noreferrer"
-              style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,background:"#fff",border:"1.5px solid #E2EAF4",borderRadius:14,padding:"14px 10px",textDecoration:"none",cursor:"pointer",transition:"border-color 0.15s"}}
+              style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,background:"#fff",border:"1.5px solid #E2EAF4",borderRadius:11,padding:"9px 7px",textDecoration:"none",cursor:"pointer",transition:"border-color 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="#E1306C"}
               onMouseLeave={e=>e.currentTarget.style.borderColor="#E2EAF4"}>
-              <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#833AB4,#FD1D1D,#F77737)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{width:32,height:32,borderRadius:10,background:"linear-gradient(135deg,#833AB4,#FD1D1D,#F77737)",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
               </div>
               <span style={{fontSize:11,fontWeight:600,color:"#334155"}}>Instagram</span>
             </a>
             <button onClick={()=>{ try{navigator.clipboard.writeText(refLink);}catch{} try{window.open("https://www.tiktok.com/","_blank","noopener");}catch{} }}
-              style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,background:"#fff",border:"1.5px solid #E2EAF4",borderRadius:14,padding:"14px 10px",cursor:"pointer",fontFamily:"inherit",transition:"border-color 0.15s"}}
+              style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,background:"#fff",border:"1.5px solid #E2EAF4",borderRadius:11,padding:"9px 7px",cursor:"pointer",fontFamily:"inherit",transition:"border-color 0.15s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="#000"}
               onMouseLeave={e=>e.currentTarget.style.borderColor="#E2EAF4"}>
-              <div style={{width:40,height:40,borderRadius:12,background:"#010101",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{width:32,height:32,borderRadius:10,background:"#010101",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.7a8.14 8.14 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.13z"/></svg>
               </div>
               <span style={{fontSize:11,fontWeight:600,color:"#334155"}}>TikTok</span>
@@ -10013,7 +10026,7 @@ function ReferralSection({ user }) {
         </div>
 
         {/* Disclaimer */}
-        <div style={{marginTop:14,display:"flex",gap:8,alignItems:"flex-start"}}>
+        <div style={{marginTop:9,display:"flex",gap:8,alignItems:"flex-start"}}>
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           <span style={{fontSize:10.5,color:"#94A3B8",lineHeight:1.5}}>
             {isEN?"Your free month is credited after your referral's first payment. Unlimited referrals.":"Tu mes gratis se acredita tras el primer pago del referido. Sin límite."}
@@ -28592,8 +28605,11 @@ export default function App(){
 
       /* ─── NAV v4 ─── */
       .nexo-topbar-v4 { height:62px; display:flex; align-items:center; padding:0 22px; gap:12px; background:#080F1F; border-bottom:1px solid rgba(255,255,255,0.07); }
+      .nexo-nav-search .nexo-search-input::placeholder { color:rgba(255,255,255,0.42); }
+      .nexo-nav-search .nexo-search-input { color:#fff; }
       .nexo-ticker-v4 { overflow:hidden; white-space:nowrap; background:#080F1F; border-bottom:1px solid rgba(255,255,255,0.08); }
-      .nexo-ticker-v4-track { display:flex; align-items:center; justify-content:space-between; width:100%; padding:7px 24px; gap:0; font-size:11.5px; color:#94a3b8; }
+      .nexo-ticker-v4-track { display:inline-flex; align-items:center; width:max-content; padding:7px 0; gap:0; font-size:11.5px; color:#94a3b8; animation:nexo-tape 38s linear infinite; }
+      .nexo-ticker-v4:hover .nexo-ticker-v4-track { animation-play-state:paused; }
       @keyframes nexo-tick-v4 { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
       .nexo-nav-row-v4 { height:50px; display:flex; align-items:center; padding:0 20px; overflow-x:auto; scrollbar-width:none; gap:2px; background:var(--c-nav); border-bottom:1px solid var(--c-navBorder); position:sticky; z-index:99; }
       .nexo-nav-row-v4::-webkit-scrollbar { display:none; }
@@ -28742,7 +28758,7 @@ export default function App(){
       {/* TICKER TAPE v4 — fila estática, sin animación, ítems distribuidos */}
       <div className="nexo-ticker-v4 nexo-hide-mobile">
         <div className="nexo-ticker-v4-track">
-          {[
+          {(()=>{ const TK=[
             {s:"ETH",  p:"$1,617",  c:"▲3%",    up:true},
             {s:"META", p:"$566.41", c:"▼0.80%",  up:false},
             {s:"GOLD", p:"$2,320",  c:"▼0.2%",   up:false},
@@ -28752,13 +28768,13 @@ export default function App(){
             {s:"SPY",  p:"$734.52", c:"▲1.25%",  up:true},
             {s:"TSLA", p:"$392.32", c:"▲2.81%",  up:true},
             {s:"MSFT", p:"$387.69", c:"▼2.43%",  up:false},
-          ].map((it,i)=>(
-            <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0,padding:"0 4px"}}>
+          ]; return [...TK,...TK].map((it,i)=>(
+            <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0,padding:"0 16px"}}>
               <span style={{fontWeight:800,color:"rgba(255,255,255,0.85)",fontSize:11.5,letterSpacing:0.2}}>{it.s}</span>
               <span style={{fontSize:11.5,color:"rgba(255,255,255,0.6)"}}>{it.p}</span>
               <span style={{fontSize:11.5,fontWeight:700,color:it.up?"#22C55E":"#F87171"}}>{it.c}</span>
             </span>
-          ))}
+          )); })()}
         </div>
       </div>
 
@@ -28802,10 +28818,10 @@ export default function App(){
 
           {/* Search — stretch center */}
           <div className="nexo-nav-search" style={{flex:1,display:"flex",justifyContent:"center",maxWidth:500,minWidth:0}}>
-            <div style={{width:"100%",maxWidth:500,background:"rgba(255,255,255,0.08)",border:"1.5px solid rgba(255,255,255,0.14)",borderRadius:10,height:38,display:"flex",alignItems:"center",gap:8,padding:"0 14px",cursor:"text"}}
+            <div style={{width:"100%",maxWidth:560,background:"rgba(255,255,255,0.06)",border:"1.5px solid rgba(255,255,255,0.13)",borderRadius:22,height:40,display:"flex",alignItems:"center",gap:8,padding:"0 16px",cursor:"text"}}
               onClick={()=>document.querySelector(".nexo-search-input")?.focus()}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <SearchBar lang={lang} posts={posts} users={MOCK_USERS} onTickerNav={(tk)=>{setTickerPage(tk);setShowLanding(false);}} onUserNav={(u)=>setProfUser(u)} onPostNav={(p)=>{setSent("all");setPage(0);}}/>
+              <SearchBar bare placeholder={isEN?"Search ticker, user or news...":"Buscar ticker, usuario o noticias..."} lang={lang} posts={posts} users={MOCK_USERS} onTickerNav={(tk)=>{setTickerPage(tk);setShowLanding(false);}} onUserNav={(u)=>setProfUser(u)} onPostNav={(p)=>{setSent("all");setPage(0);}}/>
             </div>
           </div>
 
@@ -28815,9 +28831,9 @@ export default function App(){
             {!effectivePremium && user && (
               <button onClick={()=>{setPage(8);setShowLanding(false);}}
                 className="nexo-hide-mobile"
-                style={{height:36,padding:"0 18px",borderRadius:10,border:"none",background:"#0B5CFF",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit",boxShadow:"0 4px 18px -4px rgba(11,92,255,.7)",letterSpacing:0.1,display:"flex",alignItems:"center",gap:6,transition:"all .15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="#1466FF";e.currentTarget.style.boxShadow="0 4px 24px -4px rgba(11,92,255,.9)";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="#0B5CFF";e.currentTarget.style.boxShadow="0 4px 18px -4px rgba(11,92,255,.7)";}}>
+                style={{height:38,padding:"0 18px",borderRadius:20,border:"none",background:"linear-gradient(135deg,#2563EB 0%,#6D5BE5 55%,#8B5CF6 100%)",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"inherit",boxShadow:"0 6px 20px -6px rgba(124,58,237,.7)",letterSpacing:0.1,display:"flex",alignItems:"center",gap:6,transition:"all .15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.filter="brightness(1.08)";e.currentTarget.style.boxShadow="0 6px 26px -6px rgba(124,58,237,.9)";}}
+                onMouseLeave={e=>{e.currentTarget.style.filter="none";e.currentTarget.style.boxShadow="0 6px 20px -6px rgba(124,58,237,.7)";}}>
                 ⚡ {isEN?"Activate VIP":"Activar VIP"}
               </button>
             )}
