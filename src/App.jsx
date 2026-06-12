@@ -28086,6 +28086,11 @@ export default function App(){
 
   const [showLanding, setShowLanding] = useState(true); // landing ("Invest smarter. Together.") aparece al entrar a la página
   const [emailGateDone, setEmailGateDone] = useState(true); // EmailGate removed — real landing is at /
+  const [marketOpen, setMarketOpen] = useState(false); // NYSE abierto → nav "Markets"/"Market" en verde
+  useEffect(()=>{
+    const check=()=>{ try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); const t=et.getHours()*100+et.getMinutes(); setMarketOpen(d>=1&&d<=5&&t>=930&&t<1600); }catch(_){ setMarketOpen(false); } };
+    check(); const iv=setInterval(check,30000); return ()=>clearInterval(iv);
+  },[]);
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [tickerFilter, setTickerFilter] = useState(null);
@@ -28879,8 +28884,9 @@ export default function App(){
               {label:"Messages",idx:22,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>},
             ].map(n=>(
               <button key={n.idx} className={`nexo-ntab${page===n.idx?" nact":""}`}
+                style={(n.idx===2&&marketOpen)?{color:"#16a34a"}:undefined}
                 onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}>
-                {n.svg}{n.label}
+                {n.svg}{n.label}{n.idx===2&&marketOpen&&<span title="Mercado abierto" style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",display:"inline-block",marginLeft:5,boxShadow:"0 0 5px #16a34a",animation:"nexo-pulse 1.8s infinite"}}/>}
               </button>
             ))}
           </div>
@@ -28914,9 +28920,9 @@ export default function App(){
 
             {/* Market dropdown */}
             <div className="nexo-mega">
-              <button className="nexo-mega-btn mkt-v">
+              <button className="nexo-mega-btn mkt-v" style={marketOpen?{color:"#16a34a"}:undefined}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                Market <span style={{fontSize:9,opacity:.7}}>▾</span>
+                Market {marketOpen&&<span title="Mercado abierto" style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",display:"inline-block",boxShadow:"0 0 5px #16a34a",animation:"nexo-pulse 1.8s infinite"}}/>}<span style={{fontSize:9,opacity:.7}}>▾</span>
               </button>
               <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
                 <div className="nexo-drop-label">Market Analysis</div>
