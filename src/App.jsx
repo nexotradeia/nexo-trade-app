@@ -7561,7 +7561,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
   return(
     <div style={{position:"sticky",top:96,display:"flex",flexDirection:"column",gap:10}}>
 
-      {/* ── PROFILE CARD ── */}
+      {/* ── PROFILE CARD (logueado) / JOIN CARD v4 (invitado) ── */}
+      {!user ? <JoinCard onAuth={()=>onNeedAuth&&onNeedAuth()} lang={lang}/> :
       <div style={{borderRadius:18,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,0.08)",border:"1px solid rgba(0,0,0,0.07)"}}>
 
         {/* ── COVER + BODY — dark navy + candlestick ── */}
@@ -7727,7 +7728,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
           </div>
           </>);
         })()}
-      </div>
+      </div>}
 
       {/* ── AVATAR PICKER MODAL ── */}
       {showAvatarPicker && user && (
@@ -28793,7 +28794,7 @@ export default function App(){
         </div>
 
         {/* ── LAYER 2: NAV ROW — 3 sections: tabs | prediction | dropdowns+premium ── */}
-        <div className="nexo-nav-row-v4 nexo-hide-mobile" style={{top:trialDaysLeft!==null?32+62:62,justifyContent:"space-between",gap:0}}>
+        <div className="nexo-nav-row-v4 nexo-hide-mobile" style={{top:trialDaysLeft!==null?32+62:62,justifyContent:"center",gap:30}}>
 
           {/* ── LEFT: direct page tabs ── */}
           <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0}}>
