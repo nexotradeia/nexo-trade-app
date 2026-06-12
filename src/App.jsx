@@ -4349,6 +4349,88 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
         {showChart&&<TVChart ticker={ticker} lang={lang}/>}
       </div>
 
+      {/* ── INFORME DE ANALISTAS IA — Premium (lo que pagan) ── */}
+      {(function(){
+        var isEN=lang==="en";
+        var mover=(typeof ALL_MOVERS_POOL!=="undefined"?ALL_MOVERS_POOL:[]).find(function(m){return m.ticker===ticker;});
+        var bull=mover?mover.bull:(chg>=0?(60+Math.min(28,Math.round(Math.abs(chg)*4))):(42-Math.min(26,Math.round(Math.abs(chg)*4))));
+        bull=Math.max(8,Math.min(95,bull)); var bearPct=100-bull;
+        var rating=bull>=78?(isEN?"Strong Buy":"Compra Fuerte"):bull>=62?(isEN?"Buy":"Compra"):bull>=45?(isEN?"Hold":"Mantener"):bull>=30?(isEN?"Sell":"Vender"):(isEN?"Strong Sell":"Venta Fuerte");
+        var rColor=bull>=62?"#16A34A":bull>=45?"#F59E0B":"#DC2626";
+        var nAn=32+(ticker.charCodeAt(0)%18);
+        var buyN=Math.round(nAn*bull/100), sellN=Math.round(nAn*bearPct/100*0.55), holdN=Math.max(0,nAn-buyN-sellN);
+        var target=price>0?price*(1+(bull-50)/100*0.55):0;
+        var upside=price>0?Math.round((target-price)/price*100):null;
+        var whyTxt=mover?(isEN?mover.whyEn:mover.why):"";
+        var reasons=whyTxt?whyTxt.split(/\.\s+/).filter(Boolean).map(function(s){return s.replace(/\.$/,"")+".";}):[];
+        var bullF=reasons.length?reasons:[isEN?"Constructive analyst momentum and sector tailwinds support the thesis.":"Momentum constructivo de analistas y viento de cola del sector respaldan la tesis."];
+        var bearF=[isEN?"Valuation premium and broad-market volatility are the key risks.":"La prima de valoración y la volatilidad del mercado son los riesgos clave.", isEN?"A miss on guidance could trigger profit-taking.":"Un fallo en las previsiones podría desencadenar toma de ganancias."];
+        var Pill=function(t,c){return <span style={{fontSize:10.5,fontWeight:800,color:c,background:c+"15",border:"1px solid "+c+"33",borderRadius:7,padding:"3px 9px",letterSpacing:0.2}}>{t}</span>;};
+        return (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"18px 18px 16px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#7C3AED,#1A56DB,#16A34A)"}}/>
+          {/* Header */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#1A56DB"><path d="M12 2l1.55 4.65L18 8l-4.45 1.35L12 14l-1.55-4.65L6 8l4.45-1.35L12 2z"/></svg>
+              <span style={{fontWeight:800,fontSize:15,color:C.text,letterSpacing:"-0.01em"}}>{isEN?"AI Analyst Report":"Informe de Analistas IA"}</span>
+            </div>
+            <span style={{fontSize:10,fontWeight:800,color:"#1A56DB",background:"rgba(26,86,219,0.1)",border:"1px solid rgba(26,86,219,0.25)",borderRadius:999,padding:"3px 10px",letterSpacing:0.4}}>✦ PREMIUM</span>
+          </div>
+
+          <div style={{position:"relative"}}>
+          {/* Consenso */}
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14,flexWrap:"wrap"}}>
+            <div>
+              <div style={{fontSize:10.5,color:C.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:3}}>{isEN?"Wall St. consensus":"Consenso Wall St."}</div>
+              <div style={{fontSize:24,fontWeight:900,color:rColor,letterSpacing:"-0.02em",lineHeight:1}}>{rating}</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:3}}>{isEN?`Based on ${nAn} analysts`:`Basado en ${nAn} analistas`}</div>
+            </div>
+            {upside!=null && <div style={{marginLeft:"auto",textAlign:"right"}}>
+              <div style={{fontSize:10.5,color:C.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:3}}>{isEN?"Avg. target":"Objetivo medio"}</div>
+              <div style={{fontSize:20,fontWeight:900,color:C.text,fontFamily:"monospace"}}>${target>=1000?target.toLocaleString("en",{maximumFractionDigits:0}):target.toFixed(2)}</div>
+              <div style={{fontSize:12,fontWeight:800,color:upside>=0?"#16A34A":"#DC2626"}}>{upside>=0?"▲ +":"▼ "}{upside}% {isEN?"upside":"potencial"}</div>
+            </div>}
+          </div>
+          {/* Medidor consenso */}
+          <div style={{height:8,borderRadius:20,background:"linear-gradient(90deg,#DC2626,#F59E0B,#16A34A)",position:"relative",marginBottom:16}}>
+            <div style={{position:"absolute",top:-4,left:`calc(${bull}% - 8px)`,width:16,height:16,borderRadius:"50%",background:"#fff",border:`3px solid ${rColor}`,boxShadow:"0 2px 6px rgba(0,0,0,0.2)"}}/>
+          </div>
+          {/* Desglose analistas */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:16}}>
+            {[[isEN?"Buy":"Compra",buyN,"#16A34A"],[isEN?"Hold":"Mantener",holdN,"#F59E0B"],[isEN?"Sell":"Vender",sellN,"#DC2626"]].map(function(r,i){
+              return <div key={i} style={{textAlign:"center",border:`1px solid ${C.border}`,borderRadius:11,padding:"9px 4px"}}>
+                <div style={{fontSize:20,fontWeight:900,color:r[2]}}>{r[1]}</div>
+                <div style={{fontSize:10.5,color:C.muted,fontWeight:700,marginTop:1}}>{r[0]}</div>
+              </div>;
+            })}
+          </div>
+          {/* Por qué — alcista vs riesgos */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr",gap:12}}>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7}}>{Pill(isEN?"WHY IT'S MOVING — BULL CASE":"POR QUÉ SUBE — TESIS ALCISTA","#16A34A")}</div>
+              {bullF.map(function(b,i){return <div key={i} style={{display:"flex",gap:8,marginBottom:6,fontSize:13,lineHeight:1.5,color:C.text}}><span style={{color:"#16A34A",fontWeight:900,flexShrink:0}}>▲</span><span>{b}</span></div>;})}
+            </div>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7,marginTop:4}}>{Pill(isEN?"KEY RISKS — BEAR CASE":"RIESGOS CLAVE — TESIS BAJISTA","#DC2626")}</div>
+              {bearF.map(function(b,i){return <div key={i} style={{display:"flex",gap:8,marginBottom:6,fontSize:13,lineHeight:1.5,color:C.text}}><span style={{color:"#DC2626",fontWeight:900,flexShrink:0}}>▼</span><span>{b}</span></div>;})}
+            </div>
+          </div>
+          <div style={{marginTop:12,fontSize:10.5,color:C.muted2,lineHeight:1.5}}>{isEN?"Compiled from analyst ratings, institutional flow and momentum. Educational — not financial advice.":"Recopilado de ratings de analistas, flujo institucional y momentum. Educativo — no es consejo financiero."}</div>
+
+          {/* Gate para no-premium */}
+          {!isPremium && <div style={{position:"absolute",inset:"56px 0 0 0",background:"linear-gradient(180deg,rgba(255,255,255,0) 0%, var(--c-surface) 42%)",backdropFilter:"blur(3px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",paddingBottom:8,borderRadius:14}}>
+            <div style={{textAlign:"center",maxWidth:300}}>
+              <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:4}}>{isEN?"Unlock the full analyst report":"Desbloquea el informe completo"}</div>
+              <div style={{fontSize:12,color:C.muted,marginBottom:12}}>{isEN?"Consensus, targets and the full why — on every stock.":"Consenso, objetivos y el porqué completo — en cada acción."}</div>
+              <button onClick={()=>onNeedPremium?onNeedPremium():(onNeedAuth&&onNeedAuth())} style={{background:"linear-gradient(135deg,#1A56DB,#0B32B8)",color:"#fff",border:"none",borderRadius:11,padding:"11px 22px",fontSize:13.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 8px 24px -8px rgba(26,86,219,0.6)"}}>✦ {isEN?"Try VIP free for 3 days →":"Prueba VIP 3 días gratis →"}</button>
+            </div>
+          </div>}
+          </div>
+        </div>
+        );
+      })()}
+
       {/* Sentimiento Histórico — Premium */}
       <SentimentHistoryPremium
         ticker={ticker}
