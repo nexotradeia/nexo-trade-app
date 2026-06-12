@@ -10386,6 +10386,71 @@ function JoinCard({ onAuth, lang="es" }){
   );
 }
 
+// ── MARKETS STRIP v5 — carrusel en movimiento + colores en tiempo real (PriceCtx) ──
+function MarketsStrip({ onNav }){
+  const lp = useContext(PriceCtx);
+  const registerPx = useContext(PriceRegisterCtx);
+  const ITEMS = [
+    {s:"SPX",  n:"S&P 500",  live:"SPY",  p:"7,384", fallC:1.25, bg:"#DBEAFE", fg:"#1D4ED8", letter:"S", idx:2},
+    {s:"QQQ",  n:"Nasdaq ETF",live:"QQQ", p:"714.00",fallC:2.33, bg:"#D1FAE5", fg:"#065F46", letter:"Q", idx:2},
+    {s:"TSLA", n:"Tesla Inc.",live:"TSLA",p:"392.32",fallC:2.81, img:"TSLA", idx:2},
+    {s:"MSFT", n:"Microsoft", live:"MSFT",p:"387.69",fallC:-2.43,img:"MSFT", idx:2},
+    {s:"AMZN", n:"Amazon",    live:"AMZN",p:"239.10",fallC:0.46, img:"AMZN", idx:2},
+    {s:"META", n:"Meta",      live:"META",p:"566.41",fallC:-0.80,img:"META", idx:2},
+    {s:"GOOGL",n:"Alphabet",  live:"GOOGL",p:"178.40",fallC:0.91,img:"GOOGL",idx:2},
+    {s:"BTC",  n:"Bitcoin",   live:"BTC", p:"62,860",fallC:1.20, bg:"#FFF7ED", fg:"#F7931A", letter:"₿", idx:44},
+    {s:"NVDA", n:"NVIDIA",    live:"NVDA",p:"202.10",fallC:0.84, img:"NVDA", idx:2},
+    {s:"AAPL", n:"Apple Inc.",live:"AAPL",p:"295.38",fallC:1.30, img:"AAPL", idx:2},
+  ];
+  useEffect(()=>{ try{ registerPx && registerPx(ITEMS.map(i=>i.live)); }catch(_){ } },[]);
+  const fmtP = (v)=> v>=1000 ? v.toLocaleString("en-US",{maximumFractionDigits:0}) : v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const cards = ITEMS.map(it=>{
+    const live = lp && lp[it.live];
+    const chg = (live && typeof live.change==="number") ? live.change : it.fallC;
+    const up = chg>=0;
+    let priceStr = it.p;
+    if(live && live.price>0 && it.s!=="SPX"){ priceStr = fmtP(live.price); }
+    return {...it, up, pct:Math.abs(chg).toFixed(2)+"%", priceStr};
+  });
+  const renderCard = (it,i)=>{
+    const spkUp="M0,24 C30,20 70,16 110,10 C140,6 160,5 180,3";
+    const spkDn="M0,4 C30,8 70,14 110,20 C140,24 160,26 180,28";
+    const spkPth=it.up?spkUp:spkDn;
+    const spkC=it.up?"#16A34A":"#DC2626";
+    const gradId=`msp${i}`;
+    return(
+      <div key={i} className="nexo-mkt-card" onClick={()=>onNav&&onNav(it.idx)}>
+        <div className="nexo-mkt-card-top">
+          <div className="nexo-mkt-logo" style={it.img?{background:"transparent"}:{background:it.bg,color:it.fg}}>
+            {it.img
+              ? <img src={`https://assets.parqet.com/logos/symbol/${it.img}`} style={{width:22,height:22,objectFit:"contain"}}
+                  onError={e=>{e.target.style.display="none";e.target.parentNode.style.background=it.bg||"#EFF4FB";e.target.parentNode.style.color=it.fg||"#1565C0";e.target.parentNode.textContent=it.letter||it.s.slice(0,2);}}/>
+              : <span style={{fontSize:it.letter&&it.letter.length>1?10:13,fontWeight:900}}>{it.letter}</span>}
+          </div>
+          <div><div className="nexo-mkt-sym">{it.s}</div><div className="nexo-mkt-name">{it.n}</div></div>
+        </div>
+        <div className="nexo-mkt-mid">
+          <div className="nexo-mkt-price">{it.priceStr}</div>
+          <div className={it.up?"nexo-mkt-pct-up":"nexo-mkt-pct-dn"}>{it.up?"▲":"▼"} {it.pct}</div>
+        </div>
+        <svg className="nexo-mkt-spark" viewBox="0 0 180 32" preserveAspectRatio="none">
+          <defs><linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={spkC} stopOpacity="0.15"/><stop offset="100%" stopColor={spkC} stopOpacity="0"/></linearGradient></defs>
+          <path d={spkPth} fill="none" stroke={spkC} strokeWidth="2"/>
+          <path d={`${spkPth} L180,32 L0,32Z`} fill={`url(#${gradId})`}/>
+        </svg>
+      </div>
+    );
+  };
+  return(
+    <div className="nexo-mkt-strip nexo-hide-mobile">
+      <div className="nexo-mkt-track">
+        {cards.map((it,i)=>renderCard(it,i))}
+        {cards.map((it,i)=>renderCard(it,i+100))}
+      </div>
+    </div>
+  );
+}
+
 function TerminalLiveTicker(){
   const [px, setPx] = React.useState(291.58);
   React.useEffect(()=>{
@@ -28563,7 +28628,9 @@ export default function App(){
       .nexo-dbadge-vip { font-size:9px; background:#FEF3C7; color:#92400E; padding:2px 6px; border-radius:4px; font-weight:700; margin-left:auto; flex-shrink:0; }
       .nexo-dbadge-ai  { font-size:9px; background:#EDE9FE; color:#7C3AED; padding:2px 6px; border-radius:4px; font-weight:700; margin-left:auto; flex-shrink:0; }
       /* Markets strip */
-      .nexo-mkt-strip { background:var(--c-surface); border-bottom:1px solid var(--c-border); overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+      .nexo-mkt-strip { background:var(--c-surface); border-bottom:1px solid var(--c-border); overflow:hidden; }
+      .nexo-mkt-track { display:flex; gap:0; padding:0 16px; width:max-content; animation:nexo-tick-v4 48s linear infinite; }
+      .nexo-mkt-strip:hover .nexo-mkt-track { animation-play-state:paused; }
       .nexo-mkt-strip::-webkit-scrollbar { display:none; }
       .nexo-mkt-strip-inner { display:flex; gap:0; padding:0 16px; min-width:max-content; }
       .nexo-mkt-card { padding:8px 14px; display:flex; flex-direction:column; gap:4px; cursor:pointer; border-right:1px solid var(--c-border); min-width:120px; transition:background .15s; }
@@ -29396,50 +29463,7 @@ export default function App(){
 
       {/* MARKETS STRIP v4 — desktop only, shown on feed pages */}
       {!(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99) && (
-        <div className="nexo-mkt-strip nexo-hide-mobile">
-          <div className="nexo-mkt-strip-inner">
-            {[
-              {s:"SPX",n:"S&P 500",p:"7,384",c:"+1.25%",up:true,bg:"#DBEAFE",fg:"#1D4ED8",letter:"S",idx:2},
-              {s:"QQQ",n:"Nasdaq ETF",p:"714.00",c:"+2.33%",up:true,bg:"#D1FAE5",fg:"#065F46",letter:"Q",idx:2},
-              {s:"TSLA",n:"Tesla Inc.",p:"392.32",c:"+2.81%",up:true,img:"TSLA",idx:2},
-              {s:"MSFT",n:"Microsoft",p:"387.69",c:"-2.43%",up:false,img:"MSFT",idx:2},
-              {s:"AMZN",n:"Amazon",p:"239.10",c:"+0.46%",up:true,img:"AMZN",idx:2},
-              {s:"META",n:"Meta",p:"566.41",c:"-0.80%",up:false,img:"META",idx:2},
-              {s:"GOOGL",n:"Alphabet",p:"178.40",c:"+0.91%",up:true,img:"GOOGL",idx:2},
-              {s:"BTC",n:"Bitcoin",p:"62,860",c:"+1.20%",up:true,bg:"#FFF7ED",fg:"#F7931A",letter:"₿",idx:44},
-              {s:"NVDA",n:"NVIDIA",p:"202.10",c:"+0.84%",up:true,img:"NVDA",idx:2},
-              {s:"AAPL",n:"Apple Inc.",p:"295.38",c:"+1.30%",up:true,img:"AAPL",idx:2},
-            ].map((it,i)=>{
-              const spkUp = "M0,24 C30,20 70,16 110,10 C140,6 160,5 180,3";
-              const spkDn = "M0,4 C30,8 70,14 110,20 C140,24 160,26 180,28";
-              const spkPth = it.up?spkUp:spkDn;
-              const spkC = it.up?"#16A34A":"#DC2626";
-              const gradId = `msp${i}`;
-              return(
-                <div key={i} className="nexo-mkt-card" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
-                  <div className="nexo-mkt-card-top">
-                    <div className="nexo-mkt-logo" style={it.img?{background:"transparent"}:{background:it.bg,color:it.fg}}>
-                      {it.img
-                        ? <img src={`https://assets.parqet.com/logos/symbol/${it.img}`} style={{width:22,height:22,objectFit:"contain"}}
-                            onError={e=>{e.target.style.display="none";e.target.parentNode.style.background=it.bg||"#EFF4FB";e.target.parentNode.style.color=it.fg||"#1565C0";e.target.parentNode.textContent=it.letter||it.s.slice(0,2);}}/>
-                        : <span style={{fontSize:it.letter&&it.letter.length>1?10:13,fontWeight:900}}>{it.letter}</span>}
-                    </div>
-                    <div><div className="nexo-mkt-sym">{it.s}</div><div className="nexo-mkt-name">{it.n}</div></div>
-                  </div>
-                  <div className="nexo-mkt-mid">
-                    <div className="nexo-mkt-price">{it.p}</div>
-                    <div className={it.up?"nexo-mkt-pct-up":"nexo-mkt-pct-dn"}>{it.up?"▲":"▼"} {it.c.replace(/[+-]/,"")}</div>
-                  </div>
-                  <svg className="nexo-mkt-spark" viewBox="0 0 180 32" preserveAspectRatio="none">
-                    <defs><linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={spkC} stopOpacity="0.15"/><stop offset="100%" stopColor={spkC} stopOpacity="0"/></linearGradient></defs>
-                    <path d={spkPth} fill="none" stroke={spkC} strokeWidth="2"/>
-                    <path d={`${spkPth} L180,32 L0,32Z`} fill={`url(#${gradId})`}/>
-                  </svg>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <MarketsStrip onNav={(idx)=>{setPage(idx);setShowLanding(false);}}/>
       )}
 
       {/* MARKETS MINI WIDGET — only on full-page market views */}
