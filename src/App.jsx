@@ -10601,17 +10601,12 @@ function JoinCard({ onAuth, lang="es" }){
           <div style={{fontSize:8.5,fontWeight:700,letterSpacing:"0.8px",color:"#94a3b8"}}>{isEN?"OR CONTINUE WITH":"O CONTINÚA CON"}</div>
           <div style={{flex:1,height:1,background:"#E6EDF5"}}/>
         </div>
-        {/* Social login — OAuth real vía Supabase */}
+        {/* Social login — OAuth real vía Supabase (solo Google) */}
         <div style={{display:"flex",gap:7,marginBottom:10}}>
           <button className="nexo-jc-social-btn" onClick={()=>nexoOAuth("google")}
-            style={{flex:1,background:"#fff",border:"1.5px solid #E6EDF5",borderRadius:9,padding:"8px",display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:11.5,fontWeight:700,color:"#0A1628",cursor:"pointer",fontFamily:"inherit"}}>
-            <svg width="15" height="15" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            Google
-          </button>
-          <button className="nexo-jc-social-btn" onClick={()=>nexoOAuth("apple")}
-            style={{flex:1,background:"#fff",border:"1.5px solid #E6EDF5",borderRadius:9,padding:"8px",display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:11.5,fontWeight:700,color:"#0A1628",cursor:"pointer",fontFamily:"inherit"}}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="#0A1628" style={{flexShrink:0}}><path d="M17.05 12.04c-.02-2.05 1.68-3.03 1.75-3.08-.95-1.4-2.44-1.59-2.97-1.61-1.26-.13-2.47.74-3.11.74-.64 0-1.63-.72-2.69-.7-1.38.02-2.66.8-3.37 2.04-1.44 2.5-.37 6.2 1.03 8.23.69.99 1.5 2.1 2.57 2.06 1.03-.04 1.42-.67 2.67-.67 1.24 0 1.6.67 2.69.65 1.11-.02 1.81-1.01 2.49-2 .78-1.15 1.11-2.26 1.13-2.32-.02-.01-2.17-.83-2.19-3.29zM15.5 6.2c.57-.69.95-1.65.85-2.6-.82.03-1.81.54-2.39 1.23-.52.61-.98 1.58-.86 2.51.91.07 1.84-.46 2.4-1.14z"/></svg>
-            Apple
+            style={{flex:1,background:"#fff",border:"1.5px solid #E6EDF5",borderRadius:9,padding:"10px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,fontSize:12.5,fontWeight:700,color:"#0A1628",cursor:"pointer",fontFamily:"inherit"}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            {isEN?"Continue with Google":"Continuar con Google"}
           </button>
         </div>
         <div className="nexo-jc-already" style={{textAlign:"center",fontSize:11,color:"#64748B",marginBottom:4}}>
