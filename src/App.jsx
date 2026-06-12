@@ -10715,7 +10715,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
     <footer style={{background:"#0a1628",borderTop:"1px solid rgba(21,101,192,0.15)",marginTop:48,fontFamily:"Inter,sans-serif"}}>
 
       {/* ── TOP STRIP — logo + tagline + CTA ── */}
-      <div style={{borderBottom:"1px solid rgba(21,101,192,0.10)",padding:"28px 24px"}}>
+      <div className="nexo-footer-top" style={{borderBottom:"1px solid rgba(21,101,192,0.10)",padding:"28px 24px"}}>
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:20,flexWrap:"wrap"}}>
           <img src="/logo_nexo_full.svg" alt="NexoTrade" style={{height:38,width:"auto",objectFit:"contain",flexShrink:0}}/>
           <p style={{color:"#475569",fontSize:13,margin:0,lineHeight:1.6,maxWidth:400,textAlign:"center",flex:"1 1 200px"}}>
@@ -10747,7 +10747,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
           {legalItems.map(item=><FLink key={item.label} item={item}/>)}
 
           {/* Email capture */}
-          <div style={{marginTop:18,padding:"14px 16px",background:"rgba(21,101,192,0.07)",border:"1px solid rgba(21,101,192,0.18)",borderRadius:12}}>
+          <div className="nexo-footer-news" style={{marginTop:18,padding:"14px 16px",background:"rgba(21,101,192,0.07)",border:"1px solid rgba(21,101,192,0.18)",borderRadius:12}}>
             <div style={{fontSize:12,fontWeight:800,color:"#E2E8F0",marginBottom:3}}>
               {isEN?"🗓 Monday Signal":"🗓 La señal de los lunes"}
             </div>
@@ -10770,7 +10770,7 @@ function Footer({ setPage, onAuth, lang="es", setLang }){
       {/* ── LEGAL DISCLAIMER STRIP removido a pedido (el aviso de riesgo completo sigue en el footer y en pág. 33) ── */}
 
       {/* ── BOTTOM BAR ── */}
-      <div style={{padding:"14px 24px"}}>
+      <div className="nexo-footer-bottom" style={{padding:"14px 24px"}}>
         <div style={{maxWidth:1140,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
           <span style={{color:"#334155",fontSize:11}}>© 2026 NexoTrade · nexotradeia.com · {isEN?"All rights reserved":"Todos los derechos reservados"}</span>
 
@@ -28437,8 +28437,14 @@ export default function App(){
         body { padding-bottom: 122px; }
         /* Bottom nav móvil tipo Robinhood */
         .nexo-bottom-nav { display: flex !important; }
-        /* Footer grid: 2 cols on mobile */
-        .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 24px 16px !important; }
+        /* Footer compacto en móvil */
+        footer { margin-top: 22px !important; }
+        .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 14px 14px !important; padding: 18px 16px 12px !important; }
+        .nexo-footer-grid > div > div:first-child { margin-bottom: 8px !important; }
+        .nexo-footer-top { padding: 16px 16px !important; }
+        .nexo-footer-news { margin-top: 12px !important; padding: 11px 12px !important; }
+        .nexo-footer-bottom { padding: 12px 16px 16px !important; }
+        .nexo-footer-disc { padding: 12px 16px !important; font-size: 9.5px !important; }
         .nexo-hero-stage { grid-template-columns: 1fr !important; }
         .nexo-body-grid {
           padding: 6px 8px !important;
