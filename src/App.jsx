@@ -27320,6 +27320,8 @@ export default function App(){
   const [dbReady,setDbReady]   = useState(false);
   const [feedError,setFeedError] = useState(false);
   const [showVipPopup,setVipPopup] = useState(false);
+  const [paywallOpen,setPaywallOpen] = useState(false); // PaywallModal global para CUALQUIER bloqueo premium
+  const openPaywall = ()=>setPaywallOpen(true);
   const [showWelcome,setShowWelcome] = useState(false);
   const [welcomeName,setWelcomeName] = useState("");
   const [showPushPrompt,setShowPushPrompt] = useState(false);
@@ -27847,9 +27849,9 @@ export default function App(){
   const effectivePremium = isPremium || ADMIN_EMAILS.includes(user?.email || '');
 
   const renderPage = () => {
-    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} onRepost={handleRepost}/>;
+    if(tickerPage) return <TickerPage ticker={tickerPage} posts={posts} onClose={()=>setTickerPage(null)} lang={lang} user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} isPremium={effectivePremium} onNeedPremium={openPaywall} onRepost={handleRepost}/>;
     if(page===1) return <TopsPage posts={posts} lang={lang}/>;
-    if(page===2) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="performance"/>;
+    if(page===2) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang} defaultSection="performance"/>;
     if(page===4) return(
       <div style={{textAlign:"center",padding:"60px 20px"}}>
         <div style={{fontSize:48,marginBottom:16}}>🚧</div>
@@ -27858,37 +27860,37 @@ export default function App(){
         <button onClick={()=>setPage(0)} style={{marginTop:24,background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:700,fontSize:14,cursor:"pointer"}}>{lang==="en"?"← Back to Feed":"← Volver al Feed"}</button>
       </div>
     );
-    if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} isAdmin={ADMIN_EMAILS.includes(user?.email||'')} lang={lang}/>;
+    if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={openPaywall} isAdmin={ADMIN_EMAILS.includes(user?.email||'')} lang={lang}/>;
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
     if(page===7) return <MarketsPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} lang={lang}/>;
     if(page===7777) return <TrendingPage posts={posts} lang={lang}/>;{/* TrendingPage preserved but moved off main nav */}
     if(page===8) return <ProPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onNeedAuth={()=>setAuth("login")} onSettings={()=>setShowSettings(true)} lang={lang}/>;
     if(page===808) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;{/* old PremiumPage preserved */}
-    if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
+    if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={openPaywall} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
     if(page===10) return (<><AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={(ticker)=>{if(ticker){setAiInitQuery("Give me a complete investment analysis for $"+ticker+": fundamentals, recent performance, analyst consensus, and your buy/hold/sell recommendation. Be concise.");}setShowAI(true);}} lang={lang}/>{showAI&&<AIAssistant lang={lang} onClose={()=>{setShowAI(false);setAiInitQuery("");}} initialQuery={aiInitQuery}/>}</>);
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===14) return <EconCalendarPage lang={lang}/>;
     if(page===18) return <CommoditiesPage/>;
-    if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
-    if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
+    if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
+    if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
     if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} lang={lang}/>;
     if(page===15) return <DividendCalendarPage lang={lang}/>;
-    if(page===16) return <IpoCalendarPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
-    if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
-    if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
-    if(page===35) return <GurusPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} initialTab="congress"/>;
-    if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang}/>;
-    if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
-    if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===16) return <IpoCalendarPage isPremium={effectivePremium} onNeedPremium={openPaywall}/>;
+    if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
+    if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
+    if(page===35) return <GurusPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang} initialTab="congress"/>;
+    if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
+    if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={openPaywall} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
+    if(page===38) return <WatchlistPage user={user} lang={lang} onNeedAuth={()=>setAuth("register")} posts={posts} isPremium={effectivePremium} onNeedPremium={openPaywall}/>;
     if(page===39) return <NotificationsPage user={user} lang={lang} posts={posts} following={following} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")}/>;
     if(page===40) return <LeaderboardPage posts={posts} user={user} lang={lang}/>;
-    if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={()=>setPage(8)} lang={lang} defaultSection="options"/>;
+    if(page===41) return <CryptoHubPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang} defaultSection="options"/>;
     if(page===42) return <AlertCenterPage lang={lang} user={user} onNeedAuth={()=>setAuth("register")}/>;
     if(page===43) return <PaperTradingFullPage user={user} lang={lang} onBack={()=>setPage(0)}/>;
     if(page===44) return <RadarGlobalPage lang={lang} onBack={()=>{setPage(0);setShowLanding(false);}}/>;
-    if(page===45) return <PreMarketPage lang={lang} isPremium={effectivePremium} onNeedPremium={()=>setPage(8)}/>;
+    if(page===45) return <PreMarketPage lang={lang} isPremium={effectivePremium} onNeedPremium={openPaywall}/>;
     if(page===46) return <PivotCalc lang={lang}/>;
     if(page===47) return <ProfitCalc lang={lang}/>;
     if(page===48) return <MarginCalc lang={lang}/>;
@@ -27958,7 +27960,7 @@ export default function App(){
         </div>
         <NewPost user={user} onPost={addPost} onNeedAuth={()=>setAuth("register")} lang={lang}/>
         {/* 🤖 AI Signal Card — pinned */}
-        <AiSignalCard lang={lang} onTickerClick={(tk)=>setTickerPage(tk)} onUpgrade={()=>{setPage(8);setShowLanding(false);}} isPremium={effectivePremium}/>
+        <AiSignalCard lang={lang} onTickerClick={(tk)=>setTickerPage(tk)} onUpgrade={openPaywall} isPremium={effectivePremium}/>
         {/* Banner de error de conexión */}
         {feedError && (
           <div style={{margin:"4px 0 12px",padding:"14px 16px",background:"rgba(220,38,38,0.06)",border:"1px solid rgba(220,38,38,0.2)",borderRadius:12,display:"flex",alignItems:"center",gap:12}}>
@@ -28005,12 +28007,12 @@ export default function App(){
           <div key={p._key||p.id}>
             {p._isBot
               ? <BotPostCard post={p} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang}/>
-              : <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))} isPremium={effectivePremium} onNeedPremium={()=>{setPage(8);setShowLanding(false);}}/>
+              : <PostCard post={p} onProfile={setProfUser} onPoints={showPoints} onTickerClick={(tk)=>setTickerPage(tk)} lang={lang} isNew={p.id===newPostId} onRepost={handleRepost} user={user} onNeedAuth={()=>setAuth("register")} following={following} onFollow={toggleFollow} onDM={(target)=>{setDmTarget(target);setPage(22);}} onDelete={(id)=>setPosts(prev=>prev.filter(x=>x.id!==id))} isPremium={effectivePremium} onNeedPremium={openPaywall}/>
             }
             {/* 🏆 Top Traders del mes — visible en el feed tras el 2º post */}
-            {i===1 && SHOW_TOP_TRADERS && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={()=>{setPage(8);setShowLanding(false);}}/>}
+            {i===1 && SHOW_TOP_TRADERS && <TopTradersFeedCard lang={lang} isPremium={effectivePremium} onLeaderboard={()=>{setPage(40);setShowLanding(false);}} onPremium={openPaywall}/>}
             {/* 👁 Banner Watchlist Premium — entre posts (cerrable) */}
-            {i===2 && <WatchlistFeedBanner user={user} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}} lang={lang}/>}
+            {i===2 && <WatchlistFeedBanner user={user} isPremium={effectivePremium} onUpgrade={openPaywall} lang={lang}/>}
             {/* 📧 Captura de email — SOLO visitantes no registrados */}
             {i===4 && !user && <EmailCaptureFeedCard user={user} isPremium={effectivePremium} lang={lang}/>}
             {/* 💎 En su lugar, a logueados free: empuje sutil a Premium (ya tenemos su email) */}
@@ -28826,7 +28828,7 @@ export default function App(){
               </button>
             )}
             {effectivePremium && user && (
-              <span className="nexo-hide-mobile" style={{height:36,padding:"0 14px",borderRadius:10,background:"rgba(224,182,75,0.12)",border:"1px solid rgba(224,182,75,0.3)",color:"#E0B64B",fontSize:12,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>
+              <span className="nexo-hide-mobile" style={{height:38,padding:"0 16px",borderRadius:20,background:"linear-gradient(135deg,#2563EB 0%,#6D5BE5 55%,#8B5CF6 100%)",border:"none",color:"#fff",fontSize:12.5,fontWeight:800,display:"flex",alignItems:"center",gap:6,boxShadow:"0 6px 20px -6px rgba(124,58,237,.6)"}}>
                 ✦ Premium
               </span>
             )}
@@ -29513,7 +29515,7 @@ export default function App(){
 />{!user&&<JoinCard onAuth={(mode)=>setAuth(mode)} lang={lang}/>}</div>
         <div style={{gridColumn:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
         <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}>
-          <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts} isPremium={effectivePremium} onUpgrade={()=>{setPage(8);setShowLanding(false);}}/>
+          <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts} isPremium={effectivePremium} onUpgrade={openPaywall}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
             {/* ── TELEGRAM FREE CHANNEL CTA — v4 light blue gradient ── */}
@@ -29709,8 +29711,9 @@ export default function App(){
         </button>
       )}
       {showAlerts&&<AlertsPanel lang={lang} user={user} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
+      <PaywallModal open={paywallOpen} onClose={()=>setPaywallOpen(false)} onUpgrade={()=>{setPaywallOpen(false);setPage(8);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} lang={lang}/>
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase} onOpenAlerts={()=>setAlerts(true)} alertCount={alertCount}/>}
-      <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={()=>{setPage(8);setShowLanding(false);}} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
+      <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={openPaywall} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
       <div className="nexo-bottom-nav" style={{display:"none",zIndex:1300,background:"var(--c-surface)",borderTop:"1px solid var(--c-border)",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",justifyContent:"space-around"}}>
