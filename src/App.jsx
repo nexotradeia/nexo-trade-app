@@ -29117,6 +29117,14 @@ export default function App(){
               <span>✓ {lang==="en"?"3-day free trial":"3 días gratis"}</span>
               <span>✓ {lang==="en"?"Cancel anytime":"Cancela cuando quieras"}</span>
             </div>
+            <div style={{textAlign:"center",marginTop:16}}>
+              <button onClick={()=>{setShowLanding(false);setPage(0);setTickerFilter(null);try{window.scrollTo({top:0});}catch{}}}
+                style={{background:"none",border:"none",color:"#8a97b8",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",letterSpacing:0.2,padding:"6px 10px"}}
+                onMouseEnter={e=>e.currentTarget.style.color="#c9d6f2"}
+                onMouseLeave={e=>e.currentTarget.style.color="#8a97b8"}>
+                {lang==="en"?"Skip — explore the platform →":"Saltar — explorar la plataforma →"}
+              </button>
+            </div>
           </div>
 
           {/* Dual stage — Terminal + Radar */}
