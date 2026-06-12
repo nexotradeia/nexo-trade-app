@@ -1415,7 +1415,7 @@ function TickerTape({lang="es", onPremium}) {
 }
 
 // ── SEARCH BAR ────────────────────────────────────────────────────────────────
-function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[]}) {
+function SearchBar({lang, onTickerNav, onUserNav, onPostNav, posts=[], users=[], bare=false}) {
   const t = LANGS[lang];
   const isEN = lang === "en";
   const [q,setQ]=useState(""),[res,setRes]=useState([]),[foc,setFoc]=useState(false);
@@ -7561,7 +7561,8 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
   return(
     <div style={{position:"sticky",top:96,display:"flex",flexDirection:"column",gap:10}}>
 
-      {/* ── PROFILE CARD ── */}
+      {/* ── PROFILE CARD (logueado) / JOIN CARD v4 (invitado) ── */}
+      {!user ? <JoinCard onAuth={()=>onNeedAuth&&onNeedAuth()} lang={lang}/> :
       <div style={{borderRadius:18,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,0.08)",border:"1px solid rgba(0,0,0,0.07)"}}>
 
         {/* ── COVER + BODY — dark navy + candlestick ── */}
@@ -7727,7 +7728,7 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
           </div>
           </>);
         })()}
-      </div>
+      </div>}
 
       {/* ── AVATAR PICKER MODAL ── */}
       {showAvatarPicker && user && (
@@ -9903,7 +9904,9 @@ function ReferralSection({ user }) {
         </svg>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative"}}>
           <div style={{display:"flex",alignItems:"center",gap:13}}>
-            <div style={{width:46,height:46,borderRadius:13,background:"rgba(255,255,255,0.12)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🔗</div>
+            <div style={{width:46,height:46,borderRadius:13,background:"rgba(255,255,255,0.12)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
             <div>
               <div style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:-0.5,lineHeight:1.1}}>{isEN?"Invite & Earn":"Invitar y Ganar"}</div>
               <div style={{fontSize:12,color:"rgba(255,255,255,0.75)",marginTop:4,lineHeight:1.4,maxWidth:220}}>
@@ -9925,15 +9928,19 @@ function ReferralSection({ user }) {
         {/* Reward cards */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
           <div style={{background:"#F0F4FF",borderRadius:14,padding:"14px 12px",border:"1px solid #E0E8FF"}}>
-            <div style={{width:34,height:34,borderRadius:10,background:"#1565C0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,marginBottom:10}}>⭐</div>
+            <div style={{width:34,height:34,borderRadius:10,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff" stroke="none"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
+            </div>
             <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOU EARN":"TÚ GANAS"}</div>
-            <div style={{fontSize:17,fontWeight:900,color:"#1565C0",lineHeight:1.1,marginBottom:4}}>1 month VIP</div>
+            <div style={{fontSize:17,fontWeight:900,color:"#2563EB",lineHeight:1.1,marginBottom:4}}>1 month VIP</div>
             <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?"per paid referral · no limit":"por referido pago · sin límite"}</div>
           </div>
           <div style={{background:"#ECFEFF",borderRadius:14,padding:"14px 12px",border:"1px solid #CFFAFE"}}>
-            <div style={{width:34,height:34,borderRadius:10,background:"#0891B2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,marginBottom:10}}>🎁</div>
+            <div style={{width:34,height:34,borderRadius:10,background:"#14B8A6",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            </div>
             <div style={{fontSize:9.5,fontWeight:700,color:"#64748B",letterSpacing:0.6,marginBottom:5}}>{isEN?"YOUR FRIEND GETS":"TU AMIGO RECIBE"}</div>
-            <div style={{fontSize:17,fontWeight:900,color:"#0891B2",lineHeight:1.1,marginBottom:4}}>3 days free</div>
+            <div style={{fontSize:17,fontWeight:900,color:"#0D9488",lineHeight:1.1,marginBottom:4}}>3 days free</div>
             <div style={{fontSize:10.5,color:"#64748B"}}>{isEN?"full VIP access on signup":"acceso VIP completo al registrarse"}</div>
           </div>
         </div>
@@ -9963,8 +9970,9 @@ function ReferralSection({ user }) {
             nexotradeia.com/?ref={refCode||user.id?.slice(0,8)||"…"}
           </div>
           <button onClick={handleCopy}
-            style={{background:copied?"#10b981":"#1565C0",border:"none",borderRadius:10,padding:"9px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:6}}>
-            <span>📋</span>{copied?(isEN?"✓ Copied":"✓ Copiado"):(isEN?"Copy link":"Copiar link")}
+            style={{background:copied?"#10b981":"#2563EB",border:"none",borderRadius:10,padding:"9px 16px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",flexShrink:0,transition:"background 0.2s",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:7}}>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            {copied?(isEN?"✓ Copied":"✓ Copiado"):(isEN?"Copy link":"Copiar link")}
           </button>
         </div>
 
@@ -10005,8 +10013,8 @@ function ReferralSection({ user }) {
         </div>
 
         {/* Disclaimer */}
-        <div style={{marginTop:14,display:"flex",gap:7,alignItems:"flex-start"}}>
-          <span style={{fontSize:13,flexShrink:0,marginTop:1}}>ℹ️</span>
+        <div style={{marginTop:14,display:"flex",gap:8,alignItems:"flex-start"}}>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           <span style={{fontSize:10.5,color:"#94A3B8",lineHeight:1.5}}>
             {isEN?"Your free month is credited after your referral's first payment. Unlimited referrals.":"Tu mes gratis se acredita tras el primer pago del referido. Sin límite."}
           </span>
@@ -10373,6 +10381,71 @@ function JoinCard({ onAuth, lang="es" }){
           <span onClick={()=>onAuth("login")} style={{color:"#1A56DB",fontWeight:700,cursor:"pointer"}}>{isEN?"Sign in":"Iniciar sesión"}</span>
         </div>
         <div style={{textAlign:"center",fontSize:9,color:"#CBD5E1"}}>{isEN?"Free forever · No credit card":"Gratis para siempre · Sin tarjeta"}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── MARKETS STRIP v5 — carrusel en movimiento + colores en tiempo real (PriceCtx) ──
+function MarketsStrip({ onNav }){
+  const lp = useContext(PriceCtx);
+  const registerPx = useContext(PriceRegisterCtx);
+  const ITEMS = [
+    {s:"SPX",  n:"S&P 500",  live:"SPY",  p:"7,384", fallC:1.25, bg:"#DBEAFE", fg:"#1D4ED8", letter:"S", idx:2},
+    {s:"QQQ",  n:"Nasdaq ETF",live:"QQQ", p:"714.00",fallC:2.33, bg:"#D1FAE5", fg:"#065F46", letter:"Q", idx:2},
+    {s:"TSLA", n:"Tesla Inc.",live:"TSLA",p:"392.32",fallC:2.81, img:"TSLA", idx:2},
+    {s:"MSFT", n:"Microsoft", live:"MSFT",p:"387.69",fallC:-2.43,img:"MSFT", idx:2},
+    {s:"AMZN", n:"Amazon",    live:"AMZN",p:"239.10",fallC:0.46, img:"AMZN", idx:2},
+    {s:"META", n:"Meta",      live:"META",p:"566.41",fallC:-0.80,img:"META", idx:2},
+    {s:"GOOGL",n:"Alphabet",  live:"GOOGL",p:"178.40",fallC:0.91,img:"GOOGL",idx:2},
+    {s:"BTC",  n:"Bitcoin",   live:"BTC", p:"62,860",fallC:1.20, bg:"#FFF7ED", fg:"#F7931A", letter:"₿", idx:44},
+    {s:"NVDA", n:"NVIDIA",    live:"NVDA",p:"202.10",fallC:0.84, img:"NVDA", idx:2},
+    {s:"AAPL", n:"Apple Inc.",live:"AAPL",p:"295.38",fallC:1.30, img:"AAPL", idx:2},
+  ];
+  useEffect(()=>{ try{ registerPx && registerPx(ITEMS.map(i=>i.live)); }catch(_){ } },[]);
+  const fmtP = (v)=> v>=1000 ? v.toLocaleString("en-US",{maximumFractionDigits:0}) : v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const cards = ITEMS.map(it=>{
+    const live = lp && lp[it.live];
+    const chg = (live && typeof live.change==="number") ? live.change : it.fallC;
+    const up = chg>=0;
+    let priceStr = it.p;
+    if(live && live.price>0 && it.s!=="SPX"){ priceStr = fmtP(live.price); }
+    return {...it, up, pct:Math.abs(chg).toFixed(2)+"%", priceStr};
+  });
+  const renderCard = (it,i)=>{
+    const spkUp="M0,24 C30,20 70,16 110,10 C140,6 160,5 180,3";
+    const spkDn="M0,4 C30,8 70,14 110,20 C140,24 160,26 180,28";
+    const spkPth=it.up?spkUp:spkDn;
+    const spkC=it.up?"#16A34A":"#DC2626";
+    const gradId=`msp${i}`;
+    return(
+      <div key={i} className="nexo-mkt-card" onClick={()=>onNav&&onNav(it.idx)}>
+        <div className="nexo-mkt-card-top">
+          <div className="nexo-mkt-logo" style={it.img?{background:"transparent"}:{background:it.bg,color:it.fg}}>
+            {it.img
+              ? <img src={`https://assets.parqet.com/logos/symbol/${it.img}`} style={{width:22,height:22,objectFit:"contain"}}
+                  onError={e=>{e.target.style.display="none";e.target.parentNode.style.background=it.bg||"#EFF4FB";e.target.parentNode.style.color=it.fg||"#1565C0";e.target.parentNode.textContent=it.letter||it.s.slice(0,2);}}/>
+              : <span style={{fontSize:it.letter&&it.letter.length>1?10:13,fontWeight:900}}>{it.letter}</span>}
+          </div>
+          <div><div className="nexo-mkt-sym">{it.s}</div><div className="nexo-mkt-name">{it.n}</div></div>
+        </div>
+        <div className="nexo-mkt-mid">
+          <div className="nexo-mkt-price">{it.priceStr}</div>
+          <div className={it.up?"nexo-mkt-pct-up":"nexo-mkt-pct-dn"}>{it.up?"▲":"▼"} {it.pct}</div>
+        </div>
+        <svg className="nexo-mkt-spark" viewBox="0 0 180 32" preserveAspectRatio="none">
+          <defs><linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={spkC} stopOpacity="0.15"/><stop offset="100%" stopColor={spkC} stopOpacity="0"/></linearGradient></defs>
+          <path d={spkPth} fill="none" stroke={spkC} strokeWidth="2"/>
+          <path d={`${spkPth} L180,32 L0,32Z`} fill={`url(#${gradId})`}/>
+        </svg>
+      </div>
+    );
+  };
+  return(
+    <div className="nexo-mkt-strip nexo-hide-mobile">
+      <div className="nexo-mkt-track">
+        {cards.map((it,i)=>renderCard(it,i))}
+        {cards.map((it,i)=>renderCard(it,i+100))}
       </div>
     </div>
   );
@@ -14409,7 +14482,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
   const [whaleTxs,setWhaleTxs]=useState([]); // TXs reales on-chain (Blockchair vía /api/chart)
   const [whalePaused,setWhalePaused]=useState(false);
   // Telegram alerted ref — persiste en sessionStorage para no reenviar al remontar
-  const alertedRef=useRef(new Set(JSON.parse(sessionStorage.getItem("nexo-flow-alerted")||"[]")));
+  const alertedRef=useRef(new Set((()=>{ try{ return JSON.parse(sessionStorage.getItem("nexo-flow-alerted")||"[]"); }catch{ return []; } })()));
   // Flag: en el primer render solo marcar items como vistos, NUNCA enviar
   const tgFirstRun=useRef(true);
   // Cooldown: mínimo 30 min entre alertas de Telegram
@@ -25913,9 +25986,9 @@ function MarketStatusDot({ lang }) {
     return () => clearInterval(iv);
   }, [lang]);
 
-  const color = open ? "#10B981" : label === "PRE" ? "#F59E0B" : "#64748B";
-  const bg    = open ? "rgba(16,185,129,0.07)" : label === "PRE" ? "rgba(245,158,11,0.07)" : "rgba(100,116,139,0.05)";
-  const bd    = open ? "rgba(16,185,129,0.22)" : label === "PRE" ? "rgba(245,158,11,0.2)" : "rgba(100,116,139,0.15)";
+  const color = open ? "#10B981" : label === "PRE" ? "#F59E0B" : "#EF4444";
+  const bg    = open ? "rgba(16,185,129,0.07)" : label === "PRE" ? "rgba(245,158,11,0.07)" : "rgba(239,68,68,0.08)";
+  const bd    = open ? "rgba(16,185,129,0.22)" : label === "PRE" ? "rgba(245,158,11,0.2)" : "rgba(239,68,68,0.25)";
 
   return (
     <div
@@ -25925,8 +25998,8 @@ function MarketStatusDot({ lang }) {
     >
       <span style={{
         width:7,height:7,borderRadius:"50%",background:color,display:"inline-block",
-        animation: open ? "nexo-pulse 1.8s ease-in-out infinite" : "none",
-        boxShadow: open ? `0 0 6px ${color}` : "none",
+        animation: "nexo-pulse 1.8s ease-in-out infinite",
+        boxShadow: `0 0 6px ${color}`,
         transition:"background 0.4s",
       }}/>
       <span style={{fontSize:10,fontWeight:700,color,letterSpacing:0.5,transition:"color 0.4s"}}>
@@ -27308,7 +27381,7 @@ export default function App(){
   const [newsletterEmail,setNewsletterEmail] = useState("");
   const [newsletterDone,setNewsletterDone]   = useState(false);
   const [showNewsletter,setShowNewsletter]   = useState(
-    !sessionStorage.getItem("nexo-newsletter-dismissed")
+    (()=>{ try{ return !sessionStorage.getItem("nexo-newsletter-dismissed"); }catch{ return true; } })()
   );
 
   const t = LANGS[lang];
@@ -28555,7 +28628,9 @@ export default function App(){
       .nexo-dbadge-vip { font-size:9px; background:#FEF3C7; color:#92400E; padding:2px 6px; border-radius:4px; font-weight:700; margin-left:auto; flex-shrink:0; }
       .nexo-dbadge-ai  { font-size:9px; background:#EDE9FE; color:#7C3AED; padding:2px 6px; border-radius:4px; font-weight:700; margin-left:auto; flex-shrink:0; }
       /* Markets strip */
-      .nexo-mkt-strip { background:var(--c-surface); border-bottom:1px solid var(--c-border); overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+      .nexo-mkt-strip { background:var(--c-surface); border-bottom:1px solid var(--c-border); overflow:hidden; }
+      .nexo-mkt-track { display:flex; gap:0; padding:0 16px; width:max-content; animation:nexo-tick-v4 48s linear infinite; }
+      .nexo-mkt-strip:hover .nexo-mkt-track { animation-play-state:paused; }
       .nexo-mkt-strip::-webkit-scrollbar { display:none; }
       .nexo-mkt-strip-inner { display:flex; gap:0; padding:0 16px; min-width:max-content; }
       .nexo-mkt-card { padding:8px 14px; display:flex; flex-direction:column; gap:4px; cursor:pointer; border-right:1px solid var(--c-border); min-width:120px; transition:background .15s; }
@@ -28786,7 +28861,7 @@ export default function App(){
         </div>
 
         {/* ── LAYER 2: NAV ROW — 3 sections: tabs | prediction | dropdowns+premium ── */}
-        <div className="nexo-nav-row-v4 nexo-hide-mobile" style={{top:trialDaysLeft!==null?32+62:62,justifyContent:"space-between",gap:0}}>
+        <div className="nexo-nav-row-v4 nexo-hide-mobile" style={{top:trialDaysLeft!==null?32+62:62,justifyContent:"center",gap:30}}>
 
           {/* ── LEFT: direct page tabs ── */}
           <div style={{display:"flex",alignItems:"center",gap:0,flexShrink:0}}>
@@ -29388,50 +29463,7 @@ export default function App(){
 
       {/* MARKETS STRIP v4 — desktop only, shown on feed pages */}
       {!(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99) && (
-        <div className="nexo-mkt-strip nexo-hide-mobile">
-          <div className="nexo-mkt-strip-inner">
-            {[
-              {s:"SPX",n:"S&P 500",p:"7,384",c:"+1.25%",up:true,bg:"#DBEAFE",fg:"#1D4ED8",letter:"S",idx:2},
-              {s:"QQQ",n:"Nasdaq ETF",p:"714.00",c:"+2.33%",up:true,bg:"#D1FAE5",fg:"#065F46",letter:"Q",idx:2},
-              {s:"TSLA",n:"Tesla Inc.",p:"392.32",c:"+2.81%",up:true,img:"TSLA",idx:2},
-              {s:"MSFT",n:"Microsoft",p:"387.69",c:"-2.43%",up:false,img:"MSFT",idx:2},
-              {s:"AMZN",n:"Amazon",p:"239.10",c:"+0.46%",up:true,img:"AMZN",idx:2},
-              {s:"META",n:"Meta",p:"566.41",c:"-0.80%",up:false,img:"META",idx:2},
-              {s:"GOOGL",n:"Alphabet",p:"178.40",c:"+0.91%",up:true,img:"GOOGL",idx:2},
-              {s:"BTC",n:"Bitcoin",p:"62,860",c:"+1.20%",up:true,bg:"#FFF7ED",fg:"#F7931A",letter:"₿",idx:44},
-              {s:"NVDA",n:"NVIDIA",p:"202.10",c:"+0.84%",up:true,img:"NVDA",idx:2},
-              {s:"AAPL",n:"Apple Inc.",p:"295.38",c:"+1.30%",up:true,img:"AAPL",idx:2},
-            ].map((it,i)=>{
-              const spkUp = "M0,24 C30,20 70,16 110,10 C140,6 160,5 180,3";
-              const spkDn = "M0,4 C30,8 70,14 110,20 C140,24 160,26 180,28";
-              const spkPth = it.up?spkUp:spkDn;
-              const spkC = it.up?"#16A34A":"#DC2626";
-              const gradId = `msp${i}`;
-              return(
-                <div key={i} className="nexo-mkt-card" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
-                  <div className="nexo-mkt-card-top">
-                    <div className="nexo-mkt-logo" style={it.img?{background:"transparent"}:{background:it.bg,color:it.fg}}>
-                      {it.img
-                        ? <img src={`https://assets.parqet.com/logos/symbol/${it.img}`} style={{width:22,height:22,objectFit:"contain"}}
-                            onError={e=>{e.target.style.display="none";e.target.parentNode.style.background=it.bg||"#EFF4FB";e.target.parentNode.style.color=it.fg||"#1565C0";e.target.parentNode.textContent=it.letter||it.s.slice(0,2);}}/>
-                        : <span style={{fontSize:it.letter&&it.letter.length>1?10:13,fontWeight:900}}>{it.letter}</span>}
-                    </div>
-                    <div><div className="nexo-mkt-sym">{it.s}</div><div className="nexo-mkt-name">{it.n}</div></div>
-                  </div>
-                  <div className="nexo-mkt-mid">
-                    <div className="nexo-mkt-price">{it.p}</div>
-                    <div className={it.up?"nexo-mkt-pct-up":"nexo-mkt-pct-dn"}>{it.up?"▲":"▼"} {it.c.replace(/[+-]/,"")}</div>
-                  </div>
-                  <svg className="nexo-mkt-spark" viewBox="0 0 180 32" preserveAspectRatio="none">
-                    <defs><linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={spkC} stopOpacity="0.15"/><stop offset="100%" stopColor={spkC} stopOpacity="0"/></linearGradient></defs>
-                    <path d={spkPth} fill="none" stroke={spkC} strokeWidth="2"/>
-                    <path d={`${spkPth} L180,32 L0,32Z`} fill={`url(#${gradId})`}/>
-                  </svg>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <MarketsStrip onNav={(idx)=>{setPage(idx);setShowLanding(false);}}/>
       )}
 
       {/* MARKETS MINI WIDGET — only on full-page market views */}
