@@ -10432,7 +10432,8 @@ function MarketsStrip({ onNav }){
     const spkC=it.up?"#16A34A":"#DC2626";
     const gradId=`msp${i}`;
     return(
-      <div key={i} className="nexo-mkt-card" onClick={()=>onNav&&onNav(it.idx)}>
+      <div key={i} className="nexo-mkt-card" onClick={()=>onNav&&onNav(it.idx)}
+        style={{background:it.up?"rgba(22,163,74,0.06)":"rgba(220,38,38,0.06)",border:`1px solid ${it.up?"rgba(22,163,74,0.28)":"rgba(220,38,38,0.28)"}`}}>
         <div className="nexo-mkt-card-top">
           <div className="nexo-mkt-logo" style={it.img?{background:"transparent"}:{background:it.bg,color:it.fg}}>
             {it.img
@@ -28649,9 +28650,8 @@ export default function App(){
       .nexo-mkt-strip:hover .nexo-mkt-track { animation-play-state:paused; }
       .nexo-mkt-strip::-webkit-scrollbar { display:none; }
       .nexo-mkt-strip-inner { display:flex; gap:0; padding:0 16px; min-width:max-content; }
-      .nexo-mkt-card { padding:8px 14px; display:flex; flex-direction:column; gap:4px; cursor:pointer; border-right:1px solid var(--c-border); min-width:120px; transition:background .15s; }
-      .nexo-mkt-card:hover { background:var(--c-card2); }
-      .nexo-mkt-card:first-child { border-left:none; }
+      .nexo-mkt-card { padding:8px 11px; display:flex; flex-direction:column; gap:4px; cursor:pointer; border-radius:12px; margin:7px 4px; min-width:120px; transition:all .15s; }
+      .nexo-mkt-card:hover { filter:brightness(0.98); }
       .nexo-mkt-card-top { display:flex; align-items:center; gap:7px; }
       .nexo-mkt-logo { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; flex-shrink:0; overflow:hidden; }
       .nexo-mkt-sym { font-size:12px; font-weight:800; color:var(--c-text); }
