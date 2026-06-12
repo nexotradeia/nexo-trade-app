@@ -2616,9 +2616,6 @@ function AuthModal({mode,onClose,onAuth,lang}){
         }} style={{width:"100%",marginTop:10,padding:"10px",background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,color:C.muted,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
           Continuar como visitante →
         </button>}
-        {tab==="register"&&<p style={{margin:"14px 0 0",color:C.muted2,fontSize:11,textAlign:"center",lineHeight:1.6}}>
-          🎁 Al registrarte recibes <strong style={{color:C.accentText}}>100 puntos de bienvenida</strong> y la insignia <strong>🚀 Early Adopter</strong>
-        </p>}
       </div>
     </div>
   );
@@ -7779,33 +7776,34 @@ function LeftSidebar({user, onProfile, onNeedAuth, lang, onNavigate, onLogout, o
     {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>, label:"Paper Trading", idx:9, vip:true, ai:true},
     {icon:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, label:"Plans", idx:8, premium:true},
   ];
+  const Ico=(d,extra="")=> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{__html:d}}/>;
   const navMore = [
-    {icon:"📅", label:isEN?"Economic Calendar":"Calendario",         idx:14},
-    {icon:"💰", label:"Dividends",                 idx:15},
-    {icon:"🚀", label:"IPOs 2026",                                   idx:16},
-    {icon:"⛏️", label:isEN?"Commodities":"Commodities",              idx:18},
-    {icon:"🔍", label:isEN?"Screener":"Screener",                    idx:17, vip:true},
-    {icon:"💼", label:"Portfolio Terminal Oracle AI",   idx:37, vip:true},
-    {icon:"👁", label:isEN?"Watchlist":"Watchlist",                  idx:38},
-    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>, label:"Notifications", idx:39},
-    {icon:"🚨", label:isEN?"Alert Center":"Centro Alertas",          idx:42},
-    {icon:"🎮",  label:isEN?"Paper Trading Sim":"Paper Trading Sim",  idx:9, vip:true},
-    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>, label:"Leaderboard", idx:40},
-    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6z"/></svg>, label:"News", idx:5},
-    {icon:"📅", label:"Earnings",                                    idx:6},
-    {icon:"🚀", label:"Live Markets",         idx:7},
-    {icon:"🌅", label:isEN?"Pre-Market & After-Hours":"Pre-Market y After-Hours", idx:45},
-    {icon:"📐", label:isEN?"Pivot Points":"Puntos Pivote",           idx:46},
-    {icon:"💵", label:isEN?"Profit Calculator":"Calc. Ganancias",    idx:47},
-    {icon:"⚖️", label:isEN?"Margin Calculator":"Calc. Margen",       idx:48},
-    {icon:"🌀", label:isEN?"Fibonacci":"Fibonacci",                  idx:52},
-    {icon:"🏠", label:isEN?"Mortgage Calc.":"Calc. Hipoteca",        idx:49},
-    {icon:"🔮", label:isEN?"Forward Rates":"Tasas Forward",          idx:50},
-    {icon:"💱", label:isEN?"Currency Converter":"Conversor Divisas", idx:53},
-    {icon:"🌡️", label:isEN?"FX Heat Map":"Heat Map Divisas",         idx:60},
-    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>, label:"Webinars", idx:11},
-    {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>, label:"Academy", idx:12},
-    {icon:"🌍", label:"Global Radar",           idx:44},
+    {icon:Ico('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'), label:isEN?"Economic Calendar":"Calendario", idx:14},
+    {icon:Ico('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'), label:"Dividends", idx:15},
+    {icon:Ico('<circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/>'), label:"IPOs 2026", idx:16},
+    {icon:Ico('<path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"/>'), label:isEN?"Commodities":"Commodities", idx:18},
+    {icon:Ico('<polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3"/>'), label:isEN?"Screener":"Screener", idx:17, vip:true},
+    {icon:Ico('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'), label:"Portfolio Terminal Oracle AI", idx:37, vip:true},
+    {icon:Ico('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>'), label:isEN?"Watchlist":"Watchlist", idx:38},
+    {icon:Ico('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>'), label:"Notifications", idx:39},
+    {icon:Ico('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>'), label:isEN?"Alert Center":"Centro Alertas", idx:42},
+    {icon:Ico('<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'), label:isEN?"Paper Trading Sim":"Paper Trading Sim", idx:9, vip:true},
+    {icon:Ico('<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>'), label:"Leaderboard", idx:40},
+    {icon:Ico('<path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l6 6v8a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/>'), label:"News", idx:5},
+    {icon:Ico('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/>'), label:"Earnings", idx:6},
+    {icon:Ico('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'), label:"Live Markets", idx:7},
+    {icon:Ico('<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/>'), label:isEN?"Pre-Market & After-Hours":"Pre-Market y After-Hours", idx:45},
+    {icon:Ico('<polygon points="12 3 21 20 3 20"/>'), label:isEN?"Pivot Points":"Puntos Pivote", idx:46},
+    {icon:Ico('<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="14" x2="8" y2="18"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="16" y1="14" x2="16" y2="18"/>'), label:isEN?"Profit Calculator":"Calc. Ganancias", idx:47},
+    {icon:Ico('<path d="M12 3v18M5 7h14M7 7l-4 7a4 4 0 0 0 8 0zM17 7l-4 7a4 4 0 0 0 8 0z"/>'), label:isEN?"Margin Calculator":"Calc. Margen", idx:48},
+    {icon:Ico('<line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>'), label:isEN?"Fibonacci":"Fibonacci", idx:52},
+    {icon:Ico('<path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/>'), label:isEN?"Mortgage Calc.":"Calc. Hipoteca", idx:49},
+    {icon:Ico('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'), label:isEN?"Forward Rates":"Tasas Forward", idx:50},
+    {icon:Ico('<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'), label:isEN?"Currency Converter":"Conversor Divisas", idx:53},
+    {icon:Ico('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'), label:isEN?"FX Heat Map":"Heat Map Divisas", idx:60},
+    {icon:Ico('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'), label:"Webinars", idx:11},
+    {icon:Ico('<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'), label:"Academy", idx:12},
+    {icon:Ico('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'), label:"Global Radar", idx:44},
   ];
 
   return(
@@ -26261,15 +26259,6 @@ function WelcomeModal({name, onClose, onGoVip, lang="es"}){
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Bonus badge */}
-        <div style={{background:"linear-gradient(135deg,#f59e0b22,#0F5E6822)",border:"1px solid #f59e0b44",borderRadius:12,padding:"10px 16px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
-          <span style={{fontSize:22}}>🎁</span>
-          <div>
-            <div style={{color:"#f59e0b",fontWeight:700,fontSize:13}}>{isEN?"+100 welcome points added":"+100 puntos de bienvenida añadidos"}</div>
-            <div style={{color:"#92400e",fontSize:11}}>{isEN?'"Early Adopter" badge unlocked on your profile':'Badge "Early Adopter" desbloqueado en tu perfil'}</div>
-          </div>
         </div>
 
         {/* CTAs */}
