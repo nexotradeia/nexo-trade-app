@@ -26063,6 +26063,17 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
   var _pickIdx  = (_dayIdx === 0 || _dayIdx === 6) ? 0 : (_dayIdx - 1) % _allPools.length;
   var pick = _allPools[_pickIdx] || {ticker:"NVDA", nombre:"NVIDIA", razonEn:"Strong Buy consensus.", confianza:93};
   var pickThesis = pick.razonEn ? pick.razonEn.split(".")[0] + "." : "";
+  // ── 5 stocks del día (automáticos): ordenados por consenso de analistas (confianza) y rotados por fecha ──
+  var _dailyFive = (function(){
+    try{
+      var arr = _allPools.filter(function(p){ return p && p.ticker && p.ticker!==pick.ticker; });
+      arr = arr.slice().sort(function(a,b){ return (b.confianza||0)-(a.confianza||0); });
+      if(!arr.length) return [];
+      var seed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,""),10) || 0;
+      var off = seed % arr.length;
+      return arr.slice(off).concat(arr.slice(0,off)).slice(0,5);
+    }catch(e){ return []; }
+  })();
 
   // ── Movers
   var allT = (TICKER_DATA_INIT || []).map(function(t){
@@ -26157,6 +26168,15 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
         </div>
         {/* thesis */}
         <p style={{position:"relative",zIndex:1,marginTop:12,fontSize:13.5,lineHeight:1.5,color:"#c9ced9"}}>{pickThesis}</p>
+        {/* entry / target / stop — todo sobre la acción */}
+        {(pick.entrada||pick.target||pick.stop_loss) && (
+          <div style={{position:"relative",zIndex:1,marginTop:12,display:"flex",gap:7,flexWrap:"wrap"}}>
+            {pick.entrada && <span style={{fontSize:11,fontWeight:700,color:"#bcd0ff",background:"rgba(10,92,255,0.16)",border:"1px solid rgba(10,92,255,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Entry":"Entrada"} {pick.entrada}</span>}
+            {pick.target && <span style={{fontSize:11,fontWeight:700,color:"#27d391",background:"rgba(39,211,145,0.12)",border:"1px solid rgba(39,211,145,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Target":"Objetivo"} {pick.target}</span>}
+            {pick.stop_loss && <span style={{fontSize:11,fontWeight:700,color:"#f87171",background:"rgba(248,113,113,0.12)",border:"1px solid rgba(248,113,113,0.30)",borderRadius:8,padding:"4px 9px"}}>Stop {pick.stop_loss}</span>}
+            {pick.sector && <span style={{fontSize:11,fontWeight:700,color:"#9aa6bf",background:"rgba(154,166,191,0.12)",border:"1px solid rgba(154,166,191,0.26)",borderRadius:8,padding:"4px 9px"}}>{pick.sector}</span>}
+          </div>
+        )}
         {/* CTA */}
         <div style={{position:"relative",zIndex:1,marginTop:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onOpenAI?onOpenAI(pick.ticker):onNavigate&&onNavigate(51); }}
@@ -26167,6 +26187,36 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
           <span style={{fontSize:10,color:"#5e6677",letterSpacing:"0.02em"}}>AI signal &bull; not financial advice</span>
         </div>
       </div>
+
+      {/* 5 stocks del día — analistas, automático por fecha, GRATIS */}
+      {_dailyFive.length>0 && (
+        <div style={{marginBottom:18}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <span style={{fontSize:15,fontWeight:700,color:"var(--c-text)"}}>{isEN?"Today's analyst picks":"Picks de analistas hoy"}</span>
+            <span style={{fontSize:10.5,fontWeight:800,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px",letterSpacing:0.3}}>{isEN?"FREE":"GRATIS"}</span>
+          </div>
+          <div style={{border:"1px solid var(--c-border)",borderRadius:18,overflow:"hidden",background:"var(--c-surface)"}}>
+            {_dailyFive.map(function(p,i){
+              var d=liveP(p.ticker,0,0);
+              return (
+                <div key={p.ticker+i} style={{display:"flex",alignItems:"center",gap:11,padding:"12px 14px",borderBottom:i<_dailyFive.length-1?"1px solid var(--c-border)":"none"}}>
+                  <div style={{width:38,height:38,borderRadius:10,background:"#0a0d14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <span style={{fontWeight:800,fontSize:12,color:"#fff",fontFamily:"monospace"}}>{p.ticker.slice(0,4)}</span>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:14,fontWeight:700,color:"var(--c-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.ticker} <span style={{fontSize:12,fontWeight:500,color:"var(--c-muted)"}}>{p.nombre}</span></div>
+                    <div style={{fontSize:12,fontWeight:600,color:"#16A34A",marginTop:1}}>▲ {p.entrada} → {p.target} · {p.confianza}%</div>
+                  </div>
+                  {d.price>0 && <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontSize:13,fontWeight:700,color:"var(--c-text)",fontFamily:"monospace"}}>{fmtP(d.price,p.ticker)}</div>
+                    <div style={{fontSize:11,fontWeight:600,color:upC(d.chg)}}>{fmtC(d.chg)}</div>
+                  </div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 🔥 Top Analyst Call Today */}
       {_topPick&&(
