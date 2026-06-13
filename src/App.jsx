@@ -5128,6 +5128,8 @@ const CRYPTO_LOGO = {
 };
 const logoUrlFor = (sym) => {
   const s=(sym||"").toUpperCase();
+  // Tickers cuyo logo oficial confunde (parece el producto, no el ticker) → forzar monograma
+  if(s==="GOOGL"||s==="GOOG") return null;
   if(CRYPTO_LOGO[s]) return `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${CRYPTO_LOGO[s]}.png`;
   // Logos de acciones por símbolo (repo nvstly en jsdelivr) — cubre miles de tickers; si no existe → letra
   if(/^[A-Z.]{1,6}$/.test(s)) return `https://cdn.jsdelivr.net/gh/nvstly/icons/ticker_icons/${s}.png`;
@@ -14721,6 +14723,448 @@ function generateFlowItem(id, basePrice){
   // highVol: ~55% alto volumen, ~45% bajo — rango equilibrado para demostrar el filtro
   const highVol = size>1800 || premium>5e6;
   return {id,ticker,type,isCall,isDark,isGold,price,strike,premium,size,expiry,otm,time,sentiment:isCall?"bullish":"bearish",aboveSMA200,highVol};
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 🔎 FINDER PRO — reemplaza Smart Money (pág 20). Tema oscuro propio.
+//   Precios REALES vía PriceCtx · scores/señales ILUSTRATIVOS (sello visible)
+//   Paywall VIP real (gate de tabla + trade plan bloqueado) vía onNeedPremium
+// ══════════════════════════════════════════════════════════════════
+const NFP_FLAGS={VOL:{c:"vs",l:"VOL"},BRK:{c:"bo",l:"BRK"},MOM:{c:"mo",l:"MOM"},SM:{c:"sm",l:"SM"},CAT:{c:"ca",l:"CAT"},UOA:{c:"uoa",l:"UOA"},OI:{c:"oi",l:"OI+"},BLK:{c:"sw",l:"BLK"}};
+function FinderPro({isPremium,onNeedPremium,lang="es"}){
+  const isEN=lang==="en";
+  const T=(en,es)=>isEN?en:es;
+  const lp=useContext(PriceCtx);
+  const [tab,setTab]=useState("stocks");
+  const [strict,setStrict]=useState(true);
+  const [selS,setSelS]=useState(0);
+  const [selO,setSelO]=useState(0);
+  const unlock=()=>{ onNeedPremium&&onNeedPremium(); };
+  const liveP=(sym,fb)=>{ const q=lp[sym]; return (q&&q.price)?q.price:fb; };
+  const liveC=(sym,fb)=>{ const q=lp[sym]; return (q&&typeof q.change==="number")?q.change:fb; };
+  const fmtP=(v)=> v>=1000? v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}) : v.toFixed(2);
+  const FREE=3;
+
+  const STOCKS=[
+    {tk:"NVDA",dir:"LONG",fb:140.50,fbc:2.10,tgt:165,vol:"5.5×",flags:["VOL","BRK","MOM","SM","CAT"],score:94,stop:133,entry:"138–142",mcap:"$3.45T",rsi:"68",sma:"$128",sm:"92",
+     why:T("NVDA broke $135 resistance on 5.5× average volume — the strongest signal of the day. RSI 68 leaves room before overbought, MACD just crossed bullish, earnings in 6 days. Five of five signals firing.","NVDA rompió la resistencia de $135 con 5.5× el volumen promedio — la señal más fuerte del día. RSI 68 deja margen antes de sobrecompra, MACD cruzó alcista, earnings en 6 días. Cinco de cinco señales disparando.")},
+    {tk:"MSFT",dir:"LONG",fb:447.20,fbc:0.85,tgt:490,vol:"2.1×",flags:["BRK","MOM","SM","CAT"],score:91,stop:432,entry:"445–450",mcap:"$3.32T",rsi:"61",sma:"$430",sm:"86",
+     why:T("MSFT confirmed a breakout above $445 with a healthy 2.1× volume. Smart money has been accumulating quietly for 3 weeks. Lower beta, safer entry.","MSFT confirmó rompimiento sobre $445 con volumen sano de 2.1×. El smart money lleva 3 semanas acumulando en silencio. Beta menor, entrada más segura.")},
+    {tk:"COIN",dir:"LONG",fb:234.80,fbc:3.40,tgt:295,vol:"4.2×",flags:["VOL","MOM","SM","CAT"],score:89,stop:218,entry:"232–238",mcap:"$58B",rsi:"66",sma:"$210",sm:"84",
+     why:T("COIN volume 4.2× average as BTC pushes new highs. High-beta name with earnings in 9 days — momentum + catalyst stacking.","Volumen COIN 4.2× promedio mientras BTC empuja máximos. Nombre de alta beta con earnings en 9 días — momentum + catalizador apilándose.")},
+    {tk:"META",dir:"LONG",fb:566.41,fbc:1.96,tgt:620,vol:"3.1×",flags:["VOL","BRK","SM","CAT"],score:87,stop:548,entry:"560–570",mcap:"$1.44T",rsi:"64",sma:"$540",sm:"81",
+     why:T("META broke out with 3.1× volume ahead of its product event. Institutional accumulation steady.","META rompió con volumen 3.1× antes de su evento de producto. Acumulación institucional sostenida.")},
+    {tk:"AAPL",dir:"LONG",fb:228.10,fbc:1.20,tgt:248,vol:"1.8×",flags:["BRK","MOM","SM","CAT"],score:85,stop:220,entry:"226–230",mcap:"$3.46T",rsi:"58",sma:"$220",sm:"79",
+     why:T("AAPL holding above its 50-day with steady momentum into the product cycle.","AAPL se sostiene sobre su media de 50 días con momentum estable de cara al ciclo de producto.")},
+    {tk:"PLTR",dir:"LONG",fb:28.40,fbc:4.80,tgt:35,vol:"6.7×",flags:["VOL","BRK","MOM","CAT"],score:83,stop:25.5,entry:"27.5–28.8",mcap:"$62B",rsi:"71",sma:"$24",sm:"76",
+     why:T("PLTR exploding on 6.7× volume — highest of the board — but RSI 71 is near overbought. Size carefully.","PLTR explotando con volumen 6.7× — el más alto del tablero — pero RSI 71 cerca de sobrecompra. Calcula bien el tamaño.")},
+    {tk:"TSLA",dir:"SHORT",fb:245.60,fbc:-2.30,tgt:215,vol:"2.4×",flags:["VOL","MOM","SM","CAT"],score:82,stop:258,entry:"244–248",mcap:"$780B",rsi:"42",sma:"$262",sm:"74",
+     why:T("TSLA breaking down below its 50-day on 2.4× volume — momentum turning bearish.","TSLA quiebra bajo su media de 50 días con volumen 2.4× — momentum girando bajista.")},
+  ];
+  const OPTIONS=[
+    {tk:"META",side:"CALL",strk:"$580",exp:"Jun 20",pm:"$8.42",vol:"14.2K/8.1K",iv:"38%",flags:["UOA","OI","SM"],score:94,be:"$588.42",pop:"62%",delta:"0.42",gamma:"0.018",theta:"−$11",vega:"$26",
+     why:T("META volume hit 14.2K vs 4K average (3.5×), open interest jumped +3,200 overnight, IV in the bottom 22% of 30 days. Someone big is positioning.","META alcanzó volumen 14.2K vs 4K promedio (3.5×), el interés abierto subió +3,200 de un día al otro, IV en el piso 22% de 30 días. Alguien grande se posiciona.")},
+    {tk:"SPY",side:"CALL",strk:"$730",exp:"Jun 27",pm:"$5.18",vol:"28.4K/22K",iv:"15%",flags:["SM"],score:91,be:"$735.18",pop:"71%",delta:"0.55",gamma:"0.020",theta:"−$8",vega:"$31",
+     why:T("SPY high-probability call with low IV and strong volume — the conservative play.","Call SPY de alta probabilidad con IV baja y volumen fuerte — la jugada conservadora.")},
+    {tk:"NVDA",side:"CALL",strk:"$215",exp:"Jul 18",pm:"$6.95",vol:"22.1K/14K",iv:"42%",flags:["UOA","OI","BLK"],score:90,be:"$221.95",pop:"54%",delta:"0.38",gamma:"0.015",theta:"−$13",vega:"$29",
+     why:T("NVDA unusual call activity with block flow and rising OI ahead of earnings.","Actividad inusual de calls en NVDA con flujo en bloque y OI subiendo antes de earnings.")},
+    {tk:"COIN",side:"CALL",strk:"$320",exp:"Jul 18",pm:"$4.20",vol:"9.8K/5.4K",iv:"68%",flags:["UOA","BLK"],score:88,be:"$324.20",pop:"38%",delta:"0.30",gamma:"0.012",theta:"−$9",vega:"$22",
+     why:T("COIN lottery-style call — biggest % upside if BTC keeps running, high IV so size small.","Call estilo lotería en COIN — mayor % de subida si BTC sigue, IV alta así que tamaño pequeño.")},
+    {tk:"AAPL",side:"CALL",strk:"$305",exp:"Jul 18",pm:"$3.80",vol:"18.6K/12K",iv:"22%",flags:["OI"],score:85,be:"$308.80",pop:"49%",delta:"0.40",gamma:"0.014",theta:"−$7",vega:"$24",
+     why:T("AAPL call with cheap IV and rising open interest into the product cycle.","Call AAPL con IV barata e interés abierto subiendo de cara al ciclo de producto.")},
+    {tk:"TSLA",side:"PUT",strk:"$370",exp:"Jun 27",pm:"$5.60",vol:"11.4K/7.2K",iv:"55%",flags:["BLK","SM"],score:82,be:"$364.40",pop:"45%",delta:"−0.36",gamma:"0.013",theta:"−$12",vega:"$27",
+     why:T("TSLA put with block flow and bearish smart-money tilt — hedge or directional short.","Put TSLA con flujo en bloque y sesgo bajista de smart money — cobertura o corto direccional.")},
+  ];
+
+  const rows = tab==="stocks"?STOCKS:OPTIONS;
+  const sel = tab==="stocks"?selS:selO;
+  const setSel = tab==="stocks"?setSelS:setSelO;
+  const d = rows[sel] || rows[0];
+  const dP = liveP(d.tk,d.fb||0), dC = liveC(d.tk,d.fbc||0);
+
+  const Flag=({code,big})=>{ const f=NFP_FLAGS[code]; if(!f) return null; return <span className={"f "+f.c} style={big?{padding:"4px 8px",fontSize:8.5}:undefined}>{big&&<span className="x"/>}{f.l}</span>; };
+  const Arrow=()=> <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5h10M8.5 3.5l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+
+  return(
+  <div className={"nfp t-"+tab}>
+    <style>{`
+      .nfp{--bl:#0B5CFF;--bl2:#4D8DFF;--bl3:#9FC0FF;--cy:#22D3EE;--bg:#06080E;--bg2:#0C111E;--bg3:#11182A;--ln:#19202F;--ln2:#222B3F;--tx:#C9D6F2;--mut:#67769A;--up:#34D399;--dn:#F87171;--gd:#F5C84B;--vi:#A78BFA;--tg:#26A5E4;
+        background:var(--bg);color:#fff;font-family:'Inter',sans-serif;border-radius:16px;padding:16px;margin:-4px 0;position:relative;overflow:hidden}
+      .nfp *{box-sizing:border-box}
+      .nfp .mono{font-family:'JetBrains Mono','IBM Plex Mono',monospace}
+      .nfp button{font-family:inherit;cursor:pointer}
+      .nfp .up{color:var(--up)} .nfp .dn{color:var(--dn)}
+      .nfp .glow{position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(11,92,255,.13),transparent 60%);top:-340px;left:50%;transform:translateX(-50%);pointer-events:none}
+      .nfp .wrap{position:relative;z-index:1}
+      .nfp .top{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--ln);border-radius:14px;padding:11px 14px;flex-wrap:wrap}
+      .nfp .top .ic{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#0B2B7A,#0B5CFF);display:flex;align-items:center;justify-content:center;flex:none}
+      .nfp .top h1{font-size:14px;font-weight:800;letter-spacing:-.01em}
+      .nfp .top h1 .gd{background:linear-gradient(95deg,#4D8DFF,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent}
+      .nfp .top .meta{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;color:var(--mut);text-transform:uppercase;margin-top:2px}
+      .nfp .top .sp{flex:1;min-width:8px}
+      .nfp .liveb{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--cy);font-weight:600;border:1px solid #103040;background:rgba(34,211,238,.06);border-radius:8px;padding:6px 10px}
+      .nfp .liveb i{width:6px;height:6px;border-radius:50%;background:var(--cy);animation:nfpPl 1.4s infinite}
+      @keyframes nfpPl{50%{opacity:.25}}
+      .nfp .tabs{display:flex;gap:8px;margin-top:12px;background:var(--bg2);border:1px solid var(--ln);border-radius:14px;padding:6px}
+      .nfp .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 14px;background:transparent;border:none;color:var(--mut);font-weight:700;font-size:13.5px;border-radius:11px;transition:.18s}
+      .nfp .tab.on{color:#fff;box-shadow:inset 0 0 0 1px #1D3266;background:var(--bg3)}
+      .nfp .tab .ic2{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+      .nfp .tab.stocks .ic2{background:rgba(11,92,255,.15);color:var(--bl2)} .nfp .tab.on.stocks .ic2{background:linear-gradient(135deg,#0B5CFF,#22D3EE);color:#fff}
+      .nfp .tab.options .ic2{background:rgba(167,139,250,.15);color:var(--vi)} .nfp .tab.on.options .ic2{background:linear-gradient(135deg,#A78BFA,#22D3EE);color:#fff}
+      .nfp .tab .ti{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+      .nfp .tab .ti small{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--mut);font-weight:600;margin-top:2px;text-transform:uppercase}
+      .nfp .tab.on .ti small{color:var(--bl3)}
+      .nfp .hc{display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,rgba(52,211,153,.08),rgba(11,92,255,.05));border:1px solid #1A4A38;border-radius:13px;padding:10px 14px;margin-top:12px}
+      .nfp .hc .ic3{width:30px;height:30px;border-radius:9px;background:rgba(52,211,153,.18);border:1px solid #1A4A38;display:flex;align-items:center;justify-content:center;flex:none}
+      .nfp .hc .tx{flex:1;font-size:12px;color:var(--tx)}
+      .nfp .hc .tx b{color:var(--up);font-weight:700;display:block;font-size:12.5px}
+      .nfp .hc .tx small{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--mut);text-transform:uppercase;display:block;margin-top:1px}
+      .nfp .hcsw{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#fff;font-weight:600;cursor:pointer}
+      .nfp .hcsw .tog{width:36px;height:18px;background:var(--up);border-radius:99px;position:relative}
+      .nfp .hcsw .tog::after{content:"";position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;right:2px;transition:.2s}
+      .nfp .hcsw.off .tog{background:var(--ln2)} .nfp .hcsw.off .tog::after{right:auto;left:2px}
+      .nfp .sigs{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+      .nfp .sig{background:var(--bg2);border:1px solid var(--ln);border-radius:12px;padding:11px 13px}
+      .nfp .sig .lab{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp .sig .lab .dot{width:7px;height:7px;border-radius:50%}
+      .nfp .sig.s1 .dot{background:var(--gd)}.nfp .sig.s2 .dot{background:var(--bl2)}.nfp .sig.s3 .dot{background:var(--cy)}.nfp .sig.s4 .dot{background:var(--up)}.nfp .sig.s5 .dot{background:var(--vi)}
+      .nfp .sig .v{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;margin-top:4px;line-height:1}
+      .nfp .sig .v .u{font-size:10px;color:var(--mut);font-weight:400;margin-left:3px}
+      .nfp .sig .dd{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;margin-top:3px;color:var(--mut)}
+      .nfp .pillars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+      .nfp .pl{background:var(--bg2);border:1.5px solid var(--ln);border-radius:14px;padding:12px 13px;cursor:pointer;transition:.16s}
+      .nfp .pl:hover{transform:translateY(-2px)} .nfp .pl.sel{box-shadow:0 0 0 1.5px var(--bl2) inset}
+      .nfp .pl .pn{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;color:var(--mut);text-transform:uppercase}
+      .nfp .pl .pn .dot{width:7px;height:7px;border-radius:50%}
+      .nfp .pl.rr .dot{background:var(--bl2)}.nfp .pl.pr .dot{background:var(--cy)}.nfp .pl.up_ .dot{background:var(--gd)}
+      .nfp .pl h3{font-size:13.5px;font-weight:800;margin-top:4px}
+      .nfp .pl .desc{font-size:10.5px;color:var(--mut);margin-top:2px}
+      .nfp .pl .winner{margin-top:9px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace}
+      .nfp .pl .winner .tk{font-size:12.5px;font-weight:700;color:#fff}
+      .nfp .pl .winner .o{font-size:9.5px;color:var(--mut)}
+      .nfp .pl .winner .sc{margin-left:auto;font-size:12.5px;font-weight:700}
+      .nfp .pl.rr .winner .sc{color:var(--bl2)}.nfp .pl.pr .winner .sc{color:var(--cy)}.nfp .pl.up_ .winner .sc{color:var(--gd)}
+      .nfp .grid{display:grid;grid-template-columns:1fr .82fr;gap:12px;margin-top:12px}
+      .nfp .card{background:var(--bg2);border:1px solid var(--ln);border-radius:16px;overflow:hidden}
+      .nfp .ch{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--ln)}
+      .nfp .ch b{font-size:12px;font-weight:700} .nfp .ch .meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp .ch .sp{flex:1} .nfp .ch .stat{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cy);letter-spacing:.08em;display:flex;align-items:center;gap:5px}
+      .nfp .ch .stat i{width:5px;height:5px;border-radius:50%;background:var(--cy);animation:nfpPl 1.6s infinite}
+      .nfp .filt{display:flex;gap:6px;padding:9px 14px;border-bottom:1px solid var(--ln);overflow-x:auto;flex-wrap:wrap}
+      .nfp .filt span{flex:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:600;color:var(--mut);border:1px solid var(--ln);border-radius:7px;padding:5px 9px;text-transform:uppercase}
+      .nfp .filt span.on{color:#fff;background:var(--bg3);border-color:#1D3266}
+      .nfp .tape-h{display:grid;gap:7px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--ln);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp.t-stocks .tape-h,.nfp.t-stocks .row{grid-template-columns:30px 78px 70px 60px 64px 96px 54px}
+      .nfp.t-options .tape-h,.nfp.t-options .row{grid-template-columns:30px 92px 56px 56px 60px 92px 54px}
+      .nfp .tape-h span:nth-child(n+3){text-align:right} .nfp .tape-h .fh{text-align:center}
+      .nfp .row{display:grid;gap:7px;padding:10px 14px;border-bottom:1px solid #11182A;font-family:'JetBrains Mono',monospace;font-size:10.5px;align-items:center;cursor:pointer}
+      .nfp .row:hover{background:rgba(77,141,255,.05)} .nfp .row.sel{background:rgba(11,92,255,.10);box-shadow:inset 3px 0 0 var(--bl2)}
+      .nfp .row .rk{color:var(--mut);font-size:9px}
+      .nfp .row .ct{display:flex;align-items:center;gap:6px}
+      .nfp .row .ct .tk{font-size:11.5px;font-weight:700;color:#fff}
+      .nfp .row .ct .tg{font-size:7.5px;font-weight:700;border-radius:4px;padding:1px 5px}
+      .nfp .ct .tg.c{background:rgba(52,211,153,.18);color:var(--up)} .nfp .ct .tg.p{background:rgba(248,113,113,.18);color:var(--dn)}
+      .nfp .row .num{text-align:right;color:#fff} .nfp .row .sub{text-align:right;color:var(--tx);font-size:10px}
+      .nfp .row .flags{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+      .nfp .row .flags .f,.nfp .sigflags .f{font-size:7px;font-weight:700;border-radius:3px;padding:2px 4px;font-family:'JetBrains Mono',monospace}
+      .nfp .f.vs{background:rgba(245,200,75,.14);color:var(--gd)}.nfp .f.bo{background:rgba(77,141,255,.18);color:var(--bl2)}.nfp .f.sm{background:rgba(167,139,250,.14);color:var(--vi)}.nfp .f.mo{background:rgba(34,211,238,.14);color:var(--cy)}.nfp .f.ca{background:rgba(52,211,153,.18);color:var(--up)}.nfp .f.uoa{background:rgba(245,200,75,.14);color:var(--gd)}.nfp .f.oi{background:rgba(77,141,255,.18);color:var(--bl2)}.nfp .f.sw{background:rgba(34,211,238,.14);color:var(--cy)}
+      .nfp .row .sc{text-align:right;font-weight:700;font-size:12px} .nfp .row .sc.hi{color:var(--up)} .nfp .row .sc.mid{color:var(--gd)}
+      .nfp .gate{position:relative}
+      .nfp .row.blur{filter:blur(5px);opacity:.55;pointer-events:none}
+      .nfp .gateov{position:absolute;left:0;right:0;bottom:0;height:170px;background:linear-gradient(180deg,transparent,rgba(12,17,30,.96) 60%);display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px}
+      .nfp .gateov .box{background:rgba(12,17,30,.96);border:1px solid #1D3266;border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:13px;box-shadow:0 24px 56px -20px rgba(11,92,255,.5);max-width:92%}
+      .nfp .gateov .box .lk{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:var(--bl3)}
+      .nfp .gateov .box b{font-size:12.5px;font-weight:700;color:#fff;display:block}
+      .nfp .gateov .box .cta{background:var(--bl);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap}
+      .nfp .right{display:flex;flex-direction:column;gap:12px}
+      .nfp .det-h{padding:15px 16px;border-bottom:1px solid var(--ln);background:linear-gradient(180deg,rgba(11,92,255,.10),transparent)}
+      .nfp .det-h .r1{display:flex;align-items:center;gap:9px}
+      .nfp .det-h .r1 b{font-size:18px;font-weight:800} .nfp .det-h .r1 .tg{font-size:8.5px;font-weight:800;background:rgba(52,211,153,.18);color:var(--up);border-radius:5px;padding:3px 8px}
+      .nfp .det-h .r1 .tg.p{background:rgba(248,113,113,.18);color:var(--dn)}
+      .nfp .det-h .r1 .sc{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:700;color:var(--up)} .nfp .det-h .r1 .sc small{font-size:10px;color:var(--mut);font-weight:400}
+      .nfp .det-h .subx{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--tx);margin-top:4px;letter-spacing:.04em}
+      .nfp .sigflags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+      .nfp .sigflags .f{display:flex;align-items:center;gap:5px;padding:4px 8px;font-size:8px}
+      .nfp .sigflags .f .x{width:5px;height:5px;border-radius:50%;background:currentColor}
+      .nfp .why{font-size:12px;color:var(--tx);margin-top:9px;background:rgba(11,92,255,.07);border:1px solid #1B2A52;border-radius:10px;padding:9px 11px;line-height:1.5}
+      .nfp .why b{color:var(--bl3);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;display:block;margin-bottom:3px;font-weight:600}
+      .nfp .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--ln)}
+      .nfp .stats div{background:var(--bg2);padding:10px 13px}
+      .nfp .stats .l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp .stats .v{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;color:#fff;margin-top:2px} .nfp .stats .v small{color:var(--mut);font-size:9.5px}
+      .nfp .stats .v.warn{color:var(--gd)}.nfp .stats .v.good{color:var(--up)}.nfp .stats .v.alert{color:var(--vi)}
+      .nfp .ets{padding:13px 16px;border-top:1px solid var(--ln);position:relative}
+      .nfp .ets .ettl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;margin-bottom:9px}
+      .nfp .etbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--ln);border-radius:9px;overflow:hidden}
+      .nfp .etbar div{background:var(--bg2);padding:8px 10px;text-align:center}
+      .nfp .etbar .lab{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp .etbar .v{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;margin-top:2px}
+      .nfp .etbar .v.stop{color:var(--dn)}.nfp .etbar .v.entry{color:#fff}.nfp .etbar .v.tgt{color:var(--up)}
+      .nfp .etbar.lk .v{filter:blur(5px)}
+      .nfp .etlock{position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px}
+      .nfp .etlock .cta{background:var(--bl);color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:6px}
+      .nfp .grks{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ln);border-top:1px solid var(--ln)}
+      .nfp .grks div{background:var(--bg2);padding:9px 6px;text-align:center}
+      .nfp .grks .l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase} .nfp .grks .v{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:600;margin-top:2px}
+      .nfp .acts{display:flex;gap:8px;padding:13px 16px;border-top:1px solid var(--ln)}
+      .nfp .acts .cta{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--bl);color:#fff;border:none;border-radius:10px;padding:11px;font-size:12px;font-weight:700}
+      .nfp .acts .gh{flex:none;width:40px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--ln);border-radius:10px;color:var(--tx)}
+      .nfp .telegram{background:var(--bg2);border:1px solid var(--ln);border-radius:16px;padding:14px 15px}
+      .nfp .tg-h{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+      .nfp .tg-h .ic{width:30px;height:30px;border-radius:9px;background:var(--tg);display:flex;align-items:center;justify-content:center}
+      .nfp .tg-h b{font-size:12.5px;font-weight:800} .nfp .tg-h .tagx{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;color:#7CF0C4;background:rgba(52,211,153,.14);border:1px solid #1A4A38;border-radius:5px;padding:2px 7px;margin-left:auto}
+      .nfp .wlinfo{font-size:11px;color:var(--tx);background:rgba(38,165,228,.1);border:1px solid #1A4A66;border-radius:10px;padding:9px 11px;margin-bottom:10px}
+      .nfp .wlinfo b{display:block;color:#fff;font-weight:700;margin-bottom:2px}
+      .nfp .wlchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+      .nfp .wlchips span{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;background:var(--bg3);border:1px solid var(--ln);color:#fff;border-radius:5px;padding:3px 6px}
+      .nfp .tgmsg{background:#15233A;border:1px solid #243557;border-radius:12px;padding:12px 13px;position:relative;font-size:12px;color:var(--tx)}
+      .nfp .tgmsg .r1{display:flex;align-items:center;gap:8px;margin-bottom:5px} .nfp .tgmsg .siren{animation:nfpWig 1.2s infinite;display:inline-block}
+      @keyframes nfpWig{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+      .nfp .tgmsg b{color:#fff;font-weight:800} .nfp .tgmsg .ko{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#fff} .nfp .tgmsg .ko span{color:var(--mut)}
+      .nfp .tgmsg .rsn{margin-top:7px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#9FC0FF;padding:6px 8px;background:rgba(11,92,255,.16);border-radius:6px}
+      .nfp .tg-cfg{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--bg3);border:1px solid var(--ln);color:var(--tx);font-size:11.5px;font-weight:600;border-radius:9px;padding:9px;margin-top:10px;width:100%}
+      .nfp .legend{margin-top:12px;background:var(--bg2);border:1px solid var(--ln);border-radius:12px;padding:12px 14px}
+      .nfp .legend .lh{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;margin-bottom:8px}
+      .nfp .legend .lg{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;font-size:10.5px}
+      .nfp .legend .it{display:flex;align-items:flex-start;gap:7px} .nfp .legend .it .f{flex:none;margin-top:1px}
+      .nfp .legend b{color:#fff;font-weight:600;display:block;font-size:10.5px} .nfp .legend span{color:var(--mut);font-size:10px;line-height:1.4}
+      .nfp .foot{margin-top:12px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--mut);line-height:1.7}
+      .nfp .demoseal{display:inline-flex;align-items:center;gap:6px;background:rgba(245,200,75,.10);border:1px solid #3A2E10;color:var(--gd);border-radius:7px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;font-weight:600}
+      @media(max-width:1000px){
+        .nfp .grid{grid-template-columns:1fr} .nfp .sigs{grid-template-columns:repeat(2,1fr)} .nfp .legend .lg{grid-template-columns:1fr 1fr}
+        .nfp.t-stocks .tape-h,.nfp.t-stocks .row{grid-template-columns:26px 1fr 64px 80px 50px} .nfp.t-options .tape-h,.nfp.t-options .row{grid-template-columns:26px 1fr 60px 80px 50px}
+        .nfp .tape-h .h-tgt,.nfp .tape-h .h-vol,.nfp .row .c-tgt,.nfp .row .c-vol,.nfp .tape-h .h-exp,.nfp .tape-h .h-iv,.nfp .row .c-exp,.nfp .row .c-iv{display:none}
+      }
+      @media(max-width:560px){.nfp .pillars{grid-template-columns:1fr} .nfp .tab .ti small{display:none}}
+    `}</style>
+    <div className="wrap">
+      {/* TOPBAR */}
+      <div className="top">
+        <div className="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M3 10c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0M3 6c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0M3 14c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0" stroke="#fff" strokeWidth="1.7" strokeLinecap="round"/></svg></div>
+        <div>
+          <h1>NexoTrade <span className="gd">Finder Pro</span></h1>
+          <div className="meta">{T("HIGH-CONVICTION SETUPS · STOCKS & OPTIONS","SETUPS DE ALTA CONVICCIÓN · ACCIONES Y OPCIONES")}</div>
+        </div>
+        <span className="sp"/>
+        <span className="liveb"><i/>{T("LIVE PRICES","PRECIOS EN VIVO")}</span>
+      </div>
+      {/* TABS */}
+      <div className="tabs">
+        <button className={"tab stocks"+(tab==="stocks"?" on":"")} onClick={()=>setTab("stocks")}>
+          <span className="ic2"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 11l3.5-4.4 2.6 2.1L13.5 3.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 3.5h3.5V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+          <span className="ti"><span>{T("Stocks Finder","Buscador de Acciones")}</span><small>{T("S&P 500 + Top 100","S&P 500 + Top 100")}</small></span>
+        </button>
+        <button className={"tab options"+(tab==="options"?" on":"")} onClick={()=>setTab("options")}>
+          <span className="ic2"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8c2-1.5 3.6-1.5 5.6 0s3.6 1.5 5.6 0M2 5c2-1.5 3.6-1.5 5.6 0s3.6 1.5 5.6 0M2 11c2-1.5 3.6-1.5 5.6 0s3.6 1.5 5.6 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg></span>
+          <span className="ti"><span>{T("Options Finder","Buscador de Opciones")}</span><small>{T("US options · CALLS & PUTS","Opciones US · CALLS Y PUTS")}</small></span>
+        </button>
+      </div>
+      {/* HIGH CONVICTION */}
+      <div className="hc">
+        <div className="ic3"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.8 3.7 4.1.6-3 2.9.7 4.1L8 10.9l-3.6 1.9.7-4.1-3-2.9 4.1-.6z" stroke="#34D399" strokeWidth="1.4" strokeLinejoin="round"/></svg></div>
+        <div className="tx">
+          <b>{T("High-Conviction Filter · ON","Filtro de Alta Convicción · ACTIVO")}</b>
+          <small>{tab==="stocks"?T("ONLY SETUPS WHERE 4+ SIGNALS COINCIDE","SOLO SETUPS DONDE 4+ SEÑALES COINCIDEN"):T("ONLY CONTRACTS WHERE 3+ PRO SIGNALS COINCIDE","SOLO CONTRATOS DONDE 3+ SEÑALES PRO COINCIDEN")}</small>
+        </div>
+        <div className={"hcsw"+(strict?"":" off")} onClick={()=>setStrict(s=>!s)}><span>{T("STRICT MODE","MODO ESTRICTO")}</span><span className="tog"/></div>
+      </div>
+      {/* SIGNALS */}
+      <div className="sigs">
+        {(tab==="stocks"
+          ?[["s1",T("VOLUME SURGE","SUBIDA DE VOL."),"17",T("stocks","acc."),T("Vol > 3× 20-day avg","Vol > 3× prom 20d")],
+            ["s2",T("BREAKOUT","ROMPIMIENTO"),"12",T("confirmed","confirm."),T("Price > resistance + vol","Precio > resistencia + vol")],
+            ["s3",T("MOMENTUM","MOMENTUM"),"9",T("strong","fuertes"),"RSI · MACD · SMA"],
+            ["s4",T("CATALYST","CATALIZADOR"),"23","≤ 7d",T("Earnings · events","Earnings · eventos")],
+            ["s5","SMART MONEY","85","/100",T("Bullish bias","Sesgo alcista")]]
+          :[["s1",T("UNUSUAL ACT.","ACT. INUSUAL"),"23",T("contracts","contr."),"Vol > 3× · Vol > 2× OI"],
+            ["s2",T("OI SURGE","SUBIDA OI"),"+14.2","K",T("Day-over-day OI","Cambio diario OI")],
+            ["s3",T("LOW IV RANK","IV RANK BAJO"),"18",T("cheap","baratos"),T("Bottom 25% of 30d","Piso 25% de 30d")],
+            ["s4",T("BLOCK FLOW","FLUJO BLOQUE"),"+$428","M",T("Net premium","Premium neto")],
+            ["s5","SMART MONEY","82","/100",T("Bullish","Alcista")]]
+        ).map(([s,lab,v,u,dd])=>(
+          <div key={s} className={"sig "+s}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
+        ))}
+      </div>
+      {/* PILLARS */}
+      <div className="pillars">
+        {[["rr",T("BEST RISK / REWARD","MEJOR RIESGO/RECOMPENSA"),T("Smartest play","Jugada más inteligente"),T("Best setup + catalyst","Mejor setup + catalizador"),0],
+          ["pr",tab==="stocks"?T("LOWEST RISK","MENOR RIESGO"):T("HIGHEST PROBABILITY","MAYOR PROBABILIDAD"),T("Safest play","Jugada más segura"),T("Reliable winner","El ganador confiable"),1],
+          ["up_",T("JUICIEST UPSIDE","MAYOR POTENCIAL"),T("Lottery play","Jugada de lotería"),T("Max upside potential","Máximo potencial"),2]
+        ].map(([k,pn,h3,desc,idx])=>{ const w=rows[idx]; return(
+          <div key={k} className={"pl "+k+(sel===idx?" sel":"")} onClick={()=>setSel(idx)}>
+            <div className="pn"><span className="dot"/>{pn}</div>
+            <h3>{h3}</h3><div className="desc">{desc}</div>
+            <div className="winner"><span className="tk">{w.tk}</span><span className="o">{tab==="stocks"?("$"+fmtP(liveP(w.tk,w.fb))):(w.strk+" "+w.side)}</span><span className="sc">{w.score}</span></div>
+          </div>
+        );})}
+      </div>
+      {/* MAIN GRID */}
+      <div className="grid">
+        {/* TABLE */}
+        <div className="card">
+          <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className="stat"><i/>{T("RE-SCAN 8s","RE-ESCANEO 8s")}</span></div>
+          <div className="filt">
+            <span className="on">{T("All","Todas")}</span>
+            {tab==="stocks"?<><span>{T("Long","Largos")}</span><span>{T("Short","Cortos")}</span><span>⚡ Earnings ≤7d</span></>:<><span>Calls</span><span>Puts</span><span>0–7 DTE</span></>}
+          </div>
+          <div className="tape-h">
+            <span>#</span><span>{tab==="stocks"?"TICKER":T("CONTRACT","CONTRATO")}</span>
+            <span>{tab==="stocks"?T("PRICE","PRECIO"):"STRIKE"}</span>
+            <span className={tab==="stocks"?"":"h-exp"}>{tab==="stocks"?"CHG":"EXP"}</span>
+            <span className="h-tgt">{tab==="stocks"?T("TARGET","OBJ."):"PREM"}</span>
+            <span className="fh h-vol">{tab==="stocks"?T("SIGNALS","SEÑALES"):"VOL/OI"}</span>
+            <span>SCORE</span>
+          </div>
+          <div className="gate">
+            {rows.map((r,i)=>{
+              const locked = !isPremium && i>=FREE;
+              const cls = "row"+(sel===i?" sel":"")+(locked?" blur":"");
+              const scCls = r.score>=90?"sc hi":"sc mid";
+              return tab==="stocks"?(
+                <div key={i} className={cls} onClick={()=>!locked&&setSel(i)}>
+                  <span className="rk">{String(i+1).padStart(2,"0")}</span>
+                  <span className="ct"><span className="tk">{r.tk}</span><span className={"tg "+(r.dir==="LONG"?"c":"p")}>{r.dir==="LONG"?T("LONG","LARGO"):"SHORT"}</span></span>
+                  <span className="num">${fmtP(liveP(r.tk,r.fb))}</span>
+                  <span className={"sub "+(liveC(r.tk,r.fbc)>=0?"up":"dn")}>{liveC(r.tk,r.fbc)>=0?"+":""}{liveC(r.tk,r.fbc).toFixed(2)}%</span>
+                  <span className="num c-tgt">${r.tgt}</span>
+                  <span className="flags c-vol">{r.flags.map(f=><Flag key={f} code={f}/>)}</span>
+                  <span className={scCls}>{r.score}</span>
+                </div>
+              ):(
+                <div key={i} className={cls} onClick={()=>!locked&&setSel(i)}>
+                  <span className="rk">{String(i+1).padStart(2,"0")}</span>
+                  <span className="ct"><span className="tk">{r.tk}</span><span className={"tg "+(r.side==="CALL"?"c":"p")}>{r.side}</span></span>
+                  <span className="num">{r.strk}</span>
+                  <span className="sub c-exp">{r.exp}</span>
+                  <span className="num c-tgt">{r.pm}</span>
+                  <span className="sub c-vol">{r.vol}</span>
+                  <span className={scCls}>{r.score}</span>
+                </div>
+              );
+            })}
+            {!isPremium&&(
+              <div className="gateov">
+                <div className="box">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2.5" stroke="#9FC0FF" strokeWidth="1.8"/><path d="M8 10V7.5a4 4 0 018 0V10" stroke="#9FC0FF" strokeWidth="1.8"/></svg>
+                  <div>
+                    <span className="lk">{tab==="stocks"?T("47 MORE SETUPS · VIP ONLY","47 SETUPS MÁS · SOLO VIP"):T("247 MORE CONTRACTS · VIP","247 CONTRATOS MÁS · VIP")}</span>
+                    <b>{T("Unlock full table + alerts","Desbloquea tabla completa + alertas")}</b>
+                  </div>
+                  <button className="cta" onClick={unlock}>{T("Unlock VIP","Desbloquear VIP")} <Arrow/></button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* DETAIL + TELEGRAM */}
+        <div className="right">
+          <div className="card">
+            <div className="det-h">
+              <div className="r1">
+                <b>{d.tk}</b>
+                <span className={"tg"+((tab==="stocks"?d.dir==="SHORT":d.side==="PUT")?" p":"")}>{tab==="stocks"?(d.dir==="LONG"?T("LONG","LARGO"):"SHORT"):d.side}</span>
+                <span className="sc">{d.score}<small>/100</small></span>
+              </div>
+              <div className="subx">{tab==="stocks"
+                ? (d.tk+" · "+T("CURRENT","ACTUAL")+" $"+fmtP(dP)+" · "+T("TARGET","OBJETIVO")+" $"+d.tgt)
+                : (d.strk+" "+d.side+" · EXP "+d.exp+" · "+T("BREAKEVEN","EQUILIBRIO")+" "+d.be)}</div>
+              <div className="sigflags">{d.flags.map(f=><Flag key={f} code={f} big/>)}</div>
+              <div className="why"><b>{T("WHY THIS — ORACLE AI","POR QUÉ — ORACLE AI")}</b>{d.why}</div>
+            </div>
+            {tab==="stocks"?(
+              <div className="stats">
+                <div><div className="l">{T("Current price","Precio actual")}</div><div className="v">${fmtP(dP)} <small className={dC>=0?"up":"dn"}>{dC>=0?"+":""}{dC.toFixed(2)}%</small></div></div>
+                <div><div className="l">{T("Market cap","Capitalización")}</div><div className="v">{d.mcap}</div></div>
+                <div><div className="l">{T("Volume vs avg","Vol vs prom")}</div><div className="v warn">{d.vol} <small>{T("UNUSUAL","INUSUAL")}</small></div></div>
+                <div><div className="l">RSI (14)</div><div className="v good">{d.rsi}</div></div>
+                <div><div className="l">{T("50d SMA","SMA 50d")}</div><div className="v good">{d.sma}</div></div>
+                <div><div className="l">{T("Smart Money","Smart Money")}</div><div className="v alert">{d.sm}/100</div></div>
+              </div>
+            ):(
+              <div className="stats">
+                <div><div className="l">Premium</div><div className="v">{d.pm}</div></div>
+                <div><div className="l">{T("Breakeven","Equilibrio")}</div><div className="v">{d.be}</div></div>
+                <div><div className="l">{T("Volume","Volumen")}</div><div className="v warn">{d.vol}</div></div>
+                <div><div className="l">IV</div><div className="v good">{d.iv}</div></div>
+                <div><div className="l">{T("Prob. ITM","Prob. ITM")}</div><div className="v">{d.pop}</div></div>
+                <div><div className="l">Score</div><div className="v alert">{d.score}/100</div></div>
+              </div>
+            )}
+            {/* TRADE PLAN — gated for free */}
+            {tab==="stocks"&&(
+              <div className="ets">
+                <div className="ettl">{T("/// TRADE PLAN","/// PLAN DE OPERACIÓN")}</div>
+                <div className={"etbar"+(!isPremium?" lk":"")}>
+                  <div><div className="lab">STOP</div><div className="v stop">${d.stop}</div></div>
+                  <div><div className="lab">{T("ENTRY","ENTRADA")}</div><div className="v entry">${d.entry}</div></div>
+                  <div><div className="lab">{T("TARGET","OBJETIVO")}</div><div className="v tgt">${d.tgt}</div></div>
+                </div>
+                {!isPremium&&<div className="etlock"><button className="cta" onClick={unlock}>{T("Unlock trade plan","Desbloquear plan")} <Arrow/></button></div>}
+              </div>
+            )}
+            {tab==="options"&&(
+              <div className="grks">
+                <div><div className="l">Delta</div><div className="v">{d.delta}</div></div>
+                <div><div className="l">Gamma</div><div className="v">{d.gamma}</div></div>
+                <div><div className="l">Theta</div><div className="v" style={{color:"var(--dn)"}}>{d.theta}</div></div>
+                <div><div className="l">Vega</div><div className="v">{d.vega}</div></div>
+              </div>
+            )}
+            <div className="acts">
+              <button className="cta" onClick={unlock}>{T("Place trade on broker","Operar en broker")} <Arrow/></button>
+              <button className="gh" title="Watchlist"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 2.5h10v11l-5-2.5-5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg></button>
+            </div>
+          </div>
+          {/* TELEGRAM */}
+          <div className="telegram">
+            <div className="tg-h">
+              <span className="ic"><svg width="16" height="16" viewBox="0 0 16 16" fill="#fff"><path d="M14.2 2.4L1.5 7.2c-.8.3-.8 1.3 0 1.6l2.9 1.1 1.2 3.6c.2.6 1 .7 1.4.2l1.7-1.7 3.1 2.3c.6.4 1.4.1 1.5-.6l2-9.3c.2-.7-.6-1.3-1.1-1z"/></svg></span>
+              <b>{T("Personal Telegram Alerts","Alertas Personales Telegram")}</b>
+              <span className="tagx">{T("YOUR WATCHLIST","TU WATCHLIST")}</span>
+            </div>
+            <div className="wlinfo">
+              <b>{T("Alerts only for stocks in YOUR watchlist","Solo alertas de acciones en TU watchlist")}</b>
+              <span style={{color:"var(--mut)"}}>{T("No noise · no spam · only what matters","Sin ruido · sin spam · solo lo que importa")}</span>
+              <div className="wlchips">{["NVDA","MSFT","AAPL","META","TSLA"].map(c=><span key={c}>{c}</span>)}<span style={{background:"var(--bl)",color:"#fff",borderColor:"var(--bl)"}}>+3</span></div>
+            </div>
+            <div className="tgmsg">
+              <div className="r1"><span className="siren">🚨</span><b>NVDA · Score 94/100</b></div>
+              <div className="ko"><b style={{color:"#fff"}}>NVDA</b> <span>· {T("Breakout confirmed","Rompimiento confirmado")} @ $140.50</span></div>
+              <div className="ko" style={{marginTop:3}}>{T("ENTRY","ENTRADA")} <b>$138–142</b> · STOP <b style={{color:"#F87171"}}>$133</b> · {T("TARGET","OBJETIVO")} <b style={{color:"#34D399"}}>$165</b></div>
+              <div className="rsn">VOL 5.5× · BRK $135 · SMART MONEY 92 · EARNINGS 6d</div>
+            </div>
+            <button className="tg-cfg" onClick={unlock}><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 3h8M3 7h8M3 11h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>{T("Set up my watchlist alerts","Configurar mis alertas")}</button>
+          </div>
+        </div>
+      </div>
+      {/* LEGEND */}
+      <div className="legend">
+        <div className="lh">{T("/// THE 5 SIGNALS · WHAT THEY MEAN","/// LAS 5 SEÑALES · QUÉ SIGNIFICAN")}</div>
+        <div className="lg">
+          {(tab==="stocks"
+            ?[["vs","VOL",T("Volume Surge","Subida de Volumen"),T("Day volume > 3× the 20-day average.","Volumen del día > 3× promedio de 20 días.")],
+              ["bo","BRK",T("Breakout","Rompimiento"),T("Price breaks resistance with volume.","El precio rompe resistencia con volumen.")],
+              ["mo","MOM",T("Momentum","Momentum"),T("RSI 50–70 + MACD + above 50/200 SMA.","RSI 50–70 + MACD + sobre SMA 50/200.")],
+              ["ca","CAT",T("Catalyst","Catalizador"),T("Earnings/FDA/event within 7 days.","Earnings/FDA/evento en 7 días.")],
+              ["sm","SM",T("Smart Money","Smart Money"),T("Composite of the 4 above.","Compuesto de las 4 anteriores.")]]
+            :[["uoa","UOA",T("Unusual Activity","Actividad Inusual"),T("Vol > 3× avg and > 2× open interest.","Vol > 3× prom y > 2× interés abierto.")],
+              ["oi","OI+",T("OI Surge","Subida de OI"),T("Open interest jumps day-over-day.","El interés abierto salta día a día.")],
+              ["bo","IV",T("Low IV","IV Baja"),T("Premium in bottom 25% of 30 days.","Premium en piso 25% de 30 días.")],
+              ["sw","BLK",T("Block Flow","Flujo en Bloque"),T("Large concentrated net premium.","Gran premium neto concentrado.")],
+              ["sm","SM",T("Smart Money","Smart Money"),T("Composite of the 4 above.","Compuesto de las 4 anteriores.")]]
+          ).map(([c,l,b,s])=>(
+            <div key={l} className="it"><span className={"f "+c}>{l}</span><div><b>{b}</b><span>{s}</span></div></div>
+          ))}
+        </div>
+      </div>
+      {/* FOOTNOTE + HONESTY SEAL */}
+      <div className="foot">
+        <div style={{marginBottom:8}}><span className="demoseal">⚠ {T("ILLUSTRATIVE DATA · EDUCATIONAL","DATOS ILUSTRATIVOS · EDUCATIVO")}</span></div>
+        {T("Live prices are real. Scores & signals are illustrative algorithmic examples — NOT live institutional data. Educational, not financial advice. Trading involves risk.","Los precios son reales. Los scores y señales son ejemplos algorítmicos ilustrativos — NO son datos institucionales en vivo. Educativo, no es consejo financiero. Operar implica riesgo.")}
+      </div>
+    </div>
+  </div>
+  );
 }
 
 function FlowPage({isPremium,onNeedPremium,lang="es"}){
@@ -26538,7 +26982,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
       {_dailyFive.length>0 && (
         <div style={{marginBottom:18}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:3}}>
-            <span style={{fontSize:16,fontWeight:800,color:"var(--c-text)",letterSpacing:"-0.02em",display:"inline-flex",alignItems:"center",gap:6}}><svg width="16" height="16" viewBox="0 0 24 24" fill="#FF6B35"><path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5 0.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>{isEN?"On fire today":"En fuego hoy"}</span>
+            <span style={{fontFamily:"'JetBrains Mono','IBM Plex Mono',monospace",fontSize:13,fontWeight:700,letterSpacing:"0.06em",color:"#2F7DF6",textTransform:"uppercase"}}>{isEN?"/// ON FIRE TODAY":"/// EN FUEGO HOY"}</span>
             <span style={{fontSize:10.5,fontWeight:800,color:"#16A34A",background:"rgba(22,163,74,.10)",border:"1px solid rgba(22,163,74,.25)",borderRadius:999,padding:"3px 9px",letterSpacing:0.3}}>{isEN?"FREE":"GRATIS"}</span>
           </div>
           <div style={{fontSize:12,color:"var(--c-muted)",marginBottom:12}}>{isEN?"Most talked-about by Wall St. analysts — and why":"Las más sonadas por analistas de Wall St. — y por qué"}</div>
@@ -26893,8 +27337,8 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
         <div className="nexo-pro-tools-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
           {tools.map((tool,i)=>{
             var locked=!isPremium;
-            var iconBg=locked?GOLDBG:BLUEBG;
-            var iconClr=locked?GOLD:BLUE;
+            var iconBg=BLUEBG;   // siempre azul suave (antes naranja/oro al estar locked)
+            var iconClr=BLUE;
             return(
               <div key={i}
                 onClick={()=>{
@@ -27637,6 +28081,50 @@ function AIPage({user, isPremium, onNavigate, onAI, lang="en"}){
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── PWA · prompt "Añadir a pantalla de inicio" tras la 2da visita ──────────────
+function A2HSPrompt({lang="es"}){
+  const isEN=lang==="en";
+  const [show,setShow]=useState(false);
+  const [iosMode,setIosMode]=useState(false);
+  const deferredRef=React.useRef(null);
+  useEffect(()=>{
+    try{
+      const standalone=(window.navigator&&window.navigator.standalone===true)||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
+      if(standalone) return;
+      if(localStorage.getItem("nexo-a2hs-done")==="1") return;
+      const v=parseInt(localStorage.getItem("nexo-visits")||"0",10)+1;
+      localStorage.setItem("nexo-visits",String(v));
+      const ua=navigator.userAgent||"";
+      const isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+      const onBIP=(e)=>{ e.preventDefault(); deferredRef.current=e; if(v>=2) setShow(true); };
+      window.addEventListener("beforeinstallprompt",onBIP);
+      if(isIOS && v>=2){ setIosMode(true); const t=setTimeout(()=>setShow(true),1400); return ()=>{ window.removeEventListener("beforeinstallprompt",onBIP); clearTimeout(t); }; }
+      return ()=>window.removeEventListener("beforeinstallprompt",onBIP);
+    }catch(e){}
+  },[]);
+  const dismiss=(remember)=>{ setShow(false); if(remember){try{localStorage.setItem("nexo-a2hs-done","1");}catch(e){}} };
+  const install=async()=>{
+    const d=deferredRef.current;
+    if(d){ try{ d.prompt(); await d.userChoice; }catch(e){} dismiss(true); }
+    else dismiss(false);
+  };
+  if(!show) return null;
+  return(
+    <div style={{position:"fixed",left:12,right:12,bottom:14,zIndex:10050,maxWidth:440,margin:"0 auto",background:"#0c111e",border:"1px solid #1D3266",borderRadius:16,padding:"13px 14px",boxShadow:"0 18px 48px -16px rgba(11,92,255,0.55)",display:"flex",alignItems:"center",gap:12,fontFamily:"Inter,sans-serif",animation:"slideIn 0.3s ease"}}>
+      <div style={{width:42,height:42,borderRadius:11,background:"linear-gradient(135deg,#0B2B7A,#0B5CFF)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M3 10c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0M3 6c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0M3 14c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0" stroke="#fff" strokeWidth="1.7" strokeLinecap="round"/></svg>
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{color:"#fff",fontWeight:800,fontSize:13.5,letterSpacing:"-0.01em"}}>{isEN?"Add NexoTrade to your home screen":"Añade NexoTrade a tu inicio"}</div>
+        {iosMode
+          ? <div style={{color:"#9FB2CE",fontSize:11.5,marginTop:2,lineHeight:1.4}}>{isEN?"Tap Share ⬆ then “Add to Home Screen”.":"Toca Compartir ⬆ y luego “Añadir a inicio”."}</div>
+          : <div style={{color:"#9FB2CE",fontSize:11.5,marginTop:2,lineHeight:1.4}}>{isEN?"One tap. Live alerts & faster access.":"Un toque. Alertas en vivo y acceso más rápido."}</div>}
+      </div>
+      {!iosMode&&<button onClick={install} style={{flexShrink:0,background:"#0B5CFF",color:"#fff",border:"none",borderRadius:10,padding:"9px 14px",fontSize:12.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit"}}>{isEN?"Install":"Instalar"}</button>}
+      <button onClick={()=>dismiss(true)} aria-label="close" style={{flexShrink:0,background:"transparent",border:"none",color:"#67769A",fontSize:20,lineHeight:1,cursor:"pointer",padding:"0 2px",fontFamily:"inherit"}}>×</button>
+    </div>
+  );
+}
 
 export default function App(){
   const [posts,setPosts]       = useState([]);
@@ -28293,7 +28781,7 @@ export default function App(){
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===14) return <EconCalendarPage lang={lang}/>;
     if(page===18) return <CommoditiesPage/>;
-    if(page===20) return <FlowPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
+    if(page===20) return <FinderPro isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
     if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
     if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} lang={lang}/>;
     if(page===15) return <DividendCalendarPage lang={lang}/>;
@@ -29880,6 +30368,7 @@ export default function App(){
       {showAlerts&&<AlertsPanel lang={lang} user={user} onClose={()=>setAlerts(false)} onAlertChange={(upd)=>setAlertCount(upd.filter(a=>a.active).length)}/>}
       <PaywallModal open={paywallOpen} onClose={()=>setPaywallOpen(false)} onUpgrade={()=>{setPaywallOpen(false);setPage(8);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}} lang={lang}/>
       {showSettings&&<SettingsPanel onClose={()=>setShowSettings(false)} darkMode={darkMode} setDarkMode={setDarkMode} lang={lang} setLang={setLang} user={user} supabase={supabase} onOpenAlerts={()=>setAlerts(true)} alertCount={alertCount}/>}
+      <A2HSPrompt lang={lang}/>
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={openPaywall} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
