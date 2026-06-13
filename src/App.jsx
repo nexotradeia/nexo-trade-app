@@ -6,6 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 // ── Flags de visibilidad — reactivar cuando haya 30+ usuarios ──
 const SHOW_TOP_TRADERS = false;
 
+// ── i18n helper (module-level, lee el idioma en vivo desde localStorage) ──
+const _EN = () => { try { return (localStorage.getItem("nexo-lang")||"en")==="en"; } catch { return true; } };
+
 const SUPABASE_URL  = "https://glvrzrtatekuuhwtzzhd.supabase.co";
 const SUPABASE_KEY  = "sb_publishable_1CCvWAO3iqcFZmcqvUdlZg_rOdSZZcl";
 // FIX CRÍTICO (Sesión 11): supabase-js usa navigator.locks ("lock:nexotrade-session")
@@ -38,8 +41,8 @@ async function nexoOAuth(provider){
     });
     if(error){
       console.error("[oauth] "+provider+":", error.message);
-      alert("No se pudo iniciar con "+(provider==="google"?"Google":"Apple")+". "+
-            "El proveedor aún no está activado en Supabase. ("+error.message+")");
+      alert((_EN()?"Couldn't sign in with ":"No se pudo iniciar con ")+(provider==="google"?"Google":"Apple")+". "+
+            (_EN()?"The provider isn't enabled in Supabase yet. (":"El proveedor aún no está activado en Supabase. (")+error.message+")");
     }
   }catch(e){
     console.error("[oauth] "+provider+":", e?.message||e);
@@ -2874,12 +2877,12 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                         style={{background:"none",border:"1px solid rgba(255,255,255,0.15)",borderRadius:7,padding:"5px 8px",color:"#94a3b8",fontSize:12,cursor:"pointer"}}>✕</button>
                     </div>
                     <div style={{fontSize:10,fontWeight:600,color:nickStatus==="taken"?"#ef4444":nickStatus==="available"?"#22c55e":nickStatus==="saved"?"#22c55e":nickStatus==="cooldown"?"#f59e0b":"#64748b"}}>
-                      {nickStatus==="checking"?"🔍 Verificando..."
-                      :nickStatus==="taken"?"✗ Ya en uso — elige otro"
-                      :nickStatus==="available"?"✓ Disponible"
-                      :nickStatus==="saved"?"✅ ¡Guardado!"
-                      :nickStatus==="cooldown"?`⏳ Puedes cambiarlo en ${getCooldownDaysLeft()} días`
-                      :"Solo letras, números y _ · Mín. 3 · Cada 15 días"}
+                      {nickStatus==="checking"?(_EN()?"🔍 Checking...":"🔍 Verificando...")
+                      :nickStatus==="taken"?(_EN()?"✗ Already taken — pick another":"✗ Ya en uso — elige otro")
+                      :nickStatus==="available"?(_EN()?"✓ Available":"✓ Disponible")
+                      :nickStatus==="saved"?(_EN()?"✅ Saved!":"✅ ¡Guardado!")
+                      :nickStatus==="cooldown"?(_EN()?`⏳ You can change it in ${getCooldownDaysLeft()} days`:`⏳ Puedes cambiarlo en ${getCooldownDaysLeft()} días`)
+                      :(_EN()?"Letters, numbers and _ only · Min. 3 · Every 15 days":"Solo letras, números y _ · Mín. 3 · Cada 15 días")}
                     </div>
                   </div>
                 ) : (
@@ -4432,7 +4435,7 @@ function TickerPage({ticker,posts=[],onClose,lang="es",user,onPost,onNeedAuth,is
       {/* TradingView Chart con toggle */}
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden",marginBottom:20}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",borderBottom:showChart?`1px solid ${C.border}`:"none"}}>
-          <span style={{fontWeight:700,fontSize:13,color:C.text}}>📊 Gráfico ${ticker}</span>
+          <span style={{fontWeight:700,fontSize:13,color:C.text}}>📊 {_EN()?"Chart":"Gráfico"} ${ticker}</span>
           <button onClick={()=>setShowChart(v=>!v)}
             style={{background:"rgba(15,76,129,0.08)",border:"1px solid rgba(15,76,129,0.2)",borderRadius:8,padding:"5px 14px",cursor:"pointer",color:"#0F4C81",fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:5,transition:"all 0.15s"}}
             onMouseEnter={e=>e.currentTarget.style.background="rgba(15,76,129,0.15)"}
@@ -6139,7 +6142,7 @@ function LiveConferenceModal({event, lang, onClose}){
                     </a>
                   </div>
                   <div style={{color:"#334155",fontSize:11,textAlign:"center",maxWidth:300}}>
-                    {embedError ? "El embed no está disponible — accede desde YouTube directamente." : "El livestream se activa en los canales oficiales de la empresa durante el call."}
+                    {embedError ? (_EN()?"The embed isn't available — open it on YouTube directly.":"El embed no está disponible — accede desde YouTube directamente.") : (_EN()?"The livestream goes live on the company's official channels during the call.":"El livestream se activa en los canales oficiales de la empresa durante el call.")}
                   </div>
                 </div>
               )}
@@ -7502,7 +7505,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               <div style={{width:32,height:32,borderRadius:8,background:"rgba(80,163,57,0.1)",border:"1px solid rgba(80,163,57,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📗</div>
               <div>
                 <div style={{fontWeight:800,color:"#0F172A",fontSize:13}}>E*TRADE Events</div>
-                <div style={{fontSize:10,color:"#64748B"}}>Live & On-Demand · Gratis</div>
+                <div style={{fontSize:10,color:"#64748B"}}>Live & On-Demand · {isEN?"Free":"Gratis"}</div>
               </div>
             </div>
             <div style={{fontSize:11,color:"#64748B",lineHeight:1.6,marginBottom:12}}>
@@ -7686,7 +7689,7 @@ function OnlineUsersWidget({ onlineUsers = [] }) {
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span style={{ fontSize: 13 }}>👥</span>
           <span style={{ fontSize: 12, fontWeight: 800, color: "#1A5FAD" }}>
-            En línea ahora
+            {_EN()?"Online now":"En línea ahora"}
           </span>
           {count > 0 && (
             <span style={{
@@ -7701,7 +7704,7 @@ function OnlineUsersWidget({ onlineUsers = [] }) {
       {/* User list */}
       {count === 0 ? (
         <div style={{ padding: "10px 14px", fontSize: 11, color: "#94A3B8", textAlign: "center" }}>
-          Solo tú en línea 🌙
+          {_EN()?"Only you online 🌙":"Solo tú en línea 🌙"}
         </div>
       ) : (
         <div style={{ padding: "6px 0" }}>
@@ -7751,7 +7754,7 @@ function OnlineUsersWidget({ onlineUsers = [] }) {
               padding: "6px 14px", fontSize: 11, color: "#1A5FAD",
               fontWeight: 700, cursor: "pointer", textAlign: "center",
             }}>
-              {expanded ? "Ver menos ▲" : `+${onlineUsers.length - 5} más ▼`}
+              {expanded ? (_EN()?"Show less ▲":"Ver menos ▲") : `+${onlineUsers.length - 5} ${_EN()?"more":"más"} ▼`}
             </div>
           )}
         </div>
@@ -8120,10 +8123,10 @@ const AFFILIATES = [
     name:"Interactive Brokers",
     color:"#C8102E",
     bg:"linear-gradient(135deg,#1A0003,#2D0008)",
-    tagline:"$200 para ti al abrir cuenta",
-    sub:"150 mercados · Comisiones desde $0 · Regulado SEC y FINRA",
+    tagline:"$200 for you when you open an account",
+    sub:"150 markets · Commissions from $0 · SEC & FINRA regulated",
     cta:"Open account & earn $200 →",
-    badge:"MAYOR PAGO",
+    badge:"HIGHEST PAYOUT",
     badgeColor:"#C8102E",
     url:"https://www.interactivebrokers.com/mkt/?src=nexotrade1&url=%2Fen%2Fwhyib%2Foverviewnetwork.php",
     tickers:["SPY","AAPL","MSFT","TSLA","NVDA","AMZN","META","GOOGL","AMD","QQQ"],
@@ -8134,10 +8137,10 @@ const AFFILIATES = [
     name:"Tastytrade",
     color:"#F97316",
     bg:"linear-gradient(135deg,#1A0800,#2D1200)",
-    tagline:"La plataforma de opciones #1 en EE.UU.",
-    sub:"$0 comisión al cerrar · Plataforma gratis · Educación incluida",
-    cta:"Empezar con opciones gratis →",
-    badge:"OPCIONES PRO",
+    tagline:"The #1 options platform in the U.S.",
+    sub:"$0 to close · Free platform · Education included",
+    cta:"Start trading options free →",
+    badge:"OPTIONS PRO",
     badgeColor:"#F97316",
     url:"https://open.tastytrade.com/",
     tickers:["SPY","QQQ","NVDA","TSLA","AAPL","AMD","META","AMZN"],
@@ -8148,10 +8151,10 @@ const AFFILIATES = [
     name:"Kraken",
     color:"#5741D9",
     bg:"linear-gradient(135deg,#07051A,#0D0A2D)",
-    tagline:"20% de comisiones de tus referidos PARA SIEMPRE",
-    sub:"Exchange regulado · Staking hasta 21% APY · 200+ criptos",
-    cta:"Empezar en Kraken →",
-    badge:"20% DE POR VIDA",
+    tagline:"20% of your referrals' commissions FOREVER",
+    sub:"Regulated exchange · Staking up to 21% APY · 200+ cryptos",
+    cta:"Get started on Kraken →",
+    badge:"20% FOR LIFE",
     badgeColor:"#5741D9",
     url:"https://www.kraken.com/sign-up?referral=nexotrade",
     tickers:["BTC","ETH","SOL","ADA","DOT","MATIC","AVAX","LINK"],
@@ -11587,7 +11590,7 @@ function PaperTrading({ user, lang="es" }){
                     {sellTicker===p.tk?(
                       <div style={{display:"flex",gap:5,alignItems:"center"}}>
                         <input value={sellShares} onChange={e=>setSellShares(e.target.value)}
-                          placeholder={`máx ${p.shares}`} type="number" min="0.01" step="0.01"
+                          placeholder={`${_EN()?"max":"máx"} ${p.shares}`} type="number" min="0.01" step="0.01"
                           style={{width:70,border:"1px solid rgba(220,38,38,0.3)",borderRadius:7,padding:"5px 8px",fontSize:12,outline:"none"}}/>
                         <button onClick={()=>sell(p.tk,sellShares)}
                           style={{background:"#DC2626",border:"none",borderRadius:7,padding:"5px 10px",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>{isEN?"Sell":"Vender"}</button>
@@ -11997,7 +12000,7 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
                     {sellTicker===chartTk?(
                       <div style={{display:"flex",gap:6}}>
                         <input value={sellShares} onChange={e=>setSellShares(e.target.value)}
-                          type="number" min="0.01" step="0.01" placeholder={`máx ${pf.positions[chartTk].shares}`}
+                          type="number" min="0.01" step="0.01" placeholder={`${_EN()?"max":"máx"} ${pf.positions[chartTk].shares}`}
                           style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,77,106,0.3)",borderRadius:8,padding:"8px 10px",fontSize:12,color:"#E2E8F0",outline:"none"}}/>
                         <button onClick={()=>sell(chartTk,sellShares)}
                           style={{background:"#DC2626",border:"none",borderRadius:8,padding:"8px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>{isEN?"Sell":"Vender"}</button>
@@ -13862,7 +13865,7 @@ function DividendCalendarPage({lang="es"}) {
               </div>
               <div>
                 <div style={{fontSize:13,fontWeight:isSoon?700:500,color:isSoon?C.bull:C.text}}>{fmt(d.exDate)}</div>
-                {isSoon && <div style={{fontSize:9,color:C.bull,fontWeight:700,marginTop:1}}>PRÓXIMO</div>}
+                {isSoon && <div style={{fontSize:9,color:C.bull,fontWeight:700,marginTop:1}}>{_EN()?"UPCOMING":"PRÓXIMO"}</div>}
               </div>
               <div style={{fontSize:13,color:C.muted}}>{fmt(d.payDate)}</div>
               <div style={{fontSize:13,fontWeight:600,color:C.text}}>${d.quarterly}</div>
@@ -14553,7 +14556,7 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
         );})}
       </div>
       <div style={{textAlign:"center",padding:"20px 0",fontSize:11,color:C.muted2}}>
-        Datos de reportes públicos SEC 13F · Actualización trimestral · No es consejo financiero
+        {_EN()?"Data from public SEC 13F filings · Updated quarterly · Not financial advice":"Datos de reportes públicos SEC 13F · Actualización trimestral · No es consejo financiero"}
       </div>
     </div>
   );
@@ -14579,7 +14582,7 @@ function _OldGurusPageUnused({isPremium, onNeedPremium}){
             <div style={{fontSize:12,color:"#475569",lineHeight:1.6,maxWidth:500}}>{guru.bio}</div>
           </div>
           <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-            {[["AUM",guru.aum],["Estilo",guru.style],["Último 13F",guru.updated]].map(([l,v])=>(
+            {[["AUM",guru.aum],[_EN()?"Style":"Estilo",guru.style],[_EN()?"Last 13F":"Último 13F",guru.updated]].map(([l,v])=>(
               <div key={l} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 16px",textAlign:"center"}}>
                 <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.5,marginBottom:3}}>{l}</div>
                 <div style={{fontWeight:800,color:"#F1F5F9",fontSize:13}}>{v}</div>
@@ -15444,7 +15447,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                   ? <span style={{background:"linear-gradient(135deg,#FF6000,#FF8C00)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.3}}>🔥 TOP PICK</span>
                   : <span style={{background:bull?"rgba(0,210,106,0.12)":"rgba(255,77,106,0.12)",color:bull?bullC:bearC,borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>{bull?"▲ BULLISH":"▼ BEARISH"}</span>
                 }
-                <button title="Enviar alerta a Telegram" onClick={()=>{
+                <button title={isEN?"Send alert to Telegram":"Enviar alerta a Telegram"} onClick={()=>{
                   const TG_TOKEN="8931471851:AAFActqhqBuKO3oLq5Z7FQBkl9cTa8yDSbs";
                   const TG_CHANNEL="799353199";
                   const emoji=gold?"⭐":dark?"🌑":bull?"📈":"📉";
@@ -15484,7 +15487,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                 <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid ${accentC}20`,borderRadius:10,padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:18,flexShrink:0}}>🤖</span>
                   <div>
-                    <div style={{fontSize:10,fontWeight:800,color:accentC,marginBottom:4,letterSpacing:0.5}}>ANÁLISIS IA NEXO</div>
+                    <div style={{fontSize:10,fontWeight:800,color:accentC,marginBottom:4,letterSpacing:0.5}}>{_EN()?"NEXO AI ANALYSIS":"ANÁLISIS IA NEXO"}</div>
                     <div style={{fontSize:12,color:"#94A3B8",lineHeight:1.6}}>{ia.analysis}</div>
                   </div>
                 </div>
@@ -17785,7 +17788,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
 
             {/* Thesis */}
             <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px 18px",marginBottom:14}}>
-              <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8}}>📝 TESIS DE INVERSIÓN</div>
+              <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8}}>📝 {_EN()?"INVESTMENT THESIS":"TESIS DE INVERSIÓN"}</div>
               <div style={{fontSize:13,color:"#CBD5E1",lineHeight:1.75}}>{idea.thesis}</div>
             </div>
 
@@ -24449,7 +24452,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
 
             {/* AI Analysis */}
             <div style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:"14px",marginBottom:16}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#0F4C81",letterSpacing:0.5,marginBottom:8}}>🧠 ANÁLISIS IA</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#0F4C81",letterSpacing:0.5,marginBottom:8}}>🧠 {_EN()?"AI ANALYSIS":"ANÁLISIS IA"}</div>
               <p style={{fontSize:13,color:C.muted,lineHeight:1.6,margin:0}}>
                 {(AI_ANALYSIS[selectedRow.pattern]||((r)=>`$${r.s} muestra señal ${r.pattern}. RSI ${r.rsi||"N/A"}, volumen ${r.vol||"N/A"}. Score IA: ${r.score}/100.`))(selectedRow)}
               </p>
@@ -24759,7 +24762,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
                   <div style={{display:"flex",gap:4,justifyContent:"center"}}>
                     <button onClick={()=>setSelectedRow(isSelected?null:r)}
                       style={{background:isSelected?"rgba(15,76,129,0.3)":"rgba(15,76,129,0.12)",border:"1px solid rgba(15,76,129,0.3)",borderRadius:7,padding:"4px 8px",color:isSelected?"#fff":"#0F4C81",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                      👁 Ver
+                      👁 {isEN?"View":"Ver"}
                     </button>
                     <button onClick={()=>{
                       setAlerts2(a=>[{id:Date.now(),ticker:r.s,msg:`🔔 Alerta creada: $${r.s} @ $${r.p?.toFixed(0)}`,chg:r.chg,ts:new Date().toLocaleTimeString()},...a].slice(0,5));
@@ -24783,7 +24786,7 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 16px",marginTop:12,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
         <span style={{fontSize:16}}>🔔</span>
         <span style={{fontSize:12,color:C.muted,flex:1}}>
-          {isEN?"Auto-alert when stock moves ≥2% · Click 👁 Ver for AI analysis · Updates every 30s":"Alerta automática ≥2% · Clic en 👁 Ver para análisis IA · Se actualiza cada 30s"}
+          {isEN?"Auto-alert when stock moves ≥2% · Click 👁 View for AI analysis · Updates every 30s":"Alerta automática ≥2% · Clic en 👁 Ver para análisis IA · Se actualiza cada 30s"}
         </span>
         <span style={{fontSize:11,fontWeight:700,color:wsStatus==="live"?"#10B981":"#F59E0B"}}>
           {wsStatus==="live"?"● WebSocket LIVE":"● REST 30s"}
