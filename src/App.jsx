@@ -15142,7 +15142,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
       <div className="top">
         <div className="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M3 10c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0M3 6c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0M3 14c2-1.7 3.6-1.7 5.6 0s3.6 1.7 5.6 0" stroke="#fff" strokeWidth="1.7" strokeLinecap="round"/></svg></div>
         <div>
-          <h1>NexoTrade <span className="gd">Finder Pro</span></h1>
+          <h1>NexoTrade <span className="gd">Smart Money</span></h1>
           <div className="meta">{T("HIGH-CONVICTION SETUPS · STOCKS & OPTIONS","SETUPS DE ALTA CONVICCIÓN · ACCIONES Y OPCIONES")}</div>
         </div>
         <span className="sp"/>
