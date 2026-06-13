@@ -14731,6 +14731,173 @@ function generateFlowItem(id, basePrice){
 //   Paywall VIP real (gate de tabla + trade plan bloqueado) vía onNeedPremium
 // ══════════════════════════════════════════════════════════════════
 const NFP_FLAGS={VOL:{c:"vs",l:"VOL"},BRK:{c:"bo",l:"BRK"},MOM:{c:"mo",l:"MOM"},SM:{c:"sm",l:"SM"},CAT:{c:"ca",l:"CAT"},UOA:{c:"uoa",l:"UOA"},OI:{c:"oi",l:"OI+"},BLK:{c:"sw",l:"BLK"}};
+
+// ── Watchlist + prefs persistidos (localStorage, con try/catch) ────────────────
+const NFP_DEFAULT_WL=["NVDA","MSFT","AAPL","META","TSLA"];
+function nfpGetWL(){ try{ const v=JSON.parse(localStorage.getItem("nexo-watchlist")||"null"); return Array.isArray(v)&&v.length?v:NFP_DEFAULT_WL.slice(); }catch(e){ return NFP_DEFAULT_WL.slice(); } }
+function nfpSaveWL(arr){ try{ localStorage.setItem("nexo-watchlist",JSON.stringify(arr)); }catch(e){} }
+function nfpGetPrefs(){ try{ const v=JSON.parse(localStorage.getItem("nexo-alert-prefs")||"null"); return v||{minScore:90,stocks:true,options:true,hours:true}; }catch(e){ return {minScore:90,stocks:true,options:true,hours:true}; } }
+function nfpSavePrefs(p){ try{ localStorage.setItem("nexo-alert-prefs",JSON.stringify(p)); }catch(e){} }
+const NFP_POPULAR=["SPY","QQQ","AMD","GOOGL","AMZN","COIN","PLTR","NFLX","BTC","ETH","NVDA","MSFT","AAPL","META","TSLA"];
+
+// ── WIZARD de watchlist (5 pasos) · funcional hoy (guarda local). Telegram = fase 2 ──
+function WatchlistWizard({lang="es",onClose,onDone}){
+  const isEN=lang==="en"; const T=(en,es)=>isEN?en:es;
+  const [step,setStep]=useState(1);
+  const [wl,setWl]=useState(nfpGetWL);
+  const [q,setQ]=useState("");
+  const [prefs,setPrefs]=useState(nfpGetPrefs);
+  const code=React.useMemo(()=>"NEXO-"+Math.random().toString(36).slice(2,6).toUpperCase()+"-"+Math.random().toString(36).slice(2,6).toUpperCase(),[]);
+  const add=(t)=>{ const u=(t||"").toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,6); if(!u||wl.includes(u)||wl.length>=25) return; setWl([...wl,u]); setQ(""); };
+  const rm=(t)=>setWl(wl.filter(x=>x!==t));
+  const finish=()=>{ nfpSaveWL(wl); nfpSavePrefs(prefs); onDone&&onDone(); setStep(5); };
+  const close=()=>{ nfpSaveWL(wl); nfpSavePrefs(prefs); onClose&&onClose(); };
+  const Arrow=()=> <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5h10M8.5 3.5l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+  const prog=[step>=1,step>=2,step>=3,step>=4].map((d,i)=>(<div key={i} className={"st"+(step===i+1?" cur":d?" done":"")} />));
+  return(
+    <div className="nfw" onClick={e=>e.target===e.currentTarget&&close()}>
+      <style>{`
+        .nfw{position:fixed;inset:0;z-index:10060;background:rgba(3,6,12,.78);display:flex;align-items:flex-start;justify-content:center;padding:24px 14px;overflow-y:auto;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+        .nfw *{box-sizing:border-box}
+        .nfw .card{--bl:#0B5CFF;--bg2:#0C111E;--bg3:#11182A;--ln:#19202F;--ln2:#222B3F;--tx:#C9D6F2;--mut:#67769A;--up:#34D399;--tg:#26A5E4;
+          width:100%;max-width:470px;background:var(--bg2);border:1px solid var(--ln);border-radius:22px;overflow:hidden;color:#fff;position:relative}
+        .nfw .prog{display:flex;gap:6px;padding:14px 22px 0}
+        .nfw .prog .st{flex:1;height:4px;border-radius:2px;background:var(--ln)} .nfw .prog .st.done{background:var(--up)} .nfw .prog .st.cur{background:linear-gradient(90deg,#0B5CFF,#22D3EE)}
+        .nfw .stp{padding:13px 22px 4px;font-family:'JetBrains Mono','IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase}
+        .nfw .xb{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;line-height:1;z-index:2}
+        .nfw .ch{padding:6px 22px 20px;border-bottom:1px solid var(--ln)}
+        .nfw .ch .ic{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#0B2B7A,#0B5CFF);display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+        .nfw .ch.tg .ic{background:#26A5E4}
+        .nfw .ch h2{font-size:21px;font-weight:900;letter-spacing:-.02em;margin-bottom:5px} .nfw .ch h2 .gd{background:linear-gradient(95deg,#4D8DFF,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .nfw .ch p{font-size:13px;color:var(--mut)} .nfw .ch p b{color:var(--tx);font-weight:600}
+        .nfw .body{padding:18px 22px}
+        .nfw .cta{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bl);color:#fff;border:none;border-radius:13px;padding:13px;font-size:14px;font-weight:800;width:100%;cursor:pointer}
+        .nfw .cta:disabled{background:var(--bg3);color:var(--mut);cursor:not-allowed}
+        .nfw .gh{display:flex;align-items:center;justify-content:center;gap:6px;background:transparent;border:1px solid var(--ln);color:var(--tx);border-radius:11px;padding:11px;font-size:12.5px;font-weight:600;width:100%;margin-top:9px;cursor:pointer}
+        .nfw .why{display:grid;gap:9px;margin-bottom:16px}
+        .nfw .why .it{display:flex;gap:11px;padding:11px 13px;background:var(--bg3);border:1px solid var(--ln);border-radius:12px}
+        .nfw .why .num{width:24px;height:24px;border-radius:7px;background:var(--bl);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none}
+        .nfw .why b{display:block;font-size:12.5px;font-weight:700;margin-bottom:2px} .nfw .why span{font-size:11px;color:var(--mut);line-height:1.4}
+        .nfw .search input{width:100%;background:var(--bg3);border:1px solid var(--ln);color:#fff;font-size:14px;border-radius:11px;padding:11px 13px;outline:none;font-family:inherit;margin-bottom:12px}
+        .nfw .sxnt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;margin:10px 0 8px}
+        .nfw .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+        .nfw .chips span{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:var(--tx);border:1px solid var(--ln);background:var(--bg3);border-radius:7px;padding:6px 10px;cursor:pointer}
+        .nfw .chips span.on{background:var(--bl);color:#fff;border-color:var(--bl)}
+        .nfw .sxl{background:var(--bg3);border:1px dashed var(--ln);border-radius:12px;padding:12px 13px;min-height:70px}
+        .nfw .sxl-h{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;margin-bottom:8px}
+        .nfw .sxl-h .cnt{background:var(--bl);color:#fff;border-radius:5px;padding:2px 7px}
+        .nfw .picks{display:flex;flex-wrap:wrap;gap:5px}
+        .nfw .picks .pk{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;background:var(--bg2);border:1px solid var(--ln);color:#fff;border-radius:6px;padding:4px 7px;display:flex;align-items:center;gap:6px}
+        .nfw .picks .pk button{background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;line-height:1}
+        .nfw .tgcode{background:linear-gradient(180deg,rgba(38,165,228,.10),rgba(38,165,228,.02));border:1px solid #1A4A66;border-radius:13px;padding:16px;text-align:center;margin-bottom:12px}
+        .nfw .tgcode .cl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;color:#9FC0FF;font-weight:600;margin-bottom:7px}
+        .nfw .tgcode .cv{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#fff;letter-spacing:.16em}
+        .nfw .note{background:rgba(245,200,75,.08);border:1px solid #3A2E10;border-radius:11px;padding:10px 12px;font-size:11.5px;color:#F5C84B;line-height:1.5;margin-bottom:12px}
+        .nfw .radios{display:grid;gap:8px;margin-bottom:14px}
+        .nfw .r{display:flex;align-items:center;gap:11px;padding:12px 14px;background:var(--bg3);border:1.5px solid var(--ln);border-radius:12px;cursor:pointer}
+        .nfw .r.sel{border-color:var(--bl);background:rgba(11,92,255,.07)}
+        .nfw .r .dot{width:18px;height:18px;border:1.5px solid var(--ln2);border-radius:50%;flex:none;position:relative} .nfw .r.sel .dot{border-color:var(--bl)} .nfw .r.sel .dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--bl)}
+        .nfw .r .t{flex:1} .nfw .r b{display:block;font-size:13px;font-weight:700} .nfw .r span{font-size:11px;color:var(--mut)}
+        .nfw .r .freq{font-family:'JetBrains Mono',monospace;font-size:9px;color:#9FC0FF;font-weight:700;background:rgba(11,92,255,.14);border:1px solid #1B2A52;border-radius:5px;padding:3px 7px;flex:none}
+        .nfw .togs{display:grid;gap:8px;margin-bottom:14px}
+        .nfw .tgr{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--bg3);border:1px solid var(--ln);border-radius:11px}
+        .nfw .tgr .t{flex:1} .nfw .tgr b{display:block;font-size:12.5px;font-weight:700} .nfw .tgr span{font-size:10.5px;color:var(--mut)}
+        .nfw .sw{width:38px;height:22px;border-radius:99px;background:var(--up);position:relative;cursor:pointer;flex:none} .nfw .sw::after{content:"";position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:2px;right:2px;transition:.18s} .nfw .sw.off{background:var(--ln2)} .nfw .sw.off::after{right:auto;left:2px}
+        .nfw .h{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;margin-bottom:8px}
+        .nfw .succ{text-align:center;padding:8px 0 4px}
+        .nfw .succ .ck{width:60px;height:60px;border-radius:50%;background:rgba(52,211,153,.12);border:2px solid var(--up);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+        .nfw .succ h2{font-size:22px;font-weight:900;letter-spacing:-.02em;margin-bottom:7px} .nfw .succ .sb{font-size:12.5px;color:var(--mut);max-width:320px;margin:0 auto 18px}
+        .nfw .sumg{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--ln);border:1px solid var(--ln);border-radius:11px;overflow:hidden;margin-bottom:16px}
+        .nfw .sumg>div{background:var(--bg3);padding:10px 12px} .nfw .sumg .l{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase} .nfw .sumg .v{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:#fff;margin-top:3px}
+      `}</style>
+      <div className="card">
+        <div className="prog">{prog}</div>
+        <button className="xb" onClick={close} aria-label="close">×</button>
+        {step===1&&<>
+          <div className="stp">{T("STEP 1 OF 4 · INTRO","PASO 1 DE 4 · INTRO")}</div>
+          <div className="ch tg">
+            <div className="ic"><svg width="22" height="22" viewBox="0 0 18 18" fill="#fff"><path d="M16 2.5L1.5 8c-.9.3-.9 1.5 0 1.8l3.3 1.3 1.4 4.1c.2.7 1.1.8 1.6.2l2-2 3.5 2.6c.6.5 1.6.1 1.7-.7l2.3-10.6c.2-.8-.7-1.5-1.3-1.2z"/></svg></div>
+            <h2>{T("Build your ","Crea tu ")}<span className="gd">{T("personal alert assistant","asistente de alertas")}</span></h2>
+            <p>{T("Get alerts only when YOUR stocks light up. No spam, only what matters.","Recibe alertas solo cuando TUS acciones se activan. Sin spam, solo lo que importa.")}</p>
+          </div>
+          <div className="body">
+            <div className="why">
+              <div className="it"><span className="num">1</span><div><b>{T("Pick the stocks you care about","Elige las acciones que te importan")}</b><span>{T("Up to 25 tickers in your watchlist.","Hasta 25 tickers en tu watchlist.")}</span></div></div>
+              <div className="it"><span className="num">2</span><div><b>{T("Connect Telegram (coming in phase 2)","Conecta Telegram (llega en fase 2)")}</b><span>{T("We save your setup now; the bot activates soon.","Guardamos tu configuración ya; el bot se activa pronto.")}</span></div></div>
+              <div className="it"><span className="num">3</span><div><b>{T("Only high-conviction setups","Solo setups de alta convicción")}</b><span>{T("Score ≥ 90. ~3 alerts/week, not 50.","Score ≥ 90. ~3 alertas/semana, no 50.")}</span></div></div>
+            </div>
+            <button className="cta" onClick={()=>setStep(2)}>{T("Set up my watchlist","Configurar mi watchlist")} <Arrow/></button>
+            <button className="gh" onClick={close}>{T("Skip for now","Omitir por ahora")}</button>
+          </div>
+        </>}
+        {step===2&&<>
+          <div className="stp">{T("STEP 2 OF 4 · YOUR WATCHLIST","PASO 2 DE 4 · TU WATCHLIST")}</div>
+          <div className="ch"><div className="ic"><svg width="22" height="22" viewBox="0 0 18 18" fill="none"><path d="M3 2.5h12v13l-6-3-6 3z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round"/></svg></div><h2>{T("Add the stocks ","Añade las acciones ")}<span className="gd">{T("you trade","que operas")}</span></h2><p>{T("Search any ticker or tap a popular one.","Busca cualquier ticker o toca uno popular.")}</p></div>
+          <div className="body">
+            <div className="search"><input value={q} onChange={e=>setQ(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&add(q)} placeholder={T("Search ticker (e.g. NVDA) + Enter","Busca ticker (ej. NVDA) + Enter")}/></div>
+            <div className="sxnt">{T("/// POPULAR · TAP TO ADD","/// POPULARES · TOCA PARA AÑADIR")}</div>
+            <div className="chips">{NFP_POPULAR.filter((t,i)=>NFP_POPULAR.indexOf(t)===i).map(t=>(<span key={t} className={wl.includes(t)?"on":""} onClick={()=>wl.includes(t)?rm(t):add(t)}>{t}{wl.includes(t)?" ✓":" +"}</span>))}</div>
+            <div className="sxl">
+              <div className="sxl-h"><b style={{color:"#fff"}}>{T("YOUR WATCHLIST","TU WATCHLIST")}</b><span className="cnt">{wl.length} / 25</span></div>
+              <div className="picks">{wl.length?wl.map(t=>(<span key={t} className="pk">{t}<button onClick={()=>rm(t)}>×</button></span>)):<span style={{color:"#67769A",fontSize:12}}>{T("No tickers yet","Sin tickers aún")}</span>}</div>
+            </div>
+            <button className="cta" style={{marginTop:16}} disabled={!wl.length} onClick={()=>setStep(3)}>{T("Continue with ","Continuar con ")}{wl.length} {T("stocks","acciones")} <Arrow/></button>
+          </div>
+        </>}
+        {step===3&&<>
+          <div className="stp">{T("STEP 3 OF 4 · CONNECT","PASO 3 DE 4 · CONECTAR")}</div>
+          <div className="ch tg"><div className="ic"><svg width="22" height="22" viewBox="0 0 18 18" fill="#fff"><path d="M16 2.5L1.5 8c-.9.3-.9 1.5 0 1.8l3.3 1.3 1.4 4.1c.2.7 1.1.8 1.6.2l2-2 3.5 2.6c.6.5 1.6.1 1.7-.7l2.3-10.6c.2-.8-.7-1.5-1.3-1.2z"/></svg></div><h2>{T("Connect ","Conecta ")}<span className="gd">Telegram</span></h2><p>{T("Your personal connect code is ready.","Tu código de conexión está listo.")}</p></div>
+          <div className="body">
+            <div className="tgcode"><div className="cl">{T("/// YOUR CONNECT CODE","/// TU CÓDIGO DE CONEXIÓN")}</div><div className="cv">{code}</div></div>
+            <div className="note">⚠ {T("The @NexoTradeBot activates in phase 2. We save your code and watchlist now — alerts start once the bot is live.","El @NexoTradeBot se activa en la fase 2. Guardamos tu código y watchlist ahora — las alertas empiezan cuando el bot esté en vivo.")}</div>
+            <button className="cta" onClick={()=>setStep(4)}>{T("Continue","Continuar")} <Arrow/></button>
+            <button className="gh" onClick={()=>setStep(4)}>{T("I'll connect later","Lo conecto luego")}</button>
+          </div>
+        </>}
+        {step===4&&<>
+          <div className="stp">{T("STEP 4 OF 4 · FINE-TUNE","PASO 4 DE 4 · AJUSTES")}</div>
+          <div className="ch"><div className="ic"><svg width="22" height="22" viewBox="0 0 18 18" fill="none"><path d="M2 4.5h14M5 9h8M7 13.5h4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg></div><h2><span className="gd">{T("Fine-tune","Ajusta")}</span> {T("your alerts","tus alertas")}</h2><p>{T("How strict should alerts be?","¿Qué tan estrictas las alertas?")}</p></div>
+          <div className="body">
+            <div className="h">{T("/// ALERT THRESHOLD","/// UMBRAL DE ALERTA")}</div>
+            <div className="radios">
+              {[[95,T("Only the best","Solo lo mejor"),T("Score ≥ 95 · max conviction","Score ≥ 95 · máxima convicción"),"~1/wk"],
+                [90,T("Elite setups","Setups élite"),T("Score ≥ 90 · best signal-to-noise","Score ≥ 90 · mejor señal/ruido"),"~3/wk"],
+                [85,T("Strong setups","Setups fuertes"),T("Score ≥ 85 · more opportunities","Score ≥ 85 · más oportunidades"),"~8/wk"]
+              ].map(([v,b,s,f])=>(
+                <div key={v} className={"r"+(prefs.minScore===v?" sel":"")} onClick={()=>setPrefs({...prefs,minScore:v})}><div className="dot"/><div className="t"><b>{b}</b><span>{s}</span></div><span className="freq">{f}</span></div>
+              ))}
+            </div>
+            <div className="h">{T("/// WHAT TO ALERT","/// QUÉ ALERTAR")}</div>
+            <div className="togs">
+              {[["stocks",T("Stock setups","Setups de acciones")],["options",T("Options contracts","Contratos de opciones")],["hours",T("Market hours only","Solo horario de mercado")]].map(([k,b])=>(
+                <div key={k} className="tgr"><div className="t"><b>{b}</b></div><div className={"sw"+(prefs[k]?"":" off")} onClick={()=>setPrefs({...prefs,[k]:!prefs[k]})}/></div>
+              ))}
+            </div>
+            <button className="cta" onClick={finish}>{T("Activate my alerts","Activar mis alertas")} <Arrow/></button>
+          </div>
+        </>}
+        {step===5&&<>
+          <div className="stp">{T("SETUP COMPLETE","CONFIGURACIÓN LISTA")}</div>
+          <div className="body" style={{paddingTop:22}}>
+            <div className="succ">
+              <div className="ck"><svg width="30" height="30" viewBox="0 0 32 32" fill="none"><path d="M8 16.5l5 5L24 11" stroke="#34D399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+              <h2>{T("You're ","¡Estás ")}<span className="gd">{T("all set","listo!")}</span></h2>
+              <p className="sb">{T("Your watchlist & preferences are saved. Alerts begin when the bot goes live (phase 2).","Tu watchlist y preferencias quedaron guardadas. Las alertas empiezan cuando el bot esté en vivo (fase 2).")}</p>
+            </div>
+            <div className="sumg">
+              <div><div className="l">{T("Watchlist","Watchlist")}</div><div className="v">{wl.length} {T("stocks","acciones")}</div></div>
+              <div><div className="l">{T("Threshold","Umbral")}</div><div className="v">≥ {prefs.minScore}</div></div>
+              <div><div className="l">{T("Frequency","Frecuencia")}</div><div className="v">{prefs.minScore>=95?"~1":prefs.minScore>=90?"~3":"~8"}/{T("wk","sem")}</div></div>
+              <div><div className="l">Telegram</div><div className="v" style={{color:"#F5C84B"}}>{T("Phase 2","Fase 2")}</div></div>
+            </div>
+            <button className="cta" onClick={close}>{T("Go to Finder Pro","Ir a Finder Pro")} <Arrow/></button>
+            <button className="gh" onClick={()=>setStep(2)}>{T("Edit my watchlist","Editar mi watchlist")}</button>
+          </div>
+        </>}
+      </div>
+    </div>
+  );
+}
 function FinderPro({isPremium,onNeedPremium,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
@@ -14739,7 +14906,10 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
   const [strict,setStrict]=useState(true);
   const [selS,setSelS]=useState(0);
   const [selO,setSelO]=useState(0);
+  const [showWiz,setShowWiz]=useState(false);
+  const [wlState,setWlState]=useState(nfpGetWL);
   const unlock=()=>{ onNeedPremium&&onNeedPremium(); };
+  const openWizard=()=>{ if(isPremium) setShowWiz(true); else unlock(); };
   const liveP=(sym,fb)=>{ const q=lp[sym]; return (q&&q.price)?q.price:fb; };
   const liveC=(sym,fb)=>{ const q=lp[sym]; return (q&&typeof q.change==="number")?q.change:fb; };
   const fmtP=(v)=> v>=1000? v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}) : v.toFixed(2);
@@ -15125,7 +15295,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
             <div className="wlinfo">
               <b>{T("Alerts only for stocks in YOUR watchlist","Solo alertas de acciones en TU watchlist")}</b>
               <span style={{color:"var(--mut)"}}>{T("No noise · no spam · only what matters","Sin ruido · sin spam · solo lo que importa")}</span>
-              <div className="wlchips">{["NVDA","MSFT","AAPL","META","TSLA"].map(c=><span key={c}>{c}</span>)}<span style={{background:"var(--bl)",color:"#fff",borderColor:"var(--bl)"}}>+3</span></div>
+              <div className="wlchips">{wlState.slice(0,6).map(c=><span key={c}>{c}</span>)}{wlState.length>6&&<span style={{background:"var(--bl)",color:"#fff",borderColor:"var(--bl)"}}>+{wlState.length-6}</span>}</div>
             </div>
             <div className="tgmsg">
               <div className="r1"><span className="siren">🚨</span><b>NVDA · Score 94/100</b></div>
@@ -15133,7 +15303,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
               <div className="ko" style={{marginTop:3}}>{T("ENTRY","ENTRADA")} <b>$138–142</b> · STOP <b style={{color:"#F87171"}}>$133</b> · {T("TARGET","OBJETIVO")} <b style={{color:"#34D399"}}>$165</b></div>
               <div className="rsn">VOL 5.5× · BRK $135 · SMART MONEY 92 · EARNINGS 6d</div>
             </div>
-            <button className="tg-cfg" onClick={unlock}><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 3h8M3 7h8M3 11h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>{T("Set up my watchlist alerts","Configurar mis alertas")}</button>
+            <button className="tg-cfg" onClick={openWizard}><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 3h8M3 7h8M3 11h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>{T("Set up my watchlist alerts","Configurar mis alertas")}</button>
           </div>
         </div>
       </div>
@@ -15163,6 +15333,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
         {T("Live prices are real. Scores & signals are illustrative algorithmic examples — NOT live institutional data. Educational, not financial advice. Trading involves risk.","Los precios son reales. Los scores y señales son ejemplos algorítmicos ilustrativos — NO son datos institucionales en vivo. Educativo, no es consejo financiero. Operar implica riesgo.")}
       </div>
     </div>
+    {showWiz&&<WatchlistWizard lang={lang} onClose={()=>{ setShowWiz(false); setWlState(nfpGetWL()); }} onDone={()=>setWlState(nfpGetWL())}/>}
   </div>
   );
 }
