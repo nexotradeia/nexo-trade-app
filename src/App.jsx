@@ -14739,6 +14739,8 @@ function nfpSaveWL(arr){ try{ localStorage.setItem("nexo-watchlist",JSON.stringi
 function nfpGetPrefs(){ try{ const v=JSON.parse(localStorage.getItem("nexo-alert-prefs")||"null"); return v||{minScore:90,stocks:true,options:true,hours:true}; }catch(e){ return {minScore:90,stocks:true,options:true,hours:true}; } }
 function nfpSavePrefs(p){ try{ localStorage.setItem("nexo-alert-prefs",JSON.stringify(p)); }catch(e){} }
 const NFP_POPULAR=["SPY","QQQ","AMD","GOOGL","AMZN","COIN","PLTR","NFLX","BTC","ETH","NVDA","MSFT","AAPL","META","TSLA"];
+// ¿Mercado US abierto? (Lun-Vie 9:30-16:00 ET) — para indicador LIVE/CERRADO
+function nfpMktOpen(){ try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); const m=et.getHours()*60+et.getMinutes(); return d>=1&&d<=5&&m>=570&&m<960; }catch(e){ return false; } }
 
 // ── WIZARD de watchlist (5 pasos) · funcional hoy (guarda local). Telegram = fase 2 ──
 function WatchlistWizard({lang="es",onClose,onDone}){
@@ -14908,6 +14910,8 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
   const [selO,setSelO]=useState(0);
   const [showWiz,setShowWiz]=useState(false);
   const [wlState,setWlState]=useState(nfpGetWL);
+  const [mktOpen,setMktOpen]=useState(nfpMktOpen);
+  useEffect(()=>{ const iv=setInterval(()=>setMktOpen(nfpMktOpen()),30000); return ()=>clearInterval(iv); },[]);
   const unlock=()=>{ onNeedPremium&&onNeedPremium(); };
   const openWizard=()=>{ if(isPremium) setShowWiz(true); else unlock(); };
   const liveP=(sym,fb)=>{ const q=lp[sym]; return (q&&q.price)?q.price:fb; };
@@ -14974,6 +14978,8 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
       .nfp .top .sp{flex:1;min-width:8px}
       .nfp .liveb{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--cy);font-weight:600;border:1px solid #103040;background:rgba(34,211,238,.06);border-radius:8px;padding:6px 10px}
       .nfp .liveb i{width:6px;height:6px;border-radius:50%;background:var(--cy);animation:nfpPl 1.4s infinite}
+      .nfp .liveb.closed{color:var(--mut);border-color:var(--ln2);background:rgba(103,118,154,.06)}
+      .nfp .liveb.closed i{background:var(--mut);animation:none}
       @keyframes nfpPl{50%{opacity:.25}}
       .nfp .tabs{display:flex;gap:8px;margin-top:12px;background:var(--bg2);border:1px solid var(--ln);border-radius:14px;padding:6px}
       .nfp .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 14px;background:transparent;border:none;color:var(--mut);font-weight:700;font-size:13.5px;border-radius:11px;transition:.18s}
@@ -15020,6 +15026,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
       .nfp .ch b{font-size:12px;font-weight:700} .nfp .ch .meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
       .nfp .ch .sp{flex:1} .nfp .ch .stat{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cy);letter-spacing:.08em;display:flex;align-items:center;gap:5px}
       .nfp .ch .stat i{width:5px;height:5px;border-radius:50%;background:var(--cy);animation:nfpPl 1.6s infinite}
+      .nfp .ch .stat.paused{color:var(--mut)} .nfp .ch .stat.paused i{background:var(--mut);animation:none}
       .nfp .filt{display:flex;gap:6px;padding:9px 14px;border-bottom:1px solid var(--ln);overflow-x:auto;flex-wrap:wrap}
       .nfp .filt span{flex:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:600;color:var(--mut);border:1px solid var(--ln);border-radius:7px;padding:5px 9px;text-transform:uppercase}
       .nfp .filt span.on{color:#fff;background:var(--bg3);border-color:#1D3266}
@@ -15116,7 +15123,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
           <div className="meta">{T("HIGH-CONVICTION SETUPS · STOCKS & OPTIONS","SETUPS DE ALTA CONVICCIÓN · ACCIONES Y OPCIONES")}</div>
         </div>
         <span className="sp"/>
-        <span className="liveb"><i/>{T("LIVE PRICES","PRECIOS EN VIVO")}</span>
+        <span className={"liveb"+(mktOpen?"":" closed")}><i/>{mktOpen?T("LIVE · MARKET OPEN","EN VIVO · MERCADO ABIERTO"):T("MARKET CLOSED","MERCADO CERRADO")}</span>
       </div>
       {/* TABS */}
       <div className="tabs">
@@ -15172,7 +15179,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
       <div className="grid">
         {/* TABLE */}
         <div className="card">
-          <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className="stat"><i/>{T("RE-SCAN 8s","RE-ESCANEO 8s")}</span></div>
+          <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className={"stat"+(mktOpen?"":" paused")}><i/>{mktOpen?T("PRICES LIVE","PRECIOS EN VIVO"):T("PAUSED · CLOSED","PAUSADO · CERRADO")}</span></div>
           <div className="filt">
             <span className="on">{T("All","Todas")}</span>
             {tab==="stocks"?<><span>{T("Long","Largos")}</span><span>{T("Short","Cortos")}</span><span>⚡ Earnings ≤7d</span></>:<><span>Calls</span><span>Puts</span><span>0–7 DTE</span></>}
