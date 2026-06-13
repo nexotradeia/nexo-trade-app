@@ -14912,10 +14912,14 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
   const [wlState,setWlState]=useState(nfpGetWL);
   const [mktOpen,setMktOpen]=useState(nfpMktOpen);
   useEffect(()=>{ const iv=setInterval(()=>setMktOpen(nfpMktOpen()),30000); return ()=>clearInterval(iv); },[]);
+  const [poll,setPoll]=useState({});       // precios sondeados vía Finnhub REST (gratis, ~15min retraso)
+  const [lastUpd,setLastUpd]=useState(null);
+  const [refreshing,setRefreshing]=useState(false);
   const unlock=()=>{ onNeedPremium&&onNeedPremium(); };
   const openWizard=()=>{ if(isPremium) setShowWiz(true); else unlock(); };
-  const liveP=(sym,fb)=>{ const q=lp[sym]; return (q&&q.price)?q.price:fb; };
-  const liveC=(sym,fb)=>{ const q=lp[sym]; return (q&&typeof q.change==="number")?q.change:fb; };
+  // Precio/cambio: prioriza el poll fresco (acciones), luego PriceCtx, luego fallback
+  const liveP=(sym,fb)=>{ const p=poll[sym]; if(p&&p.price) return p.price; const q=lp[sym]; if(q&&q.price) return q.price; return fb; };
+  const liveC=(sym,fb)=>{ const p=poll[sym]; if(p&&typeof p.change==="number") return p.change; const q=lp[sym]; if(q&&typeof q.change==="number"&&q.price) return q.change; return fb; };
   const fmtP=(v)=> v>=1000? v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}) : v.toFixed(2);
   const FREE=3;
 
@@ -14950,6 +14954,20 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
      why:T("TSLA put with block flow and bearish smart-money tilt — hedge or directional short.","Put TSLA con flujo en bloque y sesgo bajista de smart money — cobertura o corto direccional.")},
   ];
 
+  // ── Polling GRATIS cada 60s vía Finnhub REST (acciones + subyacentes de opciones).
+  //    Dato ~15min retraso (límite de cualquier fuente gratis). Cripto no aplica aquí.
+  const allTickers = React.useMemo(()=>[...new Set([...STOCKS.map(s=>s.tk),...OPTIONS.map(o=>o.tk)])],[]);
+  const doPoll = React.useCallback((manual)=>{
+    if(document.hidden && !manual) return;
+    if(manual) setRefreshing(true);
+    Promise.allSettled(allTickers.map(sym=>fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).then(q=>({sym,q})).catch(()=>({sym,q:null}))))
+      .then(res=>{ const upd={}; res.forEach(x=>{ const v=x.status==="fulfilled"?x.value:null; if(v&&v.q&&v.q.c){ upd[v.sym]={price:v.q.c,change:typeof v.q.dp==="number"?+v.q.dp.toFixed(2):0}; } });
+        if(Object.keys(upd).length) setPoll(p=>({...p,...upd}));
+        setLastUpd(new Date()); setRefreshing(false);
+      }).catch(()=>setRefreshing(false));
+  },[allTickers]);
+  useEffect(()=>{ doPoll(false); const iv=setInterval(()=>doPoll(false),60000); const onVis=()=>{ if(!document.hidden) doPoll(false); }; document.addEventListener("visibilitychange",onVis); return ()=>{ clearInterval(iv); document.removeEventListener("visibilitychange",onVis); }; },[doPoll]);
+
   const rows = tab==="stocks"?STOCKS:OPTIONS;
   const sel = tab==="stocks"?selS:selO;
   const setSel = tab==="stocks"?setSelS:setSelO;
@@ -14981,6 +14999,11 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
       .nfp .liveb.closed{color:var(--mut);border-color:var(--ln2);background:rgba(103,118,154,.06)}
       .nfp .liveb.closed i{background:var(--mut);animation:none}
       @keyframes nfpPl{50%{opacity:.25}}
+      .nfp .refbtn{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--ln);color:var(--tx);border-radius:8px;padding:6px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+      .nfp .refbtn:hover{border-color:var(--bl2);color:#fff} .nfp .refbtn:disabled{opacity:.6;cursor:default}
+      .nfp .refbtn .upd{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--mut);letter-spacing:.04em}
+      .nfp .refbtn svg.spin{animation:nfpSpin .7s linear infinite}
+      @keyframes nfpSpin{to{transform:rotate(360deg)}}
       .nfp .tabs{display:flex;gap:8px;margin-top:12px;background:var(--bg2);border:1px solid var(--ln);border-radius:14px;padding:6px}
       .nfp .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 14px;background:transparent;border:none;color:var(--mut);font-weight:700;font-size:13.5px;border-radius:11px;transition:.18s}
       .nfp .tab.on{color:#fff;box-shadow:inset 0 0 0 1px #1D3266;background:var(--bg3)}
@@ -15123,6 +15146,11 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
           <div className="meta">{T("HIGH-CONVICTION SETUPS · STOCKS & OPTIONS","SETUPS DE ALTA CONVICCIÓN · ACCIONES Y OPCIONES")}</div>
         </div>
         <span className="sp"/>
+        <button className="refbtn" onClick={()=>doPoll(true)} disabled={refreshing} title={T("Refresh prices","Actualizar precios")}>
+          <svg className={refreshing?"spin":""} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          <span>{refreshing?T("…","…"):T("Refresh","Actualizar")}</span>
+          {lastUpd&&<span className="upd">{lastUpd.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>}
+        </button>
         <span className={"liveb"+(mktOpen?"":" closed")}><i/>{mktOpen?T("LIVE · MARKET OPEN","EN VIVO · MERCADO ABIERTO"):T("MARKET CLOSED","MERCADO CERRADO")}</span>
       </div>
       {/* TABS */}
@@ -15337,7 +15365,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
       {/* FOOTNOTE + HONESTY SEAL */}
       <div className="foot">
         <div style={{marginBottom:8}}><span className="demoseal">⚠ {T("ILLUSTRATIVE DATA · EDUCATIONAL","DATOS ILUSTRATIVOS · EDUCATIVO")}</span></div>
-        {T("Live prices are real. Scores & signals are illustrative algorithmic examples — NOT live institutional data. Educational, not financial advice. Trading involves risk.","Los precios son reales. Los scores y señales son ejemplos algorítmicos ilustrativos — NO son datos institucionales en vivo. Educativo, no es consejo financiero. Operar implica riesgo.")}
+        {T("Stock/option prices are real, auto-refreshed ~every 60s (free data, ~15-min delayed). Scores & signals are illustrative algorithmic examples — NOT live institutional data. Educational, not financial advice. Trading involves risk.","Los precios de acciones/opciones son reales, se refrescan solos ~cada 60s (datos gratis, ~15 min de retraso). Los scores y señales son ejemplos algorítmicos ilustrativos — NO son datos institucionales en vivo. Educativo, no es consejo financiero. Operar implica riesgo.")}
       </div>
     </div>
     {showWiz&&<WatchlistWizard lang={lang} onClose={()=>{ setShowWiz(false); setWlState(nfpGetWL()); }} onDone={()=>setWlState(nfpGetWL())}/>}
