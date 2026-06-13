@@ -14738,7 +14738,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
           res.forEach(j=>{ if(j&&Array.isArray(j.items)) rows.push(...j.items); });
           if(rows.length>=6){
             rows.sort((a,b)=>b.premium-a.premium);
-            setFeed(rows.slice(0,50).map((r,i)=>({...r,id:`real_${i}_${r.ticker}_${r.strike}`,time:"Hoy"})));
+            setFeed(rows.slice(0,50).map((r,i)=>({...r,id:`real_${i}_${r.ticker}_${r.strike}`,time:(isEN?"Today":"Hoy")})));
             setRealFlow(true);
           }
         });
@@ -14954,11 +14954,11 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
     {k:"put",    l:"📉 Puts"},
     {k:"dark",   l:"🌑 Dark Pool"},
     {k:"gold",   l:"⭐ Golden Sweep"},
-    {k:"whales", l:"🐳 Ballenas BTC"},
+    {k:"whales", l:isEN?"🐳 BTC Whales":"🐳 Ballenas BTC"},
   ];
 
   const PREM_FILTERS=[
-    {k:0,      l:"Todos"},
+    {k:0,      l:isEN?"All":"Todos"},
     {k:500000, l:"$500K+"},
     {k:1e6,    l:"$1M+"},
     {k:5e6,    l:"$5M+"},
@@ -15091,7 +15091,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
               <span style={{fontSize:28}}>🐋</span>
               <div style={{fontSize:20,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.5}}>{isEN?"Smart Money":"Smart Money"}</div>
               <span style={{background:"rgba(0,210,106,0.12)",color:"#00D26A",border:"1px solid rgba(0,210,106,0.25)",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800,display:"flex",alignItems:"center",gap:4}}>
-                <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>EN VIVO
+                <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block"}}/>{isEN?"LIVE":"EN VIVO"}
               </span>
             </div>
             <div style={{fontSize:12,color:"var(--c-muted)"}}>Options flow · Dark Pool prints · {isEN?"Institutional sweeps":"Sweeps institucionales"}</div>
@@ -15151,7 +15151,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
             style={{display:"flex",alignItems:"center",gap:7,background:tgConfig.enabled?"rgba(15,76,129,0.08)":"rgba(255,255,255,0.04)",border:`1px solid ${tgConfig.enabled?"rgba(15,76,129,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:10,padding:"6px 14px",fontSize:11,fontWeight:700,color:tgConfig.enabled?"#29B6F6":"#64748B",cursor:"pointer",transition:"all 0.2s"}}>
             <span style={{fontSize:14}}>✈️</span>
             <span>{isEN?"Telegram Alerts":"Alertas Telegram"}</span>
-            <span style={{background:tgConfig.enabled?"#00D26A":"#64748B",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>{tgConfig.enabled?"ACTIVO":"OFF"}</span>
+            <span style={{background:tgConfig.enabled?"#00D26A":"#64748B",color:"#fff",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:0.5}}>{tgConfig.enabled?(isEN?"ACTIVE":"ACTIVO"):"OFF"}</span>
             <span style={{marginLeft:2,fontSize:10,color:"#475569"}}>{showTgPanel?"▲":"▼"}</span>
           </button>
           {/* Config panel */}
@@ -15199,9 +15199,9 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
                   </div>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 12px",border:"1px solid rgba(255,255,255,0.08)"}}>
-                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>Tipo orden</span>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:700,whiteSpace:"nowrap"}}>{isEN?"Order type":"Tipo orden"}</span>
                   <div style={{display:"flex",gap:4}}>
-                    {[{l:"⭐ Solo Golden",golden:true},{l:"🌊 Todos",golden:false}].map(opt=>(
+                    {[{l:isEN?"⭐ Golden only":"⭐ Solo Golden",golden:true},{l:isEN?"🌊 All":"🌊 Todos",golden:false}].map(opt=>(
                       <button key={opt.l} onClick={()=>setTgConfig(c=>({...c,goldenOnly:opt.golden}))}
                         style={{background:tgConfig.goldenOnly===opt.golden?"rgba(245,158,11,0.15)":"transparent",border:`1px solid ${tgConfig.goldenOnly===opt.golden?"rgba(245,158,11,0.4)":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:700,color:tgConfig.goldenOnly===opt.golden?"#F59E0B":"#64748B",cursor:"pointer"}}>
                         {opt.l}
