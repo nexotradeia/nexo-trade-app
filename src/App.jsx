@@ -2757,10 +2757,17 @@ function ProfilePage({user,currentUser,isFollowing,onFollow,onClose,onUserUpdate
                 <>
                 <div onClick={()=>setShowAvatarEdit(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:9998}}/>
                 <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:9999,background:"#1e293b",border:"1px solid rgba(139,92,246,0.4)",borderRadius:16,padding:16,boxShadow:"0 20px 60px rgba(0,0,0,0.7)",width:300,maxWidth:"90vw",maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                    <span style={{fontSize:11,fontWeight:700,color:"#FCD34D"}}>{lang==="en"?"Change Avatar":"Cambiar Avatar"}</span>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                    <span style={{fontSize:12,fontWeight:800,color:"#e2e8f0"}}>{lang==="en"?"Edit profile":"Editar perfil"}</span>
                     <button onClick={()=>setShowAvatarEdit(false)} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:14}}>✕</button>
                   </div>
+                  {/* ── Cambiar nombre de usuario ── */}
+                  <button onClick={()=>{setShowAvatarEdit(false);const dL=getCooldownDaysLeft();setNewNick(user.username||user.name||"");setNickStatus(dL>0?"cooldown":null);setEditingNick(true);}}
+                    style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7,width:"100%",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:9,padding:"9px 4px",cursor:"pointer",color:"#cbd5e1",fontSize:12,fontWeight:700,marginBottom:8,fontFamily:"inherit"}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                    {lang==="en"?"Change username":"Cambiar nombre de usuario"}
+                  </button>
+                  <div style={{fontSize:10,fontWeight:700,color:"#64748b",letterSpacing:0.4,marginBottom:6,textTransform:"uppercase"}}>{lang==="en"?"Photo":"Foto"}</div>
                   {/* ── Subir foto real (Supabase Storage) ── */}
                   <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(15,76,129,0.18)",border:"1.5px dashed rgba(96,165,250,0.6)",borderRadius:9,padding:"8px 4px",cursor:"pointer",color:"#93C5FD",fontSize:12,fontWeight:700,marginBottom:8}}>
                     📷 {lang==="en"?"Upload photo":"Subir foto"}
