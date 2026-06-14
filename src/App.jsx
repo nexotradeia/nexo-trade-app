@@ -14892,7 +14892,7 @@ function WatchlistWizard({lang="es",onClose,onDone}){
               <div><div className="l">{T("Frequency","Frecuencia")}</div><div className="v">{prefs.minScore>=95?"~1":prefs.minScore>=90?"~3":"~8"}/{T("wk","sem")}</div></div>
               <div><div className="l">Telegram</div><div className="v" style={{color:"#F5C84B"}}>{T("Phase 2","Fase 2")}</div></div>
             </div>
-            <button className="cta" onClick={close}>{T("Go to Finder Pro","Ir a Finder Pro")} <Arrow/></button>
+            <button className="cta" onClick={close}>{T("Go to Smart Money","Ir a Smart Money")} <Arrow/></button>
             <button className="gh" onClick={()=>setStep(2)}>{T("Edit my watchlist","Editar mi watchlist")}</button>
           </div>
         </>}
@@ -14900,7 +14900,7 @@ function WatchlistWizard({lang="es",onClose,onDone}){
     </div>
   );
 }
-function FinderPro({isPremium,onNeedPremium,lang="es"}){
+function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
   const lp=useContext(PriceCtx);
@@ -15316,8 +15316,7 @@ function FinderPro({isPremium,onNeedPremium,lang="es"}){
               </div>
             )}
             <div className="acts">
-              <button className="cta" onClick={unlock}>{T("Place trade on broker","Operar en broker")} <Arrow/></button>
-              <button className="gh" title="Watchlist"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 2.5h10v11l-5-2.5-5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg></button>
+              <button className="cta" onClick={()=>{ try{ const t=String(d.tk).toUpperCase(); const cur=nfpGetWL(); const nx=cur.includes(t)?cur:[...cur,t]; localStorage.setItem("nexo-watchlist",JSON.stringify(nx)); setWlState(nx); }catch(e){} }}>{T("Add to watchlist","Añadir a watchlist")} <Arrow/></button>
             </div>
           </div>
           {/* TELEGRAM */}
@@ -22865,6 +22864,20 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ticker:"",shares:"",entryPrice:"",note:"",broker:""});
   const BROKERS = ["Interactive Brokers","eToro","Robinhood","Trading 212","XTB","Webull","Charles Schwab","Fidelity","Trade Republic","DEGIRO","Binance","Coinbase","Bitget","Kraken","Otro"];
+  const [showBrokerPick, setShowBrokerPick] = useState(false);
+  // Brokers reales para que la gente entre a su cuenta y lleve sus números
+  const BROKER_LINKS = [
+    {n:"Interactive Brokers", c:"#D81222", u:"https://www.interactivebrokers.com/mkt/?src=nexotrade1&url=%2Fen%2Fwhyib%2Foverviewnetwork.php"},
+    {n:"eToro",               c:"#13C636", u:"https://www.etoro.com/login"},
+    {n:"Robinhood",           c:"#00C805", u:"https://robinhood.com/login"},
+    {n:"Webull",              c:"#0099FF", u:"https://www.webull.com/center"},
+    {n:"Fidelity",            c:"#368727", u:"https://www.fidelity.com/"},
+    {n:"Charles Schwab",      c:"#00A0DF", u:"https://www.schwab.com/"},
+    {n:"Trading 212",         c:"#00AAE4", u:"https://www.trading212.com/"},
+    {n:"Binance",             c:"#F0B90B", u:"https://www.binance.com/en/my/dashboard"},
+    {n:"Coinbase",            c:"#0052FF", u:"https://www.coinbase.com/dashboard"},
+    {n:"Kraken",              c:"#5741D9", u:"https://www.kraken.com/sign-in"},
+  ];
   const [shareMsg, setShareMsg] = useState(null);
   const [sortBy, setSortBy] = useState("pnl"); // pnl | ticker | value
   const [ptTab, setPtTab] = useState("returns"); // returns | market | risk | efficiency | projections | health
@@ -23386,9 +23399,30 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{width:1,height:20,background:T.br2}}/>
           <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:totalPnl>=0?T.grn:T.red,textShadow:`0 0 12px ${totalPnl>=0?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)"}`}}>{m$(totalPnl)}</div>
           {(()=>{ const s = pCloud==="synced"?{t:"☁ SYNCED",c:T.grn}:(pCloud==="loading"||pCloud==="saving")?{t:"☁ SYNC…",c:T.blue}:pCloud==="error"?{t:"⚠ LOCAL",c:T.gold}:{t:"☁ SIGN IN",c:T.dim}; return <span onClick={()=>{if(pCloud==="off"&&onNeedAuth)onNeedAuth();}} style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:s.c,border:`1px solid ${s.c}40`,borderRadius:3,padding:"3px 8px",letterSpacing:.5,cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
+          <button onClick={()=> isPremium ? setShowBrokerPick(true) : (onNeedPremium&&onNeedPremium())} style={{background:"rgba(77,166,255,.12)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>{isEN?"🔗 BROKER":"🔗 BROKER"}</button>
           {termTab==="portfolio" && <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setImpMsg(null);setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>{isEN?"+ ADD":"+ AÑADIR"}</button>}
         </div>
       </div>
+      {showBrokerPick && (
+        <div onClick={()=>setShowBrokerPick(false)} style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(2,6,20,.78)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:460,background:T.bg2,border:`1px solid ${T.br}`,borderRadius:14,padding:"20px 18px 22px",boxShadow:"0 20px 60px rgba(0,0,0,.6)"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+              <div style={{fontWeight:800,fontSize:16,color:T.txt}}>{isEN?"Connect your broker":"Conecta tu broker"}</div>
+              <button onClick={()=>setShowBrokerPick(false)} style={{background:T.bg4,border:"none",color:T.mid,width:30,height:30,borderRadius:8,fontSize:16,cursor:"pointer"}}>✕</button>
+            </div>
+            <div style={{fontSize:12,color:T.mid,marginBottom:14}}>{isEN?"Open your account to manage trades — then log them here to track your P&L.":"Entra a tu cuenta para operar — luego regístralas aquí para llevar tus ganancias."}</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              {BROKER_LINKS.map(b=>(
+                <button key={b.n} onClick={()=>{window.open(b.u,"_blank","noopener,noreferrer");setShowBrokerPick(false);}}
+                  style={{display:"flex",alignItems:"center",gap:9,textAlign:"left",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:12,padding:"12px",color:T.txt,fontSize:13,fontWeight:600,cursor:"pointer"}}>
+                  <span style={{width:9,height:9,borderRadius:"50%",background:b.c,flexShrink:0}}/>{b.n}
+                </button>
+              ))}
+            </div>
+            <div style={{fontSize:10.5,color:T.dim,marginTop:14,lineHeight:1.4}}>{isEN?"NexoTrade does not execute orders or access your funds. You trade directly on the broker's platform. Educational content — not financial advice.":"NexoTrade no ejecuta órdenes ni accede a tu dinero. Operas directamente en la plataforma del broker. Contenido educativo — no es consejo financiero."}</div>
+          </div>
+        </div>
+      )}
       {/* LAYOUT — PORTFOLIO */}
       {termTab==="portfolio" && (
       <div className="nexo-term-grid" style={{display:"grid",gridTemplateColumns:"210px 1fr 280px",alignItems:"stretch"}}>
@@ -28987,7 +29021,7 @@ export default function App(){
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===14) return <EconCalendarPage lang={lang}/>;
     if(page===18) return <CommoditiesPage/>;
-    if(page===20) return <FinderPro isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
+    if(page===20) return <FinderPro isPremium={effectivePremium} onNeedPremium={openPaywall} user={user} lang={lang}/>;
     if(page===21) return <IdeasPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
     if(page===22) return <MessagesPage user={user} following={following} supabaseClient={supabase} onNeedAuth={()=>setAuth("register")} initialChat={dmTarget} lang={lang}/>;
     if(page===15) return <DividendCalendarPage lang={lang}/>;
@@ -29041,6 +29075,18 @@ export default function App(){
             <button key={v} onClick={()=>setSent(v)} className={pri?undefined:"nexo-tab-2nd"}
               style={{background:"transparent",border:"none",borderBottom:`2.5px solid ${sent===v?(color||"#1565C0"):"transparent"}`,height:44,padding:"0 18px",cursor:"pointer",color:sent===v?(color||"#1565C0"):"#64748B",fontSize:13,fontWeight:600,transition:"all 0.15s",whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:6}}>
               <span style={{display:"flex",alignItems:"center"}}>{icon}</span><span>{l}</span>
+            </button>
+          ))}
+          {/* Accesos directos: Smart Money + Portafolio — brillan en verde cuando el mercado abre */}
+          <div style={{width:1,height:20,background:"var(--c-border)",flexShrink:0,margin:"0 4px"}}/>
+          {[
+            {idx:20, l:"Smart Money", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
+            {idx:37, l:lang==="en"?"Portfolio":"Portafolio", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>},
+          ].map(b=>(
+            <button key={b.idx} onClick={()=>{setPage(b.idx);setShowLanding&&setShowLanding(false);}}
+              style={{background:"transparent",border:"none",height:44,padding:"0 14px",cursor:"pointer",color:marketOpen?"#16a34a":"#64748B",fontSize:13,fontWeight:700,whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:6,textShadow:marketOpen?"0 0 9px rgba(34,197,94,.5)":"none",transition:"all .15s"}}>
+              <span style={{display:"flex",alignItems:"center"}}>{b.icon}</span><span>{b.l}</span>
+              {marketOpen&&<span title={lang==="en"?"Market open":"Mercado abierto"} style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",boxShadow:"0 0 6px #16a34a",display:"inline-block",animation:"nexo-pulse 1.8s infinite"}}/>}
             </button>
           ))}
           {/* Filtros extra — solo móvil (Alcistas/Bajistas/Acciones van aquí) */}
@@ -30013,7 +30059,7 @@ export default function App(){
               {label:isEN?"Feed":t.feed,idx:0,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
               {label:"News",idx:5,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>},
               {label:"Earnings",idx:6,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>},
-              {label:"Markets",idx:2,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+              {label:"Bitcoin",idx:2,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m1-12v2m0 12v2m2-16v2m0 12v2"/></svg>},
               {label:"Trending",idx:7777,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
             ].map(n=>(
               <button key={n.idx} className={`nexo-ntab${page===n.idx?" nact":""}`}
