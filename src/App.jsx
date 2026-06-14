@@ -27502,10 +27502,10 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
         </div>
 
         {/* ── PRICING: toggle + Free vs VIP + 1 CTA ── */}
-        {!isPremium&&(
+        {(
           <div style={{marginBottom:44}}>
-            {/* Billing toggle */}
-            <div style={{textAlign:"center",marginBottom:18}}>
+            {/* Billing toggle (acquisition only) */}
+            {!isPremium&&<div style={{textAlign:"center",marginBottom:18}}>
               <div style={{display:"inline-flex",background:"rgba(15,23,42,0.05)",borderRadius:14,padding:4,gap:4,border:`1px solid ${HAIR}`}}>
                 <button onClick={()=>setBilling("monthly")}
                   style={{border:"none",borderRadius:10,padding:"9px 20px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all .18s",background:billing==="monthly"?"#0F172A":"transparent",color:billing==="monthly"?"#fff":INK2}}>
@@ -27522,7 +27522,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
                   ? (isEN?`Billed $${PRICE_YR}/year · cancel anytime`:`Facturado $${PRICE_YR}/año · cancela cuando quieras`)
                   : (isEN?`Billed $${PRICE_MO}/month · cancel anytime`:`Facturado $${PRICE_MO}/mes · cancela cuando quieras`)}
               </div>
-            </div>
+            </div>}
 
             {/* Free vs VIP cards */}
             <div className="nexo-premium-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,alignItems:"start"}}>
@@ -27537,7 +27537,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
                 <div style={{fontSize:13,color:"#94A3B8",marginBottom:22}}>{isEN?"Free forever — no card":"Gratis para siempre — sin tarjeta"}</div>
                 <button onClick={()=>onNavigate&&onNavigate(0)}
                   style={{width:"100%",padding:"15px",borderRadius:13,border:"1px solid #E2E8F0",background:"#F1F5F9",color:"#334155",fontSize:14.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:24}}>
-                  {isEN?"Current plan":"Plan actual"}
+                  {isPremium?(isEN?"Your previous plan":"Tu plan anterior"):(isEN?"Current plan":"Plan actual")}
                 </button>
                 <div style={{display:"flex",flexDirection:"column",gap:11}}>
                   {FREE_FEATS.map((f,i)=>(
@@ -27561,12 +27561,14 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
                   {billing==="annual"?(isEN?`Billed annually ($${PRICE_YR}/yr)`:`Facturado anual ($${PRICE_YR}/año)`):(isEN?"Billed monthly":"Facturado mensual")}
                 </div>
                 <div style={{fontSize:13,color:"#7dd3fc",fontWeight:600,marginBottom:22}}>{isEN?"3 days free — no card required":"3 días gratis — sin tarjeta"}</div>
-                <button onClick={()=>handleSub()}
-                  style={{width:"100%",padding:"15px",borderRadius:13,border:"none",background:"linear-gradient(135deg,#00e87a,#00b85e)",color:"#00351c",fontSize:14.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:24,boxShadow:"0 6px 24px rgba(0,232,122,0.4)",transition:"transform .15s"}}
-                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
-                  onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                  {billing==="annual"?(isEN?"Start 3-day free trial":"Comenzar prueba de 3 días"):(isEN?`Start monthly — $${PRICE_MO}/mo`:`Empezar mensual — $${PRICE_MO}/mes`)}
-                </button>
+                {isPremium
+                  ? <div style={{width:"100%",padding:"15px",borderRadius:13,background:"rgba(0,232,122,0.12)",border:"1px solid rgba(0,232,122,0.3)",color:"#00e87a",fontSize:14,fontWeight:800,textAlign:"center",marginBottom:24,boxSizing:"border-box"}}>✓ {isEN?"Active plan — thanks for being VIP!":"Plan activo — ¡Gracias por ser VIP!"}</div>
+                  : <button onClick={()=>handleSub()}
+                      style={{width:"100%",padding:"15px",borderRadius:13,border:"none",background:"linear-gradient(135deg,#00e87a,#00b85e)",color:"#00351c",fontSize:14.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:24,boxShadow:"0 6px 24px rgba(0,232,122,0.4)",transition:"transform .15s"}}
+                      onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                      onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                      {billing==="annual"?(isEN?"Start 3-day free trial":"Comenzar prueba de 3 días"):(isEN?`Start monthly — $${PRICE_MO}/mo`:`Empezar mensual — $${PRICE_MO}/mes`)}
+                    </button>}
                 <div style={{display:"flex",flexDirection:"column",gap:11}}>
                   {VIP_FEATS.map((f,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,fontSize:13,lineHeight:1.4}}>
@@ -27575,23 +27577,23 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
                     </div>
                   ))}
                 </div>
-                <div style={{marginTop:18,textAlign:"center"}}>
+                {!isPremium&&<div style={{marginTop:18,textAlign:"center"}}>
                   <span onClick={()=>setBilling(billing==="annual"?"monthly":"annual")}
                     style={{fontSize:12,color:"#94A3B8",cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2}}>
                     {billing==="annual"
                       ? (isEN?`Or start monthly at $${PRICE_MO}/mo →`:`O mensual por $${PRICE_MO}/mes →`)
                       : (isEN?`Or save ${SAVE_PCT}% with annual — $${PRICE_YR}/yr →`:`O ahorra ${SAVE_PCT}% anual — $${PRICE_YR}/año →`)}
                   </span>
-                </div>
+                </div>}
               </div>
             </div>
 
             {/* Trust badges */}
-            <div style={{display:"flex",justifyContent:"center",gap:24,flexWrap:"wrap",marginTop:20}}>
+            {!isPremium&&<div style={{display:"flex",justifyContent:"center",gap:24,flexWrap:"wrap",marginTop:20}}>
               {[isEN?"🔒 Secure via Stripe":"🔒 Pago seguro Stripe", isEN?"↩️ Cancel anytime":"↩️ Cancela cuando quieras", isEN?"⚡ Instant access":"⚡ Acceso inmediato"].map((b,i)=>(
                 <span key={i} style={{fontSize:12,color:INK3,fontWeight:600}}>{b}</span>
               ))}
-            </div>
+            </div>}
           </div>
         )}
 
