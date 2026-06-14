@@ -9527,6 +9527,7 @@ function BondsWidget({lang="es"}){
 // ── MARKET OVERVIEW — índices + crypto + commodities en una vista ─────────────
 function MarketOverview({lang="es"}){
   const isEN=lang==="en";
+  const lp=useContext(PriceCtx)||{}; // precios en vivo (cripto vía Binance) para no mostrar valores fijos
   const [d,setD]=useState(null);
   const [loading,setLoading]=useState(true);
   const [region,setRegion]=useState("global");
@@ -9542,7 +9543,7 @@ function MarketOverview({lang="es"}){
   const MO_GROUPS = {
     indices:     [["SPY","S&P 500",662],["QQQ","Nasdaq 100",595],["DIA","Dow Jones",447],["IWM","Russell 2000",242]],
     commodities: [["GLD","Gold",243],["SLV","Silver",30],["USO","Oil (WTI)",78],["UNG","Nat Gas",14]],
-    crypto:      [["BTC","Bitcoin",98000],["ETH","Ethereum",3400],["SOL","Solana",195]],
+    crypto:      [["BTC","Bitcoin",62060],["ETH","Ethereum",1617],["SOL","Solana",150]],
   };
   useEffect(()=>{
     let c=false;
@@ -9623,7 +9624,7 @@ function MarketOverview({lang="es"}){
       {region==="global"
         ? <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:12}}>
             <Section title={"Indices"} rows={d?.indices}/>
-            <Section title="Crypto" rows={d?.crypto}/>
+            <Section title="Crypto" rows={(d?.crypto||[]).map(r=>{const q=lp[r.s];return (q&&q.price)?{...r,p:q.price,chg:(typeof q.change==="number"?q.change:r.chg)}:r;})}/>
             <Section title="Commodities" rows={d?.commodities}/>
           </div>
         : (regionRows&&regionRows.length===0)
