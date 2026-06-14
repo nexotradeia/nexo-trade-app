@@ -2322,7 +2322,8 @@ function AuthModal({mode,onClose,onAuth,lang}){
             avatar_color:avatar.color,
             bio: lang==="en"?"New on NexoTrade 🚀":"Nuevo en NexoTrade 🚀",
             points:100,
-            ...(refId?{referred_by:refId}:{}),
+            // solo guardar referred_by si el ref es un UUID (referido amigo). Los códigos de afiliado (texto) van por /api/track-ref.
+            ...((refId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refId))?{referred_by:refId}:{}),
           });
         }catch(e){}
         try{ localStorage.removeItem("nexo-ref"); }catch{}
