@@ -17030,10 +17030,10 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
 
   const fmt$ = v => v >= 1e9 ? `$${(v/1e9).toFixed(1)}B` : v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v/1e3).toFixed(0)}K` : `$${v}`;
   const TABS = [
-    {k:"gurus",    l:isEN?"🏛️ Gurus":"🏛️ Gurús"},
-    {k:"ark",      l:"🚀 ARK Daily"},
-    {k:"insiders", l:"🕵️ Insiders SEC"},
-    {k:"congress", l:"🏛️ Congresistas", vip:true},
+    {k:"gurus",    l:isEN?"Gurus":"Gurús",        ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>},
+    {k:"ark",      l:"ARK Daily",                  ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+    {k:"insiders", l:"Insiders SEC",               ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>},
+    {k:"congress", l:"Congresistas", vip:true,     ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg>},
   ];
   const ARK_FUNDS = ["ARKK","ARKQ","ARKW","ARKG","ARKF"];
 
@@ -17041,7 +17041,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
     <div style={{maxWidth:980,margin:"0 auto"}}>
       {/* Header */}
       <div style={{background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:16,padding:"18px 22px",marginBottom:16,display:"flex",alignItems:"center",gap:14,boxShadow:"var(--c-shadow)"}}>
-        <div style={{width:46,height:46,borderRadius:14,background:"rgba(21,101,192,0.10)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>🏛️</div>
+        <div style={{width:46,height:46,borderRadius:14,background:"rgba(21,101,192,0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#1565C0"}}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:18,fontWeight:900,color:"var(--c-text)",letterSpacing:-0.4}}>Wall St. & Capitol</div>
           <div style={{fontSize:12,color:"var(--c-muted)",marginTop:2}}>{isEN?"13F Gurus · ARK Daily · SEC Insiders · Congress":"Gurús 13F · ARK Daily · Insiders SEC · Congresistas"}</div>
@@ -17067,7 +17067,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
         {TABS.map(t => (
           <button key={t.k} onClick={()=>{ if(t.vip&&!isPremium){onNeedPremium();return;} setTab(t.k); }}
             style={{background:tab===t.k?"#1565C0":"var(--c-surface)",border:`1.5px solid ${tab===t.k?"#1565C0":"var(--c-border)"}`,borderRadius:20,padding:"8px 18px",fontSize:13,fontWeight:700,color:tab===t.k?"#fff":"var(--c-muted)",cursor:"pointer",transition:"all 0.15s",boxShadow:tab===t.k?"0 4px 12px rgba(21,101,192,0.25)":"none",display:"flex",alignItems:"center",gap:6}}>
-            {t.l}
+            <span style={{display:"flex",alignItems:"center"}}>{t.ic}</span>{t.l}
             {t.vip&&<span style={{fontSize:9,fontWeight:800,color:"#F59E0B",background:"rgba(245,158,11,0.12)",padding:"1px 5px",borderRadius:4,letterSpacing:0.5}}>VIP</span>}
           </button>
         ))}
@@ -17104,7 +17104,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                         {!search && !isLocked && idx<3 && <div style={{position:"absolute",top:12,right:12,background:"rgba(245,158,11,0.1)",color:"#B45309",fontSize:9,fontWeight:900,letterSpacing:0.4,borderRadius:20,padding:"3px 9px",zIndex:2,border:"1px solid rgba(245,158,11,0.3)"}}>⭐ TOP</div>}
                         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,paddingLeft:8}}>
                           <div style={{width:44,height:44,borderRadius:12,background:`${g.color}18`,border:`1px solid ${g.color}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,position:"relative",overflow:"hidden",flexShrink:0}}>
-                            <span>{g.emoji}</span>
+                            <span style={{fontWeight:900,fontSize:15,color:g.color,letterSpacing:0.5,fontFamily:"'Inter',sans-serif"}}>{(g.name||"").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase()}</span>
                             {GURU_PHOTOS[g.id]&&<img src={GURU_PHOTOS[g.id]} alt={g.name} onError={e=>{e.target.style.display="none";}} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",borderRadius:12}}/>}
                           </div>
                           <div>
@@ -17196,7 +17196,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             {/* Guru header */}
             <div style={{background:"var(--c-surface)",border:`1px solid var(--c-border)`,borderRadius:16,padding:"18px 22px",marginBottom:14,boxShadow:"var(--c-shadow)",borderLeft:`4px solid ${g.color}`}}>
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-                <div style={{width:50,height:50,borderRadius:14,background:`${g.color}18`,border:`1px solid ${g.color}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>{g.emoji}</div>
+                <div style={{width:50,height:50,borderRadius:14,background:`${g.color}18`,border:`1px solid ${g.color}30`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden",flexShrink:0}}><span style={{fontWeight:900,fontSize:17,color:g.color,letterSpacing:0.5,fontFamily:"'Inter',sans-serif"}}>{(g.name||"").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase()}</span>{GURU_PHOTOS[g.id]&&<img src={GURU_PHOTOS[g.id]} alt={g.name} onError={e=>{e.target.style.display="none";}} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",borderRadius:14}}/>}</div>
                 <div>
                   <div style={{fontWeight:900,color:"var(--c-text)",fontSize:18}}>{g.name}</div>
                   <div style={{fontSize:12,color:"var(--c-muted)"}}>{g.fund}</div>
