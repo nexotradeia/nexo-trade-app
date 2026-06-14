@@ -407,12 +407,13 @@ const fmtPx    = (p) => p >= 1000 ? `$${p.toLocaleString()}` : `$${p.toFixed(2)}
 const fmtChg   = (c) => `${c>=0?"+":""}${c}%`;
 const chgCol   = (c) => c >= 0 ? C.bull : C.bear;
 const fmtTimeAgo=(iso)=>{
-  if(!iso)return"ahora";
+  const en=_EN();
+  if(!iso)return en?"now":"ahora";
   const secs=Math.floor((Date.now()-new Date(iso))/1000);
-  if(secs<60)return"ahora";
-  if(secs<3600)return`hace ${Math.floor(secs/60)}m`;
-  if(secs<86400)return`hace ${Math.floor(secs/3600)}h`;
-  return`hace ${Math.floor(secs/86400)}d`;
+  if(secs<60)return en?"now":"ahora";
+  if(secs<3600)return en?`${Math.floor(secs/60)}m ago`:`hace ${Math.floor(secs/60)}m`;
+  if(secs<86400)return en?`${Math.floor(secs/3600)}h ago`:`hace ${Math.floor(secs/3600)}h`;
+  return en?`${Math.floor(secs/86400)}d ago`:`hace ${Math.floor(secs/86400)}d`;
 };
 
 // ── MODERATION ────────────────────────────────────────────────────────────────
@@ -9862,8 +9863,8 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
       {/* ── 📡 MERCADOS ── */}
       <div style={card}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <span style={{fontSize:12,fontWeight:800,color:"#0F172A",letterSpacing:-0.2}}>📡 Mercados</span>
-          <span style={{fontSize:9,color:"#94A3B8",fontWeight:600,background:"#F1F5F9",borderRadius:20,padding:"2px 8px",letterSpacing:0.5}}>EN VIVO</span>
+          <span style={{fontSize:12,fontWeight:800,color:"#0F172A",letterSpacing:-0.2}}>📡 {_EN()?"Markets":"Mercados"}</span>
+          <span style={{fontSize:9,color:"#94A3B8",fontWeight:600,background:"#F1F5F9",borderRadius:20,padding:"2px 8px",letterSpacing:0.5}}>{_EN()?"LIVE":"EN VIVO"}</span>
         </div>
         {mini.map((m,i)=>{
           const up=m.change>=0;
@@ -18384,7 +18385,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
                 {isEN?"⚡ Risk":"⚡ Riesgo"} {RISK_LABEL[idea.riskN]}
               </span>
             </div>
-            <span style={{fontSize:9,color:"#334155"}}>{daysPub === 0 ? "Hoy" : `Hace ${daysPub}d`}</span>
+            <span style={{fontSize:9,color:"#334155"}}>{daysPub === 0 ? (_EN()?"Today":"Hoy") : (_EN()?`${daysPub}d ago`:`Hace ${daysPub}d`)}</span>
           </div>
         </div>
       </div>
