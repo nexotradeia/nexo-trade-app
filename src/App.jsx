@@ -14958,7 +14958,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   //    Dato ~15min retraso (límite de cualquier fuente gratis). Cripto no aplica aquí.
   const allTickers = React.useMemo(()=>[...new Set([...STOCKS.map(s=>s.tk),...OPTIONS.map(o=>o.tk)])],[]);
   const doPoll = React.useCallback((manual)=>{
-    if(document.hidden && !manual) return;
+    // Sigue actualizando aunque la pestaña esté oculta/en segundo plano (sin pausa)
     if(manual) setRefreshing(true);
     Promise.allSettled(allTickers.map(sym=>fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).then(q=>({sym,q})).catch(()=>({sym,q:null}))))
       .then(res=>{ const upd={}; res.forEach(x=>{ const v=x.status==="fulfilled"?x.value:null; if(v&&v.q&&v.q.c){ upd[v.sym]={price:v.q.c,change:typeof v.q.dp==="number"?+v.q.dp.toFixed(2):0}; } });
