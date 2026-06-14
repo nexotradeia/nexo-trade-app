@@ -15196,10 +15196,14 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
           ["pr",tab==="stocks"?T("LOWEST RISK","MENOR RIESGO"):T("HIGHEST PROBABILITY","MAYOR PROBABILIDAD"),T("Safest play","Jugada más segura"),T("Reliable winner","El ganador confiable"),1],
           ["up_",T("JUICIEST UPSIDE","MAYOR POTENCIAL"),T("Lottery play","Jugada de lotería"),T("Max upside potential","Máximo potencial"),2]
         ].map(([k,pn,h3,desc,idx])=>{ const w=rows[idx]; return(
-          <div key={k} className={"pl "+k+(sel===idx?" sel":"")} onClick={()=>setSel(idx)}>
+          <div key={k} className={"pl "+k+(sel===idx?" sel":"")} onClick={()=> isPremium ? setSel(idx) : unlock()} style={!isPremium?{cursor:"pointer"}:undefined}>
             <div className="pn"><span className="dot"/>{pn}</div>
             <h3>{h3}</h3><div className="desc">{desc}</div>
-            <div className="winner"><span className="tk">{w.tk}</span><span className="o">{tab==="stocks"?("$"+fmtP(liveP(w.tk,w.fb))):(w.strk+" "+w.side)}</span><span className="sc">{w.score}</span></div>
+            {isPremium ? (
+              <div className="winner"><span className="tk">{w.tk}</span><span className="o">{tab==="stocks"?("$"+fmtP(liveP(w.tk,w.fb))):(w.strk+" "+w.side)}</span><span className="sc">{w.score}</span></div>
+            ) : (
+              <div className="winner"><span className="tk" style={{filter:"blur(6px)",userSelect:"none"}}>{w.tk}</span><span className="o" style={{filter:"blur(5px)",userSelect:"none"}}>••••</span><span className="sc" style={{marginLeft:"auto",display:"inline-flex",alignItems:"center",gap:4,color:"#fff",background:"linear-gradient(135deg,#F59E0B,#B45309)",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800}}>🔒 {T("Pay to unlock","Paga para ver")}</span></div>
+            )}
           </div>
         );})}
       </div>
