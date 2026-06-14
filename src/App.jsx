@@ -11545,7 +11545,7 @@ function PaperTrading({ user, lang="es" }){
           {[
             {label:"Capital inicial", val:fmtUSD(PAPER_INITIAL), col:"#64748B"},
             {label:"Invertido",       val:fmtUSD(totalInvested),  col:"#0F4C81"},
-            {label:"Posiciones",      val:positions.length,        col:"#F59E0B"},
+            {label:_EN()?"Positions":"Posiciones",      val:positions.length,        col:"#F59E0B"},
             {label:"Operaciones",     val:pf.trades.length,        col:"#FCD34D"},
           ].map(({label,val,col})=>(
             <div key={label} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 12px",minWidth:90}}>
@@ -11576,7 +11576,7 @@ function PaperTrading({ user, lang="es" }){
             <div style={{textAlign:"center",padding:"40px 20px",background:"rgba(15,76,129,0.03)",border:"1px dashed rgba(15,76,129,0.2)",borderRadius:14}}>
               <div style={{fontSize:36,marginBottom:12}}>📭</div>
               <div style={{fontWeight:700,color:"#0F172A",marginBottom:6}}>{isEN?"Empty portfolio":"Cartera vacía"}</div>
-              <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>Tienes {fmtUSD(pf.cash)} de efectivo virtual.<br/>{isEN?'Go to "Trade" and buy your first stock.':'Ve a "Operar" y compra tu primera acción.'}</div>
+              <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>{isEN?`You have ${fmtUSD(pf.cash)} in virtual cash.`:`Tienes ${fmtUSD(pf.cash)} de efectivo virtual.`}<br/>{isEN?'Go to "Trade" and buy your first stock.':'Ve a "Operar" y compra tu primera acción.'}</div>
               <button onClick={()=>setTab("operar")} style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"10px 24px",fontWeight:800,color:"#fff",cursor:"pointer",fontSize:14}}>💹 Ir a Operar</button>
             </div>
           ):(
@@ -11971,7 +11971,7 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
         <div className="nexo-paper-panel" style={{width:310,background:"#141722",borderLeft:"1px solid rgba(255,255,255,0.06)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
           {/* Tabs */}
           <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-            {[["orden","💹 Orden"],["posiciones","📊 Posiciones"],["historial","📋 Historial"]].map(([k,l])=>(
+            {[["orden",_EN()?"💹 Order":"💹 Orden"],["posiciones",_EN()?"📊 Positions":"📊 Posiciones"],["historial",_EN()?"📋 History":"📋 Historial"]].map(([k,l])=>(
               <button key={k} onClick={()=>setTab(k)}
                 style={{flex:1,padding:"10px 4px",border:"none",background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:tab===k?"#00E58F":"#64748B",borderBottom:tab===k?"2px solid #00E58F":"2px solid transparent",transition:"all 0.15s"}}>
                 {l}
@@ -23727,7 +23727,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{...lbl,padding:"0 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>{isEN?"My Watchlist":"Mi Watchlist"}</span><span style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{watchTks.length}</span></div>
               {watchTks.length? watchTks.map((tk)=>{ const act=chSel===tk; const lp=livePrices[tk]; const ch=lp?lp.change:null; return (<div key={tk} onClick={()=>setChSel(tk)} title={"Ver gráfico de "+tk} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.bg3}`,borderLeft:act?`3px solid ${T.blue}`:"3px solid transparent",background:act?"rgba(77,166,255,.10)":"transparent",cursor:"pointer",transition:"background .12s"}} onMouseEnter={e=>{if(!act)e.currentTarget.style.background="rgba(77,166,255,.05)";}} onMouseLeave={e=>{if(!act)e.currentTarget.style.background="transparent";}}><span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:act?T.blue:T.txt}}>{tk}</span><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:600,color:ch==null?T.dim:(ch>=0?T.grn:T.red)}}>{ch==null?"—":(ch>=0?"+":"")+ch.toFixed(2)+"%"}</div><div style={{fontFamily:MONO,fontSize:10,color:T.mid}}>{lp?"$"+lp.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):(NAMES[tk]||"—")}</div></div></div>); }) : <div style={{padding:"8px 14px",fontFamily:MONO,fontSize:10,color:T.dim,lineHeight:1.5}}>{isEN?"Empty · add it on the Watchlist page":"Vacía · agrégala en la página Watchlist"}</div>}
             </div>
-            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Índices</div>{IDX.map(sideRow)}</div>
+            <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"Indices":"Índices"}</div>{IDX.map(sideRow)}</div>
             <div style={{padding:"12px 0"}}><div style={{...lbl,padding:"0 14px 8px"}}>Crypto</div>{CRY.map(sideRow)}</div>
           </div>
           {/* CENTER */}
@@ -23965,7 +23965,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
                 {Array.from({length:firstDow}).map((_,i)=><div key={"b"+i}/>)}
                 {Array.from({length:dim}).map((_,i)=>{const d=i+1;const iso=`${yr}-${String(mo+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;const isToday=d===today;const has=byDate[iso]!==undefined;const dot=has?(byDate[iso]>0?T.grn:byDate[iso]<0?T.red:T.gold):null;return (<div key={d} style={{textAlign:"center",padding:"4px 0",borderRadius:5,position:"relative",background:isToday?"rgba(0,255,135,.12)":"transparent",border:isToday?`1px solid rgba(0,255,135,.4)`:"1px solid transparent"}}><span style={{fontFamily:MONO,fontSize:11,color:isToday?T.grn:d<=today?T.mid:T.dim2||T.dim}}>{d}</span>{dot&&<span style={{position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)",width:4,height:4,borderRadius:"50%",background:dot}}/>}</div>);})}
               </div>
-              <div style={{display:"flex",gap:12,marginTop:10,fontFamily:MONO,fontSize:9,color:T.dim}}><span>● <span style={{color:T.grn}}>Ganancia</span></span><span>● <span style={{color:T.red}}>{isEN?"Loss":"Pérdida"}</span></span></div>
+              <div style={{display:"flex",gap:12,marginTop:10,fontFamily:MONO,fontSize:9,color:T.dim}}><span>● <span style={{color:T.grn}}>{isEN?"Gain":"Ganancia"}</span></span><span>● <span style={{color:T.red}}>{isEN?"Loss":"Pérdida"}</span></span></div>
             </div>
             <div>{sorted.length? sorted.map(e=>{const pnl=parseFloat(e.pnl)||0;const isSel=sel&&sel.id===e.id;return (<div key={e.id} onClick={()=>setJrSel(e.id)} style={{padding:"11px 14px",borderBottom:`1px solid ${T.br}`,borderLeft:isSel?`2px solid ${T.grn}`:"2px solid transparent",background:isSel?"rgba(0,255,135,.04)":"transparent",cursor:"pointer"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginBottom:3}}>{fmtDate(e.date)}</div><div style={{fontFamily:SANS,fontSize:12,fontWeight:700,color:T.txt,marginBottom:2}}>{e.title}</div>{e.summary&&<div style={{fontFamily:SANS,fontSize:11,color:T.dim,marginBottom:5,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.summary}</div>}<div style={{display:"flex",gap:8,fontFamily:MONO,fontSize:9}}><span style={{color:e.pnl===""||e.pnl==null?T.dim:pnl>=0?T.grn:T.red,fontWeight:700}}>{e.pnl===""||e.pnl==null?"—":m$(pnl)}</span><span style={{color:T.dim}}>{e.trades||0} trades</span>{e.emotion&&<span style={{color:T.dim}}>{emoOf(e.emotion)[0]}</span>}</div></div>);}) : <div style={{padding:"40px 20px",textAlign:"center",fontFamily:MONO,color:T.dim}}><div style={{fontSize:24,marginBottom:8}}>📓</div><div style={{fontSize:11,color:T.mid}}>{isEN?"No entries yet":"Sin entradas aún"}</div></div>}</div>
           </div>
@@ -24045,7 +24045,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             {KPI.map((k,i)=>(<div key={i} style={{padding:"14px 16px",borderRight:i<4?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:19,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:T.dim,marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
           </div>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
-            <div style={{...lbl,padding:0,display:"flex",alignItems:"center",gap:8}}><span style={{width:5,height:5,borderRadius:"50%",background:T.grn}}/>Mis Posiciones de Opciones</div>
+            <div style={{...lbl,padding:0,display:"flex",alignItems:"center",gap:8}}><span style={{width:5,height:5,borderRadius:"50%",background:T.grn}}/>{isEN?"My Options Positions":"Mis Posiciones de Opciones"}</div>
             <button onClick={openNew} style={{background:"rgba(77,166,255,.14)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:11,fontWeight:700,padding:"6px 13px",borderRadius:5,cursor:"pointer"}}>{isEN?"+ Add option":"+ Añadir opción"}</button>
           </div>
           {optItems.length? (
@@ -24217,7 +24217,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         <span style={{color:T.br2}}>·</span>
         <span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:4,height:4,borderRadius:"50%",background:T.grn}}/>Oracle AI <strong style={{color:T.txt}}>ACTIVE</strong></span>
         <span style={{color:T.br2}}>·</span>
-        <span>Posiciones: <strong style={{color:T.txt}}>{positions.length}</strong></span>
+        <span>{isEN?"Positions":"Posiciones"}: <strong style={{color:T.txt}}>{positions.length}</strong></span>
         <span style={{marginLeft:"auto",color:T.mid,letterSpacing:.5}}>{nowT} ET</span>
       </div>
 
