@@ -30678,10 +30678,10 @@ export default function App(){
             active:page===0 && mFeed
           },
           {
-            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5H18l-3.75 2.7 1.5 4.5L12 12l-3.75 2.7 1.5-4.5L6 7.5h4.5z"/><path d="M5 17l1.5 1.5"/><path d="M19 17l-1.5 1.5"/><path d="M12 20v1"/></svg>,
-            l:"AI",
-            on:()=>{setPage(10);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
-            active:page===10
+            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            l:isEN?"Smart Money":"Smart Money",
+            on:()=>{setPage(20);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
+            active:page===20
           },
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>,
