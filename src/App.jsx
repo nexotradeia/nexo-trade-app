@@ -6997,15 +6997,8 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   @keyframes npp-glow{0%,100%{box-shadow:0 4px 30px rgba(0,232,122,.4)}50%{box-shadow:0 4px 55px rgba(0,232,122,.7)}}
                   @keyframes npp-shine{0%{left:-100%}100%{left:200%}}
                 `}}/>
-                <h1 style={{margin:"0 0 6px",color:"#fff",fontSize:"clamp(24px,4vw,34px)",fontWeight:900,lineHeight:1.2}}>{lang==="en"?"Trade Smarter with":"Opera más inteligente con"} <span style={{color:"#00e87a"}}>NexoTrade Pro</span></h1>
-                <p style={{margin:"0 auto 16px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{lang==="en"?"Real-time signals, institutional flow, AI picks and 52 guru portfolios — all in one platform.":"Señales en tiempo real, flujo institucional, picks IA y 52 gurús — todo en una plataforma."}</p>
-
-                {/* Price hero */}
-                <div style={{display:"inline-flex",alignItems:"baseline",gap:8,marginBottom:16,background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:16,padding:"10px 24px"}}>
-                  <span style={{fontSize:44,fontWeight:900,color:"#00e87a",fontFamily:"monospace",lineHeight:1}}>$6.58</span>
-                  <span style={{fontSize:14,color:"#64748b"}}>/mo · billed $79/year</span>
-                  <span style={{background:"#00e87a",color:"#000",fontSize:10,fontWeight:900,padding:"2px 8px",borderRadius:6,marginLeft:4}}>-59%</span>
-                </div>
+                <h1 style={{margin:"0 0 10px",color:"#fff",fontSize:"clamp(24px,4.5vw,34px)",fontWeight:900,lineHeight:1.15,letterSpacing:-0.5}}>{isEN?"Start free. Upgrade when you're ready.":"Empieza gratis. Sube cuando estés listo."}</h1>
+                <p style={{margin:"0 auto 18px",color:"#94a3b8",fontSize:15,maxWidth:480}}>{isEN?"Same platform. VIP unlocks the tools the pros use — AI picks, institutional flow, 52 guru portfolios and the full trading terminal.":"Misma plataforma. VIP desbloquea las herramientas de los pros — picks IA, flujo institucional, 52 gurús y la terminal completa."}</p>
 
                 {/* Toggle mensual / anual */}
                 <div style={{display:"inline-flex",background:"rgba(0,0,0,0.3)",borderRadius:14,padding:4,gap:4,marginBottom:16,border:"1px solid rgba(255,255,255,0.08)"}}>
@@ -7027,29 +7020,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   </button>
                 </div>
 
-                {/* CTA */}
-                <div style={{marginBottom:8}}>
-                  <button onClick={()=>handleSubscribe()}
-                    style={{position:"relative",overflow:"hidden",animation:"npp-glow 2s ease-in-out infinite",background:"linear-gradient(135deg,#00e87a,#00b85e)",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:900,color:"#000",cursor:"pointer",boxShadow:"0 4px 32px rgba(0,232,122,.45)",display:"inline-flex",alignItems:"center",gap:8}}
-                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";}}>
-                    <div style={{position:"absolute",top:0,bottom:0,width:"40%",background:"rgba(255,255,255,.25)",filter:"blur(10px)",animation:"npp-shine 2.5s ease-in-out infinite",transform:"skewX(-20deg)"}}/>
-                    {billing==="annual"
-                      ? (lang==="en" ? "🎉 Get Annual Premium — $79/year →" : "🎉 Obtener Premium Anual — $79/año →")
-                      : (lang==="en" ? "🚀 Start Monthly — $15.99/mo →" : "🚀 Empezar Mensual — $15.99/mes →")
-                    }
-                  </button>
-                </div>
-                {billing==="annual" && <div style={{fontSize:12,color:"#00e87a",marginBottom:8,fontWeight:700}}>🎉 {lang==="en"?`Save $${savingsAnual}/year vs monthly`:`Ahorras $${savingsAnual} al año vs mensual`}</div>}
-                <div style={{fontSize:12,color:"#475569",marginBottom:16}}>{lang==="en"?"✓ Instant access · ✓ Cancel anytime · ✓ Secure via Stripe":"✓ Acceso inmediato · ✓ Cancela cuando quieras · ✓ Pago seguro Stripe"}</div>
-                <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
-                  {(lang==="en"
-                    ?["AI Picks","Guru Portfolios","Institutional Flow","Screener","Oracle AI","Global Radar","Trading Terminal","Unlimited AI","Calendars"]
-                    :["Picks IA","Gurús 13F","Flujo Institucional","Screener","Oracle IA","Radar Global","Terminal Trading","IA Ilimitada","Calendarios"]
-                  ).map(b=>(
-                    <span key={b} style={{background:"rgba(0,232,122,.08)",border:"1px solid rgba(0,232,122,.2)",borderRadius:20,padding:"5px 12px",fontSize:12,color:"#e2e8f0",fontWeight:600}}>{b}</span>
-                  ))}
-                </div>
+                <div style={{fontSize:12,color:"#64748b"}}>{billing==="annual"?(isEN?"Billed $79/year · cancel anytime":"Facturado $79/año · cancela cuando quieras"):(isEN?"Billed $15.99/month · cancel anytime":"Facturado $15.99/mes · cancela cuando quieras")}</div>
               </>
           }
         </div>
@@ -7064,15 +7035,6 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
       {/* ── PLANES TAB ── */}
       {activeTab==="planes" && <>
-        {/* ── PRICING HEADER ── */}
-        <div style={{textAlign:"center",marginBottom:32}}>
-          <h2 style={{margin:"0 0 8px",fontSize:"clamp(22px,4vw,32px)",fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5,lineHeight:1.2}}>
-            {isEN?"Start free. Upgrade when you're ready.":"Empieza gratis. Sube cuando estés listo."}
-          </h2>
-          <p style={{margin:0,fontSize:15,color:"#64748B"}}>
-            {isEN?"Same platform. VIP unlocks the tools the pros use.":"Misma plataforma. VIP desbloquea las herramientas de los pros."}
-          </p>
-        </div>
 
         {/* ── PRICING CARDS ── */}
         <div className="nexo-premium-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:32,alignItems:"start"}}>
@@ -7135,11 +7097,11 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
 
             <div style={{fontSize:12,fontWeight:700,color:"#64748B",letterSpacing:1.5,marginBottom:12}}>VIP</div>
             <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-              <span style={{fontSize:42,fontWeight:900,color:"#F1F5F9",lineHeight:1}}>${(priceAnual/12).toFixed(2)}</span>
+              <span style={{fontSize:42,fontWeight:900,color:"#F1F5F9",lineHeight:1}}>${billing==="annual"?(priceAnual/12).toFixed(2):price.toFixed(2)}</span>
               <span style={{fontSize:14,color:"#64748B",fontWeight:500}}>/mo</span>
             </div>
             <div style={{fontSize:13,color:"#94A3B8",marginBottom:6}}>
-              {isEN?`Billed annually ($${priceAnual}/yr) · or $${price}/mo monthly`:`Facturado anual ($${priceAnual}/año) · o $${price}/mes mensual`}
+              {billing==="annual"?(isEN?`Billed annually ($${priceAnual}/yr)`:`Facturado anual ($${priceAnual}/año)`):(isEN?"Billed monthly":"Facturado mensual")}
             </div>
             <div style={{fontSize:13,color:"#3B82F6",fontWeight:600,marginBottom:24}}>
               {isEN?"3 days free — no card required":"3 días gratis — sin tarjeta"}
@@ -7149,11 +7111,11 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
               ? <div style={{width:"100%",padding:"14px",borderRadius:12,background:"rgba(0,229,143,0.1)",border:"1px solid rgba(0,229,143,0.25)",textAlign:"center",color:"#00E58A",fontSize:13,fontWeight:800,marginBottom:28,boxSizing:"border-box"}}>
                   ✅ {isEN?"Active plan — thanks for being VIP!":"Plan activo — ¡Gracias por ser VIP!"}
                 </div>
-              : <button onClick={()=>handleSubscribe("annual")}
-                  style={{width:"100%",padding:"14px",borderRadius:12,background:"#fff",border:"none",textAlign:"center",color:"#0F172A",fontSize:14,fontWeight:800,cursor:"pointer",marginBottom:28,boxSizing:"border-box",transition:"opacity 0.15s",boxShadow:"0 2px 12px rgba(255,255,255,0.15)"}}
-                  onMouseEnter={e=>e.currentTarget.style.opacity="0.9"}
-                  onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
-                  {isEN?"Start 3-day free trial":"Comenzar prueba de 3 días"}
+              : <button onClick={()=>handleSubscribe()}
+                  style={{width:"100%",padding:"14px",borderRadius:12,background:"linear-gradient(135deg,#00e87a,#00b85e)",border:"none",textAlign:"center",color:"#00351c",fontSize:14,fontWeight:800,cursor:"pointer",marginBottom:28,boxSizing:"border-box",transition:"transform 0.15s",boxShadow:"0 6px 24px rgba(0,232,122,0.4)"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                  {billing==="annual"?(isEN?"Start 3-day free trial":"Comenzar prueba de 3 días"):(isEN?"Start monthly — $15.99/mo":"Empezar mensual — $15.99/mes")}
                 </button>
             }
 
@@ -7180,9 +7142,9 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             {/* Monthly option link */}
             {!isPremium && (
               <div style={{marginTop:20,textAlign:"center"}}>
-                <span style={{fontSize:12,color:"#475569",cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2}}
-                  onClick={()=>handleSubscribe("monthly")}>
-                  {isEN?`Or start monthly at $${price}/mo →`:`O mensual por $${price}/mes →`}
+                <span style={{fontSize:12,color:"#94A3B8",cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2}}
+                  onClick={()=>setBilling(billing==="annual"?"monthly":"annual")}>
+                  {billing==="annual"?(isEN?`Or start monthly at $${price}/mo →`:`O mensual por $${price}/mes →`):(isEN?`Or save ${savingsPct}% with annual — $${priceAnual}/yr →`:`O ahorra ${savingsPct}% anual — $${priceAnual}/año →`)}
                 </span>
               </div>
             )}
