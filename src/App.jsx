@@ -23380,8 +23380,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const RISK=[["1.6","SHARPE",T.grn],["1.3","BETA",T.gold],["24.1%","VOL",T.red],["2.0%","VAR 95%",T.grn],["−14%","MAX DD",T.gold],["74.2%","WIN RATE",T.blue]];
     const SECT=[["XLK","+1.82",1],["XLY","+0.64",1],["XLF","-0.21",0],["XLE","+2.14",1],["XLV","-0.88",0],["XLI","+0.42",1],["XLRE","-1.24",0],["XLU","+0.12",1],["XLB","+0.78",1]];
     const TRADES=[["B","NVDA","5 uds · $148.20","+$300.50","10:32"],["S","BKNG","2 uds · $163.27","−$82.40","09:58"],["B","TSLA","7 uds · $320.00","+$620.90","09:41"],["S","AMZN","3 uds · $220.00","+$74.40",isEN?"Yesterday":"Ayer"],["B","META","3 uds · $440.00","+$447.30",isEN?"Yesterday":"Ayer"]];
-    const OF_ASK=[["$302.20",120],["$301.90",340],["$301.70",180],["$301.60",520],["$301.55",240]];
-    const OF_BID=[["$301.50",480],["$301.40",280],["$301.20",620],["$301.00",160],["$300.80",380]];
+    // Libro de órdenes (ilustrativo) calculado alrededor del precio REAL del ticker seleccionado
+    const _ofP=cp.price||100; const _ofTick=Math.max(0.01,+(_ofP*0.0003).toFixed(2));
+    const OF_ASK=[5,4,3,2,1].map((k,idx)=>["$"+(_ofP+_ofTick*k).toFixed(2),[120,340,180,520,240][idx]]);
+    const OF_BID=[1,2,3,4,5].map((k,idx)=>["$"+(_ofP-_ofTick*k).toFixed(2),[480,280,620,160,380][idx]]);
+    const _ofSpreadPct=(_ofTick/_ofP*100).toFixed(4);
     const ofMax=Math.max(...OF_ASK.map(x=>x[1]),...OF_BID.map(x=>x[1]));
     const lbl={fontFamily:MONO,fontSize:9,fontWeight:600,letterSpacing:1.5,textTransform:"uppercase",color:T.dim};
     const card={background:T.bg2,borderBottom:`1px solid ${T.br}`};
@@ -23652,7 +23655,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{...lbl,padding:"12px 14px 8px"}}>Order Flow · {cp.tk}</div>
             <div style={{padding:"0 12px 12px",display:"flex",flexDirection:"column",gap:4}}>
               {OF_ASK.map((o,i)=>(<div key={"a"+i} style={{display:"flex",alignItems:"center",gap:6,height:16}}><span style={{fontFamily:MONO,fontSize:10,color:T.red,width:52,textAlign:"right"}}>{o[0]}</span><div style={{flex:1,height:12,background:T.bg3,borderRadius:2,position:"relative",overflow:"hidden"}}><div style={{position:"absolute",right:0,top:0,height:"100%",width:(o[1]/ofMax*100)+"%",background:"rgba(255,61,90,.35)",borderRadius:2}}/></div><span style={{fontFamily:MONO,fontSize:9,color:T.dim,width:36}}>{o[1]}</span></div>))}
-              <div style={{textAlign:"center",padding:"4px 0",fontFamily:MONO,fontSize:10,color:T.gold,letterSpacing:1,borderTop:`1px solid ${T.br}`,borderBottom:`1px solid ${T.br}`,margin:"2px 0"}}>SPREAD · $0.05 · 0.0166%</div>
+              <div style={{textAlign:"center",padding:"4px 0",fontFamily:MONO,fontSize:10,color:T.gold,letterSpacing:1,borderTop:`1px solid ${T.br}`,borderBottom:`1px solid ${T.br}`,margin:"2px 0"}}>SPREAD · ${_ofTick.toFixed(2)} · {_ofSpreadPct}%</div>
               {OF_BID.map((o,i)=>(<div key={"b"+i} style={{display:"flex",alignItems:"center",gap:6,height:16}}><span style={{fontFamily:MONO,fontSize:10,color:T.grn,width:52,textAlign:"right"}}>{o[0]}</span><div style={{flex:1,height:12,background:T.bg3,borderRadius:2,position:"relative",overflow:"hidden"}}><div style={{position:"absolute",left:0,top:0,height:"100%",width:(o[1]/ofMax*100)+"%",background:"rgba(0,255,135,.3)",borderRadius:2}}/></div><span style={{fontFamily:MONO,fontSize:9,color:T.dim,width:36}}>{o[1]}</span></div>))}
             </div>
           </div>
@@ -23672,9 +23675,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const _o=cp.entry||0,_p=cp.price||0,_hi=Math.max(_o,_p)*1.008,_lo=Math.min(_o,_p)*0.992;
         const _f2=(v)=>"$"+(v||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
         const ohlv=[["O",_f2(_o),T.mid],["H",_f2(_hi),T.grn],["L",_f2(_lo),T.red],["V","—",T.mid]];
-        const STATS=[["Open","$295.20",T.txt],["52W High","$310.80",T.grn],["52W Low","$164.08",T.red],["Volume today","64.2M",T.txt],["Avg vol 10D","58.4M",T.txt],["Market Cap","$4.58T",T.txt],["P/E Ratio","31.4x",T.txt],["EPS","$9.59",T.txt],["Beta","1.3",T.txt],["Dividend Yield","0.44%",T.txt]];
-        const INDS=[["RSI (14)","68.2","Strength",T.grn],["MACD","+2.14","Bullish ↑",T.grn],["BB Upper","$308","Widening",T.gold],["BB Lower","$294","Support",T.blue],["MA 20","$296","Above ✓",T.grn],["MA 50","$281","Above ✓",T.grn],["Stoch RSI","0.82","Overbought",T.gold],["ATR (14)","$4.82","Normal vol.",T.mid]];
-        const LVLS=[["Oracle Target","$340",T.grn],["Resistance","$308",T.gold],["Support 1","$288",T.blue],["Support 2","$264",T.blue],["Suggested stop","$281",T.red]];
+        // Stats/niveles derivados del precio REAL del ticker (ilustrativo, escala con el precio)
+        const _cpx=cp.price||100;
+        const STATS=[["Open",_f2(_o||_cpx),T.txt],["52W High",_f2(_cpx*1.28),T.grn],["52W Low",_f2(_cpx*0.62),T.red],["Volume today","—",T.txt],["Avg vol 10D","—",T.txt],["Market Cap","—",T.txt],["P/E Ratio","—",T.txt],["EPS","—",T.txt],["Beta","—",T.txt],["Dividend Yield","—",T.txt]];
+        const INDS=[["RSI (14)","—","—",T.mid],["MACD","—","—",T.mid],["BB Upper",_f2(_cpx*1.03),"",T.gold],["BB Lower",_f2(_cpx*0.97),"",T.blue],["MA 20",_f2(_cpx*0.99),"",T.grn],["MA 50",_f2(_cpx*0.95),"",T.grn],["Stoch RSI","—","—",T.mid],["ATR (14)",_f2(_cpx*0.018),"",T.mid]];
+        const LVLS=[["Oracle Target",_f2(_cpx*1.10),T.grn],["Resistance",_f2(_cpx*1.04),T.gold],["Support 1",_f2(_cpx*0.97),T.blue],["Support 2",_f2(_cpx*0.92),T.blue],["Suggested stop",_f2(_cpx*0.95),T.red]];
         const IDX=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["DXY","104.32","-0.24",0]];
         const CRY=[["BTC","$63,844","+1.92",1],["ETH","$3,482","-0.54",0]];
         const end=cp.price||100; const dayChg=cp.today||0;
