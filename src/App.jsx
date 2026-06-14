@@ -27519,7 +27519,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
                 <button onClick={()=>setBilling("annual")}
                   style={{border:"none",borderRadius:10,padding:"9px 20px",fontSize:13,fontWeight:800,cursor:"pointer",fontFamily:"inherit",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:6,background:billing==="annual"?"#0F172A":"transparent",color:billing==="annual"?"#fff":INK2}}>
                   {isEN?"Annual":"Anual"} <span>${PRICE_YR}</span>
-                  <span style={{background:"#00e87a",color:"#003d20",fontSize:9,fontWeight:900,padding:"1px 6px",borderRadius:6}}>{isEN?`SAVE ${SAVE_PCT}%`:`-${SAVE_PCT}%`}</span>
+                  <span style={{background:"#1d9bff",color:"#04243f",fontSize:9,fontWeight:900,padding:"1px 6px",borderRadius:6}}>{isEN?`SAVE ${SAVE_PCT}%`:`-${SAVE_PCT}%`}</span>
                 </button>
               </div>
               <div style={{fontSize:12,color:INK3,marginTop:9}}>
@@ -27556,7 +27556,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
 
               {/* VIP */}
               <div style={{background:"#0F172A",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,padding:"30px 26px",boxShadow:"0 10px 44px rgba(0,0,0,0.35)",position:"relative",overflow:"hidden"}}>
-                <div style={{position:"absolute",top:18,right:18,background:"#00e87a",color:"#003d20",fontSize:10,fontWeight:900,padding:"4px 11px",borderRadius:20,letterSpacing:0.6}}>{isEN?"MOST POPULAR":"MÁS POPULAR"}</div>
+                <div style={{position:"absolute",top:18,right:18,background:"#1d9bff",color:"#04243f",fontSize:10,fontWeight:900,padding:"4px 11px",borderRadius:20,letterSpacing:0.6}}>{isEN?"MOST POPULAR":"MÁS POPULAR"}</div>
                 <div style={{fontSize:12,fontWeight:800,letterSpacing:1.5,color:"#94A3B8",marginBottom:12}}>VIP</div>
                 <div style={{display:"flex",alignItems:"baseline",gap:5,marginBottom:4}}>
                   <span style={{fontSize:46,fontWeight:900,color:"#fff",lineHeight:1}}>${billing==="annual"?(PRICE_YR/12).toFixed(2):PRICE_MO.toFixed(2)}</span>
@@ -27569,7 +27569,7 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
                 {isPremium
                   ? <div style={{width:"100%",padding:"15px",borderRadius:13,background:"rgba(0,232,122,0.12)",border:"1px solid rgba(0,232,122,0.3)",color:"#00e87a",fontSize:14,fontWeight:800,textAlign:"center",marginBottom:24,boxSizing:"border-box"}}>✓ {isEN?"Active plan — thanks for being VIP!":"Plan activo — ¡Gracias por ser VIP!"}</div>
                   : <button onClick={()=>handleSub()}
-                      style={{width:"100%",padding:"15px",borderRadius:13,border:"none",background:"linear-gradient(135deg,#00e87a,#00b85e)",color:"#00351c",fontSize:14.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:24,boxShadow:"0 6px 24px rgba(0,232,122,0.4)",transition:"transform .15s"}}
+                      style={{width:"100%",padding:"15px",borderRadius:13,border:"none",background:"linear-gradient(135deg,#1d9bff,#1565C0)",color:"#fff",fontSize:14.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:24,boxShadow:"0 6px 24px rgba(21,101,192,0.45)",transition:"transform .15s"}}
                       onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
                       onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
                       {billing==="annual"?(isEN?"Start 3-day free trial":"Comenzar prueba de 3 días"):(isEN?`Start monthly — $${PRICE_MO}/mo`:`Empezar mensual — $${PRICE_MO}/mes`)}
