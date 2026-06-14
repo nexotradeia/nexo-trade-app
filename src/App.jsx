@@ -24706,7 +24706,13 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
           </div>
           {isError && <div style={{padding:"28px 16px",textAlign:"center",color:C.muted,fontSize:13}}>⚠️ {isEN?"Market data unavailable right now.":"Datos del mercado no disponibles ahora."}</div>}
           {!isError && movers.length===0 && <div style={{padding:"28px 16px",textAlign:"center",color:C.muted,fontSize:13}}>{loading?(isEN?"Loading live data…":"Cargando datos en vivo…"):(isEN?"No data for this session.":"Sin datos para esta sesión.")}</div>}
-          {movers.map((r,i)=>tableRow(r,i,moversTab==="active"))}
+          {(isPremium?movers:movers.slice(0,5)).map((r,i)=>tableRow(r,i,moversTab==="active"))}
+          {!isPremium && movers.length>5 && (
+            <div onClick={()=>onNeedPremium&&onNeedPremium()} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"13px 14px",cursor:"pointer",background:`linear-gradient(135deg,${GOLD}14,${GOLD_DK}0a)`,borderTop:`1px solid ${C.border}`}}>
+              <span style={{fontSize:12.5,fontWeight:800,color:GOLD_DK}}>🔒 {movers.length-5} {isEN?"more — VIP only":"más — solo VIP"}</span>
+              <span style={{fontSize:11.5,fontWeight:800,color:"#fff",background:`linear-gradient(135deg,${GOLD},${GOLD_DK})`,borderRadius:8,padding:"4px 10px"}}>{isEN?"Unlock":"Desbloquear"}</span>
+            </div>
+          )}
         </div>
 
         {/* DERECHA — rail índices / commodities */}
