@@ -8351,6 +8351,10 @@ function MobileAffiliateBanner(){
     return ()=> clearInterval(t);
   },[]);
 
+  // Banner inferior móvil DESACTIVADO: causaba solapamiento/saltos con el menú inferior en Chrome/Safari.
+  // (Los afiliados siguen apareciendo como tarjetas dentro del feed.) Para reactivar, quitar este return.
+  return null;
+
   if(closed) return null;
 
   return(
