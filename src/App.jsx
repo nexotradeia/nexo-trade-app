@@ -2265,6 +2265,8 @@ function AIAssistant({lang,onClose,initialQuery=""}){
 function AuthModal({mode,onClose,onAuth,lang}){
   const isEN = lang==="en";
   const t=LANGS[lang];
+  // Bloquea el scroll del fondo mientras el modal está abierto (evita "frizados" y peleas de scroll en móvil)
+  useEffect(()=>{ const prev=document.body.style.overflow; document.body.style.overflow="hidden"; return ()=>{ document.body.style.overflow=prev; }; },[]);
   const [tab,setTab]=useState(mode),[name,setName]=useState(""),[email,setEmail]=useState(""),[pass,setPass]=useState("");
   const [avatar,setAvatar]=useState({emoji:"",color:"#0F4C81"});
   const [loading,setLoading]=useState(false);
@@ -2465,8 +2467,9 @@ function AuthModal({mode,onClose,onAuth,lang}){
     setLoading(false);
   };
   return(
-    <div style={{position:"fixed",inset:0,background:"#00000066",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{background:C.surface,borderRadius:22,padding:32,width:420,maxWidth:"94vw",maxHeight:"90vh",overflowY:"auto",boxShadow:C.shadowMd,border:`1px solid ${C.border}`}}>
+    <div style={{position:"fixed",inset:0,background:"#00000066",zIndex:2000,display:"flex",alignItems:"flex-start",justifyContent:"center",overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"24px 12px",boxSizing:"border-box"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{background:C.surface,borderRadius:22,padding:32,width:420,maxWidth:"94vw",margin:"auto",boxShadow:C.shadowMd,border:`1px solid ${C.border}`,position:"relative"}}>
+        <button onClick={onClose} aria-label="Close" style={{position:"absolute",top:14,right:14,width:34,height:34,borderRadius:"50%",border:"none",background:C.card2,color:C.muted,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:2,lineHeight:1}}>✕</button>
         <div style={{display:"flex",gap:4,marginBottom:24,background:C.card2,borderRadius:12,padding:4}}>
           {["login","register"].map(tb=><button key={tb} onClick={()=>setTab(tb)} style={{flex:1,padding:"8px",borderRadius:9,border:"none",cursor:"pointer",background:tab===tb?C.accent:"transparent",color:tab===tb?"#fff":C.muted,fontWeight:700,fontSize:13,fontFamily:"inherit"}}>{tb==="login"?t.login:t.register.replace("→","")}</button>)}
         </div>
@@ -13597,9 +13600,16 @@ function EconCalendarPage({lang="es"}) {
   const [source,    setSource]    = useState("local");
   const [lastUpd,   setLastUpd]   = useState(null);
   const today = new Date().toISOString().split("T")[0];
-  const CATS_ES = ["todas","Inflación","Empleo","Banco Central","Economía","Consumo","Manufactura"];
-  const CATS_EN = ["todas","Inflation","Employment","Central Bank","Economy","Consumer","Manufacturing"];
-  const CATS    = isEN ? CATS_EN : CATS_ES;
+  const CATS = ["todas","Inflación","Empleo","Banco Central","Economía","Consumo","Manufactura"];
+  const CAT_EN = {"todas":"All","Inflación":"Inflation","Empleo":"Employment","Banco Central":"Central Bank","Economía":"Economy","Consumo":"Consumer","Manufactura":"Manufacturing"};
+  const catLabel = c => isEN ? (CAT_EN[c]||c) : (c==="todas"?"Todas":c);
+  const evLabel = e => !isEN ? e : (e||"")
+    .replace("Inflación","Inflation").replace("Manufactura","Manufacturing")
+    .replace("Nóminas No Agrícolas","Nonfarm Payrolls").replace("Tasa de Desempleo","Unemployment Rate")
+    .replace("IPC / CPI","CPI").replace("Ventas al Por Menor","Retail Sales")
+    .replace("Decisión de Tasas","Rate Decision").replace("Confianza del Consumidor","Consumer Confidence")
+    .replace("PIB EEUU","US GDP").replace("(avance)","(advance)")
+    .replace("(Abr)","(Apr)").replace("(Ago)","(Aug)");
   const IMP   = {high:{bg:"#FEF2F2",color:C.bear,label:isEN?"High":"Alta"},med:{bg:"#FFFBEB",color:C.gold,label:isEN?"Med":"Media"},low:{bg:"#F0FDF4",color:C.bull,label:isEN?"Low":"Baja"}};
   const fmtDate = d => new Date(d+"T12:00:00").toLocaleDateString(isEN?"en-US":"es-ES",{weekday:"short",day:"numeric",month:"short"});
 
@@ -13651,7 +13661,7 @@ function EconCalendarPage({lang="es"}) {
           ))}
           <span style={{width:1,background:C.border,margin:"0 2px"}}/>
           {CATS.map(cat=>(
-            <button key={cat} onClick={()=>setCatFilter(cat)} style={{background:catFilter===cat?C.purpleBg:"transparent",color:catFilter===cat?C.purple:C.muted,border:`1.5px solid ${catFilter===cat?C.purple+"55":C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{cat}</button>
+            <button key={cat} onClick={()=>setCatFilter(cat)} style={{background:catFilter===cat?C.purpleBg:"transparent",color:catFilter===cat?C.purple:C.muted,border:`1.5px solid ${catFilter===cat?C.purple+"55":C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{catLabel(cat)}</button>
           ))}
         </div>
       </div>
@@ -13680,11 +13690,11 @@ function EconCalendarPage({lang="es"}) {
             <div key={i} style={{background:isToday?"rgba(15,76,129,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past&&!hasActual?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past&&!hasActual?0.55:1,display:"grid",gridTemplateColumns:"140px 1fr 150px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none",transition:"opacity 0.2s"}}>
               <div>
                 <div style={{fontSize:12,fontWeight:700,color:past?C.muted:C.text}}>{fmtDate(ev.date)}</div>
-                <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{ev.country} {ev.cat}</div>
+                <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{ev.country} {catLabel(ev.cat)}</div>
                 {ev.time && <div style={{fontSize:10,color:C.muted2,marginTop:1}}>🕗 {ev.time} ET</div>}
               </div>
               <div>
-                <div style={{fontSize:14,fontWeight:700,color:past&&!hasActual?C.muted:C.text}}>{ev.event}</div>
+                <div style={{fontSize:14,fontWeight:700,color:past&&!hasActual?C.muted:C.text}}>{evLabel(ev.event)}</div>
                 <div style={{display:"flex",gap:6,marginTop:4,alignItems:"center",flexWrap:"wrap"}}>
                   <span style={{fontSize:10,fontWeight:700,color:imp.color,background:imp.bg,borderRadius:10,padding:"2px 8px"}}>{imp.label}</span>
                   {isToday && <span style={{fontSize:10,fontWeight:700,color:C.accent,background:C.accentDim,borderRadius:10,padding:"2px 8px"}}>{isEN?"TODAY":"HOY"}</span>}
@@ -13832,7 +13842,9 @@ function DividendCalendarPage({lang="es"}) {
   const q = search.trim().toLowerCase();
   const rows = divs.filter(d=> (sector==="todos" || d.sector===sector) && (!q || d.ticker.toLowerCase().includes(q) || (d.name||"").toLowerCase().includes(q)));
   const soon = (dateStr) => dateStr && dateStr >= today && new Date(dateStr)-new Date(today) < 30*864e5;
-  const fmt  = d => d ? new Date(d+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"}) : "—";
+  const fmt  = d => d ? new Date(d+"T12:00:00").toLocaleDateString(isEN?"en-US":"es-ES",{day:"numeric",month:"short"}) : "—";
+  const SEC_EN = {"todos":"All","Tecnología":"Technology","Salud":"Health","Consumo":"Consumer","Energía":"Energy","Telecomunicaciones":"Telecom","Finanzas":"Financials","Utilities":"Utilities","REITs":"REITs","ETF":"ETF","BDC/Yield":"BDC/Yield"};
+  const secLabel = s => isEN ? (SEC_EN[s]||s) : (s==="todos"?"Todos":s);
 
   return(
     <div style={{maxWidth:900,margin:"0 auto"}}>
@@ -13867,7 +13879,7 @@ function DividendCalendarPage({lang="es"}) {
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {sectors.map(s=>(
-            <button key={s} onClick={()=>setSector(s)} style={{background:sector===s?C.bull+"22":"transparent",color:sector===s?C.bull:C.muted,border:`1.5px solid ${sector===s?C.bull+"44":C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{s}</button>
+            <button key={s} onClick={()=>setSector(s)} style={{background:sector===s?C.bull+"22":"transparent",color:sector===s?C.bull:C.muted,border:`1.5px solid ${sector===s?C.bull+"44":C.border}`,borderRadius:20,padding:"5px 13px",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{secLabel(s)}</button>
           ))}
         </div>
       </div>
@@ -13875,7 +13887,7 @@ function DividendCalendarPage({lang="es"}) {
       <div className="nexo-scroll-x" style={{borderRadius:16}}>
       <div style={{minWidth:530,background:C.card,borderRadius:16,overflow:"hidden",boxShadow:C.shadow,border:`1px solid ${C.border}`}}>
         <div style={{display:"grid",gridTemplateColumns:"90px 1fr 90px 90px 80px 80px",gap:0,background:C.card2,borderBottom:`1px solid ${C.border}`,padding:"10px 20px"}}>
-          {isEN?["Ticker","Company","Ex-Date","Payout","Quarterly","Yield"]:["Ticker","Empresa","Ex-Fecha","Pago","Trimestral","Yield"].map(h=>(
+          {(isEN?["Ticker","Company","Ex-Date","Payout","Quarterly","Yield"]:["Ticker","Empresa","Ex-Fecha","Pago","Trimestral","Yield"]).map(h=>(
             <div key={h} style={{fontSize:10,fontWeight:700,color:C.muted2,letterSpacing:0.5}}>{h.toUpperCase()}</div>
           ))}
         </div>
@@ -13888,7 +13900,7 @@ function DividendCalendarPage({lang="es"}) {
               <div style={{fontWeight:800,fontSize:13,color:C.accent}}>{d.ticker}</div>
               <div>
                 <div style={{fontSize:13,fontWeight:600,color:C.text}}>{d.name}</div>
-                <div style={{fontSize:10,color:C.muted2,marginTop:1}}>{d.sector}</div>
+                <div style={{fontSize:10,color:C.muted2,marginTop:1}}>{secLabel(d.sector)}</div>
               </div>
               <div>
                 <div style={{fontSize:13,fontWeight:isSoon?700:500,color:isSoon?C.bull:C.text}}>{fmt(d.exDate)}</div>
@@ -17045,7 +17057,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
     {k:"gurus",    l:isEN?"Gurus":"Gurús",        ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>},
     {k:"ark",      l:"ARK Daily",                  ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
     {k:"insiders", l:"Insiders SEC",               ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>},
-    {k:"congress", l:"Congresistas", vip:true,     ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg>},
+    {k:"congress", l:isEN?"Congress":"Congresistas", vip:true,     ic:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg>},
   ];
   const ARK_FUNDS = ["ARKK","ARKQ","ARKW","ARKG","ARKF"];
 
@@ -17138,7 +17150,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                             <div style={{fontSize:9,color:"var(--c-muted)"}}>{isEN?"Period":"Período"}</div>
                           </div>
                         </div>
-                        <div style={{fontSize:11,color:"var(--c-muted)",lineHeight:1.5,marginBottom:10,paddingLeft:8}}>{g.bio || `${g.fund} · ${g.period} · ${g.numStocks} posiciones`}</div>
+                        <div style={{fontSize:11,color:"var(--c-muted)",lineHeight:1.5,marginBottom:10,paddingLeft:8}}>{isEN ? `${g.fund} · ${g.period} · ${g.numStocks} positions` : (g.bio || `${g.fund} · ${g.period} · ${g.numStocks} posiciones`)}</div>
                         <div style={{display:"flex",gap:4,flexWrap:"wrap",paddingLeft:8}}>
                           {g.holdings.slice(0,5).map(h=>{
                             const px=livePx[h.t]; const pos=(px?.change||0)>=0;
@@ -20575,8 +20587,8 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     {id:"market",  l:"Market View"},
     {id:"risk",    l:"Risk"},
     {id:"returns", l:"Returns"},
-    {id:"performance", l:isEN?"📈 Performance":"📈 Rendimiento"},
-    {id:"technical", l:isEN?"🔬 Technical":"🔬 Técnico"},
+    {id:"performance", l:isEN?"Performance":"Rendimiento"},
+    {id:"technical", l:isEN?"Technical":"Técnico"},
     {id:"efficiency", l:"Efficiency"},
     {id:"projections",l:"Projections"},
     {id:"health",  l:"Health"},
