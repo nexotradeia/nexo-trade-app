@@ -30059,13 +30059,15 @@ export default function App(){
               {label:isEN?"Feed":t.feed,idx:0,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
               {label:"News",idx:5,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>},
               {label:"Earnings",idx:6,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>},
-              {label:"Bitcoin",idx:2,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m1-12v2m0 12v2m2-16v2m0 12v2"/></svg>},
+              {label:"Bitcoin",idx:2,glow:true,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m1-12v2m0 12v2m2-16v2m0 12v2"/></svg>},
               {label:"Trending",idx:7777,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+              {label:"Smart Money",idx:20,glow:true,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
+              {label:lang==="en"?"Portfolio":"Portafolio",idx:37,glow:true,svg:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>},
             ].map(n=>(
               <button key={n.idx} className={`nexo-ntab${page===n.idx?" nact":""}`}
-                style={(n.idx===2&&marketOpen)?{color:"#16a34a"}:undefined}
+                style={(n.glow&&marketOpen)?{color:"#16a34a"}:undefined}
                 onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}>
-                {n.svg}{n.label}{n.idx===2&&marketOpen&&<span title="Mercado abierto" style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",display:"inline-block",marginLeft:5,boxShadow:"0 0 5px #16a34a",animation:"nexo-pulse 1.8s infinite"}}/>}
+                {n.svg}{n.label}{n.glow&&marketOpen&&<span title="Mercado abierto" style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",display:"inline-block",marginLeft:5,boxShadow:"0 0 5px #16a34a",animation:"nexo-pulse 1.8s infinite"}}/>}
               </button>
             ))}
           </div>
