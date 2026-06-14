@@ -11501,7 +11501,7 @@ function PaperTrading({ user, lang="es" }){
               <span style={{fontSize:14,fontWeight:800,color:isGain?"#00E58F":"#FF4D6A"}}>
                 {isGain?"▲":"▼"} {fmtUSD(Math.abs(totalPnl))} ({totalPnlPct>=0?"+":""}{totalPnlPct.toFixed(2)}%)
               </span>
-              <span style={{fontSize:11,color:"#64748B"}}>desde inicio</span>
+              <span style={{fontSize:11,color:"#64748B"}}>{isEN?"since start":"desde inicio"}</span>
             </div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end"}}>
@@ -11515,10 +11515,10 @@ function PaperTrading({ user, lang="es" }){
         {/* Mini stat row */}
         <div style={{display:"flex",gap:12,marginTop:16,flexWrap:"wrap"}}>
           {[
-            {label:"Capital inicial", val:fmtUSD(PAPER_INITIAL), col:"#64748B"},
-            {label:"Invertido",       val:fmtUSD(totalInvested),  col:"#0F4C81"},
-            {label:_EN()?"Positions":"Posiciones",      val:positions.length,        col:"#F59E0B"},
-            {label:"Operaciones",     val:pf.trades.length,        col:"#FCD34D"},
+            {label:isEN?"Starting capital":"Capital inicial", val:fmtUSD(PAPER_INITIAL), col:"#64748B"},
+            {label:isEN?"Invested":"Invertido",       val:fmtUSD(totalInvested),  col:"#0F4C81"},
+            {label:isEN?"Positions":"Posiciones",      val:positions.length,        col:"#F59E0B"},
+            {label:isEN?"Trades":"Operaciones",     val:pf.trades.length,        col:"#FCD34D"},
           ].map(({label,val,col})=>(
             <div key={label} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 12px",minWidth:90}}>
               <div style={{fontSize:9,color:"#64748B",fontWeight:600}}>{label}</div>
@@ -11530,7 +11530,7 @@ function PaperTrading({ user, lang="es" }){
 
       {/* ── Tabs ── */}
       <div style={{display:"flex",gap:4,marginBottom:16,background:"rgba(0,0,0,0.04)",borderRadius:10,padding:4}}>
-        {[["cartera","📊 Cartera"],["operar","💹 Operar"],["historial","📋 Historial"]].map(([k,l])=>(
+        {[["cartera",isEN?"📊 Portfolio":"📊 Cartera"],["operar",isEN?"💹 Trade":"💹 Operar"],["historial",isEN?"📋 History":"📋 Historial"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)}
             style={{flex:1,padding:"8px 0",borderRadius:8,border:"none",cursor:"pointer",fontWeight:700,fontSize:13,
               background:tab===k?"#ffffff":  "transparent",
@@ -11549,7 +11549,7 @@ function PaperTrading({ user, lang="es" }){
               <div style={{fontSize:36,marginBottom:12}}>📭</div>
               <div style={{fontWeight:700,color:"#0F172A",marginBottom:6}}>{isEN?"Empty portfolio":"Cartera vacía"}</div>
               <div style={{color:"#64748B",fontSize:13,marginBottom:16}}>{isEN?`You have ${fmtUSD(pf.cash)} in virtual cash.`:`Tienes ${fmtUSD(pf.cash)} de efectivo virtual.`}<br/>{isEN?'Go to "Trade" and buy your first stock.':'Ve a "Operar" y compra tu primera acción.'}</div>
-              <button onClick={()=>setTab("operar")} style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"10px 24px",fontWeight:800,color:"#fff",cursor:"pointer",fontSize:14}}>💹 Ir a Operar</button>
+              <button onClick={()=>setTab("operar")} style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"10px 24px",fontWeight:800,color:"#fff",cursor:"pointer",fontSize:14}}>💹 {isEN?"Go to Trade":"Ir a Operar"}</button>
             </div>
           ):(
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -25036,8 +25036,12 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
     const live=livePrices[r.s];
     return{...r, chg:live?.change??r.chg};
   });
-  const topGainers=[...allRows].sort((a,b)=>b.chg-a.chg).slice(0,3);
-  const topLosers =[...allRows].sort((a,b)=>a.chg-b.chg).slice(0,3);
+  // dedupe por ticker (el mismo símbolo aparece en varias categorías → evita Top Gainers/Losers repetidos)
+  const uniqMap={};
+  allRows.forEach(r=>{ const k=String(r.s||"").toUpperCase(); if(k&&!(k in uniqMap)) uniqMap[k]=r; });
+  const uniqRows=Object.values(uniqMap);
+  const topGainers=[...uniqRows].sort((a,b)=>b.chg-a.chg).slice(0,3);
+  const topLosers =[...uniqRows].sort((a,b)=>a.chg-b.chg).slice(0,3);
 
   const scoreColor=s=>s>=90?"#10B981":s>=75?"#0F4C81":"#94A3B8";
   const chgColor  =c=>c>=0?"#10B981":"#EF4444";
@@ -29420,9 +29424,10 @@ export default function App(){
         .nexo-bottom-nav { display: flex !important; }
         /* Footer súper compacto en móvil + hueco para la bottom-nav */
         footer { margin-top: 8px !important; padding-bottom: 74px !important; }
-        .nexo-foot-logo { width: 38px !important; height: auto !important; max-height: none !important; }
+        .nexo-foot-logo { width: auto !important; height: auto !important; max-height: none !important; flex-shrink: 0 !important; font-size: 14px !important; }
         .nexo-footer-top { padding: 8px 14px !important; }
-        .nexo-footer-top p { font-size: 9.5px !important; max-width: none !important; line-height: 1.35 !important; }
+        .nexo-footer-top > div { flex-direction: column !important; align-items: center !important; gap: 8px !important; text-align: center !important; }
+        .nexo-footer-top p { font-size: 9.5px !important; max-width: none !important; line-height: 1.35 !important; flex: none !important; }
         .nexo-footer-top button { padding: 6px 13px !important; font-size: 11px !important; }
         .nexo-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 3px 10px !important; padding: 9px 14px 4px !important; }
         .nexo-footer-grid > div > div:first-child { font-size: 8px !important; margin-bottom: 3px !important; letter-spacing: 0.08em !important; }
