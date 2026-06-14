@@ -27379,6 +27379,15 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
 function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"}){
   var isEN = lang==="en";
   var [showMemberInfo, setShowMemberInfo] = useState(false);
+  var [billing, setBilling] = useState("annual"); // "annual" | "monthly"
+  var PRICE_MO = 15.99, PRICE_YR = 79;
+  var SAVE_PCT = Math.round((1 - PRICE_YR/(PRICE_MO*12))*100); // 59
+  function handleSub(forceBilling){
+    if(!user){onNeedAuth&&onNeedAuth();return;}
+    var plan = forceBilling || billing;
+    var link = plan==="annual" ? STRIPE_LINKS.vipAnual : STRIPE_LINKS.vip;
+    window.open(link+(user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:""),"_blank");
+  }
   // ── design tokens — CSS variables for dark mode ──
   var PAGE="var(--c-bg)",SURFACE="var(--c-surface)",S2="var(--c-card2)";
   var HAIR="var(--c-border)";
@@ -27492,84 +27501,96 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
           <p style={{fontSize:15,color:INK2,margin:0}}>{isEN?"Start free, upgrade when you're ready. Cancel anytime.":"Empieza gratis, actualiza cuando quieras. Cancela en cualquier momento."}</p>
         </div>
 
-        {/* ── PRICING CARDS ── */}
+        {/* ── PRICING: toggle + Free vs VIP + 1 CTA ── */}
         {!isPremium&&(
-          <div style={{marginBottom:48}}>
-            {/* Dark gradient header */}
-            <div style={{background:"linear-gradient(135deg,#0a1628 0%,#0d2752 55%,#0a1e42 100%)",border:"1px solid rgba(21,101,192,0.22)",borderRadius:"20px 20px 0 0",padding:"36px 32px 30px",position:"relative",overflow:"hidden"}}>
-              {/* Grid pattern overlay */}
-              <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(21,101,192,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(21,101,192,0.05) 1px,transparent 1px)",backgroundSize:"32px 32px",pointerEvents:"none"}}/>
-              <div style={{position:"relative"}}>
-                {/* Badge */}
-                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(21,101,192,0.18)",border:"1px solid rgba(21,101,192,0.38)",borderRadius:20,padding:"5px 14px",marginBottom:16}}>
-                  <span style={{fontSize:13}}>⭐</span>
-                  <span style={{fontSize:10,fontWeight:800,color:"#60A5FA",letterSpacing:"0.12em",textTransform:"uppercase"}}>NEXOTRADE VIP</span>
+          <div style={{marginBottom:44}}>
+            {/* Billing toggle */}
+            <div style={{textAlign:"center",marginBottom:18}}>
+              <div style={{display:"inline-flex",background:"rgba(15,23,42,0.05)",borderRadius:14,padding:4,gap:4,border:`1px solid ${HAIR}`}}>
+                <button onClick={()=>setBilling("monthly")}
+                  style={{border:"none",borderRadius:10,padding:"9px 20px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all .18s",background:billing==="monthly"?"#0F172A":"transparent",color:billing==="monthly"?"#fff":INK2}}>
+                  {isEN?"Monthly":"Mensual"} <span style={{opacity:.7}}>${PRICE_MO}</span>
+                </button>
+                <button onClick={()=>setBilling("annual")}
+                  style={{border:"none",borderRadius:10,padding:"9px 20px",fontSize:13,fontWeight:800,cursor:"pointer",fontFamily:"inherit",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:6,background:billing==="annual"?"#0F172A":"transparent",color:billing==="annual"?"#fff":INK2}}>
+                  {isEN?"Annual":"Anual"} <span>${PRICE_YR}</span>
+                  <span style={{background:"#00e87a",color:"#003d20",fontSize:9,fontWeight:900,padding:"1px 6px",borderRadius:6}}>{isEN?`SAVE ${SAVE_PCT}%`:`-${SAVE_PCT}%`}</span>
+                </button>
+              </div>
+              <div style={{fontSize:12,color:INK3,marginTop:9}}>
+                {billing==="annual"
+                  ? (isEN?`Billed $${PRICE_YR}/year · cancel anytime`:`Facturado $${PRICE_YR}/año · cancela cuando quieras`)
+                  : (isEN?`Billed $${PRICE_MO}/month · cancel anytime`:`Facturado $${PRICE_MO}/mes · cancela cuando quieras`)}
+              </div>
+            </div>
+
+            {/* Free vs VIP cards */}
+            <div className="nexo-premium-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,alignItems:"start"}}>
+
+              {/* FREE */}
+              <div style={{background:"#F8FAFC",border:"1px solid #E2E8F0",borderRadius:20,padding:"30px 26px",boxShadow:"0 2px 14px rgba(0,0,0,0.05)"}}>
+                <div style={{fontSize:12,fontWeight:800,letterSpacing:1.5,color:"#64748B",marginBottom:12}}>FREE</div>
+                <div style={{display:"flex",alignItems:"baseline",gap:5,marginBottom:4}}>
+                  <span style={{fontSize:46,fontWeight:900,color:"#0F172A",lineHeight:1}}>$0</span>
+                  <span style={{fontSize:14,color:"#64748B",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
                 </div>
-                {/* Headline */}
-                <h2 style={{fontSize:26,fontWeight:900,color:"#F1F5F9",margin:"0 0 10px",letterSpacing:"-0.03em",lineHeight:1.2}}>
-                  {isEN?"Unlock the full platform":"Desbloquea la plataforma completa"}
-                </h2>
-                <p style={{fontSize:14,color:"#94A3B8",margin:"0 0 26px",lineHeight:1.5}}>
-                  {isEN?"Everything serious traders use daily — in one subscription.":"Todo lo que usan los traders serios cada día — en una suscripción."}
-                </p>
-                {/* 2×3 feature grid */}
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px 24px"}}>
-                  {[
-                    isEN?"Smart Money Flow":"Smart Money Flow",
-                    isEN?"Weekly AI Picks":"AI Picks Semanales",
-                    isEN?"52 Guru Portfolios":"52 Portafolios de Gurús",
-                    isEN?"Pro Screener":"Screener Pro",
-                    isEN?"Oracle AI Signals":"Señales Oracle IA",
-                    isEN?"Earnings Alerts":"Alertas de Earnings",
-                  ].map((feat,i)=>(
-                    <div key={i} style={{display:"flex",alignItems:"center",gap:9}}>
-                      <div style={{width:17,height:17,borderRadius:5,background:"rgba(21,101,192,0.22)",border:"1.5px solid rgba(59,130,246,0.48)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                      </div>
-                      <span style={{fontSize:13,color:"#CBD5E1",fontWeight:500}}>{feat}</span>
+                <div style={{fontSize:13,color:"#94A3B8",marginBottom:22}}>{isEN?"Free forever — no card":"Gratis para siempre — sin tarjeta"}</div>
+                <button onClick={()=>onNavigate&&onNavigate(0)}
+                  style={{width:"100%",padding:"15px",borderRadius:13,border:"1px solid #E2E8F0",background:"#F1F5F9",color:"#334155",fontSize:14.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:24}}>
+                  {isEN?"Current plan":"Plan actual"}
+                </button>
+                <div style={{display:"flex",flexDirection:"column",gap:11}}>
+                  {FREE_FEATS.map((f,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,fontSize:13,lineHeight:1.4}}>
+                      <span style={{flexShrink:0,marginTop:1,color:f.ok?"#3B82F6":"#CBD5E1",fontWeight:800}}>{f.ok?"✓":"—"}</span>
+                      <span style={{color:f.ok?"#334155":"#94A3B8"}}>{f.t}</span>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* VIP */}
+              <div style={{background:"#0F172A",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,padding:"30px 26px",boxShadow:"0 10px 44px rgba(0,0,0,0.35)",position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:18,right:18,background:"#00e87a",color:"#003d20",fontSize:10,fontWeight:900,padding:"4px 11px",borderRadius:20,letterSpacing:0.6}}>{isEN?"MOST POPULAR":"MÁS POPULAR"}</div>
+                <div style={{fontSize:12,fontWeight:800,letterSpacing:1.5,color:"#94A3B8",marginBottom:12}}>VIP</div>
+                <div style={{display:"flex",alignItems:"baseline",gap:5,marginBottom:4}}>
+                  <span style={{fontSize:46,fontWeight:900,color:"#fff",lineHeight:1}}>${billing==="annual"?(PRICE_YR/12).toFixed(2):PRICE_MO.toFixed(2)}</span>
+                  <span style={{fontSize:14,color:"#64748B",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
+                </div>
+                <div style={{fontSize:13,color:"#94A3B8",marginBottom:6}}>
+                  {billing==="annual"?(isEN?`Billed annually ($${PRICE_YR}/yr)`:`Facturado anual ($${PRICE_YR}/año)`):(isEN?"Billed monthly":"Facturado mensual")}
+                </div>
+                <div style={{fontSize:13,color:"#7dd3fc",fontWeight:600,marginBottom:22}}>{isEN?"3 days free — no card required":"3 días gratis — sin tarjeta"}</div>
+                <button onClick={()=>handleSub()}
+                  style={{width:"100%",padding:"15px",borderRadius:13,border:"none",background:"linear-gradient(135deg,#00e87a,#00b85e)",color:"#00351c",fontSize:14.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:24,boxShadow:"0 6px 24px rgba(0,232,122,0.4)",transition:"transform .15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                  {billing==="annual"?(isEN?"Start 3-day free trial":"Comenzar prueba de 3 días"):(isEN?`Start monthly — $${PRICE_MO}/mo`:`Empezar mensual — $${PRICE_MO}/mes`)}
+                </button>
+                <div style={{display:"flex",flexDirection:"column",gap:11}}>
+                  {VIP_FEATS.map((f,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,fontSize:13,lineHeight:1.4}}>
+                      <span style={{flexShrink:0,marginTop:1,color:"#00e87a",fontWeight:800}}>✓</span>
+                      <span style={{color:f.bold?"#fff":"#CBD5E1",fontWeight:f.bold?700:400}}>{f.t}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{marginTop:18,textAlign:"center"}}>
+                  <span onClick={()=>setBilling(billing==="annual"?"monthly":"annual")}
+                    style={{fontSize:12,color:"#94A3B8",cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2}}>
+                    {billing==="annual"
+                      ? (isEN?`Or start monthly at $${PRICE_MO}/mo →`:`O mensual por $${PRICE_MO}/mes →`)
+                      : (isEN?`Or save ${SAVE_PCT}% with annual — $${PRICE_YR}/yr →`:`O ahorra ${SAVE_PCT}% anual — $${PRICE_YR}/año →`)}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            {/* Price card */}
-            <div style={{background:"#0f1e38",border:"1px solid rgba(21,101,192,0.28)",borderTop:"none",borderRadius:"0 0 20px 20px",padding:"26px 32px 30px"}}>
-              <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:5}}>
-                <span style={{fontSize:50,fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.05em",lineHeight:1}}>$6.58</span>
-                <span style={{fontSize:15,color:"#64748B",fontWeight:500}}>{isEN?"/mo":"/mes"}</span>
-                <span style={{fontSize:15,color:"#475569",textDecoration:"line-through"}}>$12.99</span>
-              </div>
-              <div style={{fontSize:11,color:"#64748B",marginBottom:14,letterSpacing:"0.06em",textTransform:"uppercase",fontWeight:700}}>
-                {isEN?"BILLED $79 / YEAR":"FACTURADO $79 / AÑO"}
-              </div>
-              <div style={{display:"inline-flex",alignItems:"center",background:"rgba(22,163,74,0.10)",border:"1px solid rgba(22,163,74,0.24)",borderRadius:8,padding:"5px 14px",marginBottom:24}}>
-                <span style={{fontSize:11,fontWeight:800,color:"#22C55E"}}>
-                  {isEN?"SAVE $77 VS MONTHLY · 49% OFF":"AHORRAS $77 VS MENSUAL · 49% OFF"}
-                </span>
-              </div>
-              {/* CTA */}
-              <button onClick={openStripe}
-                style={{width:"100%",background:"linear-gradient(135deg,#1565C0,#0D47A1)",border:"none",borderRadius:14,padding:"16px",fontSize:16,fontWeight:800,color:"#fff",cursor:"pointer",fontFamily:"inherit",boxShadow:"0 6px 24px rgba(21,101,192,0.38)",transition:"all 0.15s",marginBottom:10,letterSpacing:"-0.01em"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,#1976D2,#1565C0)";e.currentTarget.style.boxShadow="0 8px 32px rgba(21,101,192,0.55)";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="linear-gradient(135deg,#1565C0,#0D47A1)";e.currentTarget.style.boxShadow="0 6px 24px rgba(21,101,192,0.38)";}}>
-                {isEN?"Get Annual VIP — $79/year →":"Obtener VIP Anual — $79/año →"}
-              </button>
-              {/* Monthly alt */}
-              <div style={{textAlign:"center",marginBottom:20}}>
-                <button onClick={()=>{
-                  if(!user){onNeedAuth&&onNeedAuth();return;}
-                  window.open(STRIPE_LINKS.vip+(user?.email?`?prefilled_email=${encodeURIComponent(user.email)}`:``),`_blank`);
-                }} style={{background:"none",border:"none",color:"#64748B",fontSize:13,cursor:"pointer",fontFamily:"inherit",textDecoration:"underline",padding:0}}>
-                  {isEN?"Prefer monthly? $12.99/mo →":"¿Prefieres mensual? $12.99/mes →"}
-                </button>
-              </div>
-              {/* Trust badges */}
-              <div style={{display:"flex",justifyContent:"center",gap:20,flexWrap:"wrap"}}>
-                {[isEN?"✓ Instant access":"✓ Acceso instantáneo", isEN?"✓ Cancel anytime":"✓ Cancela cuando quieras", isEN?"✓ Secure via Stripe":"✓ Seguro con Stripe"].map((b,i)=>(
-                  <span key={i} style={{fontSize:11,color:"#475569",fontWeight:600}}>{b}</span>
-                ))}
-              </div>
+            {/* Trust badges */}
+            <div style={{display:"flex",justifyContent:"center",gap:24,flexWrap:"wrap",marginTop:20}}>
+              {[isEN?"🔒 Secure via Stripe":"🔒 Pago seguro Stripe", isEN?"↩️ Cancel anytime":"↩️ Cancela cuando quieras", isEN?"⚡ Instant access":"⚡ Acceso inmediato"].map((b,i)=>(
+                <span key={i} style={{fontSize:12,color:INK3,fontWeight:600}}>{b}</span>
+              ))}
             </div>
           </div>
         )}
