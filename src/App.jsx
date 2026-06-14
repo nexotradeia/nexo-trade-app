@@ -2327,15 +2327,11 @@ function AuthModal({mode,onClose,onAuth,lang}){
           });
         }catch(e){}
         try{ localStorage.removeItem("nexo-ref"); }catch{}
-        // Registrar referido de influencer (fire-and-forget)
+        // Registrar referido de influencer: llama directo a la función segura de
+        // Supabase (record_referral). Si el ref es código de afiliado, lo guarda en
+        // `referrals` y suma el contador; si es un UUID amigo, no hace nada. (fire-and-forget)
         if(refId){
-          try{
-            fetch("/api/track-ref",{
-              method:"POST",
-              headers:{"Content-Type":"application/json"},
-              body:JSON.stringify({ref_code:refId, user_email:email, user_id:data.user?.id||null, source:"signup"}),
-            }).catch(()=>{});
-          }catch(e){}
+          try{ supabase.rpc("record_referral",{p_ref_code:String(refId),p_email:email,p_user_id:data.user?.id||null,p_source:"signup"}).then(()=>{}).catch(()=>{}); }catch(e){}
         }
         // Email de bienvenida via Edge Function (no bloquea el flujo)
         try{
