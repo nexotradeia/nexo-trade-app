@@ -11310,36 +11310,46 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
     </div>
   );
 
+  const sIc=(p)=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{p}</svg>;
+  const TOOL_ICONS = {
+    paper:      sIc(<><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></>),
+    riesgo:     sIc(<><path d="M12 3v18"/><path d="M3 7h18"/><path d="M6 7l-3 6h6z"/><path d="M18 7l-3 6h6z"/></>),
+    sharpe:     sIc(<><path d="M3 3v18h18"/><polyline points="7 14 11 10 15 13 21 6"/></>),
+    racha:      sIc(<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>),
+    portafolio: sIc(<><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>),
+    alertas:    sIc(<><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></>),
+    exportar:   sIc(<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>),
+  };
   const TOOLS = isEN ? [
-    {k:"paper",     label:"🎮 Paper Trading"},
-    {k:"riesgo",    label:"⚖️ Risk/Reward"},
-    {k:"sharpe",    label:"📐 Sharpe Ratio"},
-    {k:"racha",     label:"🔥 Win Streak & Stats"},
-    {k:"portafolio",label:"📈 Portfolio Evolution"},
-    {k:"alertas",   label:"🔔 Price Alerts"},
-    {k:"exportar",  label:"📤 Export Data"},
+    {k:"paper",     label:"Paper Trading"},
+    {k:"riesgo",    label:"Risk/Reward"},
+    {k:"sharpe",    label:"Sharpe Ratio"},
+    {k:"racha",     label:"Win Streak & Stats"},
+    {k:"portafolio",label:"Portfolio Evolution"},
+    {k:"alertas",   label:"Price Alerts"},
+    {k:"exportar",  label:"Export Data"},
   ] : [
-    {k:"paper",    label:"🎮 Paper Trading"},
-    {k:"riesgo",   label:"⚖️ Riesgo/Recompensa"},
-    {k:"sharpe",   label:"📐 Sharpe Ratio"},
-    {k:"racha",    label:"🔥 Racha & Stats"},
-    {k:"portafolio",label:"📈 Evolución Portafolio"},
-    {k:"alertas",  label:"🔔 Alertas de Precio"},
-    {k:"exportar", label:"📤 Exportar Datos"},
+    {k:"paper",    label:"Paper Trading"},
+    {k:"riesgo",   label:"Riesgo/Recompensa"},
+    {k:"sharpe",   label:"Sharpe Ratio"},
+    {k:"racha",    label:"Racha & Stats"},
+    {k:"portafolio",label:"Evolución Portafolio"},
+    {k:"alertas",  label:"Alertas de Precio"},
+    {k:"exportar", label:"Exportar Datos"},
   ];
 
   return(
     <div>
       <div style={{marginBottom:20}}>
-        <h2 style={{color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}>🎮 {isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}</h2>
+        <h2 style={{display:"flex",alignItems:"center",gap:8,color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>{isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}</h2>
         <p style={{color:"#64748B",fontSize:13}}>{isEN?"Simulate trades risk-free + exclusive PREMIUM calculators for professional traders":"Simula trades sin riesgo + herramientas PREMIUM exclusivas para traders profesionales"}</p>
       </div>
       {/* Tabs */}
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:24}}>
         {TOOLS.map(tb=>(
           <button key={tb.k} onClick={()=>setTool(tb.k)}
-            style={{background:tool===tb.k?"linear-gradient(135deg,#F59E0B,#0F5E68)":"rgba(255,255,255,0.03)",border:`1.5px solid ${tool===tb.k?"#F59E0B":"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"8px 14px",cursor:"pointer",color:tool===tb.k?"#000":"#94A3B8",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
-            {tb.label}
+            style={{display:"flex",alignItems:"center",gap:6,background:tool===tb.k?"linear-gradient(135deg,#F59E0B,#0F5E68)":"rgba(255,255,255,0.03)",border:`1.5px solid ${tool===tb.k?"#F59E0B":"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"8px 14px",cursor:"pointer",color:tool===tb.k?"#000":"#94A3B8",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
+            <span style={{display:"flex",alignItems:"center"}}>{TOOL_ICONS[tb.k]}</span>{tb.label}
           </button>
         ))}
       </div>
@@ -17503,11 +17513,11 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             <div style={{background:"linear-gradient(135deg,rgba(10,16,30,0.98),rgba(30,20,20,0.97))",border:"1px solid rgba(220,38,38,0.25)",borderRadius:16,padding:"16px 18px",marginBottom:10,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
               {/* Header */}
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-                <div style={{width:52,height:52,borderRadius:"50%",background:"linear-gradient(135deg,#DC2626,#991B1B)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0,border:"2px solid rgba(220,38,38,0.4)"}}>🦅</div>
+                <div style={{width:52,height:52,borderRadius:"50%",background:"linear-gradient(135deg,#DC2626,#991B1B)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden",flexShrink:0,border:"2px solid rgba(220,38,38,0.4)"}}><span style={{fontWeight:900,fontSize:17,color:"#fff",letterSpacing:0.5}}>DT</span><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Donald%20Trump%20official%20portrait.jpg" alt="Trump" onError={e=>{e.target.style.display="none";}} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/></div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9"}}>Donald J. Trump</div>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3,flexWrap:"wrap"}}>
-                    <span style={{fontSize:10,fontWeight:800,color:"#EF4444",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:5,padding:"1px 7px"}}>🔴 REP</span>
+                    <span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10,fontWeight:800,color:"#EF4444",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:5,padding:"1px 7px"}}><span style={{width:6,height:6,borderRadius:"50%",background:"#EF4444",display:"inline-block"}}/>REP</span>
                     <span style={{fontSize:10,color:"#475569"}}>Presidente de EE.UU. · 47th</span>
                     <a href="https://www.quiverquant.com/Donald-Trump-Stock-Trades/" target="_blank" rel="noopener noreferrer"
                       style={{fontSize:9,fontWeight:700,color:"#38BDF8",background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:5,padding:"1px 6px",textDecoration:"none",marginLeft:"auto"}}>Ver en QuiverQuant ↗</a>
@@ -17555,10 +17565,10 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
             </div>
 
             {/* ── TRUMP MEDIA (DJT) ── */}
-            <div style={{fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,textTransform:"uppercase",marginBottom:8,marginTop:4}}>📺 Trump Media & Technology Group</div>
+            <div style={{display:"flex",alignItems:"center",gap:6,fontSize:11,fontWeight:700,color:"#475569",letterSpacing:1,textTransform:"uppercase",marginBottom:8,marginTop:4}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Trump Media & Technology Group</div>
             <div style={{background:"linear-gradient(135deg,rgba(10,16,30,0.98),rgba(15,10,30,0.97))",border:"1px solid rgba(245,158,11,0.3)",borderRadius:16,padding:"16px 18px",boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-                <div style={{width:52,height:52,borderRadius:12,background:"linear-gradient(135deg,#1e3a5f,#0f1f40)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,border:"2px solid rgba(245,158,11,0.3)"}}>🗽</div>
+                <div style={{width:52,height:52,borderRadius:12,background:"linear-gradient(135deg,#1e3a5f,#0f1f40)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,border:"2px solid rgba(245,158,11,0.3)"}}><span style={{fontFamily:"monospace",fontWeight:900,fontSize:15,color:"#F59E0B",letterSpacing:0.5}}>DJT</span></div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9"}}>Trump Media & Technology</div>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3,flexWrap:"wrap"}}>
@@ -17610,7 +17620,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:900,fontSize:15,color:"#F1F5F9",letterSpacing:-0.3}}>Markwayne Mullin</div>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3,flexWrap:"wrap"}}>
-                    <span style={{fontSize:10,fontWeight:800,color:"#EF4444",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:5,padding:"1px 7px"}}>🔴 REP</span>
+                    <span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10,fontWeight:800,color:"#EF4444",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:5,padding:"1px 7px"}}><span style={{width:6,height:6,borderRadius:"50%",background:"#EF4444",display:"inline-block"}}/>REP</span>
                     <span style={{fontSize:10,color:"#475569"}}>Senado · Oklahoma</span>
                     <a href="https://www.quiverquant.com/congresstrading/politician/Markwayne%20Mullin-M001190/net-worth" target="_blank" rel="noopener noreferrer"
                       style={{fontSize:9,fontWeight:700,color:"#38BDF8",background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:5,padding:"1px 6px",textDecoration:"none",marginLeft:"auto"}}>Ver en QuiverQuant ↗</a>
@@ -17693,7 +17703,7 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
                 <div style={{background:"linear-gradient(135deg,rgba(15,94,104,0.08),rgba(15,76,129,0.05))",border:"1px solid rgba(15,94,104,0.2)",borderRadius:12,padding:"12px 14px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-                    <span style={{fontSize:18}}>👑</span>
+                    <span style={{display:"flex",alignItems:"center",color:"#0F5E68"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 19h20"/><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 9H5z"/></svg></span>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>Pelosi Tracker</span>
                     <span style={{fontSize:10,color:"#FCD34D",background:"rgba(15,94,104,0.1)",borderRadius:6,padding:"1px 6px",marginLeft:"auto"}}>{pelosiTrades.length} trades</span>
                   </div>
@@ -17708,12 +17718,12 @@ function GurusPage({ isPremium, onNeedPremium, lang, initialTab }) {
                 </div>
                 <div style={{background:"linear-gradient(135deg,rgba(16,185,129,0.06),rgba(15,76,129,0.04))",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:"12px 14px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-                    <span style={{fontSize:16}}>🔥</span>
+                    <span style={{display:"flex",alignItems:"center",color:"#10B981"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
                     <span style={{fontWeight:800,fontSize:13,color:C.text}}>{isEN?"Most Active":"Más Activos"}</span>
                   </div>
                   {topBuyers.map(([name,count],i)=>(
                     <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                      <span style={{fontSize:11,color:["#F59E0B","#94A3B8","#B45309"][i],fontWeight:700}}>{["🥇","🥈","🥉"][i]}</span>
+                      <span style={{width:18,height:18,borderRadius:"50%",background:["#F59E0B","#94A3B8","#B45309"][i],color:"#fff",fontSize:10,fontWeight:900,display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{i+1}</span>
                       <span style={{fontSize:12,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name.split(" ").slice(0,2).join(" ")}</span>
                       <span style={{fontSize:11,color:"#10B981",fontWeight:700}}>{count} compras</span>
                     </div>
@@ -24697,9 +24707,9 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
         {/* IZQUIERDA — movers */}
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,boxShadow:C.shadow,overflow:"hidden"}}>
           <div style={{display:"flex",gap:4,padding:"10px 12px",borderBottom:`1px solid ${C.border}`,background:C.card2}}>
-            {[["active",isEN?"🔥 Most Active":"🔥 Más Activos"],["gainers",isEN?"📈 Gainers":"📈 Sube"],["losers",isEN?"📉 Losers":"📉 Baja"]].map(([k,l])=>(
+            {[["active",isEN?"Most Active":"Más Activos",<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>],["gainers",isEN?"Gainers":"Sube",<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>],["losers",isEN?"Losers":"Baja",<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>]].map(([k,l,ic])=>(
               <button key={k} onClick={()=>setMoversTab(k)}
-                style={{background:moversTab===k?C.accentDim:"transparent",border:`1px solid ${moversTab===k?"rgba(15,76,129,0.3)":"transparent"}`,borderRadius:8,padding:"6px 11px",cursor:"pointer",fontSize:11.5,fontWeight:800,color:moversTab===k?C.accent:C.muted,fontFamily:"inherit"}}>{l}</button>
+                style={{display:"inline-flex",alignItems:"center",gap:5,background:moversTab===k?C.accentDim:"transparent",border:`1px solid ${moversTab===k?"rgba(15,76,129,0.3)":"transparent"}`,borderRadius:8,padding:"6px 11px",cursor:"pointer",fontSize:11.5,fontWeight:800,color:moversTab===k?C.accent:C.muted,fontFamily:"inherit"}}><span style={{display:"flex",alignItems:"center"}}>{ic}</span>{l}</button>
             ))}
             <span style={{marginLeft:"auto",alignSelf:"center",fontSize:10.5,color:C.muted2,fontWeight:700}}>{movers.length} {isEN?"results":"resultados"}</span>
           </div>
