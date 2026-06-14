@@ -30103,7 +30103,7 @@ export default function App(){
               <button key={n.idx} className={`nexo-ntab${page===n.idx?" nact":""}`}
                 style={(n.glow&&marketOpen)?{color:"#16a34a"}:undefined}
                 onClick={()=>{setPage(n.idx);setShowLanding(false);setTickerFilter(null);}}>
-                {n.svg}{n.label}{n.glow&&marketOpen&&<span title="Mercado abierto" style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",display:"inline-block",marginLeft:5,boxShadow:"0 0 5px #16a34a",animation:"nexo-pulse 1.8s infinite"}}/>}
+                {n.svg}{n.label}{n.glow&&marketOpen&&<span title={_EN()?"Market open":"Mercado abierto"} style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",display:"inline-block",marginLeft:5,boxShadow:"0 0 5px #16a34a",animation:"nexo-pulse 1.8s infinite"}}/>}
               </button>
             ))}
           </div>
