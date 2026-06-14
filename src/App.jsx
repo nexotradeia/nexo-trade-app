@@ -11255,7 +11255,7 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
       <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,#fbbf24,#f59e0b,transparent)"}}/>
       <div style={{position:"relative",zIndex:10,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:560,padding:"40px 24px",textAlign:"center",background:"linear-gradient(180deg,rgba(6,12,18,.82) 0%,rgba(6,12,18,.92) 100%)"}}>
         <div style={{animation:"npt-float 3s ease-in-out infinite",fontSize:52,marginBottom:12}}>📈</div>
-        <div style={{animation:"npt-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(251,191,36,.15)",border:"1px solid rgba(251,191,36,.4)",borderRadius:20,padding:"4px 16px",fontSize:11,fontWeight:800,color:"#fbbf24",letterSpacing:2,marginBottom:16}}>PREMIUM FEATURE</div>
+        <div style={{animation:"npt-pulse 2s ease-in-out infinite",display:"inline-block",background:"rgba(251,191,36,.15)",border:"1px solid rgba(251,191,36,.4)",borderRadius:20,padding:"4px 16px",fontSize:11,fontWeight:800,color:"#fbbf24",letterSpacing:2,marginBottom:16}}>{isEN?"FREE TOOL · NO CARD":"GRATIS · SIN TARJETA"}</div>
         <h2 style={{fontSize:28,fontWeight:900,color:"#e0eaf8",margin:"0 0 8px",lineHeight:1.2}}>Paper Trade Like a <span style={{color:"#fbbf24"}}>Pro</span></h2>
         <p style={{fontSize:14,color:"#94a3b8",margin:"0 0 24px",maxWidth:420,lineHeight:1.6}}>Start with <strong style={{color:"#fbbf24"}}>$100,000 virtual</strong> — practice real strategies risk-free with AI-powered insights and professional metrics.</p>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",maxWidth:460,marginBottom:28}}>
@@ -28388,13 +28388,15 @@ function A2HSPrompt({lang="es"}){
       const standalone=(window.navigator&&window.navigator.standalone===true)||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
       if(standalone) return;
       if(localStorage.getItem("nexo-a2hs-done")==="1") return;
+      // No mostrar este banner a la vez que el popup de email — solo tras cerrarlo (evita 2 banners apilados)
+      const emailDone=localStorage.getItem("nexo-email-popup-seen")==="1";
       const v=parseInt(localStorage.getItem("nexo-visits")||"0",10)+1;
       localStorage.setItem("nexo-visits",String(v));
       const ua=navigator.userAgent||"";
       const isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
-      const onBIP=(e)=>{ e.preventDefault(); deferredRef.current=e; if(v>=2) setShow(true); };
+      const onBIP=(e)=>{ e.preventDefault(); deferredRef.current=e; if(v>=2 && emailDone) setShow(true); };
       window.addEventListener("beforeinstallprompt",onBIP);
-      if(isIOS && v>=2){ setIosMode(true); const t=setTimeout(()=>setShow(true),1400); return ()=>{ window.removeEventListener("beforeinstallprompt",onBIP); clearTimeout(t); }; }
+      if(isIOS && v>=2 && emailDone){ setIosMode(true); const t=setTimeout(()=>setShow(true),1400); return ()=>{ window.removeEventListener("beforeinstallprompt",onBIP); clearTimeout(t); }; }
       return ()=>window.removeEventListener("beforeinstallprompt",onBIP);
     }catch(e){}
   },[]);
