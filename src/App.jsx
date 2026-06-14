@@ -30241,7 +30241,7 @@ export default function App(){
             {/* Badge */}
             <div style={{display:"inline-flex",alignItems:"center",gap:8,fontFamily:"'JetBrains Mono',monospace",fontSize:9.5,letterSpacing:"0.18em",fontWeight:600,color:"#9FC0FF",border:"1px solid #1B2A52",background:"rgba(11,92,255,0.07)",borderRadius:99,padding:"7px 15px",marginBottom:24}}>
               <span style={{width:6,height:6,borderRadius:"50%",background:"#0EA46B",display:"inline-block",animation:"nexo-pulse 1.6s infinite"}}/>
-              {lang==="en"?"LIVE DATA · AI SIGNALS · 52 MARKETS":"DATOS EN VIVO · SEÑALES IA · 52 MERCADOS"}
+              {lang==="en"?"LIVE · 3,200+ TRADERS · VERIFIED TRACK RECORD":"EN VIVO · +3,200 TRADERS · TRACK RECORD VERIFICADO"}
             </div>
             {/* H1 */}
             <h1 style={{fontSize:"clamp(38px,6.6vw,70px)",lineHeight:1.03,letterSpacing:"-0.045em",fontWeight:900,margin:"0",color:"#fff"}}>
@@ -30252,8 +30252,8 @@ export default function App(){
             </h1>
             <p style={{fontSize:16,color:"#67769A",maxWidth:520,margin:"18px auto 0",lineHeight:1.65}}>
               {lang==="en"
-                ?<>The global community for stocks &amp; crypto. <strong style={{color:"#C9D6F2",fontWeight:600}}>AI-powered picks</strong>, institutional flow and global radar — weekly, in your inbox.</>
-                :<>La comunidad global de acciones &amp; cripto. <strong style={{color:"#C9D6F2",fontWeight:600}}>Picks con IA</strong>, flujo institucional y radar global — cada semana en tu correo.</>
+                ?<>Follow the <strong style={{color:"#C9D6F2",fontWeight:600}}>smart money</strong> before the market does. Signals, institutional flow, AI picks and Congress trades — in one app.</>
+                :<>Sigue al <strong style={{color:"#C9D6F2",fontWeight:600}}>dinero institucional</strong> antes que el mercado. Señales, flujo institucional, picks de IA y trades del Congreso — en una sola app.</>
               }
             </p>
             {/* Email + CTA */}
