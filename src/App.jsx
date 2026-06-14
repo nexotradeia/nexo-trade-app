@@ -23648,7 +23648,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div>
             <div style={{...lbl,padding:"12px 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <span>{isEN?"Live Markets":"Mercados en Vivo"}</span>
-              <span style={{display:"inline-flex",alignItems:"center",gap:5,color:T.grn,fontFamily:MONO,fontSize:9,letterSpacing:.5}}><span style={{width:6,height:6,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`,animation:"nxtBl 1.6s ease-in-out infinite"}}/>{pxUpdated?(isEN?"LIVE · "+pxUpdated:"EN VIVO · "+pxUpdated):"LIVE"}</span>
+              <span style={{display:"inline-flex",alignItems:"center",gap:5,color:T.grn,fontFamily:MONO,fontSize:9,letterSpacing:.5}}><span style={{width:6,height:6,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`,animation:"nxtBl 1.6s ease-in-out infinite"}}/>{(()=>{try{return (isEN?"LIVE · ":"EN VIVO · ")+new Date().toLocaleTimeString(isEN?"en-US":"es-ES",{hour:"2-digit",minute:"2-digit"});}catch(e){return isEN?"LIVE":"EN VIVO";}})()}</span>
             </div>
             <div style={{padding:"0 12px 12px"}}>{(()=>{
               const syms=[...new Set([...sortedRows.map(r=>r.tk),...watchTks,"SPY","QQQ","NVDA","TSLA","AAPL"])].filter(Boolean).slice(0,8);
