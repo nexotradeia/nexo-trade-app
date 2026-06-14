@@ -29077,18 +29077,6 @@ export default function App(){
               <span style={{display:"flex",alignItems:"center"}}>{icon}</span><span>{l}</span>
             </button>
           ))}
-          {/* Accesos directos: Smart Money + Portafolio — brillan en verde cuando el mercado abre */}
-          <div style={{width:1,height:20,background:"var(--c-border)",flexShrink:0,margin:"0 4px"}}/>
-          {[
-            {idx:20, l:"Smart Money", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
-            {idx:37, l:lang==="en"?"Portfolio":"Portafolio", icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>},
-          ].map(b=>(
-            <button key={b.idx} onClick={()=>{setPage(b.idx);setShowLanding&&setShowLanding(false);}}
-              style={{background:"transparent",border:"none",height:44,padding:"0 14px",cursor:"pointer",color:marketOpen?"#16a34a":"#64748B",fontSize:13,fontWeight:700,whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:6,textShadow:marketOpen?"0 0 9px rgba(34,197,94,.5)":"none",transition:"all .15s"}}>
-              <span style={{display:"flex",alignItems:"center"}}>{b.icon}</span><span>{b.l}</span>
-              {marketOpen&&<span title={lang==="en"?"Market open":"Mercado abierto"} style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",boxShadow:"0 0 6px #16a34a",display:"inline-block",animation:"nexo-pulse 1.8s infinite"}}/>}
-            </button>
-          ))}
           {/* Filtros extra — solo móvil (Alcistas/Bajistas/Acciones van aquí) */}
           <div className="nexo-only-mobile-inline" style={{display:"none",position:"relative",flexShrink:0,marginLeft:4}}>
             <button onClick={()=>setShowFeedFilters(s=>!s)}
