@@ -23664,8 +23664,20 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:4,padding:"0 12px 12px"}}>{SECT.map((s,i)=>{const pos=s[2];const inten=Math.min(Math.abs(parseFloat(s[1]))/3,1);return (<div key={i} style={{borderRadius:4,padding:"7px 8px",background:pos?`rgba(0,255,135,${0.08+inten*0.25})`:`rgba(255,61,90,${0.08+inten*0.25})`,border:`1px solid ${pos?`rgba(0,255,135,${0.15+inten*0.2})`:`rgba(255,61,90,${0.15+inten*0.2})`}`}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:"#fff",marginBottom:2}}>{s[0]}</div><div style={{fontFamily:MONO,fontSize:10,fontWeight:600,color:pos?T.grn:T.red}}>{pos?"+":""}{s[1]}%</div></div>);})}</div>
           </div>
           <div>
-            <div style={{...lbl,padding:"12px 14px 8px"}}>{isEN?"Recent Trades":"Últimos Trades"}</div>
-            <div style={{padding:"0 12px 12px"}}>{TRADES.map((t,i)=>{const pos=t[3].startsWith("+");return (<div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<TRADES.length-1?`1px solid ${T.bg3}`:"none"}}><div style={{width:28,height:28,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,background:t[0]==="B"?"rgba(0,255,135,.12)":"rgba(255,61,90,.08)",color:t[0]==="B"?T.grn:T.red,border:`1px solid ${t[0]==="B"?"rgba(0,255,135,.2)":"rgba(255,61,90,.2)"}`}}>{t[0]==="B"?"BUY":"SELL"}</div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>{t[1]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim,marginTop:1}}>{t[2]}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:pos?T.grn:T.red}}>{t[3]}</div><div style={{fontFamily:MONO,fontSize:9,color:T.dim}}>{t[4]}</div></div></div>);})}</div>
+            <div style={{...lbl,padding:"12px 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <span>{isEN?"Live Markets":"Mercados en Vivo"}</span>
+              <span style={{display:"inline-flex",alignItems:"center",gap:5,color:T.grn,fontFamily:MONO,fontSize:9,letterSpacing:.5}}><span style={{width:6,height:6,borderRadius:"50%",background:T.grn,boxShadow:`0 0 6px ${T.grn}`,animation:"nxtBl 1.6s ease-in-out infinite"}}/>{pxUpdated?(isEN?"LIVE · "+pxUpdated:"EN VIVO · "+pxUpdated):"LIVE"}</span>
+            </div>
+            <div style={{padding:"0 12px 12px"}}>{(()=>{
+              const syms=[...new Set([...sortedRows.map(r=>r.tk),...watchTks,"SPY","QQQ","NVDA","TSLA","AAPL"])].filter(Boolean).slice(0,8);
+              return syms.map((tk,i)=>{ const lq=livePrices[tk]; const row=sortedRows.find(r=>r.tk===tk); const price=lq?lq.price:(row?row.price:null); const chg=lq?(lq.change||0):(row?row.today:null); const up=(chg||0)>=0;
+                return (<div key={tk} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<syms.length-1?`1px solid ${T.bg3}`:"none"}}>
+                  <div style={{width:30,height:24,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,background:T.bg3,color:T.txt}}>{tk.slice(0,4)}</div>
+                  <div style={{flex:1,fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>{tk}</div>
+                  <div style={{textAlign:"right"}}><div style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:T.txt}}>{price!=null?"$"+price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):"—"}</div><div style={{fontFamily:MONO,fontSize:9,fontWeight:600,color:chg==null?T.dim:(up?T.grn:T.red)}}>{chg==null?"—":(up?"▲ +":"▼ ")+Math.abs(chg).toFixed(2)+"%"}</div></div>
+                </div>);
+              });
+            })()}</div>
           </div>
         </div>
       </div>
