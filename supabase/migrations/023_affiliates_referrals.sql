@@ -85,10 +85,12 @@ begin
     where lower(referral_code) = lower(trim(p_ref_code)) limit 1;
   if v_aff is null then return null; end if;
 
-  insert into public.referrals(affiliate_id, status, referred_email, referred_user_id, source, clicked_at, created_at)
-    values (v_aff, 'signup', p_email, p_user_id, coalesce(p_source,'signup'), now(), now());
+  -- Nota: las tablas affiliates/referrals YA existían en prod con un schema
+  -- propio (más columnas). Insertamos solo columnas seguras que sí existen.
+  insert into public.referrals(affiliate_id, status, referred_email)
+    values (v_aff, 'signup', p_email);
 
-  update public.affiliates set total_signups = total_signups + 1 where id = v_aff;
+  update public.affiliates set total_signups = coalesce(total_signups,0) + 1 where id = v_aff;
   return v_aff;
 end; $$;
 
