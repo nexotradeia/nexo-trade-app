@@ -14910,6 +14910,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const [selO,setSelO]=useState(0);
   const [showWiz,setShowWiz]=useState(false);
   const [wlState,setWlState]=useState(nfpGetWL);
+  const [wlMsg,setWlMsg]=useState("");   // feedback al añadir a watchlist
   const [mktOpen,setMktOpen]=useState(nfpMktOpen);
   useEffect(()=>{ const iv=setInterval(()=>setMktOpen(nfpMktOpen()),30000); return ()=>clearInterval(iv); },[]);
   const [poll,setPoll]=useState({});       // precios sondeados vía Finnhub REST (gratis, ~15min retraso)
@@ -15320,7 +15321,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
               </div>
             )}
             <div className="acts">
-              <button className="cta" onClick={()=>{ try{ const t=String(d.tk).toUpperCase(); const cur=nfpGetWL(); const nx=cur.includes(t)?cur:[...cur,t]; localStorage.setItem("nexo-watchlist",JSON.stringify(nx)); setWlState(nx); }catch(e){} }}>{T("Add to watchlist","Añadir a watchlist")} <Arrow/></button>
+              <button className="cta" onClick={()=>{ try{ const t=String(d.tk).toUpperCase(); const cur=nfpGetWL(); const already=cur.includes(t); const nx=already?cur:[...cur,t]; localStorage.setItem("nexo-watchlist",JSON.stringify(nx)); setWlState(nx); setWlMsg(already?T("✓ "+t+" already in your watchlist","✓ "+t+" ya está en tu watchlist"):T("✓ "+t+" added to watchlist","✓ "+t+" añadido a watchlist")); setTimeout(()=>setWlMsg(""),2200); }catch(e){} }}>{wlMsg ? wlMsg : <>{T("Add to watchlist","Añadir a watchlist")} <Arrow/></>}</button>
             </div>
           </div>
           {/* TELEGRAM */}
