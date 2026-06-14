@@ -22903,6 +22903,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [chMA, setChMA] = useState(true);
   const [chVol, setChVol] = useState(true);
   const [chSel, setChSel] = useState(null); // ticker seleccionado para CHARTS (null = top position)
+  const [chSearch, setChSearch] = useState(""); // buscador de ticker en CHARTS
   const [ovRange, setOvRange] = useState("1M"); // rango del gráfico overview (PORTFOLIO)
   const [navView, setNavView] = useState("overview"); // NAVIGATION: overview|positions|orders|history|analytics|risk
   const [scMarket, setScMarket] = useState("NYSE + NASDAQ");
@@ -23676,10 +23677,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const LVLS=[["Oracle Target","$340",T.grn],["Resistance","$308",T.gold],["Support 1","$288",T.blue],["Support 2","$264",T.blue],["Suggested stop","$281",T.red]];
         const IDX=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["DXY","104.32","-0.24",0]];
         const CRY=[["BTC","$63,844","+1.92",1],["ETH","$3,482","-0.54",0]];
-        const end=cp.price||100; const cShare=(TF_SHARE[chPer]!=null?TF_SHARE[chPer]:0.5); const base=end-((end-(cp.entry||100))*cShare);
+        const end=cp.price||100; const dayChg=cp.today||0;
+        // El día va de la apertura (precio actual descontando el % del día) al precio actual → refleja la dirección real del día
+        const base=dayChg!==0 ? end/(1+dayChg/100) : end-((end-(cp.entry||end))*(TF_SHARE[chPer]!=null?TF_SHARE[chPer]:0.5));
+        const chUp=end>=base; const lineCol=chUp?T.grn:T.red; const areaFill=chUp?"rgba(0,255,135,.10)":"rgba(255,61,90,.10)";
+        const seed=((cp.tk||"X").split("").reduce((a,c)=>a+c.charCodeAt(0),0))%97;
         const NC={"1m":40,"5m":42,"15m":44,"1H":46,"1D":48,"1W":40}[chPer]||46;
         const cVol={"1m":0.5,"5m":0.7,"15m":0.85,"1H":1,"1D":1.25,"1W":1.6}[chPer]||1;
-        const cdl=(()=>{ const a=[]; let pr=base; for(let i=0;i<NC;i++){ const t=i/(NC-1); const tgt=base+(end-base)*Math.pow(t,0.9); const n=(Math.sin(i*1.3)*0.6+Math.cos(i*0.7)*0.4)*cVol; const o=pr; const c=o+(tgt-o)*0.55+n*end*0.004; const hi=Math.max(o,c)+Math.abs(n)*end*0.006+end*0.0014; const lo=Math.min(o,c)-Math.abs(n)*end*0.006-end*0.0014; a.push({o,c,hi,lo,vol:40+Math.abs(n)*34+(i%7)*3,up:c>=o}); pr=c; } return a; })();
+        const cdl=(()=>{ const a=[]; let pr=base; for(let i=0;i<NC;i++){ const t=i/(NC-1); const tgt=base+(end-base)*Math.pow(t,0.9); const n=(Math.sin(i*1.3+seed)*0.55+Math.cos(i*0.7+seed*0.5)*0.4+Math.sin(i*0.31+seed*0.2)*0.32)*cVol; const o=pr; const c=o+(tgt-o)*0.55+n*end*0.004; const hi=Math.max(o,c)+Math.abs(n)*end*0.006+end*0.0014; const lo=Math.min(o,c)-Math.abs(n)*end*0.006-end*0.0014; a.push({o,c,hi,lo,vol:40+Math.abs(n)*34+(i%7)*3,up:c>=o}); pr=c; } return a; })();
         const W=920,H=430,PL=8,PR=66,PT=18,MH=320,VT=350,VH=64;
         const minP=Math.min(...cdl.map(c=>c.lo))*0.999, maxP=Math.max(...cdl.map(c=>c.hi))*1.001;
         const xC=(i)=>PL+(i+0.5)/NC*(W-PL-PR), yP=(v)=>PT+(1-(v-minP)/((maxP-minP)||1))*MH;
@@ -23711,6 +23716,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{minWidth:0,display:"flex",flexDirection:"column"}}>
             <div style={{padding:"10px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
               <span style={{fontFamily:MONO,fontSize:16,fontWeight:700,letterSpacing:1}}>{cp.tk}</span>
+              <div style={{display:"flex",alignItems:"center",gap:0,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,overflow:"hidden"}}>
+                <input value={chSearch} onChange={e=>setChSearch(e.target.value.toUpperCase())}
+                  onKeyDown={e=>{ if(e.key==="Enter"&&chSearch.trim()){ setChSel(chSearch.trim()); setChSearch(""); } }}
+                  placeholder={isEN?"Change stock…":"Cambiar acción…"}
+                  style={{background:"transparent",border:"none",outline:"none",color:T.txt,fontFamily:MONO,fontSize:11,padding:"5px 9px",width:120}}/>
+                <button onClick={()=>{ if(chSearch.trim()){ setChSel(chSearch.trim()); setChSearch(""); } }}
+                  style={{background:"rgba(0,255,135,.12)",border:"none",borderLeft:`1px solid ${T.br}`,color:T.grn,fontFamily:MONO,fontSize:10,fontWeight:700,padding:"5px 10px",cursor:"pointer"}}>{isEN?"GO":"IR"}</button>
+              </div>
               <span style={{fontFamily:MONO,fontSize:20,fontWeight:700,color:cp.price>=cp.entry?T.grn:T.red,letterSpacing:-.5}}>${(cp.price||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
               <span style={{fontFamily:MONO,fontSize:12,fontWeight:600,color:cp.pnlPct>=0?T.grn:T.red}}>{cp.pnlPct>=0?"▲ +":"▼ "}{(cp.pnlPct||0).toFixed(2)}%</span>
               <div style={{display:"flex",gap:10,fontFamily:MONO,fontSize:10}}>{ohlv.map((o,i)=>(<span key={i} style={{color:T.dim}}>{o[0]} <span style={{color:o[2]}}>{o[1]}</span></span>))}</div>
@@ -23724,14 +23737,14 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{padding:0,flex:1}}>
               <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"auto",display:"block",background:T.bg2}}>
                 {gridV.map((v,i)=>(<g key={i}><line x1={PL} y1={yP(v)} x2={W-PR} y2={yP(v)} stroke="#1a2436" strokeWidth="1"/><text x={W-PR+4} y={yP(v)+3} fontFamily={MONO} fontSize="9" fill={T.dim}>${v.toFixed(2)}</text></g>))}
-                {chType==="area" && <polygon points={xC(0)+","+(PT+MH)+" "+closeLine+" "+xC(NC-1)+","+(PT+MH)} fill="rgba(0,255,135,.10)"/>}
-                {(chType==="line"||chType==="area") && <polyline points={closeLine} fill="none" stroke={T.grn} strokeWidth="2" strokeLinejoin="round"/>}
+                {chType==="area" && <polygon points={xC(0)+","+(PT+MH)+" "+closeLine+" "+xC(NC-1)+","+(PT+MH)} fill={areaFill}/>}
+                {(chType==="line"||chType==="area") && <polyline points={closeLine} fill="none" stroke={lineCol} strokeWidth="2" strokeLinejoin="round"/>}
                 {chType==="candle" && cdl.map((c,i)=>(<g key={i}><line x1={xC(i)} y1={yP(c.hi)} x2={xC(i)} y2={yP(c.lo)} stroke={c.up?T.grn2:T.red2} strokeWidth="1"/><rect x={xC(i)-bw/2} y={yP(Math.max(c.o,c.c))} width={bw} height={Math.max(1,Math.abs(yP(c.o)-yP(c.c)))} fill={c.up?"rgba(0,255,135,.55)":"rgba(255,61,90,.5)"} stroke={c.up?T.grn:T.red} strokeWidth="1"/></g>))}
                 {chType==="bar" && cdl.map((c,i)=>(<g key={i} stroke={c.up?T.grn:T.red} strokeWidth="1.4"><line x1={xC(i)} y1={yP(c.hi)} x2={xC(i)} y2={yP(c.lo)}/><line x1={xC(i)-bw/2} y1={yP(c.o)} x2={xC(i)} y2={yP(c.o)}/><line x1={xC(i)} y1={yP(c.c)} x2={xC(i)+bw/2} y2={yP(c.c)}/></g>))}
                 {chMA && <polyline points={maPts} fill="none" stroke={T.purp} strokeWidth="1.6" strokeLinejoin="round" opacity="0.9"/>}
-                <line x1={PL} y1={yP(last.c)} x2={W-PR} y2={yP(last.c)} stroke={T.grn} strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
-                <rect x={W-PR+1} y={yP(last.c)-9} width={PR-2} height={18} fill={T.bg3} stroke={T.grn} strokeWidth="1"/>
-                <text x={W-PR+1+(PR-2)/2} y={yP(last.c)+4} textAnchor="middle" fontFamily={MONO} fontSize="10" fontWeight="700" fill={T.grn}>${last.c.toFixed(2)}</text>
+                <line x1={PL} y1={yP(last.c)} x2={W-PR} y2={yP(last.c)} stroke={lineCol} strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
+                <rect x={W-PR+1} y={yP(last.c)-9} width={PR-2} height={18} fill={T.bg3} stroke={lineCol} strokeWidth="1"/>
+                <text x={W-PR+1+(PR-2)/2} y={yP(last.c)+4} textAnchor="middle" fontFamily={MONO} fontSize="10" fontWeight="700" fill={lineCol}>${last.c.toFixed(2)}</text>
                 {chVol && cdl.map((c,i)=>{ const bh=(c.vol/maxVol)*VH; return <rect key={i} x={xC(i)-bw/2} y={VT+VH-bh} width={bw} height={bh} fill={c.up?"rgba(0,255,135,.28)":"rgba(255,61,90,.24)"}/>; })}
                 {tfLabels(chPer,6).map((mm,i)=><text key={i} x={PL+(i/5)*(W-PL-PR)} y={H-4} fontFamily={MONO} fontSize="8" fill={T.dim} textAnchor="middle">{mm}</text>)}
               </svg>
