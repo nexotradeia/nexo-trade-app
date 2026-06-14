@@ -6940,7 +6940,7 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
                   {label:"Smart Money", pg:20, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
                   {label:"Gurus 13F",   pg:21, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>},
                   {label:"Terminal",    pg:37, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>},
-                  {label:"Screener",    pg:36, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>},
+                  {label:"Asset Classes",    pg:36, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>},
                   {label:"Radar",       pg:44, ico:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>},
                 ];
                 return(
@@ -9412,7 +9412,7 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
     {t:"Currencies", items:[
       [isEN?"Currency Converter":"Conversor",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
     {t:isEN?"Investing Tools":"Inversión", items:[
-      ["Screener",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],[isEN?"Track Record":"Track Record",51]]},
+      ["Asset Classes",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],[isEN?"Track Record":"Track Record",51]]},
     {t:"Markets", items:[
       ["Live Markets",7],["Pre-Market",45],["Crypto",41],["Commodities",18],["Global Radar",44],["Smart Money",20]]},
     {t:"Education", items:[
@@ -9454,7 +9454,7 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
     {t:"Calendars",items:[["Economic",14],["Dividends",15],["IPOs",16],["Holidays",57],["Splits",58],["Futures Expiry",59]]},
     {t:"Calculators",items:[["Pivot Points",46],["Profit",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],["Mortgage",49]]},
     {t:"Currencies",items:[["Converter",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
-    {t:"Investing Tools",items:[["Screener",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],["Track Record",51]]},
+    {t:"Investing Tools",items:[["Asset Classes",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],["Track Record",51]]},
     {t:"Markets",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],["Global Radar",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
     {t:"Education",items:[["Webinars",11],["Academy",12]]},
   ];
@@ -19924,7 +19924,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   {label:"🔥 Trending",idx:7777},
   {label:isEN?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,vip:true},
   {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
-  {label:isEN?"🔬 Advanced Screener":"🔬 Screener Avanzado",idx:36,vip:true},
+  {label:"🔬 Asset Classes",idx:36},
   {label:"💼 Portafolio Terminal Oracle IA",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
   {label:isEN?"🚨 Alert Center":"🚨 Centro Alertas",idx:42},
@@ -25186,15 +25186,14 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
-              <span style={{fontSize:22,fontWeight:900,color:C.text,letterSpacing:"-0.5px"}}>🔬 {isEN?"Advanced Screener":"Screener Avanzado"}</span>
-              <span style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",color:"#fff",fontSize:10,fontWeight:800,padding:"3px 8px",borderRadius:6,letterSpacing:0.5}}>PREMIUM</span>
+              <span style={{fontSize:22,fontWeight:900,color:C.text,letterSpacing:"-0.5px"}}>🔬 Asset Classes</span>
               <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:20,padding:"3px 10px"}}>
                 <div style={{width:7,height:7,borderRadius:"50%",background:wsStatus==="live"?"#10B981":"#F59E0B",animation:"pulse 1.5s infinite"}}/>
                 <span style={{fontSize:10,fontWeight:800,color:wsStatus==="live"?"#10B981":"#F59E0B",letterSpacing:0.5}}>{wsStatus==="live"?"LIVE":"AUTO"}</span>
               </div>
             </div>
             <p style={{color:C.muted,fontSize:12,margin:0}}>
-              {isEN?"Real-time scanner · AI-powered signals · Institutional grade":"Scanner en tiempo real · Señales IA · Grado institucional"}
+              {isEN?"Crypto · Commodities · ETFs · Forex · Live data":"Crypto · Materias · ETFs · Forex · Datos en vivo"}
               {lastUpdate&&<span style={{color:C.muted2,marginLeft:8}}>· {isEN?"Updated":"Actualizado"} {lastUpdate.toLocaleTimeString()}</span>}
             </p>
           </div>
@@ -30078,7 +30077,7 @@ export default function App(){
                   {label:"Oracle AI",sub:"AI trading chat assistant",fn:()=>setShowAI(true),ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>},
                   {label:"Stock Pick AI",sub:"Automated recommendations",idx:3,badge:"NEW",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>},
                   {label:"Market Top",sub:isEN?"Top movers right now":"Líderes del momento",idx:29,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>},
-                  {label:"Screener",sub:"Advanced stock filter",idx:36,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>},
+                  {label:"Asset Classes",sub:"Crypto · Commodities · ETFs · Forex",idx:36,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>},
                 ].map((it,i)=>(
                   <div key={i} className="nexo-ditem" onClick={()=>{ it.fn?it.fn():(it.idx!=null&&(setPage(it.idx),setShowLanding(false))); }}>
                     <div className="nexo-dico nexo-dico-ia">{it.ico}</div>
