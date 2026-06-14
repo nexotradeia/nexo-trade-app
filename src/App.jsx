@@ -8355,10 +8355,11 @@ function MobileAffiliateBanner(){
 
   return(
     <div className="nexo-mobile-affiliate-banner" style={{
-      position:"fixed", bottom:0, left:0, right:0,
+      position:"fixed", bottom:"calc(58px + env(safe-area-inset-bottom, 0px))", left:0, right:0,
       zIndex:1200,
       background: aff.bg,
-      borderTop:`2px solid ${aff.color}44`,
+      borderTop:`1px solid ${aff.color}44`,
+      borderBottom:`1px solid ${aff.color}22`,
       padding:"8px 10px",
       display:"none", // CSS media query activa en móvil
       alignItems:"center",
