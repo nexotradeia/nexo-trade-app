@@ -27684,13 +27684,13 @@ function ProPage({user, isPremium, onNavigate, onNeedAuth, onSettings, lang="en"
 
           <div style={{position:"relative",zIndex:1,display:"flex",flexWrap:"wrap",gap:9,marginBottom:24}}>
             {[
-              {icon:"📊",label:isEN?"Real-time P&L":"P&L en tiempo real"},
-              {icon:"🔮",label:isEN?"AI Scenarios":"Escenarios IA"},
-              {icon:"🔔",label:isEN?"Smart Alerts":"Alertas Inteligentes"},
-              {icon:"📈",label:isEN?"Performance Charts":"Gráficos de Rendimiento"},
+              {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,label:isEN?"Real-time P&L":"P&L en tiempo real"},
+              {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>,label:isEN?"AI Scenarios":"Escenarios IA"},
+              {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>,label:isEN?"Smart Alerts":"Alertas Inteligentes"},
+              {icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,label:isEN?"Performance Charts":"Gráficos de Rendimiento"},
             ].map(function(f,i){return(
               <div key={i} style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,fontWeight:600,color:"rgba(255,255,255,0.85)",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",padding:"7px 13px",borderRadius:999}}>
-                <span>{f.icon}</span> {f.label}
+                <span style={{display:"inline-flex",alignItems:"center"}}>{f.icon}</span> {f.label}
               </div>
             );})}
           </div>
@@ -29746,9 +29746,10 @@ export default function App(){
         overflow-y: scroll !important;
         -webkit-overflow-scrolling: touch !important;
       }
-      /* overflow-x on a shell div (NOT html/body) — keeps iOS position:fixed working */
+      /* overflow-x: clip (NOT hidden) — evita scroll horizontal SIN crear scroll container,
+         así el header superior (position:sticky) se queda fijo y el nav inferior (fixed) también funciona */
       .nexo-app-shell {
-        overflow-x: hidden !important;
+        overflow-x: clip !important;
         max-width: 100vw !important;
       }
       @media (min-width: 768px) {
