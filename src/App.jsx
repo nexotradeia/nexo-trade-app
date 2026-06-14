@@ -24751,7 +24751,7 @@ function PreMarketPage({ lang="es", isPremium=false, onNeedPremium }) {
 
 function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   const isEN = lang === "en";
-  const [tab,          setTab]         = useState(isPremium?"stocks":"crypto");
+  const [tab,          setTab]         = useState("crypto");
   const [sortCol,      setSortCol]     = useState("score");
   const [sortDir,      setSortDir]     = useState(-1);
   const [search,       setSearch]      = useState("");
@@ -24929,10 +24929,6 @@ function AdvancedScreenerPage({ isPremium, onNeedPremium, lang }) {
   },[isPremium]);
 
   const tabs=[
-    {id:"stocks",  l:"📊 "+(isEN?"Stocks":"Acciones")},
-    {id:"options", l:"⚡ "+(isEN?"Options":"Opciones")},
-    {id:"intraday",l:"🕐 Intraday"},
-    {id:"scalping",l:"⚡ Scalping"},
     {id:"crypto",  l:"₿ Crypto"},
     {id:"commodities", l:"🛢️ "+(isEN?"Commodities":"Materias")},
     {id:"etfs",    l:"🗂️ ETFs"},
