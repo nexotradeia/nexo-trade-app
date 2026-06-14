@@ -19120,7 +19120,7 @@ function CryptoPerformancePage({ lang="es" }) {
           <div style={{maxWidth:1600,margin:"0 auto",display:"flex",gap:0,minWidth:600}}>
             {[
               {label:isEN?"Market Cap":"Cap. Total", val:fmt$(global.total_market_cap?.usd), sub:`${global.market_cap_change_percentage_24h_usd?.toFixed(2)}% 24h`, color:global.market_cap_change_percentage_24h_usd>=0?"#22c55e":"#f87171"},
-              {label:isEN?"24h Volume":"Vol. 24h",   val:fmt$(global.total_volume?.usd), sub:`${global.active_cryptocurrencies?.toLocaleString()} activas`, color:"#f1f5f9"},
+              {label:isEN?"24h Volume":"Vol. 24h",   val:fmt$(global.total_volume?.usd), sub:`${global.active_cryptocurrencies?.toLocaleString()} ${isEN?"active":"activas"}`, color:"#f1f5f9"},
               {label:"BTC Dom.",                     val:`${global.market_cap_percentage?.btc?.toFixed(1)}%`, sub:`ETH ${global.market_cap_percentage?.eth?.toFixed(1)}%`, color:"#F7931A"},
               {label:isEN?"Cryptos":"Criptos",       val:global.active_cryptocurrencies?.toLocaleString(), sub:isEN?"active markets":"mercados activos", color:"#f1f5f9"},
               {label:"Fear & Greed",                 val:fearGreed?.value||"—", sub:fearGreed?.value_classification||"—", color:fgColor},
