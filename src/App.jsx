@@ -5100,8 +5100,8 @@ const TICKER_DATA_INIT = [
   {s:"AVGO",  n:"Broadcom",   p:248.6,  c:+0.55,  col:"#cc0000", cg:null, fh:"AVGO"},
   {s:"DIA",   n:"Dow Jones",  p:509.7,  c:-0.35,  col:"#1A5FAD", cg:null, fh:"DIA"},
   {s:"IWM",   n:"Russell 2000",p:281.7, c:-0.40,  col:"#0F5E68", cg:null, fh:"IWM"},
-  {s:"BTC",   n:"Bitcoin",    p:61000,  c:-3.0,   col:"#F7931A", cg:null, fh:"BINANCE:BTCUSDT"},
-  {s:"ETH",   n:"Ethereum",   p:1590,   c:-9.0,   col:"#627EEA", cg:null, fh:"BINANCE:ETHUSDT"},
+  {s:"BTC",   n:"Bitcoin",    p:62060,  c:+0.05,  col:"#F7931A", cg:null, fh:"BINANCE:BTCUSDT"},
+  {s:"ETH",   n:"Ethereum",   p:1617,   c:+0.10,  col:"#627EEA", cg:null, fh:"BINANCE:ETHUSDT"},
 ];
 
 // ── Mapa ticker → dominio para logos oficiales (Clearbit). Índices/ETF sin logo → letra ──
@@ -28418,6 +28418,7 @@ export default function App(){
   const [posts,setPosts]       = useState([]);
   const [newPostId,setNewPostId]= useState(null);
   const [page,setPage]         = useState(()=>{ try{ const p=parseInt(localStorage.getItem("nexo_page")||"0"); return isNaN(p)?0:p; }catch{return 0;} });
+  const [mFeed,setMFeed]       = useState(false); // móvil: false=Home dashboard, true=Feed social
   const [sent,setSent]         = useState("all");
   const [showFeedFilters,setShowFeedFilters] = useState(false); // dropdown de filtros extra en móvil
   // ── Bots dinámicos: postean automáticamente cada ~22s ──────────────────────
@@ -30423,7 +30424,7 @@ export default function App(){
       )}
 
       {/* MOBILE HOME DASHBOARD — solo móvil página 0 (se oculta si hay un ticker abierto para que se vea su análisis) */}
-      {page===0 && !showLanding && page!==99 && !tickerPage && (
+      {page===0 && !showLanding && page!==99 && !tickerPage && !mFeed && (
         <div className="nexo-only-mobile" style={{display:"none",maxWidth:480,margin:"0 auto",boxSizing:"border-box"}}>
           <MobileDashErrorBoundary>
             <MobileHomeDashboard
@@ -30667,14 +30668,14 @@ export default function App(){
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-5h4v5h5V9.5"/></svg>,
             l:"Home",
-            on:()=>{setPage(0);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
-            active:page===0
+            on:()=>{setPage(0);setMFeed(false);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
+            active:page===0 && !mFeed
           },
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>,
             l:"Feed",
-            on:()=>{setPage(0);setShowLanding(false);setTimeout(()=>window.scrollTo({top:560,behavior:"smooth"}),60);},
-            active:false
+            on:()=>{setPage(0);setMFeed(true);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
+            active:page===0 && mFeed
           },
           {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5H18l-3.75 2.7 1.5 4.5L12 12l-3.75 2.7 1.5-4.5L6 7.5h4.5z"/><path d="M5 17l1.5 1.5"/><path d="M19 17l-1.5 1.5"/><path d="M12 20v1"/></svg>,
