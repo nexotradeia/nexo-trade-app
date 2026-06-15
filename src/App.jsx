@@ -29238,7 +29238,7 @@ export default function App(){
             {/* 🌍 Compartir viral — para todos (global) */}
             {i===8 && <ShareFeedCard user={user} lang={lang}/>}
             {/* Mini-banner afiliado contextual — solo free users */}
-            {!effectivePremium && (i+1)%3===0 && (()=>{
+            {!effectivePremium && (i+1)%6===0 && (()=>{
               const contextAffs = AFFILIATE_BY_TICKER(p.ticker||"");
               const aff = contextAffs[(Math.floor(i/3))%contextAffs.length];
               if(!aff) return null;
@@ -29260,11 +29260,11 @@ export default function App(){
               );
             })()}
             {/* Post patrocinado completo cada 5 posts — solo free users */}
-            {!effectivePremium && (i+1)%5===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
+            {!effectivePremium && (i+1)%10===0 && SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length] && (
               <SponsoredPostCard sp={SPONSORED_POSTS[(Math.floor(i/5))%SPONSORED_POSTS.length]}/>
             )}
             {/* SmartCredit afiliado cada 8 posts — solo free users */}
-            {!effectivePremium && (i+1)%8===0 && (
+            {!effectivePremium && (i+1)%14===0 && (
               <a href="https://www.smartcredit.com/join/?pid=32628" target="_blank" rel="noopener noreferrer"
                 style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,rgba(15,76,129,0.06),rgba(16,185,129,0.04))",border:"1.5px solid rgba(15,76,129,0.18)",borderRadius:14,padding:"13px 16px",margin:"6px 0",textDecoration:"none",transition:"all 0.18s"}}
                 onMouseEnter={e=>{e.currentTarget.style.background="linear-gradient(135deg,rgba(15,76,129,0.11),rgba(16,185,129,0.07))";e.currentTarget.style.borderColor="rgba(15,76,129,0.38)";}}
@@ -29281,7 +29281,7 @@ export default function App(){
               </a>
             )}
             {/* Bots ya inyectados directamente en displayFeed */}
-            {!effectivePremium && (i+1)%6===0 && <MediaNetBannerFeed/>}
+            {!effectivePremium && (i+1)%9===0 && <MediaNetBannerFeed/>}
             {!effectivePremium && (i+1)%5===0 && (
               <VipFeedCard onGoVIP={()=>setPage(8)} lang={lang}/>
             )}
