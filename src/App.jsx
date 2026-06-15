@@ -30697,6 +30697,12 @@ export default function App(){
             active:page===20
           },
           {
+            svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
+            l:isEN?"Portfolio":"Portafolio",
+            on:()=>{setPage(37);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
+            active:page===37
+          },
+          {
             svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 8.5C5 4.5 9.5 2.5 12 2.5s7 2 10.5 6"/><path d="M5 12c2-2.5 4.5-4 7-4s5 1.5 7 4"/><path d="M8.5 15.5c1-1 2.1-1.5 3.5-1.5s2.5.5 3.5 1.5"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>,
             l:"Markets",
             on:()=>{setPage(7);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});},
