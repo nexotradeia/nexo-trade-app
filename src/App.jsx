@@ -29420,6 +29420,7 @@ export default function App(){
         .nexo-left-sidebar { display: none !important; }
       }
       .nexo-show-mobile { display: none; }
+      .nexo-backfab { display: none; }
       .nexo-only-mobile-inline { display: none; }
       @media (max-width: 767px) {
         /* iOS Safari: inputs ≥16px evita el auto-zoom molesto al tocar un campo */
@@ -29428,6 +29429,7 @@ export default function App(){
         /* ── LAYOUT BASE ── */
         .nexo-sidebar { display: none !important; }
         .nexo-show-mobile { display: block !important; }
+        .nexo-backfab { display: flex !important; }
         /* Red de seguridad: nada de imágenes se desborda en móvil */
         img:not(.nexo-keep-size) { max-width: 100%; }
         .nexo-admin-overview { grid-template-columns: 1fr !important; }
@@ -30692,7 +30694,7 @@ export default function App(){
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={openPaywall} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
-      {backTo!==null && <button className="nexo-show-mobile" onClick={()=>{setPage(backTo);setBackTo(null);try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){}}} style={{position:"fixed",top:100,left:10,zIndex:1250,background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:999,padding:"7px 13px 7px 11px",fontSize:13,fontWeight:700,color:"#0F4C81",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",cursor:"pointer",fontFamily:"inherit"}}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:"-3px",marginRight:5}}><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Atrás</button>}
+      {backTo!==null && page!==44 && <button className="nexo-backfab" aria-label="Atras" onClick={()=>{setPage(backTo);setBackTo(null);try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){}}} style={{position:"fixed",bottom:92,left:14,zIndex:1250,width:46,height:46,borderRadius:"50%",alignItems:"center",justifyContent:"center",background:"var(--c-surface)",border:"1px solid var(--c-border)",color:"#0F4C81",boxShadow:"0 4px 16px rgba(0,0,0,0.22)",cursor:"pointer",padding:0}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>}
       <div className="nexo-bottom-nav" style={{display:"none",zIndex:1300,background:"var(--c-surface)",borderTop:"1px solid var(--c-border)",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",justifyContent:"space-around"}}>
         {[
           {
