@@ -3,27 +3,45 @@
     {
       "source": "/index.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
       ]
     },
     {
       "source": "/",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
       ]
     },
     {
       "source": "/app",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
-        { "key": "Clear-Site-Data", "value": "\"cache\"" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Clear-Site-Data",
+          "value": "\"cache\""
+        }
       ]
     },
     {
       "source": "/app.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
-        { "key": "Clear-Site-Data", "value": "\"cache\"" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Clear-Site-Data",
+          "value": "\"cache\""
+        }
       ]
     },
     {
@@ -41,13 +59,24 @@
     }
   ],
   "rewrites": [
-    { "source": "/app", "destination": "/app.html" },
-    { "source": "/((?!api/)(?!.*\\.html$)(?!.*\\.png$)(?!.*\\.svg$)(?!.*\\.ico$)(?!.*\\.txt$).+)", "destination": "/app.html" }
+    {
+      "source": "/app",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/((?!api/)(?!.*\\.html$)(?!.*\\.png$)(?!.*\\.svg$)(?!.*\\.ico$)(?!.*\\.txt$).+)",
+      "destination": "/app.html"
+    }
   ],
   "crons": [
     {
       "path": "/api/send-picks?secret=NEXO_PICKS_2026",
       "schedule": "0 13 * * 1"
     }
-  ]
+  ],
+  "functions": {
+    "api/data.js": {
+      "maxDuration": 30
+    }
+  }
 }
