@@ -23462,7 +23462,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         <div style={{minWidth:0}}>
           {navView==="overview" && (<>
           {/* overview strip */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",borderBottom:`1px solid ${T.br}`}}>
+          <div className="nexo-term-kpis" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",borderBottom:`1px solid ${T.br}`}}>
             {[
               {l:"P&L Total",v:m$(totalPnl),c:totalPnl>=0?T.grn:T.red,d:(ytdPct>=0?"▲ +":"▼ ")+ytdPct.toFixed(1)+"% YTD",dc:ytdPct>=0?T.grn:T.red,acc:T.grn},
               {l:"Valor Cartera",v:"$"+Math.round(totalValue).toLocaleString("en-US"),c:T.blue,d:positions.length+" posiciones",dc:T.dim,acc:T.blue},
@@ -24022,7 +24022,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const inStyle={width:"100%",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:6,padding:"9px 11px",color:T.txt,fontFamily:MONO,fontSize:13,outline:"none"};
         return (
         <div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",borderBottom:`1px solid ${T.br}`}}>
+          <div className="nexo-term-kpis" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",borderBottom:`1px solid ${T.br}`}}>
             {KPI.map((k,i)=>(<div key={i} style={{padding:"14px 16px",borderRight:i<4?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}><div style={lbl}>{k[0]}</div><div style={{fontFamily:MONO,fontSize:19,fontWeight:700,color:k[2],lineHeight:1,marginTop:6}}>{k[1]}</div><div style={{fontFamily:MONO,fontSize:10,color:T.dim,marginTop:4}}>{k[3]}</div><div style={{position:"absolute",left:0,right:0,bottom:0,height:2,background:`linear-gradient(90deg,${k[2]},transparent)`}}/></div>))}
           </div>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`}}>
@@ -29644,6 +29644,10 @@ export default function App(){
         .nexo-term-grid > div:not(:last-child) { border-bottom: 1px solid #1e2a38 !important; }
         /* tablas/contenido ancho dentro del terminal hacen scroll-x propio, no rompen la página */
         .nexo-term-grid table { display: block !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; white-space: nowrap !important; }
+        .nexo-term-kpis { grid-template-columns: repeat(2,1fr) !important; }
+        .nexo-term-kpis > div { border-right: 1px solid #1e2a38 !important; border-bottom: 1px solid #1e2a38 !important; }
+        .nexo-term-kpis > div:nth-child(2n) { border-right: none !important; }
+        .nexo-term-kpis > div:nth-child(5) { grid-column: 1 / -1 !important; border-right: none !important; }
 
         /* ── TERMINAL: el contenedor no debe exceder el ancho de pantalla (la sangría negativa -16px lo desbordaba) ── */
         .nexo-term-root { margin-left: 0 !important; margin-right: 0 !important; max-width: 100vw !important; overflow-x: hidden !important; }
