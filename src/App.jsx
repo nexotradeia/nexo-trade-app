@@ -19603,7 +19603,7 @@ function CryptoOptionsPage({ isPremium, onNeedPremium, lang="es" }) {
               <div style={{fontSize:11,fontWeight:700,color:"#f87171",letterSpacing:1,textTransform:"uppercase"}}>PUTS ▶</div>
             </div>
             <div style={{overflowX:"auto"}}>
-              <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed"}}>
+              <table style={{width:"100%",minWidth:720,borderCollapse:"collapse",tableLayout:"fixed"}}>
                 <colgroup>
                   <col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/><col style={{width:"6%"}}/>
                   <col style={{width:"10%"}}/>
