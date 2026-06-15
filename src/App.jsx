@@ -3933,7 +3933,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
               </button>
               {/* Ticker — input más pequeño en móvil */}
               <input value={ticker} onChange={e=>setTicker(e.target.value)} placeholder="$TICKER"
-                style={{background:"rgba(15,76,129,0.05)",border:"1px solid rgba(15,76,129,0.18)",borderRadius:7,color:C.accent,padding:"5px 7px",fontSize:11,outline:"none",width:64,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:1,flexShrink:0}}
+                style={{background:"rgba(15,76,129,0.05)",border:"1px solid rgba(15,76,129,0.18)",borderRadius:7,color:C.accent,padding:"5px 8px",fontSize:11,outline:"none",width:88,fontFamily:"monospace",textTransform:"uppercase",fontWeight:700,letterSpacing:0.5,flexShrink:0}}
                 onFocus={e=>e.target.style.borderColor="rgba(15,76,129,0.45)"}
                 onBlur={e=>e.target.style.borderColor="rgba(15,76,129,0.18)"}/>
             </div>
@@ -14914,11 +14914,11 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const FREE=3;
 
   const STOCKS=[
-    {tk:"NVDA",dir:"LONG",fb:140.50,fbc:2.10,tgt:165,vol:"5.5×",flags:["VOL","BRK","MOM","SM","CAT"],score:94,stop:133,entry:"138–142",mcap:"$3.45T",rsi:"68",sma:"$128",sm:"92",
-     why:T("NVDA broke $135 resistance on 5.5× average volume — the strongest signal of the day. RSI 68 leaves room before overbought, MACD just crossed bullish, earnings in 6 days. Five of five signals firing.","NVDA rompió la resistencia de $135 con 5.5× el volumen promedio — la señal más fuerte del día. RSI 68 deja margen antes de sobrecompra, MACD cruzó alcista, earnings en 6 días. Cinco de cinco señales disparando.")},
-    {tk:"MSFT",dir:"LONG",fb:447.20,fbc:0.85,tgt:490,vol:"2.1×",flags:["BRK","MOM","SM","CAT"],score:91,stop:432,entry:"445–450",mcap:"$3.32T",rsi:"61",sma:"$430",sm:"86",
-     why:T("MSFT confirmed a breakout above $445 with a healthy 2.1× volume. Smart money has been accumulating quietly for 3 weeks. Lower beta, safer entry.","MSFT confirmó rompimiento sobre $445 con volumen sano de 2.1×. El smart money lleva 3 semanas acumulando en silencio. Beta menor, entrada más segura.")},
-    {tk:"COIN",dir:"LONG",fb:234.80,fbc:3.40,tgt:295,vol:"4.2×",flags:["VOL","MOM","SM","CAT"],score:89,stop:218,entry:"232–238",mcap:"$58B",rsi:"66",sma:"$210",sm:"84",
+    {tk:"NVDA",dir:"LONG",fb:209.50,fbc:2.10,tgt:265,vol:"5.5×",flags:["VOL","BRK","MOM","SM","CAT"],score:94,stop:192,entry:"205–212",mcap:"$5.1T",rsi:"68",sma:"$188",sm:"92",
+     why:T("NVDA broke $200 resistance on 5.5× average volume — the strongest signal of the day. RSI 68 leaves room before overbought, MACD just crossed bullish, earnings in 6 days. Five of five signals firing.","NVDA rompió la resistencia de $200 con 5.5× el volumen promedio — la señal más fuerte del día. RSI 68 deja margen antes de sobrecompra, MACD cruzó alcista, earnings en 6 días. Cinco de cinco señales disparando.")},
+    {tk:"MSFT",dir:"LONG",fb:388.00,fbc:0.85,tgt:440,vol:"2.1×",flags:["BRK","MOM","SM","CAT"],score:91,stop:372,entry:"385–392",mcap:"$2.9T",rsi:"61",sma:"$372",sm:"86",
+     why:T("MSFT confirmed a breakout above $385 with a healthy 2.1× volume. Smart money has been accumulating quietly for 3 weeks. Lower beta, safer entry.","MSFT confirmó rompimiento sobre $385 con volumen sano de 2.1×. El smart money lleva 3 semanas acumulando en silencio. Beta menor, entrada más segura.")},
+    {tk:"COIN",dir:"LONG",fb:170.00,fbc:3.40,tgt:215,vol:"4.2×",flags:["VOL","MOM","SM","CAT"],score:89,stop:156,entry:"167–174",mcap:"$42B",rsi:"66",sma:"$152",sm:"84",
      why:T("COIN volume 4.2× average as BTC pushes new highs. High-beta name with earnings in 9 days — momentum + catalyst stacking.","Volumen COIN 4.2× promedio mientras BTC empuja máximos. Nombre de alta beta con earnings en 9 días — momentum + catalizador apilándose.")},
     {tk:"META",dir:"LONG",fb:566.41,fbc:1.96,tgt:620,vol:"3.1×",flags:["VOL","BRK","SM","CAT"],score:87,stop:548,entry:"560–570",mcap:"$1.44T",rsi:"64",sma:"$540",sm:"81",
      why:T("META broke out with 3.1× volume ahead of its product event. Institutional accumulation steady.","META rompió con volumen 3.1× antes de su evento de producto. Acumulación institucional sostenida.")},
