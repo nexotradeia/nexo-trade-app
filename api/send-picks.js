@@ -125,9 +125,16 @@ function signalBadge(score) {
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 
 async function getSubscribers() {
+  // Las claves nuevas (sb_secret_/sb_publishable_) NO son JWT: si se mandan en
+  // Authorization: Bearer, PostgREST falla al parsearlas y degrada a rol anon (RLS -> 0 filas).
+  // Solo las legacy (eyJ...) deben ir en Authorization. Las nuevas van solo en apikey.
+  const isJwt = SUPABASE_KEY.startsWith("eyJ");
+  const headers = isJwt
+    ? { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+    : { apikey: SUPABASE_KEY };
   const r = await fetch(
     `${SUPABASE_URL}/rest/v1/newsletter_subscribers?select=email&order=created_at.asc`,
-    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    { headers }
   );
   if (!r.ok) throw new Error(`Supabase ${r.status}: ${await r.text()}`);
   const rows = await r.json();
