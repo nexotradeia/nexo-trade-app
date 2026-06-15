@@ -7178,10 +7178,10 @@ function PremiumPage({user, isPremium, isPro, onSubscribe, onNeedAuth, lang}){
             {f:isEN?"Full-screen Trading Terminal":"Terminal de Trading full-screen",free:false,pro:true},
             {f:isEN?"Global Radar — 3D capital flow map":"Radar Global — Mapa 3D de flujos de capital",free:false,pro:true},
             {cat:isEN?"Institutional Data":"Datos Institucionales"},
-            {f:isEN?"52 Guru portfolios (Buffett, Ackman...)":"52 portafolios Gurús (Buffett, Ackman...)",free:false,pro:true},
-            {f:isEN?"Congress Trades — real time":"Congress Trades — en tiempo real",free:false,pro:true},
+            {f:isEN?"52 Guru portfolios (Buffett, Ackman...)":"52 portafolios Gurús (Buffett, Ackman...)",free:true,pro:true},
+            {f:isEN?"Congress Trades — real time":"Congress Trades — en tiempo real",free:true,pro:true},
             {f:isEN?"Institutional flow — dark pool & sweeps":"Flujo institucional — dark pool y sweeps",free:false,pro:true},
-            {f:isEN?"SEC Insiders — Form 4":"Insiders SEC — Form 4",free:false,pro:true},
+            {f:isEN?"SEC Insiders — Form 4":"Insiders SEC — Form 4",free:true,pro:true},
             {f:isEN?"ARK Invest daily holdings":"ARK Invest holdings diarios",free:false,pro:true},
             {cat:isEN?"Other":"Otros"},
             {f:isEN?"3 free Academy lessons":"3 lecciones gratis de Academia",free:true,pro:true},
@@ -19950,7 +19950,7 @@ const NAV_ITEMS = (t, isEN=false) => [
   // ── Comunidad ──
   {label:"🔥 Trending",idx:7777},
   {label:isEN?"💡 Ideas PREMIUM":"💡 Ideas PREMIUM",idx:21,vip:true},
-  {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19,vip:true},
+  {label:isEN?"🏛️ Wall St. & Capitol":"🏛️ Wall St. & Capitol",idx:19},
   {label:"🔬 Asset Classes",idx:36},
   {label:"💼 Portafolio Terminal Oracle IA",idx:37,vip:true},
   {label:isEN?"👁 Watchlist":"👁 Watchlist",idx:38},
@@ -29136,7 +29136,7 @@ export default function App(){
     if(page===15) return <DividendCalendarPage lang={lang}/>;
     if(page===16) return <IpoCalendarPage isPremium={effectivePremium} onNeedPremium={openPaywall}/>;
     if(page===17) return <ScreenerPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
-    if(page===19) return <GurusPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
+    if(page===19) return <GurusPage isPremium={true} onNeedPremium={openPaywall} lang={lang}/>;
     if(page===35) return <GurusPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang} initialTab="congress"/>;
     if(page===36) return <AdvancedScreenerPage isPremium={effectivePremium} onNeedPremium={openPaywall} lang={lang}/>;
     if(page===37) return <PortfolioTrackerPage isPremium={effectivePremium} onNeedPremium={openPaywall} user={user} lang={lang} onPost={addPost} onNeedAuth={()=>setAuth("register")}/>;
