@@ -3843,7 +3843,7 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
   };
 
   return(
-    <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:10,boxShadow:"var(--c-shadow)",boxSizing:"border-box",width:"100%",overflow:"hidden"}}>
+    <div style={{background:"var(--c-card)",border:"1px solid var(--c-border)",borderRadius:16,padding:"14px 16px",marginBottom:14,boxShadow:"var(--c-shadow)",boxSizing:"border-box",width:"100%",overflow:"hidden"}}>
       {modMsg&&<div style={{background:"rgba(255,77,106,0.08)",border:"1px solid rgba(255,77,106,0.2)",borderRadius:8,padding:"8px 12px",marginBottom:10,fontSize:12,color:"#EF4444"}}>{modMsg}</div>}
       <div style={{display:"flex",gap:10}}>
         {user?<AvatarBubble name={user.name||user.username} emoji={user.emoji} color={user.avatarColor||C.accent} photo={user.avatarUrl||null} online level={user.points}/>:<div style={{width:36,height:36,borderRadius:"50%",background:"var(--c-border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>👤</div>}
@@ -18117,7 +18117,7 @@ function BotPostCard({post,onTickerClick,lang}){
   const sentLabel = isBull?"▲ BUY":isBear?"▼ SELL":"◆ HOLD";
   const mainName  = TICKER_NAMES[post.ticker];
   return(
-    <div style={{background:C.card,border:`1.5px solid ${isBull?"rgba(22,163,74,0.22)":isBear?"rgba(220,38,38,0.22)":C.border}`,borderRadius:16,padding:"14px 16px",marginBottom:6,boxShadow:C.shadow,transition:"transform 0.18s"}}
+    <div style={{background:C.card,border:`1.5px solid ${isBull?"rgba(22,163,74,0.22)":isBear?"rgba(220,38,38,0.22)":C.border}`,borderRadius:16,padding:"14px 16px",marginBottom:14,boxShadow:C.shadow,transition:"transform 0.18s"}}
       onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
       onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
       <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
