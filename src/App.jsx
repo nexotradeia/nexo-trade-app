@@ -30465,7 +30465,7 @@ export default function App(){
       {/* SocialProofBar removed */}
 
       {/* MARKETS STRIP v4 — desktop only, shown on feed pages */}
-      {!(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99) && (
+      {!(page===2||page===6||page===7||page===9||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99) && (
         <MarketsStrip onNav={(idx)=>{setPage(idx);setShowLanding(false);}}/>
       )}
 
@@ -30494,8 +30494,8 @@ export default function App(){
       )}
 
       {/* BODY — 3 columnas estilo Socimo (en móvil se oculta durante la landing para mostrar solo el hero) */}
-      <div className={"nexo-body-grid"+((page===0&&!mFeed&&!showLanding&&!tickerPage)?" nexo-hidehome":"")} style={{maxWidth:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:(showLanding&&page===0)?"none":"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box"}}>
-        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onlineUsers={onlineUsers} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
+      <div className={"nexo-body-grid"+((page===0&&!mFeed&&!showLanding&&!tickerPage)?" nexo-hidehome":"")} style={{maxWidth:(page===2||page===6||page===7||page===9||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?1400:1200,margin:"0 auto",padding:"12px 16px",display:(showLanding&&page===0)?"none":"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,alignItems:"start",width:"100%",boxSizing:"border-box"}}>
+        <div className="nexo-left-sidebar" style={{display:(page===2||page===6||page===7||page===9||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}><LeftSidebar user={user} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} lang={lang} onlineUsers={onlineUsers} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);}} onLogout={async()=>{
           // 1. Limpiar estado React inmediatamente (UX instantánea)
           saveUser(null);
           setIsPremium(false);
@@ -30512,8 +30512,8 @@ export default function App(){
         }}
         onUserUpdate={(updated)=>saveUser(updated)}
 /></div>
-        <div style={{gridColumn:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
-        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}>
+        <div style={{gridColumn:(page===2||page===6||page===7||page===9||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"1 / -1":undefined}}>{renderPage()}</div>
+        <div className="nexo-sidebar" style={{display:(page===2||page===6||page===7||page===9||page===10||page===19||page===20||page===35||page===36||page===37||page===38||page===41||page===42||page===43||page===44||page===45||page===99)?"none":undefined}}>
           <Sidebar user={user} following={following} onFollow={toggleFollow} onProfile={setProfUser} onNeedAuth={()=>setAuth("register")} onAI={()=>setShowAI(true)} lang={lang} posts={posts} isPremium={effectivePremium} onUpgrade={openPaywall}/>
           {/* ── WIDGETS SIDEBAR ── */}
           <div style={{marginTop:16}}>
