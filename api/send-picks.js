@@ -125,20 +125,23 @@ function signalBadge(score) {
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 
 async function getSubscribers() {
-  // Las claves nuevas (sb_secret_/sb_publishable_) NO son JWT: si se mandan en
-  // Authorization: Bearer, PostgREST falla al parsearlas y degrada a rol anon (RLS -> 0 filas).
-  // Solo las legacy (eyJ...) deben ir en Authorization. Las nuevas van solo en apikey.
+  // Lee via funcion SECURITY DEFINER gateada por secreto (no depende de service key en Vercel).
   const isJwt = SUPABASE_KEY.startsWith("eyJ");
-  const headers = isJwt
-    ? { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-    : { apikey: SUPABASE_KEY };
-  const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/newsletter_subscribers?select=email&order=created_at.asc`,
-    { headers }
-  );
-  if (!r.ok) throw new Error(`Supabase ${r.status}: ${await r.text()}`);
+  const headers = {
+    apikey: SUPABASE_KEY,
+    "Content-Type": "application/json",
+    ...(isJwt ? { Authorization: `Bearer ${SUPABASE_KEY}` } : {}),
+  };
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_newsletter_emails`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ p_secret: API_SECRET }),
+  });
+  if (!r.ok) throw new Error(`Supabase RPC ${r.status}: ${await r.text()}`);
   const rows = await r.json();
-  return rows.map(row => row.email).filter(Boolean);
+  return (Array.isArray(rows) ? rows : [])
+    .map(x => (typeof x === "string" ? x : (x && (x.email || x.get_newsletter_emails))))
+    .filter(Boolean);
 }
 
 // ── EMAIL SENDER ──────────────────────────────────────────────────────────────
