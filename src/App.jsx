@@ -27181,7 +27181,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
       </div>
 
       {/* Today's AI Pick */}
-      <div style={{background:"#06080e",borderRadius:24,padding:"20px 20px 18px",marginBottom:18,position:"relative",overflow:"hidden"}}>
+      <div style={{background:"#06080e",borderRadius:20,padding:"14px 16px 13px",marginBottom:14,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(420px 200px at 88% -20%, rgba(10,92,255,0.28), transparent 70%)",pointerEvents:"none"}}/>
         {/* header row */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:1}}>
@@ -27194,14 +27194,14 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
           <span style={{fontSize:11,color:"#7a8398"}}>{isMarketOpen?"Live":"Pre-market"}</span>
         </div>
         {/* ticker */}
-        <div style={{position:"relative",zIndex:1,marginTop:16}}>
+        <div style={{position:"relative",zIndex:1,marginTop:11}}>
           <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:8}}>
             <div style={{fontSize:12,color:"#8a93a6",fontWeight:600,letterSpacing:"0.03em"}}>{pick.ticker}</div>
             {(function(){ var d=liveP(pick.ticker,0,0); if(d.price>0) return <div style={{fontSize:13,fontWeight:700,color:d.chg>=0?"#27d391":"#f87171"}}>{d.price>=1000?(d.price/1000).toFixed(1)+"k":d.price.toFixed(2)} <span style={{fontSize:11}}>{d.chg>=0?"+":""}{d.chg.toFixed(2)}%</span></div>; return null; })()}
           </div>
-          <div style={{fontSize:28,fontWeight:800,letterSpacing:"-0.03em",color:"#fff",lineHeight:1.15}}>{pick.nombre}</div>
-          {(function(){ try{ var e=parseFloat(String(pick.entrada).replace(/[^0-9.]/g,"")); var t=parseFloat(String(pick.target).replace(/[^0-9.]/g,"")); if(e>0&&t>0){ var up=Math.round((t-e)/e*100); if(up>0) return <div style={{marginTop:7,display:"flex",alignItems:"baseline",gap:7}}><span style={{fontSize:26,fontWeight:900,color:"#27d391",letterSpacing:"-0.02em",lineHeight:1}}>+{up}%</span><span style={{fontSize:12,color:"#8a93a6",fontWeight:600}}>{isEN?"upside to target":"potencial al objetivo"}</span></div>; } }catch(_){} return null; })()}
-          <div style={{marginTop:8,display:"inline-flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:"#27d391"}}>
+          <div style={{fontSize:22,fontWeight:800,letterSpacing:"-0.03em",color:"#fff",lineHeight:1.15}}>{pick.nombre}</div>
+          {(function(){ try{ var e=parseFloat(String(pick.entrada).replace(/[^0-9.]/g,"")); var t=parseFloat(String(pick.target).replace(/[^0-9.]/g,"")); if(e>0&&t>0){ var up=Math.round((t-e)/e*100); if(up>0) return <div style={{marginTop:5,display:"flex",alignItems:"baseline",gap:7}}><span style={{fontSize:21,fontWeight:900,color:"#27d391",letterSpacing:"-0.02em",lineHeight:1}}>+{up}%</span><span style={{fontSize:12,color:"#8a93a6",fontWeight:600}}>{isEN?"upside to target":"potencial al objetivo"}</span></div>; } }catch(_){} return null; })()}
+          <div style={{marginTop:6,display:"inline-flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:"#27d391"}}>
             <span style={{display:"inline-flex",gap:2,alignItems:"flex-end"}}>
               {[7,9,12,15].map(function(h,i){ return <span key={i} style={{width:3,height:h,background:"#27d391",borderRadius:2,display:"inline-block"}}/>; })}
             </span>
@@ -27209,10 +27209,10 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
           </div>
         </div>
         {/* thesis */}
-        <p style={{position:"relative",zIndex:1,marginTop:12,fontSize:13.5,lineHeight:1.5,color:"#c9ced9"}}>{pickThesis}</p>
+        <p style={{position:"relative",zIndex:1,marginTop:9,fontSize:12.5,lineHeight:1.45,color:"#c9ced9"}}>{pickThesis}</p>
         {/* entry / target / stop — todo sobre la acción */}
         {(pick.entrada||pick.target||pick.stop_loss) && (
-          <div style={{position:"relative",zIndex:1,marginTop:12,display:"flex",gap:7,flexWrap:"wrap"}}>
+          <div style={{position:"relative",zIndex:1,marginTop:9,display:"flex",gap:7,flexWrap:"wrap"}}>
             {pick.entrada && <span style={{fontSize:11,fontWeight:700,color:"#bcd0ff",background:"rgba(10,92,255,0.16)",border:"1px solid rgba(10,92,255,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Entry":"Entrada"} {pick.entrada}</span>}
             {pick.target && <span style={{fontSize:11,fontWeight:700,color:"#27d391",background:"rgba(39,211,145,0.12)",border:"1px solid rgba(39,211,145,0.30)",borderRadius:8,padding:"4px 9px"}}>{isEN?"Target":"Objetivo"} {pick.target}</span>}
             {pick.stop_loss && <span style={{fontSize:11,fontWeight:700,color:"#f87171",background:"rgba(248,113,113,0.12)",border:"1px solid rgba(248,113,113,0.30)",borderRadius:8,padding:"4px 9px"}}>Stop {pick.stop_loss}</span>}
@@ -27220,7 +27220,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
           </div>
         )}
         {/* CTA — 1º la acción, 2º el robot IA */}
-        <div style={{position:"relative",zIndex:1,marginTop:16,display:"flex",alignItems:"center",gap:9,flexWrap:"wrap"}}>
+        <div style={{position:"relative",zIndex:1,marginTop:11,display:"flex",alignItems:"center",gap:9,flexWrap:"wrap"}}>
           <button onClick={function(){ if(!isPremium){ onPremium&&onPremium(); return; } onTicker?onTicker(pick.ticker):onNavigate&&onNavigate(51); }}
             style={{display:"inline-flex",alignItems:"center",gap:8,background:"#fff",color:"#06080e",fontSize:13.5,fontWeight:700,padding:"10px 15px",borderRadius:11,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
             {isPremium?(isEN?"See full analysis":"Ver análisis completo"):(isEN?"Unlock full analysis":"Desbloquear análisis")}
@@ -27232,7 +27232,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
             {isEN?"Ask the AI":"Pregunta a la IA"}
           </button>
         </div>
-        <div style={{position:"relative",zIndex:1,marginTop:9,fontSize:10,color:"#5e6677",letterSpacing:"0.02em"}}>{isEN?"AI signal · not financial advice":"Señal IA · no es consejo financiero"}</div>
+        <div style={{position:"relative",zIndex:1,marginTop:7,fontSize:10,color:"#5e6677",letterSpacing:"0.02em"}}>{isEN?"AI signal · not financial advice":"Señal IA · no es consejo financiero"}</div>
       </div>
 
       {/* Market Pulse */}
