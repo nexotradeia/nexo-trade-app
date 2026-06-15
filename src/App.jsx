@@ -607,6 +607,8 @@ const generateAvatarSVG = (id, emoji, color, style, size=80) => {
 };
 // +3000 tickers — S&P500, Nasdaq, NYSE, Crypto, ETFs, LatAm ADRs
 const SEARCH_TICKERS = [
+  // ── IPOs recientes / destacados ──────────────────────────────
+  "SPCX",
   // ── Mega-cap tech ──────────────────────────────────────────────
   "AAPL","MSFT","GOOGL","GOOG","AMZN","NVDA","TSLA","META","AVGO","ORCL",
   "ADBE","CRM","INTC","AMD","QCOM","TXN","MU","AMAT","LRCX","KLAC","MRVL",
@@ -17917,6 +17919,7 @@ const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
 
 // Nombres de empresa para los tickers más comunes
 const TICKER_NAMES={
+  SPCX:"SpaceX",
   NVDA:"NVIDIA",AAPL:"Apple",TSLA:"Tesla",MSFT:"Microsoft",META:"Meta",
   AMZN:"Amazon",GOOGL:"Alphabet",PLTR:"Palantir",AMD:"AMD",SPY:"S&P 500 ETF",
   SMCI:"Super Micro",COIN:"Coinbase",QQQ:"Nasdaq ETF",
