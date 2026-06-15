@@ -11386,7 +11386,7 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
             ⛶ {isEN?"Open Full Terminal":"Abrir Terminal Completa"}
           </button>
         </div>
-        <PaperTrading user={user} lang={lang}/>
+        <PaperTradingFullPage user={user} lang={lang} embedded={true}/>
       </div>
 
       <div id="pt-sec-riesgo" style={{scrollMarginTop:72,marginBottom:30}}><RiskRewardCalc lang={lang}/></div>
@@ -11784,7 +11784,7 @@ const TV_SYM_MAP={
 };
 const PAPER_CRYPTO_FULL={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT"};
 
-function PaperTradingFullPage({ user, onBack, lang="es" }){
+function PaperTradingFullPage({ user, onBack, lang="es", embedded=false }){
   const isEN=lang==="en";
   const PAPER_KEY = `nexotrade_paper_${user?.id||"guest"}`;
   const loadPF = ()=>{ try{ const s=localStorage.getItem(PAPER_KEY); return s?JSON.parse(s):{cash:100000,positions:{},trades:[]}; }catch{ return {cash:100000,positions:{},trades:[]}; } };
@@ -11890,14 +11890,14 @@ function PaperTradingFullPage({ user, onBack, lang="es" }){
   const INTERVALS=[["1","1m"],["5","5m"],["15","15m"],["60","1h"],["240","4h"],["D","1D"],["W","1W"]];
 
   return(
-    <div style={{display:"flex",flexDirection:"column",height:"calc(100dvh - 58px)",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:embedded?"78vh":"calc(100dvh - 58px)",minHeight:embedded?560:undefined,borderRadius:embedded?14:0,border:embedded?"1px solid rgba(255,255,255,0.08)":"none",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
 
       {/* Toast */}
       {msg&&<div style={{position:"fixed",top:70,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:msg.ok?"#16A34A":"#DC2626",color:"#fff",padding:"10px 22px",borderRadius:12,fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.4)",whiteSpace:"nowrap"}}>{msg.text}</div>}
 
       {/* ── TOP BAR ── */}
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 16px",background:"#141722",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0,flexWrap:"wrap"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,padding:"6px 12px",color:"#94A3B8",fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"← Back":"← Volver"}</button>
+        {!embedded&&<button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,padding:"6px 12px",color:"#94A3B8",fontSize:12,fontWeight:700,cursor:"pointer"}}>{isEN?"← Back":"← Volver"}</button>}
         <div style={{width:1,height:20,background:"rgba(255,255,255,0.08)"}}/>
         <span style={{fontWeight:900,fontSize:15,color:"#00E58F",letterSpacing:0.5}}>🎮 Paper Trading</span>
         <span style={{fontSize:10,background:"rgba(0,229,143,0.1)",color:"#00E58F",border:"1px solid rgba(0,229,143,0.2)",borderRadius:20,padding:"2px 8px",fontWeight:700}}>SIMULADO</span>
