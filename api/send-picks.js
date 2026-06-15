@@ -347,6 +347,16 @@ export default async function handler(req, res) {
   const secret = req.query?.secret || req.headers?.["x-secret"];
   if (secret !== API_SECRET) return res.status(401).json({ error: "Unauthorized" });
 
+  if (req.query?.debug === "1") {
+    try {
+      const isJwt = (SUPABASE_KEY||"").startsWith("eyJ");
+      const headers = { apikey: SUPABASE_KEY, "Content-Type": "application/json", ...(isJwt ? { Authorization: `Bearer ${SUPABASE_KEY}` } : {}) };
+      const rr = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_newsletter_emails`, { method: "POST", headers, body: JSON.stringify({ p_secret: API_SECRET }) });
+      const bb = await rr.text();
+      return res.status(200).json({ debug:true, keyPrefix:(SUPABASE_KEY||"").slice(0,16), keyLen:(SUPABASE_KEY||"").length, isJwt, hasBrevo: !!BREVO_KEY, apiSecret: API_SECRET, rpcStatus: rr.status, rpcBody: bb.slice(0,400) });
+    } catch (e) { return res.status(200).json({ debug:true, error:String(e).slice(0,300) }); }
+  }
+
   const weekDate = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
   // 1. Fetch market overview
