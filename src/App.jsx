@@ -11363,7 +11363,7 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
   ];
 
   return(
-    <div>
+    <div style={{maxWidth:1180,margin:"0 auto",width:"100%"}}>
       <div style={{marginBottom:20}}>
         <h2 style={{display:"flex",alignItems:"center",gap:8,color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>{isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}</h2>
         <p style={{color:"#64748B",fontSize:13}}>{isEN?"Simulate trades risk-free + exclusive PREMIUM calculators for professional traders":"Simula trades sin riesgo + herramientas PREMIUM exclusivas para traders profesionales"}</p>
