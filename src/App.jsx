@@ -27183,6 +27183,13 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
         </div>
       </div>
 
+      {/* Atajos rapidos — visibilidad a secciones clave */}
+      <div style={{display:"flex",gap:8,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",margin:"-6px 0 18px",paddingBottom:2}}>
+        {[["Stock Pick",3],["Watchlist",38],["Track Record",51],["Global Radar",44]].map(q=>(
+          <button key={q[0]} onClick={()=>onNavigate&&onNavigate(q[1])} style={{flexShrink:0,background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:999,padding:"8px 15px",fontSize:12.5,fontWeight:700,color:"#0F4C81",cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>{q[0]}</button>
+        ))}
+      </div>
+
       {/* Today's AI Pick */}
       <div style={{background:"#06080e",borderRadius:20,padding:"14px 16px 13px",marginBottom:14,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(420px 200px at 88% -20%, rgba(10,92,255,0.28), transparent 70%)",pointerEvents:"none"}}/>
