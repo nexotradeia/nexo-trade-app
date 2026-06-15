@@ -22408,7 +22408,7 @@ function RadarGlobalPage({lang="es",onBack}){
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
-    <div style={{width:'100%',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,...(mob?{display:'flex',flexDirection:'column',overflowY:'auto',height:'calc(100vh - 112px)',overscrollBehavior:'contain',WebkitOverflowScrolling:'touch'}:{display:'grid',height:'calc(100vh - 52px)',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'})}}>
+    <div style={{width:'100%',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,...(mob?{width:'calc(100% + 32px)',boxSizing:'border-box',display:'flex',flexDirection:'column',overflowY:'auto',height:'calc(100vh - 112px)',overscrollBehavior:'contain',WebkitOverflowScrolling:'touch'}:{display:'grid',height:'calc(100vh - 52px)',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'})}}>
       <style>{`@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
       {/* ── TOPBAR ── */}
       <div style={{...(mob?{}:{gridColumn:'1/-1'}),flexShrink:0,height:mob?44:48,background:'rgba(6,12,20,.95)',backdropFilter:'blur(20px)',borderBottom:`1px solid ${C.br}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:mob?'0 8px':'0 20px',gap:mob?4:12,zIndex:100}}>
