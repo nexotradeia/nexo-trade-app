@@ -4041,7 +4041,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
   const search = (query) => {
     setLoading(true);
     // Si no hay búsqueda, usar un término aleatorio para que se vean GIFs nuevos cada vez
-    const SEEDS = ["money","cash","rich","bull market","stocks up","crypto moon","celebrate","diamond hands","stonks","to the moon","bitcoin","wealth","trading","profits"];
+    const SEEDS = ["money","cash","rich","bull market","stocks up","crypto moon","celebrate","diamond hands","stonks","to the moon","bitcoin","wealth","trading","profits","money rain","make it rain","millionaire","wall street","gold bars","stock market","cash money","get rich","payday","jackpot","money money money","rich vibes","counting money"];
     const term = query.trim() || SEEDS[Math.floor(Math.random()*SEEDS.length)];
     const url = `/api/gifs?q=${encodeURIComponent(term)}`;
     fetch(url)
@@ -4052,7 +4052,7 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
 
   useEffect(()=>{ if(tab==="gif") search(""); },[tab]);
 
-  const TAGS = ["💰 money","💵 cash","🤑 rich","💸 dollars","📈 bull","📉 bear","🚀 moon","💎 hodl","crypto","🎉 celebrate"];
+  const TAGS = ["💰 money","💵 cash","🤑 rich","💸 dollars","📈 bull","📉 bear","📊 stocks","💹 stonks","🏦 wallstreet","🤑 profit","🪙 bitcoin","🥇 gold","💰 millionaire","🚀 moon","💎 hodl","crypto","🎉 celebrate"];
   const tabs = [{k:"gif",l:"GIF 🎞️"},{k:"emoji",l:"Emojis 😎"},{k:"reaction",l:"Frases ⚡"},{k:"sticker",l:"Stickers 🎨"}];
 
   return(
