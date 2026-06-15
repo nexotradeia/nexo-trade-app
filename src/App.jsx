@@ -11890,7 +11890,7 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false }){
   const INTERVALS=[["1","1m"],["5","5m"],["15","15m"],["60","1h"],["240","4h"],["D","1D"],["W","1W"]];
 
   return(
-    <div style={{display:"flex",flexDirection:"column",height:embedded?"78vh":"calc(100dvh - 58px)",minHeight:embedded?560:undefined,borderRadius:embedded?14:0,border:embedded?"1px solid rgba(255,255,255,0.08)":"none",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:embedded?"calc(100vh - 90px)":"calc(100dvh - 58px)",minHeight:embedded?640:undefined,borderRadius:embedded?14:0,border:embedded?"1px solid rgba(255,255,255,0.08)":"none",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
 
       {/* Toast */}
       {msg&&<div style={{position:"fixed",top:70,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:msg.ok?"#16A34A":"#DC2626",color:"#fff",padding:"10px 22px",borderRadius:12,fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.4)",whiteSpace:"nowrap"}}>{msg.text}</div>}
