@@ -10585,6 +10585,10 @@ function TrackRecordPage({lang="es"}){
 
 function JoinCard({ onAuth, lang="es" }){
   const isEN = lang==="en";
+  const [btc,setBtc]=useState(null);
+  useEffect(()=>{let c=false;const ld=()=>fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true").then(r=>r.ok?r.json():null).then(j=>{if(!c&&j&&j.bitcoin)setBtc(j.bitcoin);}).catch(()=>{});ld();const iv=setInterval(ld,60000);return()=>{c=true;clearInterval(iv);};},[]);
+  const btcStr=(btc&&typeof btc.usd==="number")?Math.round(btc.usd).toLocaleString("en-US"):"62,860";
+  const btcUp=(btc&&typeof btc.usd_24h_change==="number")?btc.usd_24h_change>=0:true;
   return(
     <div className="nexo-jc-v4" style={{marginBottom:14}}>
       {/* ── HERO ── */}
@@ -10637,7 +10641,7 @@ function JoinCard({ onAuth, lang="es" }){
             <span style={{opacity:.3}}>·</span>
             <span><b style={{color:"#fff"}}>QQQ</b> <span style={{color:"#22C55E",fontWeight:700}}>▲714.00</span></span>
             <span style={{opacity:.3}}>·</span>
-            <span><b style={{color:"#fff"}}>BTC</b> <span style={{color:"#22C55E",fontWeight:700}}>▲62,860</span></span>
+            <span><b style={{color:"#fff"}}>BTC</b> <span style={{color:btcUp?"#22C55E":"#F87171",fontWeight:700}}>{btcUp?"▲":"▼"}{btcStr}</span></span>
             <span style={{opacity:.3}}>·</span>
             <span><b style={{color:"#fff"}}>NVDA</b> <span style={{color:"#22C55E",fontWeight:700}}>▲202.10</span></span>
             <span style={{opacity:.3}}>·</span>
@@ -10645,7 +10649,7 @@ function JoinCard({ onAuth, lang="es" }){
             <span style={{opacity:.3}}>·</span>
             <span><b style={{color:"#fff"}}>QQQ</b> <span style={{color:"#22C55E",fontWeight:700}}>▲714.00</span></span>
             <span style={{opacity:.3}}>·</span>
-            <span><b style={{color:"#fff"}}>BTC</b> <span style={{color:"#22C55E",fontWeight:700}}>▲62,860</span></span>
+            <span><b style={{color:"#fff"}}>BTC</b> <span style={{color:btcUp?"#22C55E":"#F87171",fontWeight:700}}>{btcUp?"▲":"▼"}{btcStr}</span></span>
           </div>
         </div>
       </div>
@@ -10702,6 +10706,8 @@ function JoinCard({ onAuth, lang="es" }){
 function MarketsStrip({ onNav }){
   const lp = useContext(PriceCtx);
   const registerPx = useContext(PriceRegisterCtx);
+  const [cg,setCg]=useState(null);
+  useEffect(()=>{let c=false;const ld=()=>fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true").then(r=>r.ok?r.json():null).then(j=>{if(!c&&j&&j.bitcoin)setCg(j.bitcoin);}).catch(()=>{});ld();const iv=setInterval(ld,60000);return()=>{c=true;clearInterval(iv);};},[]);
   const ITEMS = [
     {s:"SPX",  n:"S&P 500",  live:"SPY",  p:"7,384", fallC:1.25, bg:"#DBEAFE", fg:"#1D4ED8", letter:"S", idx:2},
     {s:"QQQ",  n:"Nasdaq ETF",live:"QQQ", p:"714.00",fallC:2.33, bg:"#D1FAE5", fg:"#065F46", letter:"Q", idx:2},
@@ -10717,7 +10723,7 @@ function MarketsStrip({ onNav }){
   useEffect(()=>{ try{ registerPx && registerPx(ITEMS.map(i=>i.live)); }catch(_){ } },[]);
   const fmtP = (v)=> v>=1000 ? v.toLocaleString("en-US",{maximumFractionDigits:0}) : v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
   const cards = ITEMS.map(it=>{
-    const live = lp && lp[it.live];
+    const live = (it.live==="BTC"&&cg&&typeof cg.usd==="number") ? {price:cg.usd,change:cg.usd_24h_change} : (lp && lp[it.live]);
     const chg = (live && typeof live.change==="number") ? live.change : it.fallC;
     const up = chg>=0;
     let priceStr = it.p;
