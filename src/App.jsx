@@ -28439,6 +28439,7 @@ export default function App(){
   const [posts,setPosts]       = useState([]);
   const [newPostId,setNewPostId]= useState(null);
   const [page,setPage]         = useState(()=>{ try{ const p=parseInt(localStorage.getItem("nexo_page")||"0"); return isNaN(p)?0:p; }catch{return 0;} });
+  const [backTo,setBackTo]      = useState(null);
   const [mFeed,setMFeed]       = useState(false); // móvil: false=Home dashboard, true=Feed social
   const [sent,setSent]         = useState("all");
   const [showFeedFilters,setShowFeedFilters] = useState(false); // dropdown de filtros extra en móvil
@@ -29081,12 +29082,12 @@ export default function App(){
     if(page===3) return <AccionesVIPPage isPremium={effectivePremium} onNeedPremium={openPaywall} isAdmin={ADMIN_EMAILS.includes(user?.email||'')} lang={lang}/>;
     if(page===5) return <NoticiasPage lang={lang}/>;
     if(page===6) return <EarningsPage lang={lang}/>;
-    if(page===7) return <MarketsPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} lang={lang}/>;
+    if(page===7) return <MarketsPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setBackTo(page);setPage(idx);setShowLanding(false);}} lang={lang}/>;
     if(page===7777) return <TrendingPage posts={posts} lang={lang}/>;{/* TrendingPage preserved but moved off main nav */}
-    if(page===8) return <ProPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onNeedAuth={()=>setAuth("login")} onSettings={()=>setShowSettings(true)} lang={lang}/>;
+    if(page===8) return <ProPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setBackTo(page);setPage(idx);setShowLanding(false);}} onNeedAuth={()=>setAuth("login")} onSettings={()=>setShowSettings(true)} lang={lang}/>;
     if(page===808) return <PremiumPage user={user} isPremium={effectivePremium} isPro={isPro} onSubscribe={(pg)=>{if(pg){setPage(pg);setShowLanding(false);}}} onNeedAuth={()=>setAuth("login")} lang={lang}/>;{/* old PremiumPage preserved */}
     if(page===9) return <VipToolsPage isPremium={effectivePremium} onNeedPremium={openPaywall} posts={posts} user={user} lang={lang} onNavigate={(idx)=>{setPage(idx);}}/>;
-    if(page===10) return (<><AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}} onAI={(ticker)=>{if(ticker){setAiInitQuery("Give me a complete investment analysis for $"+ticker+": fundamentals, recent performance, analyst consensus, and your buy/hold/sell recommendation. Be concise.");}setShowAI(true);}} lang={lang}/>{showAI&&<AIAssistant lang={lang} onClose={()=>{setShowAI(false);setAiInitQuery("");}} initialQuery={aiInitQuery}/>}</>);
+    if(page===10) return (<><AIPage user={user} isPremium={effectivePremium} onNavigate={(idx)=>{setBackTo(page);setPage(idx);setShowLanding(false);}} onAI={(ticker)=>{if(ticker){setAiInitQuery("Give me a complete investment analysis for $"+ticker+": fundamentals, recent performance, analyst consensus, and your buy/hold/sell recommendation. Be concise.");}setShowAI(true);}} lang={lang}/>{showAI&&<AIAssistant lang={lang} onClose={()=>{setShowAI(false);setAiInitQuery("");}} initialQuery={aiInitQuery}/>}</>);
     if(page===11) return <WebinarsPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===12) return <AcademiaPage user={user} isPremium={effectivePremium} onNeedAuth={()=>setAuth("register")} onGoVip={()=>setPage(8)} lang={lang}/>;
     if(page===14) return <EconCalendarPage lang={lang}/>;
@@ -30458,7 +30459,7 @@ export default function App(){
             <MobileHomeDashboard
               user={user}
               isPremium={effectivePremium}
-              onNavigate={(idx)=>{setPage(idx);setShowLanding(false);}}
+              onNavigate={(idx)=>{setBackTo(page);setPage(idx);setShowLanding(false);}}
               onTicker={(tk)=>{setTickerPage(tk);setShowLanding(false);window.scrollTo({top:0,behavior:"smooth"});}}
               onOpenAI={(ticker)=>{setAiInitQuery("Give me a complete investment analysis for $"+ticker+": current price context, key fundamentals, recent performance, analyst consensus, and your buy/hold/sell recommendation. Be concise.");setShowAI(true);}}
               onPremium={openPaywall}
@@ -30691,6 +30692,7 @@ export default function App(){
       <MobileNavDrawer open={showMobileMenu} onClose={()=>setShowMobileMenu(false)} lang={lang} isPremium={effectivePremium} onAI={()=>setShowAI(true)} onPremium={openPaywall} onNavigate={(idx)=>{setPage(idx);setShowLanding(false);setTickerFilter(null);window.scrollTo({top:0,behavior:"smooth"});}}/>
 
       {/* ── BOTTOM NAV MÓVIL — SVG line icons, visible solo en móvil vía CSS ── */}
+      {backTo!==null && <button className="nexo-show-mobile" onClick={()=>{setPage(backTo);setBackTo(null);try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){}}} style={{position:"fixed",top:100,left:10,zIndex:1250,background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:999,padding:"7px 13px 7px 11px",fontSize:13,fontWeight:700,color:"#0F4C81",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",cursor:"pointer",fontFamily:"inherit"}}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:"-3px",marginRight:5}}><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Atrás</button>}
       <div className="nexo-bottom-nav" style={{display:"none",zIndex:1300,background:"var(--c-surface)",borderTop:"1px solid var(--c-border)",boxShadow:"0 -4px 20px rgba(0,0,0,0.10)",justifyContent:"space-around"}}>
         {[
           {
@@ -30731,7 +30733,7 @@ export default function App(){
             gold:true
           },
         ].map((b,i)=>(
-          <button key={i} onClick={b.on} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.active?(b.gold?"#C8901F":"#0F4C81"):"#94A3B8",fontFamily:"inherit",padding:0,transition:"color 0.15s"}}>
+          <button key={i} onClick={()=>{setBackTo(null);b.on();}} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:b.active?(b.gold?"#C8901F":"#0F4C81"):"#94A3B8",fontFamily:"inherit",padding:0,transition:"color 0.15s"}}>
             {b.svg}
             <span style={{fontSize:9.5,fontWeight:b.active?800:600,letterSpacing:"0.01em"}}>{b.l}</span>
           </button>
