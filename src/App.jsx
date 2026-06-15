@@ -22408,6 +22408,7 @@ function RadarGlobalPage({lang="es",onBack}){
   useEffect(()=>{const fn=()=>setMob(window.innerWidth<700);window.addEventListener('resize',fn);return()=>window.removeEventListener('resize',fn);},[]);
 
   const tbBtn=(active,accent='#00f090')=>({display:'flex',alignItems:'center',gap:5,padding:mob?'3px 7px':'5px 12px',borderRadius:7,border:`1px solid ${active?`rgba(0,240,144,.25)`:C.br2}`,background:active?`rgba(0,240,144,.1)`:C.bg3,fontFamily:MONO2,fontSize:mob?9:10,fontWeight:600,color:active?accent:C.mid,cursor:'pointer',letterSpacing:'.5px'});
+  const tbBtnM=(active,accent='#00f090')=>({flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:3,padding:'9px 2px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.3)':C.br2}`,background:active?'rgba(0,240,144,.12)':C.bg3,fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?accent:C.txt,cursor:'pointer',letterSpacing:'.3px',whiteSpace:'nowrap'});
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
 
   return(
@@ -22430,13 +22431,20 @@ function RadarGlobalPage({lang="es",onBack}){
             <div style={{width:5,height:5,borderRadius:'50%',background:C.grn,boxShadow:`0 0 6px ${C.grn}`,animation:'nexo-pulse 2s ease-in-out infinite'}}/>LIVE · CoinGecko + Finnhub
           </div>
         </div>}
-        <div style={{display:'flex',alignItems:'center',gap:mob?4:6}}>
+        {!mob&&<div style={{display:'flex',alignItems:'center',gap:6}}>
           <button style={tbBtn(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>🌙 Day/Night</button>
           <button style={tbBtn(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>⚡ Flows</button>
           <button style={tbBtn(false)} onClick={refreshGlobe}>↺ Refresh</button>
           <button style={tbBtn(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>📊 Stats</button>
-        </div>
+        </div>}
       </div>
+      {/* ── MOBILE CONTROL BAR: botones legibles y tappables ── */}
+      {mob&&<div style={{flexShrink:0,display:'flex',gap:6,padding:'8px',background:'rgba(6,12,20,.92)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.br}`,zIndex:99}}>
+        <button style={tbBtnM(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>🌙 Day/Night</button>
+        <button style={tbBtnM(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>⚡ Flows</button>
+        <button style={tbBtnM(false)} onClick={refreshGlobe}>↺ Refresh</button>
+        <button style={tbBtnM(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>📊 Stats</button>
+      </div>}
 
       {/* ── LEFT PANEL ── */}
       <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
