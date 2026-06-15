@@ -9495,6 +9495,44 @@ function BondsWidget({lang="es"}){
 }
 
 // ── MARKET OVERVIEW — índices + crypto + commodities en una vista ─────────────
+function NavTickerV4(){
+  const lp=useContext(PriceCtx)||{};
+  const [cg,setCg]=useState(null);
+  useEffect(()=>{
+    let c=false;
+    const ld=()=>fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true")
+      .then(r=>r.ok?r.json():null).then(j=>{if(!c&&j)setCg(j);}).catch(()=>{});
+    ld(); const iv=setInterval(ld,60000); return()=>{c=true;clearInterval(iv);};
+  },[]);
+  const cgMap={BTC:"bitcoin",ETH:"ethereum"};
+  const fmtP=(s,p)=> p>=1000?"$"+Math.round(p).toLocaleString("en-US"):"$"+p.toFixed(2);
+  const BASE=[
+    {s:"ETH",  p:"$1,617",  chg:0.9},
+    {s:"META", p:"$566.41", chg:-0.80},
+    {s:"GOLD", p:"$2,320",  chg:-0.2},
+    {s:"BTC",  p:"$67,240", chg:1.2},
+    {s:"AAPL", p:"$295.38", chg:1.30},
+    {s:"NVDA", p:"$202.10", chg:0.84},
+    {s:"SPY",  p:"$734.52", chg:1.25},
+    {s:"TSLA", p:"$392.32", chg:2.81},
+    {s:"MSFT", p:"$387.69", chg:-2.43},
+  ];
+  const TK=BASE.map(b=>{
+    let price=null,chg=null; const cid=cgMap[b.s];
+    if(cid&&cg&&cg[cid]&&typeof cg[cid].usd==="number"){price=cg[cid].usd;chg=cg[cid].usd_24h_change;}
+    else if(lp[b.s]&&typeof lp[b.s].price==="number"){price=lp[b.s].price;chg=lp[b.s].change;}
+    if(price==null) return {s:b.s,p:b.p,c:(b.chg>=0?"\u25B2":"\u25BC")+Math.abs(b.chg).toFixed(2)+"%",up:b.chg>=0};
+    const cv=typeof chg==="number"?chg:0;
+    return {s:b.s,p:fmtP(b.s,price),c:(cv>=0?"\u25B2":"\u25BC")+Math.abs(cv).toFixed(2)+"%",up:cv>=0};
+  });
+  return [...TK,...TK].map((it,i)=>(
+    <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0,padding:"0 16px"}}>
+      <span style={{fontWeight:800,color:"rgba(255,255,255,0.85)",fontSize:11.5,letterSpacing:0.2}}>{it.s}</span>
+      <span style={{fontSize:11.5,color:"rgba(255,255,255,0.6)"}}>{it.p}</span>
+      <span style={{fontSize:11.5,fontWeight:700,color:it.up?"#22C55E":"#F87171"}}>{it.c}</span>
+    </span>
+  ));
+}
 function MarketOverview({lang="es"}){
   const isEN=lang==="en";
   const lp=useContext(PriceCtx)||{}; // precios en vivo (cripto vía Binance) para no mostrar valores fijos
@@ -9524,6 +9562,14 @@ function MarketOverview({lang="es"}){
     };
     const load=()=>{fetch("/api/prices?tickers="+syms).then(r=>r.json()).then(j=>{if(!c){setD(build(j.prices||{}));setLoading(false);}}).catch(()=>{if(!c){setD(build({}));setLoading(false);}});};
     load(); const iv=setInterval(load,60000); return()=>{c=true;clearInterval(iv);};
+  },[]);
+  // Crypto en vivo via CoinGecko (gratis, sin key, con cambio 24h) — fuente unica para evitar precios fijos/incoherentes
+  const [cg,setCg]=useState(null);
+  useEffect(()=>{
+    let c=false;
+    const ld=()=>fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true")
+      .then(r=>r.ok?r.json():null).then(j=>{if(!c&&j)setCg({BTC:j.bitcoin,ETH:j.ethereum,SOL:j.solana});}).catch(()=>{});
+    ld(); const iv=setInterval(ld,60000); return()=>{c=true;clearInterval(iv);};
   },[]);
   useEffect(()=>{
     if(region==="global") return;
@@ -9594,7 +9640,7 @@ function MarketOverview({lang="es"}){
       {region==="global"
         ? <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:12}}>
             <Section title={"Indices"} rows={d?.indices}/>
-            <Section title="Crypto" rows={(d?.crypto||[]).map(r=>{const q=lp[r.s];return (q&&q.price)?{...r,p:q.price,chg:(typeof q.change==="number"?q.change:r.chg)}:r;})}/>
+            <Section title="Crypto" rows={(d?.crypto||[]).map(r=>{const g=cg&&cg[r.s];if(g&&typeof g.usd==="number")return {...r,p:g.usd,chg:(typeof g.usd_24h_change==="number"?g.usd_24h_change:r.chg)};const q=lp[r.s];return (q&&q.price)?{...r,p:q.price,chg:(typeof q.change==="number"?q.change:r.chg)}:r;})}/>
             <Section title="Commodities" rows={d?.commodities}/>
           </div>
         : (regionRows&&regionRows.length===0)
@@ -30011,23 +30057,7 @@ export default function App(){
       {/* TICKER TAPE v4 — fila estática, sin animación, ítems distribuidos */}
       <div className="nexo-ticker-v4 nexo-hide-mobile">
         <div className="nexo-ticker-v4-track">
-          {(()=>{ const TK=[
-            {s:"ETH",  p:"$1,617",  c:"▲3%",    up:true},
-            {s:"META", p:"$566.41", c:"▼0.80%",  up:false},
-            {s:"GOLD", p:"$2,320",  c:"▼0.2%",   up:false},
-            {s:"BTC",  p:"$67,240", c:"▲1.2%",   up:true},
-            {s:"AAPL", p:"$295.38", c:"▲1.30%",  up:true},
-            {s:"NVDA", p:"$202.10", c:"▲0.84%",  up:true},
-            {s:"SPY",  p:"$734.52", c:"▲1.25%",  up:true},
-            {s:"TSLA", p:"$392.32", c:"▲2.81%",  up:true},
-            {s:"MSFT", p:"$387.69", c:"▼2.43%",  up:false},
-          ]; return [...TK,...TK].map((it,i)=>(
-            <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,flexShrink:0,padding:"0 16px"}}>
-              <span style={{fontWeight:800,color:"rgba(255,255,255,0.85)",fontSize:11.5,letterSpacing:0.2}}>{it.s}</span>
-              <span style={{fontSize:11.5,color:"rgba(255,255,255,0.6)"}}>{it.p}</span>
-              <span style={{fontSize:11.5,fontWeight:700,color:it.up?"#22C55E":"#F87171"}}>{it.c}</span>
-            </span>
-          )); })()}
+          <NavTickerV4/>
         </div>
       </div>
 
