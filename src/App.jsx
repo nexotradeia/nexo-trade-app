@@ -11368,33 +11368,14 @@ function VipToolsPage({ isPremium, onNeedPremium, posts=[], user, lang="es", onN
         <h2 style={{display:"flex",alignItems:"center",gap:8,color:"#F59E0B",fontWeight:900,fontSize:22,marginBottom:4}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>{isEN?"Paper Trading Simulator PREMIUM":"Paper Trading Simulador PREMIUM"}</h2>
         <p style={{color:"#64748B",fontSize:13}}>{isEN?"Simulate trades risk-free + exclusive PREMIUM calculators for professional traders":"Simula trades sin riesgo + herramientas PREMIUM exclusivas para traders profesionales"}</p>
       </div>
-      {/* Accesos rapidos (sticky) — TODAS las funciones se muestran juntas abajo */}
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:24,position:"sticky",top:0,zIndex:20,background:"rgba(11,14,26,0.92)",backdropFilter:"blur(8px)",padding:"10px 0"}}>
-        {TOOLS.map(tb=>(
-          <button key={tb.k} onClick={()=>{setTool(tb.k);try{document.getElementById("pt-sec-"+tb.k)?.scrollIntoView({behavior:"smooth",block:"start"});}catch(_){}}}
-            style={{display:"flex",alignItems:"center",gap:6,background:tool===tb.k?"linear-gradient(135deg,#F59E0B,#0F5E68)":"rgba(255,255,255,0.03)",border:`1.5px solid ${tool===tb.k?"#F59E0B":"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"8px 14px",cursor:"pointer",color:tool===tb.k?"#000":"#94A3B8",fontSize:12,fontWeight:700,transition:"all 0.15s"}}>
-            <span style={{display:"flex",alignItems:"center"}}>{TOOL_ICONS[tb.k]}</span>{tb.label}
-          </button>
-        ))}
+      {/* Todo vive DENTRO del terminal (pestañas del panel). El terminal queda siempre grande. */}
+      <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
+        <button onClick={()=>onNavigate&&onNavigate(43)}
+          style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"9px 18px",fontWeight:800,fontSize:13,color:"#0B0E1A",cursor:"pointer",display:"flex",alignItems:"center",gap:7,boxShadow:"0 4px 16px rgba(0,229,143,0.3)"}}>
+          ⛶ {isEN?"Open Full Terminal":"Abrir Terminal Completa"}
+        </button>
       </div>
-
-      {/* ── TODO EN UNA VISTA: terminal + todas las herramientas, una debajo de otra ── */}
-      <div id="pt-sec-paper" style={{scrollMarginTop:72,marginBottom:30}}>
-        <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
-          <button onClick={()=>onNavigate&&onNavigate(43)}
-            style={{background:"linear-gradient(135deg,#00E58F,#0F4C81)",border:"none",borderRadius:10,padding:"9px 18px",fontWeight:800,fontSize:13,color:"#0B0E1A",cursor:"pointer",display:"flex",alignItems:"center",gap:7,boxShadow:"0 4px 16px rgba(0,229,143,0.3)"}}>
-            ⛶ {isEN?"Open Full Terminal":"Abrir Terminal Completa"}
-          </button>
-        </div>
-        <PaperTradingFullPage user={user} lang={lang} embedded={true}/>
-      </div>
-
-      <div id="pt-sec-riesgo" style={{scrollMarginTop:72,marginBottom:30}}><RiskRewardCalc lang={lang}/></div>
-      <div id="pt-sec-sharpe" style={{scrollMarginTop:72,marginBottom:30}}><SharpeCalc lang={lang}/></div>
-      <div id="pt-sec-racha" style={{scrollMarginTop:72,marginBottom:30}}><WinStreakTracker lang={lang}/></div>
-      <div id="pt-sec-portafolio" style={{scrollMarginTop:72,marginBottom:30}}><PortfolioEvolution lang={lang}/></div>
-      <div id="pt-sec-alertas" style={{scrollMarginTop:72,marginBottom:30}}><PriceAlerts lang={lang}/></div>
-      <div id="pt-sec-exportar" style={{scrollMarginTop:72,marginBottom:30}}><ExportData posts={posts} user={user} lang={lang}/></div>
+      <PaperTradingFullPage user={user} lang={lang} posts={posts} embedded={true}/>
     </div>
   );
 }
@@ -11784,7 +11765,7 @@ const TV_SYM_MAP={
 };
 const PAPER_CRYPTO_FULL={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT",AVAX:"BINANCE:AVAXUSDT"};
 
-function PaperTradingFullPage({ user, onBack, lang="es", embedded=false }){
+function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[] }){
   const isEN=lang==="en";
   const PAPER_KEY = `nexotrade_paper_${user?.id||"guest"}`;
   const loadPF = ()=>{ try{ const s=localStorage.getItem(PAPER_KEY); return s?JSON.parse(s):{cash:100000,positions:{},trades:[]}; }catch{ return {cash:100000,positions:{},trades:[]}; } };
@@ -11978,12 +11959,12 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false }){
         </div>
 
         {/* ── DERECHA: PANEL DE ÓRDENES ── */}
-        <div className="nexo-paper-panel" style={{width:310,background:"#141722",borderLeft:"1px solid rgba(255,255,255,0.06)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
+        <div className="nexo-paper-panel" style={{width:["orden","posiciones","historial"].includes(tab)?310:404,background:"#141722",borderLeft:"1px solid rgba(255,255,255,0.06)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
           {/* Tabs */}
-          <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-            {[["orden",_EN()?"💹 Order":"💹 Orden"],["posiciones",_EN()?"📊 Positions":"📊 Posiciones"],["historial",_EN()?"📋 History":"📋 Historial"]].map(([k,l])=>(
+          <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0,overflowX:"auto",whiteSpace:"nowrap"}}>
+            {[["orden",_EN()?"💹 Order":"💹 Orden"],["posiciones",_EN()?"📊 Positions":"📊 Posiciones"],["historial",_EN()?"📋 History":"📋 Historial"],["riesgo","⚖️ Risk/Reward"],["sharpe","📐 Sharpe"],["racha","⚡ Win Streak"],["portafolio","📈 Portfolio"],["alertas","🔔 Alertas"],["exportar","📤 Export"]].map(([k,l])=>(
               <button key={k} onClick={()=>setTab(k)}
-                style={{flex:1,padding:"10px 4px",border:"none",background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:tab===k?"#00E58F":"#64748B",borderBottom:tab===k?"2px solid #00E58F":"2px solid transparent",transition:"all 0.15s"}}>
+                style={{flex:"0 0 auto",padding:"10px 12px",border:"none",background:"none",cursor:"pointer",fontSize:11,fontWeight:700,whiteSpace:"nowrap",color:tab===k?"#00E58F":"#64748B",borderBottom:tab===k?"2px solid #00E58F":"2px solid transparent",transition:"all 0.15s"}}>
                 {l}
               </button>
             ))}
@@ -12117,6 +12098,13 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false }){
                 )}
               </div>
             )}
+
+            {tab==="riesgo"&&<div style={{overflowX:"auto"}}><RiskRewardCalc lang={lang}/></div>}
+            {tab==="sharpe"&&<div style={{overflowX:"auto"}}><SharpeCalc lang={lang}/></div>}
+            {tab==="racha"&&<div style={{overflowX:"auto"}}><WinStreakTracker lang={lang}/></div>}
+            {tab==="portafolio"&&<div style={{overflowX:"auto"}}><PortfolioEvolution lang={lang}/></div>}
+            {tab==="alertas"&&<div style={{overflowX:"auto"}}><PriceAlerts lang={lang}/></div>}
+            {tab==="exportar"&&<div style={{overflowX:"auto"}}><ExportData posts={posts} user={user} lang={lang}/></div>}
           </div>
         </div>
       </div>
