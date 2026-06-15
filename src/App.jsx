@@ -3853,8 +3853,8 @@ function NewPost({user,onPost,onNeedAuth,lang,defaultTicker=""}){
           </div>}
           <textarea ref={taRef} value={text} onChange={handleTextChange}
             placeholder={isEN?"What do you think of the market? Use $NVDA or @META · Enter to post":"¿Qué piensas del mercado? Usa $NVDA o @META · Enter para publicar"}
-            style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:14.5,padding:"9px 12px",resize:"none",outline:"none",height:58,fontFamily:"inherit",lineHeight:1.5,boxSizing:"border-box",transition:"border-color 0.15s,height 0.15s",minWidth:0}}
-            onInput={e=>{e.target.style.height="58px";e.target.style.height=Math.min(e.target.scrollHeight,150)+"px";}}
+            style={{width:"100%",background:"var(--c-card2)",border:"1px solid var(--c-border)",borderRadius:10,color:"var(--c-text)",fontSize:15,padding:"10px 13px",resize:"none",outline:"none",height:96,fontFamily:"inherit",lineHeight:1.5,boxSizing:"border-box",transition:"border-color 0.15s,height 0.15s",minWidth:0}}
+            onInput={e=>{e.target.style.height="96px";e.target.style.height=Math.min(e.target.scrollHeight,240)+"px";}}
             onFocus={e=>e.target.style.borderColor="rgba(15,76,129,0.4)"}
             onBlur={e=>{e.target.style.borderColor="var(--c-border)";setTimeout(()=>setMentionBox(m=>({...m,open:false})),200);}}
             onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}/>
@@ -4088,9 +4088,9 @@ function GifPicker({onSelect,onClose,onText,lang="es"}){
             );})}
           </div>
           {loading?<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>🎞️ {isEN?"Searching GIFs...":"Buscando GIFs..."}</div>:(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:3,maxHeight:190,overflowY:"auto"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:4,maxHeight:250,overflowY:"auto"}}>
               {gifs.map(g=>(
-                <div key={g.id} style={{borderRadius:6,overflow:"hidden",cursor:"pointer",aspectRatio:"1",background:C.card2||"#f1f5f9",position:"relative"}}
+                <div key={g.id} style={{borderRadius:8,overflow:"hidden",cursor:"pointer",height:94,background:C.card2||"#f1f5f9",position:"relative"}}
                   onClick={()=>onSelect(g.full||g.preview)}>
                   <img src={g.preview} alt={g.title} loading="lazy" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={e=>{e.target.parentElement.style.display="none";}}/>
                 </div>
