@@ -27976,6 +27976,10 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
             {["overview","news","earnings","calendars"].map(t=>(
               <button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>
             ))}
+            <span style={{flexShrink:0,width:1,alignSelf:"stretch",background:HAIR,margin:"4px 2px"}}/>
+            {[["Pre-Market",45],["Crypto",41],["Smart Money",20],["Commodities",18],["Dividends",15],["IPOs",16],["Global Radar",44]].map(q=>(
+              <button key={q[0]} style={{...tabBtn(false),flexShrink:0}} onClick={()=>onNavigate(q[1])}>{q[0]}</button>
+            ))}
           </div>
 
           {/* Region chips */}
