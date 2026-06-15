@@ -12753,7 +12753,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
     <div style={{position:"relative",overflow:"hidden",minHeight:520,background:"rgba(7,11,20,0.98)"}}>
       {/* Preview borrosa de picks reales */}
       <div style={{filter:"blur(5px)",pointerEvents:"none",userSelect:"none",padding:"20px 16px"}}>
-        <div style={{fontWeight:800,color:"#F59E0B",fontSize:13,marginBottom:14}}>⚡ Stock Pick IA — semana del {semana}</div>
+        <div style={{fontWeight:800,color:"#F59E0B",fontSize:13,marginBottom:14,display:"flex",alignItems:"center",gap:7}}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Stock Pick IA — semana del {semana}</span></div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10}}>
           {[...((data.cortoplazo||[]).slice(0,2)),...((data.largoplazo||[]).slice(0,2)),...((data.dividendos||[]).slice(0,1)),...((data.crypto||[]).slice(0,1))].map(p=>(
             <div key={p.ticker} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:14,padding:"14px 16px"}}>
@@ -12881,9 +12881,9 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
 
           {/* Row 2: prices */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:12}}>
-            {[["📥",isEN?"Entry":"Entrada",fmtPrice(p.entrada),"#64748B"],["🎯","Target",fmtPrice(p.target),"#00D26A"],["🛑","Stop",fmtPrice(p.stop_loss),"#FF4D6A"]].map(([ico,lbl,val,col])=>(
+            {[[<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>,isEN?"Entry":"Entrada",fmtPrice(p.entrada),"#64748B"],[<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D26A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.3" fill="#00D26A" stroke="none"/></svg>,"Target",fmtPrice(p.target),"#00D26A"],[<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4D6A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="7.9 2 16.1 2 22 7.9 22 16.1 16.1 22 7.9 22 2 16.1 2 7.9"/><line x1="9" y1="12" x2="15" y2="12"/></svg>,"Stop",fmtPrice(p.stop_loss),"#FF4D6A"]].map(([ico,lbl,val,col])=>(
               <div key={lbl} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:12,padding:"10px 8px",textAlign:"center"}}>
-                <div style={{fontSize:14,marginBottom:2}}>{ico}</div>
+                <div style={{marginBottom:5,display:"flex",justifyContent:"center"}}>{ico}</div>
                 <div style={{fontSize:9,color:"#334155",fontWeight:700,letterSpacing:0.6,textTransform:"uppercase",marginBottom:4}}>{lbl}</div>
                 <div style={{fontFamily:"monospace",fontWeight:800,color:col,fontSize:14}}>{val}</div>
               </div>
@@ -12893,7 +12893,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
           {/* Row 3: R:R badge + analysis */}
           <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
             {rr&&<div style={{flexShrink:0,background:`linear-gradient(135deg,${th.from}20,${th.to}10)`,border:`1px solid ${th.from}40`,borderRadius:8,padding:"4px 8px",fontSize:10,fontWeight:800,color:th.from,whiteSpace:"nowrap"}}>R:R {rr}x</div>}
-            <div style={{fontSize:12,color:"#64748B",lineHeight:1.6,flex:1}}>💡 {isEN?(p.razonEn||p.razon_en||p.razon):p.razon}</div>
+            <div style={{fontSize:12,color:"#64748B",lineHeight:1.6,flex:1,display:"flex",gap:7,alignItems:"flex-start"}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:2}}><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg><span>{isEN?(p.razonEn||p.razon_en||p.razon):p.razon}</span></div>
           </div>
         </div>
       </div>
@@ -12944,7 +12944,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#00D26A",display:"inline-block",animation:"pulse 2s infinite"}}/>EN VIVO
               </span>
             </div>
-            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5}}>🧠 Stock Pick IA · Semana {new Date().toLocaleDateString("es",{day:"numeric",month:"short"})}</h2>
+            <h2 style={{color:"#F1F5F9",fontWeight:900,fontSize:22,margin:"0 0 3px",letterSpacing:-0.5,display:"flex",alignItems:"center",gap:10}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,opacity:0.92}}><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg><span>Stock Pick IA · Semana {new Date().toLocaleDateString("es",{day:"numeric",month:"short"})}</span></h2>
             <div style={{fontSize:11,color:"#475569"}}>{isEN?"Algorithmic selection + fundamental analysis · Wall Street consensus":"Selección algorítmica + análisis fundamental · Wall Street consensus"}</div>
           </div>
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
@@ -12976,19 +12976,19 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
       ) : (
       <>
       <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(139,92,246,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="⚡" title={isEN?"Short Term":"Corto Plazo"} sub={isEN?"1-4 week horizon · Momentum & technical":"Horizonte 1-4 semanas · Momentum y técnico"} color="#F59E0B"/>
+        <SectionTitle icon={<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>} title={isEN?"Short Term":"Corto Plazo"} sub={isEN?"1-4 week horizon · Momentum & technical":"Horizonte 1-4 semanas · Momentum y técnico"} color="#F59E0B"/>
         {data.corto.map((p,i)=><PickCard key={p.ticker} p={p} idx={i}/>)}
       </div>
       <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(6,182,212,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="🏦" title="Largo Plazo" sub="Horizonte 6-18 meses · Valor y fundamentales" color="#06B6D4"/>
+        <SectionTitle icon={<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>} title="Largo Plazo" sub="Horizonte 6-18 meses · Valor y fundamentales" color="#06B6D4"/>
         {data.largo.map((p,i)=><PickCard key={p.ticker} p={p} idx={i+3}/>)}
       </div>
       <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(245,158,11,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="💰" title="Dividendos" sub="Ingresos pasivos · Alta rentabilidad por dividendo" color="#F59E0B"/>
+        <SectionTitle icon={<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.3a2.6 2.6 0 0 0-2.5-1.3c-1.4 0-2.5.8-2.5 1.9s1.1 1.7 2.5 2 2.5.9 2.5 2-1.1 2-2.5 2a2.6 2.6 0 0 1-2.5-1.3"/><line x1="12" y1="6" x2="12" y2="7.4"/><line x1="12" y1="16.6" x2="12" y2="18"/></svg>} title="Dividendos" sub="Ingresos pasivos · Alta rentabilidad por dividendo" color="#F59E0B"/>
         {data.dividendos.map(p=><DivCard key={p.ticker} p={p}/>)}
       </div>
       <div style={{background:"rgba(255,255,255,0.01)",border:"1px solid rgba(247,147,26,0.12)",borderRadius:20,padding:"20px",marginBottom:16}}>
-        <SectionTitle icon="₿" title="Crypto" sub="Alta volatilidad · Solo con capital que puedas perder" color="#F7931A"/>
+        <SectionTitle icon={<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F7931A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4zM9.5 12h4.6a2 2 0 0 1 0 4H9.5zM9.5 8v8M11.3 6.4v1.6M11.3 16v1.6M13.4 6.4v1.6M13.4 16v1.6"/></svg>} title="Crypto" sub="Alta volatilidad · Solo con capital que puedas perder" color="#F7931A"/>
         {data.crypto.map((p,i)=><PickCard key={p.ticker} p={p} idx={i+7}/>)}
       </div>
       </>
