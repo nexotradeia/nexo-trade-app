@@ -11871,7 +11871,7 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
   const INTERVALS=[["1","1m"],["5","5m"],["15","15m"],["60","1h"],["240","4h"],["D","1D"],["W","1W"]];
 
   return(
-    <div style={{display:"flex",flexDirection:"column",height:embedded?"calc(100vh - 90px)":"calc(100dvh - 58px)",minHeight:embedded?640:undefined,borderRadius:embedded?14:0,border:embedded?"1px solid rgba(255,255,255,0.08)":"none",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
+    <div className="nexo-paper-root" style={{display:"flex",flexDirection:"column",height:embedded?"calc(100vh - 90px)":"calc(100dvh - 58px)",minHeight:embedded?640:undefined,borderRadius:embedded?14:0,border:embedded?"1px solid rgba(255,255,255,0.08)":"none",background:"#0B0E1A",color:"#E2E8F0",fontFamily:"inherit",overflow:"hidden"}}>
 
       {/* Toast */}
       {msg&&<div style={{position:"fixed",top:70,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:msg.ok?"#16A34A":"#DC2626",color:"#fff",padding:"10px 22px",borderRadius:12,fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.4)",whiteSpace:"nowrap"}}>{msg.text}</div>}
@@ -29677,6 +29677,8 @@ export default function App(){
         .nexo-paper-main { flex-direction: column !important; height: auto !important; overflow: visible !important; min-height: 0 !important; }
         .nexo-paper-chart { flex: none !important; height: 260px !important; min-height: 260px !important; }
         .nexo-paper-panel { width: 100% !important; max-width: 100% !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; max-height: none !important; overflow-y: auto !important; }
+        .nexo-paper-root { height: auto !important; min-height: 0 !important; overflow: visible !important; }
+        .nexo-paper-chart { height: 360px !important; flex: none !important; }
 
         /* ── GURUS 13F — detail stats 4-col → 2-col ── */
         .nexo-guru-detail-stats { grid-template-columns: repeat(2,1fr) !important; }
