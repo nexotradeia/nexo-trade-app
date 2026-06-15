@@ -15201,7 +15201,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       <div className="grid">
         {/* TABLE */}
         <div className="card">
-          <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className={"stat"+(mktOpen?"":" paused")}><i/>{mktOpen?T("PRICES LIVE","PRECIOS EN VIVO"):T("PAUSED · CLOSED","PAUSADO · CERRADO")}</span></div>
+          <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className={"stat"+(mktOpen?"":" paused")}><i/>{mktOpen?T("INDICATIVE","INDICATIVO"):T("PAUSED · CLOSED","PAUSADO · CERRADO")}</span></div>
           <div className="filt">
             <span className="on">{T("All","Todas")}</span>
             {tab==="stocks"?<><span>{T("Long","Largos")}</span><span>{T("Short","Cortos")}</span><span>⚡ Earnings ≤7d</span></>:<><span>Calls</span><span>Puts</span><span>0–7 DTE</span></>}
