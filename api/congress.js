@@ -185,6 +185,25 @@ export default async function handler(req, res) {
 
   // ── 3. Datos curados 2024-2026 (STOCK Act disclosures) ───────────
   const CURATED = [
+    // ── Junio 2026 (datos REALES — Capitol Trades / STOCK Act) ───
+    { name:"David Taylor",   party:"R", state:"OH", ticker:"GOOGL", type:"buy",  amount:"$1K–$15K",     date:"2026-06-04", asset:"Alphabet Inc",                house:"House"  },
+    { name:"David Taylor",   party:"R", state:"OH", ticker:"AMZN",  type:"sell", amount:"$1K–$15K",     date:"2026-06-04", asset:"Amazon.com Inc",             house:"House"  },
+    { name:"David Taylor",   party:"R", state:"OH", ticker:"AEP",   type:"buy",  amount:"$1K–$15K",     date:"2026-06-04", asset:"American Electric Power",    house:"House"  },
+    { name:"David Taylor",   party:"R", state:"OH", ticker:"AMGN",  type:"buy",  amount:"$1K–$15K",     date:"2026-06-04", asset:"Amgen Inc",                 house:"House"  },
+    { name:"David Taylor",   party:"R", state:"OH", ticker:"T",     type:"buy",  amount:"$1K–$15K",     date:"2026-06-04", asset:"AT&T Inc",                  house:"House"  },
+    { name:"David Taylor",   party:"R", state:"OH", ticker:"KR",    type:"buy",  amount:"$1K–$15K",     date:"2026-06-04", asset:"The Kroger Co",             house:"House"  },
+    { name:"David Taylor",   party:"R", state:"OH", ticker:"LRCX",  type:"sell", amount:"$1K–$15K",     date:"2026-06-04", asset:"Lam Research Corp",          house:"House"  },
+    { name:"John McGuire",   party:"R", state:"VA", ticker:"META",  type:"buy",  amount:"$1K–$15K",     date:"2026-06-03", asset:"Meta Platforms Inc",         house:"House"  },
+    { name:"John McGuire",   party:"R", state:"VA", ticker:"DELL",  type:"sell", amount:"$1K–$15K",     date:"2026-06-03", asset:"Dell Technologies Inc",      house:"House"  },
+    { name:"Gary Peters",    party:"D", state:"MI", ticker:"KHC",   type:"buy",  amount:"$1K–$15K",     date:"2026-05-20", asset:"The Kraft Heinz Co",         house:"Senate" },
+    { name:"Ro Khanna",      party:"D", state:"CA", ticker:"JPM",   type:"buy",  amount:"$1K–$15K",     date:"2026-05-17", asset:"JPMorgan Chase & Co",        house:"House"  },
+    { name:"Ro Khanna",      party:"D", state:"CA", ticker:"MU",    type:"sell", amount:"$1K–$15K",     date:"2026-05-25", asset:"Micron Technology Inc",      house:"House"  },
+    { name:"Chip Roy",       party:"R", state:"TX", ticker:"AESI",  type:"sell", amount:"$100K–$250K",  date:"2026-05-12", asset:"Atlas Energy Solutions",     house:"House"  },
+    { name:"Mike Kelly",     party:"R", state:"PA", ticker:"BMY",   type:"sell", amount:"$15K–$50K",    date:"2026-05-06", asset:"Bristol-Myers Squibb",       house:"House"  },
+    { name:"Mike Kelly",     party:"R", state:"PA", ticker:"CMCSA", type:"sell", amount:"$1K–$15K",     date:"2026-05-06", asset:"Comcast Corp",               house:"House"  },
+    { name:"John Fetterman", party:"D", state:"PA", ticker:"EXPE",  type:"buy",  amount:"$1K–$15K",     date:"2026-05-05", asset:"Expedia Group Inc",          house:"Senate" },
+    { name:"Julie Johnson",  party:"D", state:"TX", ticker:"ABT",   type:"sell", amount:"$1K–$15K",     date:"2026-05-11", asset:"Abbott Laboratories",        house:"House"  },
+    { name:"Julie Johnson",  party:"D", state:"TX", ticker:"ACN",   type:"sell", amount:"$1K–$15K",     date:"2026-05-11", asset:"Accenture PLC",              house:"House"  },
     // ── Mayo 2026 ────────────────────────────────────────────────
     { name:"Nancy Pelosi",           party:"D", state:"CA", ticker:"NVDA", type:"buy",  amount:"$500K–$1M",   date:"2026-05-20", asset:"NVIDIA Corp",                   house:"House"  },
     { name:"Josh Gottheimer",        party:"D", state:"NJ", ticker:"PLTR", type:"buy",  amount:"$50K–$100K",  date:"2026-05-19", asset:"Palantir Technologies",          house:"House"  },
