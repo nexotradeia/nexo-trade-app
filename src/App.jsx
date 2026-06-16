@@ -12061,6 +12061,10 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
                           <span>{p.shares} acc. · avg {fmtUSD(p.avgCost)}</span>
                           <span style={{color:p.pnlPct>=0?"#00E58F":"#FF4D6A"}}>{p.pnlPct>=0?"+":""}{p.pnlPct.toFixed(2)}%</span>
                         </div>
+                        <button onClick={(e)=>{e.stopPropagation();sell(p.tk,p.shares);}}
+                          style={{marginTop:8,width:"100%",background:"rgba(220,38,38,0.12)",border:"1px solid rgba(220,38,38,0.3)",borderRadius:8,padding:"7px",color:"#FF4D6A",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                          {isEN?"✕ Close position (sell all)":"✕ Cerrar posición (vender todo)"}
+                        </button>
                       </div>
                     ))}
                     <button onClick={refreshPrices}
