@@ -15535,7 +15535,6 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
       {tab==="stocks" && <MarketPulseLive lang={lang}/>}
       {tab==="stocks" && <SocialTrendingLive lang={lang}/>}
-      {tab==="stocks" && <ThirteenFLive lang={lang}/>}
       {tab==="stocks" && (
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,alignItems:"start"}}>
           <AnalystRatingsLive lang={lang}/>
