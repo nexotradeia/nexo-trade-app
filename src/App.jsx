@@ -11887,6 +11887,22 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
   const totalPnl=totalValue-100000;
   const isGain=totalPnl>=0;
 
+  // Curva de crecimiento automática: foto diaria del valor total del paper trading
+  const [pfHistory,setPfHistory]=useState(()=>{ try{return JSON.parse(localStorage.getItem(`nexotrade_pf_history_${user?.id||"guest"}`)||"[]");}catch{return [];} });
+  useEffect(()=>{
+    if(!(totalValue>0)) return;
+    const HKEY=`nexotrade_pf_history_${user?.id||"guest"}`;
+    const today=new Date().toISOString().slice(0,10);
+    setPfHistory(prev=>{
+      const next=prev.filter(h=>h.date!==today);
+      next.push({date:today,value:Math.round(totalValue)});
+      next.sort((a,b)=>a.date.localeCompare(b.date));
+      const trimmed=next.slice(-120);
+      try{localStorage.setItem(HKEY,JSON.stringify(trimmed));}catch{}
+      return trimmed;
+    });
+  },[totalValue,user]);
+
   const QUICK=["BTC","ETH","SOL","NVDA","AAPL","TSLA","MSFT","SPY","META","AMD","DOGE","XRP"];
   const INTERVALS=[["1","1m"],["5","5m"],["15","15m"],["60","1h"],["240","4h"],["D","1D"],["W","1W"]];
 
@@ -12130,7 +12146,7 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
             {tab==="riesgo"&&<div style={{overflowX:"auto"}}><RiskRewardCalc lang={lang}/></div>}
             {tab==="sharpe"&&<div style={{overflowX:"auto"}}><SharpeCalc lang={lang}/></div>}
             {tab==="racha"&&<div style={{overflowX:"auto"}}><WinStreakTracker lang={lang}/></div>}
-            {tab==="portafolio"&&<div style={{overflowX:"auto"}}><PortfolioEvolution lang={lang}/></div>}
+            {tab==="portafolio"&&<div style={{overflowX:"auto"}}><PortfolioEvolution lang={lang} autoData={pfHistory}/></div>}
             {tab==="alertas"&&<div style={{overflowX:"auto"}}><PriceAlerts lang={lang}/></div>}
             {tab==="exportar"&&<div style={{overflowX:"auto"}}><ExportData posts={posts} user={user} lang={lang}/></div>}
           </div>
@@ -12410,15 +12426,17 @@ function WinStreakTracker({lang="es"}){
 }
 
 // ── HERRAMIENTA 4: EVOLUCIÓN DEL PORTAFOLIO ───────────────────────────────────
-function PortfolioEvolution({lang="es"}){
+function PortfolioEvolution({lang="es", autoData=null}){
   const isEN=lang==="en";
-  const [entries,setEntries]=useState(()=>{ try{const s=localStorage.getItem("nexotrade_pfgrowth");return s?JSON.parse(s):[];}catch{return [];} });
-  useEffect(()=>{ try{localStorage.setItem("nexotrade_pfgrowth",JSON.stringify(entries));}catch{} },[entries]);
+  const auto=Array.isArray(autoData);
+  const [manual,setManual]=useState(()=>{ try{const s=localStorage.getItem("nexotrade_pfgrowth");return s?JSON.parse(s):[];}catch{return [];} });
+  useEffect(()=>{ if(!auto){ try{localStorage.setItem("nexotrade_pfgrowth",JSON.stringify(manual));}catch{} } },[manual,auto]);
   const [newDate,setNewDate]=useState(""); const [newVal,setNewVal]=useState("");
+  const entries = auto ? autoData.map(e=>({date:e.date,value:String(e.value)})) : manual;
 
   const addEntry=()=>{
     if(!newDate||!newVal) return;
-    setEntries(prev=>[...prev,{date:newDate,value:newVal}].sort((a,b)=>a.date.localeCompare(b.date)));
+    setManual(prev=>[...prev,{date:newDate,value:newVal}].sort((a,b)=>a.date.localeCompare(b.date)));
     setNewDate("");setNewVal("");
   };
 
@@ -12442,12 +12460,12 @@ function PortfolioEvolution({lang="es"}){
   return(
     <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
       <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:4}}>{isEN?"📈 Your Portfolio Growth":"📈 Evolución de tu Portafolio"}</h3>
-      <p style={{color:"#64748B",fontSize:12,marginBottom:20}}>{isEN?"Log your portfolio value each month to see your real growth.":"Registra el valor de tu portafolio cada mes para ver tu crecimiento real."}</p>
+      <p style={{color:"#64748B",fontSize:12,marginBottom:20}}>{auto?(isEN?"Automatic growth curve of your Paper Trading account.":"Curva de crecimiento automática de tu cuenta de Paper Trading."):(isEN?"Log your portfolio value each month to see your real growth.":"Registra el valor de tu portafolio cada mes para ver tu crecimiento real.")}</p>
       {chartData.length<2 && (
         <div style={{textAlign:"center",padding:"28px 16px",color:"#64748B",background:"rgba(255,255,255,0.02)",border:"1px dashed rgba(255,255,255,0.12)",borderRadius:12,marginBottom:20}}>
           <div style={{fontSize:30,marginBottom:8}}>📈</div>
-          <div style={{fontSize:13,fontWeight:700,color:"#94A3B8"}}>{isEN?"No data yet":"Aún sin datos"}</div>
-          <div style={{fontSize:11,marginTop:4}}>{isEN?"Add at least 2 months below to see your growth chart.":"Agrega al menos 2 meses abajo para ver tu gráfica de crecimiento."}</div>
+          <div style={{fontSize:13,fontWeight:700,color:"#94A3B8"}}>{auto?(isEN?"Building your curve…":"Formando tu curva…"):(isEN?"No data yet":"Aún sin datos")}</div>
+          <div style={{fontSize:11,marginTop:4}}>{auto?(isEN?"Your equity curve fills in as you trade over the coming days.":"Tu curva se irá formando a medida que operes en los próximos días."):(isEN?"Add at least 2 months below to see your growth chart.":"Agrega al menos 2 meses abajo para ver tu gráfica de crecimiento.")}</div>
         </div>
       )}
       {/* Chart */}
@@ -12476,8 +12494,8 @@ function PortfolioEvolution({lang="es"}){
           </svg>
         </div>
       )}
-      {/* Add entry */}
-      <div style={{display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
+      {/* Add entry (solo modo manual) */}
+      {!auto && (<div style={{display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
         <div style={{flex:1,minWidth:130}}>
           <label style={{display:"block",fontSize:10,color:"#64748B",fontWeight:700,marginBottom:4}}>{isEN?"MONTH (YYYY-MM)":"MES (YYYY-MM)"}</label>
           <input value={newDate} onChange={e=>setNewDate(e.target.value)} placeholder="2025-06" type="month"
@@ -12489,7 +12507,7 @@ function PortfolioEvolution({lang="es"}){
             style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"9px 10px",color:"#F1F5F9",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
         </div>
         <button onClick={addEntry} style={{background:"linear-gradient(135deg,#F59E0B,#0F5E68)",border:"none",borderRadius:8,padding:"10px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",whiteSpace:"nowrap"}}>{isEN?"+ Add":"+ Agregar"}</button>
-      </div>
+      </div>)}
     </div>
   );
 }
