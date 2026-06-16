@@ -20639,14 +20639,14 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   };
 
   const VIEWS = [
-    {id:"market",  l:"Market View"},
-    {id:"risk",    l:"Risk"},
-    {id:"returns", l:"Returns"},
+    {id:"market",  l:isEN?"Market View":"Mercado"},
+    {id:"risk",    l:isEN?"Risk":"Riesgo"},
+    {id:"returns", l:isEN?"Returns":"Retornos"},
     {id:"performance", l:isEN?"Performance":"Rendimiento"},
     {id:"technical", l:isEN?"Technical":"Técnico"},
-    {id:"efficiency", l:"Efficiency"},
-    {id:"projections",l:"Projections"},
-    {id:"health",  l:"Health"},
+    {id:"efficiency", l:isEN?"Efficiency":"Eficiencia"},
+    {id:"projections",l:isEN?"Projections":"Proyecciones"},
+    {id:"health",  l:isEN?"Health":"Salud"},
   ];
 
   // Mock extended data per ticker
@@ -21465,7 +21465,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                 onMouseEnter={e=>{if(!loading)e.currentTarget.style.background="rgba(15,94,104,0.28)";}}
                 onMouseLeave={e=>e.currentTarget.style.background="rgba(15,94,104,0.15)"}>
                 <span style={{display:"inline-block",animation:loading?"spin 1s linear infinite":"none",fontSize:13}}>↻</span>
-                {loading?(isEN?"Updating…":"Actualizando…"):"Refresh"}
+                {loading?(isEN?"Updating…":"Actualizando…"):(isEN?"Refresh":"Actualizar")}
               </button>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setAddViewOpen(p=>!p)}
@@ -21490,7 +21490,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                   style={{background:"linear-gradient(135deg,#0047C2,#0F4C81)",border:"none",borderRadius:9,padding:"7px 16px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:5,boxShadow:"0 2px 12px rgba(15,76,129,0.3)"}}
                   onMouseEnter={e=>e.currentTarget.style.opacity="0.9"}
                   onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
-                  Export as… ▾
+                  {isEN?"Export as… ▾":"Exportar… ▾"}
                 </button>
                 {exportOpen&&(
                   <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1E293B",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"6px",zIndex:100,minWidth:150,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
@@ -21538,7 +21538,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
       <div style={{display:"flex",gap:8,padding:"0 4px 12px",flexWrap:"wrap"}}>
         <input value={input} onChange={e=>setInput(e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g,"").slice(0,10))}
           onKeyDown={e=>e.key==="Enter"&&addTicker()}
-          placeholder="+ Add ticker: AAPL, BTC, NVDA…"
+          placeholder={isEN?"+ Add ticker: AAPL, BTC, NVDA…":"+ Añadir ticker: AAPL, BTC, NVDA…"}
           style={{flex:"1 1 160px",minWidth:0,background:"var(--c-surface)",border:"1px solid var(--c-border)",borderRadius:8,padding:"8px 14px",color:"var(--c-text)",fontSize:13,outline:"none",fontFamily:"monospace",fontWeight:700}}/>
         <button onClick={addTicker} style={{background:"#0047C2",border:"none",borderRadius:8,padding:"8px 18px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer"}}>
           + {isEN?"Add":"Agregar"}
