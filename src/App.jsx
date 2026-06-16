@@ -9549,7 +9549,7 @@ function MarketOverview({lang="es"}){
   ];
   // Market Overview vía /api/prices (Finnhub) con ETF-proxies + respaldo (nunca vacío)
   const MO_GROUPS = {
-    indices:     [["SPY","S&P 500",662],["QQQ","Nasdaq 100",595],["DIA","Dow Jones",447],["IWM","Russell 2000",242]],
+    indices:     [["SPY","S&P 500",755],["QQQ","Nasdaq 100",743],["DIA","Dow Jones",520],["IWM","Russell 2000",294]],
     commodities: [["GLD","Gold",243],["SLV","Silver",30],["USO","Oil (WTI)",78],["UNG","Nat Gas",14]],
     crypto:      [["BTC","Bitcoin",67000],["ETH","Ethereum",1800],["SOL","Solana",150]],
   };
