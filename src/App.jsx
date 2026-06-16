@@ -5646,7 +5646,7 @@ function EarningsPage({lang}){
   });
   const displayed=showAll?selFiltered:selFiltered.slice(0,30);
   const highImpactCount=selDayAll.filter(e=>["Alto","High"].includes(getImpact(e.ticker))).length;
-  const avgBull=selDayAll.length?Math.round(selDayAll.reduce((s,e)=>s+(votes[e.ticker]||50),0)/selDayAll.length):0;
+  const _votedCos=selDayAll.filter(e=>(e.community_votes||0)>0||voted[e.ticker]); const avgBull=_votedCos.length?Math.round(_votedCos.reduce((s,e)=>s+(votes[e.ticker]||50),0)/_votedCos.length):null;
   const nextCall=selDayAll.find(e=>e.horaRaw==="amc")||selDayAll[0];
   const upcoming=allEarnings.filter(e=>e.rawDate>=todayStr).sort((a,b)=>a.rawDate.localeCompare(b.rawDate));
   const upcomingUniq=Object.values(upcoming.reduce((acc,e)=>{if(!acc[e.rawDate+e.ticker])acc[e.rawDate+e.ticker]=e;return acc;},{})).slice(0,10);
@@ -5793,7 +5793,7 @@ function EarningsPage({lang}){
             {[
               {icon:"📅",l:isEN?"REPORT TODAY":"REPORTAN HOY",v:selDayAll.length,c:C.text,mono:true},
               {icon:"🔴",l:isEN?"HIGH IMPACT":"ALTO IMPACTO",v:highImpactCount,c:"#EF4444",mono:true},
-              {icon:"📈",l:isEN?"BULLISH CONSENSUS":"CONSENSO ALCISTA",v:`${avgBull}%`,c:avgBull>=60?"#10B981":avgBull>=40?"#F59E0B":"#EF4444",mono:true},
+              {icon:"📈",l:isEN?"BULLISH CONSENSUS":"CONSENSO ALCISTA",v:avgBull==null?"—":`${avgBull}%`,c:avgBull==null?"#94A3B8":avgBull>=60?"#10B981":avgBull>=40?"#F59E0B":"#EF4444",mono:true},
               {icon:"⏰",l:isEN?"NEXT CALL":"PRÓXIMO CALL",v:nextCall?`${nextCall.ticker} · ${nextCall.horaRaw==="bmo"?"Pre-mkt":"4PM"}`:"—",c:"#0F4C81",mono:false},
             ].map(s=>(
               <div key={s.l} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px"}}>
@@ -5836,6 +5836,7 @@ function EarningsPage({lang}){
             {/* Rows */}
             {displayed.map((e,idx)=>{
               const bull=votes[e.ticker]||50;
+              const hasVotes=(e.community_votes||0)>0||!!voted[e.ticker];
               const impact=getImpact(e.ticker);
               const mktcap=MKTCAP_MAP[e.ticker]||"—";
               const isFav=favorites.has(e.ticker);
@@ -5880,9 +5881,8 @@ function EarningsPage({lang}){
                   </div>
                   {/* Sentimiento + votos */}
                   <div>
-                    <div style={{display:"flex",height:6,borderRadius:4,overflow:"hidden",marginBottom:4}}>
-                      <div style={{width:`${bull}%`,background:"#10B981",transition:"width 0.3s"}}/>
-                      <div style={{flex:1,background:"#EF4444"}}/>
+                    <div style={{display:"flex",height:6,borderRadius:4,overflow:"hidden",marginBottom:4,background:"#E2E8F0"}}>
+                      {hasVotes && <><div style={{width:`${bull}%`,background:"#10B981",transition:"width 0.3s"}}/><div style={{flex:1,background:"#EF4444"}}/></>}
                     </div>
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:3}}>
                       <button onClick={ev=>{ev.stopPropagation();vote(e.ticker,"bull");}}
@@ -5897,7 +5897,7 @@ function EarningsPage({lang}){
                           fontSize:9,fontWeight:800,color:"#10B981",
                           transition:"all 0.2s",outline:"none",
                           opacity:voted[e.ticker]&&voted[e.ticker]!=="bull"?0.45:1,
-                        }}>▲ {bull}%</button>
+                        }}>{hasVotes?`▲ ${bull}%`:"▲"}</button>
                       <button onClick={ev=>{ev.stopPropagation();vote(e.ticker,"bear");}}
                         disabled={!!voted[e.ticker]}
                         title={voted[e.ticker]?"Ya votaste":"Votar Bajista"}
@@ -5910,7 +5910,7 @@ function EarningsPage({lang}){
                           fontSize:9,fontWeight:800,color:"#EF4444",
                           transition:"all 0.2s",outline:"none",
                           opacity:voted[e.ticker]&&voted[e.ticker]!=="bear"?0.45:1,
-                        }}>{100-bull}% ▼</button>
+                        }}>{hasVotes?`${100-bull}% ▼`:"▼"}</button>
                     </div>
                   </div>
                   {/* Alert Telegram */}
