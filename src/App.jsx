@@ -15123,6 +15123,58 @@ function InsidersLive({lang="es"}){
   );
 }
 
+function MarketPulseLive({lang="es"}){
+  const isEN=lang==="en";
+  const THEMES=[
+    {name:isEN?"AI":"IA",emoji:"🤖",tks:["NVDA","AVGO","AMD","PLTR","SMCI"]},
+    {name:"Nuclear",emoji:"☢️",tks:["SMR","OKLO","NNE","CEG","VST"]},
+    {name:isEN?"Uranium":"Uranio",emoji:"⛏️",tks:["CCJ","UEC","UUUU","DNN"]},
+    {name:"GLP-1",emoji:"💉",tks:["LLY","NVO","VKTX"]},
+    {name:"Quantum",emoji:"⚛️",tks:["IONQ","RGTI","QBTS","QUBT"]},
+    {name:"Bitcoin",emoji:"₿",tks:["MSTR","COIN","MARA","RIOT","HOOD"]},
+  ];
+  const [data,setData]=useState({}); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const cref=useRef(false);
+  const load=()=>{
+    setSpin(true);
+    const uniq=Array.from(new Set(THEMES.reduce((a,t)=>a.concat(t.tks),[])));
+    Promise.all(uniq.map(sy=>fetch(`https://finnhub.io/api/v1/quote?symbol=${sy}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).then(j=>[sy,(j&&typeof j.dp==="number")?j.dp:null]).catch(()=>[sy,null])))
+      .then(pairs=>{ if(cref.current) return; const m={}; pairs.forEach(p=>{ if(p[1]!=null) m[p[0]]=p[1]; }); setData(m); setSt(Object.keys(m).length?"ok":"empty"); setUpd(new Date()); setSpin(false); })
+      .catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+  };
+  useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,90000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
+  if(st==="empty") return null;
+  const rows=THEMES.map(t=>{ const vals=t.tks.map(k=>data[k]).filter(v=>v!=null); const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null; let top=null,topv=-1e9; t.tks.forEach(k=>{ if(data[k]!=null&&data[k]>topv){topv=data[k];top=k;} }); return {name:t.name,emoji:t.emoji,avg,top,topv,n:vals.length}; }).filter(r=>r.avg!=null).sort((a,b)=>b.avg-a.avg);
+  return (
+    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(168,85,247,0.2)",borderRadius:14,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
+        <span style={{fontSize:14}}>📡</span>
+        <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Market Pulse · Hot Narratives":"Market Pulse · Narrativas Calientes"}</b>
+        <span style={{fontSize:9.5,fontWeight:800,color:"#C084FC",border:"1px solid rgba(168,85,247,0.4)",borderRadius:5,padding:"2px 6px"}}>{isEN?"REAL · LIVE":"REAL · EN VIVO"}</span>
+        <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
+      </div>
+      {st==="load"
+        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading themes…":"Cargando narrativas…"}</div>
+        : <div style={{display:"flex",gap:10,padding:"14px",overflowX:"auto"}}>
+            {rows.map((r,i)=>{ const up=r.avg>=0; const col=up?"#00E58F":"#FF3D5A"; const hot=i===0&&r.avg>0;
+              return (
+                <div key={r.name} style={{flex:"0 0 auto",minWidth:138,background:hot?"rgba(0,229,143,0.06)":"rgba(255,255,255,0.025)",border:`1px solid ${hot?"rgba(0,229,143,0.4)":"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:"11px 13px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7}}>
+                    <span style={{fontSize:15}}>{r.emoji}</span>
+                    <span style={{fontSize:12.5,fontWeight:800,color:"#E6EDF7"}}>{r.name}</span>
+                    {hot && <span style={{marginLeft:"auto",fontSize:11}}>🔥</span>}
+                  </div>
+                  <div style={{fontSize:19,fontWeight:900,color:col,fontFamily:"monospace",letterSpacing:-0.5}}>{up?"+":""}{r.avg.toFixed(2)}%</div>
+                  {r.top && <div style={{fontSize:10.5,color:"#8b9bb0",marginTop:3,fontFamily:"monospace"}}>{isEN?"Top: ":"Líder: "}<span style={{color:r.topv>=0?"#00E58F":"#FF3D5A",fontWeight:700}}>{r.top} {r.topv>=0?"+":""}{r.topv.toFixed(1)}%</span></div>}
+                </div>
+              );
+            })}
+          </div>}
+      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Avg real price performance per theme (curated baskets · Finnhub). Educational — not financial advice.":"Rendimiento real promedio de precio por narrativa (canastas curadas · Finnhub). Educativo — no es consejo financiero."}</div>
+    </div>
+  );
+}
+
 function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
@@ -15415,6 +15467,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
         ))}
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
+      {tab==="stocks" && <MarketPulseLive lang={lang}/>}
       {tab==="stocks" && (
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,alignItems:"start"}}>
           <AnalystRatingsLive lang={lang}/>
