@@ -431,10 +431,10 @@ const moderateText = (text) => {
 // ── DATA ──────────────────────────────────────────────────────────────────────
 // Respaldo estático actualizado a precios reales (jun 2026) — solo se ve cuando el dato en vivo falta puntualmente
 const TAPE_ITEMS = [
-  {ticker:"NVDA",price:"$205.10",change:+1.2,earning:false},{ticker:"BTC",price:"$61,800",change:+1.4,earning:false},
+  {ticker:"NVDA",price:"$205.10",change:+1.2,earning:false},{ticker:"BTC",price:"$67,000",change:+1.4,earning:false},
   {ticker:"TSLA",price:"$391.00",change:-1.1,earning:false},{ticker:"AAPL",price:"$307.30",change:-0.3,earning:false},
   {ticker:"SPY",price:"$737.55",change:-0.2,earning:false},{ticker:"MSFT",price:"$416.70",change:+0.9,earning:false},
-  {ticker:"ETH",price:"$1,617",change:+0.9,earning:false},{ticker:"AMZN",price:"$246.00",change:+0.6,earning:false},
+  {ticker:"ETH",price:"$1,800",change:+0.9,earning:false},{ticker:"AMZN",price:"$246.00",change:+0.6,earning:false},
   {ticker:"SMCI",price:"$41.60",change:+2.0,earning:true},{ticker:"META",price:"$593.00",change:+2.1,earning:true},
   {ticker:"COIN",price:"$152.40",change:+3.3,earning:false},{ticker:"PLTR",price:"$135.50",change:+2.1,earning:false},
   {ticker:"AMD",price:"$466.40",change:+3.2,earning:false},{ticker:"GOOGL",price:"$368.50",change:+0.6,earning:true},
@@ -5103,8 +5103,8 @@ const TICKER_DATA_INIT = [
   {s:"AVGO",  n:"Broadcom",   p:248.6,  c:+0.55,  col:"#cc0000", cg:null, fh:"AVGO"},
   {s:"DIA",   n:"Dow Jones",  p:509.7,  c:-0.35,  col:"#1A5FAD", cg:null, fh:"DIA"},
   {s:"IWM",   n:"Russell 2000",p:281.7, c:-0.40,  col:"#0F5E68", cg:null, fh:"IWM"},
-  {s:"BTC",   n:"Bitcoin",    p:62060,  c:+0.05,  col:"#F7931A", cg:null, fh:"BINANCE:BTCUSDT"},
-  {s:"ETH",   n:"Ethereum",   p:1617,   c:+0.10,  col:"#627EEA", cg:null, fh:"BINANCE:ETHUSDT"},
+  {s:"BTC",   n:"Bitcoin",    p:67000,  c:+0.05,  col:"#F7931A", cg:null, fh:"BINANCE:BTCUSDT"},
+  {s:"ETH",   n:"Ethereum",   p:1800,   c:+0.10,  col:"#627EEA", cg:null, fh:"BINANCE:ETHUSDT"},
 ];
 
 // ── Mapa ticker → dominio para logos oficiales (Clearbit). Índices/ETF sin logo → letra ──
@@ -9507,7 +9507,7 @@ function NavTickerV4(){
   const cgMap={BTC:"bitcoin",ETH:"ethereum"};
   const fmtP=(s,p)=> p>=1000?"$"+Math.round(p).toLocaleString("en-US"):"$"+p.toFixed(2);
   const BASE=[
-    {s:"ETH",  p:"$1,617",  chg:0.9},
+    {s:"ETH",  p:"$1,800",  chg:0.9},
     {s:"META", p:"$566.41", chg:-0.80},
     {s:"GOLD", p:"$2,320",  chg:-0.2},
     {s:"BTC",  p:"$67,240", chg:1.2},
@@ -9551,7 +9551,7 @@ function MarketOverview({lang="es"}){
   const MO_GROUPS = {
     indices:     [["SPY","S&P 500",662],["QQQ","Nasdaq 100",595],["DIA","Dow Jones",447],["IWM","Russell 2000",242]],
     commodities: [["GLD","Gold",243],["SLV","Silver",30],["USO","Oil (WTI)",78],["UNG","Nat Gas",14]],
-    crypto:      [["BTC","Bitcoin",62060],["ETH","Ethereum",1617],["SOL","Solana",150]],
+    crypto:      [["BTC","Bitcoin",67000],["ETH","Ethereum",1800],["SOL","Solana",150]],
   };
   useEffect(()=>{
     let c=false;
@@ -9657,15 +9657,18 @@ function Sidebar({user,following,onFollow,onProfile,onNeedAuth,onAI,lang,posts=[
   const isEN = lang==="en";
   const t=LANGS[lang];
   const lp=useContext(PriceCtx);
+  const {cryptoPrices}=useCryptoPrices(); // BTC/ETH/SOL en vivo via CoinGecko (igual que la cinta) — evita precios congelados
   const SIDEBAR_STATIC=[
-    {ticker:"BTC",  price:"$62,060", change:+0.0},
+    {ticker:"BTC",  price:"$67,000", change:+0.0},
     {ticker:"NVDA", price:"$205.10", change:+0.9},
     {ticker:"TSLA", price:"$391.00", change:-1.1},
-    {ticker:"ETH",  price:"$1,617",  change:+3.0},
+    {ticker:"ETH",  price:"$1,800",  change:+3.0},
     {ticker:"AAPL", price:"$307.30", change:-0.3},
     {ticker:"SPY",  price:"$737.55", change:-0.2},
   ];
   const mini=SIDEBAR_STATIC.map(s=>{
+    const cgp=cryptoPrices[s.ticker];
+    if(cgp&&cgp.p>0){ return {ticker:s.ticker, price:fmtLivePrice(s.ticker,cgp.p), change:cgp.c}; }
     const live=lp[s.ticker];
     return {ticker:s.ticker, price:live?fmtLivePrice(s.ticker,live.price):s.price, change:live?live.change:s.change};
   });
@@ -10587,7 +10590,7 @@ function JoinCard({ onAuth, lang="es" }){
   const isEN = lang==="en";
   const [btc,setBtc]=useState(null);
   useEffect(()=>{let c=false;const ld=()=>fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true").then(r=>r.ok?r.json():null).then(j=>{if(!c&&j&&j.bitcoin)setBtc(j.bitcoin);}).catch(()=>{});ld();const iv=setInterval(ld,60000);return()=>{c=true;clearInterval(iv);};},[]);
-  const btcStr=(btc&&typeof btc.usd==="number")?Math.round(btc.usd).toLocaleString("en-US"):"62,860";
+  const btcStr=(btc&&typeof btc.usd==="number")?Math.round(btc.usd).toLocaleString("en-US"):"67,000";
   const btcUp=(btc&&typeof btc.usd_24h_change==="number")?btc.usd_24h_change>=0:true;
   return(
     <div className="nexo-jc-v4" style={{marginBottom:14}}>
@@ -10716,7 +10719,7 @@ function MarketsStrip({ onNav }){
     {s:"AMZN", n:"Amazon",    live:"AMZN",p:"239.10",fallC:0.46, img:"AMZN", idx:2},
     {s:"META", n:"Meta",      live:"META",p:"566.41",fallC:-0.80,img:"META", idx:2},
     {s:"GOOGL",n:"Alphabet",  live:"GOOGL",p:"178.40",fallC:0.91,img:"GOOGL",idx:2},
-    {s:"BTC",  n:"Bitcoin",   live:"BTC", p:"62,860",fallC:1.20, bg:"#FFF7ED", fg:"#F7931A", letter:"₿", idx:44},
+    {s:"BTC",  n:"Bitcoin",   live:"BTC", p:"67,000",fallC:1.20, bg:"#FFF7ED", fg:"#F7931A", letter:"₿", idx:44},
     {s:"NVDA", n:"NVIDIA",    live:"NVDA",p:"202.10",fallC:0.84, img:"NVDA", idx:2},
     {s:"AAPL", n:"Apple Inc.",live:"AAPL",p:"295.38",fallC:1.30, img:"AAPL", idx:2},
   ];
@@ -27202,7 +27205,7 @@ function MobileHomeDashboard({user, isPremium, onNavigate, onOpenAI, onPremium, 
 
   var spy  = liveP("SPY",  737.6,  -0.20);
   var qqq  = liveP("QQQ",  705.1,  -0.30);
-  var btc  = liveP("BTC",  62060,  +0.05);
+  var btc  = liveP("BTC",  67000,  +0.05);
 
   // ── AI Pick — rotate daily (Mon=NVDA, Tue=META, Wed=PLTR, Thu=UBER, Fri=MSFT)
   var _allCorto = (WEEKLY_PICKS_FALLBACK && WEEKLY_PICKS_FALLBACK.corto) || [];
