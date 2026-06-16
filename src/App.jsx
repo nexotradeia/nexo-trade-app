@@ -11994,6 +11994,11 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
               allow="fullscreen"
               title="TradingView Chart"
             />
+            <a href={`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tvSym)}`} target="_blank" rel="noopener noreferrer"
+              style={{position:"absolute",bottom:7,right:9,zIndex:5,fontSize:10,fontWeight:600,color:"#7c8aa6",textDecoration:"none",background:"rgba(20,23,34,0.78)",padding:"3px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.08)"}}
+              title={_EN()?"If the chart doesn't load, open it on TradingView":"Si el gráfico no carga, ábrelo en TradingView"}>
+              {_EN()?"Open in TradingView ↗":"Abrir en TradingView ↗"}
+            </a>
           </div>
         </div>
 
