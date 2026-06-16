@@ -21996,7 +21996,7 @@ const RADAR_V2_NEWS = [
   {h:'JPMorgan raises AAPL price target to $240',              type:'bull',t:'1h'},
 ];
 const RADAR_V2_TICKERS = [
-  {sym:'BTC', p:'$63,844',c:'+1.92%',up:true}, {sym:'ETH',  p:'$3,482', c:'-0.54%',up:false},
+  {sym:'BTC', p:'$66,500',c:'+0.52%',up:true}, {sym:'ETH',  p:'$1,805', c:'+3.04%',up:true},
   {sym:'NVDA',p:'$208.30',c:'+2.41%',up:true}, {sym:'AAPL', p:'$307.30',c:'-0.30%',up:false},
   {sym:'SPY', p:'$737.55',c:'-0.20%',up:false},{sym:'META', p:'$593.00',c:'+2.10%',up:true},
   {sym:'TSLA',p:'$391.00',c:'-1.10%',up:false},{sym:'MSFT', p:'$416.70',c:'+0.90%',up:true},
@@ -23452,8 +23452,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const sig=(r)=> r.pnlPct>40?["▲ BUY",T.grn,"rgba(0,255,135,.12)"] : r.pnlPct<0?["▼ SELL",T.red,"rgba(255,61,90,.1)"] : r.today>1?["▲ BUY",T.grn,"rgba(0,255,135,.12)"] : ["◆ HOLD",T.gold,"rgba(240,180,41,.1)"];
     const monthsLbl=tfLabels(ovRange,7);
     // ilustrativos
-    const TICK=[["AAPL","$301.54","+1.89",1],["NVDA","$208.30","+2.41",1],["MSFT","$412.80","+0.92",1],["META","$589.10","-0.87",0],["TSLA","$408.70","+4.53",1],["AMZN","$244.80","+1.24",1],["BTC","$63,844","+1.92",1],["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["GOLD","$2,318","+0.38",1]];
-    const WL=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["GLD","$186.40","+0.38",1],["TLT","$93.20","-0.52",0]];
+    const TICK=[["AAPL","$296.42","+1.82",1],["NVDA","$212.45","+3.54",1],["MSFT","$399.76","+2.31",1],["META","$593.48","+4.67",1],["TSLA","$411.15","+1.16",1],["AMZN","$246.02","+3.13",1],["BTC","$66,500","+0.52",1],["SPY","$754.83","+1.76",1],["QQQ","$744.00","+3.14",1],["VIX","$14.82","-3.12",0],["GOLD","$2,320","-0.20",0]];
+    const WL=[["SPY","$754.83","+1.76",1],["QQQ","$744.00","+3.14",1],["VIX","$14.82","-3.12",0],["GLD","$215.40","+0.38",1],["TLT","$93.20","-0.52",0]];
     const RISK=[["1.6","SHARPE",T.grn],["1.3","BETA",T.gold],["24.1%","VOL",T.red],["2.0%","VAR 95%",T.grn],["−14%","MAX DD",T.gold],["74.2%","WIN RATE",T.blue]];
     const SECT=[["XLK","+1.82",1],["XLY","+0.64",1],["XLF","-0.21",0],["XLE","+2.14",1],["XLV","-0.88",0],["XLI","+0.42",1],["XLRE","-1.24",0],["XLU","+0.12",1],["XLB","+0.78",1]];
     const TRADES=[["B","NVDA","5 uds · $148.20","+$300.50","10:32"],["S","BKNG","2 uds · $163.27","−$82.40","09:58"],["B","TSLA","7 uds · $320.00","+$620.90","09:41"],["S","AMZN","3 uds · $220.00","+$74.40",isEN?"Yesterday":"Ayer"],["B","META","3 uds · $440.00","+$447.30",isEN?"Yesterday":"Ayer"]];
@@ -23769,8 +23769,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         const STATS=[["Open",_f2(_o||_cpx),T.txt],["52W High",_f2(_cpx*1.28),T.grn],["52W Low",_f2(_cpx*0.62),T.red],["Volume today","—",T.txt],["Avg vol 10D","—",T.txt],["Market Cap","—",T.txt],["P/E Ratio","—",T.txt],["EPS","—",T.txt],["Beta","—",T.txt],["Dividend Yield","—",T.txt]];
         const INDS=[["RSI (14)","—","—",T.mid],["MACD","—","—",T.mid],["BB Upper",_f2(_cpx*1.03),"",T.gold],["BB Lower",_f2(_cpx*0.97),"",T.blue],["MA 20",_f2(_cpx*0.99),"",T.grn],["MA 50",_f2(_cpx*0.95),"",T.grn],["Stoch RSI","—","—",T.mid],["ATR (14)",_f2(_cpx*0.018),"",T.mid]];
         const LVLS=[["Oracle Target",_f2(_cpx*1.10),T.grn],["Resistance",_f2(_cpx*1.04),T.gold],["Support 1",_f2(_cpx*0.97),T.blue],["Support 2",_f2(_cpx*0.92),T.blue],["Suggested stop",_f2(_cpx*0.95),T.red]];
-        const IDX=[["SPY","$525.80","+0.42",1],["QQQ","$447.20","+0.70",1],["VIX","$14.82","-3.12",0],["DXY","104.32","-0.24",0]];
-        const CRY=[["BTC","$63,844","+1.92",1],["ETH","$3,482","-0.54",0]];
+        const IDX=[["SPY","$754.83","+1.76",1],["QQQ","$744.00","+3.14",1],["VIX","$14.82","-3.12",0],["DXY","104.32","-0.24",0]];
+        const CRY=[["BTC","$66,500","+0.52",1],["ETH","$1,805","+3.04",1]];
         const end=cp.price||100; const dayChg=cp.today||0;
         // El día va de la apertura (precio actual descontando el % del día) al precio actual → refleja la dirección real del día
         const base=dayChg!==0 ? end/(1+dayChg/100) : end-((end-(cp.entry||end))*(TF_SHARE[chPer]!=null?TF_SHARE[chPer]:0.5));
@@ -30496,11 +30496,11 @@ export default function App(){
               <div style={{display:"inline-block",animation:"nexo-tape 30s linear infinite",fontFamily:"'JetBrains Mono',monospace",fontSize:11}}>
                 {[
                   {s:"NVDA",p:"202.10",c:"+2.41%",up:true},{s:"AAPL",p:"291.58",c:"+1.96%",up:true},
-                  {s:"BTC",p:"63,844",c:"+1.92%",up:true},{s:"META",p:"566.41",c:"-0.80%",up:false},
+                  {s:"BTC",p:"66,500",c:"+0.52%",up:true},{s:"META",p:"593.48",c:"+4.67%",up:true},
                   {s:"TSLA",p:"392.32",c:"+2.81%",up:true},{s:"SPY",p:"734.52",c:"+1.25%",up:true},
                   {s:"NIKKEI",p:"42,180",c:"+1.18%",up:true},{s:"DAX",p:"24,610",c:"+0.72%",up:true},
                   {s:"NVDA",p:"202.10",c:"+2.41%",up:true},{s:"AAPL",p:"291.58",c:"+1.96%",up:true},
-                  {s:"BTC",p:"63,844",c:"+1.92%",up:true},{s:"META",p:"566.41",c:"-0.80%",up:false},
+                  {s:"BTC",p:"66,500",c:"+0.52%",up:true},{s:"META",p:"593.48",c:"+4.67%",up:true},
                   {s:"TSLA",p:"392.32",c:"+2.81%",up:true},{s:"SPY",p:"734.52",c:"+1.25%",up:true},
                   {s:"NIKKEI",p:"42,180",c:"+1.18%",up:true},{s:"DAX",p:"24,610",c:"+0.72%",up:true},
                 ].map((t,i)=>(
