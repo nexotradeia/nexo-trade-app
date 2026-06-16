@@ -9619,7 +9619,7 @@ function MarketOverview({lang="es"}){
     <div style={{marginBottom:20}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,flexWrap:"wrap"}}>
         <h2 style={{margin:0,fontSize:16,fontWeight:800,color:C.text}}>{isEN?"Market Overview":"Resumen del Mercado"}</h2>
-        <span style={{fontSize:10.5,fontWeight:700,color:busy?"#F59E0B":"#16A34A"}}>{busy?(isEN?"loading…":"loading…"):"● "+("live")}</span>
+        <span style={{fontSize:10.5,fontWeight:700,color:busy?"#F59E0B":"#16A34A"}}>{busy?(isEN?"loading…":"cargando…"):"● "+(isEN?"live":"en vivo")}</span>
       </div>
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
         {REGION_TABS.map(t=>{
@@ -9648,7 +9648,7 @@ function MarketOverview({lang="es"}){
           : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12}}>
               {(regionRows||[]).map(r=><Tile key={r.s} r={r}/>)}
             </div>}
-      {region!=="global" && <div style={{fontSize:10.5,color:C.muted2,marginTop:8}}>{"Index proxies via regional ETFs · for reference"}</div>}
+      <div style={{fontSize:10.5,color:C.muted2,marginTop:8}}>{region==="global" ? (isEN?"Indices & commodities shown via reference ETFs (SPY·QQQ·DIA·IWM) — not the spot index level. Crypto is live.":"Índices y materias primas vía ETF de referencia (SPY·QQQ·DIA·IWM) — no el nivel spot del índice. Cripto en vivo.") : (isEN?"Index proxies via regional ETFs · for reference":"Proxies de índice vía ETF regionales · referencia")}</div>
     </div>
   );
 }
