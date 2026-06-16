@@ -20873,6 +20873,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
   };
 
   const cols = COLS[activeView]||COLS.returns;
+  const HCOL=(h)=>{ if(isEN) return h; return ({"Name":"Nombre","Price":"Precio","Price, Current":"Precio actual","Change %":"Cambio %","Div. Yield":"Rend. Div.","Dividend Yield":"Rend. Div.","Day High":"Máx. día","Day Low":"Mín. día","Open":"Apertura","Prev Close":"Cierre ant.","Volatility %":"Volatilidad %","Net Margin":"Margen neto","Max Drawdown":"Máx. caída","Sharpe Ratio":"Ratio Sharpe","Correlation SPY":"Correlación SPY","Upside %":"Potencial %","Price Target":"Precio objetivo","EPS Estimate":"EPS estimado","Debt / Equity":"Deuda/Capital","Current Ratio":"Razón corriente","Quick Ratio":"Razón rápida","Interest Cov.":"Cobertura int.","FCF / Share":"FCF/acción","FCF/Share":"FCF/acción","Analyst Rating":"Rating analistas","# Analysts":"# Analistas"})[h]||h; };
   const totalW = cols.reduce((s,c)=>s+c.w, 0);
 
   // ── Ordenamiento de columnas (mayor a menor / menor a mayor) ──
@@ -21613,7 +21614,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
                       title={isEN?"Click to sort (high→low, click again for low→high)":"Clic para ordenar (mayor→menor, otra vez menor→mayor)"}
                       style={{...thStyle,minWidth:c.w,maxWidth:c.w+20,cursor:"pointer",color:active?"#0047C2":thStyle.color}}>
                       <span style={{display:"block"}}>
-                        {c.h}{" "}
+                        {HCOL(c.h)}{" "}
                         <span style={{fontSize:11,lineHeight:1,opacity:active?1:0.4,color:active?"#0047C2":"#94A3B8",whiteSpace:"nowrap"}}>{active?(sortDir==="desc"?"▼":"▲"):"↕"}</span>
                       </span>
                     </th>
