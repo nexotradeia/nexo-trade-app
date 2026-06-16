@@ -12,8 +12,9 @@ import quotes from '../lib/quotes.js';
 import fxhist from '../lib/fxhist.js';
 import technical from '../lib/technical.js';
 import pulse from '../lib/pulse.js';
+import social from '../lib/social.js';
 
-const ROUTES = { crypto, premarket, econ: econCalendar, econCalendar, dividends, ipos, commodities, ark, quotes, fxhist, technical, pulse };
+const ROUTES = { crypto, premarket, econ: econCalendar, econCalendar, dividends, ipos, commodities, ark, quotes, fxhist, technical, pulse, social };
 
 export default async function handler(req, res) {
   const type = String(req.query.type || "").trim();

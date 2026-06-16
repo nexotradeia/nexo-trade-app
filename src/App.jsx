@@ -15163,6 +15163,41 @@ function MarketPulseLive({lang="es"}){
   );
 }
 
+function SocialTrendingLive({lang="es"}){
+  const isEN=lang==="en";
+  const [rows,setRows]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const cref=useRef(false);
+  const load=()=>{
+    setSpin(true);
+    fetch('/api/data?type=social').then(r=>r.ok?r.json():null).then(j=>{ if(cref.current) return; const rs=(j&&Array.isArray(j.trending))?j.trending:[]; setRows(rs); setSt(rs.length?"ok":"empty"); setUpd(new Date()); setSpin(false); }).catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+  };
+  useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,120000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
+  if(st==="empty") return null;
+  const fmtW=n=> n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
+  return (
+    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:14,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
+        <span style={{fontSize:14}}>📣</span>
+        <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Social Trending":"Trending Social"}</b>
+        <span style={{fontSize:9.5,fontWeight:800,color:"#38BDF8",border:"1px solid rgba(56,189,248,0.4)",borderRadius:5,padding:"2px 6px"}}>REAL · STOCKTWITS</span>
+        <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
+      </div>
+      {st==="load"
+        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading…":"Cargando…"}</div>
+        : <div style={{display:"flex",gap:8,padding:"13px 14px",overflowX:"auto",flexWrap:"wrap"}}>
+            {rows.map((r,i)=>(
+              <div key={r.ticker+i} style={{flex:"0 0 auto",display:"flex",alignItems:"center",gap:7,background:i<3?"rgba(56,189,248,0.08)":"rgba(255,255,255,0.03)",border:`1px solid ${i<3?"rgba(56,189,248,0.35)":"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"7px 11px"}}>
+                <span style={{fontSize:10,fontWeight:800,color:i===0?"#F0B429":"#5b6b8a"}}>#{i+1}</span>
+                <span style={{fontWeight:800,color:"#E6EDF7",fontFamily:"monospace",fontSize:12.5}}>{r.ticker}</span>
+                {r.watchers>0 && <span style={{fontSize:10.5,color:"#8b9bb0"}}>👁 {fmtW(r.watchers)}</span>}
+              </div>
+            ))}
+          </div>}
+      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Most-watched tickers by the StockTwits community. Educational — not financial advice.":"Tickers más seguidos por la comunidad de StockTwits. Educativo — no es consejo financiero."}</div>
+    </div>
+  );
+}
+
 function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
@@ -15456,6 +15491,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
       {tab==="stocks" && <MarketPulseLive lang={lang}/>}
+      {tab==="stocks" && <SocialTrendingLive lang={lang}/>}
       {tab==="stocks" && (
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,alignItems:"start"}}>
           <AnalystRatingsLive lang={lang}/>
