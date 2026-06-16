@@ -14980,43 +14980,42 @@ function WatchlistWizard({lang="es",onClose,onDone}){
     </div>
   );
 }
+function PanelRefresh({onClick,spin,upd,lang}){
+  const isEN=lang==="en";
+  return (<span style={{marginLeft:"auto",display:"inline-flex",alignItems:"center",gap:8}}>
+    {upd && <span style={{fontSize:10,color:"#5b6b8a"}}>{upd.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</span>}
+    <button onClick={onClick} title={isEN?"Refresh":"Actualizar"} style={{background:"none",border:"1px solid rgba(255,255,255,0.12)",borderRadius:6,width:24,height:24,cursor:"pointer",color:"#8b9bb0",display:"inline-flex",alignItems:"center",justifyContent:"center",padding:0}}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{transition:"transform 0.6s",transform:spin?"rotate(360deg)":"none"}}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+    </button>
+  </span>);
+}
+
 function OptionsFlowLive({lang="es"}){
   const isEN=lang==="en";
-  const [rows,setRows]=useState([]);
-  const [st,setSt]=useState("load"); // load | ok | empty
-  useEffect(()=>{
-    let cancel=false;
-    const TKS=["NVDA","TSLA","SPY","QQQ","AAPL","META","AMZN","PLTR","AMD","COIN","MSFT","GOOGL","MSTR","SMCI"];
-    const load=()=>{
-      Promise.all(TKS.map(t=>fetch(`/api/options?mode=flow&ticker=${t}`).then(r=>r.ok?r.json():null).catch(()=>null)))
-        .then(res=>{
-          if(cancel) return;
-          let items=[];
-          res.forEach(j=>{ if(j&&Array.isArray(j.items)) j.items.forEach(it=>items.push(it)); });
-          items.sort((a,b)=>(b.premium||0)-(a.premium||0));
-          setRows(items.slice(0,10));
-          setSt(items.length?"ok":"empty");
-        }).catch(()=>{ if(!cancel) setSt("empty"); });
-    };
-    load();
-    const iv=setInterval(load,90000);
-    return ()=>{cancel=true;clearInterval(iv);};
-  },[]);
+  const [rows,setRows]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const cref=useRef(false);
+  const load=()=>{
+    setSpin(true);
+    const TKS=["NVDA","TSLA","SPY","QQQ","AAPL","META","AMZN","PLTR","AMD","COIN","MSTR","SMCI"];
+    Promise.all(TKS.map(t=>fetch(`/api/options?mode=flow&ticker=${t}`).then(r=>r.ok?r.json():null).catch(()=>null)))
+      .then(res=>{ if(cref.current) return; let items=[]; res.forEach(j=>{ if(j&&Array.isArray(j.items)) j.items.forEach(it=>items.push(it)); }); items.sort((a,b)=>(b.premium||0)-(a.premium||0)); setRows(items.slice(0,10)); setSt(items.length?"ok":"empty"); setUpd(new Date()); setSpin(false); })
+      .catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+  };
+  useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,60000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
   const money=n=> n>=1e6?("$"+(n/1e6).toFixed(1)+"M"):n>=1e3?("$"+(n/1e3).toFixed(0)+"K"):("$"+(n||0));
-  if(st==="empty") return null; // sin data real → no inventamos nada
+  if(st==="empty") return null;
   return (
     <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(0,229,143,0.18)",borderRadius:14,overflow:"hidden"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
         <span style={{fontSize:14}}>⚡</span>
         <b style={{fontSize:13,color:"#E6EDF7",letterSpacing:0.3}}>{isEN?"Live Options Flow":"Flujo de Opciones en Vivo"}</b>
         <span style={{fontSize:9.5,fontWeight:800,color:"#00E58F",border:"1px solid rgba(0,229,143,0.35)",borderRadius:5,padding:"2px 6px",letterSpacing:0.5}}>REAL · CBOE</span>
-        <span style={{marginLeft:"auto",fontSize:10,color:"#5b6b8a"}}>{isEN?"Biggest sweeps · ~15min":"Mayores sweeps · ~15min"}</span>
+        <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
       </div>
       {st==="load"
         ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading flow…":"Cargando flujo…"}</div>
         : <div style={{padding:"4px 0",overflowX:"auto"}}>
-            {rows.map((o,i)=>{
-              const bull=o.sentiment==="bullish"; const col=bull?"#00E58F":"#FF3D5A";
+            {rows.map((o,i)=>{ const bull=o.sentiment==="bullish"; const col=bull?"#00E58F":"#FF3D5A";
               return (
                 <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12,whiteSpace:"nowrap"}}>
                   <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{o.ticker}</span>
@@ -15035,28 +15034,30 @@ function OptionsFlowLive({lang="es"}){
 
 function AnalystRatingsLive({lang="es"}){
   const isEN=lang==="en";
-  const [rows,setRows]=useState([]); const [st,setSt]=useState("load");
-  useEffect(()=>{
-    let cancel=false;
+  const [rows,setRows]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const cref=useRef(false);
+  const load=()=>{
+    setSpin(true);
     const TKS=["NVDA","TSLA","AAPL","META","AMZN","MSFT","GOOGL","PLTR","AMD","COIN"];
     Promise.all(TKS.map(t=>fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${t}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).catch(()=>null)))
-      .then(res=>{ if(cancel) return;
+      .then(res=>{ if(cref.current) return;
         const out=[];
         res.forEach((arr,i)=>{ if(Array.isArray(arr)&&arr.length){ const d=arr[0]; const buy=(d.strongBuy||0)+(d.buy||0); const hold=d.hold||0; const sell=(d.sell||0)+(d.strongSell||0); const tot=buy+hold+sell; if(tot>0) out.push({tk:TKS[i],buy,hold,sell,tot,pct:Math.round(buy/tot*100)}); } });
-        out.sort((a,b)=>b.pct-a.pct); setRows(out); setSt(out.length?"ok":"empty");
-      }).catch(()=>{ if(!cancel) setSt("empty"); });
-    return ()=>{cancel=true;};
-  },[]);
+        out.sort((a,b)=>b.pct-a.pct); setRows(out); setSt(out.length?"ok":"empty"); setUpd(new Date()); setSpin(false);
+      }).catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+  };
+  useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,60000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
   if(st==="empty") return null;
   const lbl=p=> p>=70?(isEN?"Strong Buy":"Compra Fuerte"):p>=55?(isEN?"Buy":"Compra"):p>=45?(isEN?"Hold":"Neutral"):(isEN?"Sell":"Venta");
   const col=p=> p>=55?"#00E58F":p>=45?"#F0B429":"#FF3D5A";
   return (
     <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(77,166,255,0.18)",borderRadius:14,overflow:"hidden"}}>
+      <style>{"@keyframes nexoBarFlow{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}"}</style>
       <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
         <span style={{fontSize:14}}>📊</span>
         <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Analyst Consensus":"Consenso de Analistas"}</b>
         <span style={{fontSize:9.5,fontWeight:800,color:"#4DA6FF",border:"1px solid rgba(77,166,255,0.35)",borderRadius:5,padding:"2px 6px"}}>REAL · FINNHUB</span>
-        <span style={{marginLeft:"auto",fontSize:10,color:"#5b6b8a"}}>{isEN?"% Buy ratings":"% en Compra"}</span>
+        <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
       </div>
       {st==="load"
         ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading ratings…":"Cargando ratings…"}</div>
@@ -15064,7 +15065,7 @@ function AnalystRatingsLive({lang="es"}){
             {rows.map((r,i)=>(
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12}}>
                 <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{r.tk}</span>
-                <div style={{flex:1,height:6,borderRadius:4,background:"rgba(255,255,255,0.07)",overflow:"hidden",minWidth:60}}><div style={{width:r.pct+"%",height:"100%",background:col(r.pct)}}/></div>
+                <div style={{flex:1,height:7,borderRadius:4,background:"rgba(255,255,255,0.07)",overflow:"hidden",minWidth:60,position:"relative"}}><div style={{width:r.pct+"%",height:"100%",background:col(r.pct),borderRadius:4,transition:"width 0.9s ease",position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:0,bottom:0,left:0,width:"45%",background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)",animation:"nexoBarFlow 2.4s linear infinite"}}/></div></div>
                 <span style={{width:96,textAlign:"right",fontWeight:800,color:col(r.pct)}}>{lbl(r.pct)}</span>
                 <span style={{width:80,textAlign:"right",color:"#8b9bb0",fontFamily:"monospace",fontSize:10.5}}>{r.buy}B·{r.hold}H·{r.sell}S</span>
               </div>
@@ -15077,21 +15078,22 @@ function AnalystRatingsLive({lang="es"}){
 
 function InsidersLive({lang="es"}){
   const isEN=lang==="en";
-  const [rows,setRows]=useState([]); const [st,setSt]=useState("load");
-  useEffect(()=>{
-    let cancel=false;
+  const [rows,setRows]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const cref=useRef(false);
+  const load=()=>{
+    setSpin(true);
     const TKS=["NVDA","TSLA","AAPL","META","AMZN","MSFT","GOOGL","PLTR","AMD","COIN","MSTR","SMCI"];
     const to=new Date().toISOString().slice(0,10);
     const from=new Date(Date.now()-120*864e5).toISOString().slice(0,10);
     Promise.all(TKS.map(t=>fetch(`https://finnhub.io/api/v1/stock/insider-transactions?symbol=${t}&from=${from}&to=${to}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).catch(()=>null)))
-      .then(res=>{ if(cancel) return;
+      .then(res=>{ if(cref.current) return;
         let items=[];
-        res.forEach((j,i)=>{ if(j&&Array.isArray(j.data)){ j.data.forEach(d=>{ const sh=Math.abs(d.change||0); const price=d.transactionPrice||0; if(sh>0){ items.push({tk:TKS[i],name:d.name||"Insider",shares:sh,price,value:sh*price,date:d.filingDate||d.transactionDate||"",isBuy:(d.change||0)>0}); } }); } });
+        res.forEach((jr,i)=>{ if(jr&&Array.isArray(jr.data)){ jr.data.forEach(d=>{ const sh=Math.abs(d.change||0); const price=d.transactionPrice||0; if(sh>0){ items.push({tk:TKS[i],name:d.name||"Insider",shares:sh,price,value:sh*price,date:d.filingDate||d.transactionDate||"",isBuy:(d.change||0)>0}); } }); } });
         items.sort((a,b)=>(b.isBuy-a.isBuy)||(b.value-a.value)||(b.shares-a.shares));
-        setRows(items.slice(0,8)); setSt(items.length?"ok":"empty");
-      }).catch(()=>{ if(!cancel) setSt("empty"); });
-    return ()=>{cancel=true;};
-  },[]);
+        setRows(items.slice(0,10)); setSt(items.length?"ok":"empty"); setUpd(new Date()); setSpin(false);
+      }).catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+  };
+  useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,60000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
   if(st==="empty") return null;
   const money=n=> n>=1e6?("$"+(n/1e6).toFixed(1)+"M"):n>=1e3?("$"+(n/1e3).toFixed(0)+"K"):("$"+Math.round(n||0));
   return (
@@ -15100,7 +15102,7 @@ function InsidersLive({lang="es"}){
         <span style={{fontSize:14}}>🏛️</span>
         <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Insider Activity":"Movimientos de Insiders"}</b>
         <span style={{fontSize:9.5,fontWeight:800,color:"#F0B429",border:"1px solid rgba(240,180,41,0.35)",borderRadius:5,padding:"2px 6px"}}>REAL · SEC</span>
-        <span style={{marginLeft:"auto",fontSize:10,color:"#5b6b8a"}}>{isEN?"Buys = the real signal":"Las COMPRAS son la señal"}</span>
+        <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
       </div>
       {st==="load"
         ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading insiders…":"Cargando insiders…"}</div>
