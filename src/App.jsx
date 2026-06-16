@@ -15198,6 +15198,49 @@ function SocialTrendingLive({lang="es"}){
   );
 }
 
+function ThirteenFLive({lang="es"}){
+  const isEN=lang==="en";
+  const [funds,setFunds]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const cref=useRef(false);
+  const load=()=>{
+    setSpin(true);
+    fetch('/api/data?type=thirteenf').then(r=>r.ok?r.json():null).then(j=>{ if(cref.current) return; const fs=(j&&Array.isArray(j.funds))?j.funds:[]; setFunds(fs); setSt(fs.length?"ok":"empty"); setUpd(new Date()); setSpin(false); }).catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+  };
+  useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,1800000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
+  if(st==="empty") return null;
+  const money=n=> n>=1e9?("$"+(n/1e9).toFixed(1)+"B"):n>=1e6?("$"+(n/1e6).toFixed(0)+"M"):n>=1e3?("$"+(n/1e3).toFixed(0)+"K"):("$"+Math.round(n||0));
+  const tc=s=> String(s||"").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+  return (
+    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(34,211,238,0.18)",borderRadius:14,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
+        <span style={{fontSize:14}}>🐋</span>
+        <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Fund Holdings · 13F":"Posiciones de Fondos · 13F"}</b>
+        <span style={{fontSize:9.5,fontWeight:800,color:"#22D3EE",border:"1px solid rgba(34,211,238,0.4)",borderRadius:5,padding:"2px 6px"}}>REAL · SEC 13F</span>
+        <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
+      </div>
+      {st==="load"
+        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading 13F…":"Cargando 13F…"}</div>
+        : <div style={{display:"flex",gap:12,padding:"14px",overflowX:"auto"}}>
+            {funds.map((fd,fi)=>(
+              <div key={fi} style={{flex:"0 0 auto",minWidth:230,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"11px 12px"}}>
+                <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:6,marginBottom:9,borderBottom:"1px solid rgba(255,255,255,0.06)",paddingBottom:7}}>
+                  <b style={{fontSize:12.5,color:"#E6EDF7"}}>{fd.name}</b>
+                  <span style={{fontSize:9,color:"#5b6b8a"}}>{fd.date}</span>
+                </div>
+                {(fd.holdings||[]).map((h,hi)=>(
+                  <div key={hi} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,fontSize:11.5,padding:"4px 0"}}>
+                    <span style={{color:"#cbd5e1",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:140}}>{hi+1}. {tc(h.name)}</span>
+                    <span style={{fontWeight:800,color:"#22D3EE",fontFamily:"monospace"}}>{money(h.value)}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>}
+      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Top holdings from latest SEC 13F filings. Quarterly · delayed. Educational — not financial advice.":"Posiciones top del último 13F (SEC). Trimestral · con retraso. Educativo — no es consejo financiero."}</div>
+    </div>
+  );
+}
+
 function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
@@ -15492,6 +15535,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
       {tab==="stocks" && <MarketPulseLive lang={lang}/>}
       {tab==="stocks" && <SocialTrendingLive lang={lang}/>}
+      {tab==="stocks" && <ThirteenFLive lang={lang}/>}
       {tab==="stocks" && (
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,alignItems:"start"}}>
           <AnalystRatingsLive lang={lang}/>
