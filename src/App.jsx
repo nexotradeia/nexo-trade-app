@@ -27836,6 +27836,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   const isEN=lang==="en";
   const TAB_LBL=t=>({overview:isEN?"Overview":"Resumen",news:isEN?"News":"Noticias",earnings:isEN?"Earnings":"Resultados",calendars:isEN?"Calendars":"Calendarios"}[t]||t);
   const CAL_LBL=c=>({economic:isEN?"Economic":"Económico",dividends:isEN?"Dividends":"Dividendos",ipos:"IPOs",splits:"Splits",holidays:isEN?"Holidays":"Feriados",futures:isEN?"Futures":"Futuros"}[c]||c);
+  const REG_LBL=r=>({global:"Global",europe:isEN?"Europe":"Europa",asia:"Asia",latam:isEN?"Latam":"Latam"}[r]||r);
   var RefBtn = (
     <button onClick={triggerRefresh}
       style={{background:"none",border:"none",cursor:"pointer",padding:"2px 4px",color:"#9aa0ab",lineHeight:1,display:"flex",alignItems:"center"}}
@@ -27850,6 +27851,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
     </button>
   );
   var prices             = useContext(PriceCtx)||{};
+  const {cryptoPrices}=useCryptoPrices(); // BTC/ETH/SOL en vivo (CoinGecko); PriceCtx no trae cripto
 
   // ── design tokens — CSS variables for dark mode support ──
   var PAGE="var(--c-bg)",SURFACE="var(--c-surface)",S2="var(--c-card2)";
@@ -27904,9 +27906,9 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
     ],
   };
   var CRYPTO=[
-    {nm:"Bitcoin",   sym:"BTC", fp:61800, fc:+1.4},
-    {nm:"Ethereum",  sym:"ETH", fp:1629,  fc:-1.25},
-    {nm:"Solana",    sym:"SOL", fp:142.3, fc:+2.1},
+    {nm:"Bitcoin",   sym:"BTC", fp:67000, fc:+1.4},
+    {nm:"Ethereum",  sym:"ETH", fp:1800,  fc:-1.25},
+    {nm:"Solana",    sym:"SOL", fp:150, fc:+2.1},
     {nm:"XRP",       sym:"XRP", fp:0.58,  fc:-0.4},
   ];
 
@@ -28015,7 +28017,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
       </div>
       {/* Markets at a glance */}
       <div style={{...BLOCK,borderRadius:16}}>
-        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Markets at a glance</div>
+        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>{isEN?"Markets at a glance":"El mercado de un vistazo"}</div>
         <div style={{padding:15,textAlign:"center"}}>
           <div style={{fontSize:17,fontWeight:800,color:glance.c}}>{glance.label}</div>
           <div style={{fontSize:12,color:INK2,marginTop:3}}>{glance.sub}</div>
@@ -28069,7 +28071,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
 
           {/* Page header */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <h1 style={{fontSize:23,fontWeight:800,letterSpacing:"-0.03em",color:INK}}>Markets</h1>
+            <h1 style={{fontSize:23,fontWeight:800,letterSpacing:"-0.03em",color:INK}}>{isEN?"Markets":"Mercados"}</h1>
             <div style={{display:"flex",alignItems:"center",gap:7,fontSize:12,color:UP,fontWeight:600}}>
               <span style={{width:7,height:7,borderRadius:"50%",background:UP,display:"inline-block"}}/>
               Live · {new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true})} ET
@@ -28090,7 +28092,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
           {/* Region chips */}
           <div className="nexo-mkt-regions" style={{display:"flex",gap:7,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
             {["global","europe","asia","latam"].map(r=>(
-              <button key={r} style={{...regBtn(region===r),flexShrink:0}} onClick={()=>setRegion(r)}>{r.charAt(0).toUpperCase()+r.slice(1)}</button>
+              <button key={r} style={{...regBtn(region===r),flexShrink:0}} onClick={()=>setRegion(r)}>{REG_LBL(r)}</button>
             ))}
           </div>
 
@@ -28113,6 +28115,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
               <div style={{...BH,display:"flex",alignItems:"center",justifyContent:"space-between"}}>Crypto{RefBtn}</div>
               {CRYPTO.map((c,i)=>{
                 var live=liveP(c.sym,c.fp,c.fc);
+                var _cg=cryptoPrices[c.sym]; if(_cg&&_cg.p>0){ live={p:_cg.p,c:_cg.c}; }
                 return(
                   <div key={i} style={{display:"flex",alignItems:"center",padding:"12px 16px",borderBottom:i<CRYPTO.length-1?`1px solid ${HAIR}`:"none"}}>
                     <span style={{fontSize:14,fontWeight:600,color:INK,flex:1}}>{c.nm}</span>
