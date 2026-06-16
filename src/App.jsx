@@ -27833,6 +27833,8 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   var [calTab,setCalTab] = useState("economic");
   var [evSpin,setEvSpin] = useState(false);
   var [refreshSpin,setRefreshSpin] = useState(false);
+  var [mktNews,setMktNews] = useState(null);
+  useEffect(()=>{ let cancel=false; fetch(`https://finnhub.io/api/v1/news?category=general&token=${FINNHUB_KEY}`).then(r=>r.json()).then(d=>{ if(!cancel&&Array.isArray(d)){ var rows=d.filter(n=>n.headline&&n.source).slice(0,4).map(function(n){ var mins=Math.max(1,Math.round((Date.now()/1000-(n.datetime||0))/60)); var ago=mins<60?mins+"m":Math.round(mins/60)+"h"; return {t:n.headline,src:n.source+" · "+ago}; }); if(rows.length) setMktNews(rows); } }).catch(function(){}); return function(){cancel=true;}; },[]);
   function triggerRefresh(){setRefreshSpin(true);setTimeout(()=>setRefreshSpin(false),700);}
   const isEN=lang==="en";
   const TAB_LBL=t=>({overview:isEN?"Overview":"Resumen",news:isEN?"News":"Noticias",earnings:isEN?"Earnings":"Resultados",calendars:isEN?"Calendars":"Calendarios"}[t]||t);
@@ -28009,8 +28011,8 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
       {/* Market-moving news */}
       <div style={{...BLOCK,borderRadius:16}}>
         <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>{isEN?"Market-moving news":"Noticias que mueven el mercado"}</div>
-        {MARKET_NEWS.map((n,i)=>(
-          <div key={i} style={{padding:"12px 15px",borderBottom:i<MARKET_NEWS.length-1?`1px solid ${HAIR}`:"none"}}>
+        {(mktNews||MARKET_NEWS).map((n,i)=>(
+          <div key={i} style={{padding:"12px 15px",borderBottom:i<(mktNews||MARKET_NEWS).length-1?`1px solid ${HAIR}`:"none"}}>
             <div style={{fontSize:12.5,fontWeight:600,color:INK,lineHeight:1.4}}>{n.t}</div>
             <div style={{fontSize:11,color:INK3,marginTop:3}}>{n.src}</div>
           </div>
