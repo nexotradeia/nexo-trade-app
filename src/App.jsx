@@ -15246,6 +15246,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const T=(en,es)=>isEN?en:es;
   const lp=useContext(PriceCtx);
   const [tab,setTab]=useState("stocks");
+  const [sFilt,setSFilt]=useState("all");
   const [strict,setStrict]=useState(true);
   const [selS,setSelS]=useState(0);
   const [selO,setSelO]=useState(0);
@@ -15311,6 +15312,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   useEffect(()=>{ doPoll(false); const iv=setInterval(()=>doPoll(false),60000); const onVis=()=>{ if(!document.hidden) doPoll(false); }; document.addEventListener("visibilitychange",onVis); return ()=>{ clearInterval(iv); document.removeEventListener("visibilitychange",onVis); }; },[doPoll]);
 
   const rows = tab==="stocks"?STOCKS:OPTIONS;
+  const matchFilt=(r)=>{ if(sFilt==="all")return true; if(tab==="stocks"){ if(sFilt==="long")return r.dir==="LONG"; if(sFilt==="short")return r.dir==="SHORT"; if(sFilt==="earnings")return (r.flags||[]).includes("CAT"); if(sFilt==="intraday")return (parseFloat(r.vol)||0)>=3; } else { if(sFilt==="calls")return r.side==="CALL"; if(sFilt==="puts")return r.side==="PUT"; if(sFilt==="dte7"){ try{ var dd=new Date(r.exp+" "+new Date().getFullYear()); var days=(dd-Date.now())/864e5; if(days< -60)days+=365; return days>=0&&days<=7; }catch(e){ return true; } } } return true; };
+  const tableRows = (tab==="stocks"?STOCKS:OPTIONS).map((r,oi)=>({...r,_oi:oi})).filter(matchFilt);
   const sel = tab==="stocks"?selS:selO;
   const setSel = tab==="stocks"?setSelS:setSelO;
   const d = rows[sel] || rows[0];
@@ -15336,10 +15339,10 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .top h1 .gd{background:linear-gradient(95deg,#4D8DFF,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent}
       .nfp .top .meta{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;color:var(--mut);text-transform:uppercase;margin-top:2px}
       .nfp .top .sp{flex:1;min-width:8px}
-      .nfp .liveb{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--cy);font-weight:600;border:1px solid #103040;background:rgba(34,211,238,.06);border-radius:8px;padding:6px 10px}
-      .nfp .liveb i{width:6px;height:6px;border-radius:50%;background:var(--cy);animation:nfpPl 1.4s infinite}
-      .nfp .liveb.closed{color:var(--mut);border-color:var(--ln2);background:rgba(103,118,154,.06)}
-      .nfp .liveb.closed i{background:var(--mut);animation:none}
+      .nfp .liveb{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:#00E58F;font-weight:600;border:1px solid rgba(0,229,143,.35);background:rgba(0,229,143,.08);border-radius:8px;padding:6px 10px}
+      .nfp .liveb i{width:6px;height:6px;border-radius:50%;background:#00E58F;box-shadow:0 0 8px #00E58F;animation:nfpPl 1.4s infinite}
+      .nfp .liveb.closed{color:#FF3D5A;border-color:rgba(255,61,90,.35);background:rgba(255,61,90,.08)}
+      .nfp .liveb.closed i{background:#FF3D5A;animation:none}
       @keyframes nfpPl{50%{opacity:.25}}
       .nfp .refbtn{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--ln);color:var(--tx);border-radius:8px;padding:6px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
       .nfp .refbtn:hover{border-color:var(--bl2);color:#fff} .nfp .refbtn:disabled{opacity:.6;cursor:default}
@@ -15497,11 +15500,11 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       </div>
       {/* TABS */}
       <div className="tabs">
-        <button className={"tab stocks"+(tab==="stocks"?" on":"")} onClick={()=>setTab("stocks")}>
+        <button className={"tab stocks"+(tab==="stocks"?" on":"")} onClick={()=>{setTab("stocks");setSFilt("all");}}>
           <span className="ic2"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 11l3.5-4.4 2.6 2.1L13.5 3.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 3.5h3.5V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
           <span className="ti"><span>{T("Stocks Finder","Buscador de Acciones")}</span><small>{T("S&P 500 + Top 100","S&P 500 + Top 100")}</small></span>
         </button>
-        <button className={"tab options"+(tab==="options"?" on":"")} onClick={()=>setTab("options")}>
+        <button className={"tab options"+(tab==="options"?" on":"")} onClick={()=>{setTab("options");setSFilt("all");}}>
           <span className="ic2"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8c2-1.5 3.6-1.5 5.6 0s3.6 1.5 5.6 0M2 5c2-1.5 3.6-1.5 5.6 0s3.6 1.5 5.6 0M2 11c2-1.5 3.6-1.5 5.6 0s3.6 1.5 5.6 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg></span>
           <span className="ti"><span>{T("Options Finder","Buscador de Opciones")}</span><small>{T("US options · CALLS & PUTS","Opciones US · CALLS Y PUTS")}</small></span>
         </button>
@@ -15564,8 +15567,10 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
         <div className="card">
           <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className={"stat"+(mktOpen?"":" paused")}><i/>{mktOpen?T("INDICATIVE","INDICATIVO"):T("PAUSED · CLOSED","PAUSADO · CERRADO")}</span></div>
           <div className="filt">
-            <span className="on">{T("All","Todas")}</span>
-            {tab==="stocks"?<><span>{T("Long","Largos")}</span><span>{T("Short","Cortos")}</span><span>⚡ Earnings ≤7d</span></>:<><span>Calls</span><span>Puts</span><span>0–7 DTE</span></>}
+            {(tab==="stocks"
+              ? [["all",T("All","Todas")],["long",T("Long","Largos")],["short",T("Short","Cortos")],["intraday",T("Intraday","Intradía")],["earnings","⚡ Earnings ≤7d"]]
+              : [["all",T("All","Todas")],["calls","Calls"],["puts","Puts"],["dte7","0–7 DTE"]]
+            ).map(([k,lbl])=>(<span key={k} className={sFilt===k?"on":""} style={{cursor:"pointer"}} onClick={()=>setSFilt(k)}>{lbl}</span>))}
           </div>
           <div className="tape-h">
             <span>#</span><span>{tab==="stocks"?"TICKER":T("CONTRACT","CONTRATO")}</span>
@@ -15576,12 +15581,12 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
             <span>SCORE</span>
           </div>
           <div className="gate">
-            {rows.map((r,i)=>{
+            {tableRows.map((r,i)=>{
               const locked = !isPremium && i>=FREE;
-              const cls = "row"+(sel===i?" sel":"")+(locked?" blur":"");
+              const cls = "row"+(sel===r._oi?" sel":"")+(locked?" blur":"");
               const scCls = r.score>=90?"sc hi":"sc mid";
               return tab==="stocks"?(
-                <div key={i} className={cls} onClick={()=>!locked&&setSel(i)}>
+                <div key={i} className={cls} onClick={()=>!locked&&setSel(r._oi)}>
                   <span className="rk">{String(i+1).padStart(2,"0")}</span>
                   <span className="ct"><span className="tk">{r.tk}</span><span className={"tg "+(r.dir==="LONG"?"c":"p")}>{r.dir==="LONG"?T("LONG","LARGO"):"SHORT"}</span></span>
                   <span className="num">${fmtP(liveP(r.tk,r.fb))}</span>
@@ -15591,7 +15596,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
                   <span className={scCls}>{r.score}</span>
                 </div>
               ):(
-                <div key={i} className={cls} onClick={()=>!locked&&setSel(i)}>
+                <div key={i} className={cls} onClick={()=>!locked&&setSel(r._oi)}>
                   <span className="rk">{String(i+1).padStart(2,"0")}</span>
                   <span className="ct"><span className="tk">{r.tk}</span><span className={"tg "+(r.side==="CALL"?"c":"p")}>{r.side}</span></span>
                   <span className="num">{r.strk}</span>
