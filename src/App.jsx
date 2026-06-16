@@ -15033,6 +15033,94 @@ function OptionsFlowLive({lang="es"}){
   );
 }
 
+function AnalystRatingsLive({lang="es"}){
+  const isEN=lang==="en";
+  const [rows,setRows]=useState([]); const [st,setSt]=useState("load");
+  useEffect(()=>{
+    let cancel=false;
+    const TKS=["NVDA","TSLA","AAPL","META","AMZN","MSFT","GOOGL","PLTR","AMD","COIN"];
+    Promise.all(TKS.map(t=>fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${t}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).catch(()=>null)))
+      .then(res=>{ if(cancel) return;
+        const out=[];
+        res.forEach((arr,i)=>{ if(Array.isArray(arr)&&arr.length){ const d=arr[0]; const buy=(d.strongBuy||0)+(d.buy||0); const hold=d.hold||0; const sell=(d.sell||0)+(d.strongSell||0); const tot=buy+hold+sell; if(tot>0) out.push({tk:TKS[i],buy,hold,sell,tot,pct:Math.round(buy/tot*100)}); } });
+        out.sort((a,b)=>b.pct-a.pct); setRows(out); setSt(out.length?"ok":"empty");
+      }).catch(()=>{ if(!cancel) setSt("empty"); });
+    return ()=>{cancel=true;};
+  },[]);
+  if(st==="empty") return null;
+  const lbl=p=> p>=70?(isEN?"Strong Buy":"Compra Fuerte"):p>=55?(isEN?"Buy":"Compra"):p>=45?(isEN?"Hold":"Neutral"):(isEN?"Sell":"Venta");
+  const col=p=> p>=55?"#00E58F":p>=45?"#F0B429":"#FF3D5A";
+  return (
+    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(77,166,255,0.18)",borderRadius:14,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
+        <span style={{fontSize:14}}>📊</span>
+        <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Analyst Consensus":"Consenso de Analistas"}</b>
+        <span style={{fontSize:9.5,fontWeight:800,color:"#4DA6FF",border:"1px solid rgba(77,166,255,0.35)",borderRadius:5,padding:"2px 6px"}}>REAL · FINNHUB</span>
+        <span style={{marginLeft:"auto",fontSize:10,color:"#5b6b8a"}}>{isEN?"% Buy ratings":"% en Compra"}</span>
+      </div>
+      {st==="load"
+        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading ratings…":"Cargando ratings…"}</div>
+        : <div style={{padding:"4px 0"}}>
+            {rows.map((r,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12}}>
+                <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{r.tk}</span>
+                <div style={{flex:1,height:6,borderRadius:4,background:"rgba(255,255,255,0.07)",overflow:"hidden",minWidth:60}}><div style={{width:r.pct+"%",height:"100%",background:col(r.pct)}}/></div>
+                <span style={{width:96,textAlign:"right",fontWeight:800,color:col(r.pct)}}>{lbl(r.pct)}</span>
+                <span style={{width:80,textAlign:"right",color:"#8b9bb0",fontFamily:"monospace",fontSize:10.5}}>{r.buy}B·{r.hold}H·{r.sell}S</span>
+              </div>
+            ))}
+          </div>}
+      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Aggregated analyst recommendations (Finnhub). Educational — not financial advice.":"Recomendaciones de analistas agregadas (Finnhub). Educativo — no es consejo financiero."}</div>
+    </div>
+  );
+}
+
+function InsidersLive({lang="es"}){
+  const isEN=lang==="en";
+  const [rows,setRows]=useState([]); const [st,setSt]=useState("load");
+  useEffect(()=>{
+    let cancel=false;
+    const TKS=["NVDA","TSLA","AAPL","META","AMZN","MSFT","GOOGL","PLTR","AMD","COIN","MSTR","SMCI"];
+    const to=new Date().toISOString().slice(0,10);
+    const from=new Date(Date.now()-120*864e5).toISOString().slice(0,10);
+    Promise.all(TKS.map(t=>fetch(`https://finnhub.io/api/v1/stock/insider-transactions?symbol=${t}&from=${from}&to=${to}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).catch(()=>null)))
+      .then(res=>{ if(cancel) return;
+        let items=[];
+        res.forEach((j,i)=>{ if(j&&Array.isArray(j.data)){ j.data.forEach(d=>{ const sh=Math.abs(d.change||0); const price=d.transactionPrice||0; if(sh>0&&price>0){ items.push({tk:TKS[i],name:d.name||"Insider",shares:sh,price,value:sh*price,date:d.filingDate||d.transactionDate||"",isBuy:(d.transactionCode==="P")||((d.change||0)>0)}); } }); } });
+        items.sort((a,b)=>(b.isBuy-a.isBuy)||(b.value-a.value));
+        setRows(items.slice(0,8)); setSt(items.length?"ok":"empty");
+      }).catch(()=>{ if(!cancel) setSt("empty"); });
+    return ()=>{cancel=true;};
+  },[]);
+  if(st==="empty") return null;
+  const money=n=> n>=1e6?("$"+(n/1e6).toFixed(1)+"M"):n>=1e3?("$"+(n/1e3).toFixed(0)+"K"):("$"+Math.round(n||0));
+  return (
+    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(240,180,41,0.18)",borderRadius:14,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
+        <span style={{fontSize:14}}>🏛️</span>
+        <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Insider Activity":"Movimientos de Insiders"}</b>
+        <span style={{fontSize:9.5,fontWeight:800,color:"#F0B429",border:"1px solid rgba(240,180,41,0.35)",borderRadius:5,padding:"2px 6px"}}>REAL · SEC</span>
+        <span style={{marginLeft:"auto",fontSize:10,color:"#5b6b8a"}}>{isEN?"Buys = the real signal":"Las COMPRAS son la señal"}</span>
+      </div>
+      {st==="load"
+        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading insiders…":"Cargando insiders…"}</div>
+        : <div style={{padding:"4px 0",overflowX:"auto"}}>
+            {rows.map((r,i)=>{ const c=r.isBuy?"#00E58F":"#FF6B81";
+              return (
+              <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12,whiteSpace:"nowrap"}}>
+                <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{r.tk}</span>
+                <span style={{fontSize:10,fontWeight:800,color:c}}>{r.isBuy?(isEN?"BUY":"COMPRA"):(isEN?"SELL":"VENTA")}</span>
+                <span style={{color:"#8b9bb0",overflow:"hidden",textOverflow:"ellipsis",maxWidth:150}}>{r.name}</span>
+                <span style={{color:"#8b9bb0",fontFamily:"monospace"}}>{r.shares.toLocaleString("en-US")} @ ${r.price}</span>
+                <span style={{marginLeft:"auto",fontWeight:800,color:c,fontFamily:"monospace"}}>{money(r.value)}</span>
+              </div>
+            );})}
+          </div>}
+      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Real SEC insider transactions. Insider BUYS are the meaningful signal. Not financial advice.":"Transacciones reales de insiders (SEC). Las COMPRAS de insiders son la señal valiosa. No es consejo financiero."}</div>
+    </div>
+  );
+}
+
 function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
@@ -15325,6 +15413,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
         ))}
       </div>
       <OptionsFlowLive lang={lang}/>
+      <AnalystRatingsLive lang={lang}/>
+      <InsidersLive lang={lang}/>
       {/* PILLARS */}
       <div className="pillars">
         {[["rr",T("BEST RISK / REWARD","MEJOR RIESGO/RECOMPENSA"),T("Smartest play","Jugada más inteligente"),T("Best setup + catalyst","Mejor setup + catalizador"),0],
