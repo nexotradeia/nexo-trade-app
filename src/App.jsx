@@ -15413,8 +15413,12 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
         ))}
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
-      {tab==="stocks" && <AnalystRatingsLive lang={lang}/>}
-      {tab==="stocks" && <InsidersLive lang={lang}/>}
+      {tab==="stocks" && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,alignItems:"start"}}>
+          <AnalystRatingsLive lang={lang}/>
+          <InsidersLive lang={lang}/>
+        </div>
+      )}
       {/* PILLARS */}
       <div className="pillars">
         {[["rr",T("BEST RISK / REWARD","MEJOR RIESGO/RECOMPENSA"),T("Smartest play","Jugada más inteligente"),T("Best setup + catalyst","Mejor setup + catalizador"),0],
