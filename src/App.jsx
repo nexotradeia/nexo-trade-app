@@ -15174,27 +15174,35 @@ function SocialTrendingLive({lang="es"}){
   };
   useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,120000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
   if(st==="empty") return null;
+  const MONO="'JetBrains Mono',monospace";
   const fmtW=n=> n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
+  const logs=rows.map(r=>Math.log10((r.watchers||0)+10));
+  const lmin=Math.min.apply(null,logs), lmax=Math.max.apply(null,logs);
+  const lerp=(t)=>{ t=Math.max(0,Math.min(1,t)); return [Math.round(240+(22-240)*t), Math.round(97+(199-97)*t), Math.round(109+(132-109)*t)]; };
   return (
-    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(56,189,248,0.2)",borderRadius:14,overflow:"hidden"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
-        <span style={{fontSize:14}}>📣</span>
-        <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Social Trending":"Trending Social"}</b>
-        <span style={{fontSize:9.5,fontWeight:800,color:"#38BDF8",border:"1px solid rgba(56,189,248,0.4)",borderRadius:5,padding:"2px 6px"}}>REAL · STOCKTWITS</span>
+    <div style={{margin:"0 0 12px",background:"#0B101C",border:"1px solid rgba(255,255,255,0.07)",borderRadius:11,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+        <span style={{fontSize:11}}>🔥</span>
+        <span style={{fontSize:10.5,fontWeight:700,letterSpacing:1,color:"#C7D2E3",textTransform:"uppercase",fontFamily:MONO}}>{isEN?"Social Trending":"Trending Social"}</span>
+        <span style={{fontSize:8,fontWeight:800,color:"#38BDF8",letterSpacing:0.5}}>● STOCKTWITS</span>
         <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
       </div>
       {st==="load"
-        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading…":"Cargando…"}</div>
-        : <div style={{display:"flex",gap:8,padding:"13px 14px",overflowX:"auto",flexWrap:"wrap"}}>
-            {rows.map((r,i)=>(
-              <div key={r.ticker+i} style={{flex:"0 0 auto",display:"flex",alignItems:"center",gap:7,background:i<3?"rgba(56,189,248,0.08)":"rgba(255,255,255,0.03)",border:`1px solid ${i<3?"rgba(56,189,248,0.35)":"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"7px 11px"}}>
-                <span style={{fontSize:10,fontWeight:800,color:i===0?"#F0B429":"#5b6b8a"}}>#{i+1}</span>
-                <span style={{fontWeight:800,color:"#E6EDF7",fontFamily:"monospace",fontSize:12.5}}>{r.ticker}</span>
-                {r.watchers>0 && <span style={{fontSize:10.5,color:"#8b9bb0"}}>👁 {fmtW(r.watchers)}</span>}
-              </div>
-            ))}
+        ? <div style={{padding:"12px",color:"#5b6b8a",fontSize:11}}>{isEN?"Loading…":"Cargando…"}</div>
+        : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:7,padding:"10px"}}>
+            {rows.map((r,i)=>{ const t=lmax>lmin?(logs[i]-lmin)/(lmax-lmin):0.5; const c=lerp(t); const cs=c[0]+","+c[1]+","+c[2];
+              return (
+                <div key={r.ticker+i} style={{padding:"6px 9px",borderRadius:7,border:"1px solid rgba("+cs+",0.4)",background:"rgba("+cs+",0.09)"}}>
+                  <div style={{fontSize:8.5,color:"#6b7a95",fontFamily:MONO}}>#{i+1}</div>
+                  <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:4}}>
+                    <span style={{fontSize:11.5,fontWeight:800,color:"#E6EDF7",fontFamily:MONO}}>{r.ticker}</span>
+                    <span style={{fontSize:9.5,fontWeight:700,color:"rgb("+cs+")",fontFamily:MONO}}>{fmtW(r.watchers)}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>}
-      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Most-watched tickers by the StockTwits community. Educational — not financial advice.":"Tickers más seguidos por la comunidad de StockTwits. Educativo — no es consejo financiero."}</div>
+      <div style={{padding:"5px 12px",fontSize:8.5,color:"#475569"}}>{isEN?"Most-watched tickers · StockTwits · Color = social volume · Not advice":"Tickers más seguidos · StockTwits · Color = volumen social · No es consejo"}</div>
     </div>
   );
 }
