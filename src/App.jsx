@@ -12412,7 +12412,8 @@ function WinStreakTracker({lang="es"}){
 // ── HERRAMIENTA 4: EVOLUCIÓN DEL PORTAFOLIO ───────────────────────────────────
 function PortfolioEvolution({lang="es"}){
   const isEN=lang==="en";
-  const [entries,setEntries]=useState([{date:"2024-01",value:"10000"},{date:"2024-06",value:"11500"},{date:"2024-12",value:"13200"},{date:"2025-06",value:"14800"}]);
+  const [entries,setEntries]=useState(()=>{ try{const s=localStorage.getItem("nexotrade_pfgrowth");return s?JSON.parse(s):[];}catch{return [];} });
+  useEffect(()=>{ try{localStorage.setItem("nexotrade_pfgrowth",JSON.stringify(entries));}catch{} },[entries]);
   const [newDate,setNewDate]=useState(""); const [newVal,setNewVal]=useState("");
 
   const addEntry=()=>{
@@ -12442,6 +12443,13 @@ function PortfolioEvolution({lang="es"}){
     <div style={{background:"rgba(10,16,30,0.98)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px"}}>
       <h3 style={{color:"#F1F5F9",fontWeight:800,fontSize:16,marginBottom:4}}>{isEN?"📈 Your Portfolio Growth":"📈 Evolución de tu Portafolio"}</h3>
       <p style={{color:"#64748B",fontSize:12,marginBottom:20}}>{isEN?"Log your portfolio value each month to see your real growth.":"Registra el valor de tu portafolio cada mes para ver tu crecimiento real."}</p>
+      {chartData.length<2 && (
+        <div style={{textAlign:"center",padding:"28px 16px",color:"#64748B",background:"rgba(255,255,255,0.02)",border:"1px dashed rgba(255,255,255,0.12)",borderRadius:12,marginBottom:20}}>
+          <div style={{fontSize:30,marginBottom:8}}>📈</div>
+          <div style={{fontSize:13,fontWeight:700,color:"#94A3B8"}}>{isEN?"No data yet":"Aún sin datos"}</div>
+          <div style={{fontSize:11,marginTop:4}}>{isEN?"Add at least 2 months below to see your growth chart.":"Agrega al menos 2 meses abajo para ver tu gráfica de crecimiento."}</div>
+        </div>
+      )}
       {/* Chart */}
       {chartData.length>1 && (
         <div style={{marginBottom:20}}>
