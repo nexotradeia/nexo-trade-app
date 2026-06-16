@@ -11856,6 +11856,13 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
     setSellTicker(null); setSellShares("");
   };
 
+  const resetPf=()=>{
+    try{ if(!window.confirm(isEN?"Reset your paper portfolio to $100,000 and clear all positions?":"¿Reiniciar tu portafolio a $100,000 y borrar todas las posiciones?")) return; }catch(_){}
+    setPf({cash:100000,positions:{},trades:[]});
+    setSellTicker(null); setSellShares("");
+    showMsg(isEN?"✅ Portfolio reset to $100,000":"✅ Portafolio reiniciado a $100,000");
+  };
+
   const positions=Object.entries(pf.positions).map(([tk,pos])=>{
     const cp=prices[tk]?.price||pos.avgCost;
     const value=cp*pos.shares, cost=pos.avgCost*pos.shares;
@@ -12040,6 +12047,10 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
             {/* ── POSICIONES ── */}
             {tab==="posiciones"&&(
               <div>
+                <button onClick={resetPf}
+                  style={{width:"100%",marginBottom:10,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px",color:"#94A3B8",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  ⟳ {isEN?"Reset portfolio ($100k)":"Reiniciar portafolio ($100k)"}
+                </button>
                 {positions.length===0?(
                   <div style={{textAlign:"center",padding:"32px 16px",color:"#475569"}}>
                     <div style={{fontSize:32,marginBottom:10}}>📭</div>
