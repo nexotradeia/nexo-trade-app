@@ -12870,7 +12870,7 @@ function AccionesVIPPage({isPremium, onNeedPremium, isAdmin, lang="es"}){
           <button onClick={onNeedPremium} style={{background:"linear-gradient(135deg,#1d7fff,#0a5fe0)",border:"none",borderRadius:13,padding:"15px 32px",color:"#fff",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 6px 28px rgba(29,127,255,.45)",width:"100%",marginBottom:14,letterSpacing:.3}}>
             {isEN?"Try VIP free for 3 days →":"Prueba VIP gratis 3 días →"}
           </button>
-          <div style={{fontSize:12,color:"#5b6b7e",letterSpacing:.4,marginBottom:6}}>{isEN?"THEN ":"LUEGO "}<strong style={{color:"#cdddee"}}>$6.58/MO</strong> {isEN?"BILLED $79/YEAR":"FACTURADO $79/AÑO"} · {isEN?"OR":"O"} <span style={{textDecoration:"line-through"}}>$12.99</span> {isEN?"MONTHLY":"MENSUAL"}</div>
+          <div style={{fontSize:12,color:"#5b6b7e",letterSpacing:.4,marginBottom:6}}>{isEN?"THEN ":"LUEGO "}<strong style={{color:"#cdddee"}}>$6.58/MO</strong> {isEN?"BILLED $79/YEAR":"FACTURADO $79/AÑO"} · {isEN?"OR":"O"} <span style={{textDecoration:"line-through"}}>$15.99</span> {isEN?"MONTHLY":"MENSUAL"}</div>
           <div style={{fontSize:12,color:"#475569"}}>{isEN?"✓ Cancel anytime  ✓ Instant access":"✓ Cancela cuando quieras  ✓ Acceso inmediato"}</div>
         </div>
       </div>
@@ -15674,7 +15674,7 @@ function FlowPage({isPremium,onNeedPremium,lang="es"}){
           <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:7}}>
             <span style={{fontSize:44,fontWeight:900,background:"linear-gradient(180deg,#3aa6ff,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:-1}}>$6.58</span>
             <span style={{fontSize:13,color:"#8b9bb0"}}>/mo</span>
-            <span style={{fontSize:13,color:"#5b6b7e",textDecoration:"line-through"}}>$12.99</span>
+            <span style={{fontSize:13,color:"#5b6b7e",textDecoration:"line-through"}}>$15.99</span>
           </div>
           <div style={{fontSize:9.5,color:"#5b6b7e",letterSpacing:1,marginTop:2}}>BILLED $79 / YEAR</div>
           <div style={{display:"inline-block",marginTop:10,background:"rgba(34,197,94,.12)",border:"1px solid rgba(34,197,94,.25)",borderRadius:8,padding:"5px 12px",fontSize:10,fontWeight:800,color:"#22c55e",letterSpacing:.3}}>SAVE $77 VS MONTHLY · 49% OFF</div>
@@ -23399,7 +23399,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           </div>
           <div style={{width:1,height:54,background:"rgba(255,255,255,.1)"}}/>
           <div style={{textAlign:"left"}}>
-            <div style={{fontSize:14,color:"#5b6b7e",textDecoration:"line-through",marginBottom:8}}>$12.99/mo monthly</div>
+            <div style={{fontSize:14,color:"#5b6b7e",textDecoration:"line-through",marginBottom:8}}>$15.99/mo monthly</div>
             <div style={{display:"inline-block",background:"rgba(34,197,94,.12)",border:"1px solid rgba(34,197,94,.25)",borderRadius:8,padding:"6px 13px",fontSize:13,fontWeight:800,color:"#22c55e",letterSpacing:.3}}>SAVE $77/YEAR · 49% OFF</div>
           </div>
         </div>
