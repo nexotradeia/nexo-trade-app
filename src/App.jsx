@@ -30232,12 +30232,12 @@ export default function App(){
                 IA <span style={{fontSize:9,opacity:.7}}>▾</span>
               </button>
               <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
-                <div className="nexo-drop-label">Artificial Intelligence</div>
+                <div className="nexo-drop-label">{isEN?"Artificial Intelligence":"Inteligencia Artificial"}</div>
                 {[
-                  {label:"Oracle AI",sub:"AI trading chat assistant",fn:()=>setShowAI(true),ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>},
-                  {label:"Stock Pick AI",sub:"Automated recommendations",idx:3,badge:"NEW",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>},
+                  {label:"Oracle AI",sub:isEN?"AI trading chat assistant":"Asistente de chat de trading IA",fn:()=>setShowAI(true),ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>},
+                  {label:"Stock Pick AI",sub:isEN?"Automated recommendations":"Recomendaciones automáticas",idx:3,badge:"NEW",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>},
                   {label:"Market Top",sub:isEN?"Top movers right now":"Líderes del momento",idx:1,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>},
-                  {label:"Asset Classes",sub:"Crypto · Commodities · ETFs · Forex",idx:36,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>},
+                  {label:isEN?"Asset Classes":"Clases de activos",sub:isEN?"Crypto · Commodities · ETFs · Forex":"Cripto · Materias · ETFs · Forex",idx:36,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>},
                 ].map((it,i)=>(
                   <div key={i} className="nexo-ditem" onClick={()=>{ it.fn?it.fn():(it.idx!=null&&(setPage(it.idx),setShowLanding(false))); }}>
                     <div className="nexo-dico nexo-dico-ia">{it.ico}</div>
@@ -30255,12 +30255,12 @@ export default function App(){
                 Market {marketOpen&&<span title="Mercado abierto" style={{width:6,height:6,borderRadius:"50%",background:"#16a34a",display:"inline-block",boxShadow:"0 0 5px #16a34a",animation:"nexo-pulse 1.8s infinite"}}/>}<span style={{fontSize:9,opacity:.7}}>▾</span>
               </button>
               <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
-                <div className="nexo-drop-label">Market Analysis</div>
+                <div className="nexo-drop-label">{isEN?"Market Analysis":"Análisis de Mercado"}</div>
                 {[
-                  {label:"Global Radar",sub:"16 exchanges live",idx:44,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>},
-                  {label:"Smart Money",sub:"Live institutional flow",idx:20,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
-                  {label:"Wall St. & Capitol",sub:"13F Gurus · Congress",idx:19,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>},
-                  {label:"Trending",sub:"Top movers today",idx:7,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+                  {label:"Global Radar",sub:isEN?"16 exchanges live":"16 bolsas en vivo",idx:44,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>},
+                  {label:"Smart Money",sub:isEN?"Live institutional flow":"Flujo institucional en vivo",idx:20,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>},
+                  {label:"Wall St. & Capitol",sub:isEN?"13F Gurus · Congress":"Gurús 13F · Congreso",idx:19,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>},
+                  {label:"Trending",sub:isEN?"Top movers today":"Líderes de hoy",idx:7,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0369A1" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
                 ].map((it,i)=>(
                   <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
                     <div className="nexo-dico nexo-dico-mkt">{it.ico}</div>
@@ -30277,12 +30277,12 @@ export default function App(){
                 Tools <span style={{fontSize:9,opacity:.7}}>▾</span>
               </button>
               <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
-                <div className="nexo-drop-label">Trading Tools</div>
+                <div className="nexo-drop-label">{isEN?"Trading Tools":"Herramientas"}</div>
                 {[
-                  {label:"Watchlist",sub:"My favorite stocks",idx:38,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>},
-                  {label:"Alerts",sub:"Price notifications",idx:42,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>},
-                  {label:"Paper Trading",sub:"Risk-free simulator",idx:9,badge:"AI",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>},
-                  {label:"Portfolio Terminal",sub:"Oracle AI · Charts · Journal",idx:37,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>},
+                  {label:"Watchlist",sub:isEN?"My favorite stocks":"Mis acciones favoritas",idx:38,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>},
+                  {label:"Alerts",sub:isEN?"Price notifications":"Alertas de precio",idx:42,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>},
+                  {label:"Paper Trading",sub:isEN?"Risk-free simulator":"Simulador sin riesgo",idx:9,badge:"AI",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>},
+                  {label:"Portfolio Terminal",sub:isEN?"Oracle AI · Charts · Journal":"Oracle IA · Gráficos · Diario",idx:37,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>},
                 ].map((it,i)=>(
                   <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
                     <div className="nexo-dico nexo-dico-ops">{it.ico}</div>
@@ -30300,10 +30300,10 @@ export default function App(){
                 VIP <span style={{fontSize:9,opacity:.7}}>▾</span>
               </button>
               <div className="nexo-mega-drop" style={{left:"auto",right:0}}>
-                <div className="nexo-drop-label">Premium Access</div>
+                <div className="nexo-drop-label">{isEN?"Premium Access":"Acceso Premium"}</div>
                 {[
-                  {label:"Premium Ideas",sub:"Exclusive team picks",idx:21,badge:"VIP",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>},
-                  {label:"Activate VIP",sub:"From $6.58/mo · 3 days free",idx:8,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>},
+                  {label:"Premium Ideas",sub:isEN?"Exclusive team picks":"Selecciones exclusivas del equipo",idx:21,badge:"VIP",ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>},
+                  {label:isEN?"Activate VIP":"Activar VIP",sub:isEN?"From $6.58/mo · 3 days free":"Desde $6.58/mes · 3 días gratis",idx:8,ico:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>},
                 ].map((it,i)=>(
                   <div key={i} className="nexo-ditem" onClick={()=>{setPage(it.idx);setShowLanding(false);}}>
                     <div className="nexo-dico nexo-dico-vip">{it.ico}</div>
