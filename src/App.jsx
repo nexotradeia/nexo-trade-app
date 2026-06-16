@@ -9543,9 +9543,9 @@ function MarketOverview({lang="es"}){
   const [rLoading,setRLoading]=useState(false);
   const REGION_TABS=[
     {id:"global",label:"Global",flag:"🌐"},
-    {id:"europe",label:"Europe",flag:"🇪🇺"},
-    {id:"asia",  label:"Asia-Pacific",flag:"🌏"},
-    {id:"latam", label:"Latin America",flag:"🌎"},
+    {id:"europe",label:isEN?"Europe":"Europa",flag:"🇪🇺"},
+    {id:"asia",  label:isEN?"Asia-Pacific":"Asia-Pacífico",flag:"🌏"},
+    {id:"latam", label:isEN?"Latin America":"Latinoamérica",flag:"🌎"},
   ];
   // Market Overview vía /api/prices (Finnhub) con ETF-proxies + respaldo (nunca vacío)
   const MO_GROUPS = {
