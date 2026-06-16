@@ -11808,16 +11808,30 @@ function PaperTradingFullPage({ user, onBack, lang="es", embedded=false, posts=[
 
   const fetchQuote = async(tk)=>{
     if(!tk) return;
+    const T=tk.trim().toUpperCase();
     setFetching(true);
+    let q=null;
     try{
-      const sym=resolveSym(tk.trim().toUpperCase());
+      const sym=resolveSym(T);
       const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
       const d=await r.json();
-      if(d.c>0){ setLiveQ({price:d.c,change:d.dp||0}); setChartTk(tk.trim().toUpperCase()); }
-      else setLiveQ(null);
-    }catch{ setLiveQ(null); }
+      if(d&&d.c>0) q={price:d.c,change:d.dp||0};
+    }catch{}
+    // Respaldo: /api/prices del servidor (Finnhub + STOCK_FB, nunca vacio para acciones)
+    if(!q){
+      try{
+        const r=await fetch("/api/prices?tickers="+encodeURIComponent(T));
+        const j=await r.json();
+        const v=j&&j.prices&&j.prices[T];
+        if(v&&v.c>0) q={price:v.c,change:(typeof v.dp==="number"?v.dp:0)};
+      }catch{}
+    }
+    if(q){ setLiveQ(q); setChartTk(T); }
+    else setLiveQ(null);
     setFetching(false);
   };
+  // Precio automatico al cambiar de ticker (para que Comprar siempre se active)
+  useEffect(()=>{ if(chartTk) fetchQuote(chartTk); /* eslint-disable-next-line */ },[chartTk]);
 
   const showMsg=(text,ok=true)=>{setMsg({text,ok});setTimeout(()=>setMsg(null),3000);};
   const fmtUSD=(n)=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
