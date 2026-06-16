@@ -15254,6 +15254,52 @@ function ThirteenFLive({lang="es"}){
   );
 }
 
+function MoversLive({lang="es"}){
+  const isEN=lang==="en";
+  const MK="nexo_movers_best";
+  const [data,setData]=useState(()=>{ try{ const c=JSON.parse(localStorage.getItem(MK)||"null"); return (c&&c.gainers)?c:{gainers:[],losers:[]}; }catch(e){ return {gainers:[],losers:[]}; } });
+  const [st,setSt]=useState(()=>{ try{ const c=JSON.parse(localStorage.getItem(MK)||"null"); return (c&&((c.gainers||[]).length+(c.losers||[]).length)>0)?"ok":"load"; }catch(e){ return "load"; } });
+  const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const cref=useRef(false);
+  const load=()=>{
+    setSpin(true);
+    fetch('/api/data?type=movers').then(r=>r.ok?r.json():null).then(j=>{ if(cref.current) return;
+      const g=(j&&Array.isArray(j.gainers))?j.gainers:[]; const l=(j&&Array.isArray(j.losers))?j.losers:[]; const cnt=g.length+l.length;
+      setData(prev=>{ const pcnt=(prev.gainers||[]).length+(prev.losers||[]).length; const best=cnt>=pcnt?{gainers:g,losers:l}:prev; if(((best.gainers||[]).length+(best.losers||[]).length)>=8){ try{ localStorage.setItem(MK,JSON.stringify(best)); }catch(e){} } return best; });
+      setSt(prevSt=> cnt>0?"ok":(prevSt==="ok"?"ok":"empty")); setUpd(new Date()); setSpin(false);
+    }).catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+  };
+  useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,60000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
+  if(st==="empty") return null;
+  const MONO="'JetBrains Mono',monospace";
+  const items=(data.gainers||[]).map(x=>({...x,up:true})).concat((data.losers||[]).map(x=>({...x,up:false})));
+  if(!items.length) return null;
+  return (
+    <div style={{margin:"0 0 12px",background:"#0B101C",border:"1px solid rgba(255,255,255,0.07)",borderRadius:11,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+        <span style={{fontSize:11}}>🚀</span>
+        <span style={{fontSize:10.5,fontWeight:700,letterSpacing:1,color:"#C7D2E3",textTransform:"uppercase",fontFamily:MONO}}>Top Movers</span>
+        <span style={{fontSize:8,fontWeight:800,color:"#16C784",letterSpacing:0.5}}>● {isEN?"LIVE":"EN VIVO"}</span>
+        <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(118px,1fr))",gap:8,padding:"12px"}}>
+        {items.map((x,i)=>{ const tc=x.up?"22,199,132":"240,97,109"; const col="rgb("+tc+")";
+          return (
+            <div key={x.sym+i} style={{padding:"10px 12px",borderRadius:9,border:"1px solid rgba("+tc+",0.4)",background:"rgba("+tc+",0.09)"}}>
+              <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:6}}>
+                <span style={{fontSize:13,fontWeight:800,color:"#E6EDF7",fontFamily:MONO}}>{x.sym}</span>
+                <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:MONO}}>{x.up?"+":""}{(x.dp||0).toFixed(2)}%</span>
+              </div>
+              <div style={{fontSize:9.5,color:"#7a8aa3",fontFamily:MONO,marginTop:3}}>${(x.price||0).toFixed(2)}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{padding:"5px 12px",fontSize:8.5,color:"#475569"}}>{isEN?"Biggest gainers & losers today · ~15min · Not advice":"Mayores subidas y bajadas de hoy · ~15min · No es consejo"}</div>
+    </div>
+  );
+}
+
 function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
@@ -15549,6 +15595,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
         ))}
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
+      {tab==="stocks" && <MoversLive lang={lang}/>}
       {tab==="stocks" && <MarketPulseLive lang={lang}/>}
       {tab==="stocks" && <SocialTrendingLive lang={lang}/>}
       {tab==="stocks" && (
