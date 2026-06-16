@@ -15147,17 +15147,17 @@ function MarketPulseLive({lang="es"}){
       </div>
       {st==="load"
         ? <div style={{padding:"12px",color:"#5b6b8a",fontSize:11}}>{isEN?"Loading…":"Cargando…"}</div>
-        : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(118px,1fr))"}}>
-            {rows.map((r,i)=>{ const up=(r.avg||0)>=0; const col=up?GRN:REDc; const tcol=(r.topv||0)>=0?GRN:REDc; const hot=i===0&&(r.avg||0)>0;
+        : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:8,padding:"12px"}}>
+            {rows.map((r,i)=>{ const up=(r.avg||0)>=0; const col=up?GRN:REDc; const tcol=(r.topv||0)>=0?GRN:REDc; const tc=up?"22,199,132":"240,97,109"; const hot=i===0&&up;
               return (
-                <div key={r.name} style={{padding:"9px 12px",borderRight:"1px solid rgba(255,255,255,0.045)",borderBottom:"1px solid rgba(255,255,255,0.045)",background:hot?"rgba(22,199,132,0.04)":"transparent"}}>
+                <div key={r.name} style={{padding:"11px 13px",borderRadius:9,border:"1px solid rgba("+tc+",0.4)",background:"rgba("+tc+",0.09)",boxShadow:hot?"0 0 0 1px rgba("+tc+",0.3)":"none"}}>
                   <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
-                    <span style={{fontSize:10,opacity:0.85}}>{r.emoji}</span>
-                    <span style={{fontSize:9.5,fontWeight:700,letterSpacing:0.4,color:"#9FB0C6",textTransform:"uppercase"}}>{r.name}</span>
+                    <span style={{fontSize:12,opacity:0.9}}>{r.emoji}</span>
+                    <span style={{fontSize:10.5,fontWeight:700,letterSpacing:0.4,color:"#C7D2E3",textTransform:"uppercase"}}>{r.name}</span>
                     {hot && <span style={{marginLeft:"auto",fontSize:9}}>🔥</span>}
                   </div>
-                  <div style={{fontSize:15,fontWeight:800,fontFamily:MONO,color:col,letterSpacing:-0.3}}>{up?"+":""}{(r.avg||0).toFixed(2)}%</div>
-                  {r.top && <div style={{fontSize:8.5,color:"#6b7a95",fontFamily:MONO,marginTop:3,whiteSpace:"nowrap"}}>{r.top} <span style={{color:tcol,fontWeight:700}}>{(r.topv||0)>=0?"+":""}{(r.topv||0).toFixed(1)}%</span></div>}
+                  <div style={{fontSize:17,fontWeight:800,fontFamily:MONO,color:col,letterSpacing:-0.3}}>{up?"+":""}{(r.avg||0).toFixed(2)}%</div>
+                  {r.top && <div style={{fontSize:9,color:"#7a8aa3",fontFamily:MONO,marginTop:3,whiteSpace:"nowrap"}}>{r.top} <span style={{color:tcol,fontWeight:700}}>{(r.topv||0)>=0?"+":""}{(r.topv||0).toFixed(1)}%</span></div>}
                 </div>
               );
             })}
