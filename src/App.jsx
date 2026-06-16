@@ -15133,32 +15133,33 @@ function MarketPulseLive({lang="es"}){
   };
   useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,90000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
   if(st==="empty") return null;
+  const GRN="#16C784", REDc="#F0616D", MONO="'JetBrains Mono',monospace";
   return (
-    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(168,85,247,0.2)",borderRadius:14,overflow:"hidden"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
-        <span style={{fontSize:14}}>📡</span>
-        <b style={{fontSize:13,color:"#E6EDF7"}}>{isEN?"Market Pulse · Hot Narratives":"Market Pulse · Narrativas Calientes"}</b>
-        <span style={{fontSize:9.5,fontWeight:800,color:"#C084FC",border:"1px solid rgba(168,85,247,0.4)",borderRadius:5,padding:"2px 6px"}}>{isEN?"REAL · LIVE":"REAL · EN VIVO"}</span>
+    <div style={{margin:"0 0 12px",background:"#0B101C",border:"1px solid rgba(255,255,255,0.07)",borderRadius:11,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+        <span style={{fontSize:10.5,fontWeight:700,letterSpacing:1,color:"#C7D2E3",textTransform:"uppercase",fontFamily:MONO}}>Market Pulse</span>
+        <span style={{fontSize:8.5,fontWeight:600,color:"#6b7a95",letterSpacing:0.8}}>{isEN?"NARRATIVES":"NARRATIVAS"}</span>
+        <span style={{fontSize:8,fontWeight:800,color:GRN,letterSpacing:0.5}}>● {isEN?"LIVE":"EN VIVO"}</span>
         <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
       </div>
       {st==="load"
-        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading themes…":"Cargando narrativas…"}</div>
-        : <div style={{display:"flex",gap:10,padding:"14px",overflowX:"auto"}}>
-            {rows.map((r,i)=>{ const up=(r.avg||0)>=0; const col=up?"#00E58F":"#FF3D5A"; const hot=i===0&&(r.avg||0)>0;
+        ? <div style={{padding:"12px",color:"#5b6b8a",fontSize:11}}>{isEN?"Loading…":"Cargando…"}</div>
+        : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(118px,1fr))"}}>
+            {rows.map((r,i)=>{ const up=(r.avg||0)>=0; const col=up?GRN:REDc; const tcol=(r.topv||0)>=0?GRN:REDc; const hot=i===0&&(r.avg||0)>0;
               return (
-                <div key={r.name} style={{flex:"0 0 auto",minWidth:138,background:hot?"rgba(0,229,143,0.06)":"rgba(255,255,255,0.025)",border:`1px solid ${hot?"rgba(0,229,143,0.4)":"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:"11px 13px"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7}}>
-                    <span style={{fontSize:15}}>{r.emoji}</span>
-                    <span style={{fontSize:12.5,fontWeight:800,color:"#E6EDF7"}}>{r.name}</span>
-                    {hot && <span style={{marginLeft:"auto",fontSize:11}}>🔥</span>}
+                <div key={r.name} style={{padding:"9px 12px",borderRight:"1px solid rgba(255,255,255,0.045)",borderBottom:"1px solid rgba(255,255,255,0.045)",background:hot?"rgba(22,199,132,0.04)":"transparent"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
+                    <span style={{fontSize:10,opacity:0.85}}>{r.emoji}</span>
+                    <span style={{fontSize:9.5,fontWeight:700,letterSpacing:0.4,color:"#9FB0C6",textTransform:"uppercase"}}>{r.name}</span>
+                    {hot && <span style={{marginLeft:"auto",fontSize:9}}>🔥</span>}
                   </div>
-                  <div style={{fontSize:19,fontWeight:900,color:col,fontFamily:"monospace",letterSpacing:-0.5}}>{up?"+":""}{(r.avg||0).toFixed(2)}%</div>
-                  {r.top && <div style={{fontSize:10.5,color:"#8b9bb0",marginTop:3,fontFamily:"monospace"}}>{isEN?"Top: ":"Líder: "}<span style={{color:(r.topv||0)>=0?"#00E58F":"#FF3D5A",fontWeight:700}}>{r.top} {(r.topv||0)>=0?"+":""}{(r.topv||0).toFixed(1)}%</span></div>}
+                  <div style={{fontSize:15,fontWeight:800,fontFamily:MONO,color:col,letterSpacing:-0.3}}>{up?"+":""}{(r.avg||0).toFixed(2)}%</div>
+                  {r.top && <div style={{fontSize:8.5,color:"#6b7a95",fontFamily:MONO,marginTop:3,whiteSpace:"nowrap"}}>{r.top} <span style={{color:tcol,fontWeight:700}}>{(r.topv||0)>=0?"+":""}{(r.topv||0).toFixed(1)}%</span></div>}
                 </div>
               );
             })}
           </div>}
-      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Avg real price performance per theme (curated baskets · Finnhub). Educational — not financial advice.":"Rendimiento real promedio de precio por narrativa (canastas curadas · Finnhub). Educativo — no es consejo financiero."}</div>
+      <div style={{padding:"5px 12px",fontSize:8.5,color:"#475569"}}>{isEN?"Avg real performance per theme · Finnhub · Not advice":"Rendimiento real por narrativa · Finnhub · No es consejo"}</div>
     </div>
   );
 }
