@@ -15179,7 +15179,8 @@ function SocialTrendingLive({lang="es"}){
   if(st==="empty") return null;
   const MONO="'JetBrains Mono',monospace";
   const fmtW=n=> n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
-  const logs=rows.map(r=>Math.log10((r.watchers||0)+10));
+  const sorted=rows.slice().sort((a,b)=>(b.watchers||0)-(a.watchers||0));
+  const logs=sorted.map(r=>Math.log10((r.watchers||0)+10));
   const lmin=Math.min.apply(null,logs), lmax=Math.max.apply(null,logs);
   const lerp=(t)=>{ t=Math.max(0,Math.min(1,t)); return [Math.round(240+(22-240)*t), Math.round(97+(199-97)*t), Math.round(109+(132-109)*t)]; };
   return (
@@ -15193,7 +15194,7 @@ function SocialTrendingLive({lang="es"}){
       {st==="load"
         ? <div style={{padding:"12px",color:"#5b6b8a",fontSize:11}}>{isEN?"Loading…":"Cargando…"}</div>
         : <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:7,padding:"10px"}}>
-            {rows.map((r,i)=>{ const t=lmax>lmin?(logs[i]-lmin)/(lmax-lmin):0.5; const c=lerp(t); const cs=c[0]+","+c[1]+","+c[2];
+            {sorted.map((r,i)=>{ const t=lmax>lmin?(logs[i]-lmin)/(lmax-lmin):0.5; const c=lerp(t); const cs=c[0]+","+c[1]+","+c[2];
               return (
                 <div key={r.ticker+i} style={{padding:"6px 9px",borderRadius:7,border:"1px solid rgba("+cs+",0.4)",background:"rgba("+cs+",0.09)"}}>
                   <div style={{fontSize:8.5,color:"#6b7a95",fontFamily:MONO}}>#{i+1}</div>
