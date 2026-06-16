@@ -15412,9 +15412,9 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
           <div key={s} className={"sig "+s}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
         ))}
       </div>
-      <OptionsFlowLive lang={lang}/>
-      <AnalystRatingsLive lang={lang}/>
-      <InsidersLive lang={lang}/>
+      {tab==="options" && <OptionsFlowLive lang={lang}/>}
+      {tab==="stocks" && <AnalystRatingsLive lang={lang}/>}
+      {tab==="stocks" && <InsidersLive lang={lang}/>}
       {/* PILLARS */}
       <div className="pillars">
         {[["rr",T("BEST RISK / REWARD","MEJOR RIESGO/RECOMPENSA"),T("Smartest play","Jugada más inteligente"),T("Best setup + catalyst","Mejor setup + catalizador"),0],
