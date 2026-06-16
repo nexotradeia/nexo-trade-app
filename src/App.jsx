@@ -9377,17 +9377,17 @@ function ToolsMenu({lang="es", onNavigate, isPremium=false, variant="pill"}){
   const go=idx=>{setOpen(false);onNavigate&&onNavigate(idx);};
   const groups=[
     {t:isEN?"Calendars":"Calendarios", items:[
-      [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],["Dividends",15],["IPOs",16],["Holidays",57],["Splits",58],["Futures Expiry",59]]},
+      [isEN?"Economic Calendar":"Calendario Económico",14],["Earnings",6],["Dividends",15],["IPOs",16],[isEN?"Holidays":"Feriados",57],["Splits",58],[isEN?"Futures Expiry":"Venc. Futuros",59]]},
     {t:isEN?"Calculators":"Calculadoras", items:[
-      ["Pivot Points",46],["Profit",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],["Mortgage",49]]},
+      [isEN?"Pivot Points":"Puntos Pivote",46],[isEN?"Profit":"Ganancia",47],[isEN?"Margin":"Margen",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
     {t:isEN?"Currencies":"Divisas", items:[
-      [isEN?"Currency Converter":"Conversor",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
+      [isEN?"Currency Converter":"Conversor",53],[isEN?"Heat Map":"Mapa de Calor",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
     {t:isEN?"Investing Tools":"Inversión", items:[
       ["Asset Classes",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],[isEN?"Track Record":"Track Record",51]]},
     {t:isEN?"Markets":"Mercados", items:[
       ["Live Markets",7],["Pre-Market",45],["Crypto",41],["Commodities",18],["Global Radar",44],["Smart Money",20]]},
     {t:isEN?"Education":"Educación", items:[
-      ["Webinars",11],["Academy",12]]},
+      ["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
   const navBtn = variant==="nav";
   return(
@@ -9422,12 +9422,12 @@ function MobileNavDrawer({open,onClose,lang="es",onNavigate,onAI,onPremium,isPre
   const go=idx=>{onClose();onNavigate(idx);};
   const SECTIONS=[
     {t:isEN?"Main":"Principal",items:[["Feed",0],["Stock Pick AI",3],["Live Markets",7],["Earnings",6],["News",5],["Trending",7777]]},
-    {t:isEN?"Calendars":"Calendarios",items:[["Economic",14],["Dividends",15],["IPOs",16],["Holidays",57],["Splits",58],["Futures Expiry",59]]},
-    {t:isEN?"Calculators":"Calculadoras",items:[["Pivot Points",46],["Profit",47],["Margin",48],["Forward Rates",50],["Fibonacci",52],["Mortgage",49]]},
-    {t:isEN?"Currencies":"Divisas",items:[["Converter",53],["Heat Map",60],["Correlation",54],["Volatility",55]]},
+    {t:isEN?"Calendars":"Calendarios",items:[[isEN?"Economic":"Económico",14],["Dividends",15],["IPOs",16],[isEN?"Holidays":"Feriados",57],["Splits",58],[isEN?"Futures Expiry":"Venc. Futuros",59]]},
+    {t:isEN?"Calculators":"Calculadoras",items:[[isEN?"Pivot Points":"Puntos Pivote",46],[isEN?"Profit":"Ganancia",47],[isEN?"Margin":"Margen",48],["Forward Rates",50],["Fibonacci",52],[isEN?"Mortgage":"Hipoteca",49]]},
+    {t:isEN?"Currencies":"Divisas",items:[[isEN?"Converter":"Conversor",53],[isEN?"Heat Map":"Mapa de Calor",60],[isEN?"Correlation":"Correlación",54],[isEN?"Volatility":"Volatilidad",55]]},
     {t:isEN?"Investing Tools":"Inversión",items:[["Asset Classes",36],["Watchlist",38],["Portfolio Oracle",37],["Alerts",42],["Paper Trading",9],["Fed Rate Monitor",56],["Track Record",51]]},
     {t:isEN?"Markets":"Mercados",items:[["Pre-Market",45],["Crypto",41],["Commodities",18],["Global Radar",44],["Smart Money",20],["Wall St. & Capitol",19],["Ideas Premium",21]]},
-    {t:isEN?"Education":"Educación",items:[["Webinars",11],["Academy",12]]},
+    {t:isEN?"Education":"Educación",items:[["Webinars",11],[isEN?"Academy":"Academia",12]]},
   ];
   return(<>
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:99996,backdropFilter:"blur(2px)"}}/>
