@@ -27833,10 +27833,13 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   var [evSpin,setEvSpin] = useState(false);
   var [refreshSpin,setRefreshSpin] = useState(false);
   function triggerRefresh(){setRefreshSpin(true);setTimeout(()=>setRefreshSpin(false),700);}
+  const isEN=lang==="en";
+  const TAB_LBL=t=>({overview:isEN?"Overview":"Resumen",news:isEN?"News":"Noticias",earnings:isEN?"Earnings":"Resultados",calendars:isEN?"Calendars":"Calendarios"}[t]||t);
+  const CAL_LBL=c=>({economic:isEN?"Economic":"Económico",dividends:isEN?"Dividends":"Dividendos",ipos:"IPOs",splits:"Splits",holidays:isEN?"Holidays":"Feriados",futures:isEN?"Futures":"Futuros"}[c]||c);
   var RefBtn = (
     <button onClick={triggerRefresh}
       style={{background:"none",border:"none",cursor:"pointer",padding:"2px 4px",color:"#9aa0ab",lineHeight:1,display:"flex",alignItems:"center"}}
-      title="Refresh">
+      title={isEN?"Refresh":"Actualizar"}>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
         style={{transition:"transform 0.7s",transform:refreshSpin?"rotate(360deg)":"rotate(0deg)"}}>
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
@@ -27948,9 +27951,9 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
     {t:"Energy outperforms on supply concerns",                         src:"CNBC · 2h"},
   ];
   var spyLive=liveP("SPY",580,-0.8);
-  var glance=spyLive.c<-1?{label:"Risk-off",sub:"Equities soft, yields up, crypto firm",c:DN}
-            :spyLive.c>1 ?{label:"Risk-on", sub:"Equities rallying, risk assets bid",   c:UP}
-            :{label:"Mixed",sub:"Equity leadership mixed, watch yields",c:INK2};
+  var glance=spyLive.c<-1?{label:isEN?"Risk-off":"Aversión al riesgo",sub:isEN?"Equities soft, yields up, crypto firm":"Acciones débiles, rendimientos al alza",c:DN}
+            :spyLive.c>1 ?{label:isEN?"Risk-on":"Apetito de riesgo", sub:isEN?"Equities rallying, risk assets bid":"Acciones al alza, activos de riesgo comprados",   c:UP}
+            :{label:isEN?"Mixed":"Mixto",sub:isEN?"Equity leadership mixed, watch yields":"Liderazgo mixto, ojo a los rendimientos",c:INK2};
 
   // ── shared styles ──
   var tabBtn=(active)=>({fontSize:13.5,fontWeight:600,color:active?INK:INK2,padding:"8px 14px",borderRadius:10,background:active?SURFACE:"none",border:active?`1px solid ${HAIR}`:"none",boxShadow:active?SH:"none",cursor:"pointer",fontFamily:"inherit"});
@@ -27964,10 +27967,10 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
       {/* Today's events */}
       <div style={{...BLOCK,borderRadius:16}}>
         <div style={{padding:"11px 15px",borderBottom:`1px solid ${HAIR}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <span style={{fontSize:13.5,fontWeight:700,color:INK}}>{_econToday.length?"Today's events":"Upcoming events"}</span>
+          <span style={{fontSize:13.5,fontWeight:700,color:INK}}>{_econToday.length?(isEN?"Today's events":"Eventos de hoy"):(isEN?"Upcoming events":"Próximos eventos")}</span>
           <button onClick={triggerRefresh}
             style={{background:"none",border:"none",cursor:"pointer",padding:"2px 6px",color:INK3,lineHeight:1,display:"flex",alignItems:"center",gap:4,fontSize:11,fontWeight:600}}
-            title="Refresh">
+            title={isEN?"Refresh":"Actualizar"}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
               style={{transition:"transform 0.7s",transform:refreshSpin?"rotate(360deg)":"rotate(0deg)"}}>
               <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
@@ -27996,13 +27999,13 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
         {/* View all link → Economic Calendar */}
         <button onClick={()=>{setTab("calendars");setCalTab("economic");}}
           style={{width:"100%",background:"none",border:"none",borderTop:`1px solid ${HAIR}`,padding:"10px 15px",cursor:"pointer",fontSize:12,fontWeight:600,color:BLUE,textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"inherit"}}>
-          View Economic Calendar
+          {isEN?"View Economic Calendar":"Ver calendario económico"}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
       </div>
       {/* Market-moving news */}
       <div style={{...BLOCK,borderRadius:16}}>
-        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>Market-moving news</div>
+        <div style={{padding:"13px 15px",borderBottom:`1px solid ${HAIR}`,fontSize:13.5,fontWeight:700,color:INK}}>{isEN?"Market-moving news":"Noticias que mueven el mercado"}</div>
         {MARKET_NEWS.map((n,i)=>(
           <div key={i} style={{padding:"12px 15px",borderBottom:i<MARKET_NEWS.length-1?`1px solid ${HAIR}`:"none"}}>
             <div style={{fontSize:12.5,fontWeight:600,color:INK,lineHeight:1.4}}>{n.t}</div>
@@ -28025,7 +28028,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
   var _subNav=(
     <div style={{padding:"16px 12px 0"}}>
       <div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:20,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",maxWidth:1100,margin:"0 auto 20px"}}>
-        {["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}
+        {["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{TAB_LBL(t)}</button>)}
       </div>
     </div>
   );
@@ -28043,10 +28046,10 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
     return(
       <div style={{background:PAGE,minHeight:"100vh",padding:"16px 12px 120px",fontFamily:"'Inter',-apple-system,sans-serif"}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:16,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}</div>
+          <div className="nexo-mkt-subnav" style={{display:"flex",gap:6,marginBottom:16,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>{["overview","news","earnings","calendars"].map(t=><button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{TAB_LBL(t)}</button>)}</div>
           <div className="nexo-mkt-regions" style={{display:"flex",gap:8,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",marginBottom:20}}>
             {["economic","dividends","ipos","splits","holidays","futures"].map(c=>(
-              <button key={c} style={{...regBtn(calTab===c),flexShrink:0}} onClick={()=>setCalTab(c)}>{c.charAt(0).toUpperCase()+c.slice(1)}</button>
+              <button key={c} style={{...regBtn(calTab===c),flexShrink:0}} onClick={()=>setCalTab(c)}>{CAL_LBL(c)}</button>
             ))}
           </div>
           {calComponents[calTab]||null}
@@ -28076,10 +28079,10 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
           {/* Sub-nav tabs */}
           <div className="nexo-mkt-subnav" style={{display:"flex",gap:6,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
             {["overview","news","earnings","calendars"].map(t=>(
-              <button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>
+              <button key={t} style={{...tabBtn(tab===t),flexShrink:0}} onClick={()=>setTab(t)}>{TAB_LBL(t)}</button>
             ))}
             <span style={{flexShrink:0,width:1,alignSelf:"stretch",background:HAIR,margin:"4px 2px"}}/>
-            {[["Pre-Market",45],["Crypto",41],["Smart Money",20],["Commodities",18],["Dividends",15],["IPOs",16],["Global Radar",44]].map(q=>(
+            {[["Pre-Market",45],[isEN?"Crypto":"Cripto",41],["Smart Money",20],[isEN?"Commodities":"Materias Primas",18],[isEN?"Dividends":"Dividendos",15],["IPOs",16],["Global Radar",44]].map(q=>(
               <button key={q[0]} style={{...tabBtn(false),flexShrink:0}} onClick={()=>onNavigate(q[1])}>{q[0]}</button>
             ))}
           </div>
@@ -28123,7 +28126,7 @@ function MarketsPage({user, isPremium, onNavigate, lang="en"}){
 
           {/* Sector heatmap */}
           <div style={BLOCK}>
-            <div style={{...BH,display:"flex",alignItems:"center",justifyContent:"space-between"}}>Sector heatmap{RefBtn}</div>
+            <div style={{...BH,display:"flex",alignItems:"center",justifyContent:"space-between"}}>{isEN?"Sector heatmap":"Mapa de calor por sector"}{RefBtn}</div>
             <div className="nexo-heat-grid" style={{padding:14,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:7}}>
               {SECTORS.map((sec,i)=>(
                 <div key={i} style={{borderRadius:9,padding:"11px 10px",background:secBg(sec.c),color:"#fff"}}>
