@@ -23283,11 +23283,23 @@ function OracleIA({ positions, livePrices, isPremium, onNeedPremium, isEN }) {
 
 function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPost, onNeedAuth }) {
   const isEN = lang==="en";
-  const LS_KEY = `nexo_portfolio_${user?.id||"guest"}`;
+  const PF_BASE = `nexo_portfolio_${user?.id||"guest"}`;
+  const PF_LIST_KEY = `nexo_pf_list_${user?.id||"guest"}`;
+  const PF_ACTIVE_KEY = `nexo_pf_active_${user?.id||"guest"}`;
+  const [pfList, setPfList] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(PF_LIST_KEY)||"null"); return (Array.isArray(s)&&s.length)?s:[{id:"",name:isEN?"Portfolio 1":"Cartera 1"}]; }catch{ return [{id:"",name:isEN?"Portfolio 1":"Cartera 1"}]; } });
+  const [pfActive, setPfActive] = useState(()=>{ try{ return localStorage.getItem(PF_ACTIVE_KEY)||""; }catch{ return ""; } });
+  const LS_KEY = PF_BASE + (pfActive?`_${pfActive}`:"");
+  const pfActiveRef = useRef(pfActive); pfActiveRef.current = pfActive;
+  const [pfRenaming, setPfRenaming] = useState(null);
+  const [pfNewName, setPfNewName] = useState("");
 
   const [positions, setPositions] = useState(()=>{
     try { return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); } catch{ return []; }
   });
+  useEffect(()=>{ try{ localStorage.setItem(PF_LIST_KEY, JSON.stringify(pfList)); }catch{} },[pfList, PF_LIST_KEY]);
+  useEffect(()=>{ try{ localStorage.setItem(PF_ACTIVE_KEY, pfActive); }catch{} },[pfActive, PF_ACTIVE_KEY]);
+  const pfFirst = useRef(true);
+  useEffect(()=>{ if(pfFirst.current){ pfFirst.current=false; return; } try{ setPositions(JSON.parse(localStorage.getItem(LS_KEY)||"[]")); }catch{ setPositions([]); } },[LS_KEY]);
   const [livePrices, setLivePrices] = useState({});
   const [loading, setLoading] = useState(false);
   const WATCH_KEY = `nexo_watchlist_${user?.id||"guest"}`;
@@ -23375,9 +23387,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
         if(cancelled) return;
         if(error) throw error;
         if(data && Array.isArray(data.positions) && data.positions.length>0){
-          setPositions(data.positions);
+          if(pfActiveRef.current==="") setPositions(data.positions);
         } else {
-          let seed=[]; try { const s=JSON.parse(localStorage.getItem(LS_KEY)||"[]"); if(s&&s.length) seed=s; } catch {}
+          let seed=[]; try { const s=JSON.parse(localStorage.getItem(PF_BASE)||"[]"); if(s&&s.length) seed=s; } catch {}
           if(seed.length) await supabase.from("user_portfolios").upsert({ user_id:user.id, positions:seed, updated_at:new Date().toISOString() });
         }
         pCloudReady.current=true; if(!cancelled) setPCloud("synced");
@@ -23398,7 +23410,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   // Persist: localStorage siempre + nube (Supabase) tras la carga inicial
   useEffect(()=>{
     try { localStorage.setItem(LS_KEY, JSON.stringify(positions)); } catch{}
-    if(user?.id && pCloudReady.current){
+    if(user?.id && pCloudReady.current && pfActive===""){
       setPCloud("saving");
       supabase.from("user_portfolios")
         .upsert({ user_id:user.id, positions, updated_at:new Date().toISOString() })
@@ -23835,11 +23847,44 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:MONO,fontSize:11}}><span style={{width:6,height:6,borderRadius:"50%",background:mkt.color||T.grn,boxShadow:`0 0 8px ${mkt.color||T.grn}`,animation:"nxtBl 2s ease-in-out infinite"}}/><span style={{color:mkt.color||T.grn,letterSpacing:.5}}>{(mkt.label||"MARKET").toUpperCase()}</span><span style={{color:T.dim}}>· {mkt.sub||""}</span></div>
           <div style={{width:1,height:20,background:T.br2}}/>
           <div style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:totalPnl>=0?T.grn:T.red,textShadow:`0 0 12px ${totalPnl>=0?"rgba(0,255,135,.4)":"rgba(255,61,90,.4)"}`}}>{m$(totalPnl)}</div>
-          {(()=>{ const s = pCloud==="synced"?{t:"☁ SYNCED",c:T.grn}:(pCloud==="loading"||pCloud==="saving")?{t:"☁ SYNC…",c:T.blue}:pCloud==="error"?{t:"⚠ LOCAL",c:T.gold}:{t:"☁ SIGN IN",c:T.dim}; return <span onClick={()=>{if(pCloud==="off"&&onNeedAuth)onNeedAuth();}} style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:s.c,border:`1px solid ${s.c}40`,borderRadius:3,padding:"3px 8px",letterSpacing:.5,cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
+          {(()=>{ const s = pfActive!==""?{t:"⊟ LOCAL",c:T.dim}:pCloud==="synced"?{t:"☁ SYNCED",c:T.grn}:(pCloud==="loading"||pCloud==="saving")?{t:"☁ SYNC…",c:T.blue}:pCloud==="error"?{t:"⚠ LOCAL",c:T.gold}:{t:"☁ SIGN IN",c:T.dim}; return <span onClick={()=>{if(pCloud==="off"&&onNeedAuth)onNeedAuth();}} style={{fontFamily:MONO,fontSize:9,fontWeight:700,color:s.c,border:`1px solid ${s.c}40`,borderRadius:3,padding:"3px 8px",letterSpacing:.5,cursor:pCloud==="off"?"pointer":"default"}}>{s.t}</span>; })()}
           <button onClick={()=> isPremium ? setShowBrokerPick(true) : (onNeedPremium&&onNeedPremium())} style={{background:"rgba(77,166,255,.12)",border:`1px solid rgba(77,166,255,.4)`,color:T.blue,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>{isEN?"🔗 BROKER":"🔗 BROKER"}</button>
           {termTab==="portfolio" && <button onClick={()=>{setEditId(null);setForm({ticker:"",shares:"",entryPrice:"",note:"",broker:""});setImpMsg(null);setShowAdd(true);}} style={{background:"rgba(0,255,135,.12)",border:`1px solid rgba(0,255,135,.3)`,color:T.grn,fontFamily:MONO,fontSize:11,fontWeight:600,padding:"5px 12px",borderRadius:4,cursor:"pointer",letterSpacing:.5}}>{isEN?"+ ADD":"+ AÑADIR"}</button>}
         </div>
       </div>
+      {/* ── Selector de carteras ── */}
+      <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 14px",background:T.bg2,borderBottom:`1px solid ${T.br}`,overflowX:"auto",whiteSpace:"nowrap"}}>
+        <span style={{fontFamily:MONO,fontSize:9.5,color:T.dim,letterSpacing:1,marginRight:2,flexShrink:0}}>{isEN?"WALLETS":"CARTERAS"}</span>
+        {pfList.map(pf=>{
+          const act = pf.id===pfActive;
+          return (
+            <span key={pf.id||"_main"} style={{display:"inline-flex",alignItems:"center",gap:4,flexShrink:0}}>
+              <button onClick={()=>{ if(!act) setPfActive(pf.id); }}
+                style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 11px",borderRadius:20,fontFamily:MONO,fontSize:11.5,fontWeight:700,letterSpacing:.3,cursor:"pointer",border:act?`1px solid ${T.grn}`:`1px solid ${T.br2}`,background:act?"rgba(0,255,135,.12)":"transparent",color:act?T.grn:T.mid}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:act?T.grn:T.br2}}/>{pf.name}
+              </button>
+              {act && <button title={isEN?"Rename":"Renombrar"} onClick={()=>{ setPfRenaming(pf.id); setPfNewName(pf.name); }} style={{background:"none",border:"none",color:T.dim,cursor:"pointer",fontSize:12,padding:"2px 3px"}}>✎</button>}
+              {act && pfList.length>1 && <button title={isEN?"Delete":"Borrar"} onClick={()=>{ if(window.confirm(isEN?`Delete "${pf.name}" and its positions?`:`¿Borrar "${pf.name}" y sus posiciones?`)){ try{ localStorage.removeItem(PF_BASE+(pf.id?`_${pf.id}`:"")); }catch{} const rest=pfList.filter(x=>x.id!==pf.id); setPfList(rest); setPfActive(rest[0].id); } }} style={{background:"none",border:"none",color:T.red,cursor:"pointer",fontSize:12,padding:"2px 3px"}}>✕</button>}
+            </span>
+          );
+        })}
+        <button onClick={()=>{ const id="p"+Date.now().toString(36); const n=pfList.length+1; setPfList([...pfList,{id,name:(isEN?"Portfolio ":"Cartera ")+n}]); setPfActive(id); }}
+          style={{flexShrink:0,padding:"4px 11px",borderRadius:20,fontFamily:MONO,fontSize:11.5,fontWeight:700,cursor:"pointer",border:`1px dashed ${T.br2}`,background:"transparent",color:T.blue}}>＋ {isEN?"New":"Nueva"}</button>
+      </div>
+      {pfRenaming!==null && (
+        <div onClick={()=>setPfRenaming(null)} style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(2,6,20,.78)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:360,background:T.bg2,border:`1px solid ${T.br}`,borderRadius:14,padding:"20px 18px"}}>
+            <div style={{fontWeight:800,fontSize:15,color:T.txt,marginBottom:12}}>{isEN?"Rename wallet":"Renombrar cartera"}</div>
+            <input autoFocus value={pfNewName} onChange={e=>setPfNewName(e.target.value)} maxLength={24}
+              onKeyDown={e=>{ if(e.key==="Enter"&&pfNewName.trim()){ setPfList(pfList.map(x=>x.id===pfRenaming?{...x,name:pfNewName.trim().slice(0,24)}:x)); setPfRenaming(null); } }}
+              style={{width:"100%",boxSizing:"border-box",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 12px",color:T.txt,fontSize:14,fontFamily:MONO}}/>
+            <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+              <button onClick={()=>setPfRenaming(null)} style={{padding:"8px 14px",borderRadius:8,border:`1px solid ${T.br2}`,background:"transparent",color:T.mid,cursor:"pointer",fontSize:13}}>{isEN?"Cancel":"Cancelar"}</button>
+              <button onClick={()=>{ if(pfNewName.trim()){ setPfList(pfList.map(x=>x.id===pfRenaming?{...x,name:pfNewName.trim().slice(0,24)}:x)); setPfRenaming(null); } }} style={{padding:"8px 14px",borderRadius:8,border:"none",background:T.grn,color:T.bg,fontWeight:700,cursor:"pointer",fontSize:13}}>{isEN?"Save":"Guardar"}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {showBrokerPick && (
         <div onClick={()=>setShowBrokerPick(false)} style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(2,6,20,.78)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
           <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:460,background:T.bg2,border:`1px solid ${T.br}`,borderRadius:14,padding:"20px 18px 22px",boxShadow:"0 20px 60px rgba(0,0,0,.6)"}}>
