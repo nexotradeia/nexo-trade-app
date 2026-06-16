@@ -14980,6 +14980,59 @@ function WatchlistWizard({lang="es",onClose,onDone}){
     </div>
   );
 }
+function OptionsFlowLive({lang="es"}){
+  const isEN=lang==="en";
+  const [rows,setRows]=useState([]);
+  const [st,setSt]=useState("load"); // load | ok | empty
+  useEffect(()=>{
+    let cancel=false;
+    const TKS=["NVDA","TSLA","SPY","QQQ","AAPL","META","AMZN","PLTR","AMD","COIN","MSFT","GOOGL","MSTR","SMCI"];
+    const load=()=>{
+      Promise.all(TKS.map(t=>fetch(`/api/options?mode=flow&ticker=${t}`).then(r=>r.ok?r.json():null).catch(()=>null)))
+        .then(res=>{
+          if(cancel) return;
+          let items=[];
+          res.forEach(j=>{ if(j&&Array.isArray(j.items)) j.items.forEach(it=>items.push(it)); });
+          items.sort((a,b)=>(b.premium||0)-(a.premium||0));
+          setRows(items.slice(0,10));
+          setSt(items.length?"ok":"empty");
+        }).catch(()=>{ if(!cancel) setSt("empty"); });
+    };
+    load();
+    const iv=setInterval(load,90000);
+    return ()=>{cancel=true;clearInterval(iv);};
+  },[]);
+  const money=n=> n>=1e6?("$"+(n/1e6).toFixed(1)+"M"):n>=1e3?("$"+(n/1e3).toFixed(0)+"K"):("$"+(n||0));
+  if(st==="empty") return null; // sin data real → no inventamos nada
+  return (
+    <div style={{margin:"0 0 14px",background:"linear-gradient(180deg,#0F1626,#0B1220)",border:"1px solid rgba(0,229,143,0.18)",borderRadius:14,overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
+        <span style={{fontSize:14}}>⚡</span>
+        <b style={{fontSize:13,color:"#E6EDF7",letterSpacing:0.3}}>{isEN?"Live Options Flow":"Flujo de Opciones en Vivo"}</b>
+        <span style={{fontSize:9.5,fontWeight:800,color:"#00E58F",border:"1px solid rgba(0,229,143,0.35)",borderRadius:5,padding:"2px 6px",letterSpacing:0.5}}>REAL · CBOE</span>
+        <span style={{marginLeft:"auto",fontSize:10,color:"#5b6b8a"}}>{isEN?"Biggest sweeps · ~15min":"Mayores sweeps · ~15min"}</span>
+      </div>
+      {st==="load"
+        ? <div style={{padding:"16px 14px",color:"#5b6b8a",fontSize:12}}>{isEN?"Loading flow…":"Cargando flujo…"}</div>
+        : <div style={{padding:"4px 0",overflowX:"auto"}}>
+            {rows.map((o,i)=>{
+              const bull=o.sentiment==="bullish"; const col=bull?"#00E58F":"#FF3D5A";
+              return (
+                <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12,whiteSpace:"nowrap"}}>
+                  <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{o.ticker}</span>
+                  <span style={{fontSize:10,fontWeight:800,color:o.isGold?"#F0B429":col,background:o.isGold?"rgba(240,180,41,0.12)":"transparent",borderRadius:4,padding:o.isGold?"2px 6px":"0"}}>{o.isGold?"★ ":""}{(o.type||"").toUpperCase()}</span>
+                  <span style={{color:"#8b9bb0",fontFamily:"monospace"}}>{o.isCall?"C":"P"} ${o.strike} · {o.expiry}</span>
+                  <span style={{marginLeft:"auto",fontWeight:800,color:"#E6EDF7",fontFamily:"monospace"}}>{money(o.premium)}</span>
+                  <span style={{width:64,textAlign:"right",fontWeight:800,color:col}}>{bull?(isEN?"BULL":"ALCISTA"):(isEN?"BEAR":"BAJISTA")}</span>
+                </div>
+              );
+            })}
+          </div>}
+      <div style={{padding:"7px 14px",borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:9.5,color:"#475569"}}>{isEN?"Real unusual options activity from CBOE. Educational — not financial advice.":"Actividad inusual de opciones real (CBOE). Educativo — no es consejo financiero."}</div>
+    </div>
+  );
+}
+
 function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const isEN=lang==="en";
   const T=(en,es)=>isEN?en:es;
@@ -15271,6 +15324,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
           <div key={s} className={"sig "+s}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
         ))}
       </div>
+      <OptionsFlowLive lang={lang}/>
       {/* PILLARS */}
       <div className="pillars">
         {[["rr",T("BEST RISK / REWARD","MEJOR RIESGO/RECOMPENSA"),T("Smartest play","Jugada más inteligente"),T("Best setup + catalyst","Mejor setup + catalizador"),0],
