@@ -29845,11 +29845,9 @@ export default function App(){
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          -webkit-transform: translate3d(0,0,0) !important;
-          transform: translate3d(0,0,0) !important;
-          -webkit-backface-visibility: hidden !important;
-          backface-visibility: hidden !important;
-          will-change: transform;
+          /* Sin will-change/transform: esas pistas de GPU promueven la barra a su propia capa
+             que se retrasa frente al viewport cuando la toolbar de Safari aparece/desaparece
+             → causaba que "flotara y luego bajara". Fija normal = sigue al borde inferior. */
           height: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
           padding-bottom: env(safe-area-inset-bottom, 0px) !important;
         }
