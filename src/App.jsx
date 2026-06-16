@@ -15282,15 +15282,15 @@ function MoversLive({lang="es"}){
         <span style={{fontSize:8,fontWeight:800,color:"#16C784",letterSpacing:0.5}}>● {isEN?"LIVE":"EN VIVO"}</span>
         <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(118px,1fr))",gap:8,padding:"12px"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:7,padding:"10px"}}>
         {items.map((x,i)=>{ const tc=x.up?"22,199,132":"240,97,109"; const col="rgb("+tc+")";
           return (
-            <div key={x.sym+i} style={{padding:"10px 12px",borderRadius:9,border:"1px solid rgba("+tc+",0.4)",background:"rgba("+tc+",0.09)"}}>
+            <div key={x.sym+i} style={{padding:"6px 9px",borderRadius:7,border:"1px solid rgba("+tc+",0.4)",background:"rgba("+tc+",0.09)"}}>
               <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:6}}>
-                <span style={{fontSize:13,fontWeight:800,color:"#E6EDF7",fontFamily:MONO}}>{x.sym}</span>
-                <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:MONO}}>{x.up?"+":""}{(x.dp||0).toFixed(2)}%</span>
+                <span style={{fontSize:11.5,fontWeight:800,color:"#E6EDF7",fontFamily:MONO}}>{x.sym}</span>
+                <span style={{fontSize:10.5,fontWeight:800,color:col,fontFamily:MONO}}>{x.up?"+":""}{(x.dp||0).toFixed(2)}%</span>
               </div>
-              <div style={{fontSize:9.5,color:"#7a8aa3",fontFamily:MONO,marginTop:3}}>${(x.price||0).toFixed(2)}</div>
+              <div style={{fontSize:8.5,color:"#7a8aa3",fontFamily:MONO,marginTop:2}}>${(x.price||0).toFixed(2)}</div>
             </div>
           );
         })}
