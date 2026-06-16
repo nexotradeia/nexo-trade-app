@@ -15125,11 +15125,14 @@ function InsidersLive({lang="es"}){
 
 function MarketPulseLive({lang="es"}){
   const isEN=lang==="en";
-  const [rows,setRows]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
+  const PK="nexo_pulse_best";
+  const [rows,setRows]=useState(()=>{ try{ const c=JSON.parse(localStorage.getItem(PK)||"[]"); return Array.isArray(c)?c:[]; }catch(e){ return []; } });
+  const [st,setSt]=useState(()=>{ try{ return (JSON.parse(localStorage.getItem(PK)||"[]").length>0)?"ok":"load"; }catch(e){ return "load"; } });
+  const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
   const cref=useRef(false);
   const load=()=>{
     setSpin(true);
-    fetch('/api/data?type=pulse').then(r=>r.ok?r.json():null).then(j=>{ if(cref.current) return; const rs=(j&&Array.isArray(j.themes))?j.themes:[]; setRows(rs); setSt(rs.length?"ok":"empty"); setUpd(new Date()); setSpin(false); }).catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
+    fetch('/api/data?type=pulse').then(r=>r.ok?r.json():null).then(j=>{ if(cref.current) return; const rs=(j&&Array.isArray(j.themes))?j.themes:[]; setRows(prev=>{ const best=rs.length>=prev.length?rs:prev; if(best.length>=5){ try{ localStorage.setItem(PK,JSON.stringify(best)); }catch(e){} } return best; }); setSt(prevSt=> rs.length>0?"ok":(prevSt==="ok"?"ok":"empty")); setUpd(new Date()); setSpin(false); }).catch(()=>{ if(!cref.current){ setSt(p=>p==="load"?"empty":p); setSpin(false);} });
   };
   useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,90000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
   if(st==="empty") return null;
