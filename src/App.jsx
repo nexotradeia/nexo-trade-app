@@ -15086,8 +15086,8 @@ function InsidersLive({lang="es"}){
     Promise.all(TKS.map(t=>fetch(`https://finnhub.io/api/v1/stock/insider-transactions?symbol=${t}&from=${from}&to=${to}&token=${FINNHUB_KEY}`).then(r=>r.ok?r.json():null).catch(()=>null)))
       .then(res=>{ if(cancel) return;
         let items=[];
-        res.forEach((j,i)=>{ if(j&&Array.isArray(j.data)){ j.data.forEach(d=>{ const sh=Math.abs(d.change||0); const price=d.transactionPrice||0; if(sh>0&&price>0){ items.push({tk:TKS[i],name:d.name||"Insider",shares:sh,price,value:sh*price,date:d.filingDate||d.transactionDate||"",isBuy:(d.transactionCode==="P")||((d.change||0)>0)}); } }); } });
-        items.sort((a,b)=>(b.isBuy-a.isBuy)||(b.value-a.value));
+        res.forEach((j,i)=>{ if(j&&Array.isArray(j.data)){ j.data.forEach(d=>{ const sh=Math.abs(d.change||0); const price=d.transactionPrice||0; if(sh>0){ items.push({tk:TKS[i],name:d.name||"Insider",shares:sh,price,value:sh*price,date:d.filingDate||d.transactionDate||"",isBuy:(d.change||0)>0}); } }); } });
+        items.sort((a,b)=>(b.isBuy-a.isBuy)||(b.value-a.value)||(b.shares-a.shares));
         setRows(items.slice(0,8)); setSt(items.length?"ok":"empty");
       }).catch(()=>{ if(!cancel) setSt("empty"); });
     return ()=>{cancel=true;};
@@ -15111,8 +15111,8 @@ function InsidersLive({lang="es"}){
                 <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{r.tk}</span>
                 <span style={{fontSize:10,fontWeight:800,color:c}}>{r.isBuy?(isEN?"BUY":"COMPRA"):(isEN?"SELL":"VENTA")}</span>
                 <span style={{color:"#8b9bb0",overflow:"hidden",textOverflow:"ellipsis",maxWidth:150}}>{r.name}</span>
-                <span style={{color:"#8b9bb0",fontFamily:"monospace"}}>{r.shares.toLocaleString("en-US")} @ ${r.price}</span>
-                <span style={{marginLeft:"auto",fontWeight:800,color:c,fontFamily:"monospace"}}>{money(r.value)}</span>
+                <span style={{color:"#8b9bb0",fontFamily:"monospace"}}>{r.shares.toLocaleString("en-US")} {isEN?"sh":"acc"}{r.price>0?" @ $"+r.price:""}</span>
+                <span style={{marginLeft:"auto",fontWeight:800,color:c,fontFamily:"monospace"}}>{r.value>0?money(r.value):r.shares.toLocaleString("en-US")}</span>
               </div>
             );})}
           </div>}
