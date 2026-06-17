@@ -23493,23 +23493,13 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   // Fetch live prices for all tickers (posiciones + watchlist)
   useEffect(()=>{
     if(!positions.length && !watchTks.length) return;
-    const cryptoMap={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",BNB:"BINANCE:BNBUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",DOGE:"BINANCE:DOGEUSDT"};
-    const tickers=[...new Set([...positions.map(p=>p.ticker.toUpperCase()),...watchTks])];
+    const tickers=[...new Set([...positions.map(p=>p.ticker.toUpperCase()),...watchTks])].slice(0,60);
     setLoading(true);
-    Promise.all(tickers.map(async tk=>{
-      const sym=cryptoMap[tk]||tk;
-      try{
-        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
-        const d=await r.json();
-        if(d.c>0) return {ticker:tk,price:d.c,change:d.dp||0,prevClose:d.pc||0};
-      }catch{}
-      return null;
-    })).then(res=>{
-      const map={};
-      res.filter(Boolean).forEach(r=>{map[r.ticker]={price:r.price,change:r.change};});
-      setLivePrices(map);
-      setLoading(false);
-    });
+    // 1 sola llamada al endpoint /api/prices (cacheado en CDN, server-side, batch) — evita el 429 de Finnhub por 40 llamadas directas
+    fetch(`/api/prices?tickers=${encodeURIComponent(tickers.join(","))}`)
+      .then(r=>r.ok?r.json():null)
+      .then(j=>{ const map={}; const pr=(j&&j.prices)||{}; Object.keys(pr).forEach(tk=>{ const q=pr[tk]; if(q&&q.c>0) map[tk]={price:q.c,change:(q.dp||0)}; }); setLivePrices(map); setLoading(false); })
+      .catch(()=>{ setLoading(false); });
   },[positions,watchTks]);
 
   const totalCost   = positions.reduce((s,p)=>(s + (parseFloat(p.shares)||0)*(parseFloat(p.entryPrice)||0)),0);
