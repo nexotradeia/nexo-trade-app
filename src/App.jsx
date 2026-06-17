@@ -15355,6 +15355,18 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
      why:T("AAPL call with cheap IV and rising open interest into the product cycle.","Call AAPL con IV barata e interés abierto subiendo de cara al ciclo de producto.")},
     {tk:"TSLA",side:"PUT",strk:"$370",exp:"Jun 27",pm:"$5.60",vol:"11.4K/7.2K",iv:"55%",flags:["BLK","SM"],score:82,be:"$364.40",pop:"45%",delta:"−0.36",gamma:"0.013",theta:"−$12",vega:"$27",
      why:T("TSLA put with block flow and bearish smart-money tilt — hedge or directional short.","Put TSLA con flujo en bloque y sesgo bajista de smart money — cobertura o corto direccional.")},
+    {tk:"AMD",side:"CALL",strk:"$180",exp:"Jul 18",pm:"$4.10",vol:"12.3K/8.6K",iv:"45%",flags:["UOA","MOM"],score:80,be:"$184.10",pop:"47%",delta:"0.39",gamma:"0.016",theta:"−$10",vega:"$25",
+     why:T("AMD call riding semiconductor momentum with above-average volume.","Call AMD montada en el momentum de semiconductores con volumen por encima del promedio.")},
+    {tk:"GOOGL",side:"CALL",strk:"$200",exp:"Aug 15",pm:"$5.40",vol:"9.1K/6.2K",iv:"26%",flags:["OI","SM"],score:78,be:"$205.40",pop:"52%",delta:"0.44",gamma:"0.013",theta:"−$6",vega:"$23",
+     why:T("GOOGL call with cheap IV and steady open-interest build.","Call GOOGL con IV barata y construcción constante de interés abierto.")},
+    {tk:"AMZN",side:"CALL",strk:"$240",exp:"Jul 18",pm:"$4.75",vol:"10.7K/7.4K",iv:"30%",flags:["MOM","OI"],score:76,be:"$244.75",pop:"50%",delta:"0.41",gamma:"0.014",theta:"−$8",vega:"$24",
+     why:T("AMZN call with momentum and rising OI into the next catalyst.","Call AMZN con momentum y OI subiendo hacia el próximo catalizador.")},
+    {tk:"PLTR",side:"CALL",strk:"$32",exp:"Aug 15",pm:"$2.10",vol:"21.5K/13K",iv:"62%",flags:["UOA","VOL"],score:74,be:"$34.10",pop:"40%",delta:"0.33",gamma:"0.020",theta:"−$5",vega:"$15",
+     why:T("PLTR high-volume call — speculative with elevated IV, keep size small.","Call PLTR de alto volumen — especulativa con IV elevada, mantén el tamaño pequeño.")},
+    {tk:"MSFT",side:"CALL",strk:"$400",exp:"Jul 18",pm:"$7.20",vol:"8.9K/6.8K",iv:"24%",flags:["SM","OI"],score:72,be:"$407.20",pop:"55%",delta:"0.46",gamma:"0.011",theta:"−$7",vega:"$28",
+     why:T("MSFT conservative call with low IV and smart-money tilt.","Call MSFT conservadora con IV baja y sesgo de smart money.")},
+    {tk:"SMCI",side:"PUT",strk:"$45",exp:"Jun 27",pm:"$3.30",vol:"14.8K/9.1K",iv:"78%",flags:["BLK","VOL"],score:70,be:"$41.70",pop:"43%",delta:"−0.34",gamma:"0.022",theta:"−$11",vega:"$14",
+     why:T("SMCI put with block flow and very high IV — short-term bearish bet.","Put SMCI con flujo en bloque e IV muy alta — apuesta bajista de corto plazo.")},
   ];
 
   // ── Polling GRATIS cada 60s vía Finnhub REST (acciones + subyacentes de opciones).
