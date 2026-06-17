@@ -23338,6 +23338,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [chSearch, setChSearch] = useState(""); // buscador de ticker en CHARTS
   const [chTech, setChTech] = useState(null);
   const [ovSort, setOvSort] = useState({col:"pnl",dir:-1}); // orden tabla Overview
+  const [sectData, setSectData] = useState(null);
+  useEffect(()=>{ let c=false; fetch("/api/prices?tickers=XLK,XLY,XLF,XLE,XLV,XLI,XLRE,XLU,XLB").then(r=>r.ok?r.json():null).then(j=>{ if(c||!j||!j.prices)return; const m={}; Object.keys(j.prices).forEach(k=>{ const q=j.prices[k]; if(q&&typeof q.dp==="number") m[k]=q.dp; }); if(Object.keys(m).length) setSectData(m); }).catch(()=>{}); return ()=>{c=true;}; },[]);
   useEffect(()=>{ const tk=(chSel||(positions&&positions[0]&&positions[0].ticker)||"").toString().toUpperCase(); if(!tk) return; let cancel=false; fetch("/api/data?type=technical&symbol="+encodeURIComponent(tk)).then(r=>r.ok?r.json():null).then(j=>{ if(!cancel&&j&&j.symbol) setChTech(j); }).catch(()=>{}); return ()=>{cancel=true;}; },[chSel,positions]);
   const [ovRange, setOvRange] = useState("1M"); // rango del gráfico overview (PORTFOLIO)
   const [navView, setNavView] = useState("overview"); // NAVIGATION: overview|positions|orders|history|analytics|risk
@@ -23803,7 +23805,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const TICK=[["AAPL","$296.42","+1.82",1],["NVDA","$212.45","+3.54",1],["MSFT","$399.76","+2.31",1],["META","$593.48","+4.67",1],["TSLA","$411.15","+1.16",1],["AMZN","$246.02","+3.13",1],["BTC","$66,500","+0.52",1],["SPY","$754.83","+1.76",1],["QQQ","$744.00","+3.14",1],["VIX","$14.82","-3.12",0],["GOLD","$2,320","-0.20",0]];
     const WL=[["SPY","$754.83","+1.76",1],["QQQ","$744.00","+3.14",1],["VIX","$14.82","-3.12",0],["GLD","$215.40","+0.38",1],["TLT","$93.20","-0.52",0]];
     const RISK=(()=>{ try{ const _tot=Math.max(1,rows.reduce((x,r)=>x+r.mv,0)); const _s=[...rows].map(r=>r.mv/_tot).sort((a,b)=>b-a); const _topW=(_s[0]||0)*100; const _top3=_s.slice(0,3).reduce((a,b)=>a+b,0)*100; const _hhi=_s.reduce((a,w)=>a+w*w,0); const _div=Math.round(Math.max(0,1-_hhi)*100); const _win=rows.length?rows.filter(r=>r.pnl>0).length/rows.length*100:0; const _beta=(chTech&&chTech.metric&&chTech.metric.beta!=null)?chTech.metric.beta:null; const cc=(v,a,b)=>v>=a?T.red:v>=b?T.gold:T.grn; return [[String(rows.length),isEN?"POSITIONS":"POSICIONES",T.blue],[_topW.toFixed(0)+"%",isEN?"TOP HOLDING":"CONCENTRACION",cc(_topW,40,25)],[_top3.toFixed(0)+"%","TOP 3",cc(_top3,70,50)],[String(_div),isEN?"DIVERSIFIED":"DIVERSIF",_div>=60?T.grn:_div>=35?T.gold:T.red],[_win.toFixed(0)+"%",isEN?"IN PROFIT":"EN GANANCIA",_win>=50?T.grn:_win>=30?T.gold:T.red],[_beta!=null?_beta.toFixed(2):"—","BETA "+(cp.tk||""),T.gold]]; }catch(e){ return [["—","POSICIONES",T.blue],["—","CONCENTRACION",T.gold],["—","TOP 3",T.gold],["—","DIVERSIF",T.grn],["—","EN GANANCIA",T.grn],["—","BETA",T.gold]]; } })();
-    const SECT=[["XLK","+1.82",1],["XLY","+0.64",1],["XLF","-0.21",0],["XLE","+2.14",1],["XLV","-0.88",0],["XLI","+0.42",1],["XLRE","-1.24",0],["XLU","+0.12",1],["XLB","+0.78",1]];
+    const _SO=["XLK","XLY","XLF","XLE","XLV","XLI","XLRE","XLU","XLB"]; const SECT=sectData?_SO.map(sy=>{ const v=sectData[sy]; const n=(typeof v==="number")?v:0; return [sy,(n>=0?"+":"")+n.toFixed(2),n>=0?1:0]; }):[["XLK","+1.82",1],["XLY","+0.64",1],["XLF","-0.21",0],["XLE","+2.14",1],["XLV","-0.88",0],["XLI","+0.42",1],["XLRE","-1.24",0],["XLU","+0.12",1],["XLB","+0.78",1]];
     const TRADES=[["B","NVDA","5 uds · $148.20","+$300.50","10:32"],["S","BKNG","2 uds · $163.27","−$82.40","09:58"],["B","TSLA","7 uds · $320.00","+$620.90","09:41"],["S","AMZN","3 uds · $220.00","+$74.40",isEN?"Yesterday":"Ayer"],["B","META","3 uds · $440.00","+$447.30",isEN?"Yesterday":"Ayer"]];
     // Libro de órdenes (ilustrativo) calculado alrededor del precio REAL del ticker seleccionado
     const _ofP=cp.price||100; const _ofTick=Math.max(0.01,+(_ofP*0.0003).toFixed(2));
@@ -23943,8 +23945,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               {l:"P&L Total",v:m$(totalPnl),c:totalPnl>=0?T.grn:T.red,d:(ytdPct>=0?"▲ +":"▼ ")+ytdPct.toFixed(1)+"% YTD",dc:ytdPct>=0?T.grn:T.red,acc:T.grn},
               {l:"Valor Cartera",v:"$"+Math.round(totalValue).toLocaleString("en-US"),c:T.blue,d:positions.length+" posiciones",dc:T.dim,acc:T.blue},
               {l:"P&L Hoy",v:m$(todayPnl),c:T.gold,d:(todayPnl>=0?"▲ +":"▼ ")+(totalValue>0?(todayPnl/totalValue*100).toFixed(2):"0")+"%",dc:todayPnl>=0?T.grn:T.red,acc:T.gold},
-              {l:(isEN?"Exposure":"Exposición"),v:"87.3%",c:T.red,d:"$"+Math.round(totalValue).toLocaleString("en-US")+" invertido",dc:T.dim,acc:T.red},
-              {l:"Win Rate",v:"74.2%",c:T.purp,d:"89 / 120 trades",dc:T.dim,acc:T.purp},
+              {l:(isEN?"Cost Basis":"Costo Base"),v:"$"+Math.round(totalCost).toLocaleString("en-US"),c:T.red,d:(isEN?"invested cost":"costo invertido"),dc:T.dim,acc:T.red},
+              {l:(isEN?"In Profit":"En Ganancia"),v:(rows.length?Math.round(rows.filter(r=>r.pnl>0).length/rows.length*100):0)+"%",c:T.purp,d:rows.filter(r=>r.pnl>0).length+" / "+rows.length+(isEN?" positions":" posiciones"),dc:T.dim,acc:T.purp},
             ].map((k,i)=>(
               <div key={i} style={{padding:"14px 16px",borderRight:i<4?`1px solid ${T.br}`:"none",position:"relative",overflow:"hidden"}}>
                 <div style={lbl}>{k.l}</div>
