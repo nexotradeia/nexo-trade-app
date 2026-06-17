@@ -14821,6 +14821,8 @@ function nfpSavePrefs(p){ try{ localStorage.setItem("nexo-alert-prefs",JSON.stri
 const NFP_POPULAR=["SPY","QQQ","AMD","GOOGL","AMZN","COIN","PLTR","NFLX","BTC","ETH","NVDA","MSFT","AAPL","META","TSLA"];
 // ¿Mercado US abierto? (Lun-Vie 9:30-16:00 ET) — para indicador LIVE/CERRADO
 function nfpMktOpen(){ try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); const m=et.getHours()*60+et.getMinutes(); return d>=1&&d<=5&&m>=570&&m<960; }catch(e){ return false; } }
+function nfpMktPhase(){ try{ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(); if(d<1||d>5) return "closed"; const m=et.getHours()*60+et.getMinutes(); if(m>=240&&m<570) return "pre"; if(m>=570&&m<960) return "live"; if(m>=960&&m<1200) return "after"; return "closed"; }catch(e){ return "closed"; } }
+function nfpMktActive(){ const p=nfpMktPhase(); return p==="pre"||p==="live"||p==="after"; }
 
 // ── WIZARD de watchlist (5 pasos) · funcional hoy (guarda local). Telegram = fase 2 ──
 function WatchlistWizard({lang="es",onClose,onDone}){
@@ -14992,7 +14994,7 @@ function PanelRefresh({onClick,spin,upd,lang}){
 
 function OptionsFlowLive({lang="es"}){
   const isEN=lang==="en";
-  const mko=nfpMktOpen();
+  const mko=nfpMktActive();
   const [rows,setRows]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
   const cref=useRef(false);
   const load=()=>{
@@ -15430,7 +15432,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const Arrow=()=> <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5h10M8.5 3.5l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
 
   return(
-  <div className={"nfp t-"+tab+(mktOpen?" live":"")}>
+  <div className={"nfp t-"+tab+(nfpMktActive()?" live":"")}>
     <style>{`
       .nfp{--bl:#0B5CFF;--bl2:#4D8DFF;--bl3:#9FC0FF;--cy:#22D3EE;--bg:#06080E;--bg2:#0C111E;--bg3:#11182A;--ln:#19202F;--ln2:#222B3F;--tx:#C9D6F2;--mut:#67769A;--up:#34D399;--dn:#F87171;--gd:#F5C84B;--vi:#A78BFA;--tg:#26A5E4;
         background:var(--bg);color:#fff;font-family:'Inter',sans-serif;border-radius:16px;padding:16px;margin:-4px 0;position:relative;overflow:hidden}
@@ -15648,7 +15650,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
             ["s4",T("BLOCK FLOW","FLUJO BLOQUE"),"+$428","M",T("Net premium","Premium neto")],
             ["s5","SMART MONEY","82","/100",T("Bullish","Alcista")]]
         ).map(([s,lab,v,u,dd])=>(
-          <div key={s} className={"sig "+s+(mktOpen?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
+          <div key={s} className={"sig "+s+(nfpMktActive()?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
         ))}
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
@@ -15682,7 +15684,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       <div className="grid">
         {/* TABLE */}
         <div className="card">
-          <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className={"stat"+(mktOpen?"":" paused")}><i/>{mktOpen?T("INDICATIVE","INDICATIVO"):T("PAUSED · CLOSED","PAUSADO · CERRADO")}</span></div>
+          <div className="ch"><b>{tab==="stocks"?T("TOP STOCKS NOW","MEJORES ACCIONES AHORA"):T("TOP CONTRACTS NOW","MEJORES CONTRATOS AHORA")}</b><span className="sp"/><span className={"stat"+(nfpMktActive()?"":" paused")}><i/>{(()=>{const p=nfpMktPhase();return p==="live"?T("INDICATIVE","INDICATIVO"):p==="pre"?T("PRE-MARKET","PRE-MERCADO"):p==="after"?T("AFTER-HOURS","POST-MERCADO"):T("PAUSED · CLOSED","PAUSADO · CERRADO");})()}</span></div>
           <div className="filt">
             {(tab==="stocks"
               ? [["all",T("All","Todas")],["long",T("Long","Largos")],["short",T("Short","Cortos")],["intraday",T("Intraday","Intradía")],["earnings","⚡ Earnings ≤7d"]]
