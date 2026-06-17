@@ -15066,7 +15066,7 @@ function AnalystRatingsLive({lang="es"}){
             {rows.map((r,i)=>(
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12}}>
                 <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{r.tk}</span>
-                <div style={{flex:1,height:7,borderRadius:4,background:"rgba(255,255,255,0.07)",overflow:"hidden",minWidth:60,position:"relative"}}><div style={{width:r.pct+"%",height:"100%",background:col(r.pct),borderRadius:4,transition:"width 0.9s ease",position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:0,bottom:0,left:0,width:"45%",background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)",animation:"nexoBarFlow 2.4s linear infinite"}}/></div></div>
+                <div style={{flex:1,height:9,borderRadius:6,background:"rgba(255,255,255,0.07)",overflow:"hidden",minWidth:60,position:"relative"}}><div style={{width:r.pct+"%",height:"100%",background:r.pct>=45?"linear-gradient(90deg,#0EA572,#16C784,#5BE584)":"linear-gradient(90deg,#C42C3F,#FF3D5A,#FF7A8C)",borderRadius:6,transition:"width 0.9s ease",boxShadow:r.pct>=45?"0 0 12px rgba(22,199,132,0.6)":"0 0 12px rgba(255,61,90,0.5)"}}/></div>
                 <span style={{width:96,textAlign:"right",fontWeight:800,color:col(r.pct)}}>{lbl(r.pct)}</span>
                 <span style={{width:80,textAlign:"right",color:"#8b9bb0",fontFamily:"monospace",fontSize:10.5}}>{r.buy}B·{r.hold}H·{r.sell}S</span>
               </div>
