@@ -15272,6 +15272,7 @@ function MoversLive({lang="es"}){
   useEffect(()=>{ cref.current=false; load(); const iv=setInterval(load,60000); return ()=>{cref.current=true;clearInterval(iv);}; },[]);
   if(st==="empty") return null;
   const MONO="'JetBrains Mono',monospace";
+  const fmtVol=(v)=>{ if(!v||v<=0) return ""; if(v>=1e9) return (v/1e9).toFixed(1)+"B"; if(v>=1e6) return (v/1e6).toFixed(1)+"M"; if(v>=1e3) return (v/1e3).toFixed(0)+"K"; return String(v); };
   const items=(data.gainers||[]).map(x=>({...x,up:true})).concat((data.losers||[]).map(x=>({...x,up:false})));
   if(!items.length) return null;
   return (
@@ -15290,7 +15291,7 @@ function MoversLive({lang="es"}){
                 <span style={{fontSize:11.5,fontWeight:800,color:"#E6EDF7",fontFamily:MONO}}>{x.sym}</span>
                 <span style={{fontSize:10.5,fontWeight:800,color:col,fontFamily:MONO}}>{x.up?"+":""}{(x.dp||0).toFixed(2)}%</span>
               </div>
-              <div style={{fontSize:8.5,color:"#7a8aa3",fontFamily:MONO,marginTop:2}}>${(x.price||0).toFixed(2)}</div>
+              <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:6,marginTop:2}}><span style={{fontSize:8.5,color:"#7a8aa3",fontFamily:MONO}}>${(x.price||0).toFixed(2)}</span>{x.vol?<span style={{fontSize:8,color:"#5f6d82",fontFamily:MONO}}>Vol {fmtVol(x.vol)}</span>:null}</div>
             </div>
           );
         })}
