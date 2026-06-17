@@ -23799,6 +23799,11 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     const CW=900,CH=200,CPL=46,CPR=58,CPT=14,CPB=22; const cmn=Math.min(...ser)*0.99,cmx=Math.max(...ser)*1.01;
     const cx=(i)=>CPL+(i/N)*(CW-CPL-CPR), cy=(v)=>CH-CPB-((v-cmn)/((cmx-cmn)||1))*(CH-CPT-CPB);
     const cline=ser.map((v,i)=>cx(i).toFixed(1)+","+cy(v).toFixed(1)).join(" ");
+    const _pts=ser.map((v,i)=>[cx(i),cy(v)]);
+    const _smooth=(p)=>{ if(p.length<2) return ""; let d="M"+p[0][0].toFixed(1)+","+p[0][1].toFixed(1); for(let i=0;i<p.length-1;i++){ const p0=p[i-1]||p[i],p1=p[i],p2=p[i+1],p3=p[i+2]||p2; const c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6; d+=" C"+c1x.toFixed(1)+","+c1y.toFixed(1)+" "+c2x.toFixed(1)+","+c2y.toFixed(1)+" "+p2[0].toFixed(1)+","+p2[1].toFixed(1); } return d; };
+    const _lineD=_smooth(_pts);
+    const _areaD=_pts.length?_lineD+" L"+cx(N).toFixed(1)+","+(CH-CPB)+" L"+cx(0).toFixed(1)+","+(CH-CPB)+" Z":"";
+    const _up=ser.length?ser[N]>=ser[0]:true; const _c1=_up?"#00FF87":"#FF3D5A"; const _c2=_up?"#26E0B0":"#FF7A8C"; const _gid="pf"+Math.abs((cp.tk||"X").split("").reduce((a,c)=>a+c.charCodeAt(0),0));
     const sig=(r)=> r.pnlPct>40?["▲ BUY",T.grn,"rgba(0,255,135,.12)"] : r.pnlPct<0?["▼ SELL",T.red,"rgba(255,61,90,.1)"] : r.today>1?["▲ BUY",T.grn,"rgba(0,255,135,.12)"] : ["◆ HOLD",T.gold,"rgba(240,180,41,.1)"];
     const monthsLbl=tfLabels(ovRange,7);
     // ilustrativos
@@ -23967,13 +23972,20 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               <div style={{display:"flex",background:T.bg3,border:`1px solid ${T.br}`,borderRadius:4,padding:2,gap:1}}>{["1D","5D","1M","3M","6M","1A"].map((p,i)=>{ const a=ovRange===p; return (<span key={i} onClick={()=>setOvRange(p)} style={{padding:"4px 10px",borderRadius:3,fontFamily:MONO,fontSize:10,fontWeight:600,color:a?T.grn:T.dim,background:a?"rgba(0,255,135,.12)":"transparent",cursor:"pointer",transition:"all .12s"}}>{p}</span>); })}</div>
             </div>
             <div style={{padding:0}}>
-              <svg viewBox={"0 0 "+CW+" "+CH} style={{width:"100%",height:"auto",display:"block",background:T.bg2}}>
-                {[cmn,(cmn+cmx)/2,cmx].map((v,i)=>(<g key={i}><line x1={CPL} y1={cy(v)} x2={CW-CPR} y2={cy(v)} stroke="#1a2436" strokeWidth="1"/><text x={CPL-6} y={cy(v)+3} textAnchor="end" fontFamily={MONO} fontSize="9" fill={T.dim}>${Math.round(v)}</text></g>))}
-                <polygon points={cx(0)+","+(CH-CPB)+" "+cline+" "+cx(N)+","+(CH-CPB)} fill="rgba(0,255,135,.10)"/>
-                <polyline points={cline} fill="none" stroke={T.grn} strokeWidth="2" strokeLinejoin="round"/>
-                <circle cx={cx(N)} cy={cy(ser[N])} r="4" fill={T.grn}/><circle cx={cx(N)} cy={cy(ser[N])} r="8" fill="rgba(0,255,135,.15)"/>
-                <rect x={CW-CPR+2} y={cy(ser[N])-9} width={CPR-4} height={18} fill={T.bg3} stroke={T.grn} strokeWidth="1"/>
-                <text x={CW-CPR+2+(CPR-4)/2} y={cy(ser[N])+4} textAnchor="middle" fontFamily={MONO} fontSize="10" fontWeight="700" fill={T.grn}>${Math.round(ser[N])}</text>
+              <svg viewBox={"0 0 "+CW+" "+CH} style={{width:"100%",height:"auto",display:"block",background:"transparent"}}>
+                <defs>
+                  <linearGradient id={_gid+"area"} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={_c1} stopOpacity="0.40"/><stop offset="55%" stopColor={_c1} stopOpacity="0.12"/><stop offset="100%" stopColor={_c1} stopOpacity="0"/></linearGradient>
+                  <linearGradient id={_gid+"line"} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={_c2}/><stop offset="100%" stopColor={_c1}/></linearGradient>
+                  <filter id={_gid+"glow"} x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                {[cmn,(cmn+cmx)/2,cmx].map((v,i)=>(<g key={i}><line x1={CPL} y1={cy(v)} x2={CW-CPR} y2={cy(v)} stroke="rgba(255,255,255,0.055)" strokeWidth="1" strokeDasharray="2 6"/><text x={CPL-6} y={cy(v)+3} textAnchor="end" fontFamily={MONO} fontSize="9" fill={T.dim}>${Math.round(v)}</text></g>))}
+                <path d={_areaD} fill={"url(#"+_gid+"area)"}/>
+                <path d={_lineD} fill="none" stroke={_c1} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" opacity="0.4" filter={"url(#"+_gid+"glow)"}/>
+                <path d={_lineD} fill="none" stroke={"url(#"+_gid+"line)"} strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round"/>
+                <circle cx={cx(N)} cy={cy(ser[N])} r="6" fill={_c1} opacity="0.18"><animate attributeName="r" values="5;15;5" dur="2.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.30;0;0.30" dur="2.6s" repeatCount="indefinite"/></circle>
+                <circle cx={cx(N)} cy={cy(ser[N])} r="3.6" fill={_c1} stroke="#0b1018" strokeWidth="1.6"/>
+                <rect x={CW-CPR+2} y={cy(ser[N])-10} width={CPR-3} height={20} rx="5" fill={_c1}/>
+                <text x={CW-CPR+2+(CPR-3)/2} y={cy(ser[N])+4} textAnchor="middle" fontFamily={MONO} fontSize="10.5" fontWeight="800" fill="#06210f">${Math.round(ser[N])}</text>
                 {monthsLbl.map((mm,i)=><text key={i} x={cx(Math.round(i*N/(monthsLbl.length-1)))} y={CH-6} textAnchor="middle" fontFamily={MONO} fontSize="8" fill={T.dim}>{mm}</text>)}
               </svg>
             </div>
