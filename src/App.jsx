@@ -14992,6 +14992,7 @@ function PanelRefresh({onClick,spin,upd,lang}){
 
 function OptionsFlowLive({lang="es"}){
   const isEN=lang==="en";
+  const mko=nfpMktOpen();
   const [rows,setRows]=useState([]); const [st,setSt]=useState("load"); const [spin,setSpin]=useState(false); const [upd,setUpd]=useState(null);
   const cref=useRef(false);
   const load=()=>{
@@ -15009,7 +15010,7 @@ function OptionsFlowLive({lang="es"}){
       <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexWrap:"wrap"}}>
         <span style={{fontSize:14}}>⚡</span>
         <b style={{fontSize:13,color:"#E6EDF7",letterSpacing:0.3}}>{isEN?"Live Options Flow":"Flujo de Opciones en Vivo"}</b>
-        <span style={{fontSize:9.5,fontWeight:800,color:"#00E58F",border:"1px solid rgba(0,229,143,0.35)",borderRadius:5,padding:"2px 6px",letterSpacing:0.5}}>REAL · CBOE</span>
+        <span style={{fontSize:9.5,fontWeight:800,color:"#00E58F",border:"1px solid rgba(0,229,143,0.35)",borderRadius:5,padding:"2px 6px",letterSpacing:0.5,boxShadow:mko?"0 0 10px rgba(0,229,143,0.6)":"none",animation:mko?"nfpGreenGlow 1.8s ease-in-out infinite":"none"}}>{mko?"REAL · CBOE":"CBOE · CLOSED"}</span>
         <PanelRefresh onClick={load} spin={spin} upd={upd} lang={lang}/>
       </div>
       {st==="load"
@@ -15017,12 +15018,12 @@ function OptionsFlowLive({lang="es"}){
         : <div style={{padding:"4px 0",overflowX:"auto"}}>
             {rows.map((o,i)=>{ const bull=o.sentiment==="bullish"; const col=bull?"#00E58F":"#FF3D5A";
               return (
-                <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12,whiteSpace:"nowrap"}}>
+                <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderBottom:i<rows.length-1?"1px solid rgba(255,255,255,0.04)":"none",fontSize:12,whiteSpace:"nowrap",borderLeft:mko?("2px solid "+col):"2px solid transparent",animation:mko?"nfpRowIn .45s ease both":"none",animationDelay:mko?(i*0.045)+"s":"0s"}}>
                   <span style={{fontWeight:800,color:"#E6EDF7",width:54,fontFamily:"monospace"}}>{o.ticker}</span>
                   <span style={{fontSize:10,fontWeight:800,color:o.isGold?"#F0B429":col,background:o.isGold?"rgba(240,180,41,0.12)":"transparent",borderRadius:4,padding:o.isGold?"2px 6px":"0"}}>{o.isGold?"★ ":""}{(o.type||"").toUpperCase()}</span>
                   <span style={{color:"#8b9bb0",fontFamily:"monospace"}}>{o.isCall?"C":"P"} ${o.strike} · {o.expiry}</span>
                   <span style={{marginLeft:"auto",fontWeight:800,color:"#E6EDF7",fontFamily:"monospace"}}>{money(o.premium)}</span>
-                  <span style={{width:64,textAlign:"right",fontWeight:800,color:col}}>{bull?(isEN?"BULL":"ALCISTA"):(isEN?"BEAR":"BAJISTA")}</span>
+                  <span style={{width:64,textAlign:"right",fontWeight:800,color:col,textShadow:mko?("0 0 8px "+col):"none"}}>{bull?(isEN?"BULL":"ALCISTA"):(isEN?"BEAR":"BAJISTA")}</span>
                 </div>
               );
             })}
@@ -15395,7 +15396,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const Arrow=()=> <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5h10M8.5 3.5l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
 
   return(
-  <div className={"nfp t-"+tab}>
+  <div className={"nfp t-"+tab+(mktOpen?" live":"")}>
     <style>{`
       .nfp{--bl:#0B5CFF;--bl2:#4D8DFF;--bl3:#9FC0FF;--cy:#22D3EE;--bg:#06080E;--bg2:#0C111E;--bg3:#11182A;--ln:#19202F;--ln2:#222B3F;--tx:#C9D6F2;--mut:#67769A;--up:#34D399;--dn:#F87171;--gd:#F5C84B;--vi:#A78BFA;--tg:#26A5E4;
         background:var(--bg);color:#fff;font-family:'Inter',sans-serif;border-radius:16px;padding:16px;margin:-4px 0;position:relative;overflow:hidden}
@@ -15443,7 +15444,14 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .sig{background:var(--bg2);border:1px solid var(--ln);border-radius:12px;padding:11px 13px}
       .nfp .sig .lab{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
       .nfp .sig .lab .dot{width:7px;height:7px;border-radius:50%}
-      .nfp .sig.s1 .dot{background:var(--gd)}.nfp .sig.s2 .dot{background:var(--bl2)}.nfp .sig.s3 .dot{background:var(--cy)}.nfp .sig.s4 .dot{background:var(--up)}.nfp .sig.s5 .dot{background:var(--vi)}
+      .nfp .sig.s1 .dot{background:var(--gd);--c:var(--gd)}.nfp .sig.s2 .dot{background:var(--bl2);--c:var(--bl2)}.nfp .sig.s3 .dot{background:var(--cy);--c:var(--cy)}.nfp .sig.s4 .dot{background:var(--up);--c:var(--up)}.nfp .sig.s5 .dot{background:var(--vi);--c:var(--vi)}
+      .nfp .sig.live .dot{animation:nfpDotGlow 1.7s ease-in-out infinite}
+      .nfp .sig.live{border-color:rgba(255,255,255,0.12)}
+      @keyframes nfpDotGlow{0%,100%{box-shadow:0 0 2px 0 var(--c)}50%{box-shadow:0 0 9px 2px var(--c)}}
+      @keyframes nfpGreenGlow{0%,100%{box-shadow:0 0 4px rgba(0,229,143,.30)}50%{box-shadow:0 0 13px rgba(0,229,143,.75)}}
+      @keyframes nfpRowIn{from{opacity:.15;transform:translateX(-7px)}to{opacity:1;transform:none}}
+      .nfp.live .f,.nfp.live .ct .tg,.nfp.live .det-h .r1 .tg,.nfp.live .sigflags .f .x{animation:nfpFlagGlow 2s ease-in-out infinite}
+      @keyframes nfpFlagGlow{0%,100%{box-shadow:0 0 1px 0 currentColor}50%{box-shadow:0 0 8px 1px currentColor}}
       .nfp .sig .v{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;margin-top:4px;line-height:1}
       .nfp .sig .v .u{font-size:10px;color:var(--mut);font-weight:400;margin-left:3px}
       .nfp .sig .dd{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;margin-top:3px;color:var(--mut)}
@@ -15605,7 +15613,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
             ["s4",T("BLOCK FLOW","FLUJO BLOQUE"),"+$428","M",T("Net premium","Premium neto")],
             ["s5","SMART MONEY","82","/100",T("Bullish","Alcista")]]
         ).map(([s,lab,v,u,dd])=>(
-          <div key={s} className={"sig "+s}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
+          <div key={s} className={"sig "+s+(mktOpen?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
         ))}
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
