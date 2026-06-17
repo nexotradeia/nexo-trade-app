@@ -15352,6 +15352,22 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
      why:T("AVGO strong volume and momentum as AI demand stays hot.","AVGO con volumen y momentum fuertes mientras la demanda de IA sigue caliente.")},
     {tk:"SMCI",dir:"SHORT",fb:48.00,fbc:-3.50,tgt:38,vol:"3.4×",flags:["VOL","MOM"],score:72,stop:54,entry:"47–50",mcap:"$28B",rsi:"39",sma:"$58",sm:"68",
      why:T("SMCI breaking down on heavy volume — momentum turned bearish, short setup.","SMCI quiebra con volumen alto — momentum girado bajista, setup de corto.")},
+    {tk:"CRM",dir:"LONG",fb:280.00,fbc:1.20,tgt:340,vol:"1.9×",flags:["BRK","MOM","SM"],score:70,stop:262,entry:"276–284",mcap:"$270B",rsi:"58",sma:"$262",sm:"71",
+     why:T("CRM breaking out with healthy volume and steady accumulation.","CRM rompiendo con volumen sano y acumulación estable.")},
+    {tk:"NFLX",dir:"LONG",fb:910.00,fbc:0.90,tgt:1050,vol:"1.6×",flags:["MOM","SM","CAT"],score:69,stop:860,entry:"900–920",mcap:"$390B",rsi:"60",sma:"$840",sm:"70",
+     why:T("NFLX momentum holding into the next earnings catalyst.","NFLX con momentum sostenido hacia el próximo catalizador de earnings.")},
+    {tk:"UBER",dir:"LONG",fb:88.00,fbc:1.80,tgt:105,vol:"2.2×",flags:["VOL","BRK","MOM"],score:68,stop:82,entry:"86–90",mcap:"$185B",rsi:"62",sma:"$80",sm:"69",
+     why:T("UBER breaking resistance on rising volume.","UBER rompiendo resistencia con volumen creciente.")},
+    {tk:"SHOP",dir:"LONG",fb:115.00,fbc:2.40,tgt:140,vol:"2.6×",flags:["VOL","MOM","CAT"],score:67,stop:106,entry:"112–118",mcap:"$150B",rsi:"64",sma:"$104",sm:"68",
+     why:T("SHOP volume picking up with momentum into earnings.","SHOP con volumen subiendo y momentum hacia earnings.")},
+    {tk:"MU",dir:"LONG",fb:118.00,fbc:1.50,tgt:145,vol:"2.0×",flags:["BRK","MOM","SM"],score:66,stop:110,entry:"116–121",mcap:"$130B",rsi:"59",sma:"$108",sm:"67",
+     why:T("MU breaking out as memory pricing improves.","MU rompiendo al alza mientras mejora el precio de memorias.")},
+    {tk:"CRWD",dir:"LONG",fb:360.00,fbc:1.10,tgt:430,vol:"1.7×",flags:["MOM","SM","CAT"],score:65,stop:340,entry:"356–366",mcap:"$88B",rsi:"57",sma:"$338",sm:"66",
+     why:T("CRWD momentum steady with smart-money support into results.","CRWD con momentum estable y respaldo de smart money hacia resultados.")},
+    {tk:"MRVL",dir:"LONG",fb:88.00,fbc:2.10,tgt:110,vol:"2.3×",flags:["VOL","MOM"],score:64,stop:81,entry:"86–90",mcap:"$76B",rsi:"61",sma:"$80",sm:"65",
+     why:T("MRVL riding AI networking demand with strong volume.","MRVL montada en la demanda de redes para IA con volumen fuerte.")},
+    {tk:"DELL",dir:"LONG",fb:135.00,fbc:1.30,tgt:165,vol:"1.8×",flags:["BRK","SM"],score:63,stop:126,entry:"133–138",mcap:"$95B",rsi:"56",sma:"$124",sm:"64",
+     why:T("DELL breakout with steady institutional buying on AI servers.","DELL rompimiento con compra institucional estable por servidores de IA.")},
   ];
   const OPTIONS=[
     {tk:"META",side:"CALL",strk:"$580",exp:"Jun 20",pm:"$8.42",vol:"14.2K/8.1K",iv:"38%",flags:["UOA","OI","SM"],score:94,be:"$588.42",pop:"62%",delta:"0.42",gamma:"0.018",theta:"−$11",vega:"$26",
@@ -15378,6 +15394,14 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
      why:T("MSFT conservative call with low IV and smart-money tilt.","Call MSFT conservadora con IV baja y sesgo de smart money.")},
     {tk:"SMCI",side:"PUT",strk:"$45",exp:"Jun 27",pm:"$3.30",vol:"14.8K/9.1K",iv:"78%",flags:["BLK","VOL"],score:70,be:"$41.70",pop:"43%",delta:"−0.34",gamma:"0.022",theta:"−$11",vega:"$14",
      why:T("SMCI put with block flow and very high IV — short-term bearish bet.","Put SMCI con flujo en bloque e IV muy alta — apuesta bajista de corto plazo.")},
+    {tk:"ARM",side:"CALL",strk:"$160",exp:"Jul 18",pm:"$5.10",vol:"7.6K/4.9K",iv:"52%",flags:["UOA","MOM"],score:69,be:"$165.10",pop:"45%",delta:"0.37",gamma:"0.016",theta:"−$9",vega:"$20",
+     why:T("ARM call with unusual activity riding AI-chip momentum.","Call ARM con actividad inusual montada en el momentum de chips de IA.")},
+    {tk:"MU",side:"CALL",strk:"$125",exp:"Aug 15",pm:"$4.30",vol:"10.2K/6.8K",iv:"48%",flags:["OI","MOM"],score:68,be:"$129.30",pop:"48%",delta:"0.41",gamma:"0.014",theta:"−$7",vega:"$21",
+     why:T("MU call with rising open interest as memory cycle turns.","Call MU con interés abierto subiendo mientras gira el ciclo de memorias.")},
+    {tk:"DELL",side:"CALL",strk:"$140",exp:"Jul 18",pm:"$3.60",vol:"6.1K/3.9K",iv:"40%",flags:["SM"],score:66,be:"$143.60",pop:"50%",delta:"0.43",gamma:"0.012",theta:"−$6",vega:"$18",
+     why:T("DELL call with smart-money tilt on AI server demand.","Call DELL con sesgo de smart money por demanda de servidores de IA.")},
+    {tk:"BABA",side:"PUT",strk:"$78",exp:"Jun 27",pm:"$2.90",vol:"9.4K/6.1K",iv:"50%",flags:["BLK","VOL"],score:64,be:"$75.10",pop:"44%",delta:"−0.35",gamma:"0.017",theta:"−$8",vega:"$16",
+     why:T("BABA put with block flow — short-term bearish hedge.","Put BABA con flujo en bloque — cobertura bajista de corto plazo.")},
   ];
 
   // ── Polling GRATIS cada 60s vía Finnhub REST (acciones + subyacentes de opciones).
@@ -15489,15 +15513,15 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .filt{display:flex;gap:6px;padding:9px 14px;border-bottom:1px solid var(--ln);overflow-x:auto;flex-wrap:wrap}
       .nfp .filt span{flex:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:600;color:var(--mut);border:1px solid var(--ln);border-radius:7px;padding:5px 9px;text-transform:uppercase}
       .nfp .filt span.on{color:#fff;background:var(--bg3);border-color:#1D3266}
-      .nfp .tape-h{display:grid;gap:7px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--ln);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp .tape-h{display:grid;gap:7px;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--ln);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
       .nfp.t-stocks .tape-h,.nfp.t-stocks .row{grid-template-columns:30px 78px 70px 60px 64px 96px 54px}
       .nfp.t-options .tape-h,.nfp.t-options .row{grid-template-columns:30px 92px 56px 56px 60px 92px 54px}
       .nfp .tape-h span:nth-child(n+3){text-align:right} .nfp .tape-h .fh{text-align:center}
-      .nfp .row{display:grid;gap:7px;padding:10px 14px;border-bottom:1px solid #11182A;font-family:'JetBrains Mono',monospace;font-size:10.5px;align-items:center;cursor:pointer}
+      .nfp .row{display:grid;gap:7px;padding:13px 16px;border-bottom:1px solid #11182A;font-family:'JetBrains Mono',monospace;font-size:12px;align-items:center;cursor:pointer}
       .nfp .row:hover{background:rgba(77,141,255,.05)} .nfp .row.sel{background:rgba(11,92,255,.10);box-shadow:inset 3px 0 0 var(--bl2)}
       .nfp .row .rk{color:var(--mut);font-size:9px}
       .nfp .row .ct{display:flex;align-items:center;gap:6px}
-      .nfp .row .ct .tk{font-size:11.5px;font-weight:700;color:#fff}
+      .nfp .row .ct .tk{font-size:13px;font-weight:700;color:#fff}
       .nfp .row .ct .tg{font-size:7.5px;font-weight:700;border-radius:4px;padding:1px 5px}
       .nfp .ct .tg.c{background:rgba(52,211,153,.18);color:var(--up)} .nfp .ct .tg.p{background:rgba(248,113,113,.18);color:var(--dn)}
       .nfp .row .num{text-align:right;color:#fff} .nfp .row .sub{text-align:right;color:var(--tx);font-size:10px}
