@@ -15536,6 +15536,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .demoseal{display:inline-flex;align-items:center;gap:6px;background:rgba(245,200,75,.10);border:1px solid #3A2E10;color:var(--gd);border-radius:7px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;font-weight:600}
       @media(max-width:1000px){
         .nfp .grid{grid-template-columns:1fr} .nfp .sigs{grid-template-columns:repeat(2,1fr)} .nfp .legend .lg{grid-template-columns:1fr 1fr}
+        .nfp .sigs .sig:nth-child(5){grid-column:1 / -1}
         .nfp.t-stocks .tape-h,.nfp.t-stocks .row{grid-template-columns:26px 1fr 64px 80px 50px} .nfp.t-options .tape-h,.nfp.t-options .row{grid-template-columns:26px 1fr 60px 80px 50px}
         .nfp .tape-h .h-tgt,.nfp .tape-h .h-vol,.nfp .row .c-tgt,.nfp .row .c-vol,.nfp .tape-h .h-exp,.nfp .tape-h .h-iv,.nfp .row .c-exp,.nfp .row .c-iv{display:none}
       }
@@ -24196,7 +24197,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
           <div style={{minWidth:0,display:"flex",flexDirection:"column"}}>
             <div style={{padding:"10px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
               <span style={{fontFamily:MONO,fontSize:16,fontWeight:700,letterSpacing:1}}>{cp.tk}</span>
-              <div style={{display:"flex",alignItems:"center",gap:0,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,overflow:"hidden"}}>
+              <div className="nexo-chsearch-box" style={{display:"flex",alignItems:"center",gap:0,background:T.bg3,border:`1px solid ${T.br}`,borderRadius:5,overflow:"hidden"}}>
                 <input value={chSearch} onChange={e=>setChSearch(e.target.value.toUpperCase())}
                   onKeyDown={e=>{ if(e.key==="Enter"&&chSearch.trim()){ setChSel(chSearch.trim()); setChSearch(""); } }}
                   placeholder={isEN?"Change stock…":"Cambiar acción…"}
@@ -30169,6 +30170,11 @@ export default function App(){
         .nexo-term-tabs::-webkit-scrollbar { display: none !important; }
         .nexo-term-tabs > button { flex: 0 0 auto !important; }
         .nexo-term-tabs > div { flex: 0 0 auto !important; }
+
+        /* ── TERMINAL CHARTS: el buscador "Cambiar accion" usa su propia fila
+              y todo el ancho en movil (antes el ancho fijo 120px recortaba el placeholder) ── */
+        .nexo-chsearch-box { flex: 1 1 100% !important; order: 5 !important; }
+        .nexo-chsearch-box input { flex: 1 1 auto !important; width: auto !important; }
 
         /* ── WIN STREAK TRACKER — 2 col → 1 col ── */
         .nexo-winstreak-layout { grid-template-columns: 1fr !important; }
