@@ -23337,6 +23337,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [chSel, setChSel] = useState(null); // ticker seleccionado para CHARTS (null = top position)
   const [chSearch, setChSearch] = useState(""); // buscador de ticker en CHARTS
   const [chTech, setChTech] = useState(null);
+  const [ovSort, setOvSort] = useState({col:"pnl",dir:-1}); // orden tabla Overview
   useEffect(()=>{ const tk=(chSel||(positions&&positions[0]&&positions[0].ticker)||"").toString().toUpperCase(); if(!tk) return; let cancel=false; fetch("/api/data?type=technical&symbol="+encodeURIComponent(tk)).then(r=>r.ok?r.json():null).then(j=>{ if(!cancel&&j&&j.symbol) setChTech(j); }).catch(()=>{}); return ()=>{cancel=true;}; },[chSel,positions]);
   const [ovRange, setOvRange] = useState("1M"); // rango del gráfico overview (PORTFOLIO)
   const [navView, setNavView] = useState("overview"); // NAVIGATION: overview|positions|orders|history|analytics|risk
@@ -23982,10 +23983,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
-                <thead><tr style={{background:T.bg2}}>{(isEN?["SYMBOL","UNITS","ENTRY","CUR. PRICE","MKT VALUE","P&L $","P&L %","TODAY","SIGNAL",""]:["SÍMBOLO","UNIDADES","ENTRADA","PRECIO ACT.","MKT VALUE","P&L $","P&L %","HOY","SEÑAL",""]).map((h,i)=><th key={i} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                <thead><tr style={{background:T.bg2}}>{[["SYMBOL","SÍMBOLO","tk"],["UNITS","UNIDADES","shares"],["ENTRY","ENTRADA","entry"],["CUR. PRICE","PRECIO ACT.","price"],["MKT VALUE","MKT VALUE","mv"],["P&L $","P&L $","pnl"],["P&L %","P&L %","pnlPct"],["TODAY","HOY","today"],["SIGNAL","SEÑAL",null],["","",null]].map((c,i)=><th key={i} onClick={()=>{ if(c[2]) setOvSort(st=>({col:c[2],dir:st.col===c[2]?-st.dir:-1})); }} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:(ovSort.col===c[2]&&c[2])?T.grn:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap",cursor:c[2]?"pointer":"default",userSelect:"none"}}>{isEN?c[0]:c[1]}{c[2]?((ovSort.col===c[2])?(ovSort.dir<0?" ▼":" ▲"):" ⇅"):""}</th>)}</tr></thead>
                 <tbody>
-                  {sortedRows.map((r,i)=>{ const sg=sig(r); const tp=r.today>=0; return (
-                    <tr key={r.p.id} style={{borderBottom:"1px solid #111820"}}>
+                  {[...rows].sort((a,b)=>{ const _f=ovSort.col; if(!_f) return 0; if(_f==="tk") return ovSort.dir*String(a.tk).localeCompare(String(b.tk)); return ovSort.dir*(((a[_f]||0))-((b[_f]||0))); }).map((r,i)=>{ const sg=sig(r); const tp=r.today>=0; const _sel=cp&&cp.tk===r.tk; return (
+                    <tr key={r.p.id} onClick={()=>setChSel(r.tk)} title={(isEN?"Show ":"Ver ")+r.tk+(isEN?" on the right":" a la derecha")} style={{borderBottom:"1px solid #111820",cursor:"pointer",background:_sel?"rgba(0,255,135,.07)":"transparent",borderLeft:_sel?`3px solid ${T.grn}`:"3px solid transparent"}}>
                       <td style={{padding:"9px 14px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:30,height:30,borderRadius:6,background:avatarBg(r.tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r.tk.slice(0,2)}</div><div><div style={{fontSize:13,fontWeight:700,color:T.txt,letterSpacing:.5}}>{r.tk}</div><div style={{fontSize:10,color:T.dim}}>{r.name}</div></div></div></td>
                       <td style={{padding:"9px 14px",color:T.txt,fontWeight:500}}>{r.shares}</td>
                       <td style={{padding:"9px 14px",color:T.mid}}>${r.entry.toLocaleString("en-US")}</td>
@@ -24014,9 +24015,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
               </div>
               <div style={{overflowX:"auto"}}>
                 <table style={{width:"100%",borderCollapse:"collapse",fontFamily:MONO,fontSize:11}}>
-                  <thead><tr style={{background:T.bg2}}>{(isEN?["SYMBOL","UNITS","ENTRY","CUR. PRICE","MKT VALUE","% PORT.","P&L $","P&L %",""]:["SÍMBOLO","UNIDADES","ENTRADA","PRECIO ACT.","MKT VALUE","% CARTERA","P&L $","P&L %",""]).map((h,i)=><th key={i} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                  <thead><tr style={{background:T.bg2}}>{[["SYMBOL","SÍMBOLO","tk"],["UNITS","UNIDADES","shares"],["ENTRY","ENTRADA","entry"],["CUR. PRICE","PRECIO ACT.","price"],["MKT VALUE","MKT VALUE","mv"],["% PORT.","% CARTERA","mv"],["P&L $","P&L $","pnl"],["P&L %","P&L %","pnlPct"],["","",null]].map((c,i)=><th key={i} onClick={()=>{ if(c[2]) setOvSort(st=>({col:c[2],dir:st.col===c[2]?-st.dir:-1})); }} style={{padding:"8px 14px",fontSize:9,fontWeight:600,letterSpacing:1.5,color:(ovSort.col===c[2]&&c[2])?T.grn:T.dim,textAlign:"left",borderBottom:`1px solid ${T.br}`,whiteSpace:"nowrap",cursor:c[2]?"pointer":"default",userSelect:"none"}}>{isEN?c[0]:c[1]}{c[2]?((ovSort.col===c[2])?(ovSort.dir<0?" ▼":" ▲"):" ⇅"):""}</th>)}</tr></thead>
                   <tbody>
-                    {[...sortedRows].sort((a,b)=>b.mv-a.mv).map((r)=>{ const pct=r.mv/tot*100; return (
+                    {[...rows].sort((a,b)=>{ const _f=ovSort.col; if(!_f) return 0; if(_f==="tk") return ovSort.dir*String(a.tk).localeCompare(String(b.tk)); return ovSort.dir*(((a[_f]||0))-((b[_f]||0))); }).map((r)=>{ const pct=r.mv/tot*100; return (
                       <tr key={r.p.id} style={{borderBottom:"1px solid #111820"}}>
                         <td style={{padding:"9px 14px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:28,height:28,borderRadius:6,background:avatarBg(r.tk),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:MONO,fontSize:9,fontWeight:800,color:T.txt}}>{r.tk.slice(0,2)}</div><div><div style={{fontSize:12,fontWeight:700,color:T.txt}}>{r.tk}</div><div style={{fontSize:9,color:T.dim}}>{r.name}</div>{r.p.broker?<div style={{fontSize:8,color:T.blue,marginTop:2,display:"inline-block",border:`1px solid ${T.blue}33`,borderRadius:3,padding:"1px 5px"}}>🏦 {r.p.broker}</div>:null}</div></div></td>
                         <td style={{padding:"9px 14px",color:T.txt}}>{r.shares}</td>
