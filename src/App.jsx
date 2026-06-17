@@ -15342,6 +15342,16 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
      why:T("PLTR exploding on 6.7× volume — highest of the board — but RSI 71 is near overbought. Size carefully.","PLTR explotando con volumen 6.7× — el más alto del tablero — pero RSI 71 cerca de sobrecompra. Calcula bien el tamaño.")},
     {tk:"TSLA",dir:"SHORT",fb:245.60,fbc:-2.30,tgt:215,vol:"2.4×",flags:["VOL","MOM","SM","CAT"],score:82,stop:258,entry:"244–248",mcap:"$780B",rsi:"42",sma:"$262",sm:"74",
      why:T("TSLA breaking down below its 50-day on 2.4× volume — momentum turning bearish.","TSLA quiebra bajo su media de 50 días con volumen 2.4× — momentum girando bajista.")},
+    {tk:"AMD",dir:"LONG",fb:175.00,fbc:1.50,tgt:215,vol:"2.8×",flags:["VOL","MOM","SM"],score:80,stop:160,entry:"172–178",mcap:"$280B",rsi:"60",sma:"$165",sm:"77",
+     why:T("AMD riding semiconductor momentum with above-average volume and smart-money accumulation.","AMD montada en el momentum de semiconductores con volumen sobre el promedio y acumulación de smart money.")},
+    {tk:"AMZN",dir:"LONG",fb:235.00,fbc:1.10,tgt:270,vol:"1.9×",flags:["BRK","MOM","CAT"],score:78,stop:222,entry:"232–238",mcap:"$2.4T",rsi:"57",sma:"$225",sm:"72",
+     why:T("AMZN confirming a breakout with steady momentum into its next catalyst.","AMZN confirmando un rompimiento con momentum estable hacia su próximo catalizador.")},
+    {tk:"GOOGL",dir:"LONG",fb:198.00,fbc:0.90,tgt:230,vol:"1.7×",flags:["BRK","SM"],score:76,stop:188,entry:"196–202",mcap:"$2.4T",rsi:"55",sma:"$190",sm:"70",
+     why:T("GOOGL holding above its 50-day with quiet institutional accumulation.","GOOGL sosteniéndose sobre su media de 50 días con acumulación institucional silenciosa.")},
+    {tk:"AVGO",dir:"LONG",fb:330.00,fbc:2.00,tgt:390,vol:"2.3×",flags:["VOL","MOM","SM"],score:74,stop:312,entry:"325–335",mcap:"$1.5T",rsi:"63",sma:"$300",sm:"73",
+     why:T("AVGO strong volume and momentum as AI demand stays hot.","AVGO con volumen y momentum fuertes mientras la demanda de IA sigue caliente.")},
+    {tk:"SMCI",dir:"SHORT",fb:48.00,fbc:-3.50,tgt:38,vol:"3.4×",flags:["VOL","MOM"],score:72,stop:54,entry:"47–50",mcap:"$28B",rsi:"39",sma:"$58",sm:"68",
+     why:T("SMCI breaking down on heavy volume — momentum turned bearish, short setup.","SMCI quiebra con volumen alto — momentum girado bajista, setup de corto.")},
   ];
   const OPTIONS=[
     {tk:"META",side:"CALL",strk:"$580",exp:"Jun 20",pm:"$8.42",vol:"14.2K/8.1K",iv:"38%",flags:["UOA","OI","SM"],score:94,be:"$588.42",pop:"62%",delta:"0.42",gamma:"0.018",theta:"−$11",vega:"$26",
@@ -15460,7 +15470,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .pl:hover{transform:translateY(-2px)} .nfp .pl.sel{box-shadow:0 0 0 1.5px var(--bl2) inset}
       .nfp .pl .pn{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;color:var(--mut);text-transform:uppercase}
       .nfp .pl .pn .dot{width:7px;height:7px;border-radius:50%}
-      .nfp .pl.rr .dot{background:var(--bl2)}.nfp .pl.pr .dot{background:var(--cy)}.nfp .pl.up_ .dot{background:var(--gd)}
+      .nfp .pl.rr .dot{background:var(--bl2);--c:var(--bl2)}.nfp .pl.pr .dot{background:var(--cy);--c:var(--cy)}.nfp .pl.up_ .dot{background:var(--gd);--c:var(--gd)}
+      .nfp.live .pl .dot{animation:nfpDotGlow 1.7s ease-in-out infinite}
       .nfp .pl h3{font-size:13.5px;font-weight:800;margin-top:4px}
       .nfp .pl .desc{font-size:10.5px;color:var(--mut);margin-top:2px}
       .nfp .pl .winner{margin-top:9px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace}
