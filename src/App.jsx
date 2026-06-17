@@ -13735,7 +13735,7 @@ function EconCalendarPage({lang="es"}) {
       </div>
 
       <div className="nexo-scroll-x" style={{borderRadius:12}}>
-      <div style={{minWidth:440,display:"flex",flexDirection:"column",gap:8}}>
+      <div className="nexo-econ-rows" style={{minWidth:440,display:"flex",flexDirection:"column",gap:8}}>
         {rows.length===0 && <div style={{textAlign:"center",padding:"40px 0",color:C.muted}}>{isEN?"No events for this filter.":"Sin eventos con ese filtro."}</div>}
         {rows.map((ev,i)=>{
           const past    = ev.date < today;
@@ -13743,7 +13743,7 @@ function EconCalendarPage({lang="es"}) {
           const imp     = IMP[ev.imp] || IMP.low;
           const hasActual = ev.actual && ev.actual !== "—" && ev.actual !== null;
           return(
-            <div key={i} style={{background:isToday?"rgba(15,76,129,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past&&!hasActual?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past&&!hasActual?0.55:1,display:"grid",gridTemplateColumns:"140px 1fr 150px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none",transition:"opacity 0.2s"}}>
+            <div key={i} style={{background:isToday?"rgba(15,76,129,0.03)":C.card,border:`1px solid ${isToday?C.accent+"44":C.border}`,borderLeft:`4px solid ${past&&!hasActual?C.muted2:imp.color}`,borderRadius:12,padding:"14px 20px",opacity:past&&!hasActual?0.55:1,display:"grid",gridTemplateColumns:"140px 1fr 150px",alignItems:"center",gap:16,boxShadow:isToday?C.shadowGlow:"none",transition:"opacity 0.2s"}} className="nexo-econ-row">
               <div>
                 <div style={{fontSize:12,fontWeight:700,color:past?C.muted:C.text}}>{fmtDate(ev.date)}</div>
                 <div style={{fontSize:10,color:C.muted2,marginTop:2}}>{ev.country} {catLabel(ev.cat)}</div>
@@ -30086,8 +30086,8 @@ export default function App(){
         .nexo-news-sidebar { position: static !important; top: auto !important; }
 
         /* ── EARNINGS PAGE — layout stacked ── */
-        .nexo-earnings-layout { grid-template-columns: 1fr !important; }
-        .nexo-earnings-sidebar { position: static !important; top: auto !important; }
+        .nexo-earnings-layout { grid-template-columns: minmax(0,1fr) !important; }
+        .nexo-earnings-sidebar { position: static !important; top: auto !important; min-width: 0 !important; }
         .nexo-earnings-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
 
         /* ── FLOW PAGE stats strip — minmax(0,1fr) evita que el min-content
@@ -30175,6 +30175,10 @@ export default function App(){
               y todo el ancho en movil (antes el ancho fijo 120px recortaba el placeholder) ── */
         .nexo-chsearch-box { flex: 1 1 100% !important; order: 5 !important; }
         .nexo-chsearch-box input { flex: 1 1 auto !important; width: auto !important; }
+
+        /* ── CALENDARIO ECONOMICO: filas caben sin scroll horizontal en movil ── */
+        .nexo-econ-rows { min-width: 0 !important; }
+        .nexo-econ-row { grid-template-columns: 82px minmax(0,1fr) 92px !important; gap: 10px !important; padding: 12px 12px !important; }
 
         /* ── WIN STREAK TRACKER — 2 col → 1 col ── */
         .nexo-winstreak-layout { grid-template-columns: 1fr !important; }
