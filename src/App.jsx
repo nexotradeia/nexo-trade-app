@@ -15683,9 +15683,9 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
           {lastUpd&&<span className="upd">{lastUpd.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>}
         </button>
         {isAdminFP && (
-          <span title={T("Data API calls used (Twelve Data) — only you see this","Llamadas a la API de datos usadas (Twelve Data) — solo tú ves esto")} style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:700,color:"#9FC0FF",border:"1px solid rgba(77,141,255,.35)",background:"rgba(77,141,255,.08)",borderRadius:8,padding:"6px 10px"}}>
-            📊 {apiUsage ? ((apiUsage.used!=null?apiUsage.used:"—")+(apiUsage.limit?(" / "+apiUsage.limit):"")) : "…"}
-            <span style={{color:"#67769A",fontWeight:400,letterSpacing:".06em"}}>{T("API calls","llamadas API")}</span>
+          <span title={T("Data API calls used today (Twelve Data) — only you see this. Free plan: 800/day, 8/min.","Llamadas a la API de datos usadas hoy (Twelve Data) — solo tú ves esto. Plan gratis: 800/día, 8/min.")} style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:700,color:(apiUsage&&apiUsage.todayLimit&&apiUsage.today>=apiUsage.todayLimit*0.85)?"#F5C84B":"#9FC0FF",border:"1px solid rgba(77,141,255,.35)",background:"rgba(77,141,255,.08)",borderRadius:8,padding:"6px 10px"}}>
+            📊 {apiUsage ? ((apiUsage.today!=null?apiUsage.today:"—")+(apiUsage.todayLimit?(" / "+apiUsage.todayLimit):"")) : "…"}
+            <span style={{color:"#67769A",fontWeight:400,letterSpacing:".06em"}}>{T("calls today","hoy")}{apiUsage&&apiUsage.perMin!=null?(" · "+apiUsage.perMin+"/"+(apiUsage.perMinLimit||8)+T(" min"," min")):""}</span>
           </span>
         )}
         <span className={"liveb"+(mktOpen?"":" closed")}><i/>{mktOpen?T("LIVE · MARKET OPEN","EN VIVO · MERCADO ABIERTO"):T("MARKET CLOSED","MERCADO CERRADO")}</span>
