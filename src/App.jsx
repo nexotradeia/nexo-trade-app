@@ -23607,6 +23607,46 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
     }
   },[positions, LS_KEY, user?.id]);
 
+  // ── RESPALDO EN LA NUBE (user_vault): carteras secundarias + dividendos/opciones/alertas ──
+  //    El portafolio principal ya va a user_portfolios; esto cubre TODO lo demás para que no
+  //    se pierda al borrar caché o cambiar de dispositivo.
+  const vaultReady = useRef(false);
+  useEffect(()=>{
+    const uid=user?.id; if(!uid){ vaultReady.current=false; return; }
+    let cancelled=false; vaultReady.current=false;
+    (async()=>{
+      try{
+        const {data}=await supabase.from('user_vault').select('data').eq('user_id',uid).maybeSingle();
+        if(cancelled) return;
+        const v=data&&data.data;
+        if(v&&typeof v==='object'){
+          const setLS=(k,arr)=>{ try{ if(Array.isArray(arr)) localStorage.setItem(k,JSON.stringify(arr)); }catch{} };
+          if(Array.isArray(v.pfList)&&v.pfList.length){ try{localStorage.setItem(PF_LIST_KEY,JSON.stringify(v.pfList));}catch{} setPfList(v.pfList); }
+          const W=(v.wallets&&typeof v.wallets==='object')?v.wallets:{};
+          Object.keys(W).forEach(id=>{ const w=W[id]||{}; const suf=id?`_${id}`:''; setLS(PF_BASE+suf,w.positions); setLS(`nexo_divs_${uid}${suf}`,w.divs); setLS(`nexo_options_${uid}${suf}`,w.opts); setLS(`nexo_alerts_${uid}${suf}`,w.alerts); });
+          const act=W[pfActiveRef.current||'']; if(act){ if(Array.isArray(act.positions)&&(pfActiveRef.current||'')!=='') setPositions(act.positions); if(Array.isArray(act.divs)) setDivItems(act.divs); if(Array.isArray(act.opts)) setOptItems(act.opts); if(Array.isArray(act.alerts)) setAlItems(act.alerts); }
+        }
+      }catch(e){}
+      vaultReady.current=true;
+    })();
+    return ()=>{cancelled=true;};
+  },[user?.id]);
+  useEffect(()=>{
+    const uid=user?.id; if(!uid||!vaultReady.current) return;
+    const t=setTimeout(()=>{
+      try{
+        const rd=(k)=>{ try{ const s=JSON.parse(localStorage.getItem(k)||'null'); return Array.isArray(s)?s:[]; }catch{ return []; } };
+        const cur=pfActiveRef.current||''; const wallets={};
+        (Array.isArray(pfList)&&pfList.length?pfList:[{id:''}]).forEach(w=>{ const id=w.id||''; const suf=id?`_${id}`:'';
+          if(id===cur) wallets[id]={positions,divs:divItems,opts:optItems,alerts:alItems};
+          else wallets[id]={positions:rd(PF_BASE+suf),divs:rd(`nexo_divs_${uid}${suf}`),opts:rd(`nexo_options_${uid}${suf}`),alerts:rd(`nexo_alerts_${uid}${suf}`)};
+        });
+        supabase.from('user_vault').upsert({user_id:uid,data:{pfList,wallets},updated_at:new Date().toISOString()}).then(()=>{},()=>{});
+      }catch(e){}
+    },1500);
+    return ()=>clearTimeout(t);
+  },[pfList,positions,divItems,optItems,alItems,user?.id]);
+
   useEffect(()=>{ try{ localStorage.setItem(AL_KEY, JSON.stringify(alItems)); }catch{} },[alItems, AL_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(JR_KEY, JSON.stringify(jrItems)); }catch{} },[jrItems, JR_KEY]);
   useEffect(()=>{ try{ localStorage.setItem(AL_KEY+"_fired", JSON.stringify(alFired)); }catch{} },[alFired, AL_KEY]);
