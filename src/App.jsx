@@ -23537,6 +23537,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [divForm, setDivForm] = useState({symbol:"",shares:"",divShare:"",freq:"Trimestral",exDate:"",payDate:""});
   const [divMsg, setDivMsg] = useState(null);
   const [divDrip, setDivDrip] = useState({});
+  const [divOpen, setDivOpen] = useState(null);  // pago expandido en Próximos Pagos
   const [alFilter, setAlFilter] = useState("All");
   const [alToggles, setAlToggles] = useState({});
   const AL_KEY = `nexo_alerts_${user?.id||"guest"}${pfActive?`_${pfActive}`:""}`;  // alertas POR cartera
@@ -24824,7 +24825,26 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{background:T.bg2,borderLeft:`1px solid ${T.br}`}}>
               <div style={{borderBottom:`1px solid ${T.br}`,padding:"12px 0"}}>
                 <div style={{...lbl,padding:"0 14px 8px"}}>{isEN?"Upcoming Payments":"Próximos Pagos"}</div>
-                {future.length? <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:8}}>{future.slice(0,8).map((x,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:11,background:T.bg3,border:`1px solid ${i===0?"rgba(240,180,41,.3)":T.br}`,borderRadius:8,padding:"10px 12px"}}><div style={{textAlign:"center",flexShrink:0,width:34}}><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt}}>{new Date(x.d.payDate+"T00:00").getDate()}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>{new Date(x.d.payDate+"T00:00").toLocaleDateString("es-ES",{month:"short"}).toUpperCase()}</div></div><div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{x.d.symbol}{i===0&&<span style={{color:T.gold,fontSize:9}}> ⚡</span>}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,marginTop:1}}>{x.d.freq} · ${x.d.divShare}/acc</div></div><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.gold}}>${proxOf(x.d).toFixed(2)}</div></div>))}</div>
+                {future.length? <div style={{padding:"0 12px",display:"flex",flexDirection:"column",gap:8}}>{future.slice(0,8).map((x,i)=>{ const open=divOpen===x.d.id; const days=Math.max(0,Math.ceil((new Date(x.d.payDate+"T00:00").getTime()-Date.now())/86400000)); const ann=annualOf(x.d); const pct=ingresoAnual>0?Math.round(ann/ingresoAnual*100):0; const py=perYear[x.d.freq]||4; return (
+                  <div key={i} onClick={()=>setDivOpen(open?null:x.d.id)} title={isEN?"Tap for detail":"Toca para ver detalle"} style={{background:T.bg3,border:`1px solid ${open?"rgba(240,180,41,.55)":(i===0?"rgba(240,180,41,.3)":T.br)}`,borderRadius:8,padding:"10px 12px",cursor:"pointer",transition:"border-color .15s"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:11}}>
+                      <div style={{textAlign:"center",flexShrink:0,width:34}}><div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.txt}}>{new Date(x.d.payDate+"T00:00").getDate()}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim}}>{new Date(x.d.payDate+"T00:00").toLocaleDateString("es-ES",{month:"short"}).toUpperCase()}</div></div>
+                      <div style={{flex:1}}><div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:T.txt}}>{x.d.symbol}{i===0&&<span style={{color:T.gold,fontSize:9}}> ⚡</span>}</div><div style={{fontFamily:SANS,fontSize:9,color:T.dim,marginTop:1}}>{x.d.freq} · ${x.d.divShare}/acc</div></div>
+                      <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:T.gold}}>${proxOf(x.d).toFixed(2)}</div>
+                      <span style={{color:T.dim,fontSize:9,marginLeft:1,display:"inline-block",transform:open?"rotate(180deg)":"none",transition:"transform .15s"}}>▾</span>
+                    </div>
+                    {open && <div style={{marginTop:9,paddingTop:9,borderTop:`1px solid ${T.br}`,display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 10px"}}>
+                      {[
+                        [isEN?"Shares × $/sh":"Acciones × $/acc",(parseFloat(x.d.shares)||0).toLocaleString("en-US",{maximumFractionDigits:2})+" × $"+x.d.divShare],
+                        [isEN?"This payment":"Este pago","$"+proxOf(x.d).toFixed(2)],
+                        [isEN?"Days left":"Faltan",days+(isEN?(days===1?" day":" days"):(days===1?" día":" días"))],
+                        [isEN?"Frequency":"Frecuencia",x.d.freq+" ("+py+(isEN?"/yr":"/año")+")"],
+                        [isEN?"Annual (this)":"Al año (este)","$"+ann.toFixed(2)],
+                        [isEN?"% of income":"% de tu ingreso",pct+"%"],
+                      ].map(([l,v],j)=>(<div key={j}><div style={{fontFamily:MONO,fontSize:8,color:T.dim,letterSpacing:.5,textTransform:"uppercase"}}>{l}</div><div style={{fontFamily:MONO,fontSize:11.5,fontWeight:700,color:j===5?T.gold:T.txt,marginTop:2}}>{v}</div></div>))}
+                    </div>}
+                  </div>
+                ); })}</div>
                 : <div style={{padding:"20px 14px",fontFamily:MONO,fontSize:11,color:T.dim,textAlign:"center"}}>Agrega dividendos con fecha de pago</div>}
               </div>
               <div style={{padding:"14px"}}>
