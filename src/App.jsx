@@ -24776,7 +24776,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
             <div style={{minWidth:0}}>
               {divItems.length>0 && <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.br}`}}>
                 <div style={{...lbl,marginBottom:10}}>{isEN?"Payment Calendar · next 6 months":"Calendario de Pagos · próximos 6 meses"}</div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>{months.map((m,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 11px"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginBottom:6}}>{m.label}</div><div style={{fontFamily:MONO,fontSize:16,fontWeight:700,color:m.sum>0?T.gold:T.dim}}>{m.sum>0?"$"+Math.round(m.sum):"—"}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim,marginTop:4,lineHeight:1.4,minHeight:20}}>{m.items.join(" · ")}</div></div>))}</div>
+                <div className="nexo-div-cal" style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>{months.map((m,i)=>(<div key={i} style={{background:T.bg3,border:`1px solid ${T.br}`,borderRadius:8,padding:"10px 11px"}}><div style={{fontFamily:MONO,fontSize:9,color:T.dim,letterSpacing:1,marginBottom:6}}>{m.label}</div><div style={{fontFamily:MONO,fontSize:16,fontWeight:700,color:m.sum>0?T.gold:T.dim}}>{m.sum>0?"$"+Math.round(m.sum):"—"}</div><div style={{fontFamily:MONO,fontSize:8,color:T.dim,marginTop:4,lineHeight:1.4,minHeight:20}}>{m.items.join(" · ")}</div></div>))}</div>
               </div>}
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:T.bg2,borderBottom:`1px solid ${T.br}`,flexWrap:"wrap",gap:8}}>
                 <div style={{...lbl,padding:0}}>Mis Dividendos</div>
@@ -30340,6 +30340,7 @@ export default function App(){
         .nexo-term-kpis > div { border-right: 1px solid #1e2a38 !important; border-bottom: 1px solid #1e2a38 !important; }
         .nexo-term-kpis > div:nth-child(2n) { border-right: none !important; }
         .nexo-term-kpis > div:nth-child(5) { grid-column: 1 / -1 !important; border-right: none !important; }
+        .nexo-div-cal { grid-template-columns: repeat(3,1fr) !important; }
 
         /* ── TERMINAL: el contenedor no debe exceder el ancho de pantalla (la sangría negativa -16px lo desbordaba) ── */
         .nexo-term-root { margin-left: 0 !important; margin-right: 0 !important; max-width: 100vw !important; overflow-x: hidden !important; }
