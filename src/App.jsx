@@ -15446,7 +15446,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const OPTIONS_LIVE = React.useMemo(()=>{ if(!(optRows&&optRows.length)) return OPTIONS;
     const fmtT=v=>v==null?"—":(v<0?"−$"+Math.abs(v):"$"+v);
     return optRows.map(c=>{ const flags=[]; const oi=c.oiNum||0, vol=c.volNum||0; const notional=(c.premium||0)*vol*100;
-      if(vol>=2*Math.max(oi,1))flags.push("UOA"); if(oi>=3000)flags.push("OI"); if(notional>=750000)flags.push("BLK"); if((c.probNum||0)>=52||(c.score||0)>=85)flags.push("SM"); if(vol>=8000)flags.push("VOL");
+      if(vol>=Math.max(oi,1))flags.push("UOA"); if(oi>=1000)flags.push("OI"); if(notional>=300000)flags.push("BLK"); if((c.probNum||0)>=48||(c.score||0)>=75)flags.push("SM"); if(vol>=2000)flags.push("VOL");
       const kStr=Number.isInteger(c.strikeNum)?String(c.strikeNum):(c.strikeNum||0).toFixed(1);
       return { tk:c.s, side:c.isCall?"CALL":"PUT", strk:"$"+kStr, exp:c.exp,
         pm:(c.premium!=null?"$"+c.premium.toFixed(2):c.price), vol:((c.vol||"—")+"/"+(c.oi||"—")), iv:(c.iv||"—"),
@@ -15474,7 +15474,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const fmtK2=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
 
   const rows = tab==="stocks"?STOCKS_LIVE:OPTIONS_LIVE;
-  const matchFilt=(r)=>{ if(strict){ const need=tab==="stocks"?4:3; if((r.flags||[]).length<need) return false; } if(sFilt==="all")return true; if(tab==="stocks"){ if(sFilt==="long")return r.dir==="LONG"; if(sFilt==="short")return r.dir==="SHORT"; if(sFilt==="earnings")return (r.flags||[]).includes("CAT"); if(sFilt==="intraday")return (parseFloat(r.vol)||0)>=3; } else { if(sFilt==="calls")return r.side==="CALL"; if(sFilt==="puts")return r.side==="PUT"; if(sFilt==="dte7"){ try{ var dd=new Date(r.exp+" "+new Date().getFullYear()); var days=(dd-Date.now())/864e5; if(days< -60)days+=365; return days>=0&&days<=7; }catch(e){ return true; } } } return true; };
+  const matchFilt=(r)=>{ if(strict){ const need=tab==="stocks"?3:2; if((r.flags||[]).length<need) return false; } if(sFilt==="all")return true; if(tab==="stocks"){ if(sFilt==="long")return r.dir==="LONG"; if(sFilt==="short")return r.dir==="SHORT"; if(sFilt==="earnings")return (r.flags||[]).includes("CAT"); if(sFilt==="intraday")return (parseFloat(r.vol)||0)>=3; } else { if(sFilt==="calls")return r.side==="CALL"; if(sFilt==="puts")return r.side==="PUT"; if(sFilt==="dte7"){ try{ var dd=new Date(r.exp+" "+new Date().getFullYear()); var days=(dd-Date.now())/864e5; if(days< -60)days+=365; return days>=0&&days<=7; }catch(e){ return true; } } } return true; };
   const tableRows = rows.map((r,oi)=>({...r,_oi:oi})).filter(matchFilt);
   const sel = tab==="stocks"?selS:selO;
   const setSel = tab==="stocks"?setSelS:setSelO;
@@ -15690,7 +15690,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
         <div className="ic3" style={!strict?{background:"var(--bg3)",borderColor:"var(--ln2)",opacity:.55}:undefined}><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.8 3.7 4.1.6-3 2.9.7 4.1L8 10.9l-3.6 1.9.7-4.1-3-2.9 4.1-.6z" stroke="#34D399" strokeWidth="1.4" strokeLinejoin="round"/></svg></div>
         <div className="tx">
           <b style={!strict?{color:"var(--mut)"}:undefined}>{strict?T("High-Conviction Filter · ON","Filtro de Alta Convicción · ACTIVO"):T("High-Conviction Filter · OFF","Filtro de Alta Convicción · INACTIVO")}</b>
-          <small>{strict?(tab==="stocks"?T("ONLY SETUPS WHERE 4+ SIGNALS COINCIDE","SOLO SETUPS DONDE 4+ SEÑALES COINCIDEN"):T("ONLY CONTRACTS WHERE 3+ PRO SIGNALS COINCIDE","SOLO CONTRATOS DONDE 3+ SEÑALES PRO COINCIDEN")):T("SHOWING ALL SETUPS · TAP TO FILTER","MOSTRANDO TODOS LOS SETUPS · TÓCALO PARA FILTRAR")}</small>
+          <small>{strict?(tab==="stocks"?T("ONLY SETUPS WHERE 3+ SIGNALS COINCIDE","SOLO SETUPS DONDE 3+ SEÑALES COINCIDEN"):T("ONLY CONTRACTS WHERE 2+ PRO SIGNALS COINCIDE","SOLO CONTRATOS DONDE 2+ SEÑALES PRO COINCIDEN")):T("SHOWING ALL SETUPS · TAP TO FILTER","MOSTRANDO TODOS LOS SETUPS · TÓCALO PARA FILTRAR")}</small>
         </div>
         <div className={"hcsw"+(strict?"":" off")} onClick={()=>setStrict(s=>!s)}><span>{T("STRICT MODE","MODO ESTRICTO")}</span><span className="tog"/></div>
       </div>
@@ -15890,11 +15890,11 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
               ["mo","MOM",T("Momentum","Momentum"),T("RSI 50–70 + MACD + above 50/200 SMA.","RSI 50–70 + MACD + sobre SMA 50/200.")],
               ["ca","CAT",T("Catalyst","Catalizador"),T("Earnings/FDA/event within 7 days.","Earnings/FDA/evento en 7 días.")],
               ["sm","SM",T("Smart Money","Smart Money"),T("Composite of the 4 above.","Compuesto de las 4 anteriores.")]]
-            :[["uoa","UOA",T("Unusual Activity","Actividad Inusual"),T("Day volume > 2× open interest.","Volumen del día > 2× interés abierto.")],
-              ["oi","OI",T("Open Interest","Interés Abierto"),T("Open interest ≥ 3,000 contracts.","Interés abierto ≥ 3,000 contratos.")],
-              ["sw","BLK",T("Block Flow","Flujo en Bloque"),T("Notional traded ≥ $750K today.","Nocional negociado ≥ $750K hoy.")],
+            :[["uoa","UOA",T("Unusual Activity","Actividad Inusual"),T("Day volume ≥ open interest.","Volumen del día ≥ interés abierto.")],
+              ["oi","OI",T("Open Interest","Interés Abierto"),T("Open interest ≥ 1,000 contracts.","Interés abierto ≥ 1,000 contratos.")],
+              ["sw","BLK",T("Block Flow","Flujo en Bloque"),T("Notional traded ≥ $300K today.","Nocional negociado ≥ $300K hoy.")],
               ["sm","SM",T("Smart Money","Smart Money"),T("High prob. ITM or top score.","Alta prob. ITM o score alto.")],
-              ["vs","VOL",T("High Volume","Alto Volumen"),T("≥ 8,000 contracts traded today.","≥ 8,000 contratos hoy.")]]
+              ["vs","VOL",T("High Volume","Alto Volumen"),T("≥ 2,000 contracts traded today.","≥ 2,000 contratos hoy.")]]
           ).map(([c,l,b,s])=>(
             <div key={l} className="it"><span className={"f "+c}>{l}</span><div><b>{b}</b><span>{s}</span></div></div>
           ))}
