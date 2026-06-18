@@ -18718,7 +18718,9 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
 
   const IdeaCard = ({ idea }) => {
     const [mobileExpanded, setMobileExpanded] = useState(false);
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    // Unificado: el móvil usa exactamente la misma tarjeta que la web (igual a la web).
+    const isMobile = false;
+    const mono = (idea.ticker||"").replace(/[^A-Za-z0-9]/g,"").slice(0,2).toUpperCase();
     const live       = livePx[idea.ticker];
     const curPrice   = live?.price || idea.entry;
     const change     = live?.change || 0;
@@ -18790,14 +18792,15 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
           {/* Row 1: icon + ticker + signal badge */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <div style={{width:36,height:36,borderRadius:10,background:`${sc}18`,border:`1px solid ${sc}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>{idea.icon}</div>
+              <div style={{width:38,height:38,borderRadius:11,background:`linear-gradient(145deg,${sc}22,${sc}10)`,border:`1px solid ${sc}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13.5,fontWeight:900,fontFamily:"'JetBrains Mono',monospace",letterSpacing:-0.5,color:sc,flexShrink:0}}>{mono}</div>
               <div>
                 <div style={{fontFamily:"monospace",fontWeight:900,fontSize:15,color:sc,letterSpacing:-0.5}}>{idea.ticker}</div>
                 <div style={{fontSize:10,color:"#475569",fontWeight:600,maxWidth:130,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{idea.name}</div>
               </div>
             </div>
-            <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:20,padding:"4px 10px",display:"flex",alignItems:"center",gap:4}}>
-              <span style={{fontSize:11,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {isEN?(idea.signal==="COMPRA"?"BUY":idea.signal==="VENTA"?"SELL":"HOLD"):idea.signal}</span>
+            <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:8,padding:"4px 11px",display:"flex",alignItems:"center",gap:5}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:sc,boxShadow:`0 0 6px ${sc}`}}/>
+              <span style={{fontSize:10.5,fontWeight:900,color:sc,letterSpacing:1}}>{isEN?(idea.signal==="COMPRA"?"BUY":idea.signal==="VENTA"?"SELL":"HOLD"):idea.signal}</span>
             </div>
           </div>
 
@@ -18850,9 +18853,9 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
           {/* Bottom row: horizon + risk + days */}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:8}}>
             <div style={{display:"flex",gap:6}}>
-              <span style={{background:"rgba(15,94,104,0.1)",border:"1px solid rgba(15,94,104,0.2)",borderRadius:5,padding:"2px 7px",fontSize:9,color:"#818CF8",fontWeight:700}}>⏱ {idea.horizon}</span>
-              <span style={{background:`rgba(${RISK_COLOR[idea.riskN]==="#10B981"?"16,185,129":RISK_COLOR[idea.riskN]==="#F59E0B"?"245,158,11":"239,68,68"},0.1)`,borderRadius:5,padding:"2px 7px",fontSize:9,color:RISK_COLOR[idea.riskN],fontWeight:700}}>
-                {isEN?"⚡ Risk":"⚡ Riesgo"} {RISK_LABEL[idea.riskN]}
+              <span style={{background:"rgba(129,140,248,0.08)",border:"1px solid rgba(129,140,248,0.18)",borderRadius:6,padding:"3px 8px",fontSize:9,color:"#818CF8",fontWeight:700,letterSpacing:0.3}}>{idea.horizon}</span>
+              <span style={{background:`rgba(${RISK_COLOR[idea.riskN]==="#10B981"?"16,185,129":RISK_COLOR[idea.riskN]==="#F59E0B"?"245,158,11":"239,68,68"},0.1)`,border:`1px solid ${RISK_COLOR[idea.riskN]}25`,borderRadius:6,padding:"3px 8px",fontSize:9,color:RISK_COLOR[idea.riskN],fontWeight:700,letterSpacing:0.3,display:"flex",alignItems:"center",gap:4}}>
+                <span style={{width:5,height:5,borderRadius:"50%",background:RISK_COLOR[idea.riskN]}}/>{isEN?"Risk":"Riesgo"} {RISK_LABEL[idea.riskN]}
               </span>
             </div>
             <span style={{fontSize:9,color:"#334155"}}>{daysPub === 0 ? (_EN()?"Today":"Hoy") : (_EN()?`${daysPub}d ago`:`Hace ${daysPub}d`)}</span>
@@ -18883,7 +18886,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
             {/* Header */}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:18}}>
               <div style={{display:"flex",gap:12,alignItems:"center"}}>
-                <div style={{width:52,height:52,borderRadius:14,background:`${sc}18`,border:`1px solid ${sc}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{idea.icon}</div>
+                <div style={{width:52,height:52,borderRadius:15,background:`linear-gradient(145deg,${sc}22,${sc}10)`,border:`1px solid ${sc}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,fontFamily:"'JetBrains Mono',monospace",letterSpacing:-0.5,color:sc}}>{(idea.ticker||"").replace(/[^A-Za-z0-9]/g,"").slice(0,2).toUpperCase()}</div>
                 <div>
                   <div style={{fontFamily:"monospace",fontWeight:900,fontSize:22,color:sc}}>{idea.ticker}</div>
                   <div style={{fontSize:13,color:"#64748B",fontWeight:600}}>{idea.name}</div>
@@ -18891,8 +18894,9 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
                 </div>
               </div>
               <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
-                <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:20,padding:"5px 14px"}}>
-                  <span style={{fontSize:13,fontWeight:900,color:sc}}>{SIGNAL_ICON[idea.signal]} {isEN?(idea.signal==="COMPRA"?"BUY":idea.signal==="VENTA"?"SELL":"HOLD"):idea.signal}</span>
+                <div style={{background:SIGNAL_BG[idea.signal],border:`1px solid ${sc}40`,borderRadius:9,padding:"5px 14px",display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{width:7,height:7,borderRadius:"50%",background:sc,boxShadow:`0 0 7px ${sc}`}}/>
+                  <span style={{fontSize:12.5,fontWeight:900,color:sc,letterSpacing:1}}>{isEN?(idea.signal==="COMPRA"?"BUY":idea.signal==="VENTA"?"SELL":"HOLD"):idea.signal}</span>
                 </div>
                 <button onClick={onClose} style={{background:"transparent",border:"none",color:"#475569",cursor:"pointer",fontSize:18,padding:"2px 6px"}}>✕</button>
               </div>
@@ -18936,7 +18940,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
 
             {/* Thesis */}
             <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"16px 18px",marginBottom:14}}>
-              <div style={{fontSize:11,color:"#475569",fontWeight:700,letterSpacing:0.5,marginBottom:8}}>📝 {_EN()?"INVESTMENT THESIS":"TESIS DE INVERSIÓN"}</div>
+              <div style={{fontSize:10,color:sc,fontWeight:800,letterSpacing:1.2,marginBottom:8}}>{_EN()?"INVESTMENT THESIS":"TESIS DE INVERSIÓN"}</div>
               <div style={{fontSize:13,color:"#CBD5E1",lineHeight:1.75}}>{idea.thesis}</div>
             </div>
 
@@ -18957,10 +18961,11 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
       {/* ── HEADER ── */}
       <div style={{background:"linear-gradient(135deg,rgba(10,14,26,0.98),rgba(20,26,46,0.95))",border:"1px solid rgba(15,94,104,0.2)",borderRadius:20,padding:"18px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:"radial-gradient(circle,rgba(15,94,104,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
-        <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-          <span style={{fontSize:28}}>💡</span>
+        <div style={{display:"flex",alignItems:"center",gap:13,flexWrap:"wrap"}}>
+          <div style={{width:4,height:38,borderRadius:3,background:"linear-gradient(180deg,#4F46E5,#0F5E68)",flexShrink:0}}/>
           <div>
-            <div style={{fontSize:19,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>{isEN?"Investment Ideas":"Ideas de Inversión"}</div>
+            <div style={{fontSize:11,fontWeight:800,color:"#4F46E5",letterSpacing:2,textTransform:"uppercase",marginBottom:2}}>{isEN?"NEXOTRADE RESEARCH":"NEXOTRADE RESEARCH"}</div>
+            <div style={{fontSize:20,fontWeight:900,color:"#F1F5F9",letterSpacing:-0.5}}>{isEN?"Investment Ideas":"Ideas de Inversión"}</div>
             <div style={{fontSize:12,color:"#475569"}}>{isEN?"Signals analyzed by NexoTrade Research · Real-time prices":"Señales analizadas por NexoTrade Research · Precios en tiempo real"} · {IDEAS_DATA.length} {isEN?"active ideas":"ideas activas"}</div>
           </div>
           <div style={{marginLeft:"auto",display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -18976,7 +18981,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
         {/* Signal filter */}
         <div style={{display:"flex",gap:4}}>
-          {(isEN?[["todos","🌐 All"],["compra","↑ Buys"],["venta","↓ Sells"],["neutro","→ Hold"]]:[["todos","🌐 Todos"],["compra","↑ Compras"],["venta","↓ Ventas"],["neutro","→ Neutro"]]).map(([k,l])=>(
+          {(isEN?[["todos","All"],["compra","Buys"],["venta","Sells"],["neutro","Hold"]]:[["todos","Todos"],["compra","Compras"],["venta","Ventas"],["neutro","Neutro"]]).map(([k,l])=>(
             <button key={k} onClick={()=>{setFilter(k);setPage(1);}}
               style={{background:filter===k?"linear-gradient(135deg,#0F5E68,#4F46E5)":"transparent",border:`1.5px solid ${filter===k?"transparent":C.border}`,borderRadius:20,padding:"6px 13px",fontSize:11,fontWeight:700,color:filter===k?"#fff":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
               {l}
@@ -18985,7 +18990,7 @@ function IdeasPage({ isPremium, onNeedPremium, lang="es" }) {
         </div>
         <div style={{width:1,height:24,background:C.border}}/>
         {/* Risk filter */}
-        {(isEN?[["todos","⚡ All risk"],["1","🟢 Low"],["2","🟡 Med"],["3","🔴 High"]]:[["todos","⚡ Todo riesgo"],["1","🟢 Bajo"],["2","🟡 Medio"],["3","🔴 Alto"]]).map(([k,l])=>(
+        {(isEN?[["todos","All risk"],["1","Low"],["2","Med"],["3","High"]]:[["todos","Todo riesgo"],["1","Bajo"],["2","Medio"],["3","Alto"]]).map(([k,l])=>(
           <button key={k} onClick={()=>{setRiskF(k);setPage(1);}}
             style={{background:riskF===k?"rgba(15,94,104,0.2)":"transparent",border:`1.5px solid ${riskF===k?"#0F5E68":C.border}`,borderRadius:20,padding:"6px 12px",fontSize:11,fontWeight:700,color:riskF===k?"#A5B4FC":C.muted,cursor:"pointer",transition:"all 0.15s"}}>
             {l}
