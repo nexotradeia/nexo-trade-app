@@ -15426,8 +15426,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   //    El backend gratuito trae ~8 acciones por llamada (límite del proveedor de datos);
   //    el cliente ACUMULA por ticker hasta completar el universo (~24) en pocos minutos.
   useEffect(()=>{ let dead=false;
-    const load=()=>fetch('/api/data?type=finder&t='+Math.floor(Date.now()/45000)).then(r=>r.ok?r.json():null).then(j=>{ if(!dead&&j&&Array.isArray(j.rows)&&j.rows.length) setFinderRows(prev=>{ const m={}; (prev||[]).forEach(r=>{m[r.tk]=r;}); j.rows.forEach(r=>{m[r.tk]=r;}); return Object.values(m).sort((a,b)=>(b.score||0)-(a.score||0)); }); }).catch(()=>{});
-    load(); const iv=setInterval(load,60000); return ()=>{dead=true;clearInterval(iv);};
+    const load=()=>fetch('/api/data?type=finder').then(r=>r.ok?r.json():null).then(j=>{ if(!dead&&j&&Array.isArray(j.rows)&&j.rows.length) setFinderRows(prev=>{ const m={}; (prev||[]).forEach(r=>{m[r.tk]=r;}); j.rows.forEach(r=>{m[r.tk]=r;}); return Object.values(m).sort((a,b)=>(b.score||0)-(a.score||0)); }); }).catch(()=>{});
+    load(); const iv=setInterval(load,45000); return ()=>{dead=true;clearInterval(iv);};
   },[]);
   // ── CONTRATOS de opciones REALES: cadenas CBOE + Greeks Black-Scholes. ~14 subyacentes líquidos.
   useEffect(()=>{ let dead=false;
