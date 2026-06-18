@@ -23527,8 +23527,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [optItems, setOptItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(OPT_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
   const [optShow, setOptShow] = useState(false);
   const [optForm, setOptForm] = useState({symbol:"",kind:"CALL",side:"LONG",strike:"",expiry:"",contracts:"",entry:"",current:""});
-  const DIV_KEY = `nexo_divs_${user?.id||"guest"}`;
+  const DIV_KEY = `nexo_divs_${user?.id||"guest"}${pfActive?`_${pfActive}`:""}`;  // dividendos POR cartera
   const [divItems, setDivItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(DIV_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
+  const divFirst = useRef(true);
+  useEffect(()=>{ if(divFirst.current){ divFirst.current=false; return; } try{ const s=JSON.parse(localStorage.getItem(DIV_KEY)||"null"); setDivItems(Array.isArray(s)?s:[]); }catch{ setDivItems([]); } },[DIV_KEY]);
   const [divShow, setDivShow] = useState(false);
   const [divForm, setDivForm] = useState({symbol:"",shares:"",divShare:"",freq:"Trimestral",exDate:"",payDate:""});
   const [divMsg, setDivMsg] = useState(null);
