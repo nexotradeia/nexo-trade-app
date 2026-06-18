@@ -13846,6 +13846,17 @@ const DIV_FALLBACK = [
   {ticker:"SCHD",  name:"Schwab US Dividend ETF", price:32.4,   divRate:1.08,  yield:3.34,  quarterly:"0.27",   exDate:"2026-06-25",payDate:"2026-06-30",sector:"ETF"},
   {ticker:"VOO",   name:"Vanguard S&P 500 ETF",   price:679.7,  divRate:6.80,  yield:1.00,  quarterly:"1.70",   exDate:"2026-06-27",payDate:"2026-07-02",sector:"ETF"},
   {ticker:"VST",   name:"Vistra Corp",            price:147.5,  divRate:0.89,  yield:0.60,  quarterly:"0.2235", exDate:"2026-06-12",payDate:"2026-06-30",sector:"Utilities"},
+  // ── Pagadores recientes / holdings adicionales ───────────────────────────────
+  {ticker:"GOOGL", name:"Alphabet Inc (A)",       price:368.0,  divRate:0.84,  yield:0.23,  quarterly:"0.21",   exDate:"2026-09-08",payDate:"2026-09-15",sector:"Tecnología"},
+  {ticker:"GOOG",  name:"Alphabet Inc (C)",       price:368.0,  divRate:0.84,  yield:0.23,  quarterly:"0.21",   exDate:"2026-09-08",payDate:"2026-09-15",sector:"Tecnología"},
+  {ticker:"META",  name:"Meta Platforms",         price:577.0,  divRate:2.10,  yield:0.36,  quarterly:"0.525",  exDate:"2026-09-15",payDate:"2026-09-26",sector:"Tecnología"},
+  {ticker:"LHX",   name:"L3Harris Technologies",  price:295.0,  divRate:4.80,  yield:1.63,  quarterly:"1.20",   exDate:"2026-08-28",payDate:"2026-09-15",sector:"Industrial"},
+  {ticker:"V",     name:"Visa Inc",               price:327.0,  divRate:2.36,  yield:0.72,  quarterly:"0.59",   exDate:"2026-08-12",payDate:"2026-09-02",sector:"Finanzas"},
+  {ticker:"MA",    name:"Mastercard Inc",         price:520.0,  divRate:3.04,  yield:0.58,  quarterly:"0.76",   exDate:"2026-07-09",payDate:"2026-08-08",sector:"Finanzas"},
+  {ticker:"DIS",   name:"Walt Disney Co",         price:103.0,  divRate:1.00,  yield:0.97,  quarterly:"0.50",   exDate:"2026-07-07",payDate:"2026-07-23",sector:"Consumo"},
+  {ticker:"NKE",   name:"Nike Inc",               price:75.0,   divRate:1.60,  yield:2.13,  quarterly:"0.40",   exDate:"2026-09-04",payDate:"2026-10-01",sector:"Consumo"},
+  {ticker:"QQQ",   name:"Invesco QQQ Trust",      price:744.0,  divRate:2.80,  yield:0.38,  quarterly:"0.70",   exDate:"2026-09-22",payDate:"2026-10-31",sector:"ETF"},
+  {ticker:"SPY",   name:"SPDR S&P 500 ETF",       price:747.0,  divRate:7.00,  yield:0.94,  quarterly:"1.75",   exDate:"2026-09-19",payDate:"2026-10-31",sector:"ETF"},
 ];
 
 function DividendCalendarPage({lang="es"}) {
