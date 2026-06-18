@@ -23400,7 +23400,9 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [ovSort, setOvSort] = useState({col:"pnl",dir:-1}); // orden tabla Overview
   const [sectData, setSectData] = useState(null);
   useEffect(()=>{ let c=false; fetch("/api/prices?tickers=XLK,XLY,XLF,XLE,XLV,XLI,XLRE,XLU,XLB").then(r=>r.ok?r.json():null).then(j=>{ if(c||!j||!j.prices)return; const m={}; Object.keys(j.prices).forEach(k=>{ const q=j.prices[k]; if(q&&typeof q.dp==="number") m[k]=q.dp; }); if(Object.keys(m).length) setSectData(m); }).catch(()=>{}); return ()=>{c=true;}; },[]);
-  const chTechTk=(chSel||(positions&&positions[0]&&positions[0].ticker)||"").toString().toUpperCase();
+  // Ticker por defecto = la posición con MAYOR P&L (igual que `best`/`cp` que muestra el gráfico), para que chTech siempre coincida con el ticker mostrado.
+  const chDefTk=(()=>{ try{ if(!positions||!positions.length) return ""; let bt="",bp=-Infinity; positions.forEach(p=>{ const tk=(p.ticker||"").toUpperCase(); const lp=livePrices[tk]; const entry=parseFloat(p.entryPrice)||0; const shares=parseFloat(p.shares)||0; const price=lp?lp.price:entry; const pnl=(price-entry)*shares; if(pnl>bp){bp=pnl;bt=tk;} }); return bt; }catch(e){ return ""; } })();
+  const chTechTk=(chSel||chDefTk||"").toString().toUpperCase();
   useEffect(()=>{ if(!chTechTk) return; let cancel=false; fetch("/api/data?type=technical&symbol="+encodeURIComponent(chTechTk)).then(r=>r.ok?r.json():null).then(j=>{ if(!cancel&&j&&j.symbol&&String(j.symbol).toUpperCase()===chTechTk) setChTech(j); }).catch(()=>{}); return ()=>{cancel=true;}; },[chTechTk]);
   const [ovRange, setOvRange] = useState("1M"); // rango del gráfico overview (PORTFOLIO)
   const [navView, setNavView] = useState("overview"); // NAVIGATION: overview|positions|orders|history|analytics|risk
