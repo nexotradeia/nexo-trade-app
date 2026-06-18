@@ -23700,7 +23700,7 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
       const H=clean[hdrIdx].map(c=>c.toLowerCase());
       const find=(re)=>H.findIndex(c=>re.test(c));
       iT=find(/tick|symbol|s[ií]mbol/);
-      iS=find(/qty|quantity|acc|share|cant|unid/);
+      iS=find(/qty|quantity|share|cant|unid|acci/);  // "acci"=acciones; NO "acc" (chocaba con "Account #")
       iAvg=find(/avg.*cost|average.*cost|cost.*\/?.*share|precio.*prom|costo.*prom|avg.*price|entry|entrada/);
       iCost=find(/cost basis|costo|coste|book value|libro/);
       iPrice=find(/price|precio|last|actual/);
