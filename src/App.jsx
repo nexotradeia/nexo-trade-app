@@ -22757,11 +22757,15 @@ function RadarGlobalPage({lang="es",onBack}){
   const [fgScore,setFgScore]=useState(72);
   const [fgLabel,setFgLabel]=useState('GREED');
   useEffect(()=>{
-    fetch('https://api.alternative.me/fng/?limit=1')
+    const load=()=>fetch('https://api.alternative.me/fng/?limit=1')
       .then(r=>r.json())
-      .then(d=>{const v=parseInt(d.data[0].value);setFgScore(v);setFgLabel(d.data[0].value_classification.toUpperCase());})
+      .then(d=>{const v=parseInt(d.data[0].value);if(isFinite(v)){setFgScore(v);setFgLabel((d.data[0].value_classification||'').toUpperCase());}})
       .catch(()=>{});
+    load(); const iv=setInterval(load,300000); return ()=>clearInterval(iv);  // refresca cada 5 min
   },[]);
+  // Tick de 1s: garantiza que las cuentas regresivas de sesiones se actualicen siempre
+  const [gNow,setGNow]=useState(0);
+  useEffect(()=>{ const iv=setInterval(()=>setGNow(n=>(n+1)%86400),1000); return ()=>clearInterval(iv); },[]);
   useEffect(()=>{
     const fc=fgRef.current;if(!fc)return;
     const c=fc.getContext('2d'),cx=70,cy=76,r=54;
