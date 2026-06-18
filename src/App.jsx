@@ -15310,7 +15310,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const lp=useContext(PriceCtx);
   const [tab,setTab]=useState("stocks");
   const [sFilt,setSFilt]=useState("all");
-  const [strict,setStrict]=useState(()=>{ try{ return localStorage.getItem("nexo_sm_strict")==="1"; }catch(e){ return false; } });
+  const [strict,setStrict]=useState(false);
   const [selS,setSelS]=useState(0);
   const [selO,setSelO]=useState(0);
   const [showWiz,setShowWiz]=useState(false);
@@ -15471,24 +15471,15 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
 
   // KPIs REALES calculados del dataset activo
   const kStk = React.useMemo(()=>{ const a=finderRows||[]; if(!a.length) return null;
-    const pk=f=>a.filter(r=>(r.flags||[]).includes(f));   // ya vienen ordenadas por score
-    const tk=arr=>arr.slice(0,2).map(r=>r.tk);
-    const volA=pk("VOL"),brkA=pk("BRK"),momA=pk("MOM"),catA=pk("CAT");
+    const c=f=>a.filter(r=>(r.flags||[]).includes(f)).length;
     const sm=Math.round(a.reduce((s,r)=>s+(r.smartMoney||50),0)/a.length);
-    const smTop=a.slice().sort((x,y)=>(y.smartMoney||0)-(x.smartMoney||0)).slice(0,2).map(r=>r.tk);
-    return {vol:volA.length,brk:brkA.length,mom:momA.length,cat:catA.length,sm,
-      volTk:tk(volA),brkTk:tk(brkA),momTk:tk(momA),catTk:tk(catA),smTk:smTop}; },[finderRows]);
+    return {vol:c("VOL"),brk:c("BRK"),mom:c("MOM"),cat:c("CAT"),sm}; },[finderRows]);
   const kOpt = React.useMemo(()=>{ const a=optRows||[]; if(!a.length) return null;
-    const tkOf=arr=>arr.slice(0,2).map(c=>c.tk);
-    const uoaA=a.filter(c=>(c.volNum||0)>=2*Math.max(c.oiNum||0,1));
+    const uoa=a.filter(c=>(c.volNum||0)>=2*Math.max(c.oiNum||0,1)).length;
     const oiTot=a.reduce((s,c)=>s+(c.oiNum||0),0);
-    const oiTop=a.slice().sort((x,y)=>(y.oiNum||0)-(x.oiNum||0)).slice(0,2).map(c=>c.tk);
-    const lowIvA=a.filter(c=>c.ivNum!=null&&c.ivNum<=35);
+    const lowIv=a.filter(c=>c.ivNum!=null&&c.ivNum<=35).length;
     let bull=0,bear=0; a.forEach(c=>{ const n=(c.premium||0)*(c.volNum||0)*100; if(c.isCall)bull+=n; else bear+=n; });
-    const bullTop=a.filter(c=>c.isCall).slice(0,2).map(c=>c.tk);
-    const netTop=a.slice().sort((x,y)=>((y.premium||0)*(y.volNum||0))-((x.premium||0)*(x.volNum||0))).slice(0,2).map(c=>c.tk);
-    return {uoa:uoaA.length,oiTot,lowIv:lowIvA.length,net:bull-bear,bullPct:Math.round(bull/Math.max(bull+bear,1)*100),
-      uoaTk:tkOf(uoaA),oiTk:oiTop,lowIvTk:tkOf(lowIvA),netTk:netTop,bullTk:bullTop}; },[optRows]);
+    return {uoa,oiTot,lowIv,net:bull-bear,bullPct:Math.round(bull/Math.max(bull+bear,1)*100)}; },[optRows]);
   const fmtM=n=>{ const a=Math.abs(n); return a>=1e9?"$"+(a/1e9).toFixed(1)+"B":a>=1e6?"$"+(a/1e6).toFixed(0)+"M":a>=1e3?"$"+(a/1e3).toFixed(0)+"K":"$"+Math.round(a); };
   const fmtK2=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
 
@@ -15564,7 +15555,6 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .sig .v{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;margin-top:5px;line-height:1}
       .nfp .sig .v .u{font-size:12px;color:var(--mut);font-weight:400;margin-left:3px}
       .nfp .sig .dd{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;margin-top:4px;color:var(--mut)}
-      .nfp .sig .sigtk{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;margin-top:6px;color:var(--bl3);letter-spacing:.02em}
       .nfp .pillars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
       .nfp .pl{background:var(--bg2);border:1.5px solid var(--ln);border-radius:14px;padding:12px 13px;cursor:pointer;transition:.16s}
       .nfp .pl:hover{transform:translateY(-2px)} .nfp .pl.sel{box-shadow:0 0 0 1.5px var(--bl2) inset}
@@ -15718,23 +15708,23 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
           <b style={!strict?{color:"var(--mut)"}:undefined}>{strict?T("High-Conviction Filter · ON","Filtro de Alta Convicción · ACTIVO"):T("High-Conviction Filter · OFF","Filtro de Alta Convicción · INACTIVO")}</b>
           <small>{strict?(tab==="stocks"?T("ONLY SETUPS WHERE 3+ SIGNALS COINCIDE","SOLO SETUPS DONDE 3+ SEÑALES COINCIDEN"):T("ONLY CONTRACTS WHERE 2+ PRO SIGNALS COINCIDE","SOLO CONTRATOS DONDE 2+ SEÑALES PRO COINCIDEN")):T("SHOWING ALL SETUPS · TAP TO FILTER","MOSTRANDO TODOS LOS SETUPS · TÓCALO PARA FILTRAR")}</small>
         </div>
-        <div className={"hcsw"+(strict?"":" off")} onClick={()=>setStrict(s=>{ const n=!s; try{ localStorage.setItem("nexo_sm_strict", n?"1":"0"); }catch(e){} return n; })}><span>{T("STRICT MODE","MODO ESTRICTO")}</span><span className="tog"/></div>
+        <div className={"hcsw"+(strict?"":" off")} onClick={()=>setStrict(s=>!s)}><span>{T("STRICT MODE","MODO ESTRICTO")}</span><span className="tog"/></div>
       </div>
       {/* SIGNALS */}
       <div className="sigs">
         {(tab==="stocks"
-          ?[["s1",T("VOLUME SURGE","SUBIDA DE VOL."), kStk?String(kStk.vol):"—",T("stocks","acc."),T("Vol ≥1.5× average","Vol ≥1.5× promedio"), kStk&&kStk.volTk],
-            ["s2",T("BREAKOUT","ROMPIMIENTO"), kStk?String(kStk.brk):"—",T("confirmed","confirm."),T("Breaking 30-day high","Rompe máx. 30 días"), kStk&&kStk.brkTk],
-            ["s3",T("MOMENTUM","MOMENTUM"), kStk?String(kStk.mom):"—",T("strong","fuertes"),"RSI · MACD", kStk&&kStk.momTk],
-            ["s4",T("CATALYST","CATALIZADOR"), kStk?String(kStk.cat):"—","≤ 10d",T("Earnings ahead","Earnings cerca"), kStk&&kStk.catTk],
-            ["s5","SMART MONEY", kStk?String(kStk.sm):"—","/100",T("Top conviction","Top convicción"), kStk&&kStk.smTk]]
-          :[["s1",T("UNUSUAL ACT.","ACT. INUSUAL"), kOpt?String(kOpt.uoa):"—",T("contracts","contr."),T("Vol > 2× OI","Vol > 2× OI"), kOpt&&kOpt.uoaTk],
-            ["s2",T("OPEN INTEREST","INTERÉS ABIERTO"), kOpt?fmtK2(kOpt.oiTot):"—","",T("Most OI","Mayor OI"), kOpt&&kOpt.oiTk],
-            ["s3",T("LOW IV","IV BAJA"), kOpt?String(kOpt.lowIv):"—",T("cheap","baratos"),T("IV ≤ 35%","IV ≤ 35%"), kOpt&&kOpt.lowIvTk],
-            ["s4",T("BLOCK FLOW","FLUJO BLOQUE"), kOpt?((kOpt.net>=0?"+":"−")+fmtM(kOpt.net)):"—","",T("Biggest flow","Mayor flujo"), kOpt&&kOpt.netTk],
-            ["s5","SMART MONEY", kOpt?String(kOpt.bullPct):"—","/100",T("Top bullish","Top alcistas"), kOpt&&kOpt.bullTk]]
-        ).map(([s,lab,v,u,dd,tks])=>(
-          <div key={s} className={"sig "+s+(nfpMktActive()?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div>{tks&&tks.length?<div className="sigtk">{tks.join(" · ")}</div>:null}</div>
+          ?[["s1",T("VOLUME SURGE","SUBIDA DE VOL."), kStk?String(kStk.vol):"—",T("stocks","acc."),T("Vol ≥1.5× average","Vol ≥1.5× promedio")],
+            ["s2",T("BREAKOUT","ROMPIMIENTO"), kStk?String(kStk.brk):"—",T("confirmed","confirm."),T("Breaking 30-day high","Rompe máx. 30 días")],
+            ["s3",T("MOMENTUM","MOMENTUM"), kStk?String(kStk.mom):"—",T("strong","fuertes"),"RSI · MACD"],
+            ["s4",T("CATALYST","CATALIZADOR"), kStk?String(kStk.cat):"—","≤ 10d",T("Earnings ahead","Earnings cerca")],
+            ["s5","SMART MONEY", kStk?String(kStk.sm):"—","/100",T("Avg conviction","Convicción prom.")]]
+          :[["s1",T("UNUSUAL ACT.","ACT. INUSUAL"), kOpt?String(kOpt.uoa):"—",T("contracts","contr."),T("Vol > 2× OI","Vol > 2× OI")],
+            ["s2",T("OPEN INTEREST","INTERÉS ABIERTO"), kOpt?fmtK2(kOpt.oiTot):"—","",T("Total OI (shown)","OI total (mostrado)")],
+            ["s3",T("LOW IV","IV BAJA"), kOpt?String(kOpt.lowIv):"—",T("cheap","baratos"),T("IV ≤ 35%","IV ≤ 35%")],
+            ["s4",T("BLOCK FLOW","FLUJO BLOQUE"), kOpt?((kOpt.net>=0?"+":"−")+fmtM(kOpt.net)):"—","",T("Net call−put premium","Premium neto call−put")],
+            ["s5","SMART MONEY", kOpt?String(kOpt.bullPct):"—","/100",T("Bullish flow %","% flujo alcista")]]
+        ).map(([s,lab,v,u,dd])=>(
+          <div key={s} className={"sig "+s+(nfpMktActive()?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
         ))}
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
