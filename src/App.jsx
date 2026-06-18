@@ -23523,8 +23523,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [scOrigin, setScOrigin] = useState("All"); // All | Portfolio | Watchlist
   const [optTicker, setOptTicker] = useState("AAPL");
   const [optExpiry, setOptExpiry] = useState("Jul 5");
-  const OPT_KEY = `nexo_options_${user?.id||"guest"}`;
+  const OPT_KEY = `nexo_options_${user?.id||"guest"}${pfActive?`_${pfActive}`:""}`;  // opciones POR cartera
   const [optItems, setOptItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(OPT_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
+  const optFirst = useRef(true);
+  useEffect(()=>{ if(optFirst.current){ optFirst.current=false; return; } try{ const s=JSON.parse(localStorage.getItem(OPT_KEY)||"null"); setOptItems(Array.isArray(s)?s:[]); }catch{ setOptItems([]); } },[OPT_KEY]);
   const [optShow, setOptShow] = useState(false);
   const [optForm, setOptForm] = useState({symbol:"",kind:"CALL",side:"LONG",strike:"",expiry:"",contracts:"",entry:"",current:""});
   const DIV_KEY = `nexo_divs_${user?.id||"guest"}${pfActive?`_${pfActive}`:""}`;  // dividendos POR cartera
@@ -23537,8 +23539,10 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [divDrip, setDivDrip] = useState({});
   const [alFilter, setAlFilter] = useState("All");
   const [alToggles, setAlToggles] = useState({});
-  const AL_KEY = `nexo_alerts_${user?.id||"guest"}`;
+  const AL_KEY = `nexo_alerts_${user?.id||"guest"}${pfActive?`_${pfActive}`:""}`;  // alertas POR cartera
   const [alItems, setAlItems] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(AL_KEY)||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
+  const alFirst = useRef(true);
+  useEffect(()=>{ if(alFirst.current){ alFirst.current=false; return; } try{ const s=JSON.parse(localStorage.getItem(AL_KEY)||"null"); setAlItems(Array.isArray(s)?s:[]); }catch{ setAlItems([]); } },[AL_KEY]);
   const [alType, setAlType] = useState("price_above");
   const [alForm, setAlForm] = useState({symbol:"",target:"",freq:"Una vez",notif:"Push + Email",note:""});
   const [alFired, setAlFired] = useState(()=>{ try{ const s=JSON.parse(localStorage.getItem(AL_KEY+"_fired")||"null"); return Array.isArray(s)?s:[]; }catch{ return []; } });
