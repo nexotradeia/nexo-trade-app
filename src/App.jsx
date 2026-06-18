@@ -22470,6 +22470,40 @@ const RADAR_V2_FLOWS = [
   {from:{lat:40.7,lon:-74},   to:{lat:22.3,lon:114.2}, color:'#00f090', amount:3.1},
   {from:{lat:19.1,lon:72.9},  to:{lat:51.5,lon:-0.1},  color:'#4090ff', amount:0.7},
 ];
+// Bolsas mundiales para el globo realista (v4): nombre, índice, país, lat/lon, big=etiqueta visible
+const RADAR_EXCH = [
+  {n:'NYSE',    idx:'S&P 500',  co:'EE.UU.',     lat:40.7, lon:-74.0, big:1},
+  {n:'NASDAQ',  idx:'NASDAQ',   co:'EE.UU.',     lat:41.0, lon:-74.3, big:1},
+  {n:'TSX',     idx:'TSX',      co:'Canadá',     lat:43.7, lon:-79.4, big:0},
+  {n:'B3',      idx:'BOVESPA',  co:'Brasil',     lat:-23.5,lon:-46.6, big:1},
+  {n:'BMV',     idx:'IPC',      co:'México',     lat:19.4, lon:-99.1, big:0},
+  {n:'BCBA',    idx:'MERVAL',   co:'Argentina',  lat:-34.6,lon:-58.4, big:0},
+  {n:'LSE',     idx:'FTSE 100', co:'R. Unido',   lat:51.5, lon:-0.1,  big:1},
+  {n:'EURONEXT',idx:'CAC 40',   co:'Francia',    lat:48.9, lon:2.3,   big:0},
+  {n:'XETRA',   idx:'DAX',      co:'Alemania',   lat:50.1, lon:8.7,   big:1},
+  {n:'BME',     idx:'IBEX 35',  co:'España',     lat:40.4, lon:-3.7,  big:0},
+  {n:'BIT',     idx:'FTSE MIB', co:'Italia',     lat:45.5, lon:9.2,   big:0},
+  {n:'SIX',     idx:'SMI',      co:'Suiza',      lat:47.4, lon:8.5,   big:0},
+  {n:'OMX',     idx:'OMX 30',   co:'Suecia',     lat:59.3, lon:18.1,  big:0},
+  {n:'MOEX',    idx:'MOEX',     co:'Rusia',      lat:55.8, lon:37.6,  big:0},
+  {n:'JSE',     idx:'JSE 40',   co:'Sudáfrica',  lat:-26.2,lon:28.0,  big:0},
+  {n:'EGX',     idx:'EGX 30',   co:'Egipto',     lat:30.0, lon:31.2,  big:0},
+  {n:'TADAWUL', idx:'TASI',     co:'Arabia S.',  lat:24.7, lon:46.7,  big:0},
+  {n:'DFM',     idx:'DFM',      co:'EAU',        lat:25.2, lon:55.3,  big:0},
+  {n:'BSE',     idx:'SENSEX',   co:'India',      lat:19.1, lon:72.9,  big:1},
+  {n:'NSE',     idx:'NIFTY 50', co:'India',      lat:19.0, lon:72.8,  big:0},
+  {n:'SGX',     idx:'STI',      co:'Singapur',   lat:1.35, lon:103.8, big:0},
+  {n:'SET',     idx:'SET',      co:'Tailandia',  lat:13.7, lon:100.5, big:0},
+  {n:'IDX',     idx:'IDX',      co:'Indonesia',  lat:-6.2, lon:106.8, big:0},
+  {n:'HKEX',    idx:'HANG SENG',co:'Hong Kong',  lat:22.3, lon:114.2, big:1},
+  {n:'SSE',     idx:'SHANGHAI', co:'China',      lat:31.2, lon:121.5, big:1},
+  {n:'SZSE',    idx:'SHENZHEN', co:'China',      lat:22.5, lon:114.1, big:0},
+  {n:'TWSE',    idx:'TAIEX',    co:'Taiwán',     lat:25.0, lon:121.5, big:0},
+  {n:'KRX',     idx:'KOSPI',    co:'Corea',      lat:37.5, lon:127.0, big:0},
+  {n:'TSE',     idx:'NIKKEI',   co:'Japón',      lat:35.7, lon:139.7, big:1},
+  {n:'ASX',     idx:'ASX 200',  co:'Australia',  lat:-33.9,lon:151.2, big:1},
+  {n:'NZX',     idx:'NZX 50',   co:'N. Zelanda', lat:-41.3,lon:174.8, big:0},
+];
 const RADAR_V2_COUNTRIES = [
   {flag:'🇨🇳',name:'China',       val:'280M',pct:100},
   {flag:'🇺🇸',name:'USA',         val:'200M',pct:71},
@@ -22553,6 +22587,7 @@ function RadarGlobalPage({lang="es",onBack}){
   const [dayNightOn,setDayNightOn]=useState(true);
   const [flowsOn,setFlowsOn]=useState(true);
   const [gMode,setGMode]=useState('standard');
+  const [mktMode,setMktMode]=useState('calm'); // calm | crash | storm | rally  (modo de mercado del globo v4)
   // legacy compat (unused in v2 but kept to avoid removing refs to them)
   const [selMkt,setSelMkt]=useState(null);
   const [showStats,setShowStats]=useState(false);
@@ -22602,6 +22637,7 @@ function RadarGlobalPage({lang="es",onBack}){
   // canvas globe
   useEffect(()=>{
     const cvs=cvsRef.current; if(!cvs)return;
+    return; // globo canvas v2 DESACTIVADO — ahora se usa el globo WebGL realista (v4) definido más abajo
     const ctx=cvs.getContext('2d');
     const t=T.current;
     // init particles
@@ -22833,6 +22869,7 @@ function RadarGlobalPage({lang="es",onBack}){
   // Three.js globe (npm) — v3 clean · carga dinámica (no infla el bundle inicial en móvil)
   useEffect(()=>{
     if(!cvsRef.current||!wrapRef.current)return;
+    return; // globo v3 antiguo DESACTIVADO — reemplazado por el globo realista v4 (efecto siguiente)
     let cleanup=()=>{}; let cancelled=false;
     (async()=>{
     const THREE = await import('three');
@@ -22944,6 +22981,99 @@ function RadarGlobalPage({lang="es",onBack}){
     return ()=>{ cancelled=true; cleanup(); };
   },[]);
 
+  // ── GLOBO REALISTA v4 — día/noche, bolsas mundiales, arcos interactivos y modos Crash/Storm/Rally ──
+  useEffect(()=>{T.current.mktMode=mktMode;},[mktMode]);
+  useEffect(()=>{
+    if(!cvsRef.current||!wrapRef.current)return;
+    let cancelled=false, cleanup=()=>{};
+    (async()=>{
+      const THREE=await import('three');
+      if(cancelled||!cvsRef.current||!wrapRef.current)return;
+      const wrap=wrapRef.current, cvs=cvsRef.current;
+      let W=wrap.clientWidth||700, H=wrap.clientHeight||480;
+      const renderer=new THREE.WebGLRenderer({canvas:cvs,antialias:true,alpha:true});
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+      renderer.setSize(W,H,false); renderer.setClearColor(0x000000,0);
+      const scene=new THREE.Scene();
+      const camera=new THREE.PerspectiveCamera(36,W/H,0.1,200); camera.position.set(0,0,7.6);
+      {const n=1300,pos=new Float32Array(n*3);for(let i=0;i<n;i++){const r=40+Math.random()*60,t=Math.random()*Math.PI*2,p=Math.acos(2*Math.random()-1);pos[i*3]=r*Math.sin(p)*Math.cos(t);pos[i*3+1]=r*Math.sin(p)*Math.sin(t);pos[i*3+2]=r*Math.cos(p);}
+        const sgg=new THREE.BufferGeometry();sgg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+        scene.add(new THREE.Points(sgg,new THREE.PointsMaterial({color:0x99aacc,size:0.16,transparent:true,opacity:.85})));}
+      const R=2.05, SUN=new THREE.Vector3(-3.2,1.4,4.0).normalize();
+      const llv=(lat,lon,rad)=>{const phi=(90-lat)*Math.PI/180,th=(lon+180)*Math.PI/180,r=rad||R;return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(th),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(th));};
+      const uni={dayMap:{value:null},nightMap:{value:null},hasDay:{value:0},hasNight:{value:0},sunDir:{value:SUN},tint:{value:new THREE.Vector3(0.23,0.63,1.0)},tintAmt:{value:0.35},bright:{value:1.0},dn:{value:1.0}};
+      const mat=new THREE.ShaderMaterial({uniforms:uni,
+        vertexShader:["varying vec2 vUv;varying vec3 vN;varying vec3 vW;","void main(){vUv=uv;vN=normalize(mat3(modelMatrix)*normal);vec4 wp=modelMatrix*vec4(position,1.0);vW=wp.xyz;gl_Position=projectionMatrix*viewMatrix*wp;}"].join("\n"),
+        fragmentShader:["uniform sampler2D dayMap;uniform sampler2D nightMap;uniform float hasDay;uniform float hasNight;uniform vec3 sunDir;uniform vec3 tint;uniform float tintAmt;uniform float bright;uniform float dn;","varying vec2 vUv;varying vec3 vN;varying vec3 vW;","void main(){float ang=dot(normalize(vN),normalize(sunDir));float lit=mix(1.0,smoothstep(-0.12,0.30,ang),dn);","vec3 day=hasDay>0.5?texture2D(dayMap,vUv).rgb:vec3(0.10,0.30,0.55);","vec3 night=hasNight>0.5?texture2D(nightMap,vUv).rgb*1.5:vec3(0.02,0.04,0.08);","vec3 dayLit=day*(0.35+0.95*max(ang,0.0))*bright;vec3 col=mix(night,dayLit,lit);","vec3 vd=normalize(cameraPosition-vW);float fres=pow(1.0-max(dot(normalize(vN),vd),0.0),2.6);col+=tint*fres*tintAmt;","gl_FragColor=vec4(col,1.0);}"].join("\n")});
+      const G=new THREE.Group(); scene.add(G);
+      G.add(new THREE.Mesh(new THREE.SphereGeometry(R,96,96),mat));
+      const TL=new THREE.TextureLoader(); TL.crossOrigin='anonymous';
+      TL.load('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg',t=>{uni.dayMap.value=t;uni.hasDay.value=1;},undefined,()=>{});
+      TL.load('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg',t=>{uni.nightMap.value=t;uni.hasNight.value=1;},undefined,()=>{});
+      const atm=new THREE.Mesh(new THREE.SphereGeometry(R*1.18,96,96),new THREE.ShaderMaterial({uniforms:{c:{value:new THREE.Color(0x3aa0ff)}},vertexShader:"varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",fragmentShader:"uniform vec3 c;varying vec3 vN;void main(){float k=pow(0.66-dot(vN,vec3(0,0,1.0)),3.2);if(k<0.0)k=0.0;gl_FragColor=vec4(c,1.0)*k;}",blending:THREE.AdditiveBlending,side:THREE.BackSide,transparent:true})); G.add(atm);
+      RADAR_EXCH.forEach(e=>{e.pos=llv(e.lat,e.lon,R*1.005);e.chg=0;});
+      const eg=new THREE.BufferGeometry(),ep=new Float32Array(RADAR_EXCH.length*3);
+      RADAR_EXCH.forEach((e,k)=>{ep[k*3]=e.pos.x;ep[k*3+1]=e.pos.y;ep[k*3+2]=e.pos.z;});
+      eg.setAttribute('position',new THREE.BufferAttribute(ep,3));
+      const exMat=new THREE.PointsMaterial({color:0x3aa0ff,size:0.12,transparent:true,opacity:1}); G.add(new THREE.Points(eg,exMat));
+      const findE=(nm)=>RADAR_EXCH.find(e=>e.n===nm);
+      const PAIR=[['NYSE','LSE'],['LSE','XETRA'],['NYSE','TSE'],['TSE','HKEX'],['HKEX','SSE'],['LSE','BSE'],['NYSE','B3'],['TSE','ASX'],['SGX','HKEX'],['XETRA','TADAWUL'],['NYSE','NASDAQ'],['NYSE','BMV'],['HKEX','KRX'],['LSE','JSE']];
+      const arcs=[];
+      PAIR.forEach(pr=>{const a=findE(pr[0]),b=findE(pr[1]);if(!a||!b)return;
+        const s=a.pos,e=b.pos,mid=s.clone().add(e).multiplyScalar(0.5).setLength(R*(1.22+s.distanceTo(e)*0.10));
+        const cu=new THREE.QuadraticBezierCurve3(s,mid,e);
+        const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints(cu.getPoints(46)),new THREE.LineBasicMaterial({color:0x3aa0ff,transparent:true,opacity:0.5})); G.add(ln);
+        const d=new THREE.Mesh(new THREE.SphereGeometry(0.04,10,10),new THREE.MeshBasicMaterial({color:0x9fd0ff})); G.add(d);
+        arcs.push({cu:cu,ln:ln,dot:d,t:Math.random(),sp:0.004+Math.random()*0.005});});
+      const lbox=document.createElement('div'); lbox.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:6;'; wrap.appendChild(lbox);
+      const labels=[];
+      RADAR_EXCH.filter(e=>e.big).forEach(e=>{const el=document.createElement('div');
+        el.style.cssText="position:absolute;transform:translate(-50%,-150%);font-family:'IBM Plex Mono',monospace;background:rgba(4,10,18,.78);border:0.5px solid rgba(120,170,255,.4);border-radius:6px;padding:2px 6px;white-space:nowrap;transition:opacity .15s;line-height:1.3;";
+        lbox.appendChild(el); labels.push({e:e,el:el});});
+      function tickVals(){const m=T.current.mktMode||'calm';const bias=m==='crash'?-1:m==='rally'?1:0;
+        RADAR_EXCH.forEach(e=>{e.chg=(Math.random()-0.5)*(m==='storm'?2.4:0.7)+bias*(0.5+Math.random()*0.7);});}
+      tickVals(); const ivVals=setInterval(tickVals,1400);
+      const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
+      const COLW={calm:'#3aa0ff',crash:'#ff4d4d',storm:'#ffb020',rally:'#28d17c'};
+      function onClick(ev){if(T.current.isDragging)return;const rect=cvs.getBoundingClientRect();let best=null,bd=20;
+        RADAR_EXCH.forEach(e=>{const w=e.pos.clone().applyMatrix4(G.matrixWorld);const pr=w.clone().project(camera);if(pr.z>1)return;const sx=(pr.x*0.5+0.5)*rect.width,sy=(-pr.y*0.5+0.5)*rect.height;const nrm=w.clone().sub(G.position).normalize(),vd=w.clone().sub(camera.position).normalize();if(nrm.dot(vd)>=-0.05)return;const dist=Math.hypot(sx-(ev.clientX-rect.left),sy-(ev.clientY-rect.top));if(dist<bd){bd=dist;best=e;}});
+        if(best&&T.current.onMarketClick)T.current.onMarketClick({name:best.n,label:best.idx+' · '+best.co,color:COLW[T.current.mktMode||'calm']});}
+      let drag=false,lx=0,ly=0;
+      const onMD=(ev)=>{drag=true;T.current.isDragging=false;lx=ev.clientX;ly=ev.clientY;cvs.style.cursor='grabbing';};
+      const onMM=(ev)=>{if(!drag)return;const dx=ev.clientX-lx,dy=ev.clientY-ly;if(Math.abs(dx)+Math.abs(dy)>3)T.current.isDragging=true;T.current.rot=(T.current.rot||0)+dx*0.005;T.current.rotXv=(T.current.rotXv||0)+dy*0.003;T.current.rotXv=Math.max(-0.8,Math.min(0.8,T.current.rotXv));lx=ev.clientX;ly=ev.clientY;};
+      const onMU=()=>{drag=false;cvs.style.cursor='grab';setTimeout(()=>{T.current.isDragging=false;},60);};
+      cvs.style.cursor='grab';
+      cvs.addEventListener('click',onClick);cvs.addEventListener('mousedown',onMD);window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);
+      let tx=0,ty=0,tl=null;
+      const onTD=(ev)=>{const t0=ev.touches[0];if(!t0)return;tx=t0.clientX;ty=t0.clientY;tl=null;lx=t0.clientX;ly=t0.clientY;};
+      const onTM=(ev)=>{const t0=ev.touches[0];if(!t0)return;const dx=Math.abs(t0.clientX-tx),dy=Math.abs(t0.clientY-ty);if(!tl){if(dx>6||dy>6)tl=dx>dy?'rot':'scroll';else return;}if(tl==='scroll')return;ev.preventDefault();T.current.rot=(T.current.rot||0)+(t0.clientX-lx)*0.005;T.current.rotXv=(T.current.rotXv||0)+(t0.clientY-ly)*0.003;T.current.rotXv=Math.max(-0.8,Math.min(0.8,T.current.rotXv));lx=t0.clientX;ly=t0.clientY;};
+      cvs.addEventListener('touchstart',onTD,{passive:true});cvs.addEventListener('touchmove',onTM,{passive:false});
+      const ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(()=>{W=wrap.clientWidth||W;H=wrap.clientHeight||H;renderer.setSize(W,H,false);camera.aspect=W/H;camera.updateProjectionMatrix();}):null; if(ro)ro.observe(wrap);
+      let af,tmp=new THREE.Vector3();
+      const ATM={calm:[0.23,0.63,1.0],crash:[1.0,0.30,0.30],storm:[1.0,0.69,0.13],rally:[0.16,0.82,0.49]};
+      const animate=()=>{af=requestAnimationFrame(animate);const m=T.current.mktMode||'calm';
+        const spin=m==='storm'?0.0026:m==='crash'?0.0017:m==='rally'?0.0013:0.0009;
+        if(!T.current.isPausedR)T.current.rot=(T.current.rot||0)+spin;
+        G.rotation.y=T.current.rot||0; G.rotation.x=(T.current.rotXv||0)+0.08;
+        uni.dn.value=T.current.showDayNight===false?0.0:1.0;
+        const col=new THREE.Color(COLW[m]); exMat.color.set(col); arcs.forEach(o=>o.ln.material.color.set(col));
+        const a=ATM[m]||ATM.calm;
+        if(m==='storm'){uni.bright.value=0.7+Math.random()*0.8;uni.tintAmt.value=0.55+Math.random()*0.5;atm.material.uniforms.c.value.setRGB(1.0,0.55+Math.random()*0.3,0.10);uni.tint.value.set(a[0],a[1],a[2]);}
+        else {uni.bright.value+=(1.0-uni.bright.value)*0.1;uni.tintAmt.value+=((m==='calm'?0.35:0.5)-uni.tintAmt.value)*0.1;uni.tint.value.set(a[0],a[1],a[2]);atm.material.uniforms.c.value.setRGB(a[0],a[1],a[2]);}
+        let shake=T.current.shake||0; if(m==='crash')shake=0.05; T.current.shake=shake*0.86; G.position.x=(Math.random()-0.5)*shake; G.position.y=(Math.random()-0.5)*shake;
+        const showFlows=T.current.showFlows!==false;
+        arcs.forEach(o=>{o.ln.visible=showFlows;o.dot.visible=showFlows;o.t+=o.sp*(m==='crash'?1.9:m==='rally'?1.4:1);if(o.t>1)o.t=0;o.dot.position.copy(o.cu.getPoint(o.t));o.ln.material.opacity=m==='storm'?(0.3+Math.random()*0.4):0.5;});
+        renderer.render(scene,camera);
+        G.updateWorldMatrix(true,false);
+        labels.forEach(L=>{tmp.copy(L.e.pos).applyMatrix4(G.matrixWorld);const nrm=tmp.clone().sub(G.position).normalize(),vd=tmp.clone().sub(camera.position).normalize();const front=nrm.dot(vd)<-0.05;const pr=tmp.clone().project(camera);L.el.style.left=((pr.x*0.5+0.5)*W)+'px';L.el.style.top=((-pr.y*0.5+0.5)*H)+'px';const up=L.e.chg>=0;L.el.innerHTML='<span style="color:#dcecff;font-size:10px;">'+L.e.idx+' <span style="color:'+(up?'#33e29a':'#ff7a7a')+'">'+(up?'▲':'▼')+Math.abs(L.e.chg).toFixed(1)+'%</span></span><br><span style="color:#7f93ad;font-size:8.5px;">'+L.e.co+'</span>';L.el.style.opacity=(front&&pr.z<1)?'1':'0';});
+      };
+      animate();
+      cleanup=()=>{cancelAnimationFrame(af);clearInterval(ivVals);if(ro)ro.disconnect();cvs.removeEventListener('click',onClick);cvs.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);cvs.removeEventListener('touchstart',onTD);cvs.removeEventListener('touchmove',onTM);if(lbox.parentNode)lbox.parentNode.removeChild(lbox);try{renderer.dispose();}catch(e){}};
+    })();
+    return ()=>{cancelled=true;cleanup();};
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+
   // pause toggle
   const togglePause=()=>{
     const next=!isPaused;
@@ -23043,6 +23173,12 @@ function RadarGlobalPage({lang="es",onBack}){
           <button key={m} style={tbBtnM(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
         ))}
       </div>}
+      {/* ── MOBILE MARKET MODE: Crash / Storm / Rally (globo v4) ── */}
+      {mob&&<div style={{flexShrink:0,display:'flex',gap:6,padding:'0 8px 8px',background:'rgba(6,12,20,.92)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.br}`,zIndex:99}}>
+        {[['crash','📉 Crash'],['storm','⛈️ Storm'],['rally','📈 Rally']].map(([m,label])=>(
+          <button key={m} style={tbBtnM(mktMode===m)} onClick={()=>setMktMode(x=>x===m?'calm':m)}>{label}</button>
+        ))}
+      </div>}
 
       {/* ── LEFT PANEL ── */}
       <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
@@ -23109,12 +23245,18 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── GLOBE ── */}
-      <div style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)',...(mob?{height:'360px',flexShrink:0}:{flex:1})}}>
+      <div ref={wrapRef} style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)',...(mob?{height:'360px',flexShrink:0}:{flex:1})}}>
         <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'pan-y'}}/>
         {/* Mode toggles — desktop only */}
         {!mob&&<div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
           {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
             <button key={m} style={modeBtn(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
+          ))}
+        </div>}
+        {/* Market mode — Crash / Storm / Rally (globo v4) */}
+        {!mob&&<div style={{position:'absolute',top:14,left:20,display:'flex',gap:6}}>
+          {[['crash','📉 Crash','#ff5a5a'],['storm','⛈️ Storm','#ffc266'],['rally','📈 Rally','#33e29a']].map(([m,label,ac])=>(
+            <button key={m} onClick={()=>setMktMode(x=>x===m?'calm':m)} style={{...modeBtn(mktMode===m),...(mktMode===m?{color:ac,borderColor:ac,background:'rgba(255,255,255,.06)'}:{})}}>{label}</button>
           ))}
         </div>}
         {/* Trading now */}
