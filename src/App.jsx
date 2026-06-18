@@ -22789,9 +22789,9 @@ function RadarGlobalPage({lang="es",onBack}){
     {name:'TSE',   city:'Tokyo',    tz:'Asia/Tokyo',       o:9,    c:15.5, flag:'🇯🇵'},
     {name:'HKEX',  city:'Hong Kong',tz:'Asia/Hong_Kong',   o:9.5,  c:16,   flag:'🇭🇰'},
   ];
-  const getLocalH=(tz)=>{try{const p=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());return +p.find(x=>x.type==='hour').value + +p.find(x=>x.type==='minute').value/60;}catch{return new Date().getUTCHours()+new Date().getUTCMinutes()/60;}};
+  const getLocalH=(tz)=>{try{const p=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date());const h=+p.find(x=>x.type==='hour').value,m=+p.find(x=>x.type==='minute').value,s=+((p.find(x=>x.type==='second')||{}).value||0);return (h%24)+m/60+s/3600;}catch{const n=new Date();return n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;}};
   const getLocalDay=(tz)=>{try{return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].indexOf(new Intl.DateTimeFormat('en-US',{timeZone:tz,weekday:'long'}).format(new Date()));}catch{return new Date().getUTCDay();}};
-  const getSessStatus=(s)=>{const lh=getLocalH(s.tz),ld=getLocalDay(s.tz),wknd=ld===0||ld===6,isOpen=!wknd&&lh>=s.o&&lh<s.c;const fmt=(hrs)=>{const x=Math.abs(hrs);return `${Math.floor(x)}h ${Math.round((x-Math.floor(x))*60)}m`};return{open:isOpen,label:wknd?'Closed (weekend)':isOpen?`Closes in ${fmt(s.c-lh)}`:`Opens in ${fmt(s.o-lh)}`};};
+  const getSessStatus=(s)=>{const lh=getLocalH(s.tz),ld=getLocalDay(s.tz),wknd=ld===0||ld===6,isOpen=!wknd&&lh>=s.o&&lh<s.c;const fmt=(hrs)=>{const x=Math.abs(hrs);const H=Math.floor(x);const M=Math.floor((x-H)*60);const S=Math.floor((((x-H)*60)-M)*60);return (H>0?H+'h ':'')+M+'m '+S+'s';};return{open:isOpen,label:wknd?'Closed (weekend)':isOpen?`Closes in ${fmt(s.c-lh)}`:`Opens in ${fmt(s.o-lh)}`};};
 
   // (legacy useEffect kept for compat — no-op)
   useEffect(()=>{
