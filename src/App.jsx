@@ -15321,6 +15321,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   const [poll,setPoll]=useState({});       // precios sondeados vía Finnhub REST (gratis, ~15min retraso)
   const [lastUpd,setLastUpd]=useState(null);
   const [refreshing,setRefreshing]=useState(false);
+  const [finderRows,setFinderRows]=useState(null);  // SETUPS de acciones REALES (motor técnico /api/data?type=finder)
+  const [optRows,setOptRows]=useState(null);         // contratos de opciones REALES (/api/options)
   const unlock=()=>{ onNeedPremium&&onNeedPremium(); };
   const openWizard=()=>{ if(isPremium) setShowWiz(true); else unlock(); };
   // Precio/cambio: prioriza el poll fresco (acciones), luego PriceCtx, luego fallback
@@ -15420,9 +15422,60 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   },[allTickers]);
   useEffect(()=>{ doPoll(false); const iv=setInterval(()=>doPoll(false),60000); const onVis=()=>{ if(!document.hidden) doPoll(false); }; document.addEventListener("visibilitychange",onVis); return ()=>{ clearInterval(iv); document.removeEventListener("visibilitychange",onVis); }; },[doPoll]);
 
-  const rows = tab==="stocks"?STOCKS:OPTIONS;
+  // ── SETUPS de acciones REALES: motor técnico (RSI/SMA/MACD/volumen reales). Cache 1h CDN.
+  useEffect(()=>{ let dead=false;
+    const load=()=>fetch('/api/data?type=finder').then(r=>r.ok?r.json():null).then(j=>{ if(!dead&&j&&Array.isArray(j.rows)&&j.rows.length) setFinderRows(j.rows); }).catch(()=>{});
+    load(); const iv=setInterval(load,300000); return ()=>{dead=true;clearInterval(iv);};
+  },[]);
+  // ── CONTRATOS de opciones REALES: cadenas CBOE + Greeks Black-Scholes. ~14 subyacentes líquidos.
+  useEffect(()=>{ let dead=false;
+    const TKS=["NVDA","TSLA","SPY","QQQ","AAPL","META","AMZN","MSFT","AMD","COIN","GOOGL","PLTR","MSTR","AVGO"];
+    const load=()=>Promise.all(TKS.map(t=>fetch(`/api/options?ticker=${t}`).then(r=>r.ok?r.json():null).catch(()=>null)))
+      .then(res=>{ if(dead)return; let items=[]; res.forEach(j=>{ if(j&&Array.isArray(j.contracts)) j.contracts.slice(0,2).forEach(c=>items.push(c)); }); items.sort((a,b)=>(b.score||0)-(a.score||0)); if(items.length) setOptRows(items.slice(0,24)); }).catch(()=>{});
+    load(); const iv=setInterval(load,180000); return ()=>{dead=true;clearInterval(iv);};
+  },[]);
+
+  // Mapea las acciones reales al formato de la tabla (fallback al set ilustrativo si la API aún no carga).
+  const STOCKS_LIVE = React.useMemo(()=> (finderRows&&finderRows.length)? finderRows.map(r=>({
+    tk:r.tk, dir:r.dir, fb:r.price, fbc:r.chg, tgt:r.tgt, vol:(r.volRatio!=null?r.volRatio+"×":"—"),
+    flags:r.flags||[], score:r.score, stop:r.stop, entry:r.entry,
+    mcap:(r.mcap?"$"+r.mcap:"—"), rsi:(r.rsi!=null?String(r.rsi):"—"),
+    sma:(r.sma50!=null?"$"+r.sma50:"—"), sm:String(r.smartMoney), why:(isEN?r.why_en:r.why_es),
+  })) : STOCKS, [finderRows,isEN]);
+  // Mapea los contratos reales al formato de la tabla de opciones.
+  const OPTIONS_LIVE = React.useMemo(()=>{ if(!(optRows&&optRows.length)) return OPTIONS;
+    const fmtT=v=>v==null?"—":(v<0?"−$"+Math.abs(v):"$"+v);
+    return optRows.map(c=>{ const flags=[]; const oi=c.oiNum||0, vol=c.volNum||0; const notional=(c.premium||0)*vol*100;
+      if(vol>=2*Math.max(oi,1))flags.push("UOA"); if(oi>=3000)flags.push("OI"); if(notional>=750000)flags.push("BLK"); if((c.probNum||0)>=52||(c.score||0)>=85)flags.push("SM"); if(vol>=8000)flags.push("VOL");
+      const kStr=Number.isInteger(c.strikeNum)?String(c.strikeNum):(c.strikeNum||0).toFixed(1);
+      return { tk:c.s, side:c.isCall?"CALL":"PUT", strk:"$"+kStr, exp:c.exp,
+        pm:(c.premium!=null?"$"+c.premium.toFixed(2):c.price), vol:((c.vol||"—")+"/"+(c.oi||"—")), iv:(c.iv||"—"),
+        flags, score:c.score, be:(c.breakeven!=null?"$"+c.breakeven.toFixed(2):"—"),
+        pop:(c.probNum!=null?c.probNum+"%":"—"), delta:c.delta!=null?String(c.delta):"—",
+        gamma:c.gamma!=null?String(c.gamma):"—", theta:fmtT(c.theta), vega:(c.vega!=null?"$"+c.vega:"—"),
+        why:(isEN? `${c.s} ${c.isCall?"call":"put"} — ${c.probNum}% prob. ITM, IV ${c.ivNum}%, ${c.vol} volume vs ${c.oi} open interest. ${notional>=1e6?"Large block flow.":""}`
+                 : `${c.s} ${c.isCall?"call":"put"} — ${c.probNum}% prob. ITM, IV ${c.ivNum}%, volumen ${c.vol} vs ${c.oi} de interés abierto. ${notional>=1e6?"Flujo en bloque grande.":""}`),
+      };
+    });
+  },[optRows,isEN]);
+
+  // KPIs REALES calculados del dataset activo
+  const kStk = React.useMemo(()=>{ const a=finderRows||[]; if(!a.length) return null;
+    const c=f=>a.filter(r=>(r.flags||[]).includes(f)).length;
+    const sm=Math.round(a.reduce((s,r)=>s+(r.smartMoney||50),0)/a.length);
+    return {vol:c("VOL"),brk:c("BRK"),mom:c("MOM"),cat:c("CAT"),sm}; },[finderRows]);
+  const kOpt = React.useMemo(()=>{ const a=optRows||[]; if(!a.length) return null;
+    const uoa=a.filter(c=>(c.volNum||0)>=2*Math.max(c.oiNum||0,1)).length;
+    const oiTot=a.reduce((s,c)=>s+(c.oiNum||0),0);
+    const lowIv=a.filter(c=>c.ivNum!=null&&c.ivNum<=35).length;
+    let bull=0,bear=0; a.forEach(c=>{ const n=(c.premium||0)*(c.volNum||0)*100; if(c.isCall)bull+=n; else bear+=n; });
+    return {uoa,oiTot,lowIv,net:bull-bear,bullPct:Math.round(bull/Math.max(bull+bear,1)*100)}; },[optRows]);
+  const fmtM=n=>{ const a=Math.abs(n); return a>=1e9?"$"+(a/1e9).toFixed(1)+"B":a>=1e6?"$"+(a/1e6).toFixed(0)+"M":a>=1e3?"$"+(a/1e3).toFixed(0)+"K":"$"+Math.round(a); };
+  const fmtK2=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
+
+  const rows = tab==="stocks"?STOCKS_LIVE:OPTIONS_LIVE;
   const matchFilt=(r)=>{ if(strict){ const need=tab==="stocks"?4:3; if((r.flags||[]).length<need) return false; } if(sFilt==="all")return true; if(tab==="stocks"){ if(sFilt==="long")return r.dir==="LONG"; if(sFilt==="short")return r.dir==="SHORT"; if(sFilt==="earnings")return (r.flags||[]).includes("CAT"); if(sFilt==="intraday")return (parseFloat(r.vol)||0)>=3; } else { if(sFilt==="calls")return r.side==="CALL"; if(sFilt==="puts")return r.side==="PUT"; if(sFilt==="dte7"){ try{ var dd=new Date(r.exp+" "+new Date().getFullYear()); var days=(dd-Date.now())/864e5; if(days< -60)days+=365; return days>=0&&days<=7; }catch(e){ return true; } } } return true; };
-  const tableRows = (tab==="stocks"?STOCKS:OPTIONS).map((r,oi)=>({...r,_oi:oi})).filter(matchFilt);
+  const tableRows = rows.map((r,oi)=>({...r,_oi:oi})).filter(matchFilt);
   const sel = tab==="stocks"?selS:selO;
   const setSel = tab==="stocks"?setSelS:setSelO;
   const d = rows[sel] || rows[0];
@@ -15478,7 +15531,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .hcsw.off .tog{background:var(--ln2)} .nfp .hcsw.off .tog::after{right:auto;left:2px}
       .nfp .sigs{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
       .nfp .sig{background:var(--bg2);border:1px solid var(--ln);border-radius:12px;padding:11px 13px}
-      .nfp .sig .lab{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp .sig{padding:13px 15px}
+      .nfp .sig .lab{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase}
       .nfp .sig .lab .dot{width:7px;height:7px;border-radius:50%}
       .nfp .sig.s1 .dot{background:var(--gd);--c:var(--gd)}.nfp .sig.s2 .dot{background:var(--bl2);--c:var(--bl2)}.nfp .sig.s3 .dot{background:var(--cy);--c:var(--cy)}.nfp .sig.s4 .dot{background:var(--up);--c:var(--up)}.nfp .sig.s5 .dot{background:var(--vi);--c:var(--vi)}
       .nfp .sig.live .dot{animation:nfpDotGlow 1.7s ease-in-out infinite}
@@ -15488,22 +15542,23 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       @keyframes nfpRowIn{from{opacity:.15;transform:translateX(-7px)}to{opacity:1;transform:none}}
       .nfp.live .f,.nfp.live .ct .tg,.nfp.live .det-h .r1 .tg,.nfp.live .sigflags .f .x{animation:nfpFlagGlow 2s ease-in-out infinite}
       @keyframes nfpFlagGlow{0%,100%{box-shadow:0 0 1px 0 currentColor}50%{box-shadow:0 0 8px 1px currentColor}}
-      .nfp .sig .v{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;margin-top:4px;line-height:1}
-      .nfp .sig .v .u{font-size:10px;color:var(--mut);font-weight:400;margin-left:3px}
-      .nfp .sig .dd{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;margin-top:3px;color:var(--mut)}
+      .nfp .sig .v{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;margin-top:5px;line-height:1}
+      .nfp .sig .v .u{font-size:12px;color:var(--mut);font-weight:400;margin-left:3px}
+      .nfp .sig .dd{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;margin-top:4px;color:var(--mut)}
       .nfp .pillars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
       .nfp .pl{background:var(--bg2);border:1.5px solid var(--ln);border-radius:14px;padding:12px 13px;cursor:pointer;transition:.16s}
       .nfp .pl:hover{transform:translateY(-2px)} .nfp .pl.sel{box-shadow:0 0 0 1.5px var(--bl2) inset}
-      .nfp .pl .pn{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;color:var(--mut);text-transform:uppercase}
+      .nfp .pl{padding:15px 16px}
+      .nfp .pl .pn{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
       .nfp .pl .pn .dot{width:7px;height:7px;border-radius:50%}
       .nfp .pl.rr .dot{background:var(--bl2);--c:var(--bl2)}.nfp .pl.pr .dot{background:var(--cy);--c:var(--cy)}.nfp .pl.up_ .dot{background:var(--gd);--c:var(--gd)}
       .nfp.live .pl .dot{animation:nfpDotGlow 1.7s ease-in-out infinite}
-      .nfp .pl h3{font-size:13.5px;font-weight:800;margin-top:4px}
-      .nfp .pl .desc{font-size:10.5px;color:var(--mut);margin-top:2px}
-      .nfp .pl .winner{margin-top:9px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace}
-      .nfp .pl .winner .tk{font-size:12.5px;font-weight:700;color:#fff}
-      .nfp .pl .winner .o{font-size:9.5px;color:var(--mut)}
-      .nfp .pl .winner .sc{margin-left:auto;font-size:12.5px;font-weight:700}
+      .nfp .pl h3{font-size:16.5px;font-weight:800;margin-top:5px}
+      .nfp .pl .desc{font-size:12px;color:var(--mut);margin-top:3px}
+      .nfp .pl .winner{margin-top:11px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace}
+      .nfp .pl .winner .tk{font-size:15px;font-weight:700;color:#fff}
+      .nfp .pl .winner .o{font-size:11.5px;color:var(--mut)}
+      .nfp .pl .winner .sc{margin-left:auto;font-size:18px;font-weight:700}
       .nfp .pl.rr .winner .sc{color:var(--bl2)}.nfp .pl.pr .winner .sc{color:var(--cy)}.nfp .pl.up_ .winner .sc{color:var(--gd)}
       .nfp .grid{display:grid;grid-template-columns:1fr .82fr;gap:12px;margin-top:12px}
       .nfp .card{background:var(--bg2);border:1px solid var(--ln);border-radius:16px;overflow:hidden}
@@ -15515,22 +15570,22 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .filt{display:flex;gap:6px;padding:9px 14px;border-bottom:1px solid var(--ln);overflow-x:auto;flex-wrap:wrap}
       .nfp .filt span{flex:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:600;color:var(--mut);border:1px solid var(--ln);border-radius:7px;padding:5px 9px;text-transform:uppercase}
       .nfp .filt span.on{color:#fff;background:var(--bg3);border-color:#1D3266}
-      .nfp .tape-h{display:grid;gap:7px;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--ln);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+      .nfp .tape-h{display:grid;gap:7px;padding:11px 16px;background:var(--bg3);border-bottom:1px solid var(--ln);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase}
       .nfp.t-stocks .tape-h,.nfp.t-stocks .row{grid-template-columns:30px 78px 70px 60px 64px 96px 54px}
       .nfp.t-options .tape-h,.nfp.t-options .row{grid-template-columns:30px 92px 56px 56px 60px 92px 54px}
       .nfp .tape-h span:nth-child(n+3){text-align:right} .nfp .tape-h .fh{text-align:center}
-      .nfp .row{display:grid;gap:7px;padding:13px 16px;border-bottom:1px solid #11182A;font-family:'JetBrains Mono',monospace;font-size:12px;align-items:center;cursor:pointer}
+      .nfp .row{display:grid;gap:7px;padding:16px 16px;border-bottom:1px solid #11182A;font-family:'JetBrains Mono',monospace;font-size:13.5px;align-items:center;cursor:pointer}
       .nfp .row:hover{background:rgba(77,141,255,.05)} .nfp .row.sel{background:rgba(11,92,255,.10);box-shadow:inset 3px 0 0 var(--bl2)}
       .nfp .row .rk{color:var(--mut);font-size:9px}
       .nfp .row .ct{display:flex;align-items:center;gap:6px}
-      .nfp .row .ct .tk{font-size:13px;font-weight:700;color:#fff}
+      .nfp .row .ct .tk{font-size:15.5px;font-weight:700;color:#fff}
       .nfp .row .ct .tg{font-size:7.5px;font-weight:700;border-radius:4px;padding:1px 5px}
       .nfp .ct .tg.c{background:rgba(52,211,153,.18);color:var(--up)} .nfp .ct .tg.p{background:rgba(248,113,113,.18);color:var(--dn)}
-      .nfp .row .num{text-align:right;color:#fff} .nfp .row .sub{text-align:right;color:var(--tx);font-size:10px}
+      .nfp .row .num{text-align:right;color:#fff;font-size:13.5px} .nfp .row .sub{text-align:right;color:var(--tx);font-size:11.5px}
       .nfp .row .flags{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
       .nfp .row .flags .f,.nfp .sigflags .f{font-size:7px;font-weight:700;border-radius:3px;padding:2px 4px;font-family:'JetBrains Mono',monospace}
       .nfp .f.vs{background:rgba(245,200,75,.14);color:var(--gd)}.nfp .f.bo{background:rgba(77,141,255,.18);color:var(--bl2)}.nfp .f.sm{background:rgba(167,139,250,.14);color:var(--vi)}.nfp .f.mo{background:rgba(34,211,238,.14);color:var(--cy)}.nfp .f.ca{background:rgba(52,211,153,.18);color:var(--up)}.nfp .f.uoa{background:rgba(245,200,75,.14);color:var(--gd)}.nfp .f.oi{background:rgba(77,141,255,.18);color:var(--bl2)}.nfp .f.sw{background:rgba(34,211,238,.14);color:var(--cy)}
-      .nfp .row .sc{text-align:right;font-weight:700;font-size:12px} .nfp .row .sc.hi{color:var(--up)} .nfp .row .sc.mid{color:var(--gd)}
+      .nfp .row .sc{text-align:right;font-weight:700;font-size:15px} .nfp .row .sc.hi{color:var(--up)} .nfp .row .sc.mid{color:var(--gd)}
       .nfp .gate{position:relative}
       .nfp .row.blur{filter:blur(5px);opacity:.55;pointer-events:none}
       .nfp .gateov{position:absolute;left:0;right:0;bottom:0;height:170px;background:linear-gradient(180deg,transparent,rgba(12,17,30,.96) 60%);display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px}
@@ -15541,33 +15596,35 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .right{display:flex;flex-direction:column;gap:12px}
       .nfp .det-h{padding:15px 16px;border-bottom:1px solid var(--ln);background:linear-gradient(180deg,rgba(11,92,255,.10),transparent)}
       .nfp .det-h .r1{display:flex;align-items:center;gap:9px}
-      .nfp .det-h .r1 b{font-size:18px;font-weight:800} .nfp .det-h .r1 .tg{font-size:8.5px;font-weight:800;background:rgba(52,211,153,.18);color:var(--up);border-radius:5px;padding:3px 8px}
+      .nfp .det-h .r1 b{font-size:22px;font-weight:800} .nfp .det-h .r1 .tg{font-size:9.5px;font-weight:800;background:rgba(52,211,153,.18);color:var(--up);border-radius:5px;padding:3px 8px}
       .nfp .det-h .r1 .tg.p{background:rgba(248,113,113,.18);color:var(--dn)}
-      .nfp .det-h .r1 .sc{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:700;color:var(--up)} .nfp .det-h .r1 .sc small{font-size:10px;color:var(--mut);font-weight:400}
-      .nfp .det-h .subx{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--tx);margin-top:4px;letter-spacing:.04em}
+      .nfp .det-h .r1 .sc{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:27px;font-weight:700;color:var(--up)} .nfp .det-h .r1 .sc small{font-size:12px;color:var(--mut);font-weight:400}
+      .nfp .det-h .subx{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--tx);margin-top:5px;letter-spacing:.04em}
       .nfp .sigflags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
       .nfp .sigflags .f{display:flex;align-items:center;gap:5px;padding:4px 8px;font-size:8px}
       .nfp .sigflags .f .x{width:5px;height:5px;border-radius:50%;background:currentColor}
-      .nfp .why{font-size:12px;color:var(--tx);margin-top:9px;background:rgba(11,92,255,.07);border:1px solid #1B2A52;border-radius:10px;padding:9px 11px;line-height:1.5}
+      .nfp .why{font-size:13.5px;color:var(--tx);margin-top:10px;background:rgba(11,92,255,.07);border:1px solid #1B2A52;border-radius:10px;padding:11px 13px;line-height:1.55}
       .nfp .why b{color:var(--bl3);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;display:block;margin-bottom:3px;font-weight:600}
       .nfp .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--ln)}
       .nfp .stats div{background:var(--bg2);padding:10px 13px}
-      .nfp .stats .l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
-      .nfp .stats .v{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;color:#fff;margin-top:2px} .nfp .stats .v small{color:var(--mut);font-size:9.5px}
+      .nfp .stats div{padding:12px 14px}
+      .nfp .stats .l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase}
+      .nfp .stats .v{font-family:'JetBrains Mono',monospace;font-size:15.5px;font-weight:600;color:#fff;margin-top:3px} .nfp .stats .v small{color:var(--mut);font-size:11px}
       .nfp .stats .v.warn{color:var(--gd)}.nfp .stats .v.good{color:var(--up)}.nfp .stats .v.alert{color:var(--vi)}
       .nfp .ets{padding:13px 16px;border-top:1px solid var(--ln);position:relative}
       .nfp .ets .ettl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;margin-bottom:9px}
       .nfp .etbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--ln);border-radius:9px;overflow:hidden}
       .nfp .etbar div{background:var(--bg2);padding:8px 10px;text-align:center}
-      .nfp .etbar .lab{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
-      .nfp .etbar .v{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;margin-top:2px}
+      .nfp .etbar .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase}
+      .nfp .etbar .v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;margin-top:3px}
       .nfp .etbar .v.stop{color:var(--dn)}.nfp .etbar .v.entry{color:#fff}.nfp .etbar .v.tgt{color:var(--up)}
       .nfp .etbar.lk .v{filter:blur(5px)}
       .nfp .etlock{position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px}
       .nfp .etlock .cta{background:var(--bl);color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:6px}
       .nfp .grks{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ln);border-top:1px solid var(--ln)}
       .nfp .grks div{background:var(--bg2);padding:9px 6px;text-align:center}
-      .nfp .grks .l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase} .nfp .grks .v{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:600;margin-top:2px}
+      .nfp .grks div{padding:11px 6px}
+      .nfp .grks .l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--mut);text-transform:uppercase} .nfp .grks .v{font-family:'JetBrains Mono',monospace;font-size:14.5px;font-weight:600;margin-top:3px}
       .nfp .acts{display:flex;gap:8px;padding:13px 16px;border-top:1px solid var(--ln)}
       .nfp .acts .cta{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--bl);color:#fff;border:none;border-radius:10px;padding:11px;font-size:12px;font-weight:700}
       .nfp .acts .gh{flex:none;width:40px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--ln);border-radius:10px;color:var(--tx)}
@@ -15640,16 +15697,16 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       {/* SIGNALS */}
       <div className="sigs">
         {(tab==="stocks"
-          ?[["s1",T("VOLUME SURGE","SUBIDA DE VOL."),"17",T("stocks","acc."),T("Vol > 3× 20-day avg","Vol > 3× prom 20d")],
-            ["s2",T("BREAKOUT","ROMPIMIENTO"),"12",T("confirmed","confirm."),T("Price > resistance + vol","Precio > resistencia + vol")],
-            ["s3",T("MOMENTUM","MOMENTUM"),"9",T("strong","fuertes"),"RSI · MACD · SMA"],
-            ["s4",T("CATALYST","CATALIZADOR"),"23","≤ 7d",T("Earnings · events","Earnings · eventos")],
-            ["s5","SMART MONEY","85","/100",T("Bullish bias","Sesgo alcista")]]
-          :[["s1",T("UNUSUAL ACT.","ACT. INUSUAL"),"23",T("contracts","contr."),"Vol > 3× · Vol > 2× OI"],
-            ["s2",T("OI SURGE","SUBIDA OI"),"+14.2","K",T("Day-over-day OI","Cambio diario OI")],
-            ["s3",T("LOW IV RANK","IV RANK BAJO"),"18",T("cheap","baratos"),T("Bottom 25% of 30d","Piso 25% de 30d")],
-            ["s4",T("BLOCK FLOW","FLUJO BLOQUE"),"+$428","M",T("Net premium","Premium neto")],
-            ["s5","SMART MONEY","82","/100",T("Bullish","Alcista")]]
+          ?[["s1",T("VOLUME SURGE","SUBIDA DE VOL."), kStk?String(kStk.vol):"—",T("stocks","acc."),T("Vol ≥1.5× average","Vol ≥1.5× promedio")],
+            ["s2",T("BREAKOUT","ROMPIMIENTO"), kStk?String(kStk.brk):"—",T("confirmed","confirm."),T("Breaking 30-day high","Rompe máx. 30 días")],
+            ["s3",T("MOMENTUM","MOMENTUM"), kStk?String(kStk.mom):"—",T("strong","fuertes"),"RSI · MACD"],
+            ["s4",T("CATALYST","CATALIZADOR"), kStk?String(kStk.cat):"—","≤ 10d",T("Earnings ahead","Earnings cerca")],
+            ["s5","SMART MONEY", kStk?String(kStk.sm):"—","/100",T("Avg conviction","Convicción prom.")]]
+          :[["s1",T("UNUSUAL ACT.","ACT. INUSUAL"), kOpt?String(kOpt.uoa):"—",T("contracts","contr."),T("Vol > 2× OI","Vol > 2× OI")],
+            ["s2",T("OPEN INTEREST","INTERÉS ABIERTO"), kOpt?fmtK2(kOpt.oiTot):"—","",T("Total OI (shown)","OI total (mostrado)")],
+            ["s3",T("LOW IV","IV BAJA"), kOpt?String(kOpt.lowIv):"—",T("cheap","baratos"),T("IV ≤ 35%","IV ≤ 35%")],
+            ["s4",T("BLOCK FLOW","FLUJO BLOQUE"), kOpt?((kOpt.net>=0?"+":"−")+fmtM(kOpt.net)):"—","",T("Net call−put premium","Premium neto call−put")],
+            ["s5","SMART MONEY", kOpt?String(kOpt.bullPct):"—","/100",T("Bullish flow %","% flujo alcista")]]
         ).map(([s,lab,v,u,dd])=>(
           <div key={s} className={"sig "+s+(nfpMktActive()?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div></div>
         ))}
@@ -15811,7 +15868,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
               <span style={{color:"var(--mut)"}}>{T("No noise · no spam · only what matters","Sin ruido · sin spam · solo lo que importa")}</span>
               <div className="wlchips">{wlState.slice(0,6).map(c=><span key={c}>{c}</span>)}{wlState.length>6&&<span style={{background:"var(--bl)",color:"#fff",borderColor:"var(--bl)"}}>+{wlState.length-6}</span>}</div>
             </div>
-            {(()=>{ const g = tab==="stocks" ? d : (STOCKS[selS]||STOCKS[0]); const gp = liveP(g.tk,g.fb); const buy = g.dir!=="SHORT"; return (
+            {(()=>{ const g = tab==="stocks" ? d : (STOCKS_LIVE[selS]||STOCKS_LIVE[0]); const gp = liveP(g.tk,g.fb); const buy = g.dir!=="SHORT"; return (
             <div className="tgmsg">
               <div className="r1"><span className="siren">🚨</span><b>{g.tk} · Score {g.score}/100</b></div>
               <div className="ko"><b style={{color:"#fff"}}>{g.tk}</b> <span>· {buy?T("Breakout confirmed","Rompimiento confirmado"):T("Breakdown confirmed","Quiebre confirmado")} @ ${fmtP(gp)}</span></div>
@@ -15833,11 +15890,11 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
               ["mo","MOM",T("Momentum","Momentum"),T("RSI 50–70 + MACD + above 50/200 SMA.","RSI 50–70 + MACD + sobre SMA 50/200.")],
               ["ca","CAT",T("Catalyst","Catalizador"),T("Earnings/FDA/event within 7 days.","Earnings/FDA/evento en 7 días.")],
               ["sm","SM",T("Smart Money","Smart Money"),T("Composite of the 4 above.","Compuesto de las 4 anteriores.")]]
-            :[["uoa","UOA",T("Unusual Activity","Actividad Inusual"),T("Vol > 3× avg and > 2× open interest.","Vol > 3× prom y > 2× interés abierto.")],
-              ["oi","OI+",T("OI Surge","Subida de OI"),T("Open interest jumps day-over-day.","El interés abierto salta día a día.")],
-              ["bo","IV",T("Low IV","IV Baja"),T("Premium in bottom 25% of 30 days.","Premium en piso 25% de 30 días.")],
-              ["sw","BLK",T("Block Flow","Flujo en Bloque"),T("Large concentrated net premium.","Gran premium neto concentrado.")],
-              ["sm","SM",T("Smart Money","Smart Money"),T("Composite of the 4 above.","Compuesto de las 4 anteriores.")]]
+            :[["uoa","UOA",T("Unusual Activity","Actividad Inusual"),T("Day volume > 2× open interest.","Volumen del día > 2× interés abierto.")],
+              ["oi","OI",T("Open Interest","Interés Abierto"),T("Open interest ≥ 3,000 contracts.","Interés abierto ≥ 3,000 contratos.")],
+              ["sw","BLK",T("Block Flow","Flujo en Bloque"),T("Notional traded ≥ $750K today.","Nocional negociado ≥ $750K hoy.")],
+              ["sm","SM",T("Smart Money","Smart Money"),T("High prob. ITM or top score.","Alta prob. ITM o score alto.")],
+              ["vs","VOL",T("High Volume","Alto Volumen"),T("≥ 8,000 contracts traded today.","≥ 8,000 contratos hoy.")]]
           ).map(([c,l,b,s])=>(
             <div key={l} className="it"><span className={"f "+c}>{l}</span><div><b>{b}</b><span>{s}</span></div></div>
           ))}
@@ -15845,8 +15902,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       </div>
       {/* FOOTNOTE + HONESTY SEAL */}
       <div className="foot">
-        <div style={{marginBottom:8}}><span className="demoseal">⚠ {T("ILLUSTRATIVE DATA · EDUCATIONAL","DATOS ILUSTRATIVOS · EDUCATIVO")}</span></div>
-        {T("Stock/option prices are real, auto-refreshed ~every 60s (free data, ~15-min delayed). Scores & signals are illustrative algorithmic examples — NOT live institutional data. Educational, not financial advice. Trading involves risk.","Los precios de acciones/opciones son reales, se refrescan solos ~cada 60s (datos gratis, ~15 min de retraso). Los scores y señales son ejemplos algorítmicos ilustrativos — NO son datos institucionales en vivo. Educativo, no es consejo financiero. Operar implica riesgo.")}
+        <div style={{marginBottom:8}}><span className="demoseal">✓ {T("REAL MARKET DATA · EDUCATIONAL","DATOS REALES DE MERCADO · EDUCATIVO")}</span></div>
+        {T("Prices, indicators (RSI, SMA, MACD, volume) and option Greeks are computed from real market data (~15-min delayed, free sources). Scores & signals are our algorithm's reading of those indicators — educational, not financial advice. Trading involves risk.","Los precios, indicadores (RSI, SMA, MACD, volumen) y los Greeks de opciones se calculan con datos reales de mercado (~15 min de retraso, fuentes gratuitas). Los scores y señales son la lectura de nuestro algoritmo sobre esos indicadores — educativo, no es consejo financiero. Operar implica riesgo.")}
       </div>
     </div>
     {showWiz&&<WatchlistWizard lang={lang} onClose={()=>{ setShowWiz(false); setWlState(nfpGetWL()); }} onDone={()=>setWlState(nfpGetWL())}/>}

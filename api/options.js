@@ -23,6 +23,26 @@ function probITM(S, K, ivDec, days, isCall) {
   return Math.round(p * 100);
 }
 
+const normPdf = x => 0.3989422804014327 * Math.exp(-x * x / 2);
+
+// Griegas reales por Black-Scholes (r=4%). Delta/Gamma adimensionales;
+// Theta = decaimiento por DÍA en $ por contrato (×100); Vega = $ por +1% de IV por contrato (×100).
+function greeks(S, K, ivDec, days, isCall) {
+  if (!S || !K || !ivDec || ivDec <= 0 || days <= 0) return null;
+  const T = days / 365, r = 0.04, vol = ivDec, sqT = Math.sqrt(T);
+  const d1 = (Math.log(S / K) + (r + vol * vol / 2) * T) / (vol * sqT);
+  const d2 = d1 - vol * sqT;
+  const pdf = normPdf(d1);
+  const delta = isCall ? normCdf(d1) : normCdf(d1) - 1;
+  const gamma = pdf / (S * vol * sqT);
+  const thetaYr = isCall
+    ? (-(S * pdf * vol) / (2 * sqT) - r * K * Math.exp(-r * T) * normCdf(d2))
+    : (-(S * pdf * vol) / (2 * sqT) + r * K * Math.exp(-r * T) * normCdf(-d2));
+  const theta = (thetaYr / 365) * 100;   // $ por día por contrato
+  const vega = S * pdf * sqT * 0.01 * 100; // $ por +1% IV por contrato
+  return { delta: +delta.toFixed(2), gamma: +gamma.toFixed(3), theta: Math.round(theta), vega: Math.round(vega) };
+}
+
 const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(n || 0);
 
 // Pago potencial: cuantas veces multiplica la prima si la accion hace su
@@ -59,6 +79,9 @@ function feasScore(o, S, days, prob) {
 
 function shapeRow(t, o, S, days, expStr) {
   const prob = probITM(S, o.strike, o.iv, days, o.isCall);
+  const g = greeks(S, o.strike, o.iv, days, o.isCall);
+  const lastPx = o.last > 0 ? o.last : (((o.bid || 0) + (o.ask || 0)) / 2);
+  const breakeven = o.isCall ? o.strike + lastPx : o.strike - lastPx;
   const kStr = Number.isInteger(o.strike) ? String(o.strike) : o.strike.toFixed(1);
   return {
     s: t,
@@ -75,6 +98,14 @@ function shapeRow(t, o, S, days, expStr) {
     chg: o.chg || 0,
     score: feasScore(o, S, days, prob),
     spot: S, days,
+    isCall: o.isCall,
+    strikeNum: o.strike,
+    premium: lastPx > 0 ? +lastPx.toFixed(2) : null,
+    breakeven: +breakeven.toFixed(2),
+    ivNum: o.iv > 0 ? Math.round(o.iv * 100) : null,
+    volNum: o.vol || 0, oiNum: o.oi || 0,
+    probNum: prob,
+    delta: g ? g.delta : null, gamma: g ? g.gamma : null, theta: g ? g.theta : null, vega: g ? g.vega : null,
   };
 }
 

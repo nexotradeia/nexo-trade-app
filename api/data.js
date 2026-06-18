@@ -15,8 +15,9 @@ import pulse from '../lib/pulse.js';
 import social from '../lib/social.js';
 import thirteenf from '../lib/thirteenf.js';
 import movers from '../lib/movers.js';
+import finder from '../lib/finder.js';
 
-const ROUTES = { crypto, premarket, econ: econCalendar, econCalendar, dividends, ipos, commodities, ark, quotes, fxhist, technical, pulse, social, thirteenf, movers };
+const ROUTES = { crypto, premarket, econ: econCalendar, econCalendar, dividends, ipos, commodities, ark, quotes, fxhist, technical, pulse, social, thirteenf, movers, finder };
 
 export default async function handler(req, res) {
   const type = String(req.query.type || "").trim();
