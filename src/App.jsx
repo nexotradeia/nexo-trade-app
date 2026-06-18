@@ -4848,9 +4848,9 @@ function NoticiasPage({lang}){
   const getSentiment=(h="")=>{
     const pos=/(record|surge|rally|gain|rise|profit|beat|bull|strong|growth|up|high|boost|soar)/i;
     const neg=/(fall|drop|crash|loss|decline|bear|weak|cut|miss|down|low|risk|fear|sell|warning)/i;
-    if(pos.test(h)) return {label:isEN?"POSITIVE SENTIMENT":"SENTIMIENTO POSITIVO", color:"#16A34A", bg:"rgba(22,163,74,0.12)"};
-    if(neg.test(h)) return {label:isEN?"NEGATIVE SENTIMENT":"SENTIMIENTO NEGATIVO", color:"#DC2626", bg:"rgba(220,38,38,0.10)"};
-    return {label:isEN?"NEUTRAL":"NEUTRAL",                                           color:"#64748B", bg:"rgba(100,116,139,0.10)"};
+    if(pos.test(h)) return {label:isEN?"POSITIVE SENTIMENT":"SENTIMIENTO POSITIVO", short:isEN?"Positive":"Positivo", color:"#16A34A", bg:"rgba(22,163,74,0.12)"};
+    if(neg.test(h)) return {label:isEN?"NEGATIVE SENTIMENT":"SENTIMIENTO NEGATIVO", short:isEN?"Negative":"Negativo", color:"#DC2626", bg:"rgba(220,38,38,0.10)"};
+    return {label:isEN?"NEUTRAL":"NEUTRAL",                                           short:"Neutral", color:"#64748B", bg:"rgba(100,116,139,0.10)"};
   };
 
   // Extract unique tickers from news
@@ -5005,7 +5005,7 @@ function NoticiasPage({lang}){
                           ))}
                           <span style={{display:"inline-flex",alignItems:"center",gap:3,background:sent.bg,borderRadius:4,padding:"2px 7px",fontSize:10,fontWeight:700,color:sent.color}}>
                             <span style={{width:5,height:5,borderRadius:"50%",background:sent.color,display:"inline-block"}}/>
-                            {sent.label.split(" ")[0].charAt(0).toUpperCase()+sent.label.split(" ")[0].slice(1).toLowerCase()}
+                            {sent.short}
                           </span>
                           <span style={{color:C.muted2,fontSize:10.5,marginLeft:"auto"}}>{timeAgo(n.datetime)}</span>
                         </div>
