@@ -23400,7 +23400,8 @@ function PortfolioTrackerPage({ isPremium, onNeedPremium, user, lang="es", onPos
   const [ovSort, setOvSort] = useState({col:"pnl",dir:-1}); // orden tabla Overview
   const [sectData, setSectData] = useState(null);
   useEffect(()=>{ let c=false; fetch("/api/prices?tickers=XLK,XLY,XLF,XLE,XLV,XLI,XLRE,XLU,XLB").then(r=>r.ok?r.json():null).then(j=>{ if(c||!j||!j.prices)return; const m={}; Object.keys(j.prices).forEach(k=>{ const q=j.prices[k]; if(q&&typeof q.dp==="number") m[k]=q.dp; }); if(Object.keys(m).length) setSectData(m); }).catch(()=>{}); return ()=>{c=true;}; },[]);
-  useEffect(()=>{ const tk=(chSel||(positions&&positions[0]&&positions[0].ticker)||"").toString().toUpperCase(); if(!tk) return; let cancel=false; fetch("/api/data?type=technical&symbol="+encodeURIComponent(tk)).then(r=>r.ok?r.json():null).then(j=>{ if(!cancel&&j&&j.symbol) setChTech(j); }).catch(()=>{}); return ()=>{cancel=true;}; },[chSel,positions]);
+  const chTechTk=(chSel||(positions&&positions[0]&&positions[0].ticker)||"").toString().toUpperCase();
+  useEffect(()=>{ if(!chTechTk) return; let cancel=false; fetch("/api/data?type=technical&symbol="+encodeURIComponent(chTechTk)).then(r=>r.ok?r.json():null).then(j=>{ if(!cancel&&j&&j.symbol&&String(j.symbol).toUpperCase()===chTechTk) setChTech(j); }).catch(()=>{}); return ()=>{cancel=true;}; },[chTechTk]);
   const [ovRange, setOvRange] = useState("1M"); // rango del gráfico overview (PORTFOLIO)
   const [navView, setNavView] = useState("overview"); // NAVIGATION: overview|positions|orders|history|analytics|risk
   const [scMarket, setScMarket] = useState("NYSE + NASDAQ");
