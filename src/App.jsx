@@ -22932,6 +22932,12 @@ function RadarGlobalPage({lang="es",onBack}){
         <button style={tbBtnM(false)} onClick={refreshGlobe}>↺ Refresh</button>
         <button style={tbBtnM(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>📊 Stats</button>
       </div>}
+      {/* ── MOBILE GLOBE MODE SELECTOR (Standard/Crypto/Heat) — en desktop están sobre el globo ── */}
+      {mob&&<div style={{flexShrink:0,display:'flex',gap:6,padding:'0 8px 8px',background:'rgba(6,12,20,.92)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.br}`,zIndex:99}}>
+        {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
+          <button key={m} style={tbBtnM(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
+        ))}
+      </div>}
 
       {/* ── LEFT PANEL ── */}
       <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
@@ -23052,9 +23058,9 @@ function RadarGlobalPage({lang="es",onBack}){
           </div>
         </div>}
         {/* ── STATS OVERLAY ── */}
-        {showStats&&<div style={{position:'absolute',inset:0,background:'rgba(2,4,8,.92)',backdropFilter:'blur(18px)',zIndex:20,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+        {showStats&&<div style={{position:mob?'fixed':'absolute',inset:0,background:'rgba(2,4,8,.96)',backdropFilter:'blur(18px)',zIndex:mob?9999:20,display:'flex',flexDirection:'column',overflow:'hidden'}}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 20px',borderBottom:`1px solid ${C.br}`,flexShrink:0}}>
-            <div style={{fontFamily:MONO2,fontSize:11,fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:C.grn}}>📊 Global Market Stats — Trading Volume by Country</div>
+            <div style={{fontFamily:MONO2,fontSize:mob?10:11,fontWeight:700,letterSpacing:mob?'.5px':'2px',textTransform:'uppercase',color:C.grn,flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>📊 {mob?'Global Market Stats':'Global Market Stats — Trading Volume by Country'}</div>
             <button onClick={()=>setShowStats(false)} style={{background:'rgba(255,80,80,.12)',border:'1px solid rgba(255,80,80,.25)',borderRadius:7,padding:'4px 12px',fontFamily:MONO2,fontSize:11,fontWeight:600,color:'#ff5050',cursor:'pointer'}}>✕ Close</button>
           </div>
           <div style={{overflowY:'auto',padding:'8px 16px',flex:1}}>
