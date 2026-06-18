@@ -15629,11 +15629,11 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
         </button>
       </div>
       {/* HIGH CONVICTION */}
-      <div className="hc">
-        <div className="ic3"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.8 3.7 4.1.6-3 2.9.7 4.1L8 10.9l-3.6 1.9.7-4.1-3-2.9 4.1-.6z" stroke="#34D399" strokeWidth="1.4" strokeLinejoin="round"/></svg></div>
+      <div className="hc" style={!strict?{borderColor:"var(--ln2)",background:"var(--bg2)"}:undefined}>
+        <div className="ic3" style={!strict?{background:"var(--bg3)",borderColor:"var(--ln2)",opacity:.55}:undefined}><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.8 3.7 4.1.6-3 2.9.7 4.1L8 10.9l-3.6 1.9.7-4.1-3-2.9 4.1-.6z" stroke="#34D399" strokeWidth="1.4" strokeLinejoin="round"/></svg></div>
         <div className="tx">
-          <b>{T("High-Conviction Filter · ON","Filtro de Alta Convicción · ACTIVO")}</b>
-          <small>{tab==="stocks"?T("ONLY SETUPS WHERE 4+ SIGNALS COINCIDE","SOLO SETUPS DONDE 4+ SEÑALES COINCIDEN"):T("ONLY CONTRACTS WHERE 3+ PRO SIGNALS COINCIDE","SOLO CONTRATOS DONDE 3+ SEÑALES PRO COINCIDEN")}</small>
+          <b style={!strict?{color:"var(--mut)"}:undefined}>{strict?T("High-Conviction Filter · ON","Filtro de Alta Convicción · ACTIVO"):T("High-Conviction Filter · OFF","Filtro de Alta Convicción · INACTIVO")}</b>
+          <small>{strict?(tab==="stocks"?T("ONLY SETUPS WHERE 4+ SIGNALS COINCIDE","SOLO SETUPS DONDE 4+ SEÑALES COINCIDEN"):T("ONLY CONTRACTS WHERE 3+ PRO SIGNALS COINCIDE","SOLO CONTRATOS DONDE 3+ SEÑALES PRO COINCIDEN")):T("SHOWING ALL SETUPS · TAP TO FILTER","MOSTRANDO TODOS LOS SETUPS · TÓCALO PARA FILTRAR")}</small>
         </div>
         <div className={"hcsw"+(strict?"":" off")} onClick={()=>setStrict(s=>!s)}><span>{T("STRICT MODE","MODO ESTRICTO")}</span><span className="tog"/></div>
       </div>
