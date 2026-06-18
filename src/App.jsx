@@ -15479,16 +15479,17 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
     return {vol:volA.length,brk:brkA.length,mom:momA.length,cat:catA.length,sm,
       volTk:tk(volA),brkTk:tk(brkA),momTk:tk(momA),catTk:tk(catA),smTk:smTop}; },[finderRows]);
   const kOpt = React.useMemo(()=>{ const a=optRows||[]; if(!a.length) return null;
-    const tkOf=arr=>arr.slice(0,2).map(c=>c.tk);
+    const tic=c=>c.s||c.ticker||c.tk;   // los contratos crudos traen `s`
+    const uniq=arr=>{ const o=[]; for(const c of arr){ const t=tic(c); if(t&&!o.includes(t))o.push(t); if(o.length>=2)break; } return o; };
     const uoaA=a.filter(c=>(c.volNum||0)>=2*Math.max(c.oiNum||0,1));
     const oiTot=a.reduce((s,c)=>s+(c.oiNum||0),0);
-    const oiTop=a.slice().sort((x,y)=>(y.oiNum||0)-(x.oiNum||0)).slice(0,2).map(c=>c.tk);
+    const oiTop=a.slice().sort((x,y)=>(y.oiNum||0)-(x.oiNum||0));
     const lowIvA=a.filter(c=>c.ivNum!=null&&c.ivNum<=35);
     let bull=0,bear=0; a.forEach(c=>{ const n=(c.premium||0)*(c.volNum||0)*100; if(c.isCall)bull+=n; else bear+=n; });
-    const bullTop=a.filter(c=>c.isCall).slice(0,2).map(c=>c.tk);
-    const netTop=a.slice().sort((x,y)=>((y.premium||0)*(y.volNum||0))-((x.premium||0)*(x.volNum||0))).slice(0,2).map(c=>c.tk);
+    const bullA=a.filter(c=>c.isCall);
+    const netTop=a.slice().sort((x,y)=>((y.premium||0)*(y.volNum||0))-((x.premium||0)*(x.volNum||0)));
     return {uoa:uoaA.length,oiTot,lowIv:lowIvA.length,net:bull-bear,bullPct:Math.round(bull/Math.max(bull+bear,1)*100),
-      uoaTk:tkOf(uoaA),oiTk:oiTop,lowIvTk:tkOf(lowIvA),netTk:netTop,bullTk:bullTop}; },[optRows]);
+      uoaTk:uniq(uoaA),oiTk:uniq(oiTop),lowIvTk:uniq(lowIvA),netTk:uniq(netTop),bullTk:uniq(bullA)}; },[optRows]);
   const fmtM=n=>{ const a=Math.abs(n); return a>=1e9?"$"+(a/1e9).toFixed(1)+"B":a>=1e6?"$"+(a/1e6).toFixed(0)+"M":a>=1e3?"$"+(a/1e3).toFixed(0)+"K":"$"+Math.round(a); };
   const fmtK2=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
 
@@ -15564,7 +15565,8 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       .nfp .sig .v{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;margin-top:5px;line-height:1}
       .nfp .sig .v .u{font-size:12px;color:var(--mut);font-weight:400;margin-left:3px}
       .nfp .sig .dd{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;margin-top:4px;color:var(--mut)}
-      .nfp .sig .sigtk{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;margin-top:6px;color:var(--bl3);letter-spacing:.02em}
+      .nfp .sig .sigtk{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+      .nfp .sig .sigtk span{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;color:#E6EFFF;background:rgba(77,141,255,.18);border:1px solid rgba(77,141,255,.4);border-radius:6px;padding:3px 8px;letter-spacing:.03em}
       .nfp .pillars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
       .nfp .pl{background:var(--bg2);border:1.5px solid var(--ln);border-radius:14px;padding:12px 13px;cursor:pointer;transition:.16s}
       .nfp .pl:hover{transform:translateY(-2px)} .nfp .pl.sel{box-shadow:0 0 0 1.5px var(--bl2) inset}
@@ -15734,7 +15736,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
             ["s4",T("BLOCK FLOW","FLUJO BLOQUE"), kOpt?((kOpt.net>=0?"+":"−")+fmtM(kOpt.net)):"—","",T("Biggest flow","Mayor flujo"), kOpt&&kOpt.netTk],
             ["s5","SMART MONEY", kOpt?String(kOpt.bullPct):"—","/100",T("Top bullish","Top alcistas"), kOpt&&kOpt.bullTk]]
         ).map(([s,lab,v,u,dd,tks])=>(
-          <div key={s} className={"sig "+s+(nfpMktActive()?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div>{tks&&tks.length?<div className="sigtk">{tks.join(" · ")}</div>:null}</div>
+          <div key={s} className={"sig "+s+(nfpMktActive()?" live":"")}><div className="lab"><span className="dot"/>{lab}</div><div className="v">{v}<span className="u">{u}</span></div><div className="dd">{dd}</div>{tks&&tks.length?<div className="sigtk">{tks.map(t=><span key={t}>{t}</span>)}</div>:null}</div>
         ))}
       </div>
       {tab==="options" && <OptionsFlowLive lang={lang}/>}
