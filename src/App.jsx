@@ -13983,7 +13983,7 @@ const IPOS_2026 = [
   {company:"CoreWeave Inc",        ticker:"CRWV",  exchange:"NASDAQ",  date:"2026-03-28",range:"$40",     raise:"$1.5B",  sector:"Cloud/AI",    status:"trading",   desc:"GPU cloud provider for AI workloads, OpenAI's primary infrastructure partner. Up ~140% since IPO."},
   {company:"Venture Global LNG",   ticker:"VG",    exchange:"NYSE",    date:"2026-01-24",range:"$25",     raise:"$1.75B", sector:"Energy",      status:"trading",   desc:"Major U.S. LNG exporter. One of the biggest IPOs of the year by capital raised."},
   {company:"eToro Group Ltd",      ticker:"ETOR",  exchange:"NASDAQ",  date:"2026-05-14",range:"$52",     raise:"$620M",  sector:"Fintech",     status:"trading",   desc:"Social trading platform with 35M registered users worldwide. Debuted above range."},
-  {company:"SpaceX",               ticker:"SPCX",  exchange:"NASDAQ",  date:"2026-06-11",range:"TBD",     raise:"TBD",    sector:"Aerospace",   status:"upcoming",  desc:"La empresa aeroespacial de Elon Musk sale a bolsa. Starlink + lanzamientos. El IPO más esperado de la década. Cotiza esta semana."},
+  {company:"SpaceX",               ticker:"SPCX",  exchange:"NASDAQ",  date:"2026-06-11",range:"$95",     raise:"$8.5B",  sector:"Aerospace",   status:"trading",   valuation:"$350B", desc:"Elon Musk's aerospace giant — Starlink + launches. The most anticipated IPO of the decade. Debuted June 11 above its range."},
   {company:"Klarna Bank AB",       ticker:"KLAR",  exchange:"NYSE",    date:"2026-07-01",range:"$68–$72", raise:"$1.0B",  sector:"Fintech",     status:"upcoming",  desc:"Europe's leading BNPL platform with 85M users across 45 countries. Highly anticipated."},
   {company:"Chime Financial",      ticker:"CHYM",  exchange:"NYSE",    date:"2026-07-08",range:"$22–$26", raise:"$600M",  sector:"Neobank",     status:"upcoming",  desc:"U.S. neobank with 22M active accounts. No overdraft fees model disrupting traditional banking."},
   {company:"SHEIN Group Ltd",      ticker:"SHEI",  exchange:"NYSE",    date:"2026-07-22",range:"$60–$70", raise:"$5.0B",  sector:"Retail",      status:"upcoming",  desc:"Ultra-fast fashion e-commerce giant. Est. valuation $65B. Highly controversial ESG profile."},
@@ -15421,7 +15421,7 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
   useEffect(()=>{ doPoll(false); const iv=setInterval(()=>doPoll(false),60000); const onVis=()=>{ if(!document.hidden) doPoll(false); }; document.addEventListener("visibilitychange",onVis); return ()=>{ clearInterval(iv); document.removeEventListener("visibilitychange",onVis); }; },[doPoll]);
 
   const rows = tab==="stocks"?STOCKS:OPTIONS;
-  const matchFilt=(r)=>{ if(sFilt==="all")return true; if(tab==="stocks"){ if(sFilt==="long")return r.dir==="LONG"; if(sFilt==="short")return r.dir==="SHORT"; if(sFilt==="earnings")return (r.flags||[]).includes("CAT"); if(sFilt==="intraday")return (parseFloat(r.vol)||0)>=3; } else { if(sFilt==="calls")return r.side==="CALL"; if(sFilt==="puts")return r.side==="PUT"; if(sFilt==="dte7"){ try{ var dd=new Date(r.exp+" "+new Date().getFullYear()); var days=(dd-Date.now())/864e5; if(days< -60)days+=365; return days>=0&&days<=7; }catch(e){ return true; } } } return true; };
+  const matchFilt=(r)=>{ if(strict){ const need=tab==="stocks"?4:3; if((r.flags||[]).length<need) return false; } if(sFilt==="all")return true; if(tab==="stocks"){ if(sFilt==="long")return r.dir==="LONG"; if(sFilt==="short")return r.dir==="SHORT"; if(sFilt==="earnings")return (r.flags||[]).includes("CAT"); if(sFilt==="intraday")return (parseFloat(r.vol)||0)>=3; } else { if(sFilt==="calls")return r.side==="CALL"; if(sFilt==="puts")return r.side==="PUT"; if(sFilt==="dte7"){ try{ var dd=new Date(r.exp+" "+new Date().getFullYear()); var days=(dd-Date.now())/864e5; if(days< -60)days+=365; return days>=0&&days<=7; }catch(e){ return true; } } } return true; };
   const tableRows = (tab==="stocks"?STOCKS:OPTIONS).map((r,oi)=>({...r,_oi:oi})).filter(matchFilt);
   const sel = tab==="stocks"?selS:selO;
   const setSel = tab==="stocks"?setSelS:setSelO;
@@ -15595,8 +15595,9 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
       @media(max-width:1000px){
         .nfp .grid{grid-template-columns:1fr} .nfp .sigs{grid-template-columns:repeat(2,1fr)} .nfp .legend .lg{grid-template-columns:1fr 1fr}
         .nfp .sigs .sig:nth-child(5){grid-column:1 / -1}
-        .nfp.t-stocks .tape-h,.nfp.t-stocks .row{grid-template-columns:26px 1fr 64px 80px 50px} .nfp.t-options .tape-h,.nfp.t-options .row{grid-template-columns:26px 1fr 60px 80px 50px}
-        .nfp .tape-h .h-tgt,.nfp .tape-h .h-vol,.nfp .row .c-tgt,.nfp .row .c-vol,.nfp .tape-h .h-exp,.nfp .tape-h .h-iv,.nfp .row .c-exp,.nfp .row .c-iv{display:none}
+        .nfp.t-stocks .tape-h,.nfp.t-stocks .row{grid-template-columns:26px 1fr 64px 70px 46px} .nfp.t-options .tape-h,.nfp.t-options .row{grid-template-columns:26px 1fr 58px 66px 46px}
+        .nfp.t-stocks .tape-h .h-tgt,.nfp.t-stocks .row .c-tgt,.nfp.t-stocks .tape-h .h-vol,.nfp.t-stocks .row .c-vol{display:none}
+        .nfp.t-options .tape-h .h-exp,.nfp.t-options .row .c-exp,.nfp.t-options .tape-h .h-vol,.nfp.t-options .row .c-vol{display:none}
       }
       @media(max-width:560px){.nfp .pillars{grid-template-columns:1fr} .nfp .tab .ti small{display:none}}
     `}</style>
@@ -15810,12 +15811,14 @@ function FinderPro({isPremium,onNeedPremium,user,lang="es"}){
               <span style={{color:"var(--mut)"}}>{T("No noise · no spam · only what matters","Sin ruido · sin spam · solo lo que importa")}</span>
               <div className="wlchips">{wlState.slice(0,6).map(c=><span key={c}>{c}</span>)}{wlState.length>6&&<span style={{background:"var(--bl)",color:"#fff",borderColor:"var(--bl)"}}>+{wlState.length-6}</span>}</div>
             </div>
+            {(()=>{ const g = tab==="stocks" ? d : (STOCKS[selS]||STOCKS[0]); const gp = liveP(g.tk,g.fb); const buy = g.dir!=="SHORT"; return (
             <div className="tgmsg">
-              <div className="r1"><span className="siren">🚨</span><b>NVDA · Score 94/100</b></div>
-              <div className="ko"><b style={{color:"#fff"}}>NVDA</b> <span>· {T("Breakout confirmed","Rompimiento confirmado")} @ $140.50</span></div>
-              <div className="ko" style={{marginTop:3}}>{T("ENTRY","ENTRADA")} <b>$138–142</b> · STOP <b style={{color:"#F87171"}}>$133</b> · {T("TARGET","OBJETIVO")} <b style={{color:"#34D399"}}>$165</b></div>
-              <div className="rsn">VOL 5.5× · BRK $135 · SMART MONEY 92 · EARNINGS 6d</div>
+              <div className="r1"><span className="siren">🚨</span><b>{g.tk} · Score {g.score}/100</b></div>
+              <div className="ko"><b style={{color:"#fff"}}>{g.tk}</b> <span>· {buy?T("Breakout confirmed","Rompimiento confirmado"):T("Breakdown confirmed","Quiebre confirmado")} @ ${fmtP(gp)}</span></div>
+              <div className="ko" style={{marginTop:3}}>{T("ENTRY","ENTRADA")} <b>${g.entry}</b> · STOP <b style={{color:"#F87171"}}>${g.stop}</b> · {T("TARGET","OBJETIVO")} <b style={{color:"#34D399"}}>${g.tgt}</b></div>
+              <div className="rsn">{(g.flags||[]).map(f=>(NFP_FLAGS[f]?NFP_FLAGS[f].l:f)).join(" · ")} · SM {g.sm} · VOL {g.vol}</div>
             </div>
+            ); })()}
             <button className="tg-cfg" onClick={openWizard}><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 3h8M3 7h8M3 11h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>{T("Set up my watchlist alerts","Configurar mis alertas")}</button>
           </div>
         </div>
