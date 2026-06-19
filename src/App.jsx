@@ -19574,7 +19574,11 @@ function CryptoPerformancePage({ lang="es" }) {
       // ── Respaldo: si CoinGecko falla, usar Binance (datos reales de 24h) en vez de mostrar error ──
       if (!coinsData) {
         try {
-          const b = await fetch("https://api.binance.com/api/v3/ticker/24hr").then(r => r.ok ? r.json() : null).catch(()=>null);
+          let b = null;
+          for (const host of ["https://api.binance.us","https://api.binance.com","https://data-api.binance.vision"]) {
+            b = await fetch(host + "/api/v3/ticker/24hr").then(r => r.ok ? r.json() : null).catch(()=>null);
+            if (Array.isArray(b) && b.length) break;
+          }
           if (Array.isArray(b)) {
             const MAP = {BTC:"Bitcoin",ETH:"Ethereum",BNB:"BNB",SOL:"Solana",XRP:"XRP",ADA:"Cardano",DOGE:"Dogecoin",AVAX:"Avalanche",DOT:"Polkadot",LINK:"Chainlink",MATIC:"Polygon",LTC:"Litecoin",TRX:"TRON",SHIB:"Shiba Inu",UNI:"Uniswap",ATOM:"Cosmos",XLM:"Stellar",NEAR:"NEAR Protocol",APT:"Aptos",FIL:"Filecoin",ARB:"Arbitrum",OP:"Optimism",INJ:"Injective",SUI:"Sui",SEI:"Sei",RENDER:"Render",IMX:"Immutable",AAVE:"Aave",GRT:"The Graph",ALGO:"Algorand",HBAR:"Hedera",VET:"VeChain",TIA:"Celestia",FTM:"Fantom",MKR:"Maker"};
             const bm = {};
