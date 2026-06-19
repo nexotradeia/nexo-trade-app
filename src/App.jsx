@@ -23191,8 +23191,8 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>}
       {/* ── MOBILE MARKET MODE: Crash / Storm / Rally (globo v4) ── */}
       {mob&&<div style={{flexShrink:0,display:'flex',gap:6,padding:'0 8px 8px',background:'rgba(6,12,20,.92)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.br}`,zIndex:99}}>
-        {[['crash','📉 Crash'],['storm','⛈️ Storm'],['rally','📈 Rally']].map(([m,label])=>(
-          <button key={m} style={tbBtnM(mktMode===m)} onClick={()=>setMktMode(x=>x===m?'calm':m)}>{label}</button>
+        {[['crash','Crash'],['storm','Storm'],['rally','Rally']].map(([m,label])=>(
+          <button key={m} style={tbBtnM(mktMode===m)} onClick={()=>setMktMode(x=>x===m?'calm':m)}>{mktIcon(m)} {label}</button>
         ))}
       </div>}
 
@@ -23271,8 +23271,8 @@ function RadarGlobalPage({lang="es",onBack}){
         </div>}
         {/* Market mode — Crash / Storm / Rally (globo v4) */}
         {!mob&&<div style={{position:'absolute',top:14,left:20,display:'flex',gap:6}}>
-          {[['crash','📉 Crash','#ff5a5a'],['storm','⛈️ Storm','#ffc266'],['rally','📈 Rally','#33e29a']].map(([m,label,ac])=>(
-            <button key={m} onClick={()=>setMktMode(x=>x===m?'calm':m)} style={{...modeBtn(mktMode===m),...(mktMode===m?{color:ac,borderColor:ac,background:'rgba(255,255,255,.06)'}:{})}}>{label}</button>
+          {[['crash','Crash','#ff5a5a'],['storm','Storm','#ffc266'],['rally','Rally','#33e29a']].map(([m,label,ac])=>(
+            <button key={m} onClick={()=>setMktMode(x=>x===m?'calm':m)} style={{...modeBtn(mktMode===m),...(mktMode===m?{color:ac,borderColor:ac,background:'rgba(255,255,255,.06)'}:{})}}>{mktIcon(m)} {label}</button>
           ))}
         </div>}
         {/* Trading now */}
