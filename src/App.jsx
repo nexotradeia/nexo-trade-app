@@ -23132,6 +23132,22 @@ function RadarGlobalPage({lang="es",onBack}){
   const tbBtn=(active,accent='#00f090')=>({display:'flex',alignItems:'center',gap:5,padding:mob?'3px 7px':'5px 12px',borderRadius:7,border:`1px solid ${active?`rgba(0,240,144,.25)`:C.br2}`,background:active?`rgba(0,240,144,.1)`:C.bg3,fontFamily:MONO2,fontSize:mob?9:10,fontWeight:600,color:active?accent:C.mid,cursor:'pointer',letterSpacing:'.5px'});
   const tbBtnM=(active,accent='#00f090')=>({flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:3,padding:'9px 2px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.3)':C.br2}`,background:active?'rgba(0,240,144,.12)':C.bg3,fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?accent:C.txt,cursor:'pointer',letterSpacing:'.3px',whiteSpace:'nowrap'});
   const modeBtn=(active)=>({padding:'6px 12px',borderRadius:8,border:`1px solid ${active?'rgba(0,240,144,.25)':C.br2}`,background:active?'rgba(0,240,144,.1)':'rgba(6,12,20,.8)',fontFamily:MONO2,fontSize:10,fontWeight:600,color:active?C.grn:C.mid,cursor:'pointer',display:'flex',alignItems:'center',gap:5});
+  const mktIcon=(m)=>{
+    if(m==='crash')return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 7 9 13 13 9 21 17"/><polyline points="15 17 21 17 21 11"/></svg>;
+    if(m==='rally')return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>;
+    return <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>;
+  };
+  const rIcon=(name)=>{
+    const p={width:13,height:13,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};
+    if(name==='moon')return <svg {...p}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>;
+    if(name==='bolt')return <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>;
+    if(name==='refresh')return <svg {...p}><path d="M20 11A8 8 0 0 0 5 8"/><polyline points="4 4 4 9 9 9"/><path d="M4 13a8 8 0 0 0 15 3"/><polyline points="20 20 20 15 15 15"/></svg>;
+    if(name==='stats')return <svg {...p}><line x1="5" y1="21" x2="5" y2="11"/><line x1="12" y1="21" x2="12" y2="4"/><line x1="19" y1="21" x2="19" y2="14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>;
+    if(name==='globe')return <svg {...p}><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></svg>;
+    if(name==='fire')return <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c3 3.2 4.5 5.6 4.5 8.6a4.5 4.5 0 0 1-9 0c0-1.2.3-2.1 1-3 .1 1 .7 1.7 1.5 2C9.7 7 11 4.8 12 2z"/></svg>;
+    if(name==='activity')return <svg {...p}><polyline points="2 12 6 12 9 4 13 20 16 12 22 12"/></svg>;
+    return null;
+  };
 
   return(
     <div style={{width:'100%',margin:'-12px -16px',background:C.bg,fontFamily:"'Inter',sans-serif",color:C.txt,...(mob?{width:'calc(100% + 32px)',boxSizing:'border-box',display:'flex',flexDirection:'column',overflowY:'auto',height:'calc(100vh - 112px)',overscrollBehavior:'contain',WebkitOverflowScrolling:'touch'}:{display:'grid',height:'calc(100vh - 52px)',gridTemplateRows:'48px 1fr 30px',gridTemplateColumns:'260px 1fr 260px',overflow:'hidden'})}}>
@@ -23145,7 +23161,7 @@ function RadarGlobalPage({lang="es",onBack}){
             <div style={{fontFamily:MONO2,fontSize:12,fontWeight:700,letterSpacing:2,color:C.txt}}>NEXO<span style={{color:C.grn}}>TRADE</span></div>
           </div>}
           {!mob&&<div style={{width:1,height:18,background:C.br2}}/>}
-          <div style={{fontFamily:MONO2,fontSize:mob?10:11,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn}}>🌍 {mob?'Radar':'Global Capital Radar'}</div>
+          <div style={{fontFamily:MONO2,fontSize:mob?10:11,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,display:'flex',alignItems:'center',gap:5}}>{rIcon('globe')} {mob?'Radar':'Global Capital Radar'}</div>
           {!mob&&<div style={{fontFamily:MONO2,fontSize:11,color:C.mid}}>{utcClock}</div>}
         </div>
         {!mob&&<div style={{display:'flex',alignItems:'center',gap:8}}>
@@ -23154,23 +23170,23 @@ function RadarGlobalPage({lang="es",onBack}){
           </div>
         </div>}
         {!mob&&<div style={{display:'flex',alignItems:'center',gap:6}}>
-          <button style={tbBtn(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>🌙 Day/Night</button>
-          <button style={tbBtn(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>⚡ Flows</button>
-          <button style={tbBtn(false)} onClick={refreshGlobe}>↺ Refresh</button>
-          <button style={tbBtn(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>📊 Stats</button>
+          <button style={tbBtn(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>{rIcon('moon')} Day/Night</button>
+          <button style={tbBtn(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>{rIcon('bolt')} Flows</button>
+          <button style={tbBtn(false)} onClick={refreshGlobe}>{rIcon('refresh')} Refresh</button>
+          <button style={tbBtn(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>{rIcon('stats')} Stats</button>
         </div>}
       </div>
       {/* ── MOBILE CONTROL BAR: botones legibles y tappables ── */}
       {mob&&<div style={{flexShrink:0,display:'flex',gap:6,padding:'8px',background:'rgba(6,12,20,.92)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.br}`,zIndex:99}}>
-        <button style={tbBtnM(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>🌙 Day/Night</button>
-        <button style={tbBtnM(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>⚡ Flows</button>
-        <button style={tbBtnM(false)} onClick={refreshGlobe}>↺ Refresh</button>
-        <button style={tbBtnM(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>📊 Stats</button>
+        <button style={tbBtnM(dayNightOn)} onClick={()=>setDayNightOn(v=>!v)}>{rIcon('moon')} Day/Night</button>
+        <button style={tbBtnM(flowsOn)} onClick={()=>setFlowsOn(v=>!v)}>{rIcon('bolt')} Flows</button>
+        <button style={tbBtnM(false)} onClick={refreshGlobe}>{rIcon('refresh')} Refresh</button>
+        <button style={tbBtnM(showStats,'#60c0ff')} onClick={()=>setShowStats(v=>!v)}>{rIcon('stats')} Stats</button>
       </div>}
       {/* ── MOBILE GLOBE MODE SELECTOR (Standard/Crypto/Heat) — en desktop están sobre el globo ── */}
       {mob&&<div style={{flexShrink:0,display:'flex',gap:6,padding:'0 8px 8px',background:'rgba(6,12,20,.92)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.br}`,zIndex:99}}>
-        {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
-          <button key={m} style={tbBtnM(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
+        {[['standard','Standard'],['crypto','Crypto'],['heatmap','Heat']].map(([m,label])=>(
+          <button key={m} style={tbBtnM(gMode===m)} onClick={()=>setGMode(m)}>{m==='standard'?rIcon('globe'):m==='heatmap'?rIcon('fire'):<span style={{fontWeight:700,fontSize:12}}>₿</span>} {label}</button>
         ))}
       </div>}
       {/* ── MOBILE MARKET MODE: Crash / Storm / Rally (globo v4) ── */}
@@ -23184,7 +23200,7 @@ function RadarGlobalPage({lang="es",onBack}){
       <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
         {/* Countdown */}
         <div style={{background:'rgba(0,240,144,.06)',border:'1px solid rgba(0,240,144,.15)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
-          <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,marginBottom:4}}>⏰ Next market opens</div>
+          <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,marginBottom:4,display:'flex',alignItems:'center',justifyContent:'center',gap:5}}>{rIcon('activity')} Next market opens</div>
           <div style={{fontFamily:MONO2,fontSize:22,fontWeight:700,color:C.grn,textShadow:`0 0 16px rgba(0,240,144,.4)`,letterSpacing:2}}>{nextCd}</div>
           <div style={{fontFamily:MONO2,fontSize:10,color:C.mid,marginTop:3}}>TSE — Tokyo Stock Exchange</div>
         </div>
@@ -23249,8 +23265,8 @@ function RadarGlobalPage({lang="es",onBack}){
         <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'pan-y'}}/>
         {/* Mode toggles — desktop only */}
         {!mob&&<div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
-          {[['standard','🌍 Standard'],['crypto','₿ Crypto'],['heatmap','🔥 Heat']].map(([m,label])=>(
-            <button key={m} style={modeBtn(gMode===m)} onClick={()=>setGMode(m)}>{label}</button>
+          {[['standard','Standard'],['crypto','Crypto'],['heatmap','Heat']].map(([m,label])=>(
+            <button key={m} style={modeBtn(gMode===m)} onClick={()=>setGMode(m)}>{m==='standard'?rIcon('globe'):m==='heatmap'?rIcon('fire'):<span style={{fontWeight:700,fontSize:12}}>₿</span>} {label}</button>
           ))}
         </div>}
         {/* Market mode — Crash / Storm / Rally (globo v4) */}
