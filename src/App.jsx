@@ -21634,7 +21634,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
           ))}
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1.7fr 1fr",gap:16}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:16,alignItems:"start"}}>
           <Card>
             <SecTitle icon="📊" title={isEN?"Portfolio evolution":"Evolución de cartera"} sub={isEN?"Total value vs S&P 500 — last 12 months":"Valor total vs S&P 500 — últimos 12 meses"} tag={fmtPct(portRet1y)} tagColor="#059669"/>
             <svg viewBox={"0 0 "+EW+" "+EH} style={{width:"100%",height:"auto"}}>
@@ -21672,12 +21672,12 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
             bullets={isEN?["🏆 Best & Worst stocks","🔥 Monthly heatmap","⚡ Return vs Risk chart","💰 Dividends & ranking"]:["🏆 Mejores y peores acciones","🔥 Mapa de calor mensual","⚡ Gráfico Rentabilidad/Riesgo","💰 Dividendos y ranking"]}
             onPlans={onNeedPremium}/>
         ) : <>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:16,alignItems:"start"}}>
           <Card><SecTitle icon="🏆" title={isEN?"Best stocks":"Mejores acciones"} sub={isEN?"Highest return in period":"Mayor retorno en el período"} tag="Top 6" tagColor="#059669"/>{top6.map(r=>barRow(r,true))}</Card>
           <Card><SecTitle icon="📉" title={isEN?"Worst stocks":"Peores acciones"} sub={isEN?"Biggest drop in period":"Mayor caída en el período"} tag="Bottom 6" tagColor="#DC2626"/>{bottom6.map(r=>barRow(r,false))}</Card>
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1.2fr",gap:16}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:16,alignItems:"start"}}>
           <Card><SecTitle icon="🔥" title={isEN?"Monthly heatmap":"Mapa de calor mensual"} sub={isEN?"% monthly return — last 6 months":"% retorno mensual — últimos 6 meses"}/>
             <div style={{overflowX:"auto"}}><table style={{borderCollapse:"separate",borderSpacing:"4px",width:"100%"}}>
               <thead><tr><th></th>{heatMonths.map((m,i)=><th key={i} style={{fontSize:9,fontWeight:800,color:"#94A3B8",textTransform:"uppercase",padding:"0 2px"}}>{m}</th>)}</tr></thead>
