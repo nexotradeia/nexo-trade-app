@@ -23197,7 +23197,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>}
 
       {/* ── LEFT PANEL ── */}
-      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderRight:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0,order:mob?2:0}}>
         {/* Countdown */}
         <div style={{background:'rgba(0,240,144,.06)',border:'1px solid rgba(0,240,144,.15)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
           <div style={{fontFamily:MONO2,fontSize:9,fontWeight:600,letterSpacing:'1.5px',textTransform:'uppercase',color:C.grn,marginBottom:4,display:'flex',alignItems:'center',justifyContent:'center',gap:5}}>{rIcon('activity')} Next market opens</div>
@@ -23261,7 +23261,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── GLOBE ── */}
-      <div ref={wrapRef} style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)',...(mob?{height:'360px',flexShrink:0}:{flex:1})}}>
+      <div ref={wrapRef} style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#0a1828 0%,#020408 70%)',...(mob?{height:'360px',flexShrink:0,order:1}:{flex:1})}}>
         <canvas ref={cvsRef} className="nexo-radar-canvas" style={{display:'block',width:'100%',height:'100%',touchAction:'pan-y'}}/>
         {/* Mode toggles — desktop only */}
         {!mob&&<div style={{position:'absolute',top:14,right:20,display:'flex',gap:6}}>
@@ -23362,7 +23362,7 @@ function RadarGlobalPage({lang="es",onBack}){
       </div>
 
       {/* ── RIGHT PANEL ── */}
-      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0}}>
+      <div style={{background:'rgba(6,12,20,.85)',backdropFilter:'blur(16px)',borderLeft:mob?'none':`1px solid ${C.br}`,borderTop:mob?`1px solid ${C.br}`:'none',display:'flex',flexDirection:'column',overflowY:mob?'visible':'auto',padding:12,gap:12,flexShrink:0,order:mob?3:0}}>
         {/* Traders by country */}
         <div style={pc}>
           <div style={pchd}>Traders by Country (M)</div>
