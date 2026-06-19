@@ -19570,7 +19570,28 @@ function CryptoPerformancePage({ lang="es" }) {
         fetch("https://api.coingecko.com/api/v3/global").then(r => r.ok ? r.json() : null).catch(()=>null),
         fetch("https://api.alternative.me/fng/?limit=1").then(r => r.ok ? r.json() : null).catch(()=>null),
       ]);
-      if (Array.isArray(coinsRes)) { setCoins(coinsRes); setErr(null); }
+      let coinsData = Array.isArray(coinsRes) ? coinsRes : null;
+      // ── Respaldo: si CoinGecko falla, usar Binance (datos reales de 24h) en vez de mostrar error ──
+      if (!coinsData) {
+        try {
+          const b = await fetch("https://api.binance.com/api/v3/ticker/24hr").then(r => r.ok ? r.json() : null).catch(()=>null);
+          if (Array.isArray(b)) {
+            const MAP = {BTC:"Bitcoin",ETH:"Ethereum",BNB:"BNB",SOL:"Solana",XRP:"XRP",ADA:"Cardano",DOGE:"Dogecoin",AVAX:"Avalanche",DOT:"Polkadot",LINK:"Chainlink",MATIC:"Polygon",LTC:"Litecoin",TRX:"TRON",SHIB:"Shiba Inu",UNI:"Uniswap",ATOM:"Cosmos",XLM:"Stellar",NEAR:"NEAR Protocol",APT:"Aptos",FIL:"Filecoin",ARB:"Arbitrum",OP:"Optimism",INJ:"Injective",SUI:"Sui",SEI:"Sei",RENDER:"Render",IMX:"Immutable",AAVE:"Aave",GRT:"The Graph",ALGO:"Algorand",HBAR:"Hedera",VET:"VeChain",TIA:"Celestia",FTM:"Fantom",MKR:"Maker"};
+            const bm = {};
+            b.forEach(t => { if (t.symbol && t.symbol.endsWith("USDT")) { const sym = t.symbol.slice(0,-4); if (MAP[sym]) bm[sym] = t; } });
+            const ordered = Object.keys(MAP).filter(s => bm[s]);
+            if (ordered.length) {
+              coinsData = ordered.map((s,i) => { const t = bm[s]; const chg = parseFloat(t.priceChangePercent)||0; return {
+                id:s.toLowerCase(), symbol:s.toLowerCase(), name:MAP[s], image:"",
+                current_price:parseFloat(t.lastPrice)||0, market_cap_rank:i+1, total_volume:parseFloat(t.quoteVolume)||0,
+                price_change_percentage_24h:chg, price_change_percentage_24h_in_currency:chg,
+                price_change_percentage_1h_in_currency:null, price_change_percentage_7d_in_currency:null, price_change_percentage_30d_in_currency:null
+              };}).sort((a,b)=> (b.total_volume||0)-(a.total_volume||0)).map((c,i)=>({...c,market_cap_rank:i+1}));
+            }
+          }
+        } catch(e) {}
+      }
+      if (coinsData && coinsData.length) { setCoins(coinsData); setErr(null); }
       else { setErr(isEN ? "Connection error. Retrying..." : "Error de conexión. Reintentando..."); }
       if (globalRes?.data) setGlobal(globalRes.data);
       if (fgRes?.data?.[0]) setFearGreed(fgRes.data[0]);
