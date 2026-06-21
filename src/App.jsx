@@ -4803,6 +4803,27 @@ function TopsPage({posts=[],lang="es"}){
   );
 }
 
+// Traducción EN→ES de titulares/resúmenes de noticias (Finnhub llega en inglés).
+// Usa el endpoint gratuito de Google, por lotes (1 request) preservando saltos de
+// línea, con caché en memoria. Si falla o no alinea, deja el texto original.
+const _nexoTrCache = (typeof window!=="undefined") ? (window.__nexoTrCache = window.__nexoTrCache || {}) : {};
+async function nexoBatchTrES(texts){
+  const clean = texts.map(t => (t||"").replace(/\s*\n\s*/g, " ").trim());
+  const need = clean.filter(t => t && !_nexoTrCache[t]);
+  if(need.length){
+    try{
+      const joined = need.join("\n");
+      const u = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=" + encodeURIComponent(joined);
+      const r = await fetch(u);
+      const j = await r.json();
+      const full = (j && j[0]) ? j[0].map(s => s[0]).join("") : "";
+      const parts = full.split("\n");
+      if(parts.length === need.length){ need.forEach((t,i)=>{ _nexoTrCache[t] = parts[i]; }); }
+    }catch(e){}
+  }
+  return clean.map(t => _nexoTrCache[t] || t);
+}
+
 function NoticiasPage({lang}){
   const isEN=lang==="en";
   const [cat,setCat]=useState("general");
@@ -4810,22 +4831,36 @@ function NoticiasPage({lang}){
   const [loading,setLoading]=useState(true);
   const [lastUp,setLastUp]=useState(null);
   const [spinning,setSpinning]=useState(false);
+  const reqRef=useRef(0);
 
   const fetchNews=(c=cat)=>{
+    const myReq=++reqRef.current;
     setLoading(true);setSpinning(true);
     fetch(`https://finnhub.io/api/v1/news?category=${c}&token=${FINNHUB_KEY}`)
       .then(r=>r.json())
       .then(data=>{
-        if(Array.isArray(data)){
-          setNews(data.filter(n=>n.headline&&n.source).slice(0,30));
+        if(Array.isArray(data) && myReq===reqRef.current){
+          const list=data.filter(n=>n.headline&&n.source).slice(0,30);
+          setNews(list);
           setLastUp(new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}));
+          if(!isEN){
+            (async()=>{
+              try{
+                const heads=await nexoBatchTrES(list.map(n=>n.headline));
+                let sums=[]; const allS=list.map(n=>n.summary||"");
+                for(let i=0;i<allS.length;i+=8){ sums=sums.concat(await nexoBatchTrES(allS.slice(i,i+8))); }
+                if(myReq!==reqRef.current) return;
+                setNews(list.map((n,i)=>({...n, headline:heads[i]||n.headline, summary:sums[i]||n.summary})));
+              }catch(e){}
+            })();
+          }
         }
       })
       .catch(()=>{})
       .finally(()=>{setLoading(false);setTimeout(()=>setSpinning(false),600);});
   };
 
-  useEffect(()=>{ fetchNews(cat); },[cat]);
+  useEffect(()=>{ fetchNews(cat); },[cat,lang]);
 
   const cats=[
     {k:"general", l:isEN?"📰 Macro":"📰 Macro",     color:"#1565C0"},
