@@ -611,7 +611,7 @@ const SEARCH_TICKERS = [
   "SPCX",
   // ── Mega-cap tech ──────────────────────────────────────────────
   "AAPL","MSFT","GOOGL","GOOG","AMZN","NVDA","TSLA","META","AVGO","ORCL",
-  "ADBE","CRM","INTC","AMD","QCOM","TXN","MU","AMAT","LRCX","KLAC","MRVL",
+  "ADBE","CRM","INTC","AMD","QCOM","TXN","MU","SNDK","AMAT","LRCX","KLAC","MRVL",
   "NFLX","SPOT","SNAP","PINS","TWTR","RBLX","LYFT","UBER","ABNB","DASH",
   "SHOP","ETSY","EBAY","AMGN","GILD","BIIB","REGN","VRTX","ILMN","MRNA",
   "BNTX","PFE","JNJ","MRK","ABT","MDT","BMY","ABBV","LLY","AZN",
@@ -1133,7 +1133,7 @@ const TAPE_TICKERS = [
   "QQQ","GLD","UBER","SHOP","V","ORCL","CRM","WMT","COST","ANET",
   "NU","SQ","LLY","AVGO","IWM","TLT","SNOW","NOW","XOM","PYPL",
   // Sesión 11: más stocks + SPCX (SpaceX — IPO 11 jun 2026; muestra precio automático al cotizar)
-  "SPCX","JPM","BAC","GS","DIS","INTC","MU","BABA","HOOD","ABNB","GME","RIVN","MARA",
+  "SPCX","JPM","BAC","GS","DIS","INTC","MU","SNDK","BABA","HOOD","ABNB","GME","RIVN","MARA",
 ];
 const SIDEBAR_TICKERS = ["BTC","NVDA","TSLA","ETH","SOL","AAPL","SPY","QQQ","DIA","IWM"];
 const ALL_TRACK = [...new Set([...TAPE_TICKERS,...SIDEBAR_TICKERS])];
@@ -18536,7 +18536,7 @@ const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
 
 // Nombres de empresa para los tickers más comunes
 const TICKER_NAMES={
-  SPCX:"SpaceX",
+  SPCX:"SpaceX",SNDK:"SanDisk",
   NVDA:"NVIDIA",AAPL:"Apple",TSLA:"Tesla",MSFT:"Microsoft",META:"Meta",
   AMZN:"Amazon",GOOGL:"Alphabet",PLTR:"Palantir",AMD:"AMD",SPY:"S&P 500 ETF",
   SMCI:"Super Micro",COIN:"Coinbase",QQQ:"Nasdaq ETF",
@@ -21367,7 +21367,7 @@ function WatchlistPage({ user, lang="es", onNeedAuth, posts=[], isPremium=false,
     ? <span style={{fontFamily:"monospace",color:color||(val!=null&&typeof val==="number"&&suffix==="%"?pctColor(val):"#0F172A")}}>{val!=null?Number(val).toFixed(1)+suffix:"—"}</span>
     : upgBtn;
 
-  const TICKER_NAMES_W={AAPL:"Apple",MSFT:"Microsoft",NVDA:"NVIDIA",GOOGL:"Alphabet",AMZN:"Amazon",META:"Meta",TSLA:"Tesla",AMD:"AMD",PLTR:"Palantir",COIN:"Coinbase",NFLX:"Netflix",AVGO:"Broadcom",ORCL:"Oracle",CRM:"Salesforce",NOW:"ServiceNow",DDOG:"Datadog",CRWD:"CrowdStrike",SNOW:"Snowflake",UBER:"Uber",ABNB:"Airbnb",SHOP:"Shopify",MELI:"MercadoLibre",NU:"Nubank",BTC:"Bitcoin",ETH:"Ethereum",SOL:"Solana",SPY:"S&P 500 ETF",QQQ:"Nasdaq ETF",GLD:"Gold ETF",JPM:"JPMorgan",BAC:"Bank of America",GS:"Goldman Sachs",V:"Visa",MA:"Mastercard",PYPL:"PayPal",NBIS:"NeuroBo Pharma",GLW:"Corning",INTC:"Intel",MU:"Micron",QCOM:"Qualcomm",TXN:"Texas Instr.",SMCI:"Super Micro",ARM:"ARM Holdings",RIVN:"Rivian",NIO:"NIO",BABA:"Alibaba",JD:"JD.com",PDD:"PDD Holdings",VALE:"Vale",PBR:"Petrobras",ITUB:"Itaú",BBD:"Bradesco",GGB:"Gerdau"};
+  const TICKER_NAMES_W={AAPL:"Apple",MSFT:"Microsoft",NVDA:"NVIDIA",GOOGL:"Alphabet",AMZN:"Amazon",META:"Meta",TSLA:"Tesla",AMD:"AMD",PLTR:"Palantir",COIN:"Coinbase",NFLX:"Netflix",AVGO:"Broadcom",ORCL:"Oracle",CRM:"Salesforce",NOW:"ServiceNow",DDOG:"Datadog",CRWD:"CrowdStrike",SNOW:"Snowflake",UBER:"Uber",ABNB:"Airbnb",SHOP:"Shopify",MELI:"MercadoLibre",NU:"Nubank",BTC:"Bitcoin",ETH:"Ethereum",SOL:"Solana",SPY:"S&P 500 ETF",QQQ:"Nasdaq ETF",GLD:"Gold ETF",JPM:"JPMorgan",BAC:"Bank of America",GS:"Goldman Sachs",V:"Visa",MA:"Mastercard",PYPL:"PayPal",NBIS:"NeuroBo Pharma",GLW:"Corning",INTC:"Intel",MU:"Micron",SNDK:"SanDisk",QCOM:"Qualcomm",TXN:"Texas Instr.",SMCI:"Super Micro",ARM:"ARM Holdings",RIVN:"Rivian",NIO:"NIO",BABA:"Alibaba",JD:"JD.com",PDD:"PDD Holdings",VALE:"Vale",PBR:"Petrobras",ITUB:"Itaú",BBD:"Bradesco",GGB:"Gerdau"};
   const nm = (tk,d,m) => <div style={{display:"flex",alignItems:"center",gap:11}}>{Avatar(tk)}<div style={{minWidth:0}}><div style={{fontWeight:900,fontSize:14,fontFamily:"monospace",color:"#0F172A",letterSpacing:0.3}}>{tk}</div><div style={{fontSize:10.5,color:"#64748B",marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{TICKER_NAMES_W[tk]||tk}</div></div></div>;
   const pr = (tk,d,m) => <span style={{fontFamily:"monospace",fontWeight:800,fontSize:14.5,color:d?.price!=null?"#0F172A":"#94A3B8"}}>{fmtPrice(d?.price??null,tk)}</span>;
   const COLS = {
