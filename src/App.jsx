@@ -5571,6 +5571,7 @@ function EarningsPage({lang}){
   const [votes,    setVotes]    = useState(Object.fromEntries(MOCK_EARNINGS.map(e=>[e.ticker,e.bull_pct])));
   const [liveEvent,setLiveEvent]= useState(null);
   const [selEarning, setSelEarning] = useState(null);
+  const [analyst,setAnalyst]=useState({});
   const earningsListRef = useRef(null);
 
   // ── Mobile: scroll to list when date selected ──
@@ -5661,6 +5662,41 @@ function EarningsPage({lang}){
       }).catch(()=>{}).finally(()=>setLoadingEar(false));
   },[calMonth,calYear,refreshKey]);
 
+  // ── Cobertura de analistas (Finnhub recommendation trends, REAL + fallback) ──
+  const ANALYST_FALLBACK={
+    NVDA:{total:68,buy:63,buyPct:93}, MSFT:{total:60,buy:55,buyPct:92}, AAPL:{total:45,buy:33,buyPct:73},
+    META:{total:64,buy:57,buyPct:89}, GOOGL:{total:60,buy:52,buyPct:87}, AMZN:{total:66,buy:62,buyPct:94},
+    TSLA:{total:50,buy:24,buyPct:48}, NFLX:{total:48,buy:34,buyPct:71}, AMD:{total:52,buy:40,buyPct:77},
+    MU:{total:36,buy:31,buyPct:86}, JPM:{total:30,buy:18,buyPct:60}, GS:{total:28,buy:17,buyPct:61},
+    SNDK:{total:18,buy:14,buyPct:78},
+  };
+  useEffect(()=>{
+    const syms=[...new Set(earnings.map(e=>e.ticker))].filter(Boolean);
+    const prioritized=[...syms].sort((a,b)=>(HIGH_IMPACT.has(b)?1:0)-(HIGH_IMPACT.has(a)?1:0)).slice(0,24);
+    const todo=prioritized.filter(sym=>!(sym in analyst));
+    if(todo.length===0) return;
+    let cancelled=false;
+    (async()=>{
+      const res=await Promise.allSettled(todo.map(sym=>
+        fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${sym}&token=${FINNHUB_KEY}`)
+          .then(r=>r.json())
+          .then(arr=>{
+            const l=Array.isArray(arr)&&arr.length?arr[0]:null;
+            if(!l) return {sym,data:ANALYST_FALLBACK[sym]||null};
+            const total=(l.strongBuy||0)+(l.buy||0)+(l.hold||0)+(l.sell||0)+(l.strongSell||0);
+            const buy=(l.strongBuy||0)+(l.buy||0);
+            if(!total) return {sym,data:ANALYST_FALLBACK[sym]||null};
+            return {sym,data:{total,buy,buyPct:Math.round(buy/total*100)}};
+          })
+          .catch(()=>({sym,data:ANALYST_FALLBACK[sym]||null}))
+      ));
+      if(cancelled) return;
+      setAnalyst(prev=>{const next={...prev}; res.forEach(r=>{if(r.status==="fulfilled")next[r.value.sym]=r.value.data;}); return next;});
+    })();
+    return ()=>{cancelled=true;};
+  // eslint-disable-next-line
+  },[earnings]);
+
   const vote=(ticker,dir)=>{
     if(voted[ticker])return;
     setVoted(v=>({...v,[ticker]:dir}));
@@ -5680,6 +5716,9 @@ function EarningsPage({lang}){
     return true;
   });
   const displayed=showAll?selFiltered:selFiltered.slice(0,30);
+  const _spotScored=selFiltered.map(e=>{const a=analyst[e.ticker];return (a&&a.total>0)?{e,a,score:a.total*(0.5+a.buyPct/200)}:null;}).filter(Boolean).sort((x,y)=>y.score-x.score);
+  const topSpot=_spotScored.slice(0,5);
+  const spotlightSet=new Set(topSpot.map(s=>s.e.ticker));
   const highImpactCount=selDayAll.filter(e=>["Alto","High"].includes(getImpact(e.ticker))).length;
   const _votedCos=selDayAll.filter(e=>(e.community_votes||0)>0||voted[e.ticker]); const avgBull=_votedCos.length?Math.round(_votedCos.reduce((s,e)=>s+(votes[e.ticker]||50),0)/_votedCos.length):null;
   const nextCall=selDayAll.find(e=>e.horaRaw==="amc")||selDayAll[0];
@@ -5840,6 +5879,27 @@ function EarningsPage({lang}){
             ))}
           </div>
 
+          {topSpot.length>0&&(
+            <div style={{marginBottom:14,background:"linear-gradient(135deg,rgba(245,158,11,0.16),rgba(245,158,11,0.04))",border:"1px solid rgba(245,158,11,0.45)",borderRadius:14,padding:"13px 16px",boxShadow:"0 0 0 1px rgba(245,158,11,0.1),0 6px 20px -8px rgba(245,158,11,0.45)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:10,flexWrap:"wrap"}}>
+                <span style={{fontSize:16}}>⭐</span>
+                <span style={{fontSize:13,fontWeight:900,color:"#B45309",letterSpacing:0.3}}>{isEN?"Analyst Spotlight":"Destacadas por analistas"}</span>
+                <span style={{fontSize:10,color:C.muted,fontWeight:600}}>· {isEN?"most-covered & top-rated reporting":"las más cubiertas y mejor valoradas que reportan"}</span>
+              </div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {topSpot.map(({e,a})=>(
+                  <div key={e.ticker} onClick={()=>setSelEarning(e)} style={{display:"flex",alignItems:"center",gap:8,background:C.card,border:"1px solid rgba(245,158,11,0.4)",borderRadius:10,padding:"7px 11px",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default"}}>
+                    <LogoBadge sym={e.ticker} col={tickerBg(e.ticker)} size={26} radius={6}/>
+                    <div style={{minWidth:0}}>
+                      <div style={{fontWeight:800,fontSize:12,color:C.text,fontFamily:"monospace"}}>{e.ticker}</div>
+                      <div style={{fontSize:9,color:C.muted}}>{a.total} {isEN?"analysts":"analistas"} · <span style={{color:a.buyPct>=70?"#10B981":a.buyPct>=50?"#F59E0B":"#EF4444",fontWeight:800}}>{a.buyPct}% {isEN?"buy":"compra"}</span></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Table */}
           <div className="nexo-scroll-x" style={{borderRadius:14}}>
           <div style={{minWidth:820,background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:"hidden"}}>
@@ -5877,12 +5937,16 @@ function EarningsPage({lang}){
               const isFav=favorites.has(e.ticker);
               const bg=tickerBg(e.ticker);
               const isAlerked=alertedEar.has(e.ticker+e.rawDate);
+              const a=analyst[e.ticker];
+              const isSpot=spotlightSet.has(e.ticker);
+              const rowBg=isSpot?"linear-gradient(90deg,rgba(245,158,11,0.14),rgba(245,158,11,0.03))":"transparent";
+              const rowGlow=isSpot?"inset 3px 0 0 #F59E0B,inset 0 0 0 1px rgba(245,158,11,0.22)":"none";
               return(
                 <div key={`${e.ticker}-${e.rawDate}`}
                   onClick={()=>setSelEarning(e)}
-                  style={{display:"grid",gridTemplateColumns:"28px minmax(170px,1.6fr) 110px 100px 90px 80px minmax(130px,1fr) 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default"}}
-                  onMouseEnter={ev=>ev.currentTarget.style.background="rgba(15,76,129,0.04)"}
-                  onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
+                  style={{display:"grid",gridTemplateColumns:"28px minmax(170px,1.6fr) 110px 100px 90px 80px minmax(130px,1fr) 52px",gap:8,padding:"11px 16px",borderBottom:`1px solid ${C.border}`,transition:"background 0.15s",alignItems:"center",cursor:EARNINGS_RESULTS[e.ticker]?"pointer":"default",background:rowBg,boxShadow:rowGlow}}
+                  onMouseEnter={ev=>ev.currentTarget.style.background=isSpot?"linear-gradient(90deg,rgba(245,158,11,0.24),rgba(245,158,11,0.07))":"rgba(15,76,129,0.04)"}
+                  onMouseLeave={ev=>ev.currentTarget.style.background=rowBg}>
                   {/* Star */}
                   <div onClick={()=>setFavorites(f=>{const s=new Set(f);isFav?s.delete(e.ticker):s.add(e.ticker);return s;})}
                     style={{cursor:"pointer",fontSize:14,color:isFav?"#F59E0B":C.muted2,textAlign:"center",lineHeight:1}}>
@@ -5894,6 +5958,7 @@ function EarningsPage({lang}){
                     <div style={{minWidth:0}}>
                       <div style={{fontWeight:800,fontSize:13,color:C.text,fontFamily:"monospace"}}>{e.ticker}</div>
                       <div style={{fontSize:10,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nombre}</div>
+                      {isSpot&&a&&<div style={{fontSize:9,fontWeight:800,color:"#B45309",marginTop:2,display:"flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}><span>⭐</span>{a.total} {isEN?"analysts":"analistas"} · {a.buyPct}% {isEN?"buy":"compra"}</div>}
                     </div>
                   </div>
                   {/* Hora badge */}
