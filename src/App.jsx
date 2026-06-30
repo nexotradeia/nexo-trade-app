@@ -5651,6 +5651,13 @@ function EarningsPage({lang}){
         if(deduped.length>0){
           setEarnings(deduped);
           setVotes(Object.fromEntries(deduped.map(e=>[e.ticker,e.bull_pct])));
+          // Al cambiar de mes: si el dia seleccionado no cae en este mes, saltar al primer dia con earnings
+          setSelDay(prev=>{
+            if(prev>=from && prev<=to) return prev;
+            const dts=[...new Set(deduped.map(e=>e.rawDate))].filter(d=>d>=from&&d<=to).sort();
+            return dts[0]||prev;
+          });
+          setShowAll(false);
           const unknown=[...new Set(deduped.filter(e=>!MOCK_EARNINGS.find(m=>m.ticker===e.ticker)).map(e=>e.ticker))].slice(0,20);
           if(unknown.length>0){
             const results=await Promise.allSettled(unknown.map(sym=>fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FINNHUB_KEY}`).then(r=>r.json()).then(d=>({sym,name:d.name||sym})).catch(()=>({sym,name:sym}))));
