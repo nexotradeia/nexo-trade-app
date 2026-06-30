@@ -5620,8 +5620,19 @@ function EarningsPage({lang}){
     setLoadingEar(true);
     const from=new Date(calYear,calMonth,1).toISOString().slice(0,10);
     const to=new Date(calYear,calMonth+1,0).toISOString().slice(0,10);
-    fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_KEY}`)
-      .then(r=>r.json())
+    // Finnhub topa en 1500 filas por llamada -> partir el mes en ventanas de 7 dias y unir
+    const _pad=n=>String(n).padStart(2,"0");
+    const _lastDay=new Date(calYear,calMonth+1,0).getDate();
+    const _chunks=[];
+    for(let d=1; d<=_lastDay;){
+      const eDay=Math.min(d+6,_lastDay);
+      _chunks.push([`${calYear}-${_pad(calMonth+1)}-${_pad(d)}`,`${calYear}-${_pad(calMonth+1)}-${_pad(eDay)}`]);
+      d=eDay+1;
+    }
+    Promise.all(_chunks.map(([cs,ce])=>
+      fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${cs}&to=${ce}&token=${FINNHUB_KEY}`).then(r=>r.json()).catch(()=>null)
+    ))
+      .then(parts=>({earningsCalendar:parts.filter(Boolean).flatMap(p=>p&&p.earningsCalendar?p.earningsCalendar:[])}))
       .then(async data=>{
         if(!data?.earningsCalendar?.length){ setLoadingEar(false); return; }
         const all=data.earningsCalendar.map(e=>{
