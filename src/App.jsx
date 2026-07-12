@@ -608,7 +608,7 @@ const generateAvatarSVG = (id, emoji, color, style, size=80) => {
 // +3000 tickers — S&P500, Nasdaq, NYSE, Crypto, ETFs, LatAm ADRs
 const SEARCH_TICKERS = [
   // ── IPOs recientes / destacados ──────────────────────────────
-  "SPCX",
+  "SPCX","SKHYV",
   // ── Mega-cap tech ──────────────────────────────────────────────
   "AAPL","MSFT","GOOGL","GOOG","AMZN","NVDA","TSLA","META","AVGO","ORCL",
   "ADBE","CRM","INTC","AMD","QCOM","TXN","MU","SNDK","AMAT","LRCX","KLAC","MRVL",
@@ -1134,6 +1134,8 @@ const TAPE_TICKERS = [
   "NU","SQ","LLY","AVGO","IWM","TLT","SNOW","NOW","XOM","PYPL",
   // Sesión 11: más stocks + SPCX (SpaceX — IPO 11 jun 2026; muestra precio automático al cotizar)
   "SPCX","JPM","BAC","GS","DIS","INTC","MU","SNDK","BABA","HOOD","ABNB","GME","RIVN","MARA",
+  // Sesión 54: SKHYV (SK hynix — debut Nasdaq 10 jul 2026, ADR "when issued"; pasa a ticker SKHY el 14 jul 2026)
+  "SKHYV",
 ];
 const SIDEBAR_TICKERS = ["BTC","NVDA","TSLA","ETH","SOL","AAPL","SPY","QQQ","DIA","IWM"];
 const ALL_TRACK = [...new Set([...TAPE_TICKERS,...SIDEBAR_TICKERS])];
@@ -18619,7 +18621,7 @@ const BOT_POSTS = IDEAS_DATA.slice(0,10).map((idea, i) => {
 
 // Nombres de empresa para los tickers más comunes
 const TICKER_NAMES={
-  SPCX:"SpaceX",SNDK:"SanDisk",
+  SPCX:"SpaceX",SNDK:"SanDisk",SKHYV:"SK hynix",
   NVDA:"NVIDIA",AAPL:"Apple",TSLA:"Tesla",MSFT:"Microsoft",META:"Meta",
   AMZN:"Amazon",GOOGL:"Alphabet",PLTR:"Palantir",AMD:"AMD",SPY:"S&P 500 ETF",
   SMCI:"Super Micro",COIN:"Coinbase",QQQ:"Nasdaq ETF",
